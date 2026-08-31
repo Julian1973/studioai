@@ -171,6 +171,91 @@
    "maturity": "observation",
    "approvalState": "awaiting-human-decision",
    "regression": null
+  },
+  {
+   "patternId": "pat-47410c78",
+   "proposedAt": "2026-08-29T18:37:14",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on scene 1: “Keep the approved two-shot Scene 1 structure and every successful identity, geography, honeycomb position and continuity choice. Revise S1.SH1 only: add Zenny meditating in the established background with her locked turn”",
+   "supportingEvidence": [
+    "ev-cf68ebfab0"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  },
+  {
+   "patternId": "pat-aefb147c",
+   "proposedAt": "2026-08-29T18:58:31",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on scene 1: “Rejected: the revision changed the locked two-shot Scene 1 structure into three production units. Preserve exactly S1.SH1 and S1.SH2 while retaining the requested Zenny, twig-snap and two snore-cycle correction.”",
+   "supportingEvidence": [
+    "ev-ccc17943c1"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  },
+  {
+   "patternId": "pat-e26a07bf",
+   "proposedAt": "2026-08-30T01:32:12",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on scene 2: “Delegated overnight production preparation; no provider spend.”",
+   "supportingEvidence": [
+    "ev-27a43585d5"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  },
+  {
+   "patternId": "pat-6014ca08",
+   "proposedAt": "2026-08-30T01:35:51",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on scene 3: “Delegated overnight production preparation; no provider spend.”",
+   "supportingEvidence": [
+    "ev-189c5a5419"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  },
+  {
+   "patternId": "pat-77ee1217",
+   "proposedAt": "2026-08-30T12:23:21",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on scene 1: “Approved by Julian after exact S1.SH2 dialogue correction and friendly-banter review.”",
+   "supportingEvidence": [
+    "ev-aa0282e03d"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
   }
  ]
 }

@@ -20,6 +20,7 @@ import cb_llm
 import cb_emission_conformance as emission
 import cb_engine_rules
 import cb_voice_director
+import cb_audio_authority
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -991,6 +992,20 @@ def _locked_line_text(line):
     return str(line.get("exactText") if line.get("exactText") is not None else line.get("text") or "")
 
 
+def _locked_spoken_text(line):
+    """Remove script numbering and parenthetical stage notes before word comparison."""
+    text = _locked_line_text(line).strip()
+    text = re.sub(r"^\s*\d+\s*\t", "", text)
+    return re.sub(r"\s*\([^)]*\)\s*$", "", text).strip()
+
+
+def _voice_word_sequence(text):
+    """Compare spoken payload only; script numbers and trailing action notes are not audio."""
+    text = re.sub(r"^\s*\d+\s*\t", "", str(text or "")).strip()
+    text = re.sub(r"\s*\([^)]*\)\s*$", "", text).strip()
+    return _spoken_words(text)
+
+
 def validate_voice_direction(result, locked_lines):
     got = result.lines
     if len(got) != len(locked_lines):
@@ -1015,11 +1030,15 @@ def validate_voice_direction(result, locked_lines):
             raise RuntimeError(f"Voice Director changed speaker on line {idx}")
         if out.character.strip().lower() != str(locked["speaker"]).strip().lower():
             raise RuntimeError(f"Voice Director changed character on line {idx}")
-        locked_text = _locked_line_text(locked)
-        if _spoken_words(out.exactDialogue) != _spoken_words(locked_text):
+        locked_text = _locked_spoken_text(locked)
+        if _voice_word_sequence(out.exactDialogue) != _voice_word_sequence(locked_text):
             raise RuntimeError(f"Voice Director changed locked dialogue on line {idx}")
-        if _spoken_words(out.performedText) != _spoken_words(locked_text):
+        if _voice_word_sequence(out.performedText) != _voice_word_sequence(locked_text):
             raise RuntimeError(f"Voice Director added, dropped or changed words on line {idx}")
+        performance_override = str(locked.get("performanceOverride") or "").strip()
+        if performance_override and out.performedText.strip() != performance_override:
+            raise RuntimeError(
+                f"Voice Director ignored the human performance override on line {idx}")
         if out.archetypeId not in registers:
             raise RuntimeError(
                 f"Voice Director selected unregistered archetype {out.archetypeId!r} "
@@ -1177,7 +1196,7 @@ def creative_translation_report(shot, direction, provider_prompt=None):
         provider_action = str(actual_clock.get("providerAction") or "").strip()
         compiled_action = provider_action
         for line in shot.get("dialogueLines") or []:
-            spoken = str(line.get("exactText") or "").strip()
+            spoken = _locked_spoken_text(line)
             if spoken:
                 compiled_action = re.sub(
                     re.escape(spoken), "the assigned dialogue placement",
@@ -1224,6 +1243,9 @@ def creative_translation_report(shot, direction, provider_prompt=None):
 
 
 def prepare_voice(context, locked_lines, *, log=print):
+    locked_lines = cb_audio_authority.route_lines(locked_lines)["spokenDialogue"]
+    if not locked_lines:
+        return {"lines": [], "audioAuthority": "seedance-2.5-sfx-only"}
     registers = cb_voice_director.archetype_registers().get("registers") or {}
     register_contract = {
         key: {
@@ -1243,6 +1265,10 @@ def prepare_voice(context, locked_lines, *, log=print):
         "\n\nTAG PURPOSE LAW: every bracketed audio tag used in performedText or in any "
         "takeRecipes.performedText must have one matching tagPurposes row. The tag value "
         "must omit brackets and its purpose must explain the dramatic job of that tag.\n" +
+        "\n\nHUMAN PERFORMANCE OVERRIDE LAW: when a locked line contains "
+        "performanceOverride, copy it verbatim into performedText and the primary take "
+        "recipe. Reconcile intention, cadence and body direction to that performance; "
+        "never restore an older delivery description.\n" +
         "\n\nLOCKED LINES (same count/order/speaker/words must be returned):\n" + _j(locked_lines),
         VoiceDirection, label="department_voice", log=log)
     return validate_voice_direction(result, locked_lines)
@@ -1253,7 +1279,7 @@ SEEDANCE_AUDIO_EXCLUSIONS_SECTION = (
     "No narration. No improvised or extra words. No extra voices. No subtitles, "
     "captions, text overlays, or watermark. No character redesign, no wardrobe "
     "changes, no duplicated cast members, and no mouth movement from silent listeners. "
-    "Seedance may generate non-verbal music, ambience and SFX that support the scene; "
+    "Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; "
     "do not add sung lyrics, vocal music, narration, or any additional spoken words."
 )
 
@@ -1264,7 +1290,7 @@ def _seedance_audio_exclusions_section():
 
 def _seedance_nonverbal_audio_policy():
     return (
-        "Seedance may generate non-verbal music, ambience and SFX that support the "
+        "Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the "
         "scene; do not add sung lyrics, vocal music, narration, or any additional "
         "spoken words."
     )
@@ -1298,7 +1324,9 @@ def adapt_seedance25_prompt(text):
 def _apply_animation_provider_shell(prompt, shot, references=None):
     """Apply the non-creative house contract around generated Seedance direction."""
     text = str(prompt or "").strip()
-    dialogue = list(shot.get("dialogueLines") or [])
+    routed_audio = cb_audio_authority.route_lines(shot.get("dialogueLines") or [])
+    dialogue = routed_audio["spokenDialogue"]
+    sfx_cues = routed_audio["seedanceSfxCues"]
     text = "\n".join(
         line for line in text.splitlines()
         if not line.strip().lower().startswith("audio-lock:")
@@ -1325,7 +1353,8 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
             "remain silent and closed-mouth. No narration, no improvised or extra words, "
             "no extra voices, and no subtitles or captions. Do not synthesize an alternate spoken "
             "performance: use the supplied @Audio1 for dialogue timing, mouth timing and voice; "
-            "Seedance may create only non-verbal SFX, ambience and music.\n\n" + text
+            "Seedance 2.5 must provide the directed non-verbal SFX, ambience and instrumental music. "
+            + emission.SINGLE_INSTANCE_DIALOGUE_LOCK + "\n\n" + text
         )
         placements = "[Dialogue Placement]\n" + "\n".join(
             emission.dialogue_placement_line(item, hold_after=False)
@@ -1337,6 +1366,17 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
                     text[start:].lstrip())
         else:
             text = text.rstrip() + "\n\n" + placements
+
+    if sfx_cues:
+        cue_lines = []
+        for cue in sfx_cues:
+            timing = (f"{float(cue['startSec']):.1f}-{float(cue['endSec']):.1f}s"
+                      if cue.get("startSec") is not None and cue.get("endSec") is not None
+                      else "at the authored action beat")
+            cue_lines.append(
+                f"- {timing}: {cue.get('character') or 'Character'} — "
+                f"{', '.join(cue.get('kinds') or [])}. {cue['instruction']}")
+        text = text.rstrip() + "\n\n[SEEDANCE 2.5 NON-VERBAL SFX]\n" + "\n".join(cue_lines)
 
     reference_lines = []
     exclusions = {
@@ -1578,15 +1618,16 @@ def _approved_attribute_ownership(data, character_state_locks=None):
     return list(dict.fromkeys(ownership))
 
 
-def provider_dialogue_lines(shot):
-    """Return dialogue with character-name casing made safe for speech providers."""
+def provider_audio_routing(shot):
+    """Route provider-safe script lines to dialogue and non-verbal audio lanes."""
     names = {
         str(name).strip() for name in (shot.get("charactersInFrame") or [])
         if len(str(name).strip()) > 1
     }
     lines = []
-    for source in shot.get("dialogueLines") or []:
+    for source_index, source in enumerate(shot.get("dialogueLines") or [], start=1):
         line = dict(source)
+        line["_sourceDialogueIndex"] = source_index
         text = str(line.get("exactText") or line.get("text") or "")
         for name in sorted(names, key=len, reverse=True):
             text = re.sub(rf"\b{re.escape(name.upper())}\b", name, text)
@@ -1595,7 +1636,12 @@ def provider_dialogue_lines(shot):
         else:
             line["text"] = text
         lines.append(line)
-    return lines
+    return cb_audio_authority.route_lines(lines)
+
+
+def provider_dialogue_lines(shot):
+    """Return only spoken dialogue with provider-safe character-name casing."""
+    return provider_audio_routing(shot)["spokenDialogue"]
 
 
 def compile_animation_provider_prompt(shot, direction):
@@ -1610,7 +1656,9 @@ def compile_animation_provider_prompt(shot, direction):
     data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
     character_state_locks = dict(shot.get("characterStateLocks") or {})
     approved_ownership = _approved_attribute_ownership(data, character_state_locks)
-    dialogue = provider_dialogue_lines(shot)
+    routed_audio = provider_audio_routing(shot)
+    dialogue = routed_audio["spokenDialogue"]
+    seedance_sfx_cues = routed_audio["seedanceSfxCues"]
     references = _render_reference_order(data.get("referenceContract") or [])
     stages = emission.time_tiles(
         list(data.get("stagePlan") or []),
@@ -1704,10 +1752,17 @@ def compile_animation_provider_prompt(shot, direction):
     sections = []
     if dialogue:
         sections.append(
-            "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, "
-            "cadence, delivery, mouth timing and silence. No alternative performance is "
-            "permitted. Listeners remain silent and closed-mouth. No narration; no extra "
-            "words; no subtitles or captions. Dialogue language: English.")
+            "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority "
+            "for every English dialogue line, voice identity, cadence, delivery, mouth "
+            "timing and silence. Each exact dialogue line appears once in braces in the "
+            "Shot Sequence and is bound to its named speaker and @Audio1. The exact braced "
+            "dialogue markers place approved words only; no alternative performance is "
+            "permitted. Listeners remain silent and closed-mouth unless they are the named "
+            "speaker for that exact line. No narration, no extra words, and no subtitles or "
+            "captions. Dialogue language: English. No music comes from @Audio1; Seedance "
+            "generates separate synchronized non-dialogue SFX, ambience and instrumental "
+            "musical underscore beneath the approved dialogue rhythm. "
+            + emission.SINGLE_INSTANCE_DIALOGUE_LOCK)
 
     exclusions = {
         "opening_frame": "Exclude redesign and later action.",
@@ -1900,6 +1955,15 @@ def compile_animation_provider_prompt(shot, direction):
 
     audio_cues = emission.dialogue_cues(
         dialogue, duration_sec=data.get("durationSec") or shot.get("durationSec"))
+    audio_cues_by_source = {
+        int(line.get("_sourceDialogueIndex") or index): cue
+        for index, (line, cue) in enumerate(zip(dialogue, audio_cues), start=1)
+    }
+    sfx_cues_by_source = {
+        int(cue["sourceDialogueIndex"]): cue
+        for cue in seedance_sfx_cues
+        if cue.get("sourceDialogueIndex") is not None
+    }
     internal_shots = list(data.get("shotPlan") or [])
     multi_shot = len(internal_shots) > 1
     explicit_cut_sequence = any(
@@ -1953,19 +2017,38 @@ def compile_animation_provider_prompt(shot, direction):
             directions = list(item.get("dialogueDirections") or [])
             for dialogue_position, line_index in enumerate(
                     item.get("dialogueLineIndexes") or []):
-                if not 1 <= int(line_index) <= len(audio_cues):
+                source_index = int(line_index)
+                cue = audio_cues_by_source.get(source_index)
+                sfx_cue = sfx_cues_by_source.get(source_index)
+                if cue is None and sfx_cue is None:
                     raise ValueError(
                         f"Internal shot {number} references invalid dialogue line {line_index}")
+                if sfx_cue is not None:
+                    start, end = sfx_cue.get("startSec"), sfx_cue.get("endSec")
+                    timing = (
+                        f"{float(start):g}-{float(end):g}s: "
+                        if start is not None and end is not None else ""
+                    )
+                    parts.append(
+                        "Non-verbal SFX: " + timing
+                        + str(sfx_cue.get("instruction") or "").strip())
+                if cue is None:
+                    continue
                 direction_text = (directions[dialogue_position]
                                   if dialogue_position < len(directions) else "")
                 parts.append(emission.dialogue_placement_line(
-                    audio_cues[int(line_index) - 1],
+                    cue,
                     direction=direction_text,
                     hold_after=bool(item.get("holdAfterDialogue", True))))
-                emitted_dialogue.append(int(line_index))
+                emitted_dialogue.append(source_index)
             for beat_id in item.get("gagBeatIds") or []:
                 clock = gag_clocks.get(str(beat_id))
                 if not clock:
+                    # Silent visual shots may carry a stale inherited gag marker;
+                    # without a defined gag clock it cannot contribute audio/timing
+                    # and must not block an otherwise valid animation prompt.
+                    if not gag_clocks and not dialogue_lines:
+                        continue
                     raise ValueError(
                         f"Internal shot {number} references unknown gag beat {beat_id}")
                 hold_sec = clock.get("recoveryHoldSec")
@@ -2005,7 +2088,7 @@ def compile_animation_provider_prompt(shot, direction):
                     "multi-shot dialogue duplicates locked line(s): "
                     + ", ".join(str(index) for index in duplicates))
             missing_dialogue = [
-                index for index in range(1, len(dialogue) + 1)
+                index for index in audio_cues_by_source
                 if index not in seen]
             if missing_dialogue and not shot_lines:
                 raise ValueError(
@@ -2013,8 +2096,8 @@ def compile_animation_provider_prompt(shot, direction):
             if missing_dialogue:
                 fallback_lines = [
                     emission.dialogue_placement_line(
-                        audio_cues[index - 1],
-                        direction=str(audio_cues[index - 1].get("delivery") or "").strip(),
+                        audio_cues_by_source[index],
+                        direction=str(audio_cues_by_source[index].get("delivery") or "").strip(),
                         hold_after=False)
                     for index in missing_dialogue]
                 shot_lines[-1] = shot_lines[-1].rstrip() + " " + " ".join(fallback_lines)
@@ -2143,6 +2226,15 @@ def compile_animation_provider_prompt(shot, direction):
         sequence_header = (
             "[Performance Sequence]" if short_unit else "[Timestamp Script Storyboard]")
         sections.append(sequence_header + "\n" + "\n\n".join(stage_sections))
+    human_review = str(shot.get("watchDirectorFeedbackApproved") or "").strip()
+    if human_review:
+        sections.append(
+            "[Human Review Correction]\n"
+            "This bounded correction is approved Director intent. Integrate it into the "
+            "staged action and camera while preserving canon, the opening frame, exact "
+            "@Audio1 dialogue and the signed landing state:\n"
+            + complete(human_review, context="human review correction")
+        )
     consistency = [consistency_clause(item) for item in
                    data.get("consistencyContract") or [] if str(item).strip()]
     safeguards = [consistency_clause(item) for item in
@@ -2159,6 +2251,9 @@ def compile_animation_provider_prompt(shot, direction):
     traversal = cb_engine_rules.travel_traversal_boilerplate(shot, data)
     if traversal:
         supplement.append(traversal)
+    repeated_contacts = cb_engine_rules.repeated_contact_boilerplate(shot, data)
+    if repeated_contacts:
+        supplement.append(repeated_contacts)
     sailing = cb_engine_rules.sailing_departure_boilerplate(shot, data)
     if sailing and not sailing_causality_injected:
         supplement.append(sailing)
@@ -2176,10 +2271,19 @@ def compile_animation_provider_prompt(shot, direction):
     if dialogue:
         foley = re.search(
             r"(?:only|retain|add)\s+[^.;]*foley[^.;]*", audio_contract, re.I)
-        audio = ("@Audio1 guides dialogue timing and mouth shapes; final approved "
-                 "dialogue is restored in post. No extra voices.")
-        if audio_contract:
-            audio += " " + audio_contract
+        audio = (
+            "@Audio1 is the sole authority and sole performance authority for every "
+            "English dialogue line, voice identity, cadence, delivery, mouth timing and "
+            "silence. Each exact dialogue line appears once in braces in the Shot Sequence "
+            "and is bound to its named speaker and @Audio1. No alternative performance is "
+            "permitted; listeners remain silent and closed-mouth unless they are the named "
+            "speaker for that line. No narration or extra words. Use Seedance-generated "
+            "non-dialogue SFX, ambience and instrumental musical underscore only underneath "
+            "the approved dialogue rhythm."
+        )
+        # Speaker ownership and occurrence counts are compiled from the immutable
+        # dialogue lines above. Specialist prose may describe performance, but must not
+        # restate or renumber dialogue authority in the provider payload.
         if foley:
             audio += " " + foley.group(0).strip().capitalize() + "."
         if not re.search(
@@ -2194,6 +2298,16 @@ def compile_animation_provider_prompt(shot, direction):
                 r"\bno\b[^.;]{0,120}\b(?:music|bgm|musical underscore)\b",
                 audio, re.I):
             audio = audio.rstrip(" .") + ". " + _seedance_nonverbal_audio_policy()
+    if seedance_sfx_cues:
+        authored_sfx = []
+        for cue in seedance_sfx_cues:
+            start, end = cue.get("startSec"), cue.get("endSec")
+            timing = (
+                f"{float(start):g}-{float(end):g}s: "
+                if start is not None and end is not None else ""
+            )
+            authored_sfx.append(timing + str(cue.get("instruction") or "").strip())
+        audio = audio.rstrip(" .") + ". Authored non-verbal SFX cues: " + " ".join(authored_sfx)
     if not re.search(r"\bno watermark\b", audio, re.I):
         audio = audio.rstrip(" .") + ". No watermark."
     sections.append("[Audio]\n" + audio)
@@ -2239,6 +2353,10 @@ def prepare_animation(context, images, *, log=print):
         "approved bounded review feedback: preserve its requested emotional, physical, "
         "continuity and sound corrections "
         "while translating them into this typed direction and the deterministic provider prompt. "
+        "Every explicitly counted action, action order, camera response, performance quality "
+        "and audio ownership rule in watchDirectorFeedback must appear in the matching "
+        "shotPlan causalAction/observablePerformance and stagePlan primaryEvent; do not leave "
+        "the correction only in provider prose or a safeguard. "
         "Do not copy its prose wholesale and do not let it override locked canon, SEE or HEAR. "
         "Lock only story truth, exact audio, canon, reference roles, opening state and the "
         "required landing. Direct intention, relationship, playable cause-and-effect and "
@@ -2347,6 +2465,18 @@ def prepare_animation(context, images, *, log=print):
         context.get("sceneGeographyLedger") or shot.get("geographyLedgerApproved") or [])
     if approved_geography:
         result.geography = list(approved_geography)
+    if (not result.witnessStagingSides and
+            len(shot.get("charactersInFrame") or []) >= 2 and
+            result.creativeTranslation.gagClocks):
+        continuity_characters = list(
+            ((shot.get("continuityOut") or {}).get("characters") or []))
+        result.witnessStagingSides = [
+            f"{item.get('character')} holds {item.get('screenZone')}; "
+            f"{item.get('pose')}; facing {item.get('facing')}."
+            for item in continuity_characters
+            if item.get("character") and item.get("screenZone") and
+            item.get("pose") and item.get("facing")
+        ]
     result.providerPrompt = compile_animation_provider_prompt(shot, result)
     approved_stages = shot.get("storyboardStagePlanApproved") or []
     if approved_stages:

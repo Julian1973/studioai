@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "showId": "crystal-bears",
-  "lockedAt": "2026-08-28T09:48:53+00:00",
+  "lockedAt": "2026-08-30T00:02:40+00:00",
   "lockedBy": "Julian",
-  "policySha256": "beac492f5afb965ec5cff3a2003cee2895691808d3189d0f1d88c5c01ff0fd3e",
+  "policySha256": "fc3625bf18b0fee24f6e10b6ae4a6a9517626072f5c41448e6f112551307fca2",
   "sources": {
     "bannedVocabulary": {
       "path": "shows/crystal-bears/canon/banned_vocabulary.json",
@@ -15,7 +15,7 @@
     },
     "characters": {
       "path": "shows/crystal-bears/canon/characters.json",
-      "sha256": "956200fb50971fd16d6b35098c2692bd3d47608a4dc67078c08097e2a3423205"
+      "sha256": "a373e544c247dd57f26ad7969820f08d91b9d1454268ea407b50c82416b56cba"
     },
     "cinematographyTaste": {
       "path": "shows/crystal-bears/creative/CINEMATOGRAPHY_TASTE_CANON.md",
@@ -103,7 +103,7 @@
     },
     "showBible": {
       "path": "shows/crystal-bears/canon/LOCKED_CANON.md",
-      "sha256": "c49d38a2a2fd143b9aae2465345bf64341035ef621fde7282f48cb64402a30b6"
+      "sha256": "f46f3bf3045c20da286087d322b870cef1d008ee11f7d8386bb042133401ba4c"
     },
     "showrunnerTaste": {
       "path": "shows/crystal-bears/creative/SHOWRUNNER_TASTE_CANON.md",
@@ -1166,6 +1166,20 @@
           "sha256": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1"
         }
       ]
+    },
+    "Bo's Mum": {
+      "tier": "recurring-guest",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "engine/media/shots/Ep2_3.B1.S1_HEAR_LOCKED_1b6f22e1.mp3",
+          "roles": [
+            "anchor"
+          ],
+          "sha256": "1b6f22e1e396881b994e121ce9db14627746e1b71653edf7292f376435d2354d"
+        }
+      ]
     }
   },
   "locationAssets": [
@@ -1334,5 +1348,5 @@
       "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
     }
   ],
-  "manifestDigest": "4fa0ce5c19d87228239d2e95481a3490a4c3f097bc947490704d9e2d93e061ea"
+  "manifestDigest": "1bd7201454af656fec1609e820fcdf6dd276be9222a05464d402d41578e24342"
 }

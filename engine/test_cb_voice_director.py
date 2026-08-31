@@ -70,7 +70,7 @@ def test_compiler_emits_nine_stable_v3_requests_with_canon_settings():
      "Missing performance questions"),
     (lambda item: item["takeRecipes"][0].update(
         {"performedText": "[exhales][confident] Totally nailed it."}),
-     "preserves every locked script word"),
+     "must preserve every locked script word"),
     (lambda item: item["takeRecipes"][0].update(
         {"performedText": "[exhales][confident][angry] Nailed it."}),
      "off-palette/banned tags"),
@@ -95,6 +95,46 @@ def test_voice_path_rejects_a_dangling_performed_sentence():
     item["takeRecipes"][0]["performedText"] = "[exhales][confident] Nailed it"
     with pytest.raises(V.VoiceContractError, match="complete spoken sentence"):
         V.compile_line(item, LOCKED)
+
+
+def test_voice_path_preserves_intentionally_unpunctuated_locked_dialogue():
+    locked = {**LOCKED, "exactText": "ACHOO! … Oh, Ah, Hi Fuzzby"}
+    item = copy.deepcopy(direction())
+    item["exactDialogue"] = locked["exactText"]
+    item["takeRecipes"] = [{**item["takeRecipes"][0],
+                             "performedText": "[exhales] ACHOO! … Oh, Ah, Hi Fuzzby"}]
+    item["pauseReasons"] = ["The ellipsis holds Keen's embarrassed recovery after the sneeze."]
+    compiled = V.compile_line(item, locked)
+    assert V.emit_v3_requests(compiled)[0]["body"]["text"].endswith("Hi Fuzzby")
+
+
+def test_voice_path_excludes_script_number_and_trailing_stage_note_from_speech():
+    locked = {
+        **LOCKED,
+        "speaker": "Aida",
+        "exactText": "7\tSomeone needs a little help today. (AIDA reacts to off camera SNEEZE)",
+    }
+    item = copy.deepcopy(direction())
+    item.update({
+        "character": "Aida",
+        "exactDialogue": locked["exactText"],
+        "estimatedDurationSec": 2.0,
+    })
+    item["takeRecipes"] = [{
+        **item["takeRecipes"][0],
+        "recipeId": "S2.SH2.Aida.01.primary",
+        "performedText": "[exhales] Someone needs a little help today.",
+    }]
+
+    compiled = V.compile_line(item, locked)
+    assert compiled["exactDialogue"] == locked["exactText"]
+    assert V.emit_v3_requests(compiled)[0]["body"]["text"].endswith(
+        "Someone needs a little help today.")
+
+    item["takeRecipes"][0]["performedText"] = (
+        "[exhales] Someone needs a lot of help today.")
+    with pytest.raises(V.VoiceContractError, match="must preserve every locked script word"):
+        V.compile_line(item, locked)
 
 
 def test_voice_path_preserves_a_scripted_interruption():

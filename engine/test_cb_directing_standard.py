@@ -9,6 +9,13 @@ import cb_departments as D
 import cb_render as R
 
 
+def test_scene_director_uses_a_cross_process_serialisation_lock():
+    source = pathlib.Path(C.__file__).read_text()
+    assert "episode-scene-director.lock" in source
+    assert "fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)" in source
+    assert "@_serial_scene_director\ndef run_scene(" in source
+
+
 def _cinematography():
     return {
         "storyPointOfView": "Stay with Bo's private hesitation.",
@@ -130,6 +137,30 @@ def test_timing_slate_requires_and_records_human_rhythm_approval(tmp_path, monke
     assert R.timing_slate_status("3", "EpT")["approved"] is False
     R.decide_timing_slate("3", "approved", episode="EpT", log=lambda *_: None)
     assert R.timing_slate_status("3", "EpT")["approved"] is True
+
+
+def test_watch_uses_hear_approval_without_a_duplicate_rhythm_gate():
+    source = pathlib.Path(R.__file__).read_text()
+    fire_source = source[source.index("def fire_shot("):source.index("def next_shot(")]
+    assert "_performance_budget_report(" in fire_source
+    assert "voice-timed performance budget is overloaded" in fire_source
+    assert "needs Julian's rhythm approval" not in fire_source
+
+
+def test_fresh_validation_keeps_full_script_occurrences_for_mixed_sfx_dialogue():
+    source = pathlib.Path(R.__file__).read_text()
+    validation = source[source.index("def _fresh_validation("):source.index("def _prompt_version(")]
+    assert 'target_lines = list(target_rec.get("dialogueLines") or [])' in validation
+    assert "target_lines = cb_audio_authority.spoken_dialogue_lines(target_rec)" not in validation
+
+
+def test_voice_direction_save_is_scoped_to_spoken_dialogue():
+    source = pathlib.Path(R.__file__).read_text()
+    scoped_validation = (
+        'cb_departments.validate_voice_direction(\n'
+        '            model, cb_audio_authority.spoken_dialogue_lines(shot))'
+    )
+    assert scoped_validation in source
 
 
 def test_prompt_score_is_named_contract_completeness_not_artistic_quality():

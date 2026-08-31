@@ -5,6 +5,7 @@ HERE = Path(__file__).resolve().parent
 HTML = (HERE / "director.html").read_text(encoding="utf-8")
 CSS = (HERE / "director.css").read_text(encoding="utf-8")
 JS = (HERE / "director.js").read_text(encoding="utf-8")
+APP = (HERE / "app.html").read_text(encoding="utf-8")
 SERVER = (HERE / "serve.py").read_text(encoding="utf-8")
 ROOM = (HERE / "room.html").read_text(encoding="utf-8")
 BOARD = (HERE / "board.html").read_text(encoding="utf-8")
@@ -165,6 +166,11 @@ def test_story_intake_approval_is_idempotent_when_package_is_already_current():
     assert 'status.get("candidateCurrent")' in SERVER
     assert '"alreadyCurrent": True' in SERVER
     assert "Story & Direction is already approved for this script and canon lock." in SERVER
+
+
+def test_department_run_never_reuses_a_stale_candidate():
+    assert 'status.get("candidate") and status.get("candidateCurrent")' in SERVER
+    assert 'args = ["cb_render.py", "department-prepare"' in SERVER
 
 
 def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
@@ -387,6 +393,13 @@ def test_keyframe_refire_is_one_visible_replacement_job():
     assert "generating the A/B replacement pair" in JS
     assert '"cb_studio_director.py", "refire-keyframe"' in SERVER
     assert 'f"director:refire-keyframe:{target}"' in SERVER
+
+
+def test_hear_keeps_dialogue_above_returned_voice_media():
+    dialogue = APP.index("${dialogueEditor}${voiceMedia}${performanceEditor}")
+    legacy = "${voiceMedia}${dialogueEditor}${performanceEditor}"
+    assert dialogue >= 0
+    assert legacy not in APP
 
 
 def test_director_action_area_explains_current_outcome_before_button():

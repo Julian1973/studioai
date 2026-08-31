@@ -98,7 +98,7 @@ def test_registry_targets_live_byteplus_25_and_retires_every_20_execution_route(
     assert target.enabled
     assert target.status == "production"
     assert target.transport == "byteplus-async"
-    assert target.modes == ["reference-to-video", "video-extension"]
+    assert target.modes == ["reference-to-video", "video-extension", "video-editing"]
     assert target.endpoints["reference-to-video"] == (
         "/api/v3/contents/generations/tasks")
     assert target.duration.maxSec == 30
@@ -256,6 +256,26 @@ def test_byteplus_25_contract_qualifies_video_extension():
     assert contract["mode"] == "video-extension"
     assert contract["endpoint"] == "/api/v3/contents/generations/tasks"
     assert contract["costRateKey"] == "seedance_25_byteplus_480p_per_sec"
+
+
+def test_byteplus_25_contract_qualifies_native_video_editing():
+    contract = cb_providers.request_contract(
+        mode="video-editing", duration=24, resolution="480p",
+        image_count=0, audio_count=1, video_count=1,
+        model_id="dreamina-seedance-2-5-260628")
+
+    assert contract["mode"] == "video-editing"
+    assert contract["endpoint"] == "/api/v3/contents/generations/tasks"
+    assert contract["costRateKey"] == "seedance_25_byteplus_480p_per_sec"
+
+
+def test_video_editing_requires_an_existing_video():
+    with pytest.raises(cb_providers.ProviderCapabilityError, match="requires an existing video"):
+        cb_gen.generate_video_seedance_ref(
+            "Strictly edit @Video1.", [], duration=24, resolution="480p",
+            raw_prompt=True, production_route="cb_render",
+            model_id="dreamina-seedance-2-5-260628",
+            operation_mode="video-editing")
 
 
 def test_byteplus_local_video_can_use_explicit_temporary_host(monkeypatch, tmp_path):

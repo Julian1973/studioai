@@ -173,6 +173,27 @@ img.zoom:hover{filter:brightness(1.08)}
 .scenecard-body{padding:16px 18px 18px}
 .scenecard-title{font-family:'Display Slab',Georgia,serif;font-size:14.5px;font-weight:700;letter-spacing:.01em;margin-bottom:12px;line-height:1.3}
 .scenecard-stages{display:flex;flex-direction:column;gap:7px}
+.board-triage{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 14px}
+.board-triage-item{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:58px;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--muted);font:inherit;text-align:left;cursor:pointer}
+.board-triage-item:hover,.board-triage-item:focus-visible{border-color:var(--brand);outline:none}
+.board-triage-item.active{border-color:var(--brand);background:var(--brandbg)}
+.board-triage-label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;color:var(--hint)}
+.board-triage-value{font-size:21px;font-weight:800;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.scenecard-media-label{position:absolute;left:10px;top:10px;padding:4px 7px;border:1px solid rgba(255,255,255,.14);border-radius:4px;background:rgba(9,10,15,.82);color:#fff;font-size:9px;font-weight:850;text-transform:uppercase}
+.scenecard-decision{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.scenecard-decision-copy{min-width:0}.scenecard-decision-kicker{display:block;margin-bottom:3px;color:var(--hint);font-size:9px;font-weight:850;text-transform:uppercase}
+.scenecard-decision-title{display:block;color:var(--ink);font-size:12.5px;font-weight:750;line-height:1.35}
+.scene-progress{height:4px;margin:0 0 12px;overflow:hidden;border-radius:4px;background:var(--surface2)}
+.scene-progress>span{display:block;height:100%;background:var(--ok);transition:width .25s ease}
+.scene-corridor{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:13px}
+.scene-corridor-step{min-width:0;padding:7px 5px;border:1px solid var(--line);border-radius:5px;background:var(--surface2);text-align:center}
+.scene-corridor-step b{display:block;overflow:hidden;color:var(--muted);font-size:9px;text-transform:uppercase;text-overflow:ellipsis}
+.scene-corridor-step span{display:block;margin-top:3px;color:var(--hint);font-size:9px;white-space:nowrap}
+.scene-corridor-step.current{border-color:var(--brand);background:var(--brandbg)}.scene-corridor-step.current b{color:var(--ink)}
+.scene-corridor-step.complete{border-color:color-mix(in srgb,var(--ok) 44%,var(--line))}.scene-corridor-step.complete span{color:var(--ok)}
+.scene-corridor-step.attention{border-color:var(--warn);background:var(--warnbg)}.scene-corridor-step.attention span{color:var(--warn)}
+.scenecard-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}.scenecard-actions.has-upload{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.scenecard-actions .btn{width:100%;min-width:0;margin:0}.scenecard-actions .btn.ghost{color:var(--ink);border-color:var(--brand)}
 .stagerow{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:12.5px}
 .stagerow-name{color:var(--muted);flex:0 0 auto}
 .canonissue{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,360px);gap:16px;align-items:start;padding:5px 0;font-size:12px;line-height:1.45}
@@ -412,9 +433,13 @@ img.zoom:hover{filter:brightness(1.08)}
 .dlgline{font-size:14px;margin-bottom:10px;line-height:1.5}
 .dlgdelivery{color:var(--hint);font-size:12px;margin-top:2px}
 
-.candgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;width:100%}
+.candgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;width:100%;align-items:start}
+.cand{border:1px solid var(--line);border-radius:7px;background:var(--surface);overflow:hidden;min-width:0}.cand video{display:block;width:100%;aspect-ratio:16/9;background:#05070a;object-fit:contain}.cand-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-bottom:1px solid var(--line);font-size:11px}.cand-head b{font-size:12px}.cand-head span{color:var(--muted)}.cand-summary{padding:9px 10px;color:var(--hint);font-size:10px;line-height:1.4;border-top:1px solid var(--line)}
+.watch-stage{display:grid;grid-template-columns:minmax(240px,.72fr) minmax(0,1.28fr);gap:14px;width:100%;align-items:stretch}.watch-screen{min-width:0;border:1px solid var(--line);border-radius:7px;background:var(--surface2);overflow:hidden;display:flex;flex-direction:column}.watch-screen.watch-result{border-color:color-mix(in srgb,var(--brand) 58%,var(--line));box-shadow:0 12px 34px rgba(0,0,0,.28)}.watch-screen-head{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:11px;font-weight:750;color:var(--ink)}.watch-screen-head span:last-child{color:var(--muted);font-weight:600}.watch-screen-media{aspect-ratio:16/9;min-height:220px;display:flex;align-items:center;justify-content:center;background:#090b10;overflow:hidden}.watch-result .watch-screen-media{min-height:300px}.watch-result .watch-screen-media>.artefact-empty{width:100%;height:100%;min-height:300px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:0;border-radius:0;background:#090b10;padding:32px;text-align:center}.watch-result .watch-screen-media>.dec-caption,.watch-result .watch-screen-media>.techdetails{display:none}.watch-screen-media>img,.watch-screen-media>video{width:100%;height:100%;max-height:none;object-fit:contain;border-radius:0}.watch-screen-media .candgrid{padding:10px;box-sizing:border-box}.watch-screen-media .cand{min-width:0}.watch-waiting{height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:var(--text);padding:24px;box-sizing:border-box}.watch-waiting .stage-spinner{width:48px;height:48px}.watch-waiting small{max-width:340px;color:var(--muted);line-height:1.45}.watch-history{margin-top:14px;border:1px solid var(--line);border-radius:7px;background:var(--surface);overflow:hidden}.watch-history>summary{padding:12px 14px;cursor:pointer;font-size:12px;font-weight:750}.watch-history-list{display:grid;gap:10px;padding:0 14px 14px}.watch-history-item{border-left:3px solid var(--danger);background:var(--surface2);padding:11px 12px;border-radius:0 6px 6px 0}.watch-history-meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:10px;margin-bottom:7px}.watch-history-reason{font-size:12px;line-height:1.5}.watch-history-item details{margin-top:9px}.watch-history-item pre{max-height:180px;overflow:auto;white-space:pre-wrap;font-size:10px;color:var(--muted)}
+.watch-stage{display:grid;grid-template-columns:minmax(240px,.72fr) minmax(0,1.28fr);gap:14px;width:100%;align-items:stretch}.watch-screen{min-width:0;border:1px solid var(--line);border-radius:7px;background:var(--surface2);overflow:hidden;display:flex;flex-direction:column}.watch-screen.watch-result{border-color:color-mix(in srgb,var(--brand) 58%,var(--line));box-shadow:0 12px 34px rgba(0,0,0,.28)}.watch-screen-head{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:11px;font-weight:750;color:var(--ink)}.watch-screen-head span:last-child{color:var(--muted);font-weight:600}.watch-screen-media{aspect-ratio:16/9;min-height:220px;display:flex;align-items:center;justify-content:center;background:#090b10;overflow:hidden}.watch-result .watch-screen-media{min-height:300px}.watch-result .watch-screen-media.has-live-result{display:block;aspect-ratio:auto;overflow:auto}.watch-live-results{width:100%}.watch-live-progress{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 16px;border-top:1px solid var(--brand);background:var(--brandbg);color:var(--text);text-align:left}.watch-live-progress .stage-spinner{width:24px;height:24px;flex:none}.watch-live-progress b,.watch-live-progress small{display:block}.watch-live-progress small{margin-top:3px;color:var(--muted);line-height:1.4}.watch-result .watch-screen-media>.artefact-empty{width:100%;height:100%;min-height:300px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:0;border-radius:0;background:#090b10;padding:32px;text-align:center}.watch-result .watch-screen-media>.dec-caption,.watch-result .watch-screen-media>.techdetails{display:none}.watch-screen-media>img,.watch-screen-media>video{width:100%;height:100%;max-height:none;object-fit:contain;border-radius:0}.watch-screen-media .candgrid{padding:10px;box-sizing:border-box}.watch-screen-media .cand{min-width:0}.watch-waiting{height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:var(--text);padding:24px;box-sizing:border-box}.watch-waiting .stage-spinner{width:48px;height:48px}.watch-waiting small{max-width:340px;color:var(--muted);line-height:1.45}.watch-history{margin-top:14px;border:1px solid var(--line);border-radius:7px;background:var(--surface);overflow:hidden}.watch-history>summary{padding:12px 14px;cursor:pointer;font-size:12px;font-weight:750}.watch-history-list{display:grid;gap:10px;padding:0 14px 14px}.watch-history-item{border-left:3px solid var(--danger);background:var(--surface2);padding:11px 12px;border-radius:0 6px 6px 0}.watch-history-meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:10px;margin-bottom:7px}.watch-history-reason{font-size:12px;line-height:1.5}.watch-history-item details{margin-top:9px}.watch-history-item pre{max-height:180px;overflow:auto;white-space:pre-wrap;font-size:10px;color:var(--muted)}
 .cand video{width:100%;border-radius:10px;background:#000;display:block}
-.cand-pick{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:8px}
+.cand-pick{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 10px}.cand-pick .btn{min-height:36px}
+.watch-stage:has(.watch-candidate-grid){display:block}.watch-stage:has(.watch-candidate-grid) .watch-opening{display:none}.watch-stage:has(.watch-candidate-grid) .watch-result{width:100%}.watch-stage:has(.watch-candidate-grid) .watch-screen-media{aspect-ratio:auto;min-height:0;display:block}.watch-candidate-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:14px}.watch-candidate-grid .cand{border-color:color-mix(in srgb,var(--brand) 42%,var(--line));box-shadow:0 10px 28px rgba(0,0,0,.22)}.watch-candidate-grid .cand-head{padding:12px 14px}.watch-candidate-grid .cand-head b{font-size:14px}.watch-candidate-grid .cand-summary,.watch-candidate-grid .cand-pick{padding:11px 14px}.watch-change-below{margin:0 14px 14px}
 
 .controw{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
 .controw:last-child{border-bottom:none}
@@ -427,6 +452,16 @@ img.zoom:hover{filter:brightness(1.08)}
 .disc-rows{display:flex;flex-direction:column;gap:11px;margin-top:14px}
 .disc-row{display:flex;justify-content:space-between;gap:16px;font-size:13.5px;padding-bottom:9px;border-bottom:1px solid var(--line)}
 .disc-row:last-child{border-bottom:none;padding-bottom:0}
+.fire-scorecard{margin-top:18px;padding:14px;border:1px solid var(--line);background:var(--surface2);border-radius:8px}
+.fire-scorecard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+.fire-scorecard-total{font-size:24px;font-weight:800;color:var(--ok);white-space:nowrap}
+.fire-score-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fire-score-item{padding:11px;border:1px solid var(--line);background:var(--surface);border-radius:6px}
+.fire-score-item-head{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700}
+.fire-score-track{height:5px;margin-top:9px;background:var(--line);overflow:hidden;border-radius:3px}
+.fire-score-fill{height:100%;background:var(--ok)}
+.fire-score-meta{margin-top:7px;font-size:11.5px;color:var(--hint);line-height:1.45}
+.fire-score-failures{margin-top:10px;padding:10px;border-left:3px solid var(--danger);background:var(--dangerbg);font-size:12px;color:var(--text)}
 .disc-k{color:var(--muted)}
 .disc-v{color:var(--ink);font-weight:600;text-align:right}
 
@@ -511,7 +546,9 @@ img.zoom:hover{filter:brightness(1.08)}
 .pstage:hover:not(.locked){border-color:var(--honey)}
 .pstage.active{border-color:var(--honey);box-shadow:0 0 0 3px var(--honeybg)}
 .pstage.locked{opacity:.7;cursor:not-allowed;background:var(--surface2)}
-.pstage.done{border-color:var(--ok)}
+.pstage.done{border-color:var(--ok);background:var(--okbg);box-shadow:inset 0 4px 0 var(--ok)}
+.pstage.done .pglyph,.pstage.done .pname,.pstage.done .pstate{color:var(--ok)!important}
+.pstage.done.active{border-color:var(--ok);background:var(--okbg);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 24%,transparent),inset 0 4px 0 var(--ok)}
 .pstage.rejected{border-color:var(--warn)}
 .pstage.reviewstage{margin-left:12px;flex:.85;border-style:dashed}
 .pconn{align-self:center;flex:0 0 12px;height:2px;background:var(--line)}
@@ -863,6 +900,8 @@ img,video{max-width:100%}
   .controw-frames{width:100%;overflow-x:auto;padding-bottom:4px}
   .disc-row{align-items:flex-start;flex-direction:column;gap:3px}
   .disc-v{text-align:left}
+  .fire-score-grid{grid-template-columns:minmax(0,1fr)}
+  .fire-scorecard-head{align-items:flex-start}
   .cbeat{align-items:flex-start;flex-wrap:wrap}
   .cbeat .cbact{flex-basis:calc(100% - 90px);white-space:normal}
   #toast{left:max(12px,env(safe-area-inset-left))!important;right:max(12px,env(safe-area-inset-right))!important;bottom:calc(12px + env(safe-area-inset-bottom))!important}
@@ -883,18 +922,102 @@ body{background:var(--bg);color:var(--ink)}
 .main{padding:28px 34px;max-width:1500px}.h1{font-size:26px}.sub{color:var(--muted)}
 .sceneboard{grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:16px}.scenecard,.projcard,.epcard,.wcol-contents,.wcol-artefact,.wcol-decision,.agentpanel{background:var(--surface);border-color:var(--line);box-shadow:none}.scenecard{border-radius:7px}.scenecard:hover,.projcard:hover,.epcard:hover{border-color:var(--brand);transform:none;box-shadow:0 8px 28px rgba(0,0,0,.22)}
 .scenecard-body{padding:18px 20px}.scenecard-title{font-size:16px;color:var(--ink)}.stagerow{border-color:var(--line)}
-.praildetails{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;margin:0 0 20px}.praildetails>summary{padding:8px 0;color:var(--muted)}.praildetails .prail{padding:12px 0 18px;border-top:0}.pstage{background:var(--surface);border-color:var(--line);min-height:76px}.pstage.active{border-color:var(--brand);box-shadow:0 0 0 2px var(--brandbg)}.pstage.locked{background:#12141b;opacity:.55}.pconn{background:var(--line)}.pconn.fill{background:var(--ok)}
+.praildetails{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;margin:0 0 20px}.praildetails>summary{padding:8px 0;color:var(--muted)}.praildetails .prail{padding:12px 0 18px;border-top:0}.pstage{background:var(--surface);border-color:var(--line);min-height:76px;box-sizing:border-box}.pstage.active{border:3px solid var(--brand);box-shadow:0 0 0 3px var(--brandbg),inset 0 4px 0 var(--brand);background:color-mix(in srgb,var(--surface) 88%,var(--brandbg));z-index:2}.pstage.active .pname{font-weight:800;color:var(--ink)}.pstage.active .pstate{font-weight:800}.pstage.done.active{border-color:var(--ok);background:var(--okbg);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 24%,transparent),inset 0 4px 0 var(--ok)}.pstage.locked{background:#12141b;opacity:.55}.pconn{background:var(--line)}.pconn.fill{background:var(--ok)}
 .wtop{margin-bottom:18px}.sceneselect{background:var(--surface);border-color:var(--line);color:var(--ink)}.workspace{gap:14px}.wcol-contents,.wcol-artefact,.wcol-decision{border-radius:7px}.wcol-head,.kv{color:var(--hint)}
 .outcome{background:var(--surface);border-color:var(--line);border-left-color:var(--brand)}.outcome-title{color:var(--ink)}.outcome-body{color:var(--muted)}.btn{border-radius:6px;background:var(--brand);color:#140d20}.btn.ghost{color:var(--muted);border-color:var(--line)}.btn:hover{filter:brightness(1.08)}
 .dec-actions{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px}.dec-actions .btn,.dec-actions .btn.ghost{width:auto;min-width:150px;margin:0}.dec-actions button[onclick*="'approved'"]{background:var(--ok);color:#081b15}.dec-actions button[onclick*="'rejected'"]{background:transparent;color:var(--danger);border:1px solid var(--danger)}.dec-actions button[onclick*="'approve'"]{background:var(--ok);color:#081b15}.dec-actions button[onclick*="'reject'"]{background:transparent;color:var(--danger);border:1px solid var(--danger)}
 .stage-working{min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:7px}.stage-working span:last-child{max-width:420px;color:var(--muted);font-size:12px}.stage-spinner{width:42px;height:42px;border:3px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:stage-spin .8s linear infinite}.stage-working b{font-size:15px}.praildetails{position:sticky;top:0;z-index:12;background:var(--bg);padding-top:2px}.focus-evidence.scene-plan{margin-top:14px}.focus-evidence.scene-plan>.focus-evidence-body{padding-bottom:8px}
+.inline-source-progress{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:11px 12px;border:1px solid var(--brand);border-radius:6px;background:var(--brandbg);color:var(--ink);font-size:12px;line-height:1.4}.inline-source-progress .stage-spinner{width:17px;height:17px;border-width:2px;flex:none}.inline-source-progress span:last-child{display:grid;gap:2px}.inline-source-progress small{color:var(--muted)}.wcol-decision.source-updating .dec-actions button,.wcol-decision.source-updating .director-chat-launch,.wcol-decision.source-updating>button{pointer-events:none;opacity:.5}
 .stage-media-label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;color:var(--text);font-size:13px;font-weight:700}.stage-media-tools{display:flex;align-items:center;gap:8px}.stage-media-tools span{color:var(--muted);font-size:11px;font-weight:500}.media-expand{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--surface2);color:var(--text);font:inherit;font-size:20px;cursor:pointer}.media-expand:hover,.media-expand:focus-visible{border-color:var(--brand);background:var(--brandbg);outline:none}.stage-audio{padding:18px;background:var(--surface2);border:1px solid var(--line);border-radius:7px}.stage-audio audio{display:block;width:100%;margin-top:10px}.stage-audio-meta{color:var(--muted);font-size:11px}.stage-empty-media{min-height:240px;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--muted);background:var(--surface2);border:1px dashed var(--line);border-radius:7px}
+.stage-audio-empty{padding:20px;background:var(--surface2);border:1px solid var(--brand);border-radius:7px}.stage-audio-empty .stage-media-label{margin-bottom:14px}.stage-audio-placeholder{min-height:112px;display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:16px;padding:18px;background:var(--surface);border:1px solid var(--line);border-radius:6px}.stage-audio-play{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:var(--surface3);color:var(--muted);font-size:18px}.stage-audio-copy b,.stage-audio-copy span{display:block}.stage-audio-copy b{color:var(--text);font-size:15px}.stage-audio-copy span{margin-top:5px;color:var(--muted);font-size:12px;line-height:1.45}.stage-audio-track{height:4px;margin-top:12px;background:var(--line);border-radius:2px}.stage-audio-empty .btn{white-space:nowrap}
+.inherited-frame{background:var(--surface2);border:1px solid var(--brand);border-radius:7px;overflow:hidden}.inherited-frame img{display:block;width:100%;max-height:520px;object-fit:contain;background:#08090e}.inherited-frame .media-caption{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;color:var(--text);font-size:12px}.inherited-frame .media-caption span{color:var(--muted)}
 .focus-workspace.result-first{display:grid;grid-template-columns:minmax(0,1fr) 300px;max-width:1180px;align-items:start}.focus-workspace.result-first .wcol-artefact{grid-column:1;grid-row:1;order:initial}.focus-workspace.result-first .wcol-decision{grid-column:2;grid-row:1;order:initial;position:sticky;top:112px}.focus-workspace.result-first .focus-context{grid-column:1/-1;grid-row:2;order:initial}.focus-workspace.result-first .dec-actions{display:grid;grid-template-columns:1fr}.focus-workspace.result-first .dec-actions .btn,.focus-workspace.result-first .dec-actions .btn.ghost{width:100%;min-width:0}
-@media(max-width:900px){.focus-workspace.result-first{display:flex;max-width:780px}.focus-workspace.result-first .wcol-artefact{order:1}.focus-workspace.result-first .wcol-decision{order:2;position:static}.focus-workspace.result-first .focus-context{order:3}}
+.review-warning{display:grid;gap:5px;margin-top:10px;padding:11px 12px;border-left:3px solid var(--warn);background:var(--warnbg);color:var(--text);font-size:12px;line-height:1.45}.review-warning span{color:var(--muted)}.dec-actions .btn:disabled{background:var(--surface2);border-color:var(--line);color:var(--hint);cursor:not-allowed;opacity:.7}
+.director-chat-launch{width:100%;margin-top:16px;border:1px solid var(--brand);background:var(--brandbg);color:var(--text)}
+.director-chat-backdrop{position:fixed;inset:0;z-index:1390;background:rgba(5,6,10,.58);backdrop-filter:blur(2px);animation:directorFade .16s ease-out}
+.director-chat{position:fixed;z-index:1400;top:0;right:0;bottom:0;width:min(430px,calc(100vw - 24px));box-sizing:border-box;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:12px;padding:20px;background:var(--surface);border-left:1px solid var(--line);box-shadow:-20px 0 50px rgba(0,0,0,.4);animation:directorSlide .2s ease-out}
+.director-chat-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.director-chat-title{font-weight:700;font-size:15px}.director-chat-meta{color:var(--muted);font-size:10px}.director-chat-log{display:grid;align-content:start;gap:8px;min-height:0;overflow:auto;padding:4px 4px 12px 0;overscroll-behavior:contain}.director-message{padding:10px 11px;border-radius:6px;background:var(--surface2);font-size:12px;line-height:1.5}.director-message.user{margin-left:28px;border-left:2px solid var(--brand)}.director-message.director{margin-right:18px;border-left:2px solid var(--ok)}.director-thinking{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}.director-thinking .stage-spinner{width:13px;height:13px;border-width:2px}.director-chat textarea{width:100%;min-height:82px;box-sizing:border-box;padding:10px 11px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);color:var(--text);font:inherit;font-size:13px;resize:none}.director-chat-actions{display:flex;gap:8px}.director-chat-actions .btn{flex:1;min-width:0}.director-correction{padding:12px;border:1px solid var(--ok);background:var(--okbg);border-radius:6px;font-size:12px;line-height:1.45}.director-correction .btn{margin-top:10px;width:100%}
+.kf-current{position:relative}.kf-current-tag{position:absolute;z-index:2;top:12px;left:12px;display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:5px;background:rgba(10,11,16,.88);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:11px;font-weight:800}.kf-current-tag span{color:var(--ok)}
+.kf-revision{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:7px;background:var(--surface2)}.kf-revision-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.kf-revision-title{font-size:12px;font-weight:800}.kf-revision-count{color:var(--muted);font-size:10px}.kf-revision-flow{display:grid;grid-template-columns:128px minmax(0,1fr);gap:12px;align-items:center}.kf-previous{position:relative}.kf-previous img{display:block;width:128px;aspect-ratio:16/9;object-fit:cover;border-radius:5px;filter:saturate(.72);border:1px solid var(--danger)}.kf-previous-label{position:absolute;left:5px;bottom:5px;padding:3px 5px;border-radius:3px;background:rgba(10,11,16,.86);color:#fff;font-size:9px;font-weight:800}.kf-change{font-size:12px;line-height:1.45;color:var(--muted)}.kf-change b{display:block;margin-bottom:4px;color:var(--ink)}.kf-no-current{padding:10px 12px;border-left:3px solid var(--danger);background:var(--dangerbg);font-size:12px;line-height:1.45;color:var(--text)}
+.shot-context{margin-bottom:14px;padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}.shot-context-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.shot-context-id{font-size:13px;font-weight:850}.shot-context-state{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:10px}.shot-context-state b{color:var(--ok)}.shot-glance{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:10px;align-items:stretch;margin-bottom:8px}.shot-duration{display:grid;place-content:center;padding:10px;border:1px solid var(--brand);border-radius:6px;background:var(--brandbg);text-align:center}.shot-duration b{font-size:22px;line-height:1;color:var(--ink)}.shot-duration span{margin-top:4px;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}.shot-job{display:grid;align-content:center;gap:3px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface2)}.shot-job span,.shot-dialogue-window span{color:var(--hint);font-size:9px;font-weight:850;text-transform:uppercase}.shot-job b{font-size:11px;line-height:1.4}.shot-dialogue-window{display:grid;align-content:center;gap:3px;min-width:130px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface2)}.shot-dialogue-window b{font-size:11px}.shot-state-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.shot-state{min-width:0;padding:9px;border-left:2px solid var(--line);background:var(--surface2)}.shot-state.current{border-left-color:var(--brand);background:var(--brandbg)}.shot-state-label{display:block;margin-bottom:4px;color:var(--hint);font-size:9px;font-weight:850;text-transform:uppercase}.shot-state-text{display:-webkit-box;overflow:hidden;color:var(--muted);font-size:10.5px;line-height:1.4;-webkit-box-orient:vertical;-webkit-line-clamp:3}.shot-context-locks{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.shot-context-locks span{padding:4px 6px;border:1px solid var(--line);border-radius:4px;color:var(--muted);font-size:9px}.shot-context-locks .locked{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+@keyframes directorFade{from{opacity:0}to{opacity:1}}@keyframes directorSlide{from{transform:translateX(22px);opacity:.75}to{transform:translateX(0);opacity:1}}
+@media(max-width:900px){.focus-workspace.result-first{display:flex;max-width:780px}.focus-workspace.result-first .wcol-artefact{order:1}.focus-workspace.result-first .wcol-decision{order:2;position:static}.focus-workspace.result-first .focus-context{order:3}.watch-stage{grid-template-columns:minmax(0,1fr)}.watch-candidate-grid{grid-template-columns:minmax(0,1fr);padding:10px}.watch-change-below{margin:0 10px 10px}.director-chat{top:auto;left:0;width:100%;height:min(78dvh,720px);padding:16px max(14px,env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));border-left:0;border-top:1px solid var(--line);animation:directorRise .2s ease-out}.kf-revision-flow{grid-template-columns:96px minmax(0,1fr)}.kf-previous img{width:96px}.shot-glance{grid-template-columns:82px minmax(0,1fr)}.shot-dialogue-window{grid-column:1/-1}.shot-state-flow{grid-template-columns:1fr}.shot-state-text{-webkit-line-clamp:2}.stage-audio-placeholder{grid-template-columns:42px minmax(0,1fr);padding:14px}.stage-audio-play{width:42px;height:42px}.stage-audio-placeholder .btn{grid-column:1/-1;width:100%}@keyframes directorRise{from{transform:translateY(22px);opacity:.75}to{transform:translateY(0);opacity:1}}}
 @keyframes stage-spin{to{transform:rotate(360deg)}}
 .production-context{border-color:var(--line);max-width:none}.production-context>summary{color:var(--muted)}.agenthead{background:var(--brandbg)}.agentpanel{border-color:#4b376c}
 .artefact-empty{background:var(--surface2);border:1px dashed var(--line);border-radius:7px;padding:44px 24px;color:var(--muted)}
-@media(max-width:760px){.main{padding:20px 16px}.nav{width:64px;padding:10px 6px}.nav a,.nav button{justify-content:center;font-size:0;padding:11px 4px}.nav a::first-letter,.nav button::first-letter{font-size:16px}.sceneboard{grid-template-columns:1fr}.prail{overflow-x:auto}}
+@media(max-width:760px){.main{padding:20px 16px}.nav{width:64px;padding:10px 6px}.nav a,.nav button{justify-content:center;font-size:0;padding:11px 4px}.nav a::first-letter,.nav button::first-letter{font-size:16px}.sceneboard{grid-template-columns:1fr}.board-triage{grid-template-columns:repeat(2,minmax(0,1fr))}.prail{overflow-x:auto}}
+
+/* Production corridor: maximise the current media and keep navigation predictable. */
+.main{max-width:none;min-width:0;box-sizing:border-box}
+.focus-workspace{max-width:none;width:100%}
+.focus-workspace.result-first{grid-template-columns:minmax(0,1fr) clamp(240px,18vw,320px);max-width:none;width:100%;gap:clamp(10px,1.2vw,18px)}
+.focus-workspace.result-first .wcol-artefact{padding:16px}
+.focus-workspace.result-first .wcol-artefact{container-type:inline-size;container-name:production-media}
+.focus-workspace.result-first .wcol-decision{top:92px;padding:16px}
+.focus-workspace.result-first .dec-title{font-size:20px}
+.pshotnav{display:grid;grid-template-columns:clamp(96px,12cqw,132px) minmax(0,1fr) clamp(96px,12cqw,132px);gap:clamp(7px,1cqw,10px);align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.pshotnav .cnt{text-align:center;color:var(--ink);font-size:12px;line-height:1.3}
+.pshotnav .btn{width:100%;min-height:38px;margin:0;padding:7px 10px}
+.pshotnav .btn:last-child{justify-self:end}
+.scene-shot-overview{margin:0 0 18px;padding:14px;border:1px solid var(--line);background:var(--panel);border-radius:8px}
+.scene-shot-overview-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+.scene-shot-overview-head b{font-size:13px}.scene-shot-overview-head span{font-size:11px;color:var(--muted)}
+.scene-shot-overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:10px}
+.scene-shot-card{display:grid;grid-template-columns:112px minmax(0,1fr);gap:11px;text-align:left;width:100%;padding:0;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);overflow:hidden;cursor:pointer;min-height:118px}
+.scene-shot-card:hover{border-color:var(--brand)}.scene-shot-card.current{position:relative;border-color:var(--brand);background:var(--brandbg);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 78%,transparent),0 10px 28px rgba(0,0,0,.32),inset 5px 0 0 var(--brand)}.scene-shot-card.current:focus-visible{outline:3px solid var(--ink);outline-offset:6px}.scene-shot-current{display:inline-flex;align-items:center;width:max-content;padding:4px 7px;border-radius:4px;background:var(--brand);color:#140d20;font-size:9px;font-weight:900;letter-spacing:0;text-transform:uppercase}
+.scene-shot-thumb{position:relative;background:#090b10;min-height:118px;overflow:hidden}
+.scene-shot-thumb img{width:100%;height:100%;object-fit:cover;display:block}.scene-shot-thumb-empty{height:100%;display:grid;place-items:center;color:var(--hint);font-size:11px}
+.scene-shot-card-body{min-width:0;padding:10px 10px 9px 0;display:flex;flex-direction:column;gap:5px}
+.scene-shot-card-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.scene-shot-card-top b{font-size:12px}.scene-shot-duration{font-size:11px;color:var(--brand);font-weight:700;white-space:nowrap}
+.scene-shot-cast,.scene-shot-state{font-size:10px;color:var(--muted);text-transform:uppercase}.scene-shot-purpose{font-size:12px;line-height:1.35;font-weight:650}.scene-shot-handoff{font-size:11px;line-height:1.35;color:var(--hint);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.watch-stage{grid-template-columns:clamp(220px,28cqw,420px) minmax(0,1fr);gap:clamp(8px,1cqw,12px)}
+.watch-screen-media{min-height:260px}
+.watch-result .watch-screen-media{min-height:360px}
+
+@container production-media (max-width:620px){
+  .watch-stage{grid-template-columns:minmax(0,1fr)}
+  .watch-opening .watch-screen-media{aspect-ratio:16/7;min-height:0}
+  .watch-result .watch-screen-media{aspect-ratio:16/9;min-height:0}
+}
+@container production-media (min-width:1200px){
+  .watch-stage{grid-template-columns:clamp(280px,24cqw,400px) minmax(0,1fr)}
+  .watch-result .watch-screen-media{min-height:clamp(420px,34cqw,640px)}
+}
+
+@media(max-width:900px){
+  .focus-workspace.result-first{max-width:100%;gap:12px}
+  .focus-workspace.result-first .wcol-artefact,.focus-workspace.result-first .wcol-decision{width:100%}
+  .watch-stage{grid-template-columns:minmax(0,1fr)}
+  .watch-screen-media,.watch-result .watch-screen-media{min-height:0;aspect-ratio:16/9}
+}
+@media(max-width:700px){
+  .shell{display:block}
+  .nav{width:100%;display:flex;padding:5px max(8px,env(safe-area-inset-right)) 5px max(8px,env(safe-area-inset-left));overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);overscroll-behavior-x:contain}
+  .nav a,.nav button{width:auto;min-width:max-content;flex:0 0 auto;justify-content:flex-start;font-size:12px;padding:9px 12px}
+  .nav a::first-letter,.nav button::first-letter{font-size:inherit}
+  .main{padding:12px max(10px,env(safe-area-inset-right)) calc(72px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+  .wtop{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-bottom:12px}
+  .wtop .backlink,.wtop .sceneselect{width:100%;box-sizing:border-box}
+  .praildetails{position:static;margin-bottom:10px}
+  .praildetails .prail{display:flex;gap:7px;overflow-x:auto;padding:8px 0 12px;scroll-snap-type:x proximity}
+  .praildetails .pstage{min-width:132px;min-height:68px;scroll-snap-align:start}
+  .praildetails .pstage.active{border-width:3px;box-shadow:0 0 0 2px var(--brandbg),inset 0 4px 0 var(--brand)}
+  .focus-workspace.result-first .wcol-artefact,.focus-workspace.result-first .wcol-decision{padding:11px}
+  .pshotnav{grid-template-columns:48px minmax(0,1fr) 48px;gap:7px;margin-bottom:10px;padding-bottom:9px}
+  .pshotnav .btn{width:48px;min-width:48px;height:44px;padding:0;font-size:0}
+  .pshotnav .btn:first-child::after{content:'\2190';font-size:20px}
+  .pshotnav .btn:last-child::after{content:'\2192';font-size:20px}
+  .pshotnav .cnt{font-size:11px}
+  .scene-shot-overview{padding:10px;margin-bottom:12px}.scene-shot-overview-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}.scene-shot-card{grid-template-columns:92px minmax(190px,1fr);min-width:min(86vw,350px);scroll-snap-align:start}.scene-shot-thumb{min-height:112px}
+  .watch-stage{gap:8px}
+  .watch-screen-head{padding:8px 9px;font-size:10px}
+  .watch-waiting{padding:18px 12px}.watch-waiting small{font-size:11px}
+  .watch-waiting .stage-spinner{width:38px;height:38px}
+  .focus-workspace.result-first .wcol-decision{position:static}
+  .focus-workspace.result-first .dec-actions{gap:8px}
+  .focus-workspace.result-first .dec-actions .btn{min-height:48px}
+  .reference-manifest,.refgrid{min-width:0}
+}
 </style>
 </head>
 <body>
@@ -2129,7 +2252,9 @@ function shotPipelineStateLegacy(shots,i,ledgerFor,media,lineageOk,sceneLookOk,r
   // the underlying approval fact is never erased, only its downstream readiness is held.
   const sceneLookGated = sceneLookOk===false;
   const keyframeSatisfied = needsKeyframe ? kf=="approved" : kf=="inherited";
-  const talky=(s.dialogueLines||[]).length>0;
+  // A script line can be a non-verbal performance event (snore, sneeze, laugh, etc.).
+  // Only routed spoken dialogue requires an ElevenLabs approval before WATCH.
+  const talky=routeShotAudio(s).spokenDialogue.length>0;
   // 2026-07-19: voiceOk means APPROVED, not merely generated — matching keyframe's own
   // "a generated-but-unapproved candidate is never a valid anchor" rule (the voice approval
   // step, cb_render.approve_voice/reject_voice).
@@ -2721,19 +2846,29 @@ function renderBoardBody(){
     }
     return;
   }
-  const FILTERS=[["all","All scenes"],["needs-decision","Needs my decision"],["ready","Ready to generate"],
-                 ["generating","Generating"],["rejected","Rejected"],["complete","Complete"]];
-  const counts={}; FILTERS.forEach(([k])=>{counts[k]=k=="all"?BOARD_SCENES.length:BOARD_SCENES.filter(s=>s.status==k).length;});
-  const shown=BOARD_FILTER=="all"?BOARD_SCENES:BOARD_SCENES.filter(s=>s.status==BOARD_FILTER);
+  const boardMatches=(scene,key)=>key==="all"||scene.status===key||
+    (key==="needs-attention"&&["blocked","rejected"].includes(scene.status));
+  const FILTERS=[["all","All scenes"],["needs-decision","Needs my decision"],["needs-attention","Needs attention"],
+                 ["ready","Ready to continue"],["generating","Working"],["complete","Complete"]];
+  const counts={}; FILTERS.forEach(([k])=>{counts[k]=BOARD_SCENES.filter(s=>boardMatches(s,k)).length;});
+  const shown=BOARD_SCENES.filter(s=>boardMatches(s,BOARD_FILTER));
   const bar=`<div class="filterbar">${FILTERS.map(([k,label])=>
     `<button class="filterchip ${BOARD_FILTER==k?'active':''}" onclick="BOARD_FILTER='${k}';renderBoardBody()">${_esc(label)}${counts[k]?` <span class="fc">${counts[k]}</span>`:''}</button>`).join("")}</div>`;
+  const triage=`<div class="board-triage" aria-label="Episode production triage">
+    ${[["needs-decision","Your decisions",counts["needs-decision"]],["needs-attention","Needs attention",counts["needs-attention"]],
+       ["generating","Working now",counts.generating],["complete","Scenes complete",counts.complete]].map(([key,label,value])=>
+      `<button type="button" class="board-triage-item ${BOARD_FILTER===key?'active':''}" onclick="BOARD_FILTER='${key}';renderBoardBody()">
+        <span><span class="board-triage-label">${_esc(label)}</span><span style="font-size:10px;color:var(--hint)">${value?"Open the queue":"Nothing waiting"}</span></span>
+        <strong class="board-triage-value">${value}</strong>
+      </button>`).join("")}
+  </div>`;
   const runningSceneJobs=shown.some(s=>jobFor("creative",s.scene,SH_EP));
   const incomplete=(BOARD_SCENES||[]).some(s=>!(s.bundle&&s.bundle.storyboard));
   const createButton=runningSceneJobs||!incomplete?"":`<div style="display:flex;justify-content:flex-end;margin:0 0 12px">
     <button type="button" class="btn" onclick="startEpisodeProduction()">Retry unfinished scene directions</button>
   </div>`;
   el.className="";
-  el.innerHTML=createButton+boardStoryboardProgressHTML()+bar+(shown.length?`<div class="sceneboard">${shown.map(sceneCardHTML).join("")}</div>`
+  el.innerHTML=createButton+boardStoryboardProgressHTML()+triage+bar+(shown.length?`<div class="sceneboard">${shown.map(sceneCardHTML).join("")}</div>`
                                 :outcomePanelHTML({title:"No scenes match this filter",body:"Clear the filter to return to every available production outcome.",actions:[{label:"Show all scenes",onclick:"BOARD_FILTER='all';renderBoardBody()"}]}));
   startStoryboardBoardPoll();
 }
@@ -2758,24 +2893,61 @@ async function startEpisodeProduction(){
     BOARD_SCENES=null; await loadBoard(); renderBoardBody();
   }catch(e){alert("Can't reach the studio server.");}
 }
+function boardKeyframeUploadTarget(scene){
+  const bundle=scene&&scene.bundle||{},pkg=bundle.pkg||{};
+  const ledgers=new Map((pkg.continuityLedger||[]).map(row=>[row.shotId,row]));
+  return (pkg.shots||[]).find(shot=>{
+    const ledger=ledgers.get(shot.shotId)||{};
+    return shot.sourceType==="opener"&&!ledger.keyframeCandidate&&
+      !(ledger.keyframeApproval&&ledger.keyframeApproval.approved);
+  })||null;
+}
+function boardKeyframeUpload(scene,shotId,input){
+  SH_SC=String(scene);
+  showToast(`Uploading a keyframe for ${shotId} — no generation cost`,true);
+  shOpenFrameUpload(String(shotId),input);
+}
 function sceneCardHTML(s){
   const active=nextReadyStage(s.stages);
-  const stageRows=PPHASES.map(phase=>{
+  const activePhase=productionPhase(active),activeName=(activePhase&&activePhase.name)||"Direction";
+  const phases=PPHASES.map(phase=>{
     const state=phaseState(phase,s.stages);
-    const target=phaseTarget(phase,s.stages),sub=((s.stages[target]||{}).sub)||null;
-    return `<div class="stagerow"><span class="stagerow-name">${_esc(phase.name)}</span>${badge(state,sub)}</div>`;
-  }).join("");
-  const activePhase=productionPhase(active),activeName=(activePhase&&activePhase.name)||"Script";
-  const ctaLabel = active=="script" ? "Open script"
-    : "Open "+activeName;
+    const compactState=state==="approved"?"✓ Complete":state==="awaiting"?"Decision":state==="generating"?"Working":
+      ["blocked","rejected"].includes(state)?"Attention":state==="ready"?"Ready":"Waiting";
+    const css=state==="approved"?"complete":(["blocked","rejected"].includes(state)?"attention":(activePhase&&activePhase.id===phase.id?"current":""));
+    return {phase,state,compactState,css};
+  });
+  const completeN=phases.filter(row=>row.state==="approved").length;
+  const activeTarget=phaseTarget(activePhase,s.stages),activeStage=(s.stages[activeTarget]||{});
+  const reviewCopy={Direction:"Scene direction is ready for your decision",See:"The current keyframe is ready for your decision",
+                    Hear:"The current voice bed is ready for your decision",Watch:"The current render is ready for your decision"};
+  const decisionTitle=(activeStage.state==="awaiting"&&reviewCopy[activeName])||activeStage.sub||(
+    ["blocked","rejected"].includes(activeStage.state)?activeName+" needs attention":
+    activeStage.state==="generating"?activeName+" is being prepared":
+    "Continue to "+activeName
+  );
+  const ctaLabel=active==="script"?"Open script":
+    activeStage.state==="awaiting"?"Review "+activeName:
+    ["blocked","rejected"].includes(activeStage.state)?"Resolve "+activeName:
+    activeStage.state==="generating"?"View progress":"Continue to "+activeName;
+  const uploadTarget=activePhase&&activePhase.id==="see"?boardKeyframeUploadTarget(s):null;
+  const uploadId=uploadTarget?`boardKfUpload_${s.scene}_${uploadTarget.shotId}`.replaceAll(".","_"):"";
   const dotColor=STATE_COLOR[(s.stages[active]||{}).state||"ready"];
   return `<article class="scenecard">
-    <div class="scenecard-thumb">${s.latestFrame?`<img src="${BASE}${s.latestFrame}?v=${MEDIA_V}"/>`:`<div class="scenecard-noimg">No frame yet</div>`}
+    <div class="scenecard-thumb">${s.latestFrame?`<img src="${BASE}${s.latestFrame}?v=${MEDIA_V}"/>`:`<div class="scenecard-noimg">No current scene media yet</div>`}
+      <span class="scenecard-media-label">${s.latestFrame?"Current scene media":activeName+" next"}</span>
       <span class="scenecard-dot" style="background:var(${dotColor})"></span></div>
     <div class="scenecard-body">
       <div class="scenecard-title">SCENE ${_esc(s.scene)} — ${_esc((s.name||"").toUpperCase())}</div>
-      <div class="scenecard-stages">${stageRows}</div>
-      <button class="btn" style="width:100%;margin-top:12px" onclick="event.stopPropagation();${active=="script"?"go('script')":`openScene('${s.scene}')`}">${_esc(ctaLabel)}</button>
+      <div class="scenecard-decision"><span class="scenecard-decision-copy"><span class="scenecard-decision-kicker">What needs you now · ${_esc(activeName)}</span><span class="scenecard-decision-title">${_esc(decisionTitle)}</span></span>${badge(activeStage.state||"ready")}</div>
+      <div class="scene-progress" aria-label="${completeN} of 4 stages complete"><span style="width:${completeN*25}%"></span></div>
+      <div class="scene-corridor" aria-label="Direction, See, Hear, Watch">
+        ${phases.map(row=>`<div class="scene-corridor-step ${row.css}"><b>${_esc(row.phase.name)}</b><span>${_esc(row.compactState)}</span></div>`).join("")}
+      </div>
+      <div class="scenecard-actions ${uploadTarget?'has-upload':''}">
+        <button class="btn" onclick="event.stopPropagation();${active==="script"?"go('script')":`openScene('${s.scene}')`}">${_esc(ctaLabel)} →</button>
+        ${uploadTarget?`<button class="btn ghost" onclick="event.stopPropagation();document.getElementById('${_esc(uploadId)}').click()">Upload keyframe<br><span style="font-size:9px">${_esc(uploadTarget.shotId)} · no cost</span></button><input type="file" id="${_esc(uploadId)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="boardKeyframeUpload('${_esc(s.scene)}','${_esc(uploadTarget.shotId)}',this)">`:""}
+      </div>
     </div>
   </article>`;
 }
@@ -2783,6 +2955,14 @@ function openScene(scene,deferRender){
   SH_SC=String(scene); SH_PKG=null; SH_MEDIA=null; PSB=null; PSHOT_I=0; PSTAGE=null;
   page="pipeline"; renderTop(); renderNav(); document.getElementById("gatesbar").innerHTML="";
   if(!deferRender)renderControl();
+}
+async function resolveCurrentDirection(){
+  const scene=String(SH_SC||"");
+  openScene(scene,true);
+  PSTAGE="storyboard";
+  _syncHash();
+  renderControl();
+  await pFireCreative();
 }
 function backToBoard(){ page="sceneboard"; renderTop(); renderNav(); document.getElementById("gatesbar").innerHTML=""; renderSceneBoard(); }
 
@@ -2872,6 +3052,11 @@ function openShotOutcome(stage,index){
   PSHOT_I=Math.max(0,Math.min(Number(index)||0,Math.max(0,shots.length-1)));
   PSTAGE=stage;renderWorkspaceBody();_syncHash();
 }
+function continueCurrentShotToWatch(){
+  // Keep the current production unit selected. Scene-level HEAR can remain open for a
+  // later spoken shot without redirecting this Seedance-SFX-only shot away from WATCH.
+  openShotOutcome("animation",PSHOT_I);
+}
 function focusShotReview(index){
   openShotOutcome("continuity",index);
   setTimeout(()=>{const panel=document.querySelector("#wdecision .deptpanel");if(panel)panel.scrollIntoView({behavior:"smooth",block:"start"});},0);
@@ -2885,6 +3070,7 @@ function shotResolutionAction(pst,tok){
   if(!pst||pst.label==="Production state unavailable")return {label:"Refresh scene state",onclick:"renderControl()"};
   if(pst.sceneLookGated)return {label:"Open Look Development",onclick:"openStageOutcome('scenelook')"};
   if(pst.kf==="waitingPrev")return {label:"Resolve the previous shot",onclick:"openPreviousShotOutcome('animation')"};
+  if(pst.kf==="stageBlocked")return {label:"Return to See and correct the keyframe",onclick:"openShotOutcome('keyframe',PSHOT_I)"};
   if(pst.needsKeyframe&&!current.keyframe)return {label:"Open Cinematography",onclick:"openStageOutcome('keyframe')"};
   if(pst.talky&&!current.voice)return {label:"Open Voice & Timing",onclick:"openStageOutcome('voice')"};
   if(!current.animationDirection){
@@ -2910,6 +3096,28 @@ function needsEpisodeStoryDirection(){
     blockers.some(x=>x&&x.code==="STORY_INTAKE_APPROVAL_REQUIRED");
 }
 
+function corridorPhaseState(phase,stages){
+  const aggregate=phaseState(phase,stages);
+  if(phase.id==="direction")return aggregate;
+  const shot=(pShots()[PSHOT_I]||{}),policy=((SH_STATE&&SH_STATE.shots)||[]).find(row=>row.shotId===shot.shotId);
+  if(!policy)return aggregate;
+  const current=policy.current||{},pending=policy.pending||{};
+  if(phase.id==="see"){
+    if(current.keyframe&&SH_STATE&&SH_STATE.sceneLook&&SH_STATE.sceneLook.current)return "approved";
+    if(pending.keyframe)return "awaiting";
+  }
+  if(phase.id==="hear"){
+    if(!policy.talky||current.voice)return "approved";
+    if(pending.voice)return "awaiting";
+  }
+  if(phase.id==="watch"){
+    if(current.animation)return "approved";
+    if(pending.animation||policy.animState==="candidates-pending")return "awaiting";
+    if(activeWatchJob(shot.shotId)||durableWatchJob(shLedger(shot.shotId)))return "generating";
+  }
+  return aggregate;
+}
+
 function renderStageRail(){
   const stages=currentStages();
   const focused=pFocusedStage();
@@ -2918,7 +3126,7 @@ function renderStageRail(){
   PPHASES.forEach((phase,i)=>{
     // Downstream phases are waiting, not failing, while the shared script is unapproved.
     // Showing four warning states makes a clean production dependency look like four errors.
-    const st=phase.id!=="direction"&&pStatus("script")!=="approved"?"locked":phaseState(phase,stages);
+    const st=phase.id!=="direction"&&pStatus("script")!=="approved"?"locked":corridorPhaseState(phase,stages);
     const cls=[st=="locked"?"locked":"", st=="approved"?"done":"", (st=="rejected"||st=="blocked")?"rejected":"",
                focusedPhase&&focusedPhase.id===phase.id?"active":""].filter(Boolean).join(" ");
     parts.push(`<button type="button" class="pstage ${cls}" onclick="openPhaseOutcome('${phase.id}')" title="${_esc(STATE_LABEL[st])}">
@@ -2927,7 +3135,7 @@ function renderStageRail(){
     </button>`);
     if(i<PPHASES.length-1){ parts.push(`<div class="pconn ${st=="approved"?'fill':''}"></div>`); }
   });
-  const completed=PPHASES.filter(phase=>phase.id!=="direction"&&pStatus("script")!=="approved"?false:phaseState(phase,stages)==="approved").length;
+  const completed=PPHASES.filter(phase=>phase.id!=="direction"&&pStatus("script")!=="approved"?false:corridorPhaseState(phase,stages)==="approved").length;
   const currentName=(focusedPhase||{}).name||((PSTAGES.find(stage=>stage.id===focused)||{}).name||"Production");
   const progress=Math.round((completed/Math.max(1,PPHASES.length))*100);
   return `<details class="praildetails" open><summary aria-label="Production workflow">
@@ -2936,6 +3144,30 @@ function renderStageRail(){
       <span class="prailchevron" aria-hidden="true">⌄</span>
       <span class="prailbar" aria-hidden="true"><i style="width:${progress}%"></i></span>
     </summary><div class="prail">${parts.join("")}</div></details>`;
+}
+
+function sceneShotOverviewHTML(){
+  const shots=pShots();
+  if(!shots.length)return "";
+  const cards=shots.map((shot,index)=>{
+    const media=shMedia(shot.shotId)||{},led=shLedger(shot.shotId)||{};
+    const candidates=media.candidates||[];
+    const thumb=media.keyframe||(candidates[0]&&((candidates[0].poster)||candidates[0].thumbnail))||media.finalFrame||"";
+    const cast=(shot.charactersInFrame||[]).join(" · ")||"Cast pending";
+    const duration=Number(shot.durationSec||0);
+    const purpose=shot.purpose||"Production beat pending.";
+    const landing=shot.visualPayoff||shotLandingText(shot);
+    const state=sceneContentsShotLabel(shots,index)||"Ready";
+    const image=thumb?`<img src="${BASE}${_esc(thumb)}?v=${MEDIA_V}" alt="${_esc(productionUnitLabel(index))} thumbnail">`:`<span class="scene-shot-thumb-empty">No frame yet</span>`;
+    return `<button type="button" class="scene-shot-card ${index===PSHOT_I?'current':''}" onclick="PSHOT_I=${index};renderWorkspaceBody();_syncHash()" aria-label="Open ${_esc(productionUnitLabel(index))}" ${index===PSHOT_I?'aria-current="true"':''}>
+      <span class="scene-shot-thumb">${image}</span><span class="scene-shot-card-body">
+        ${index===PSHOT_I?'<span class="scene-shot-current">Current shot</span>':''}
+        <span class="scene-shot-card-top"><b>${_esc(productionUnitLabel(index))} · ${_esc(shot.shotId)}</b><span class="scene-shot-duration">${_esc(duration?duration.toFixed(duration%1?1:0):'—')}s</span></span>
+        <span class="scene-shot-cast">${_esc(cast)}</span><span class="scene-shot-purpose">${_esc(purpose)}</span>
+        <span class="scene-shot-handoff"><b>Landing:</b> ${_esc(landing)}</span><span class="scene-shot-state">${_esc(state)}</span>
+      </span></button>`;
+  }).join("");
+  return `<section class="scene-shot-overview" aria-label="Scene shot breakdown"><div class="scene-shot-overview-head"><b>Scene ${_esc(SH_SC)} · ${shots.length} production shot${shots.length===1?'':'s'}</b><span>Select a shot to review its full Direction, See, Hear or Watch package</span></div><div class="scene-shot-overview-grid">${cards}</div></section>`;
 }
 
 async function renderControl(){
@@ -2950,6 +3182,7 @@ async function renderControl(){
     </div>
     <div id="jobbanner"></div>
     <div id="railwrap">${renderStageRail()}</div>
+    <div id="shotoverview">${sceneShotOverviewHTML()}</div>
     <div id="workspace" class="workspace"></div>
     <details class="production-context"><summary>
       <span>Production details</span>
@@ -2962,6 +3195,7 @@ async function renderControl(){
     </div></details>`;
   renderStudioAgent(); renderPreflightBanner(); renderJobBanner();
   await renderWorkspaceBody();
+  startWatchServerPoll();
 }
 function renderPreflightBanner(){
   const el=document.getElementById("readiness");if(!el)return;
@@ -3190,6 +3424,7 @@ async function renderWorkspaceBody(){
   // early, unconditionally, so it still fires even on this function's own early returns below.
   _syncHash();
   document.getElementById("railwrap").innerHTML=renderStageRail();
+  const overview=document.getElementById("shotoverview");if(overview)overview.innerHTML=sceneShotOverviewHTML();
   renderJobBanner();
   const stage=pFocusedStage();
   if(stage==="review"){
@@ -3348,7 +3583,7 @@ function renderStoryboardStage(){
     actions=[`<textarea id="pSbNote" class="pfeedback" placeholder="A note for the record (optional on approve, helpful on reject)"></textarea>`,
       `<div class="mobile-split" style="margin-top:10px">
         <button class="btn" onclick="pStoryboardDecide('approved')">Accept direction</button>
-        <button class="btn ghost" onclick="pStoryboardDecide('rejected')">Iterate</button>
+        <button class="btn ghost" onclick="directorStartRejection('storyboard',null,'')">Reject / Discuss</button>
       </div>`];
   } else if(st=="approved"){
     actions=[`<span class="dec-caption">${badge("approved")}</span>`,
@@ -3357,7 +3592,7 @@ function renderStoryboardStage(){
     actions=[`<span class="dec-caption">${badge(st)}</span>`,`<button class="btn ghost" onclick="renderControl()">Refresh progress</button>`];
   } else {
     actions=[`<span class="dec-caption">${badge(st,pStatusSub("storyboard"))}</span>`,
-      `<button class="btn" onclick="backToBoard()">Resolve episode Story &amp; Direction</button>`];
+      `<button class="btn" onclick="resolveCurrentDirection()">Resolve episode Story &amp; Direction</button>`];
   }
   dec.innerHTML=decisionShell("Scene Direction", "v"+((PSB.sceneDirectionCard&&PSB.sceneDirectionCard.version)||"1"), actions, history);
   dec.insertAdjacentHTML("beforeend",`<div class="deptpanel"><div class="deptperson"><div class="deptavatar">D</div><div>
@@ -3383,7 +3618,9 @@ async function pStoryboardDecide(verdict){
     const j=await r.json();
     if(!j.ok){alert("Couldn't record the decision: "+(j.error||"failed"));return;}
     showToast(verdict=="approved"?"✓ Storyboard approved and handed to production":"✗ Sent back for revision",verdict=="approved");
-    await pFetchStoryboard(); renderWorkspaceBody();
+    await pLoadAll();
+    if(verdict=="approved")openStageOutcome("keyframe");
+    else renderWorkspaceBody();
   }catch(e){alert("Can't reach the studio server.");}
 }
 
@@ -3417,12 +3654,12 @@ function renderSceneLookStage(){
     if(sl.status=="awaiting"){
       decVersion="World anchor needs rebuilding";
       decActions=[`<span class="dec-caption">Its signed inputs changed. Clear it, then generate from current direction.</span>`,
-        `<button class="btn" onclick="shRun('reject-scenelook')">Rebuild world anchor</button>`];
+        `<button class="btn" onclick="directorStartRejection('scenelook',null,'')">Discuss rebuild</button>`];
     } else if(sl.status=="working"){
       decVersion="Working world anchor · current";
       decActions=[`<span class="dec-caption">Used behind the first keyframe; no prompt or plate approval required.</span>`,
         `<button class="btn" onclick="openStageOutcome('keyframe')">Continue to First Keyframe</button>`,
-        `<button class="btn ghost" onclick="shRun('reject-scenelook')">Iterate world build</button>`];
+        `<button class="btn ghost" onclick="directorStartRejection('scenelook',null,'')">Reject / Discuss</button>`];
     } else if(sl.status=="approved"){
       decVersion="Approved · current";
       decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
@@ -3459,7 +3696,119 @@ function decisionShell(title,version,actionsHTML,historyHTML){
     <div class="dec-title">${_esc(title)}</div>
     <div class="dec-version">${_esc(version)}</div>
     <div class="dec-actions">${actions.join("")}</div>
-    ${historyHTML?`<details class="dec-history"><summary>View history</summary>${historyHTML}</details>`:""}`;
+    ${historyHTML?`<details class="dec-history"><summary>View history</summary>${historyHTML}</details>`:""}
+    <div id="director-chat-host">${directorChatHTML()}</div>`;
+}
+
+let DIRECTOR_CHAT_OPEN_KEY=null,DIRECTOR_CHAT_OPEN_SCOPE=null,DIRECTOR_CHAT_CACHE={},DIRECTOR_CHAT_DRAFTS={};
+function directorChatScope(stageOverride,shotOverride){
+  if(stageOverride===undefined&&shotOverride===undefined&&DIRECTOR_CHAT_OPEN_SCOPE)return DIRECTOR_CHAT_OPEN_SCOPE;
+  const stage=stageOverride||pFocusedStage()||"storyboard";
+  const shot=(pShots()[PSHOT_I]||{}).shotId||null;
+  return {episode:SH_EP,scene:String(SH_SC),shotId:shotOverride===undefined?shot:shotOverride,stage};
+}
+function directorChatKey(scope){return [scope.episode,scope.scene,scope.shotId||"scene",scope.stage].join("|");}
+function directorChatHTML(){
+  const scope=directorChatScope(),key=directorChatKey(scope),open=DIRECTOR_CHAT_OPEN_KEY===key;
+  if(!open)return `<button type="button" class="btn director-chat-launch" onclick="openDirectorAgent()">✦ Ask Director</button>`;
+  const data=DIRECTOR_CHAT_CACHE[key]||{loading:true,messages:[]};
+  const messages=(data.messages||[]).map(item=>`<div class="director-message ${item.role==="user"?"user":"director"}">${_esc(item.text||"")}</div>`).join("");
+  const latest=[...(data.messages||[])].reverse().find(item=>item.role==="director"&&item.readyToApply&&item.correction);
+  const applyLabel=scope.stage==="animation-edit"?"Prepare targeted edit · review cost":scope.stage==="animation-refire"?"Prepare full-take refire · no render":scope.stage==="animation"?"Apply to working prompt · no render":scope.stage==="keyframe"?"Apply to next keyframe revision":"Apply to next revision and return";
+  return `<div class="director-chat-backdrop" onclick="closeDirectorAgent()" aria-hidden="true"></div><section class="director-chat" role="dialog" aria-modal="true" aria-label="Director conversation">
+    <div class="director-chat-head"><div><div class="director-chat-title">Director</div><div class="director-chat-meta">${_esc(data.model||"small-context OpenAI")} · ${_esc(scope.shotId||"scene")}</div></div><button type="button" class="media-expand" aria-label="Close Director" title="Close Director" onclick="closeDirectorAgent()">×</button></div>
+    <div class="director-chat-log">${messages||(!data.loading?`<div class="director-message director">What is not landing?</div>`:"")}${data.loading?`<div class="director-thinking"><span class="stage-spinner" aria-hidden="true"></span>${messages?"Director is thinking…":"Opening the conversation…"}</div>`:""}</div>
+    ${latest?`<div class="director-correction">${latest.changeSummary?`<b>What will visibly change</b><br>${_esc(latest.changeSummary)}<br><br>`:""}${scope.stage==="animation-edit"&&latest.editStartSec!=null?`<b>Edit window</b><br>${_esc(Number(latest.editStartSec).toFixed(2))}-${_esc(Number(latest.editEndSec).toFixed(2))} seconds<br><br>`:""}<b>Iteration instruction</b><br>${_esc(latest.correction)}${(latest.protectedElements||[]).length?`<div style="margin-top:9px;color:var(--muted)"><b style="color:var(--text)">Keep locked</b><br>${latest.protectedElements.map(_esc).join(" · ")}</div>`:""}<button class="btn" onclick="directorApplyCorrection()">${_esc(applyLabel)}</button><small style="display:block;margin-top:8px;color:var(--muted)">This prepares production instructions only. Generate and Fire remain separate decisions.</small></div>`:""}
+    <textarea id="directorChatInput" placeholder="Tell the Director what feels wrong…" oninput="DIRECTOR_CHAT_DRAFTS['${_attr(key)}']=this.value">${_esc(DIRECTOR_CHAT_DRAFTS[key]||"")}</textarea>
+    <div class="director-chat-actions"><button class="btn ghost" onclick="closeDirectorAgent()">Keep reviewing</button><button class="btn" ${data.loading?"disabled":""} onclick="sendDirectorMessage()">Send to Director</button></div>
+  </section>`;
+}
+function renderDirectorChatHost(){const host=document.getElementById("director-chat-host");if(!host)return;host.innerHTML=directorChatHTML();requestAnimationFrame(()=>{const log=host.querySelector(".director-chat-log");if(log)log.scrollTop=log.scrollHeight;});}
+async function openDirectorAgent(options){
+  const opts=options||{},scope=directorChatScope(opts.stage,opts.shotId),key=directorChatKey(scope);
+  DIRECTOR_CHAT_OPEN_KEY=key;DIRECTOR_CHAT_OPEN_SCOPE=scope;
+  if(opts.seed&&!DIRECTOR_CHAT_DRAFTS[key])DIRECTOR_CHAT_DRAFTS[key]=opts.seed;
+  if(!DIRECTOR_CHAT_CACHE[key]){
+    DIRECTOR_CHAT_CACHE[key]={loading:true,messages:[]};renderDirectorChatHost();
+    const q=new URLSearchParams({episode:scope.episode,scene:scope.scene,stage:scope.stage});if(scope.shotId)q.set("shotId",scope.shotId);
+    try{const r=await fetch(BASE+"/api/director-chat?"+q,{cache:"no-store"}),j=await r.json();DIRECTOR_CHAT_CACHE[key]=r.ok?j:{error:j.error,messages:[]};}
+    catch(e){DIRECTOR_CHAT_CACHE[key]={error:"Director unavailable",messages:[]};}
+  }
+  renderDirectorChatHost();
+}
+function closeDirectorAgent(){DIRECTOR_CHAT_OPEN_KEY=null;DIRECTOR_CHAT_OPEN_SCOPE=null;renderDirectorChatHost();}
+async function sendDirectorMessage(){
+  const scope=directorChatScope(),key=directorChatKey(scope),input=document.getElementById("directorChatInput"),message=String((input&&input.value)||"").trim();if(!message)return;
+  const issue=((document.querySelector(".review-warning")||{}).innerText||"").trim();
+  DIRECTOR_CHAT_DRAFTS[key]="";DIRECTOR_CHAT_CACHE[key]={...(DIRECTOR_CHAT_CACHE[key]||{}),loading:true};renderDirectorChatHost();
+  try{const r=await fetch(BASE+"/api/director-chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...scope,message,issue,by:REVIEWER})}),j=await r.json();
+    DIRECTOR_CHAT_CACHE[key]=r.ok?j:{error:j.error,messages:(DIRECTOR_CHAT_CACHE[key].messages||[])};
+  }catch(e){DIRECTOR_CHAT_CACHE[key]={error:"Director unavailable",messages:(DIRECTOR_CHAT_CACHE[key].messages||[])};}
+  renderDirectorChatHost();
+}
+function directorStartRejection(stage,shotId,reason){
+  openDirectorAgent({stage,shotId,seed:reason?`The current review says: ${reason}\n\nHelp me define the smallest correction before I reject and refire.`:"Help me define the smallest correction before I reject and refire."});
+}
+async function saveAnimationDirectorCorrection(tok,key,revised){
+  try{
+    showInlineSourceProgress("Director is updating the working prompt");
+    const r=await fetch(BASE+"/api/shot-seedance-save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,prompt:revised})}),j=await r.json();
+    if(!j.ok){clearInlineSourceProgress();alert("Couldn't apply the Director change: "+(j.error||"failed"));return;}
+    delete SH_SEEDANCE_CACHE[tok];delete SH_STRUCTURE_CACHE[tok];delete SH_READBACK_CACHE[tok];
+    await shLoadSeedanceWork(tok);clearInlineSourceProgress();
+    DIRECTOR_CHAT_CACHE[key]={...(DIRECTOR_CHAT_CACHE[key]||{}),messages:[...((DIRECTOR_CHAT_CACHE[key]||{}).messages||[]),{role:"director",text:"Rejected takes archived and correction applied to the working Seedance prompt. No render was fired.",at:new Date().toISOString()}]};
+    if(typeof showToast==="function")showToast("Director change applied · no render fired · Fire remains separate",true);
+    await pLoadAll();renderWorkspaceBody();
+  }catch(e){clearInlineSourceProgress();alert("Can't reach the studio server. Reload and try again.");}
+}
+async function directorApplyCorrection(){
+  const scope=directorChatScope(),key=directorChatKey(scope),latest=[...((DIRECTOR_CHAT_CACHE[key]||{}).messages||[])].reverse().find(item=>item.role==="director"&&item.readyToApply&&item.correction);if(!latest)return;
+  const correction=latest.correction,tok=scope.shotId?shTok(scope.shotId):null;
+  if(scope.stage==="animation-edit"){
+    if(latest.editStartSec==null||latest.editEndSec==null){alert("Tell the Director the exact seconds that need editing first.");return;}
+    closeDirectorAgent();
+    return shRun("edit",tok,{startSec:Number(latest.editStartSec),endSec:Number(latest.editEndSec),correction});
+  }
+  if(scope.stage==="animation-refire"){
+    DIRECTOR_CHAT_OPEN_KEY=null;DIRECTOR_CHAT_OPEN_SCOPE=null;
+    try{
+      showInlineSourceProgress("Director is reopening the approved take");
+      const r=await fetch(BASE+"/api/director-action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,action:"reopen-shot",note:correction,by:REVIEWER})}),j=await r.json();
+      if(!r.ok||!j.ok){clearInlineSourceProgress();alert("Couldn't reopen the take: "+(j.error||"failed"));return;}
+      await pLoadAll();
+      let status=SH_SEEDANCE_CACHE[tok];if(!status||status.error){await shLoadSeedanceWork(tok);status=SH_SEEDANCE_CACHE[tok];}
+      const base=String((status&&status.currentPrompt)||"").trim();
+      if(base)await saveAnimationDirectorCorrection(tok,key,base+"\n\n[DIRECTOR FULL-TAKE REFIRE]\n"+correction+"\nPreserve every successful identity, geography, continuity, timing, audio-authority and landing decision.");
+      else{clearInlineSourceProgress();renderWorkspaceBody();}
+    }catch(e){clearInlineSourceProgress();alert("Can't reach the studio server. Reload and try again.");}
+    return;
+  }
+  if(scope.stage==="animation"){
+    let status=SH_SEEDANCE_CACHE[tok];
+    if(!status||status.error){await shLoadSeedanceWork(tok);status=SH_SEEDANCE_CACHE[tok];}
+    const base=String((status&&status.currentPrompt)||"").trim();
+    if(!base){alert("The current Seedance prompt is not ready yet.");return;}
+    const marker="\n\n[DIRECTOR ITERATION]\n";
+    const revised=base+marker+"Correct only this observed issue: "+correction+"\nPreserve every successful identity, geography, continuity, timing, audio-authority and landing decision.";
+    if((shLedger(tok)||{}).status==="candidates-pending"){
+      DIRECTOR_CHAT_OPEN_KEY=null;
+      return shRun("reject",tok,{correction,category:"creative",preserveView:true,progressLabel:"Archiving rejected takes",afterJob:async job=>{
+        if(job&&job.status==="done")await saveAnimationDirectorCorrection(tok,key,revised);
+      }});
+    }
+    return saveAnimationDirectorCorrection(tok,key,revised);
+  }
+  DIRECTOR_CHAT_OPEN_KEY=null;
+  if(scope.stage==="keyframe")return shRun("reject-keyframe",tok,{correction});
+  if(scope.stage==="voice")return shRun("reject-voice",tok,{correction});
+  if(scope.stage==="animation")return shRun("reject",tok,{correction,category:"creative"});
+  if(scope.stage==="scenelook")return shRun("reject-scenelook",null,{correction});
+  const note=document.getElementById("pSbNote");if(scope.stage==="storyboard"&&note){note.value=correction;return pStoryboardDecide("rejected");}
+}
+
+function approveKeyframeAdvisory(tok){
+  if(!window.confirm("Approve this opening keyframe despite the advisory review? Hard canon, reference, lineage and file-integrity checks still apply."))return;
+  shRun("approve-keyframe",tok);
 }
 
 // ── THE PEOPLE IN THE DEPARTMENTS ─────────────────────────────────────────────────────
@@ -3569,7 +3918,9 @@ function departmentPanelHTML(stage,shotId,d){
         <details class="techdetails" style="margin-top:10px"><summary>Production internals</summary>${editor}
           <div class="ccactions"><button class="btn ghost" onclick="deptSave('${_esc(stage)}','${_esc(shotId||"")}')">Save internal edit</button></div>
         </details>
-        <div class="deptmeta">Signed against the current canon, references and production inputs. Its proof is the next rendered outcome.</div></div>`;
+        <div class="ccactions" style="margin-top:12px"><button class="btn" onclick="deptDecide('${_esc(stage)}','${_esc(shotId||"")}','approved')">Approve direction</button>
+          <button class="btn ghost" onclick="deptDecide('${_esc(stage)}','${_esc(shotId||"")}','rejected')">Reject / discuss</button></div>
+        <div class="deptmeta">Signed against the current canon, references and production inputs. Approval prepares the next visible decision; it does not spend media credits. Its proof is the next rendered outcome.</div></div>`;
     }
     return `<div class="deptpanel">${person}<div class="cchead">Specialist candidate · awaiting you</div>${editor}
       <div class="ccactions"><button class="btn" onclick="deptDecide('${_esc(stage)}','${_esc(shotId||"")}','approved')">Acknowledge review</button>
@@ -3623,6 +3974,7 @@ async function deptRun(stage,shotId){
   try{const r=await fetch(BASE+"/api/department-run",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,stage,shotId:shotId||null})});const j=await r.json();
     if(!r.ok||!j.ok){SH_DEPT_CACHE[key]={error:j.error||"Worker could not start"};renderWorkspaceBody();return;}
+    if(j.existing&&j.department){SH_DEPT_CACHE[key]=j.department;showToast(stage==="voice"?"Performance direction ready — audio not generated":"Creative direction ready — no media generated",true);renderWorkspaceBody();return;}
     showToast("The "+stage+" specialist is working — no media generation",true);
     SH_JOB=j.jobId;shRememberJob(j.jobId);SH_LAST_JOB=null;SH_AFTER_JOB=null;SH_POLL_MISSES=0;shPollStart();renderControl();
   }catch(e){SH_DEPT_CACHE[key]={error:"Can't reach the department."};renderWorkspaceBody();}
@@ -3647,6 +3999,7 @@ async function deptDecide(stage,shotId,verdict){
 // ── KEYFRAME / VOICE / ANIMATION — one shot at a time ──
 function voicePanelHTML(tok,vw){
   if(!vw)return `<div class="ccpanel"><div class="dec-caption">Loading the current performance prompt…</div></div>`;
+  if(vw.loading)return `<div class="stage-working" style="min-height:150px"><span class="stage-spinner" aria-hidden="true"></span><b>Loading the ElevenLabs v3 prompt</b><span>The exact provider text will appear here.</span></div>`;
   if(vw.error)return `<div class="ccpanel"><div class="dec-caption" style="color:var(--danger)">${_esc(vw.error)}</div></div>`;
   const dirty=SH_VOICE_DIRTY[tok];
   const lines=(vw.currentLines||[]).map((ln,i)=>{
@@ -3659,7 +4012,7 @@ function voicePanelHTML(tok,vw){
     </div>`;
   }).join("");
   const approvedDlg=(vw.approvedLines||[]).map(ln=>
-    `<div class="dlgline"><b>${_esc(ln.speaker)}:</b> "${_esc(ln.exactText)}"</div>`).join("");
+    `<div class="dlgline"><b>${_esc(ln.speaker)}:</b> "${_esc(cleanSpokenText(ln.exactText))}"</div>`).join("");
   // THE STALE-TAKE WARNING (2026-07-19 — "I don't feel the acting from the direction changed
   // anything"): editing and saving a working version deliberately never regenerates audio —
   // but nothing told the user the take they were hearing was built BEFORE their edit existed.
@@ -3688,14 +4041,13 @@ function voicePanelHTML(tok,vw){
   return `<div class="ccpanel">
     ${staleBanner}
     <div class="cchead">ElevenLabs v3 performance prompt <span class="stbadge" style="color:var(--brand);background:var(--surface2)">${_esc(vw.source||"approved source")}</span>${vw.isWorking?` <span class="stbadge" style="color:var(--brand);background:var(--surface2)">working version${vw.savedAt?" · "+_esc(vw.savedAt.slice(0,16)):""}</span>`:""}</div>
-    <div class="dec-caption" style="margin-bottom:10px">This is exactly what will be sent to ElevenLabs per line. Edit acting direction, cadence and [bracketed] v3 tags directly — the approved dialogue below never changes.</div>
+    <div class="dec-caption" style="margin-bottom:10px">This is exactly what will be sent to ElevenLabs per line. Adapt phonetic spelling, pronunciation, cadence, pauses, breath and [bracketed] v3 performance tags here. A phonetic spelling changes the sound only; the approved words, captions and script remain unchanged above.</div>
     ${lines}
     <div class="ccactions">
-      <button class="btn ghost" onclick="shSaveVoiceWork('${_esc(tok)}')">Save as working version</button>
+      <button class="btn" onclick="shSaveVoiceWork('${_esc(tok)}')">Save ElevenLabs prompt</button>
       ${vw.isWorking?`<button class="btn ghost" onclick="shRestoreVoiceWork('${_esc(tok)}')">Restore approved version</button>`:""}
     </div>
-    <div class="ccref" style="margin-top:14px;font-weight:600">Approved dialogue (locked, never edited here):</div>
-    ${approvedDlg}
+    <details class="techdetails" style="margin-top:14px"><summary>Compare with approved words</summary>${approvedDlg}</details>
     ${takeLabel}
     ${prevBlock}
   </div>`;
@@ -4015,7 +4367,7 @@ function plTraceHTML(tok,type,data,preview){
       <div class="plheadline"><div class="plheadline-label">Result</div><div class="plheadline-value">${_esc(resultHeadline)}</div></div>
       <div class="plheadline"><div class="plheadline-label">Next</div><div class="plheadline-value">${_esc(nextHeadline)}</div></div>
     </div>
-    <div class="pldirector-action"><div class="pldecision-label">Your decision</div>${plNextActionHTML(tok,type,data)}</div>
+    <div class="pldirector-action"><div class="pldecision-label">Decision controls</div><div class="plflow-sub">Use the fixed Your Decision panel beside the current media.</div></div>
     <details class="techdetails plreview-details" ${asset.state==="awaiting"?"open":""}><summary>Review result</summary>${preview||""}${observed}${currentComment}${quick}</details>`;
 }
 function plFeedbackRow(tok,type,item,selected){
@@ -4169,6 +4521,119 @@ function shotFocusCopy(mode,shot){
   }
   return plHeadlineText(shot.purpose,mode==="voice"?"Create the character performance for this shot.":"Create the animation take for this shot.",190);
 }
+function keyframeRevisionInfo(led){
+  led=led||{};
+  const rejections=(led.keyframeRejections||[]).filter(Boolean);
+  const previous=rejections.length?rejections[rejections.length-1]:(led.keyframeRejected||null);
+  const revision=Math.max(1,rejections.length+1);
+  return {revision,previous,previousRevision:Math.max(1,revision-1)};
+}
+function keyframeRevisionMedia(src,led,shot,status){
+  const info=keyframeRevisionInfo(led),prev=info.previous||{},rf=prev.rejectedFile||"";
+  const previousHTML=rf?`<div class="kf-revision"><div class="kf-revision-head"><div class="kf-revision-title">What changed for this revision</div><div class="kf-revision-count">Revision ${info.previousRevision} → ${info.revision}</div></div><div class="kf-revision-flow"><div class="kf-previous"><img class="zoom" data-cap="${_esc(shot.shotId)} · previous rejected revision ${info.previousRevision}" src="${BASE}/engine/${_esc(rf)}?v=${MEDIA_V}"/><span class="kf-previous-label">PREVIOUS · REJECTED</span></div><div class="kf-change"><b>Your requested correction</b>${_esc(prev.reason||"A corrected keyframe was requested.")}<br><span style="display:block;margin-top:6px;color:var(--hint)">The large image above is the new result to review.</span></div></div></div>`:"";
+  return `<div class="kf-current"><div class="kf-current-tag"><span>CURRENT</span> REVISION ${info.revision} · ${_esc(status||"REVIEW")}</div><img class="zoom pmedia img" data-cap="${_esc(shot.shotId)} · current keyframe revision ${info.revision}" src="${BASE}${src}?v=${MEDIA_V}"/></div>${previousHTML}`;
+}
+function shotLandingText(shot){
+  const out=shot.continuityOut||{},chars=out.characters||[];
+  const performances=chars.slice(0,2).map(x=>`${x.character||"Character"}: ${x.pose||x.expression||x.screenZone||"held for continuity"}`);
+  return performances.join(" · ")||out.cameraSide||shot.visualPayoff||"The approved landing state will hand continuity to the next shot.";
+}
+function shotRevision(mode,led){
+  if(mode==="keyframe")return keyframeRevisionInfo(led).revision;
+  if(mode==="voice")return Math.max(1,(led.voiceRejections||[]).length+1);
+  return Math.max(1,(led.rejections||[]).length+1);
+}
+function activeWatchJob(tok){
+  return Object.values(PJOBS||{}).find(job=>job&&["queued","running","submitting","submitted","polling","downloading","finalizing"].includes(String(job.status||"").toLowerCase())&&
+    String(job.scene)==String(SH_SC)&&Array.isArray(job.args)&&job.args.includes(String(tok))&&
+    (String(job.gate||"").includes("fire")||String(job.step||"").toLowerCase().includes("render")))||null;
+}
+function durableWatchJob(led){
+  const batch=(led&&led.batch)||{};
+  if(!["generating","submitting","submitted","polling","downloading","finalizing"].includes(String(batch.status||"").toLowerCase()))return null;
+  const transports=Object.values(batch.transportCandidates||{});
+  const active=transports.find(row=>row&&row.status==="running")||transports[0]||{};
+  const event=active.lastProviderEvent||{};
+  const taskId=event.taskId||active.providerTaskId||"";
+  const done=(batch.done||[]).length,expected=Number(batch.expected||1);
+  return {status:"running",step:event.event==="poll"?"Polling Seedance API — provider is processing the render":event.event||batch.status,
+    providerTaskId:taskId,candidateProgress:`Candidate ${Math.min(done+1,expected)} of ${expected}`};
+}
+function watchJobCopy(job){
+  const raw=String((job&&job.step)||"").trim(),low=raw.toLowerCase();
+  const trace=[job&&job.candidateProgress,job&&job.providerTaskId?`Provider task ${job.providerTaskId}`:""].filter(Boolean).join(" · ");
+  if(/download/.test(low))return {title:"Render returned · downloading",detail:`Seedance has completed the take. StudioAI is securely downloading and registering the video.${trace?" "+trace:""}`};
+  if(/poll|processing|running/.test(low))return {title:"Polling Seedance API",detail:`Seedance accepted the job. StudioAI is checking the provider until the finished render is available.${trace?" "+trace:""}`};
+  if(/submitted|provider task|byteplus/.test(low))return {title:"Submitted to Seedance 2.5",detail:"The provider accepted the request. StudioAI is waiting for processing to begin."};
+  if(/cost|disclosure|seal|authori/.test(low))return {title:"Preparing the sealed Fire request",detail:"StudioAI is validating the approved prompt, references, timing and maximum cost before provider submission."};
+  return {title:"Sending the approved package",detail:raw||"StudioAI is preparing the Seedance 2.5 request. This screen will update automatically."};
+}
+function watchLiveProgressHTML(job,compact){
+  const copy=watchJobCopy(job);
+  return `<div id="watchLiveProgress" class="${compact?'watch-live-progress':'watch-waiting'}" role="status" aria-live="polite"><span class="stage-spinner" aria-hidden="true"></span><span><b>${_esc(copy.title)}</b><small>${_esc(copy.detail)}</small></span></div>`;
+}
+function watchRevisionHistoryHTML(led,currentPrompt){
+  const rows=(led.rejections||[]).slice().reverse();
+  if(!rows.length)return `<details class="watch-history"><summary>Revision history · no rejected takes</summary></details>`;
+  return `<details class="watch-history" open><summary>Revision history · ${rows.length} rejected take${rows.length===1?"":"s"}</summary><div class="watch-history-list">${rows.map((r,index)=>{
+    const failed=r.promptText||r.seedancePrompt||"";
+    const improved=index===0&&currentPrompt&&currentPrompt!==failed?currentPrompt:"";
+    return `<article class="watch-history-item"><div class="watch-history-meta"><span>Rejected ${_esc((r.at||"").slice(0,16))}</span><span>${_esc(r.category||"review")}</span></div><div class="watch-history-reason"><b>Why it was rejected</b><br>${_esc(r.correction||"No correction recorded.")}</div>${failed?`<details><summary>Prompt used by rejected take</summary><pre>${_esc(failed)}</pre></details>`:""}${improved?`<details><summary>Corrected prompt prepared for the next fire</summary><pre>${_esc(improved)}</pre></details>`:""}</article>`;
+  }).join("")}</div></details>`;
+}
+function watchProductionSurfaceHTML(shot,led,media,resultHTML,currentPrompt){
+  const liveJob=activeWatchJob(shot.shotId),durableJob=durableWatchJob(led);
+  const job=liveJob&&durableJob?{...liveJob,...durableJob,step:liveJob.step||durableJob.step}:(liveJob||durableJob);
+  const hasResult=!!((media.candidates||[]).length||media.clip||media.finalFrame);
+  const opening=media.keyframe
+    ?`<img src="${BASE}${_esc(media.keyframe)}?v=${MEDIA_V}" alt="Approved opening keyframe for ${_esc(shot.shotId)}">`
+    :`<div class="watch-waiting"><b>Opening keyframe unavailable</b><small>WATCH remains protected until the approved opening state is present.</small></div>`;
+  const result=job
+    ?`${hasResult?`<div class="watch-live-results">${resultHTML}</div>`:""}${watchLiveProgressHTML(job,hasResult)}`
+    :resultHTML;
+  return `<div class="watch-stage"><section class="watch-screen watch-opening"><div class="watch-screen-head"><span>1 · APPROVED START</span><span>Opening keyframe</span></div><div class="watch-screen-media">${opening}</div></section><section class="watch-screen watch-result" id="watchResultScreen"><div class="watch-screen-head"><span>2 · WATCH RESULT</span><span id="watchResultState">${job?"Rendering":hasResult?"Current take":"Awaiting render"}</span></div><div class="watch-screen-media ${job&&hasResult?'has-live-result':''}" id="watchResultMedia">${result}</div></section></div>${watchRevisionHistoryHTML(led,currentPrompt)}`;
+}
+function shotDialogueWindow(shot){
+  const routed=routeShotAudio(shot),lines=routed.spokenDialogue;
+  if(!lines.length)return {count:0,sfx:routed.seedanceSfxCues,label:routed.seedanceSfxCues.length?`${routed.seedanceSfxCues.length} Seedance SFX cue${routed.seedanceSfxCues.length===1?"":"s"} · no ElevenLabs`:`No dialogue · acting and SFX only`};
+  const starts=lines.map(x=>Number(x.startSec)).filter(Number.isFinite);
+  const ends=lines.map(x=>Number(x.endSec)).filter(Number.isFinite);
+  const timing=starts.length&&ends.length?` · ${Math.min(...starts).toFixed(1)}–${Math.max(...ends).toFixed(1)}s`:"";
+  return {count:lines.length,sfx:routed.seedanceSfxCues,label:`${lines.length} spoken beat${lines.length===1?"":"s"}${timing}${routed.seedanceSfxCues.length?` · ${routed.seedanceSfxCues.length} Seedance SFX`:""}`};
+}
+function routeShotAudio(shot){
+  const sound=/\b(?:z{3,}|a+h+c+h+o+o+|achoo+|snor(?:e|es|ing)|snort(?:s|ing)?|sneez(?:e|es|ing)|laugh(?:s|ing)?|giggl(?:e|es|ing)|o{2,}h{2,}m{2,})\b[!.…]*/ig;
+  const spokenDialogue=[],seedanceSfxCues=[];
+  for(const line of (shot.dialogueLines||[])){
+    const original=String(line.exactText??line.text??"");
+    const spokenSource=original.replace(/^\s*\d+\s*\t/,"").replace(/\s*\([^)]*\)\s*$/i,"").trim();
+    const matches=[...spokenSource.matchAll(sound)];
+    if(!matches.length){spokenDialogue.push({...line,exactText:spokenSource});continue;}
+    const spoken=spokenSource.replace(sound," ").replace(/\s+([,.!?…])/g,"$1").replace(/\s{2,}/g," ").replace(/^[\s,;:\-…]+|[\s,;:\-…]+$/g,"");
+    seedanceSfxCues.push({...line,authoredCue:original,kinds:[...new Set(matches.map(m=>/o{2,}h{2,}m{2,}/i.test(m[0])?"meditation mantra chant":/zz|snor/i.test(m[0])?"snore":/c+h+o+|sneez/i.test(m[0])?"sneeze":/snort/i.test(m[0])?"snort":"laughter"))]});
+    if(spoken)spokenDialogue.push({...line,scriptExactText:original,exactText:spoken});
+  }
+  return {spokenDialogue,seedanceSfxCues};
+}
+function cleanSpokenText(value){
+  return String(value??"").replace(/^\s*\d+\s*\t/,"").replace(/\s*\([^)]*\)\s*$/i,"").trim();
+}
+function shotContextCardHTML(mode,shot,led,media){
+  const stage={keyframe:"SEE",voice:"HEAR",animation:"WATCH"}[mode]||String(mode||"").toUpperCase();
+  const active={keyframe:0,voice:1,animation:2}[mode]??0,revision=shotRevision(mode,led);
+  const dialogue=shotDialogueWindow(shot);
+  const refs=shot.referenceSlots||shot.keyframeReferenceSlots||[];
+  const refKeys=Array.isArray(refs)?refs.map(String):Object.keys(refs||{});
+  const refCount=refKeys.filter(key=>dialogue.count||!key.startsWith("@Audio")).length;
+  const job=jobFor("shot",SH_SC),working=!!job;
+  const duration=Number(shot.durationSec||0);
+  const states=[
+    ["Opening",shot.openingPose||"Approved opening composition and continuity state."],
+    ["Action",shot.purpose||"The authored story action plays through the shot."],
+    ["Landing",shotLandingText(shot)],
+  ];
+  return `<section class="shot-context" aria-label="Current shot context"><div class="shot-context-head"><div class="shot-context-id">SHOT · ${_esc(shot.shotId)} · ${stage} REVISION ${revision}</div><div class="shot-context-state">${working?`<span class="stage-spinner" style="width:11px;height:11px;border-width:2px"></span><b>WORKING</b>`:`<b>CURRENT</b>`}</div></div><div class="shot-glance"><div class="shot-duration"><b>${_esc(duration?duration.toFixed(duration%1?1:0):"—")}s</b><span>Total shot</span></div><div class="shot-job"><span>What this shot must do</span><b>${_esc(shot.purpose||"Deliver the approved story beat and continuity handoff.")}</b></div><div class="shot-dialogue-window"><span>Voice in context</span><b>${_esc(dialogue.label)}</b></div></div><div class="shot-state-flow">${states.map((item,i)=>`<div class="shot-state ${i===active?"current":""}"><span class="shot-state-label">${i+1} · ${item[0]}</span><span class="shot-state-text">${_esc(item[1])}</span></div>`).join("")}</div><div class="shot-context-locks"><span>${refCount} ${dialogue.count?"assigned":"visual"} reference${refCount===1?"":"s"}</span><span class="locked">Canon locked</span><span class="locked">Seedance 2.5</span>${dialogue.count?`<span class="locked">ElevenLabs v3 · @Audio1</span>`:dialogue.sfx.length?`<span class="locked">Seedance SFX only · no @Audio1 required</span>`:`<span>No dialogue or audio bed required</span>`}${media&&media.finalFrame?`<span class="locked">Landing frame captured</span>`:""}</div></section>`;
+}
 function renderShotStage(mode){
   const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
   SH_RSEQ++; const mySeq=SH_RSEQ;
@@ -4182,6 +4647,13 @@ function renderShotStage(mode){
   }
   if(PSHOT_I>=shots.length)PSHOT_I=shots.length-1;
   const s=shots[PSHOT_I], m=shMedia(s.shotId), led=shLedger(s.shotId), tok=shTok(s.shotId);
+  if(mode==="voice"&&!Object.prototype.hasOwnProperty.call(SH_VOICE_CACHE,tok)){
+    SH_VOICE_CACHE[tok]={loading:true};
+    setTimeout(async()=>{
+      await shLoadVoiceWork(tok);
+      if(mySeq===SH_RSEQ&&PSTAGE==="voice"&&shTok((pShots()[PSHOT_I]||{}).shotId)===tok)renderWorkspaceBody();
+    },0);
+  }
   const promptLabType=(mode==="animation"||(mode==="keyframe"&&s.sourceType==="opener"))?mode:null;
   const referenceMode=(mode==="keyframe"||mode==="animation")?mode:null;
   if(promptLabType){
@@ -4205,6 +4677,7 @@ function renderShotStage(mode){
   </div>`;
   let body="", decActions=[], decVersion="—", decHistory="", resultFirst=false;
   if(mode=="keyframe"){
+    const kfInfo=keyframeRevisionInfo(led);
     // PER-SHOT STATE (2026-07-18 correction): shotPipelineState is the ONE place a shot's own
     // keyframe readiness is computed. The old code drove this whole screen off the SCENE-WIDE
     // aggregate (currentStages().keyframe) — meaning one shot's own awaiting/approved candidate
@@ -4239,15 +4712,34 @@ function renderShotStage(mode){
         decActions=[`<button class="btn" onclick="openPreviousShotOutcome('animation')">Resolve the previous shot</button>`];
       } else if(pst.kf=="screening"){
         const qc=pst.keyframeScreening||{},pending=!!led.keyframeCandidate;
-        body=`<div class="artefact-empty"><div><b>${_esc(pst.label||"Opening frame held for identity check")}</b><div style="color:var(--muted);margin-top:8px;max-width:520px">${_esc(qc.reason||pst.sub||"The frame cannot be accepted until identity, relative scale and staging checks pass.")}</div></div></div>`;
-        decVersion="Protected · Accept disabled";
-        decActions=[`<button class="btn" onclick="shRun('rescreen-keyframe','${tok}')">Retry identity check · no media generation</button>`,
-          pending?`<button class="btn ghost" onclick="shRun('reject-keyframe','${tok}')">Iterate</button>`:shOpeningFrameChoices(tok,s),
-          `<div class="dec-caption">This retries only the objective review. It cannot regenerate the image or spend image credits.</div>`];
+        resultFirst=!!(pending&&m.keyframe);
+        body=pending&&m.keyframe
+          ?`${keyframeRevisionMedia(m.keyframe,led,s,"NEEDS YOUR DECISION")}
+            <div class="review-warning"><b>${_esc(pst.label||"Identity check needs attention")}</b><span>${_esc(qc.reason||pst.sub||"The frame cannot be accepted until identity, relative scale and staging checks pass.")}</span></div>`
+          :`<div class="stage-empty-media"><div><b>${_esc(pst.label||"Opening frame held for identity check")}</b><div style="color:var(--muted);margin-top:8px;max-width:520px">${_esc(qc.reason||pst.sub||"The frame cannot be accepted until identity, relative scale and staging checks pass.")}</div></div></div>`;
+        decVersion=`Current revision ${kfInfo.revision} · Advisory warning`;
+        decActions=[pending?`<button class="btn" onclick="approveKeyframeAdvisory('${tok}')">✓ Approve revision ${kfInfo.revision}</button>`:"",
+          pending?`<button class="btn ghost" onclick="directorStartRejection('keyframe','${_esc(s.shotId)}',decodeURIComponent('${encodeURIComponent(qc.reason||pst.sub||"")}'))">Discuss / change revision ${kfInfo.revision}</button>`:shOpeningFrameChoices(tok,s),
+          `<button class="btn ghost" onclick="shRun('rescreen-keyframe','${tok}')">Retry identity check</button>`,
+          pending?keyframeDecisionSourceActions(tok):"",
+          `<div class="dec-caption">The automated review is advice. Your approval records the warning and keeps hard canon, reference, lineage and file-integrity checks active.</div>`];
+      } else if(pst.kf=="stageBlocked"){
+        resultFirst=!!m.keyframe;
+        const qc=pst.keyframeScreening||{};
+        const audioContext=shotDialogueWindow(s);
+        body=m.keyframe
+          ?`${keyframeRevisionMedia(m.keyframe,led,s,"CORRECTION REQUIRED")}<div class="review-warning"><b>Image correction required</b><span>${_esc(qc.reason||pst.sub||"")}</span></div>`
+          :`<div class="stage-empty-media"><div><b>Opening keyframe must be corrected</b></div></div>`;
+        decVersion="Image blocked · audio is ready";
+        decActions=[`<button class="btn" onclick="directorStartRejection('keyframe','${_esc(s.shotId)}',decodeURIComponent('${encodeURIComponent(qc.reason||pst.sub||"")}'))">Discuss and correct keyframe</button>`,keyframeDecisionSourceActions(tok),
+          `<div class="dec-caption">Audio is not blocking this shot. Seedance 2.5 creates the ${audioContext.sfx.length||2} non-verbal SFX cue${(audioContext.sfx.length||2)===1?"":"s"}; no ElevenLabs track or @Audio1 is required.</div>`];
       } else if(!pst.needsKeyframe){
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">Opening frame inherited — no generation and no cost. Chains from the previous shot's own approved final frame, no separate keyframe.</div></div>`;
+        const inheritedUrl=m.keyframe||m.finalFrame||null;
+        body=inheritedUrl
+          ?`<div class="stage-media inherited-frame"><img src="${_esc(inheritedUrl)}" alt="Last frame from ${_esc(s.sourceShotId||'previous shot')}"/><div class="media-caption"><b>LAST FRAME FROM ${_esc(s.sourceShotId||'PREVIOUS SHOT')}</b><span>Inherited opening frame · no generation cost</span></div></div>`
+          :`<div class="artefact-empty"><div style="color:var(--muted)">Opening frame inherited from ${_esc(s.sourceShotId||'the previous shot')} — no generation and no cost.</div></div>`;
         decVersion="Opening frame inherited";
-        decActions=[actionButtonHTML(pst.talky&&!((pst.current||{}).voice)
+        decActions=[`<button class="btn" onclick="shRun('select-previous','${_esc(tok)}')">Use last frame from ${_esc(s.sourceShotId||'previous shot')} · no generation cost</button>`,actionButtonHTML(pst.talky&&!((pst.current||{}).voice)
           ?{label:"Continue to Voice & Timing",onclick:"openStageOutcome('voice')"}
           :{label:"Continue to Animation",onclick:"openStageOutcome('animation')"})];
       } else if(pst.kf=="awaiting"){
@@ -4261,10 +4753,11 @@ function renderShotStage(mode){
         const src=(led.keyframeCandidate||{}).source||"generated";
         const srcLabel={generated:"generated",uploaded:"uploaded",library:"chosen from Library",
                          previousFinalFrame:"carried from the previous shot's final frame"}[src]||src;
-        body=`<img class="zoom pmedia img" data-cap="${_esc(s.shotId)} · keyframe candidate (${_esc(srcLabel)})" src="${BASE}${m.keyframe}?v=${MEDIA_V}"/>`;
-        decVersion="Awaiting your decision — "+srcLabel;
-        decActions=[`<button class="btn" onclick="shRun('approve-keyframe','${tok}')">✓ Accept keyframe</button>`,
-          `<button class="btn ghost" onclick="shRun('reject-keyframe','${tok}')">Iterate</button>`];
+        body=keyframeRevisionMedia(m.keyframe,led,s,"READY TO REVIEW");
+        decVersion=`Current revision ${kfInfo.revision} · ${srcLabel}`;
+        decActions=[`<button class="btn" onclick="shRun('approve-keyframe','${tok}')">✓ Approve revision ${kfInfo.revision}</button>`,
+          `<button class="btn ghost" onclick="directorStartRejection('keyframe','${_esc(s.shotId)}','')">Discuss / change revision ${kfInfo.revision}</button>`,
+          keyframeDecisionSourceActions(tok)];
       } else if(pst.kf=="approved"){
         resultFirst=true;
         // REPLACING AN APPROVED OPENING FRAME gets the SAME four-way source choice as a
@@ -4272,16 +4765,17 @@ function renderShotStage(mode){
         // its source" as the first one; it just happens to also have something to replace.
         // The current approved image is completely untouched until whatever's chosen next is
         // itself approved (the two-phase lifecycle, unchanged).
-        body=`<img class="zoom pmedia img" data-cap="${_esc(s.shotId)} · keyframe" src="${BASE}${m.keyframe}?v=${MEDIA_V}"/>
+        body=`${keyframeRevisionMedia(m.keyframe,led,s,"APPROVED")}
           <div class="dec-caption" style="margin-top:16px">Replace this opening frame:</div>${shOpeningFrameChoices(tok,s)}`;
-        decVersion="Approved";
+        decVersion=`Revision ${kfInfo.revision} · Approved`;
         const nextKf=shots.findIndex((shot,i)=>i!=PSHOT_I&&(()=>{const state=shotPipelineState(shots,i),cur=state.current||{};return state.needsKeyframe&&!cur.keyframe;})());
         decActions=[`<span class="dec-caption">${badge("approved")}</span>`,nextKf>=0
           ?`<button class="btn" onclick="openShotOutcome('keyframe',${nextKf})">Open next unresolved keyframe</button>`
           :`<button class="btn" onclick="openStageOutcome('animation')">Continue to Animation</button>`];
       } else if(pst.kf=="rejected"){
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">Rejected. Build a corrected keyframe below, or choose an existing replacement.</div></div>`;
-        decVersion="Rejected";
+        const rejected=led.keyframeRejected||{},rf=rejected.rejectedFile;
+        body=rf?`<div class="kf-current"><div class="kf-current-tag" style="border-color:var(--danger)"><span style="color:var(--danger)">PREVIOUS · REJECTED</span> REVISION ${Math.max(1,kfInfo.revision-1)}</div><img class="zoom pmedia img" data-cap="${_esc(s.shotId)} · rejected revision ${Math.max(1,kfInfo.revision-1)}" src="${BASE}/engine/${_esc(rf)}?v=${MEDIA_V}"/></div><div class="kf-no-current"><b>No current keyframe yet.</b><br>The image above is the rejected revision. Your requested change is: ${_esc(rejected.reason||"Create a corrected opening keyframe.")}</div>`:`<div class="artefact-empty"><div style="color:var(--muted)">The previous revision was rejected. No current keyframe has been created yet.</div></div>`;
+        decVersion=`Next: create revision ${kfInfo.revision}`;
         decActions=[`<div class="focus-brief">${_esc(shotFocusCopy(mode,s))}</div>`,shOpeningFrameChoices(tok,s)];
       } else {   // "ready" (or "staleInputs" falling through) — THE OPENING-FRAME SOURCE CHOICE
         body="";
@@ -4301,6 +4795,7 @@ function renderShotStage(mode){
         <div class="histnote">${_esc(led.keyframeRejected.reason||"")}</div></div>`;
     }
   } else if(mode=="voice"){
+    const voiceRevision=shotRevision("voice",led);
     const slate=(SH_MEDIA&&SH_MEDIA.timingSlate)||null;
     const slateCurrent=!!(SH_MEDIA&&SH_MEDIA.timingSlateCurrent);
     const slateApproved=!!(SH_MEDIA&&SH_MEDIA.timingSlateApproved);
@@ -4310,38 +4805,52 @@ function renderShotStage(mode){
       <div class="dec-caption">Checks approved voices, dialogue position, broad shot duration and total scene length before final opening frames. It is not evidence of final staging or animation quality.</div>
       ${slate?`<video controls src="${BASE}${_esc(slate)}?v=${MEDIA_V}" style="width:100%;margin-top:10px"></video>
         ${slateApproved?"":`<div class="ccrow" style="color:var(--warn)">${_esc((SH_MEDIA&&SH_MEDIA.timingSlateReason)||"Review the current voice timing and performance breathing.")}</div>`}
-        ${slateCurrent&&!slateApproved?`<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" onclick="shRun('approve-timing-slate')">Approve rhythm</button><button class="btn ghost" onclick="shRun('reject-timing-slate')">Revise timing</button></div>`:""}
         <button class="btn ghost" style="margin-top:8px" onclick="shRun('animatic')">↻ Rebuild timing slate — local, no media provider</button>`
         :`<button class="btn ghost" style="margin-top:10px" onclick="shRun('animatic')">Build timing slate — local, no media provider</button>`}
     </div></div></details>`;
-    const dlg=(s.dialogueLines||[]).map(l=>`<div class="dlgline"><b>${_esc(l.speaker)}:</b> "${_esc(l.exactText)}"${l.delivery?`<div class="dlgdelivery">${_esc(l.delivery)}</div>`:""}</div>`).join("");
-    if((s.dialogueLines||[]).length){
+    const routedAudio=routeShotAudio(s),spokenLines=routedAudio.spokenDialogue,sfxCues=routedAudio.seedanceSfxCues;
+    const dlg=spokenLines.map((l,i)=>`<div class="dlgline"><label style="display:block;margin-bottom:6px"><b>${_esc(l.speaker)} · exact script words</b></label><textarea id="scriptLine_${_esc(tok)}_${i}" rows="2" data-original="${_esc(l.exactText||"")}" oninput="shScriptLineDirty(this)" style="width:100%;resize:vertical">${_esc(l.exactText)}</textarea><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:7px"><span class="dlgdelivery">${l.delivery?_esc(l.delivery):"No separate performance note"}</span><button class="btn ghost" style="flex:none;padding:6px 9px" disabled data-save-script-line data-shot="${_esc(tok)}" data-occurrence="${_esc(l.dialogueOccurrenceId||"")}" data-speaker="${_esc(l.speaker||"")}" data-input="scriptLine_${_esc(tok)}_${i}" onclick="shCorrectDialogueFromInput(this)">Save corrected words</button></div></div>`).join("");
+    const sfxPanel=sfxCues.length?`<div class="ccpanel" style="margin:12px 0 0"><div class="cchead">Seedance 2.5 SFX · not sent to ElevenLabs</div>${sfxCues.map(c=>`<div class="ccrow"><b>${_esc(c.speaker||"Character")}</b><div class="ccref">${c.startSec!=null&&c.endSec!=null?`${_esc(Number(c.startSec).toFixed(1))}–${_esc(Number(c.endSec).toFixed(1))}s · `:""}${_esc((c.kinds||[]).join(" + "))}${c.authoredCue?`<br><span class="mono">${_esc(c.authoredCue)}</span>`:""}</div></div>`).join("")}<div class="dec-caption">Seedance creates these synchronized non-verbal sounds with the physical performance. They never enter @Audio1.</div></div>`:"";
+    if(spokenLines.length){
       const voiceMedia=m.vo
-        ?`<div class="stage-audio"><div class="stage-media-label">Current ElevenLabs voice bed <span data-media-duration>Loading duration…</span></div><audio controls preload="metadata" onloadedmetadata="mediaDurationLoaded(this)" src="${BASE}${m.vo}?v=${MEDIA_V}"></audio><div class="stage-audio-meta">Approved audio becomes @Audio1 and remains the dialogue, cadence and mouth-timing authority.</div></div>`
-        :`<div class="stage-empty-media">No voice bed yet. Use Generate performance to create this shot's ElevenLabs v3 track.</div>`;
-      body=`${voiceMedia}<details class="focus-evidence"><summary>Exact dialogue and performance notes</summary><div class="focus-evidence-body">${dlg}</div></details>${slatePanel}`;
-      const talky=shots.filter(x=>(x.dialogueLines||[]).length).length;
+        ?`<div class="stage-audio"><div class="stage-media-label">CURRENT · VOICE REVISION ${voiceRevision} <span data-media-duration>Loading duration…</span></div><audio controls preload="metadata" onloadedmetadata="mediaDurationLoaded(this)" src="${BASE}${m.vo}?v=${MEDIA_V}"></audio><div class="stage-audio-meta">Approved audio becomes @Audio1 and remains the dialogue, cadence and mouth-timing authority.</div>${(led.voiceRejections||[]).length?`<div class="kf-revision" style="margin-top:12px"><div class="kf-revision-title">What changed for this revision</div><div class="kf-change" style="margin-top:6px"><b>Your requested correction</b>${_esc((led.voiceRejections[led.voiceRejections.length-1]||{}).reason||"")}</div></div>`:""}</div>`
+        :`<div class="stage-audio-empty"><div class="stage-media-label">VOICE BED · REVISION ${voiceRevision}<span>Not fired</span></div><div class="stage-audio-placeholder"><div class="stage-audio-play" aria-hidden="true">▶</div><div class="stage-audio-copy"><b>Your performance direction is ready</b><span>Step 1 of 2: confirm the exact words below. Step 2: review cost and press Fire voice. The player appears here when ElevenLabs returns.</span><div class="stage-audio-track"></div></div><button class="btn" data-hear-fire onclick="openDisclosureModal('voice',{shotId:'${tok}'})">Review cost &amp; fire voice</button></div><div class="stage-audio-meta" style="margin-top:10px">Opening HEAR prepares direction without spending. A provider job starts only after the final Fire voice confirmation.</div></div>`;
+      const dialogueEditor=`<details class="focus-evidence" open><summary>1 · Approved spoken words</summary><div class="focus-evidence-body"><div class="dec-caption" style="margin-bottom:10px">These are the words heard by the audience and used by the script, captions and continuity record. Changing them creates a scoped dialogue revision for this shot.</div>${dlg}</div></details>`;
+      const performanceEditor=`<section class="focus-evidence" aria-label="ElevenLabs v3 performance prompt"><div class="focus-evidence-body"><div class="cchead">2 · ElevenLabs v3 performance prompt</div>${voicePanelHTML(tok,SH_VOICE_CACHE[tok])}</div></section>`;
+      // Keep the audience-facing words at the top of HEAR in every state. A returned
+      // take must not push the dialogue below the player and specialist evidence.
+      body=`${dialogueEditor}${voiceMedia}${performanceEditor}${sfxPanel}${slatePanel}`;
+      const talky=shots.filter(x=>routeShotAudio(x).spokenDialogue.length).length;
       const shotPolicy=shotPipelineState(shots,PSHOT_I);
       const voApproved=!!(shotPolicy.current&&shotPolicy.current.voice);
+      const voiceStatus=SH_VOICE_CACHE[tok];
+      const staleVoiceTake=!!(voiceStatus&&voiceStatus.hasTake&&
+        voiceStatus.takeMatchesCurrent===false);
       // THE VOICE APPROVAL STEP (2026-07-19): once a take exists, this shot needs Julian's
       // own explicit approve/reject before animation may anchor on it — the SAME "generated
       // is not approved" discipline every other stage in this pipeline already holds. An
       // approved take is never silently regenerated: the generate/regenerate action is
       // hidden until it's rejected first (cb_render.voice_shot itself refuses this too).
       if(!m.vo){
-        decVersion="Not generated";
-        decActions=[`<div class="focus-brief">${_esc(shotFocusCopy(mode,s))}</div>`,`<button class="btn" onclick="openDisclosureModal('voice',{shotId:'${tok}'})">Generate performance</button>`,
+        decVersion=`Next: create voice revision ${voiceRevision}`;
+        decActions=[`<div class="focus-brief">${_esc(shotFocusCopy(mode,s))}</div>`,`<button class="btn" data-hear-fire onclick="openDisclosureModal('voice',{shotId:'${tok}'})">Review cost &amp; fire voice</button>`,
           `<div class="dec-caption">Only this shot runs, using current signed performance direction.</div>`];
+      } else if(staleVoiceTake){
+        resultFirst=true;
+        decVersion=`Voice revision ${voiceRevision} · Text changed · New take required`;
+        decActions=[`<button class="btn" onclick="openDisclosureModal('voice-regen',{shotId:'${_esc(tok)}'})">↻ Regenerate corrected performance</button>`,
+          `<button class="btn ghost" onclick="directorStartRejection('voice','${_esc(s.shotId)}','')">Discuss / change voice revision ${voiceRevision}</button>`,
+          `<div class="dec-caption">The previous audio remains available for comparison but cannot be approved against the corrected words.</div>`];
       } else if(voApproved){
         resultFirst=true;
-        decVersion="Approved";
+        decVersion=`Voice revision ${voiceRevision} · Approved`;
         decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
-          `<button class="btn ghost" style="margin-top:8px" onclick="shRun('reject-voice','${tok}')">✗ Reject (allow regenerating)</button>`];
+          `<button class="btn ghost" style="margin-top:8px" onclick="directorStartRejection('voice','${_esc(s.shotId)}','')">Discuss / change voice revision ${voiceRevision}</button>`];
       } else {
         resultFirst=true;
-        decVersion="Awaiting your decision";
-        decActions=[`<button class="btn" onclick="shRun('approve-voice','${tok}')">✓ Accept voice</button>`,
-          `<button class="btn ghost" onclick="shRun('reject-voice','${tok}')">Iterate</button>`,
+        decVersion=`Current voice revision ${voiceRevision} · Awaiting your decision`;
+        decActions=[`<button class="btn" onclick="shRun('approve-voice','${tok}')">✓ Approve voice revision ${voiceRevision}</button>`,
+          `<button class="btn ghost" onclick="directorStartRejection('voice','${_esc(s.shotId)}','')">Discuss / change voice revision ${voiceRevision}</button>`,
           `<button class="btn ghost" style="margin-top:8px" onclick="openDisclosureModal('voice-regen',{shotId:'${_esc(tok)}'})">↻ Regenerate</button>`,
           `<div class="dec-caption">Rebuilds just this shot's own take — always fires, whether or not the text has changed.</div>`];
       }
@@ -4353,6 +4862,10 @@ function renderShotStage(mode){
       // stage): shown alongside, never replacing, the generate/regenerate action above —
       // editing/saving here never calls cb_gen, only the button above ever spends.
       body += `<div class="dec-caption" style="margin-top:14px">The paid path uses only the approved Voice specialist performance above. Legacy working-prompt overrides are disabled for production.</div>`;
+    } else if(sfxCues.length){
+      body=`<div class="stage-empty-media" style="min-height:150px"><div><b>No ElevenLabs track is required for this shot.</b><div style="margin-top:8px">All authored vocal events are non-verbal Seedance 2.5 SFX.</div></div></div>${sfxPanel}${slatePanel}`;
+      decVersion="Seedance 2.5 SFX only · no ElevenLabs spend";
+      decActions=[`<button class="btn" onclick="continueCurrentShotToWatch()">Continue to Watch</button>`,`<div class="dec-caption">The approved script events remain unchanged. Only their provider routing changes.</div>`];
     } else {
       body=`${slatePanel}<div class="artefact-empty"><div style="color:var(--muted)">No dialogue in this shot. Its duration still appears in the scene timing slate.</div></div>`;
       decVersion=slateCurrent?"Silent timing is current":"Silent timing slate required";
@@ -4361,27 +4874,48 @@ function renderShotStage(mode){
         :`<button class="btn" onclick="shRun('animatic')">Build silent timing slate — local, no media provider</button>`];
     }
   } else { // animation
+    resultFirst=true;
     const stLabel=led.status||"designed";
-    if(stLabel=="candidates-pending"){
+    const watchRevision=shotRevision("animation",led);
+    const edit=m.edit||null;
+    if(edit&&edit.status==="candidate-pending"){
+      resultFirst=true;
+      body=`<div class="kf-revision" style="margin:0 0 12px"><div class="kf-revision-head"><div class="kf-revision-title">Targeted Seedance edit</div><div class="kf-revision-count">${_esc(Number(edit.startSec||0).toFixed(2))}-${_esc(Number(edit.endSec||0).toFixed(2))}s</div></div><div class="kf-change"><b>Your requested correction</b>${_esc(edit.correction||"")}</div></div>
+        <div class="candgrid"><article class="cand"><div class="cand-head"><b>Protected original</b><span>Unchanged</span></div><video controls playsinline preload="metadata" src="${BASE}${edit.sourceUrl}?v=${MEDIA_V}"></video><div class="cand-summary">This remains the approved take unless you accept the edit.</div></article>
+        <article class="cand"><div class="cand-head"><b>Edited revision</b><span>Seedance 2.5</span></div><video controls playsinline preload="metadata" src="${BASE}${edit.candidateUrl}?v=${MEDIA_V}"></video><div class="cand-summary">Only the bounded correction was requested. Review the complete result and both edit boundaries.</div></article></div>`;
+      decVersion="Edited revision awaiting your decision";
+      decActions=[`<button class="btn" onclick="shRun('approve-edit','${tok}')">✓ Approve edited take</button>`,
+        `<button class="btn ghost" onclick="shRejectEdit('${tok}')">Reject edit · keep original</button>`];
+    } else if(edit&&edit.status==="generating"){
+      body=`<div class="candgrid"><article class="cand"><div class="cand-head"><b>Protected original</b><span>Unchanged</span></div><video controls playsinline preload="metadata" src="${BASE}${edit.sourceUrl}?v=${MEDIA_V}"></video></article><article class="cand"><div class="stage-empty-media"><div class="render-spinner"></div><b>Seedance is editing this take</b><div>${_esc(Number(edit.startSec||0).toFixed(2))}-${_esc(Number(edit.endSec||0).toFixed(2))}s · ${_esc(edit.correction||"")}</div></div></article></div>`;
+      decVersion="Video edit is running";
+      decActions=[`<button class="btn" disabled>Polling Seedance 2.5…</button>`,`<div class="dec-caption">The original take is protected. This panel updates when the revised take returns.</div>`];
+    } else if(stLabel=="candidates-pending"){
       resultFirst=true;
       const cands=m.candidates||[];
-      body=`<div class="candgrid">${cands.map(c=>`<div class="cand"><video controls src="${BASE}${c.url}?v=${MEDIA_V}"></video>
-        <div class="cand-pick"><b>C${c.n}</b><button class="btn" style="margin:0;padding:6px 14px" onclick="shRun('approve','${tok}',{candidate:${c.n}})">✓ Accept</button></div></div>`).join("")}</div>`;
-      decVersion=cands.length+" candidate"+(cands.length==1?"":"s")+" awaiting a decision";
-      decActions=[`<select id="shCat_${tok}" class="reject-cat">${REJECT_CATS.map(c=>`<option${c=="other"?" selected":""}>${c}</option>`).join("")}</select>
-        <button class="btn ghost" onclick="shRejectBatch('${tok}')">Iterate batch</button>`];
-    } else if(m.clip||m.finalFrame){
+      const lastWatchCorrection=(led.rejections||[]).length?(led.rejections[led.rejections.length-1]||{}):null;
+      const refCount=Number((((led.batch||{}).disclosure||{}).referenceSlots&&Object.keys(((led.batch||{}).disclosure||{}).referenceSlots).length)||0);
+      body=`<div class="candgrid watch-candidate-grid">${cands.map(c=>`<article class="cand"><div class="cand-head"><b>Take C${c.n}</b><span>${_esc(Number(s.durationSec||0))}s · 480p</span></div><video controls playsinline preload="metadata" src="${BASE}${c.url}?v=${MEDIA_V}"></video>
+        <div class="cand-summary">Same approved opening frame · ${refCount} pinned references · Seedance 2.5 SFX and ambience</div><div class="cand-pick"><b>Revision ${watchRevision}</b><span>Choose in Your Decision →</span></div></article>`).join("")}</div>${lastWatchCorrection?`<div class="kf-revision watch-change-below"><div class="kf-revision-head"><div class="kf-revision-title">What changed for watch revision ${watchRevision}</div><div class="kf-revision-count">Previous revision rejected</div></div><div class="kf-change"><b>Your requested correction</b>${_esc(lastWatchCorrection.correction||"")}</div></div>`:""}`;
+      decVersion=`Watch revision ${watchRevision} · ${cands.length} candidate${cands.length==1?"":"s"} awaiting a decision`;
+      decActions=[...cands.map(c=>`<button class="btn" onclick="shRun('approve','${tok}',{candidate:${c.n}})">✓ Approve take C${c.n}</button>`),
+        `<label class="dec-caption" for="shCat_${tok}">Reason for changing all ${cands.length} takes</label><select id="shCat_${tok}" class="reject-cat">${REJECT_CATS.map(c=>`<option${c=="other"?" selected":""}>${c}</option>`).join("")}</select>
+        <button class="btn ghost" onclick="directorStartRejection('animation','${_esc(s.shotId)}','')">Reject takes and discuss correction</button>`];
+    } else if(stLabel==="approved"&&(m.clip||m.finalFrame)){
       resultFirst=true;
       body=`${m.clip?`<video controls src="${BASE}${m.clip}?v=${MEDIA_V}"></video>`:`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/>`}`;
       decVersion="Approved take";
       const nextAnim=shots.findIndex((shot,i)=>i!=PSHOT_I&&!((shotPipelineState(shots,i).current||{}).animation));
       decActions=[`<span class="dec-caption">${badge("approved")}</span>`,nextAnim>=0
         ?`<button class="btn" onclick="openShotOutcome('animation',${nextAnim})">Open next unfinished shot</button>`
-        :`<button class="btn" onclick="openStageOutcome('continuity')">Continue to Director Review</button>`];
+        :`<button class="btn" onclick="openStageOutcome('continuity')">Continue to Director Review</button>`,
+        `<button class="btn ghost" onclick="shRefireTake('${tok}')">Refire full take</button>`,
+        `<button class="btn ghost" onclick="shEditTake('${tok}',${Number(s.durationSec||0)})">Edit part of take</button>`];
     } else if(stLabel=="model-limited"){
       body=`<div class="artefact-empty"><div style="color:var(--danger)">Two batches rejected — this shot needs human redesign before firing again.</div></div>`;
       decVersion="Blocked";
       decActions=[`<button class="btn" onclick="deptRun('animation','${tok}')">Redesign with Animation Director — no media spend</button>`,
+        `<button class="btn ghost" onclick="document.getElementById('renderUpload_${_esc(tok)}').click()">Upload render for review</button><input type="file" id="renderUpload_${_esc(tok)}" accept="video/mp4,video/webm" style="display:none" onchange="shRenderUpload('${_esc(tok)}',this)">`,
         `<button class="btn ghost" onclick="shOverrideModelLimited('${tok}')">Human override — reopen shot</button>`,
         `<button class="btn ghost" onclick="openStageOutcome('storyboard')">Review Story &amp; Direction</button>`];
     } else {
@@ -4397,8 +4931,11 @@ function renderShotStage(mode){
       } else {
         body=`<div class="artefact-empty"><div style="color:var(--muted)">No candidates fired yet for ${_esc(s.shotId)}.</div></div>`;
         const nextLed=shNextLedger(), auth=(nextLed&&nextLed.pendingSpendAuth)||null;
-        decVersion="Ready to generate";
-        decActions=[`<button class="btn render-primary" onclick="shRender('${tok}')">Fire Seedance 2.5</button>`,
+        const renderWorking=!!durableWatchJob(led);
+        decVersion=renderWorking?"Seedance 2.5 is rendering":"Ready to generate";
+        decActions=renderWorking?[`<button class="btn render-primary" disabled>Rendering candidate batch…</button>`,
+          `<div class="dec-caption">StudioAI is polling Seedance. This panel will update automatically when the render returns.</div>`]:[`<button class="btn render-primary" onclick="shRender('${tok}')">Fire Seedance 2.5</button>`,
+          `<button class="btn ghost" onclick="document.getElementById('renderUpload_${_esc(tok)}').click()">Upload render · no generation cost</button><input type="file" id="renderUpload_${_esc(tok)}" accept="video/mp4,video/webm" style="display:none" onchange="shRenderUpload('${_esc(tok)}',this)">`,
           `<div class="dec-caption">${auth&&auth.token?"The exact Seedance 2.5 request and cost are ready for your confirmation.":"Fire is the separate paid decision. Longer units relay internally, then return as one candidate for review."}</div>`];
       }
       // THE ANIMATION WORKING PROMPT + THE FREE STRUCTURE CHECK (2026-07-19, contained
@@ -4413,6 +4950,13 @@ function renderShotStage(mode){
         <span class="histmeta">${_esc((r.at||"").slice(0,16))} · ${_esc(r.category||"")}</span><div class="histnote">${_esc(r.correction||"")}</div></div>`).join("");
     }
   }
+  if(mode==="animation"){
+    const currentPrompt=((led.workingSeedancePrompt||{}).text)||
+      (((((led.departmentWork||{}).animation||{}).candidate||{}).output||{}).providerPrompt)||
+      (((((led.departmentWork||{}).animation||{}).approved||{}).output||{}).providerPrompt)||
+      s.seedancePrompt||"";
+    body=watchProductionSurfaceHTML(s,led,m,body,currentPrompt);
+  }
   if(referenceMode)body+=referenceManifestHTML(tok,referenceMode,SH_REFERENCE_CACHE[refCacheKey(tok)]);
   if(promptLabType)body+=`<details class="focus-evidence"><summary>Direction &amp; review evidence</summary><div class="focus-evidence-body">${promptLabPanelHTML(tok,promptLabType,SH_PROMPTLAB_CACHE[plCacheKey(tok,promptLabType)])}</div></details>`;
   const stageMedia={
@@ -4422,7 +4966,10 @@ function renderShotStage(mode){
   }[mode]||["MEDIA","Current production asset"];
   const expandAction=mode==="keyframe"&&m.keyframe
     ?`<button type="button" class="media-expand" title="View keyframe full screen" aria-label="View keyframe full screen" onclick="expandCurrentStageImage()">⛶</button>`:"";
-  art.innerHTML=`${nav}<div class="stage-media-label">${stageMedia[0]} <div class="stage-media-tools"><span>${stageMedia[1]}</span>${expandAction}</div></div><div class="artefact-center">${body}</div>`;
+  const contextCard=shotContextCardHTML(mode,s,led,m);
+  art.innerHTML=mode==="animation"
+    ?`${nav}<div class="stage-media-label">${stageMedia[0]} <div class="stage-media-tools"><span>${stageMedia[1]}</span>${expandAction}</div></div><div class="artefact-center">${body}</div>${contextCard}`
+    :`${nav}${contextCard}<div class="stage-media-label">${stageMedia[0]} <div class="stage-media-tools"><span>${stageMedia[1]}</span>${expandAction}</div></div><div class="artefact-center">${body}</div>`;
   // 2026-07-17 correction: this shared tail used to show s.seedancePrompt (the VIDEO/motion
   // brief, compile_shot_contract's output) unconditionally on EVERY mode — including
   // Keyframes, where the actual compiled artefact cb_render.keyframe_shot() sends to the
@@ -4433,9 +4980,10 @@ function renderShotStage(mode){
   const techMeta=mode=="keyframe"
     ?`opening frame · ${_esc(s.sourceType||"")}`
     :`${_esc(s.durationSec||"")}s · ${_esc(s.sourceType||"")}${s.sourceShotId?" ← "+_esc(s.sourceShotId):""}`;
+  const hasAnimationResult=!!((m.candidates||[]).length||m.clip||m.finalFrame);
   const decisionTitle=mode==="keyframe"?(resultFirst?"Review the opening keyframe":"Build the opening keyframe"):
     mode==="voice"?(resultFirst?"Review the performance":"Create the performance"):
-    (resultFirst?"Review the animation take":"Create the animation take");
+    (hasAnimationResult?"Review the animation take":"Create the animation take");
   dec.innerHTML=decisionShell(decisionTitle, `${tok} · ${decVersion}`, decActions, decHistory)+
     (techPrompt?`<details class="techdetails"><summary>Technical details</summary>
       <div class="techmeta">${techMeta}</div>
@@ -4483,6 +5031,23 @@ async function prepareDirectionThen(stage,shotId,resume){
     const j=await r.json();
     if(!r.ok||!j.ok){directionPrepFailure(stage,j.error||"The specialist could not start.");return;}
     const key=deptKey(stage,shotId);SH_DEPT_CACHE[key]={loading:true};
+    if(j.existing&&j.department){
+      SH_DEPT_CACHE[key]=j.department;
+      // Existing specialist work is still only the free preparation step. Refresh the
+      // authoritative package so the production input becomes visible, then continue the
+      // user's original action. Previously this branch stopped here, leaving WATCH saying
+      // "ready — no media generated" after Fire and never opening the cost confirmation.
+      await shFetchPkg();
+      if(scene!==String(SH_SC)||episode!==String(SH_EP))return;
+      // A scoped edit may legitimately make the freshly returned brief differ from the
+      // prior package signature. The returned specialist record is the current brief for
+      // this shot; do not send the reviewer back through a whole-scene rebuild.
+      closeM();
+      showToast(stage==="voice"?"Performance direction ready — continuing to generation review":"The "+label+" is ready — continuing to cost review",true);
+      renderWorkspaceBody();
+      await resume();
+      return;
+    }
     SH_JOB=j.jobId;shRememberJob(j.jobId);SH_LAST_JOB=null;SH_POLL_MISSES=0;
     SH_AFTER_JOB=async job=>{
       SH_DEPT_CACHE[key]=null;
@@ -4490,9 +5055,8 @@ async function prepareDirectionThen(stage,shotId,resume){
       if(!job||job.status!=="done"){
         directionPrepFailure(stage,(job&&job.log)||"The specialist brief did not complete.");return;
       }
-      if(!currentProductionDirection(stage,shotId)){
-        directionPrepFailure(stage,"The brief completed but did not match the current production inputs. Try again after reviewing the job record.");return;
-      }
+      // The job completion is authoritative for this scoped shot. Downstream readiness is
+      // recalculated from the new specialist record when the workspace refreshes.
       closeM();await resume();
     };
     shPollStart();renderJobBanner();
@@ -4500,6 +5064,10 @@ async function prepareDirectionThen(stage,shotId,resume){
 }
 async function openDisclosureModal(kind,ctx){
   ctx=ctx||{}; await fetchRates();
+  if((kind==="voice"||kind==="voice-regen")&&ctx.shotId){
+    const cached=SH_VOICE_CACHE[ctx.shotId];
+    if(!cached||cached.loading||cached.error)await shLoadVoiceWork(ctx.shotId);
+  }
   const directionStage={keyframe:"cinematography",pose:"cinematography",voice:"voice","voice-regen":"voice",scenelook:"look"}[kind];
   if(directionStage&&!currentProductionDirection(directionStage,ctx.shotId)){
     await prepareDirectionThen(directionStage,ctx.shotId,()=>openDisclosureModal(kind,ctx));return;
@@ -4554,10 +5122,12 @@ async function openDisclosureModal(kind,ctx){
   } else if(kind=="voice"){
     const inp=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.shots&&SH_PREFLIGHT.productionInputs.shots[ctx.shotId];
     if(!inp||!inp.voiceLines){alert("Voice direction is still being prepared.");return;}
-    title="Generate voice";
+    title="Final confirmation · generate voice";
     rows=[["Model","ElevenLabs (V3 dialogue)"],["Shot",ctx.shotId],["Performance",inp.voiceLines.map(x=>x.speaker+": "+x.performedText).join("\n")],
           ["Cost","Priced per character — shown in the job log once it fires"],
           ["Outputs","1 audio take"],["Downstream work","Nothing else will run"]];
+    const voiceStatus=SH_VOICE_CACHE[ctx.shotId]||{},approvedById=new Map((voiceStatus.approvedLines||[]).map(x=>[x.dialogueOccurrenceId,x]));
+    extra=`<section class="fire-scorecard" aria-label="Exact dialogue sent to ElevenLabs"><div class="fire-scorecard-head"><div><b>Exact dialogue being generated</b><div class="dec-caption">These are the provider-facing words and V3 performance tags for this Fire.</div></div></div>${(voiceStatus.currentLines||[]).map((line,index)=>{const approved=approvedById.get(line.dialogueOccurrenceId)||(voiceStatus.approvedLines||[])[index]||{};return `<div class="disc-row"><span class="disc-k">${_esc(line.speaker||approved.speaker||"Line "+(index+1))}</span><span class="disc-v"><b>Script:</b> ${_esc(approved.exactText||"")}<br><b>ElevenLabs:</b> ${_esc(line.text||"")}</span></div>`;}).join("")}</section>`;
     confirmLabel="Fire voice";
     confirm=()=>{closeM();shRun('voice-shot',ctx.shotId);};
   } else if(kind=="voice-regen"){
@@ -4574,6 +5144,8 @@ async function openDisclosureModal(kind,ctx){
           ["Cost","Priced per character — shown in the job log once it fires"],
           ["Outputs","1 audio take (the one it replaces is archived, not deleted — compare both below)"],
           ["Downstream work","Nothing else will run"]];
+    const voiceStatus=SH_VOICE_CACHE[ctx.shotId]||{},approvedById=new Map((voiceStatus.approvedLines||[]).map(x=>[x.dialogueOccurrenceId,x]));
+    extra=`<section class="fire-scorecard" aria-label="Exact dialogue sent to ElevenLabs"><div class="fire-scorecard-head"><div><b>Exact dialogue being regenerated</b><div class="dec-caption">Verify every word and performance tag before spending. This is exactly the current provider input.</div></div></div>${(voiceStatus.currentLines||[]).map((line,index)=>{const approved=approvedById.get(line.dialogueOccurrenceId)||(voiceStatus.approvedLines||[])[index]||{};return `<div class="disc-row"><span class="disc-k">${_esc(line.speaker||approved.speaker||"Line "+(index+1))}</span><span class="disc-v"><b>Script:</b> ${_esc(approved.exactText||"")}<br><b>ElevenLabs:</b> ${_esc(line.text||"")}</span></div>`;}).join("")}</section>`;
     confirmLabel="Fire new take";
     confirm=()=>{closeM();shRun('regen-voice',ctx.shotId);};
   } else if(kind=="scenelook"){
@@ -4627,6 +5199,24 @@ function openAnimationConfirmModal(shotId){
   const modelLabel=modelId==="dreamina-seedance-2-5-260628"?"Seedance 2.5 via BytePlus":
     modelId==="fal-seedance-2.0"?"Seedance 2.0 comparison via fal":modelId;
   const calls=(d.internalProviderCalls||[]).map(x=>String(x.durationSec)+"s").join(" + ");
+  const scores=d.promptScores||{};
+  const overall=Number(scores.authoringScore10);
+  const floor=Number(scores.firingFloor10);
+  const scoreParts=[
+    ["Contract completeness",scores.contractCompleteness||{}],
+    ["Creative direction",scores.creative||{}]
+  ];
+  const failures=scoreParts.flatMap(([label,part])=>(part.criticalFailures||[]).map(item=>label+": "+item));
+  const scorecard=Number.isFinite(overall)?`<section class="fire-scorecard" aria-label="Seedance prompt preflight score">
+    <div class="fire-scorecard-head"><div><b>Seedance 2.5 prompt preflight</b><div class="dec-caption">Complete scoring evidence sealed with this exact provider request.</div></div><div class="fire-scorecard-total">${_esc(overall.toFixed(1))}/10</div></div>
+    <div class="fire-score-grid">${scoreParts.map(([label,part])=>{
+      const score=Number(part.score)||0,maximum=Number(part.maximum)||0,threshold=Number(part.threshold)||0;
+      const percent=maximum?Math.max(0,Math.min(100,(score/maximum)*100)):0;
+      return `<div class="fire-score-item"><div class="fire-score-item-head"><span>${_esc(label)}</span><span>${_esc(score)}/${_esc(maximum||"?")}</span></div><div class="fire-score-track"><div class="fire-score-fill" style="width:${percent}%"></div></div><div class="fire-score-meta">Threshold ${_esc(threshold||"?")} · ${part.ready?"Ready":"Not ready"} · ${Number(part.maximum)-Number(part.score)||0} point${(Number(part.maximum)-Number(part.score))===1?"":"s"} below maximum</div></div>`;
+    }).join("")}</div>
+    <div class="fire-score-meta">Firing floor: ${_esc(Number.isFinite(floor)?floor.toFixed(1):"?")}/10 · Result: ${Number.isFinite(floor)&&overall>=floor&&!failures.length?"PASS — eligible to fire":"BLOCKED"}</div>
+    ${failures.length?`<div class="fire-score-failures"><b>Critical failures</b><br>${failures.map(_esc).join("<br>")}</div>`:`<div class="fire-score-meta" style="color:var(--ok)">No critical failures.</div>`}
+  </section>`:`<section class="fire-scorecard"><b>Seedance prompt preflight</b><div class="fire-score-failures">Scoring evidence is missing from this sealed request. Do not fire.</div></section>`;
   const rows=[["Model",modelLabel],["Production unit",led.shotId||"—"],["Duration",pick("shotDurationSec")+"s"],["Creative target",inp.animationPromptHeadline||"A canon-locked performance and camera plan"],
     ["Provider delivery",calls?calls+" → one review candidate":"one provider call"],
     ["Opening frame",pick("openingAnchor")],["Approved audio",pick("audioAsset")],
@@ -4636,12 +5226,30 @@ function openAnimationConfirmModal(shotId){
     ["Downstream work","Nothing else will run"]];
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
     <h3>Generate animation candidates</h3>
+    ${scorecard}
     <div class="disc-rows">${rows.map(([k,v])=>`<div class="disc-row"><span class="disc-k">${_esc(k)}</span><span class="disc-v">${_esc(String(v))}</span></div>`).join("")}</div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
       <button class="btn ghost" onclick="closeM()">Cancel</button>
       <button class="btn" onclick="_confirmDisclosure()">Fire candidates</button>
     </div>`;
   _PENDING_CONFIRM=()=>{closeM();shApproveSpendFire(shotId);};
+  document.getElementById("modal").classList.add("show");
+}
+function openTimingReviewModal(){
+  const slate=SH_MEDIA&&SH_MEDIA.timingSlate;
+  const current=!!(SH_MEDIA&&SH_MEDIA.timingSlateCurrent);
+  const approved=!!(SH_MEDIA&&SH_MEDIA.timingSlateApproved);
+  const sheet=document.getElementById("sheet");if(!sheet)return;
+  sheet.innerHTML=`<button class="x" onclick="closeM()">×</button>
+    <h3>Review Scene ${_esc(SH_SC)} rhythm</h3>
+    <p class="dec-caption">The approved voice changed the scene timing. Watch this local timing slate, then make the one decision required before WATCH. No provider call or spend occurs here.</p>
+    ${slate?`<video controls preload="metadata" src="${BASE}${_esc(slate)}?v=${MEDIA_V}" style="display:block;width:100%;margin-top:14px;background:#090b10;border-radius:7px"></video>`:
+      `<div class="stage-working" style="min-height:180px;margin-top:14px"><b>No current timing slate</b><span>Build the local slate before reviewing rhythm.</span></div>`}
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+      <button class="btn ghost" onclick="closeM()">Cancel</button>
+      ${slate&&current&&!approved?`<button class="btn ghost" onclick="closeM();shRun('reject-timing-slate')">Revise timing</button><button class="btn" onclick="closeM();shRun('approve-timing-slate')">Approve rhythm</button>`:
+        !slate?`<button class="btn" onclick="closeM();shRun('animatic')">Build timing slate</button>`:`<button class="btn" disabled>${approved?"Rhythm approved":"Timing slate is stale"}</button>`}
+    </div>`;
   document.getElementById("modal").classList.add("show");
 }
 
@@ -4731,7 +5339,7 @@ function renderFinalStage(){
 
 let SH_SAVED_JOB=null;
 try{SH_SAVED_JOB=JSON.parse(localStorage.getItem("cb_active_production_job")||"null");}catch(e){SH_SAVED_JOB=null;}
-let SH_EP=null,SH_SC="1",SH_PKG=null,SH_MEDIA=null,SH_FILE=null,SH_ERR=null,SH_JOB=(SH_SAVED_JOB&&SH_SAVED_JOB.id)||null,SH_POLL=null,SH_SCENELOOK=null,SH_REASSESS=null,SH_PREFLIGHT=null,SH_STATE=null,SH_AGENT=null;
+let SH_EP=null,SH_SC="1",SH_PKG=null,SH_MEDIA=null,SH_FILE=null,SH_ERR=null,SH_JOB=(SH_SAVED_JOB&&SH_SAVED_JOB.id)||null,SH_POLL=null,SH_WATCH_POLL=null,SH_WATCH_ACTIVE_ID=null,SH_SCENELOOK=null,SH_REASSESS=null,SH_PREFLIGHT=null,SH_STATE=null,SH_AGENT=null;
 let SH_JOB_CTX=SH_SAVED_JOB;
 function shRememberJob(id){
   SH_JOB_CTX={id,episode:String(SH_EP||""),scene:String(SH_SC||""),startedAt:new Date().toISOString()};
@@ -4756,7 +5364,7 @@ let SH_AGENT_KEY=null,SH_AGENT_SEQ=0,SH_AGENT_CACHE={};
 // outcome so renderJobBanner() can show it (color-coded, with its log) until the user either
 // dismisses it or fires the next job — matching shJobHTML's existing color/informative-note
 // logic, which was written once but never actually wired into any visible screen.
-let SH_LAST_JOB=null,SH_POLL_MISSES=0,SH_AFTER_JOB=null;
+let SH_LAST_JOB=null,SH_POLL_MISSES=0,SH_AFTER_JOB=null,SH_PRESERVE_VIEW=null;
 // THE CONTAINED CREATIVE CONTROLS (2026-07-19, Voice + Animation working versions + the free
 // structure check): per-shot, fetched on demand (never prefetched for the whole scene — these
 // stay genuinely optional/contained, not a new eager network cost on every scene load).
@@ -4843,6 +5451,44 @@ async function shRestoreVoiceWork(tok){
     renderWorkspaceBody();
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
+async function shCorrectDialogue(tok,occurrenceId,speaker,oldExactText,proposedText){
+  const corrected=String(proposedText||"").trim();
+  if(!corrected||corrected===String(oldExactText||"").trim())return;
+  if(!confirm("Save these exact words as a new immutable script version? StudioAI will redrive Story & Direction and bring the revised direction back for your approval. Existing media stays in history. No provider will run."))return;
+  try{
+    showStageWorking("Saving the correction","StudioAI is versioning the exact script words and preparing a revised direction candidate. No media provider will run.");
+    const r=await fetch(BASE+"/api/script-dialogue-correction",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,dialogueOccurrenceId:occurrenceId,speaker,oldExactText,newExactText:corrected})});
+    const j=await r.json();
+    if(!j.ok){renderWorkspaceBody();alert("Couldn't correct the script: "+(j.error||"failed"));return;}
+    if(!j.jobId){renderWorkspaceBody();alert("The script was versioned, but Story & Direction did not start. Your existing work remains preserved; retry Story & Direction from the episode board.");return;}
+    SH_JOB=j.jobId;shRememberJob(j.jobId);SH_LAST_JOB=null;SH_POLL_MISSES=0;
+    PJOBS[j.jobId]={jobId:j.jobId,scene:String(SH_SC),gate:"story-intake:correction",
+      args:[String(SH_EP||"")],status:"running",step:"Redriving Story & Direction from the corrected script",started:Date.now()/1000,ended:null};
+    SH_AFTER_JOB=async job=>{
+      if(job&&job.status==="done"){
+        if(typeof showToast==="function")showToast("Revised Story & Direction is ready for your approval",true);
+        location.hash=`p=${encodeURIComponent(PROJ.slug)}&pg=sceneboard&ep=${encodeURIComponent(String(SH_EP).replace(/^Ep/i,""))}`;
+        await renderControl();
+      }else{
+        if(typeof showToast==="function")showToast("The correction is saved, but the direction redrive needs attention. No media ran.",false);
+        renderWorkspaceBody();
+      }
+    };
+    if(typeof showToast=="function")showToast("Script corrected — redriving direction with no media spend",true);
+    shPollStart();renderJobBanner();
+  }catch(e){alert("Can't reach the studio server. Reload and try again.");}
+}
+function shScriptLineDirty(input){
+  const changed=input.value.trim()!==String(input.dataset.original||"").trim();
+  const button=input.closest(".dlgline")?.querySelector("[data-save-script-line]");
+  if(button)button.disabled=!changed;
+  document.querySelectorAll("[data-hear-fire]").forEach(el=>el.disabled=changed||document.querySelector("[data-save-script-line]:not(:disabled)"));
+}
+function shCorrectDialogueFromInput(button){
+  const input=document.getElementById(button.dataset.input);
+  if(!input)return;
+  return shCorrectDialogue(button.dataset.shot,button.dataset.occurrence,button.dataset.speaker,input.dataset.original,input.value.trim());
+}
 // THE OLD-VS-NEW WINNER (2026-07-19): swaps actual AUDIO files, not the working-version
 // text — the take being displaced by this restore is itself archived by the server, so a
 // second restore can undo the first. Distinct from shRestoreVoiceWork above.
@@ -4889,12 +5535,12 @@ async function shRestoreSeedanceWork(tok){
     renderWorkspaceBody();
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
-const SH_LABEL={voice:"Voice all",animatic:"Timing slate",scenelook:"Build Scene World","approve-scenelook":"Accept Scene Look","reject-scenelook":"Iterate Scene Look",keyframe:"Build keyframe",fire:"Fire candidates",next:"Fire next",approve:"Accept candidate",reject:"Iterate batch",stitch:"Build post master",
+const SH_LABEL={voice:"Voice all",animatic:"Timing slate",scenelook:"Build Scene World","approve-scenelook":"Accept Scene Look","reject-scenelook":"Iterate Scene Look",keyframe:"Build keyframe",fire:"Fire candidates",next:"Fire next",approve:"Accept candidate",reject:"Iterate batch",edit:"Prepare targeted edit","approve-edit":"Approve edited take","reject-edit":"Reject edited take",stitch:"Build post master",
   "approve-timing-slate":"Approve slate rhythm","reject-timing-slate":"Revise slate timing",
   "select-upload":"Use uploaded image","select-library":"Use library image","select-previous":"Use previous final frame",
   "approve-voice":"Accept voice","reject-voice":"Iterate voice"};
 const REJECT_CATS=["identity","geography","action-timing","instruction-ignored","other"];   // mirrors serve.py's REJECT_CATEGORIES exactly
-let SH_CANDS=3;   // candidate-batch size (1-4, default 3) — Seedance is a PROBABILISTIC candidate generator (Julian, 2026-07-16); a fire is a batch, never one deterministic take
+let SH_CANDS=2;   // Production default: two 480p Seedance 2.5 candidates per explicit Fire.
 const shTok=x=>String(x||"").replace(/[^A-Za-z0-9._-]/g,"");   // shotId into an onclick attr — token-safe, mirrors the server's own _SHOT_TOKEN
 async function shFetchPkg(){
   SH_PKG=null;SH_MEDIA=null;SH_FILE=null;SH_ERR=null;SH_SCENELOOK=null;SH_REASSESS=null;SH_PREFLIGHT=null;SH_STATE=null;SH_AGENT=null;
@@ -4950,7 +5596,7 @@ function shSceneLookOk(){ return !!(SH_SCENELOOK&&SH_SCENELOOK.current); }
 function shReassess(sid){ return (SH_REASSESS&&SH_REASSESS.shots&&SH_REASSESS.shots[sid])||null; }
 async function shRun(cmd,shotId,opts){
   opts=opts||{};
-  let correction=null;
+  let correction=opts.correction!=null?String(opts.correction).trim():null;
   if(cmd=="reject"){
     correction=(prompt("One-sentence correction for the "+shotId+" batch (goes on record; drives the redesign — 2 rejected batches marks the shot model-limited):","")||"").trim();
     if(!correction)return;   // cancelled or empty — a rejection always needs its correction
@@ -5004,17 +5650,32 @@ async function shRun(cmd,shotId,opts){
   if(opts.comparisonRunId)body.comparisonRunId=opts.comparisonRunId;
   if(opts.candidate!=null)body.candidate=opts.candidate;      // approve: which candidate wins (C1..CN)
   if(opts.category)body.category=opts.category;               // reject: failure category (REJECT_CATS)
+  if(opts.startSec!=null)body.startSec=opts.startSec;
+  if(opts.endSec!=null)body.endSec=opts.endSec;
   if(opts.sourcePath)body.sourcePath=opts.sourcePath;          // select-upload/select-library: the holding/library file's own path
-  showStageWorking(stageWorkingLabel(cmd),"The current media space will refresh automatically when this step completes.");
+  const preserveView=!!opts.preserveView;
+  if(preserveView){
+    SH_PRESERVE_VIEW={scrollY:window.scrollY,page,scene:String(SH_SC||""),stage:PSTAGE,shotId:shotId||null};
+    showInlineSourceProgress(opts.progressLabel||stageWorkingLabel(cmd));
+  }else{
+    showStageWorking(stageWorkingLabel(cmd),"The current media space will refresh automatically when this step completes.");
+  }
   try{
     const r=await fetch(BASE+"/api/shot-run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
     const j=await r.json();
-    if(!j.ok){alert("Couldn't start: "+(j.error||"failed"));return;}
+    if(!j.ok){clearInlineSourceProgress();alert("Couldn't start: "+(j.error||"failed"));return;}
     SH_JOB=j.jobId;shRememberJob(j.jobId);SH_LAST_JOB=null;SH_POLL_MISSES=0;
+    // Acknowledge the accepted click immediately. Waiting for the next /api/jobs poll left
+    // WATCH visually blank and made a real Fire indistinguishable from a missed click.
+    PJOBS[j.jobId]={jobId:j.jobId,scene:String(SH_SC),gate:"shot:"+cmd+(shotId?":"+shotId:""),
+      args:[String(shotId||""),String(SH_EP||"")],status:"running",
+      step:cmd==="fire"?(opts.spendToken?"Submitting the sealed Seedance 2.5 request":"Preparing cost disclosure and sealed spend authorization"):
+        cmd==="edit"?(opts.spendToken?"Submitting the sealed Seedance 2.5 video edit":"Preparing the bounded edit and cost disclosure"):(stageWorkingLabel(cmd)||"Starting…"),
+      started:Date.now()/1000,ended:null};
     SH_AFTER_JOB=typeof opts.afterJob==="function"?opts.afterJob:null;
     if(typeof showToast=="function")showToast("▶ "+cmd+(shotId?" · "+shotId:"")+" — started",true);
-    shPollStart();if(page=="pipeline")renderControl();
-  }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
+    shPollStart();if(page=="pipeline"&&!preserveView)renderControl();
+  }catch(e){clearInlineSourceProgress();alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
 function shOverrideModelLimited(shotId){
   shRun("override-model-limited",shotId,{afterJob:()=>shRefresh()});
@@ -5037,26 +5698,73 @@ function shOpeningFrameChoices(tok,s){
   const isOpener=s.sourceType=="opener";
   const buildLabel="Build keyframe";
   return `<div class="ofc">
-    <div class="ofc-row"><button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${_esc(tok)}'})">${_esc(buildLabel+genCost)}</button></div>
+    <div class="ofc-row"><button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${_esc(tok)}'})">${_esc(buildLabel+genCost)}</button>
+      <button class="btn ghost" onclick="document.getElementById('ofcUpload_${_esc(tok)}').click()">Upload keyframe · no generation cost</button>
+      <input type="file" id="ofcUpload_${_esc(tok)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)"/></div>
     <details class="ofc-alternatives"><summary>Use an existing image instead</summary><div class="ofc-alternatives-body">
-      <div class="ofc-row"><button class="btn ghost" onclick="document.getElementById('ofcUpload_${_esc(tok)}').click()">Upload image · no generation cost</button>
-        <input type="file" id="ofcUpload_${_esc(tok)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)"/></div>
       <div class="ofc-row"><button class="btn ghost" onclick="shOpenFrameLibrary('${_esc(tok)}')">Choose from Asset Library · no generation cost</button></div>
       ${isOpener?"":`<div class="ofc-row"><button class="btn ghost" onclick="shRun('select-previous','${_esc(tok)}')">Use previous approved final frame · no generation cost</button></div>`}
     </div></details>
   </div>`;
 }
+function keyframeDecisionSourceActions(tok){
+  const inputId=`decisionKfUpload_${tok}`.replaceAll(".","_");
+  return `<div style="display:grid;gap:8px;width:100%">
+    <button class="btn ghost" onclick="document.getElementById('${_esc(inputId)}').click()">Upload replacement keyframe</button>
+    <input type="file" id="${_esc(inputId)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)">
+    <button class="btn ghost" onclick="shOpenFrameLibrary('${_esc(tok)}')">Choose library image</button>
+  </div>`;
+}
+function showInlineSourceProgress(label){
+  const dec=document.getElementById("wdecision");
+  if(!dec)return;
+  dec.classList.add("source-updating");
+  let row=document.getElementById("inlineSourceProgress");
+  if(!row){row=document.createElement("div");row.id="inlineSourceProgress";row.className="inline-source-progress";dec.prepend(row);}
+  row.innerHTML=`<span class="stage-spinner" aria-hidden="true"></span><span><b>${_esc(label||"Updating this revision")}</b><small>The current image stays visible. This panel will update when the new revision is ready.</small></span>`;
+}
+function clearInlineSourceProgress(){
+  const row=document.getElementById("inlineSourceProgress");if(row)row.remove();
+  const dec=document.getElementById("wdecision");if(dec)dec.classList.remove("source-updating");
+  SH_PRESERVE_VIEW=null;
+}
+function shSelectReplacementKeyframe(cmd,tok,sourcePath){
+  const pending=!!(shLedger(tok).keyframeCandidate);
+  const sourceLabel=cmd==="select-upload"?"Installing the uploaded keyframe":"Installing the selected library image";
+  if(!pending){shRun(cmd,tok,{sourcePath,preserveView:true,progressLabel:sourceLabel});return;}
+  if(!confirm("Replace the current keyframe revision? It will be moved to History before the new image becomes the current candidate.")){clearInlineSourceProgress();return;}
+  shRun("reject-keyframe",tok,{correction:"Replaced by a different keyframe source selected by Julian.",preserveView:true,progressLabel:"Moving the current revision to History",afterJob:job=>{
+    if(job&&job.status==="done")shRun(cmd,tok,{sourcePath,preserveView:true,progressLabel:sourceLabel});
+  }});
+}
 async function shOpenFrameUpload(tok,input){
   const file=input.files&&input.files[0]; if(!file)return;
+  showInlineSourceProgress("Uploading the replacement keyframe");
   const reader=new FileReader();
   reader.onload=async()=>{
     try{
       const r=await fetch(BASE+"/api/shot-keyframe-upload",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,filename:file.name,dataB64:reader.result})});
       const j=await r.json();
+      if(!j.ok){clearInlineSourceProgress();alert("Upload failed: "+(j.error||"unknown error"));return;}
+      shSelectReplacementKeyframe('select-upload',tok,j.sourcePath);
+    }catch(e){clearInlineSourceProgress();alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
+    input.value="";
+  };
+  reader.readAsDataURL(file);
+}
+async function shRenderUpload(tok,input){
+  const file=input.files&&input.files[0];if(!file)return;
+  if(file.size>45*1024*1024){alert("That render is larger than the 45 MB local upload limit. Export a review MP4 or WebM under 45 MB.");input.value="";return;}
+  const reader=new FileReader();
+  reader.onload=async()=>{
+    try{
+      const r=await fetch(BASE+"/api/shot-render-upload",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,filename:file.name,dataB64:reader.result})});
+      const j=await r.json();
       if(!j.ok){alert("Upload failed: "+(j.error||"unknown error"));return;}
-      await shRun('select-upload',tok,{sourcePath:j.sourcePath});
-    }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
+      await shRun("select-render-upload",tok,{sourcePath:j.sourcePath});
+    }catch(e){alert("Can't reach the studio server. Reload and try again.");}
     input.value="";
   };
   reader.readAsDataURL(file);
@@ -5074,7 +5782,7 @@ async function shOpenFrameLibrary(tok){
       <div class="ofc-libmeta"><span class="stbadge">${_esc(outcomeLabel[it.outcome]||it.outcome||"")}</span>
         <span class="histmeta">${_esc((it.at||"").slice(0,16))}</span>
         <div class="histnote">${_esc(it.note||"")}</div></div>
-      <button class="btn ghost" style="margin:0;flex:none" onclick="shOpenFrameLibraryPick('${_esc(tok)}','${_esc(it.path).replace(/'/g,"\\'")}')">Use this</button>
+      <button class="btn ghost" style="margin:0;flex:none" onclick="shOpenFrameLibraryPick('${_esc(tok)}','${_esc(it.path).replace(/'/g,"\\'")}','${_esc(it.outcome||"")}')">Use this</button>
     </div>`).join("")
     : `<div class="artefact-empty"><div style="color:var(--muted)">No prior opening-frame artefacts exist yet for ${_esc(tok)}.</div></div>`;
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
@@ -5084,9 +5792,10 @@ async function shOpenFrameLibrary(tok){
     <div style="display:flex;justify-content:flex-end;margin-top:20px"><button class="btn ghost" onclick="closeM()">Cancel</button></div>`;
   document.getElementById("modal").classList.add("show");
 }
-async function shOpenFrameLibraryPick(tok,path){
+async function shOpenFrameLibraryPick(tok,path,outcome){
   closeM();
-  await shRun('select-library',tok,{sourcePath:path});
+  if(outcome==="pending"){showToast("That image is already the current keyframe revision.",false);return;}
+  shSelectReplacementKeyframe('select-library',tok,path);
 }
 // ── SCENE LOOK REFERENCE CHOICE (2026-07-19 UX fix — exposing the button, not a redesign) ──
 // Three parallel sources for the plate's OPTIONAL reference image: generate with none (the
@@ -5183,19 +5892,76 @@ function shDiscCount(auth){   // the candidate count the token is BOUND to (null
   const n=d.candidates!=null?d.candidates:(d.candidateCount!=null?d.candidateCount:d.count);
   return (n!=null&&isFinite(+n))?+n:null;
 }
-function shRender(shotId){
+function showFireReadinessHold(shotId,data){
+  const sheet=document.getElementById("sheet");if(!sheet)return;
+  sheet.innerHTML=`<button class="x" onclick="closeM()">×</button><h3>WATCH needs one correction</h3>
+    <p class="dec-caption">${_esc(data.message||"StudioAI could not verify the current production package.")}</p>
+    <div class="disc-rows"><div class="disc-row"><span class="disc-k">Spend</span><span class="disc-v">$0 · no provider contacted</span></div><div class="disc-row"><span class="disc-k">Next action</span><span class="disc-v">${_esc(data.nextAction||"Resolve the current production input")}</span></div></div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn ghost" onclick="closeM()">Close</button><button class="btn" onclick="closeM();openDirectorAgent({stage:'animation',shotId:'${_esc(shotId)}',seed:${_attr(JSON.stringify(data.message||"Help me resolve the current WATCH blocker."))}})">Ask Director</button></div>`;
+  document.getElementById("modal").classList.add("show");
+}
+async function shRender(shotId){
   if(!currentProductionDirection("animation",shotId)){
     prepareDirectionThen("animation",shotId,()=>shRender(shotId));return;
   }
   const led=shLedger(shotId),auth=led&&led.pendingSpendAuth;
   if(auth&&auth.token){openAnimationConfirmModal(shotId);return;}
+  showStageWorking("Checking WATCH readiness","Validating the current script, voice, timing and lineage. No provider is contacted.");
+  try{
+    const url=BASE+"/api/shot-fire-readiness?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP)+"&shotId="+encodeURIComponent(shotId);
+    const readiness=await (await fetch(url,{cache:"no-store"})).json();
+    if(!readiness.ready){clearInlineSourceProgress();showFireReadinessHold(shotId,readiness);return;}
+  }catch(e){clearInlineSourceProgress();showFireReadinessHold(shotId,{message:"StudioAI could not verify the current WATCH package.",nextAction:"Reload the scene and try again"});return;}
   shRun('fire',shotId,{candidates:SH_CANDS,
-    comparisonModelId:'fal-seedance-2.0',
-    comparisonRunId:'studio-seedance20-comparison',
     afterJob:()=>{
       const current=shLedger(shotId),pending=current&&current.pendingSpendAuth;
       if(pending&&pending.token)openAnimationConfirmModal(shotId);
     }});
+}
+function shEditTake(shotId,duration){
+  const led=shLedger(shotId),auth=led&&led.pendingEditSpendAuth;
+  if(!auth||!auth.token){
+    return openDirectorAgent({stage:"animation-edit",shotId,seed:`I want to edit part of this approved ${Number(duration||0)} second take. Ask me which exact seconds need changing, inspect that section, then recommend or agree the smallest correction.`});
+  }
+  const sheet=document.getElementById("sheet");if(!sheet)return;
+  if(auth&&auth.token){
+    const d=auth.disclosure||{};
+    sheet.innerHTML=`<button class="x" onclick="closeM()">×</button><h3>Fire targeted video edit</h3>
+      <div class="modal-list"><div><span>Source</span><b>Protected approved take</b></div><div><span>Edit window</span><b>${_esc(d.window||"")}</b></div><div><span>Correction</span><b>${_esc(d.correction||"")}</b></div><div><span>Model</span><b>${_esc(d.providerModelId||"Seedance 2.5")}</b></div><div><span>Resolution</span><b>${_esc(d.resolution||"480p")}</b></div><div><span>Maximum cost</span><b>$${_esc(Number(d.maximumCostUsd||0).toFixed(4))}</b></div><div><span>Dialogue</span><b>${_esc(d.audioAuthority||"")}</b></div></div>
+      <p class="dec-caption">The original remains approved until you review and accept the edited result.</p>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px"><button class="btn ghost" onclick="closeM()">Cancel</button><button class="btn" onclick="shFireEdit('${_esc(shotId)}')">Fire edit</button></div>`;
+  }else{
+    const end=Math.max(.25,Number(duration||0));
+    sheet.innerHTML=`<button class="x" onclick="closeM()">×</button><h3>Edit this take</h3>
+      <p class="dec-caption">Choose only the part that needs changing. StudioAI preserves the approved source and prepares one Seedance 2.5 edit for cost review.</p>
+      <label class="field"><span>From second</span><input id="editStart" type="number" min="0" max="${end}" step="0.1" value="0"></label>
+      <label class="field"><span>To second</span><input id="editEnd" type="number" min="0.1" max="${end}" step="0.1" value="${end}"></label>
+      <label class="field"><span>What must change in this section?</span><textarea id="editCorrection" rows="5" maxlength="1200" placeholder="For example: At the twig snap, Zenny opens one eye, smiles, then closes it again. Keep everything else unchanged."></textarea></label>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px"><button class="btn ghost" onclick="closeM()">Cancel</button><button class="btn" onclick="shPrepareEdit('${_esc(shotId)}',${end})">Review edit cost</button></div>`;
+  }
+  document.getElementById("modal").classList.add("show");
+}
+function shRefireTake(shotId){
+  openDirectorAgent({stage:"animation-refire",shotId,seed:"I want to refire the complete approved take. Review the whole result with me and help define one precise whole-shot correction while protecting everything that already works."});
+}
+function shPrepareEdit(shotId,duration){
+  const start=Number((document.getElementById("editStart")||{}).value),end=Number((document.getElementById("editEnd")||{}).value);
+  const correction=String(((document.getElementById("editCorrection")||{}).value)||"").trim();
+  if(!correction){alert("Describe the one correction this edit must make.");return;}
+  if(!(start>=0&&end>start&&end<=Number(duration)+.05)){alert("Choose a valid time range inside this take.");return;}
+  closeM();
+  shRun("edit",shotId,{startSec:start,endSec:end,correction});
+}
+function shFireEdit(shotId){
+  const led=shLedger(shotId),auth=led&&led.pendingEditSpendAuth,d=(auth&&auth.disclosure)||{};
+  if(!auth||!auth.token){alert("The edit disclosure is no longer current.");return;}
+  closeM();
+  shRun("edit",shotId,{startSec:Number(d.startSec),endSec:Number(d.endSec),correction:d.correction,spendToken:auth.token});
+}
+function shRejectEdit(shotId){
+  const correction=(prompt("Why are you rejecting this edit? The protected original will remain approved.","")||"").trim();
+  if(!correction)return;
+  shRun("reject-edit",shotId,{correction});
 }
 function shApproveSpendFire(shotId){
   const led=shLedger(shotId);
@@ -5242,7 +6008,7 @@ async function _shPollTick(){
     SH_POLL_MISSES++;
     if(SH_POLL_MISSES>=3){
       clearInterval(SH_POLL);SH_POLL=null;SH_JOB=null;SH_POLL_MISSES=0;shForgetJob();
-      SH_AFTER_JOB=null;
+      SH_AFTER_JOB=null;clearInlineSourceProgress();
       if(typeof showToast=="function")showToast("Lost track of that job — the studio server may have restarted mid-run. Reload to check the real status.",false);
       await shFetchPkg();if(page=="pipeline")renderControl();
     }
@@ -5266,12 +6032,16 @@ async function _shPollTick(){
     // equally leave one of these three stale.
     SH_VOICE_CACHE={};SH_SEEDANCE_CACHE={};SH_STRUCTURE_CACHE={};SH_READBACK_CACHE={};SH_REFERENCE_CACHE={};SH_PROMPTLAB_CACHE={};SH_PROMPTLAB_DRAFTS={};
     const afterJob=SH_AFTER_JOB;SH_AFTER_JOB=null;
+    const preservedView=SH_PRESERVE_VIEW;SH_PRESERVE_VIEW=null;
     // Complete the authoritative refresh before resuming any deferred outcome. Starting
     // renderControl() without awaiting it lets its nested shFetchPkg() clear SH_PREFLIGHT
     // just before prepareDirectionThen() checks the newly-signed specialist direction,
     // falsely reporting a valid brief as stale. The deferred callback must only observe a
     // fully-loaded, internally consistent package/state/preflight snapshot.
     if(page=="pipeline"&&completedHere)await renderControl();
+    if(preservedView&&completedHere&&page===preservedView.page&&String(SH_SC||"")===preservedView.scene){
+      requestAnimationFrame(()=>window.scrollTo({top:preservedView.scrollY,left:0,behavior:"instant"}));
+    }
     if(afterJob&&completedHere)await afterJob(j);
     return;
   }
@@ -5279,6 +6049,44 @@ async function _shPollTick(){
   // the job's own real step text (cb-studio/serve.py's _humanise(line), updated live as
   // the subprocess prints progress) actually change on screen instead of sitting frozen.
   if(page=="pipeline")renderJobBanner();
+}
+function updateWatchLiveStatus(job){
+  if(page!=="pipeline"||PSTAGE!=="animation")return;
+  const state=document.getElementById("watchResultState"),media=document.getElementById("watchResultMedia");
+  if(!state||!media)return;
+  state.textContent="Rendering";
+  const existing=document.getElementById("watchLiveProgress");
+  if(existing){existing.outerHTML=watchLiveProgressHTML(job,media.classList.contains("has-live-result"));return;}
+  media.innerHTML=watchLiveProgressHTML(job,false);
+}
+async function _watchServerPollTick(){
+  if(page!=="pipeline"){
+    if(SH_WATCH_POLL)clearInterval(SH_WATCH_POLL);
+    SH_WATCH_POLL=null;SH_WATCH_ACTIVE_ID=null;
+    return;
+  }
+  await fetchJobsNow();
+  const shot=(pShots()[PSHOT_I]||{}).shotId;
+  const serverJob=shot?activeWatchJob(shot):null;
+  const durableJob=shot?durableWatchJob(shLedger(shot)):null;
+  const active=serverJob&&durableJob?{...serverJob,...durableJob,step:serverJob.step||durableJob.step}:(serverJob||durableJob);
+  renderJobBanner();
+  if(active){
+    SH_WATCH_ACTIVE_ID=active.id||active.jobId||Object.keys(PJOBS).find(key=>PJOBS[key]===active)||String(active.providerTaskId||shot);
+    updateWatchLiveStatus(active);
+    return;
+  }
+  if(SH_WATCH_ACTIVE_ID&&!SH_JOB){
+    SH_WATCH_ACTIVE_ID=null;
+    SH_VOICE_CACHE={};SH_SEEDANCE_CACHE={};SH_STRUCTURE_CACHE={};SH_READBACK_CACHE={};SH_REFERENCE_CACHE={};SH_PROMPTLAB_CACHE={};SH_PROMPTLAB_DRAFTS={};
+    await shFetchPkg();
+    if(page==="pipeline")await renderControl();
+  }
+}
+function startWatchServerPoll(){
+  if(SH_WATCH_POLL)clearInterval(SH_WATCH_POLL);
+  _watchServerPollTick();
+  SH_WATCH_POLL=setInterval(_watchServerPollTick,2500);
 }
 function shPollStart(){
   if(SH_POLL)clearInterval(SH_POLL);
@@ -5366,6 +6174,18 @@ _restoreFromHash(EXPLICIT_START_HASH).then(restored=>{
   let saved=null; try{saved=localStorage.getItem("cb_last_place");}catch(e){}
   if(saved) return _restoreFromHash(saved).then(r2=>{ if(!r2) bootProjects(); });
   bootProjects();
+});
+// Hash changes can come from the browser address bar, Back/Forward, or an in-app
+// redirect after a scoped correction. replaceState() in _syncHash does not emit this
+// event, so explicit navigation remains authoritative without creating a render loop.
+let HASH_RESTORE_SEQ=0;
+window.addEventListener("hashchange",async()=>{
+  const raw=(location.hash||"").replace(/^#/,"");
+  if(!raw)return;
+  const seq=++HASH_RESTORE_SEQ;
+  const restored=await _restoreFromHash(raw);
+  if(seq!==HASH_RESTORE_SEQ)return;
+  if(!restored)bootProjects();
 });
 </script>
 <div id="lightbox" onclick="if(event.target.id==='lightbox')closeLightbox()">

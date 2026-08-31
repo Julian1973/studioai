@@ -299,7 +299,7 @@ def test_animation_provider_shell_enforces_audio_lock_and_continuity_contract():
     assert "[AUDIO AND EXCLUSIONS]" in compiled
     assert "No improvised or extra words" in compiled
     assert "no duplicated cast members" in compiled
-    assert "Seedance may generate non-verbal music, ambience and SFX" in compiled
+    assert "Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX" in compiled
     assert "Spoken action: Fuzzby: {Nailed it.}" in compiled
     assert "Spoken action: Zenny: {Officially nuts!}" in compiled
     assert "@Audio1 remains the sole English dialogue and performance authority." in compiled
@@ -858,7 +858,7 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert "[AUDIO AND EXCLUSIONS]" in prompt
     assert "No narration. No improvised or extra words." in prompt
     assert "no duplicated cast members" in prompt
-    assert "Seedance may generate non-verbal music, ambience and SFX" in prompt
+    assert "Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX" in prompt
     assert "Hold: 2.2s" in prompt and "approximately 2.2s" not in prompt
     # Length is advisory. The production gate measures whether the compiled prompt
     # delivers the beat and satisfies the Seedance/craft contracts.
@@ -986,7 +986,7 @@ def test_physics_comes_from_general_approved_staging_registry():
     }
     prompt = D.compile_animation_provider_prompt(shot, direction)
     assert "Physics: The lantern pulls the rope taut" in prompt
-    assert "Seedance may generate non-verbal music, ambience and SFX" in prompt
+    assert "Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX" in prompt
 
 
 def test_animation_compiler_emits_continuous_internal_units_as_timed_phases():
@@ -1089,7 +1089,8 @@ def test_animation_compiler_normalizes_seedance_ready_watch_prompt():
     assert "Camera: Shot 1:" not in prompt
     assert "Camera: Cut to" not in prompt
     assert "[Performance Sequence]" not in prompt
-    assert "@Audio1 guides dialogue timing and mouth shapes" in prompt
+    assert "@Audio1 is the sole authority and sole performance authority" in prompt
+    assert "Seedance-generated non-dialogue SFX, ambience and instrumental" in prompt
     assert "No extra voices." in prompt
     assert prompt.count("{Are you sure?}") == 1
     assert prompt.count("{I've got this.}") == 1
@@ -1152,6 +1153,10 @@ def test_animation_slots_append_all_required_continuity_props(monkeypatch):
         "sourceType": "relay",
         "sourceShotId": "6.B1.S1",
         "charactersInFrame": ["Aida"],
+        "dialogueLines": [{
+            "speaker": "Aida", "exactText": "Ready.",
+            "startSec": 1, "endSec": 2,
+        }],
         "referenceSlots": {
             "@图1": "previous shot final frame",
             "@图2": "scene plate",
@@ -1169,6 +1174,26 @@ def test_animation_slots_append_all_required_continuity_props(monkeypatch):
     assert slots["@图4"] == "prop:story_vehicle"
     assert slots["@图5"] == "prop:story_vehicle_loaded_state"
     assert slots["@Audio1"] == "voice track"
+
+
+def test_animation_slots_remove_stale_audio_for_seedance_only_sfx():
+    shot = {
+        "shotId": "S1.SH1",
+        "charactersInFrame": ["Fuzzby"],
+        "dialogueLines": [{
+            "speaker": "Fuzzby", "exactText": "ZZZZZ …",
+            "startSec": 2, "endSec": 4,
+        }],
+        "referenceSlots": {
+            "@图1": "opening keyframe",
+            "@图2": "Fuzzby",
+            "@Audio1": "voice track",
+        },
+    }
+
+    slots = R._effective_reference_slots({}, shot, "referenceSlots", "1", "Ep2")
+
+    assert slots == {"@图1": "opening keyframe", "@图2": "Fuzzby"}
 
 
 def test_relay_reference_bundle_blocks_missing_scene_and_character_refs():
@@ -1339,6 +1364,98 @@ def test_scene_continuity_locks_block_when_missing_from_prompt():
     report = R._scene_state_prompt_report(shot, "Keen looks at the water.")
     assert report["ok"] is False
     assert report["missing"] == ["Keen boat contents and departure props"]
+
+
+def test_animation_prompt_routes_pure_snore_to_seedance_sfx():
+    shot = {
+        "shotId": "S1.SH1",
+        "durationSec": 10,
+        "charactersInFrame": ["Fuzzby"],
+        "dialogueLines": [{
+            "dialogueOccurrenceId": "s1-snore-1",
+            "speaker": "FUZZBY",
+            "exactText": "ZZZZZ …",
+            "startSec": 2,
+            "endSec": 4,
+        }],
+    }
+    direction = {
+        "durationSec": 10,
+        "generationGoal": "Fuzzby sleeps peacefully while a natural snore establishes the quiet morning.",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Establish the sleeping boundary.",
+            "framingLensAndCamera": "Hold a low near-wide view of the honeycomb.",
+            "causalAction": "Keen approaches while Fuzzby remains asleep.",
+            "observablePerformance": "Keen moves carefully and Fuzzby stays settled.",
+            "landingImage": "Keen pauses short of the honeycomb.",
+            "dialogueLineIndexes": [],
+        }, {
+            "shotNumber": 2,
+            "purpose": "Let the sleeping owner interrupt the approach.",
+            "framingLensAndCamera": "Ease closer without changing screen direction.",
+            "causalAction": "Fuzzby's snore makes Keen freeze.",
+            "observablePerformance": "Fuzzby sleeps while Keen holds completely still.",
+            "landingImage": "Keen remains frozen beside the sleeping Fuzzby.",
+            "dialogueLineIndexes": [1],
+            "dialogueDirections": ["Keep this as a natural sleeping sound."],
+        }],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["1.B1"],
+            "purpose": "Resting temptation",
+            "initialOrCarriedState": "Fuzzby is asleep beside the honeycomb.",
+            "cause": "The honey scent keeps him deeply settled.",
+            "primaryEvent": "Fuzzby snores naturally while remaining asleep.",
+            "observableEndState": "Fuzzby remains asleep beside the honeycomb.",
+            "emotionOrCameraAnalysis": "Hold close enough to read peaceful sleep.",
+        }],
+        "audioContract": "Natural forest ambience and restrained score.",
+        "continuityFinish": "Fuzzby remains asleep beside the honeycomb.",
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "{ZZZZZ" not in prompt
+    assert "2-4s:" in prompt
+    assert "natural snore" in prompt
+    assert "Do not synthesize words or place this sound in @Audio1" in prompt
+
+
+def test_animation_prompt_keeps_leading_inline_sfx_with_its_spoken_order():
+    shot = {
+        "shotId": "S1.SH2",
+        "durationSec": 10,
+        "charactersInFrame": ["Fuzzby"],
+        "dialogueLines": [{
+            "dialogueOccurrenceId": "s1-mixed-1",
+            "speaker": "FUZZBY",
+            "exactText": "[sneeze] I am awake!",
+            "startSec": 1,
+            "endSec": 3,
+        }],
+    }
+    direction = {
+        "durationSec": 10,
+        "generationGoal": "Fuzzby wakes with a sneeze and delivers the approved spoken line.",
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["1.B2"],
+            "purpose": "Abrupt waking",
+            "initialOrCarriedState": "Fuzzby is asleep beside the honeycomb.",
+            "cause": "Pollen tickles Fuzzby's nose.",
+            "primaryEvent": "Fuzzby sneezes, wakes and speaks.",
+            "observableEndState": "Fuzzby is awake and blinking.",
+            "emotionOrCameraAnalysis": "Hold for the startled reaction.",
+        }],
+        "audioContract": "Use @Audio1 for the spoken words.",
+        "continuityFinish": "Fuzzby is awake and blinking.",
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert prompt.count("{[sneeze] I am awake!}") == 1
+    assert "Seedance-generated non-dialogue SFX" in prompt
 
 
 def test_relay_final_frame_is_state_handoff_not_geography_master():

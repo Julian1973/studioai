@@ -245,11 +245,13 @@ def test_repository_ep1_human_canon_decisions_are_locked():
         assert any("missing" in str(item).lower() or "differs" in str(item).lower()
                    for item in report["blockers"])
     assert report["scriptCanon"]["ok"] is True
-    locked_roster = {
+    locked_visual_roster = {
         name for name, record in policy["roster"].items()
-        if record.get("status") == "locked"
+        if record.get("status") == "locked" and record.get("presenceMode") != "offscreen-only"
     }
-    assert locked_roster <= set(identity_packs["characters"])
+    assert locked_visual_roster <= set(identity_packs["characters"])
+    assert "Bo's Mum" not in identity_packs["characters"]
+    assert policy["roster"]["Bo's Mum"]["presenceMode"] == "offscreen-only"
     assert characters["Squeaky"]["gender"] == "Male"
     assert characters["Luna"]["crystalCall"]["call"] == (
         "With quiet and might, I trust my sight — Lepidolite, reveal what’s right!"

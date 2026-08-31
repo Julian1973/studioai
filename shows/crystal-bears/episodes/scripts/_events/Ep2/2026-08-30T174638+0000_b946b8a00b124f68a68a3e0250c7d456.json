@@ -1,0 +1,23 @@
+{
+ "schemaVersion": 1,
+ "eventId": "b946b8a00b124f68a68a3e0250c7d456",
+ "kind": "script-dialogue-corrected",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:a6ec42ec756b336a0529fb0e8b580bda10d76f29fe061eb0a52a75dbfeb4dd13",
+ "previousScriptVersionId": "sha256:3f413e84aa8f9a4d26bf7a7157196c5927c822788e69585b7af1113e8fcab76e",
+ "title": "Bo's Big Day V2",
+ "displayFile": "Ep2_Bo_s_Big_Day_V2.txt",
+ "activatedAt": "2026-08-30T17:46:38+00:00",
+ "activatedBy": "Julian",
+ "changeScope": {
+  "kind": "dialogue-correction",
+  "scene": "1",
+  "shotId": "S1.SH3",
+  "dialogueOccurrenceId": "dialogue-occurrence:sha256:a5a4732bc3cc7093bf37622dabdc051e9943a3bee4198f64e1e0c60c0a7c5b4c",
+  "speaker": "Keen, Zenny",
+  "previousExactText": "Ommmm…",
+  "correctedExactText": "We’ll see, Fuzzby. We’ll see. / OHHMMMMM…",
+  "requestedDurationSec": 12,
+  "camera": "slow ground-level pullback and crane rise to overhead wide"
+ }
+}

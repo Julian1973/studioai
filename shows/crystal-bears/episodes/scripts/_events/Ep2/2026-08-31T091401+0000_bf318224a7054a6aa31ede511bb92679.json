@@ -1,0 +1,16 @@
+{
+ "schemaVersion": 1,
+ "eventId": "bf318224a7054a6aa31ede511bb92679",
+ "kind": "script-cleaned",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:a8b1c490449e3fd996201c1fb0ecb5bc96a940cc80384f55156a314be31ed57c",
+ "previousScriptVersionId": "sha256:51394de3a828babe4883ad845b72f82ff3b233af32dc5f0502035c43e0ea8c7d",
+ "title": "Bo's Big Day V3",
+ "displayFile": "Ep2_Bo_s_Big_Day_V3.txt",
+ "activatedAt": "2026-08-31T09:14:01+00:00",
+ "activatedBy": "Julian",
+ "changeScope": {
+  "kind": "dialogue-format-cleanup",
+  "episode": "Ep2"
+ }
+}

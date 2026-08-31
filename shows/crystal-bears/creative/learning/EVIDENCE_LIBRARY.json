@@ -740,6 +740,248 @@
    "assetPointers": [
     "Ep2_scene1_storyboard.json"
    ]
+  },
+  {
+   "evidenceId": "ev-cf68ebfab0",
+   "capturedAt": "2026-08-29T18:37:14",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "rejected",
+   "userFeedbackVerbatim": "Keep the approved two-shot Scene 1 structure and every successful identity, geography, honeycomb position and continuity choice. Revise S1.SH1 only: add Zenny meditating in the established background with her locked turnaround reference; replace the vague crunchy-ground betrayal with one distinct twig snap under Keen's paw; on the snap Zenny opens one eye, gives a small knowing smile, then closes it and returns to stillness; strengthen two separate sustained Fuzzby snore-and-bubble beats with readable swell, sound, pop, reaction and recovery. Preserve S1.SH2 dialogue and its final Ommmm payoff.",
+   "systemClassification": "user rejected at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: rejected",
+   "assetPointers": [
+    "Ep2_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-ccc17943c1",
+   "capturedAt": "2026-08-29T18:58:31",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "rejected",
+   "userFeedbackVerbatim": "Rejected: the revision changed the locked two-shot Scene 1 structure into three production units. Preserve exactly S1.SH1 and S1.SH2 while retaining the requested Zenny, twig-snap and two snore-cycle correction.",
+   "systemClassification": "user rejected at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: rejected",
+   "assetPointers": [
+    "Ep2_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-30270aac6d",
+   "capturedAt": "2026-08-29T21:35:40",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep2_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-1433aca63a",
+   "capturedAt": "2026-08-29T21:36:08",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep2_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-f534eecd87",
+   "capturedAt": "2026-08-30T00:57:14",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "2",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep2_scene2_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-27a43585d5",
+   "capturedAt": "2026-08-30T01:32:12",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "2",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "Delegated overnight production preparation; no provider spend.",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep2_scene2_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-189c5a5419",
+   "capturedAt": "2026-08-30T01:35:51",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "3",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "Delegated overnight production preparation; no provider spend.",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep2_scene3_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-ff11243e21",
+   "capturedAt": "2026-08-30T06:51:46",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep2_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-aa0282e03d",
+   "capturedAt": "2026-08-30T12:23:21",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "Approved by Julian after exact S1.SH2 dialogue correction and friendly-banter review.",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep2_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-64117857b7",
+   "capturedAt": "2026-08-30T21:43:46",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "2",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep2_scene2_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-0cb46c1864",
+   "capturedAt": "2026-08-30T21:47:34",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep2",
+   "scene": "2",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep2_scene2_storyboard.json"
+   ]
   }
  ],
  "quarantine": {

@@ -237,12 +237,25 @@ def is_instance_lock_equivalent(value, characters):
             and any(word in text for word in ("duplicate", "duplicates", "blended")))
 
 
+SINGLE_INSTANCE_DIALOGUE_LOCK = (
+    "Use @Audio1 as the only voice authority. Only the character currently speaking "
+    "in @Audio1 may move their mouth. "
+    "Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and "
+    "instrumental music; it must not generate speech, sung lyrics or vocal music. "
+    "VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists "
+    "once in @Audio1. Use the written transcript only to assign the correct speaker and "
+    "mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. "
+    "The final render must contain exactly one audible dialogue performance: the supplied "
+    "@Audio1, unchanged."
+)
+
+
 def validate_dialogue_synthesis(prompt, dialogue_lines):
     """Validate the synthesis contract used by every Seedance render emission.
 
-    The provider receives the words so it can stage speech and lip sync, while the
-    approved audio reference remains the sole performance authority. Exact audio
-    passthrough is not assumed; the rendered voice is a guide track for post.
+    The provider receives the verbatim words only to stage speaker attribution and lip
+    sync. The approved audio reference is the sole audible performance authority and
+    must never be accompanied by a synthesized duplicate.
     """
     text = str(prompt or "")
     low = text.casefold()
@@ -263,6 +276,11 @@ def validate_dialogue_synthesis(prompt, dialogue_lines):
         "listeners remain silent and closed-mouth",
         "no narration",
         "no subtitles or captions",
+        "transcript only",
+        "already exists once in @audio1",
+        "do not synthesize, repeat, dub, echo, layer or replace",
+        "exactly one audible dialogue performance",
+        "@audio1, unchanged",
     )
     for phrase in required_phrases:
         if phrase not in low:

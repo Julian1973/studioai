@@ -30,6 +30,92 @@ def test_primary_dashboard_cards_expose_explicit_actions():
     assert 'Continue Production' not in APP
 
 
+def test_scene_board_is_a_visual_director_queue_not_a_department_matrix():
+    assert 'aria-label="Episode production triage"' in APP
+    assert 'Your decisions' in APP
+    assert 'Needs attention' in APP
+    assert 'Working now' in APP
+    assert 'Scenes complete' in APP
+    assert 'What needs you now · ${_esc(activeName)}' in APP
+    assert 'aria-label="Direction, See, Hear, Watch"' in APP
+    assert 'Current scene media' in APP
+    assert 'Review "+activeName' in APP
+    assert 'Resolve "+activeName' in APP
+    assert 'Department matrix' not in APP
+    assert 'Batch approve' not in APP
+
+
+def test_scene_board_attention_filter_includes_blocked_and_rejected_scenes():
+    assert '(key==="needs-attention"&&["blocked","rejected"].includes(scene.status))' in APP
+    assert '["needs-attention","Needs attention"]' in APP
+
+
+def test_see_and_watch_offer_visible_zero_spend_upload_choices():
+    assert "Upload keyframe · no generation cost" in APP
+    assert "Upload render · no generation cost" in APP
+    assert 'accept="image/png,image/jpeg,image/webp"' in APP
+    assert 'accept="video/mp4,video/webm"' in APP
+    assert 'function shRenderUpload(tok,input)' in APP
+    assert '/api/shot-render-upload' in APP
+    assert 'shRun("select-render-upload",tok' in APP
+
+
+def test_scene_board_exposes_keyframe_upload_for_the_next_eligible_shot():
+    assert "function boardKeyframeUploadTarget(scene)" in APP
+    assert 'activePhase.id==="see"?boardKeyframeUploadTarget(s):null' in APP
+    assert "Upload keyframe<br>" in APP
+    assert "${_esc(uploadTarget.shotId)} · no cost" in APP
+    assert "onchange=\"boardKeyframeUpload(" in APP
+    assert 'shot.sourceType==="opener"&&!ledger.keyframeCandidate' in APP
+
+
+def test_dialogue_correction_redrives_direction_without_abandoning_the_scene():
+    correction = SERVER.index('if self.path == "/api/script-dialogue-correction":')
+    synchronize = SERVER.index("synchronize_episode_script_registry(", correction)
+    start = SERVER.index('"story-intake:correction", scene', correction)
+    assert synchronize < start
+    assert '"story-intake:correction", scene' in SERVER
+    assert '["cb_intake.py", "run", ep]' in SERVER
+    assert '"providerCalled": False' in SERVER
+    assert '"redriveScope": "story-direction-candidate"' in SERVER
+    assert 'SH_JOB=j.jobId;shRememberJob(j.jobId)' in APP
+    assert 'Redriving Story & Direction from the corrected script' in APP
+    assert 'if(job&&job.status==="done")' in APP
+    assert 'Revised Story & Direction is ready for your approval' in APP
+    assert 'location.reload();' not in re.search(
+        r"async function shCorrectDialogue\(.*?\n\}", APP, re.DOTALL
+    ).group(0)
+
+
+def test_dialogue_correction_registry_sync_is_verified_before_intake():
+    assert "def synchronize_episode_script_registry(" in SERVER
+    assert 'actual != expected_script_version_id' in SERVER
+    assert 'episode registry synchronization failed for {episode}' in SERVER
+
+
+def test_hear_exposes_words_and_provider_prompt_as_separate_editable_layers():
+    assert "1 · Approved spoken words" in APP
+    assert "2 · ElevenLabs v3 performance prompt" in APP
+    assert "Changing them creates a scoped dialogue revision for this shot" in APP
+    assert "Adapt phonetic spelling, pronunciation, cadence, pauses, breath" in APP
+    assert "Save ElevenLabs prompt" in APP
+    assert "voicePanelHTML(tok,SH_VOICE_CACHE[tok])" in APP
+    assert "await shLoadVoiceWork(tok)" in APP
+
+
+def test_keyframe_review_decision_rail_exposes_upload_and_library_sources():
+    assert "function keyframeDecisionSourceActions(tok)" in APP
+    assert "Upload replacement keyframe" in APP
+    assert "Choose library image" in APP
+    assert "pending?keyframeDecisionSourceActions(tok)" in APP
+    assert "keyframeDecisionSourceActions(tok)];" in APP
+    assert "function shSelectReplacementKeyframe(cmd,tok,sourcePath)" in APP
+    assert "Replace the current keyframe revision?" in APP
+    assert 'correction:"Replaced by a different keyframe source selected by Julian."' in APP
+    assert 'if(job&&job.status==="done")shRun(cmd,tok,{sourcePath,preserveView:true,progressLabel:sourceLabel})' in APP
+    assert 'if(outcome==="pending")' in APP
+
+
 def test_every_shared_outcome_and_decision_shell_has_an_action_fallback():
     assert 'onclick="${_attr(action.onclick)}"' in APP
     outcome = re.search(
@@ -57,7 +143,7 @@ def test_blocked_rejected_review_and_complete_states_offer_outcomes():
         "Run episode Story &amp; Direction",
         "Open Look Development",
         "Resolve the previous shot",
-        "Build a corrected keyframe below",
+        "Next: create revision",
         "Redesign with Animation Director",
         "Open next unfinished shot",
         "focusShotReview",
@@ -81,6 +167,12 @@ def test_empty_and_moved_views_route_somewhere_useful():
     assert "generated scene shot" in APP
     assert "locked location master" in APP
     assert "approved &amp; stored (reusable)" not in APP
+
+
+def test_explicit_hash_navigation_reloads_the_requested_scene():
+    assert 'window.addEventListener("hashchange",async()=>{' in APP
+    assert 'const restored=await _restoreFromHash(raw);' in APP
+    assert 'if(seq!==HASH_RESTORE_SEQ)return;' in APP
 
 
 def test_scene_asset_status_only_counts_files_proven_on_disk():
@@ -144,7 +236,7 @@ def test_scene_review_exposes_the_simple_director_journey():
 def test_internal_direction_is_not_a_fake_human_approval_gate():
     assert "Direction ready" in APP
     assert "Its proof is the next rendered outcome" in APP
-    assert "Approve direction" not in APP
+    assert "Approve direction" in APP
     assert "productionInputs" in APP
     assert "approvedInputs" not in APP
     assert '["Creative target",inp.keyframePromptHeadline' in APP
@@ -170,9 +262,35 @@ def test_fire_prepares_internal_direction_then_returns_to_the_visible_outcome():
     assert 'prepareDirectionThen("animation",shotId,()=>shRender(shotId))' in APP
     assert "SH_AFTER_JOB" in APP
     assert '>Fire candidates</button>' in APP
+    assert "Seedance 2.5 prompt preflight" in APP
+    assert "Contract completeness" in APP
+    assert "Creative direction" in APP
+    assert "Firing floor:" in APP
+    assert "No critical failures." in APP
     assert 'if(!confirm("PAID BATCH' not in APP
-    assert "✓ Accept keyframe" in APP
+    assert "✓ Approve revision" in APP
     assert "Iterate batch" in APP
+
+
+def test_hear_keeps_the_audio_outcome_prominent_before_and_after_generation():
+    assert "stage-audio-empty" in APP
+    assert "Your performance direction is ready" in APP
+    assert "Step 1 of 2: confirm the exact words below. Step 2: review cost and press Fire voice." in APP
+    assert "Save corrected words" in APP
+    assert "data-hear-fire" in APP
+    assert "A provider job starts only after the final Fire voice confirmation." in APP
+    assert "Review cost &amp; fire voice" in APP
+    assert "Final confirmation · generate voice" in APP
+    assert "Performance direction ready — audio not generated" in APP
+    assert 'openDisclosureModal(\'voice\',{shotId:\'${tok}\'})' in APP
+    assert '<audio controls preload="metadata"' in APP
+
+
+def test_current_shot_is_visually_unmistakable_and_accessible():
+    assert "box-shadow:0 0 0 4px" in APP
+    assert "scene-shot-current" in APP
+    assert "Current shot" in APP
+    assert 'aria-current="true"' in APP
 
 
 def test_completed_job_refresh_finishes_before_deferred_outcome_resumes():
@@ -247,7 +365,8 @@ def test_see_hear_watch_keep_the_stage_media_visible():
     assert 'class="stage-audio"' in APP
     assert 'onloadedmetadata="mediaDurationLoaded(this)"' in APP
     assert '<video controls src="${BASE}${m.clip}?v=${MEDIA_V}"></video>' in APP
-    assert '<details class="focus-evidence"><summary>Exact dialogue and performance notes</summary>' in APP
+    assert '<details class="focus-evidence" open><summary>1 · Approved spoken words</summary>' in APP
+    assert 'aria-label="ElevenLabs v3 performance prompt"' in APP
 
 
 def test_see_has_an_obvious_full_screen_image_control():
@@ -263,7 +382,179 @@ def test_populated_stage_is_a_top_level_media_and_decision_desk():
     assert '.focus-workspace.result-first .wcol-decision{grid-column:2;grid-row:1' in APP
     assert '@media(max-width:900px){.focus-workspace.result-first{display:flex' in APP
     assert 'workspace.classList.toggle("result-first",resultFirst)' in APP
+
+
+def test_identity_screening_keeps_the_keyframe_visible_for_review():
+    assert 'resultFirst=!!(pending&&m.keyframe)' in APP
+    assert 'keyframeRevisionMedia(m.keyframe,led,s,"NEEDS YOUR DECISION")' in APP
+    assert 'approveKeyframeAdvisory' in APP
+    assert 'Approve revision ${kfInfo.revision}' in APP
+    assert 'approveKeyframeAdvisory' in APP
+    assert 'hard canon, reference, lineage and file-integrity checks' in APP.lower()
+    assert '>Reject / Discuss</button>' in APP
+    assert 'class="review-warning"' in APP
+
+
+def test_see_makes_revision_lineage_and_current_decision_explicit():
+    assert 'function keyframeRevisionInfo' in APP
+    assert 'function keyframeRevisionMedia' in APP
+    assert 'What changed for this revision' in APP
+    assert 'Your requested correction' in APP
+    assert 'The large image above is the new result to review.' in APP
+    assert 'Approve revision ${kfInfo.revision}' in APP
+    assert 'Discuss / change revision ${kfInfo.revision}' in APP
+    assert 'PREVIOUS · REJECTED' in APP
+    assert 'No current keyframe yet.' in APP
+
+
+def test_conversational_director_is_present_on_every_decision_surface():
+    assert '<div id="director-chat-host">${directorChatHTML()}</div>' in APP
+    assert '✦ Ask Director' in APP
+    assert 'class="director-chat-backdrop"' in APP
+    assert 'role="dialog" aria-modal="true"' in APP
+    assert 'Apply to next revision and return' in APP
+    assert 'What will visibly change' in APP
+    assert 'Keep locked' in APP
+    assert 'Director is thinking' in APP
+    assert '.director-chat{position:fixed' in APP
+    assert 'Apply to working prompt · no render' in APP
+    assert '[DIRECTOR ITERATION]' in APP
+    assert 'Director change applied · no render fired' in APP
+
+
+def test_approved_watch_has_clear_approve_refire_and_bounded_edit_paths():
+    assert "Refire full take" in APP
+    assert "Edit part of take" in APP
+    assert 'stage:"animation-edit"' in APP
+    assert 'stage:"animation-refire"' in APP
+    assert "Prepare targeted edit · review cost" in APP
+    assert 'shRun("edit",tok,{startSec:Number(latest.editStartSec)' in APP
+
+
+def test_voice_fire_confirmation_shows_exact_provider_dialogue():
+    assert "Exact dialogue being generated" in APP
+    assert "Exact dialogue being regenerated" in APP
+    assert "These are the provider-facing words and V3 performance tags for this Fire." in APP
+    assert "This is exactly the current provider input." in APP
+    assert "<b>Script:</b>" in APP
+    assert "<b>ElevenLabs:</b>" in APP
+
+
+def test_filmagent_style_shot_context_is_visible_across_see_hear_watch():
+    assert 'function shotContextCardHTML' in APP
+    assert 'function shotLandingText' in APP
+    assert 'SHOT · ${_esc(shot.shotId)} · ${stage} REVISION ${revision}' in APP
+    assert '["Opening",shot.openingPose' in APP
+    assert '["Action",shot.purpose' in APP
+    assert '["Landing",shotLandingText(shot)]' in APP
+    assert 'Canon locked' in APP
+    assert 'Seedance 2.5' in APP
+    assert 'ElevenLabs v3 · @Audio1' in APP
+    assert 'fetch(BASE+"/api/director-chat"' in APP
+    assert 'function directorApplyCorrection()' in APP
+    assert 'directorStartRejection(\'keyframe\'' in APP
+    assert 'directorStartRejection(\'voice\'' in APP
+    assert 'directorStartRejection(\'animation\'' in APP
     assert '"Creative direction"' in APP
+
+
+def test_shot_context_keeps_duration_purpose_and_dialogue_timing_visible():
+    assert 'function shotDialogueWindow(shot)' in APP
+    assert 'class="shot-glance"' in APP
+    assert '<span>Total shot</span>' in APP
+    assert '<span>What this shot must do</span>' in APP
+    assert '<span>Voice in context</span>' in APP
+    assert 'Math.min(...starts).toFixed(1)' in APP
+    assert 'Math.max(...ends).toFixed(1)' in APP
+
+
+def test_hear_visually_separates_elevenlabs_dialogue_from_seedance_sfx():
+    assert 'function routeShotAudio(shot)' in APP
+    assert 'o{2,}h{2,}m{2,}' in APP
+    assert '"meditation mantra chant"' in APP
+    assert 'authoredCue:original' in APP
+    assert 'Seedance 2.5 SFX · not sent to ElevenLabs' in APP
+    assert 'No ElevenLabs track is required for this shot.' in APP
+    assert 'Seedance 2.5 SFX only · no ElevenLabs spend' in APP
+    assert 'They never enter @Audio1.' in APP
+
+
+def test_watch_readiness_uses_routed_spoken_dialogue_not_raw_script_events():
+    assert 'const talky=routeShotAudio(s).spokenDialogue.length>0;' in APP
+    assert 'Only routed spoken dialogue requires an ElevenLabs approval before WATCH.' in APP
+    assert 'function continueCurrentShotToWatch()' in APP
+    assert 'onclick="continueCurrentShotToWatch()">Continue to Watch' in APP
+
+
+def test_watch_has_two_screen_progress_and_prompt_revision_history():
+    assert 'function watchProductionSurfaceHTML(' in APP
+    assert '1 · APPROVED START' in APP
+    assert '2 · WATCH RESULT' in APP
+    assert 'function watchJobCopy(job)' in APP
+    assert 'Polling Seedance API' in APP
+    assert 'Submitted to Seedance 2.5' in APP
+    assert 'Preparing the sealed Fire request' in APP
+    assert 'role="status" aria-live="polite"' in APP
+    assert 'function watchRevisionHistoryHTML(' in APP
+    assert 'Why it was rejected' in APP
+    assert 'Prompt used by rejected take' in APP
+    assert 'Corrected prompt prepared for the next fire' in APP
+    assert 'function durableWatchJob(led)' in APP
+    assert 'const liveJob=activeWatchJob(shot.shotId),durableJob=durableWatchJob(led);' in APP
+    assert 'liveJob&&durableJob?{...liveJob,...durableJob' in APP
+    assert 'Provider task ${job.providerTaskId}' in APP
+
+
+def test_watch_discovers_server_jobs_after_reload_or_cross_tab_fire():
+    assert 'id="watchResultState"' in APP
+    assert 'id="watchResultMedia"' in APP
+    assert 'function updateWatchLiveStatus(job)' in APP
+    assert 'function _watchServerPollTick()' in APP
+    assert 'await fetchJobsNow();' in APP
+    assert 'const serverJob=shot?activeWatchJob(shot):null;' in APP
+    assert 'const durableJob=shot?durableWatchJob(shLedger(shot)):null;' in APP
+    assert 'const active=serverJob&&durableJob?{...serverJob,...durableJob' in APP
+    assert 'SH_WATCH_POLL=setInterval(_watchServerPollTick,2500);' in APP
+    assert 'startWatchServerPoll();' in APP
+    assert 'function watchLiveProgressHTML(job,compact)' in APP
+    assert 'hasResult?`<div class="watch-live-results">${resultHTML}</div>`' in APP
+    assert 'watchLiveProgressHTML(job,hasResult)' in APP
+    assert 'if(existing){existing.outerHTML=watchLiveProgressHTML' in APP
+
+
+def test_top_corridor_keeps_completed_current_shot_phases_green():
+    assert 'function corridorPhaseState(phase,stages)' in APP
+    assert 'if(current.keyframe&&SH_STATE&&SH_STATE.sceneLook&&SH_STATE.sceneLook.current)return "approved";' in APP
+    assert 'if(!policy.talky||current.voice)return "approved";' in APP
+    assert 'if(current.animation)return "approved";' in APP
+    assert 'corridorPhaseState(phase,stages)==="approved"' in APP
+    assert '.pstage.done.active{border-color:var(--ok)' in APP
+
+
+def test_fire_is_acknowledged_in_watch_before_the_first_job_poll():
+    assert 'PJOBS[j.jobId]={jobId:j.jobId' in APP
+    assert 'Submitting the sealed Seedance 2.5 request' in APP
+    assert 'Preparing cost disclosure and sealed spend authorization' in APP
+    assert 'renderWorking?"Seedance 2.5 is rendering":"Ready to generate"' in APP
+    assert 'Rendering candidate batch…' in APP
+
+
+def test_watch_routes_a_failed_opening_stage_back_to_see():
+    assert 'pst.kf==="stageBlocked"' in APP
+    assert 'Return to See and correct the keyframe' in APP
+    assert 'Image blocked · audio is ready' in APP
+    assert 'Seedance SFX only · no @Audio1 required' in APP
+    assert 'Audio is not blocking this shot.' in APP
+
+
+def test_normal_watch_fire_never_selects_legacy_comparison_transport():
+    fire_start = APP.index("function shRender(shotId)")
+    fire_end = APP.index("function shApproveSpendFire", fire_start)
+    production_fire = APP[fire_start:fire_end]
+    assert "comparisonModelId" not in production_fire
+    assert "comparisonRunId" not in production_fire
+    assert "shRun('fire',shotId,{candidates:SH_CANDS" in production_fire
+    assert "let SH_CANDS=2;" in APP
 
 
 def test_scene_boot_uses_one_authoritative_state_and_preflight_response():
@@ -284,3 +575,18 @@ def test_reference_and_pose_cards_stack_at_phone_width():
     mobile = re.search(r"@media \(max-width:700px\)\{(.*?)\n\}", APP, re.DOTALL)
     assert mobile
     assert ".refgrid{grid-template-columns:minmax(0,1fr)}" in mobile.group(1)
+
+
+def test_keyframe_replacement_updates_inline_without_leaving_the_review_surface():
+    assert 'SH_PRESERVE_VIEW={scrollY:window.scrollY,page,scene:String(SH_SC||""),stage:PSTAGE,shotId:shotId||null}' in APP
+    assert 'shPollStart();if(page=="pipeline"&&!preserveView)renderControl();' in APP
+    assert 'The current image stays visible. This panel will update when the new revision is ready.' in APP
+    assert 'window.scrollTo({top:preservedView.scrollY,left:0,behavior:"instant"})' in APP
+    assert 'sourcePath,preserveView:true,progressLabel:sourceLabel' in APP
+    assert 'preserveView:true,progressLabel:"Moving the current revision to History"' in APP
+
+
+def test_stale_voice_take_cannot_be_approved_against_corrected_words():
+    assert "takeMatchesCurrent===false" in APP
+    assert "Regenerate corrected performance" in APP
+    assert "cannot be approved against the corrected words" in APP

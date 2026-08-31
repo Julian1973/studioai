@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import pathlib
 import subprocess
 
@@ -23,6 +24,12 @@ CHANNELS = 2
 # small overruns should be logged as natural extension, not treated as a dead-end.
 WINDOW_TOLERANCE_SEC = 0.75
 EDGE_FADE_SEC = 0.012
+# ElevenLabs dialogue-with-timestamps returns one continuous acted conversation. Its
+# segment ranges already contain the actor's pauses, so adding another gap at every
+# boundary duplicates silence and can push an otherwise valid performance over budget.
+MIN_DIALOGUE_GAP_SEC = 0.0
+MIN_LANDING_ROOM_SEC = 0.35
+TIMING_COVERAGE_TOLERANCE_SEC = 0.20
 
 
 def file_sha256(path):
@@ -32,6 +39,117 @@ def file_sha256(path):
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def minimum_master_duration(raw_audio_path, timing_path, dialogue_lines):
+    """Return the shortest shot duration that preserves every natural line take.
+
+    Extending the shot can only solve an overrun at the final dialogue boundary. Any
+    earlier overlap still requires a performance or authored-cue decision, so refuse it
+    here rather than hiding the conflict by moving or compressing dialogue.
+    """
+    raw_audio_path = pathlib.Path(raw_audio_path)
+    timing = json.loads(pathlib.Path(timing_path).read_text(encoding="utf-8"))
+    if timing.get("audioSha256") != file_sha256(raw_audio_path):
+        raise AudioTimingError("dialogue timing metadata does not match the raw audio bytes")
+    ranges = _source_ranges(timing, len(dialogue_lines))
+    if _needs_continuous_assembly(raw_audio_path, timing, ranges):
+        if not dialogue_lines:
+            return 0.0
+        first = dialogue_lines[0]
+        try:
+            first_start = float(
+                first.get("startSec")
+                if first.get("startSec") is not None else first.get("startsAtSec"))
+        except (TypeError, ValueError) as exc:
+            raise AudioTimingError("dialogue line 1 has no approved start anchor") from exc
+        return first_start + _probe_duration(raw_audio_path)
+    authored = []
+    for index, (line, source_range) in enumerate(zip(dialogue_lines, ranges)):
+        try:
+            target_start = float(
+                line.get("startSec")
+                if line.get("startSec") is not None else line.get("startsAtSec"))
+        except (TypeError, ValueError) as exc:
+            raise AudioTimingError(
+                f"dialogue line {index + 1} has no approved start anchor") from exc
+        authored.append((index, target_start, source_range[1] - source_range[0]))
+    for position, (index, target_start, source_duration) in enumerate(authored[:-1]):
+        next_start = authored[position + 1][1]
+        if source_duration > next_start - target_start + WINDOW_TOLERANCE_SEC:
+            raise AudioTimingError(
+                f"dialogue line {index + 1} overlaps the next approved start; "
+                "shot extension cannot resolve an internal timing conflict")
+    if not authored:
+        return 0.0
+    _, final_start, final_duration = authored[-1]
+    return final_start + final_duration
+
+
+def cascade_retime_for_natural_performance(raw_audio_path, timing_path, dialogue_lines,
+                                           minimum_gap_sec=MIN_DIALOGUE_GAP_SEC):
+    """Move only later starts to preserve a returned take without clipping or compression.
+
+    The first authored anchor remains fixed. Each later line keeps its authored start unless
+    the preceding natural performance requires it to move. Returns copied lines, required
+    duration and an audit list; it never edits script text or calls a provider.
+    """
+    raw_audio_path = pathlib.Path(raw_audio_path)
+    timing = _read_json(timing_path)
+    if timing.get("audioSha256") != file_sha256(raw_audio_path):
+        raise AudioTimingError("dialogue timing metadata does not match the raw audio bytes")
+    ranges = _source_ranges(timing, len(dialogue_lines))
+    if _needs_continuous_assembly(raw_audio_path, timing, ranges):
+        if not dialogue_lines:
+            return {"lines": [], "requiredDurationSec": 0.0,
+                    "changes": [], "providerCalled": False}
+        first = dialogue_lines[0]
+        key = "startSec" if first.get("startSec") is not None else "startsAtSec"
+        try:
+            first_start = float(first[key])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise AudioTimingError("dialogue line 1 has no approved start anchor") from exc
+        return {"lines": [dict(line) for line in dialogue_lines],
+                "requiredDurationSec": first_start + _probe_duration(raw_audio_path),
+                "changes": [], "providerCalled": False}
+    retimed, changes, previous_end = [], [], None
+    for index, (original, source_range) in enumerate(zip(dialogue_lines, ranges)):
+        line = dict(original)
+        key = "startSec" if line.get("startSec") is not None else "startsAtSec"
+        try:
+            authored_start = float(line[key])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise AudioTimingError(
+                f"dialogue line {index + 1} has no approved start anchor") from exc
+        start = authored_start if previous_end is None else max(
+            authored_start, previous_end + float(minimum_gap_sec))
+        duration = source_range[1] - source_range[0]
+        if start > authored_start + 0.001:
+            changes.append({"dialogueIndex": index, "fromSec": authored_start,
+                            "toSec": start, "shiftSec": start - authored_start})
+        line[key] = start
+        if line.get("endSec") is not None:
+            authored_window = max(0.01, float(line["endSec"]) - authored_start)
+            line["endSec"] = start + max(authored_window, duration)
+        elif line.get("estimatedDurationSec") is not None:
+            line["estimatedDurationSec"] = max(float(line["estimatedDurationSec"]), duration)
+        retimed.append(line)
+        previous_end = start + duration
+    return {"lines": retimed, "requiredDurationSec": float(previous_end or 0),
+            "changes": changes, "providerCalled": False}
+
+
+def natural_master_duration(required_duration_sec, maximum_duration_sec=30.0,
+                            landing_room_sec=MIN_LANDING_ROOM_SEC):
+    """Choose a whole-second slate that preserves the take and landing room."""
+    required = float(required_duration_sec)
+    maximum = float(maximum_duration_sec)
+    target = float(math.ceil(required + float(landing_room_sec)))
+    if target > maximum + 0.001:
+        raise AudioTimingError(
+            f"natural performance requires {required:.2f}s plus "
+            f"{landing_room_sec:.2f}s landing room in a {maximum:g}s maximum")
+    return target
 
 
 def dialogue_timing_path(audio_path):
@@ -86,7 +204,140 @@ def _source_ranges(timing, expected_count):
         raise AudioTimingError(
             "ElevenLabs timing metadata does not map one source range to every approved line"
         )
+    aligned = _character_aligned_ranges(timing, raw, expected_count)
+    if aligned is not None:
+        return aligned
     return [tuple(grouped[index]) for index in range(expected_count)]
+
+
+def _character_aligned_ranges(timing, segments, expected_count):
+    """Resolve per-input ranges from the provider's precise character alignment."""
+    alignment = (timing.get("alignment") or timing.get("normalizedAlignment") or
+                 timing.get("normalized_alignment"))
+    if not isinstance(alignment, dict):
+        return None
+    starts = alignment.get("character_start_times_seconds") or []
+    ends = alignment.get("character_end_times_seconds") or []
+    characters = alignment.get("characters") or []
+    if not starts or len(starts) != len(ends) or len(starts) != len(characters):
+        return None
+    bounds = {}
+    for item in segments:
+        try:
+            index = int(item.get("dialogueInputIndex", item.get("dialogue_input_index")))
+            start_index = int(item.get("characterStartIndex",
+                                       item.get("character_start_index")))
+            end_index = int(item.get("characterEndIndex", item.get("character_end_index")))
+        except (TypeError, ValueError):
+            return None
+        if start_index < 0 or end_index <= start_index or end_index > len(starts):
+            return None
+        current = bounds.setdefault(index, [start_index, end_index])
+        current[0] = min(current[0], start_index)
+        current[1] = max(current[1], end_index)
+    if set(bounds) != set(range(expected_count)):
+        return None
+    ranges = []
+    for index in range(expected_count):
+        start_index, end_index = bounds[index]
+        try:
+            start = float(starts[start_index])
+            end = float(ends[end_index - 1])
+        except (TypeError, ValueError):
+            return None
+        if start < 0 or end <= start:
+            return None
+        ranges.append((start, end))
+    return ranges
+
+
+def _needs_continuous_assembly(raw_audio_path, timing, ranges):
+    """Detect provider segment timestamps that leave audible output unassigned.
+
+    Text-to-Dialogue is one continuous acted performance. When its segment envelope does
+    not cover the returned audio, slicing by those ranges can remove words. Character-level
+    alignment is authoritative when present; older sidecars without it retain the complete
+    conversation as one performance instead.
+    """
+    if not ranges:
+        return False
+    raw_duration = _probe_duration(raw_audio_path)
+    covered_start = min(start for start, _ in ranges)
+    covered_end = max(end for _, end in ranges)
+    gaps = [next_start - end for (_, end), (next_start, _) in zip(ranges, ranges[1:])]
+    return (covered_start > TIMING_COVERAGE_TOLERANCE_SEC or
+            raw_duration - covered_end > TIMING_COVERAGE_TOLERANCE_SEC or
+            any(gap > TIMING_COVERAGE_TOLERANCE_SEC for gap in gaps))
+
+
+def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, out,
+                                       ranges, timing_path):
+    """Place a Text-to-Dialogue conversation once when per-turn timestamps are unsafe."""
+    first = dialogue_lines[0]
+    try:
+        target_start = float(
+            first.get("startSec")
+            if first.get("startSec") is not None else first.get("startsAtSec"))
+    except (TypeError, ValueError) as exc:
+        raise AudioTimingError("dialogue line 1 has no approved start anchor") from exc
+    raw_duration = _probe_duration(raw_audio)
+    target_end = target_start + raw_duration
+    if target_start < 0 or target_end > duration_sec + WINDOW_TOLERANCE_SEC:
+        raise AudioTimingError(
+            f"continuous dialogue performance needs {target_end:.2f}s but the shot is "
+            f"{duration_sec:.2f}s")
+
+    delay_ms = int(round(target_start * 1000))
+    filters = (
+        f"[0:a]aformat=sample_rates={SAMPLE_RATE}:channel_layouts=stereo,"
+        f"adelay={delay_ms}|{delay_ms}[performance];"
+        f"[1:a]atrim=duration={duration_sec:.6f},asetpts=PTS-STARTPTS[silence];"
+        "[silence][performance]amix=inputs=2:duration=first:"
+        f"dropout_transition=0:normalize=0,atrim=duration={duration_sec:.6f}[outa]"
+    )
+    command = [
+        "ffmpeg", "-y", "-i", str(raw_audio), "-f", "lavfi", "-t",
+        f"{duration_sec:.6f}", "-i",
+        f"anullsrc=channel_layout=stereo:sample_rate={SAMPLE_RATE}",
+        "-filter_complex", filters, "-map", "[outa]", "-ar", str(SAMPLE_RATE),
+        "-ac", str(CHANNELS), "-c:a", "pcm_s16le", str(out),
+    ]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode or not out.is_file():
+        raise AudioTimingError(
+            "could not preserve the continuous dialogue performance: " + result.stderr[-400:]
+        )
+
+    placements = []
+    for index, (line, source_range) in enumerate(zip(dialogue_lines, ranges)):
+        placements.append({
+            "dialogueIndex": index,
+            "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
+            "sourceStartSec": source_range[0],
+            "sourceEndSec": source_range[1],
+            "targetStartSec": target_start + source_range[0],
+            "targetEndSec": target_start + source_range[1],
+            "continuousPerformance": True,
+        })
+    contract = {
+        "schemaVersion": 1,
+        "assemblyMode": "continuous-dialogue-performance",
+        "rawAudioPath": str(raw_audio),
+        "rawAudioSha256": file_sha256(raw_audio),
+        "dialogueTimingPath": str(timing_path),
+        "dialogueTimingSha256": file_sha256(timing_path),
+        "durationSec": duration_sec,
+        "performanceTargetStartSec": target_start,
+        "performanceTargetEndSec": target_end,
+        "placements": placements,
+        "outputPath": str(out),
+        "outputSha256": file_sha256(out),
+    }
+    contract_path = timed_master_contract_path(out)
+    contract_path.write_text(json.dumps(contract, indent=2, ensure_ascii=False) + "\n",
+                             encoding="utf-8")
+    return {**contract, "contractPath": str(contract_path),
+            "contractSha256": file_sha256(contract_path)}
 
 
 def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
@@ -104,6 +355,10 @@ def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
     if timing.get("audioSha256") != file_sha256(raw_audio):
         raise AudioTimingError("dialogue timing metadata does not match the raw audio bytes")
     ranges = _source_ranges(timing, len(dialogue_lines))
+    if _needs_continuous_assembly(raw_audio, timing, ranges):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        return _render_continuous_dialogue_master(
+            raw_audio, dialogue_lines, duration_sec, out, ranges, timing_path)
 
     authored = []
     for index, (line, source_range) in enumerate(zip(dialogue_lines, ranges)):

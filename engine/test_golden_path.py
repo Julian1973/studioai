@@ -1385,7 +1385,7 @@ def test_same_process_comparison_returns_one_candidate_from_approved_stage_relay
     assert calls[1]["image_urls"][0].endswith("segment_1_final.png")
     assert len(joined) == 1 and len(joined[0]) == 2
     assert len(paths) == 1 and pathlib.Path(paths[0]).read_bytes() == \
-        b"JOINED-COMPARISON-CANDIDATE|APPROVED_HEAR"
+        b"JOINED-COMPARISON-CANDIDATE"
     final_ledger = _led()[shot["shotId"]]
     assert final_ledger["status"] == "candidates-pending"
     assert final_ledger["batch"]["transportCandidates"]["1"]["status"] == "joined"

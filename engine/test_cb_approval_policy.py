@@ -104,6 +104,25 @@ def _approve_department(package, shot_id, stage):
     return work["approved"]
 
 
+def test_seedance_provider_payload_keeps_verbatim_transcript_for_lip_sync():
+    prompt = (
+        "AUDIO-AUTHORITY: @Audio1 is the sole authority. "
+        + render.emission.SINGLE_INSTANCE_DIALOGUE_LOCK
+        + "\nSpoken action: Keen: {ACHOO! ... Oh, Ah, Hi Fuzzby}\n"
+        + "Fuzzby reacts after \u201cACHOO! ... Oh, Ah, Hi Fuzzby\u201d."
+    )
+    lines = [{"speaker": "Keen", "exactText": "ACHOO! ... Oh, Ah, Hi Fuzzby"}]
+
+    provider = render._provider_safe_dialogue_prompt(prompt, lines)
+
+    assert provider == prompt
+    assert provider.count("ACHOO! ... Oh, Ah, Hi Fuzzby") == 2
+    assert "{ACHOO! ... Oh, Ah, Hi Fuzzby}" in provider
+    assert "written transcript only to assign the correct speaker and mouth timing" in provider
+    assert "Do not synthesize, repeat, dub, echo, layer" in provider
+    assert "@Audio1" in provider
+
+
 def _prepare_department(package, shot_id, stage):
     ledger = render._ledger(package, shot_id)
     work = ledger.setdefault("departmentWork", {}).setdefault(
@@ -159,6 +178,32 @@ def test_invalid_voice_contract_is_never_treated_as_current_direction(tmp_path):
 
     assert status["current"] is False
     assert status["reason"].startswith("voice-contract-invalid:")
+
+
+def test_voice_direction_freshness_excludes_seedance_only_sfx(tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    spoken = {"speaker": "Keen", "exactText": "Hello"}
+    sneeze = {"speaker": "Keen", "exactText": "ACHOO!"}
+    shot["dialogueLines"] = [sneeze, spoken]
+    candidate = _prepare_department(package, shot["shotId"], "voice")
+    candidate["output"] = {"shotId": shot["shotId"], "lines": [spoken]}
+    checked = {}
+
+    monkeypatch.setattr(
+        render.cb_departments.VoiceDirection, "model_validate",
+        lambda output: output)
+    monkeypatch.setattr(
+        render.cb_audio_authority, "spoken_dialogue_lines",
+        lambda current_shot: [spoken])
+    monkeypatch.setattr(
+        render.cb_departments, "validate_voice_direction",
+        lambda direction, lines: checked.setdefault("lines", lines))
+
+    status = render._department_record_status(
+        package, shot["shotId"], "voice", "1", "Ep1")
+
+    assert status["current"] is True
+    assert checked["lines"] == [spoken]
 
 
 def test_animation_direction_without_provider_prompt_is_not_current(tmp_path, monkeypatch):
@@ -503,7 +548,7 @@ def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatc
             "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
             "speaker": "Fuzzby", "character": "Fuzzby",
             "exactDialogue": "I still feel him... every day.",
-            "performedText": "[quietly] I still feel him... [exhales] every day.",
+            "performedText": "[angry] I still feel him... every day.",
             "dramaticIntention": "Keep the thought connected.", "subtext": "Memory lives on.",
             "cadenceAndBreath": "Quiet and connected.", "timingAndBody": "Stay still.",
             "archetypeId": "held-heart", "performanceQuestions": {
@@ -515,10 +560,9 @@ def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatc
             "listener": "Zenny", "bodyVoiceRelationship": "Still body.",
             "previousText": "A quiet look.", "startsAtSec": 1.0,
             "estimatedDurationSec": 2.0, "pauseReasons": [],
-            "tagPurposes": [{"tag": "quietly", "purpose": "Intimacy"},
-                            {"tag": "exhales", "purpose": "Release"}],
+            "tagPurposes": [{"tag": "angry", "purpose": "Superseded direction"}],
             "takeRecipes": [{"recipeId": "A", "label": "Primary",
-                              "performedText": "[quietly] I still feel him... [exhales] every day.",
+                              "performedText": "[angry] I still feel him... every day.",
                               "primary": True, "takesCount": 1}],
         }],
     }

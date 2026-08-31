@@ -144,6 +144,12 @@ def test_dialogue_cost_reaches_the_ledger_correctly(monkeypatch, tmp_path):
                     "start_time_seconds": 0.0, "end_time_seconds": 1.0,
                     "character_start_index": 0, "character_end_index": 18,
                 }],
+                "alignment": {
+                    "characters": list("Bizzy-bizzy-bizzy!"),
+                    "character_start_times_seconds": [0.0] * 18,
+                    "character_end_times_seconds": [1.0] * 18,
+                },
+                "normalized_alignment": None,
             }
     monkeypatch.setattr(cb_gen, "_rpost", lambda *a, **k: FakeResp())
     monkeypatch.setattr(cb_gen, "MEDIA", tmp_path)
@@ -168,3 +174,4 @@ def test_dialogue_cost_reaches_the_ledger_correctly(monkeypatch, tmp_path):
     timing = json.load(open(tmp_path / "proof_vo.mp3.dialogue.json"))
     assert timing["inputCount"] == 1
     assert timing["voiceSegments"][0]["dialogueInputIndex"] == 0
+    assert timing["alignment"]["characters"][:5] == list("Bizzy")

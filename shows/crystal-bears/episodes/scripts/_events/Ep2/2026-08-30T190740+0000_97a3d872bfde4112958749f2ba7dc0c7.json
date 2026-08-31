@@ -1,0 +1,21 @@
+{
+ "schemaVersion": 1,
+ "eventId": "97a3d872bfde4112958749f2ba7dc0c7",
+ "kind": "script-dialogue-corrected",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:ce92b79487e594f0d7492866f1683a1dfc4049ee9d50048ffd2cf3dc6f6aa230",
+ "previousScriptVersionId": "sha256:a6ec42ec756b336a0529fb0e8b580bda10d76f29fe061eb0a52a75dbfeb4dd13",
+ "title": "Bo's Big Day V2",
+ "displayFile": "Ep2_Bo_s_Big_Day_V2.txt",
+ "activatedAt": "2026-08-30T19:07:40+00:00",
+ "activatedBy": "Julian",
+ "changeScope": {
+  "kind": "dialogue-correction",
+  "scene": "1",
+  "shotId": "S1.SH3",
+  "dialogueOccurrenceId": "dialogue-occurrence:sha256:c8288371e9122123a7cc3943063694297fde40e982442a90d77b1a6af8be2037",
+  "speaker": "Zenny",
+  "previousExactText": "OHHMMMMM…",
+  "correctedExactText": "oooohhhhhhhhmmmmmmmmmmmm"
+ }
+}

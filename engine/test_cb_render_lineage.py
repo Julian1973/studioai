@@ -211,6 +211,17 @@ def main():
         except R.Refused:
             check("reject_keyframe refuses a blank reason", True)
 
+        print("== a Director correction can be queued before the first keyframe exists ==")
+        pkg, path = _write_package(scratch, scene, episode, storyboard_md5=live_md5,
+                                    revision=10, extra_ledger={})
+        R.reject_keyframe(scene, "S1.SH1", "add Zenny in the established seated position",
+                          episode, reviewed_by="TestReviewer")
+        queued = json.load(open(path))["continuityLedger"][0]
+        check("pre-generation correction is recorded without a fake rejection",
+              queued["pendingKeyframeCorrection"]["reason"] ==
+              "add Zenny in the established seated position" and
+              not queued.get("keyframeRejections"), queued)
+
         print("== approve_keyframe() refuses a candidate whose OWN direct inputs have since "
               "changed (not the whole storyboard) ==")
         R._keyframe_input_signature = lambda pkg, shot, sc, ep="Ep1": {"cardHash": "a-different-value-now"}

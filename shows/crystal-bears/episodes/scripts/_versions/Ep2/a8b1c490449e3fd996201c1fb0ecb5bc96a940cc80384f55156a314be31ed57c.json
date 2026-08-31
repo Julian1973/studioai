@@ -1,0 +1,11 @@
+{
+ "schemaVersion": 1,
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:a8b1c490449e3fd996201c1fb0ecb5bc96a940cc80384f55156a314be31ed57c",
+ "algorithm": "sha256",
+ "sha256": "a8b1c490449e3fd996201c1fb0ecb5bc96a940cc80384f55156a314be31ed57c",
+ "byteLength": 9510,
+ "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/a8b1c490449e3fd996201c1fb0ecb5bc96a940cc80384f55156a314be31ed57c.txt",
+ "createdAt": "2026-08-31T09:14:01+00:00",
+ "sourceName": "cleaned dialogue numbering"
+}

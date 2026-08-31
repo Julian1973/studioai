@@ -42,6 +42,9 @@ MUTATING_OPERATIONS = (
     "next_shot",
     "approve_shot",
     "reject_shot",
+    "edit_shot",
+    "approve_shot_edit",
+    "reject_shot_edit",
     "stitch_scene",
 )
 

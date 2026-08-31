@@ -1,11 +1,11 @@
 {
  "episode": "Ep2",
  "canonVersion": "1.0",
- "builtAt": "2026-08-28T11:54:24",
+ "builtAt": "2026-08-31T09:32:31",
  "sources": {
   "showBible": {
    "path": "shows/crystal-bears/canon/LOCKED_CANON.md",
-   "sha256": "c49d38a2a2fd143b9aae2465345bf64341035ef621fde7282f48cb64402a30b6"
+   "sha256": "f46f3bf3045c20da286087d322b870cef1d008ee11f7d8386bb042133401ba4c"
   },
   "studioBible": {
    "path": "CRYSTAL_BEARS_STUDIO_BIBLE.md",
@@ -13,7 +13,7 @@
   },
   "characters": {
    "path": "shows/crystal-bears/canon/characters.json",
-   "sha256": "956200fb50971fd16d6b35098c2692bd3d47608a4dc67078c08097e2a3423205"
+   "sha256": "a373e544c247dd57f26ad7969820f08d91b9d1454268ea407b50c82416b56cba"
   },
   "locations": {
    "path": "shows/crystal-bears/canon/locations.json",
@@ -56,20 +56,20 @@
    "sha256": "241c010233906c2fd67c2f467913d06dd124e3da1aeac335a517e1458d7bf443"
   },
   "scriptPackage": {
-   "path": "cb-output/Ep2_The_Thing_beat_package.json",
-   "sha256": "3dd6c8fe17b3fe2a49e0046b6e3d0294839de006aea9d713cd8c6d3b6b2bb304"
+   "path": "cb-output/Ep2_Every_Single_Time_beat_package.json",
+   "sha256": "b982bab944d30f30c406bb8529bf154cfc5ffa25a79951e99a5808b1fa25da6d"
   }
  },
  "gaps": [],
  "conflicts": [],
  "canonLock": {
-  "manifestDigest": "4fa0ce5c19d87228239d2e95481a3490a4c3f097bc947490704d9e2d93e061ea",
+  "manifestDigest": "1bd7201454af656fec1609e820fcdf6dd276be9222a05464d402d41578e24342",
   "profile": "storyboard",
-  "profileDigest": "007362f614c61982abf3e27ec4075a56cbe4529f0e06bdefb114bd62fdb2d0a6",
+  "profileDigest": "e50901a8f9bdc4ca8d9fbf3926eae5fc981118827d4006df84cd77492d504c69",
   "sourceHashes": {
-   "showBible": "c49d38a2a2fd143b9aae2465345bf64341035ef621fde7282f48cb64402a30b6",
+   "showBible": "f46f3bf3045c20da286087d322b870cef1d008ee11f7d8386bb042133401ba4c",
    "studioBible": "51b44ba88d6134f40c6e6864d13416358b9149ec945557a4fc839e578e716215",
-   "characters": "956200fb50971fd16d6b35098c2692bd3d47608a4dc67078c08097e2a3423205",
+   "characters": "a373e544c247dd57f26ad7969820f08d91b9d1454268ea407b50c82416b56cba",
    "locations": "700db5114d5ae703f55e76f8308a5db33fc8eaa1ecbd4a15392a639899302df0",
    "continuity": "db8bf00f2bf37ddf94159881fe65c70b72b0db9c6ce1d80f903e562f890261db",
    "episodeArc": "7e06f051effa4eacaae41410f6170aed86772a3ed23599d599cec610d572ed2b",

@@ -166,14 +166,18 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
     )
 
 
-def test_episode_two_production_script_has_eight_scenes_and_57_exact_dialogue_lines():
+def test_episode_two_production_script_has_eight_scenes_and_58_exact_dialogue_lines():
     script_path = cb_intake.ROOT / "cb-studio/data/scripts/Ep2_Bos_Big_Day_V2.txt"
     parsed = cb_intake.parse_script(
         script_path.read_text(encoding="utf-8"), cb_intake._load_roster(),
         log=lambda *_: None)
     dialogue = [event for event in parsed["events"] if event["type"] == "dialogue"]
     assert len(parsed["scenes"]) == 8
-    assert len(dialogue) == 57
+    assert len(dialogue) == 58
+    mum_lines = [event for event in dialogue if event["speaker"] == "Bo's Mum"]
+    assert [event["text"] for event in mum_lines] == [
+        "BO, it’s time for you to go to the Learning Circle? Don’t forget your lunch."
+    ]
     assert all(event["text"] for event in dialogue)
 
 

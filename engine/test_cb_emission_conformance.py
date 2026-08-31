@@ -72,7 +72,7 @@ def test_dialogue_synthesis_allows_typographic_punctuation_variants():
         "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, "
         "delivery, mouth timing and silence. No alternative performance is permitted. "
         "Listeners remain silent and closed-mouth. No narration; no extra words; "
-        "no subtitles or captions.\n"
+        "no subtitles or captions. " + C.SINGLE_INSTANCE_DIALOGUE_LOCK + "\n"
         "Dialogue placement: Keen, small but brave: {Like you said... it's part of growing up.}"
     )
     result = C.validate_dialogue_synthesis(prompt, [{
@@ -80,6 +80,21 @@ def test_dialogue_synthesis_allows_typographic_punctuation_variants():
         "text": "Like you said… it’s part of growing up.",
     }])
     assert result["ready"] is True
+
+
+def test_dialogue_synthesis_refuses_a_second_generated_voice_contract():
+    prompt = (
+        "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, "
+        "delivery, mouth timing and silence. No alternative performance is permitted. "
+        "Listeners remain silent and closed-mouth. No narration; no extra words; "
+        "no subtitles or captions. The rendered dialogue is a guide track.\n"
+        "Spoken action: Keen: {No matter how hard you try.}"
+    )
+    result = C.validate_dialogue_synthesis(prompt, [{
+        "speaker": "Keen", "text": "No matter how hard you try.",
+    }])
+    assert result["ready"] is False
+    assert any("transcript only" in error for error in result["errors"])
 
 
 def test_multi_character_instance_lock_is_exact_and_deduplicated():
@@ -214,7 +229,7 @@ Shot 1: Camera: hold the approved composition. Action: Keen looks to Aida and sp
 {Thank you.} Hold the pose for a full beat after the line ends.
 End state: the approved emotional beat is visibly complete.
 [AUDIO AND EXCLUSIONS]
-No narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance may generate non-verbal music, ambience and SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words."""
+No narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words."""
 
     report = S.preflight(prompt, duration_sec=15, timing_beats=[])
 

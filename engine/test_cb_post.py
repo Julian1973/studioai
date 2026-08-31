@@ -30,6 +30,30 @@ sys.path.insert(0, HERE)
 import cb_post
 
 
+def test_replace_guide_dialogue_discards_provider_audio(monkeypatch, tmp_path):
+    video = tmp_path / "provider.mp4"
+    voice = tmp_path / "approved.wav"
+    out = tmp_path / "review.mp4"
+    video.write_bytes(b"provider")
+    voice.write_bytes(b"approved")
+    monkeypatch.setattr(cb_post, "_dur", lambda path: 12.0)
+    captured = {}
+
+    def fake_run(cmd, capture_output, text):
+        captured["cmd"] = cmd
+        pathlib.Path(cmd[-1]).write_bytes(b"review")
+        return type("Result", (), {"returncode": 0})()
+
+    monkeypatch.setattr(cb_post.subprocess, "run", fake_run)
+
+    assert cb_post.replace_guide_dialogue(video, voice, out) == str(out)
+    command = " ".join(captured["cmd"])
+    assert "[0:a]" not in command
+    assert "amix=" not in command
+    assert "[1:a]" in command
+    assert "[dialogue]" in command
+
+
 def _scratch(fn):
     """REAL, PRE-EXISTING BUG FOUND AND FIXED HERE (2026-07-14, while adversarially verifying the SFX-
     sweetening build): cb_post.run()'s own FIRST LINE is `os.chdir(os.path.dirname(os.path.abspath(__file__)))`

@@ -1,21 +1,104 @@
 {
- "approved": null,
- "candidate": {
-  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S1_plate_candidate_787928a3.jpeg",
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S1_plate_candidate_145f7eff.jpeg",
   "hash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f",
   "inputSignature": {
-   "canonProfileDigest": "ad66d6b3f85538c03ee5ef6dd10f5c18dedd265ff29e2db6d86d78a4154e4116",
-   "briefHash": "636fed2750c5e4dd84058d6982b6ad93729a534685ea1113b81b53dc066c465e",
+   "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+   "briefHash": "f0df68f6c01d8059b7ecb77417e9a985701651477dbfaf3a567ac89ab1f6fcaf",
    "referenceHashes": {},
    "plateHash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
   },
   "referencePath": null,
-  "generatedAt": "2026-08-28T14:16:12",
+  "generatedAt": "2026-08-30T20:48:02",
   "source": "library",
   "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/ep1/CB_Scene_BuzzingNook_anchor.jpeg",
-  "packageRevision": 1
+  "packageRevision": 7,
+  "approvedAt": "2026-08-30T20:48:02",
+  "reviewedBy": "Julian"
  },
- "history": [],
+ "candidate": null,
+ "history": [
+  {
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S1_plate_candidate_787928a3.jpeg",
+   "hash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f",
+   "inputSignature": {
+    "canonProfileDigest": "ad66d6b3f85538c03ee5ef6dd10f5c18dedd265ff29e2db6d86d78a4154e4116",
+    "briefHash": "636fed2750c5e4dd84058d6982b6ad93729a534685ea1113b81b53dc066c465e",
+    "referenceHashes": {},
+    "plateHash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-28T14:16:12",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/ep1/CB_Scene_BuzzingNook_anchor.jpeg",
+   "packageRevision": 1,
+   "outcome": "rejected",
+   "rejectedAt": "2026-08-29T21:39:15",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Stale Scene Look candidate from production revision 1; rebuild its lineage against accepted Scene 1 production revision 3 without changing the approved Buzzing Nook visual source.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260829T213915/Ep2_S1_plate_candidate_787928a3.jpeg"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S1_plate_candidate_fa092745.jpeg",
+   "hash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f",
+   "inputSignature": {
+    "canonProfileDigest": "ad66d6b3f85538c03ee5ef6dd10f5c18dedd265ff29e2db6d86d78a4154e4116",
+    "briefHash": "3404ff8903af5d3030789d52b996b45ad03a3d46a6699c77b977be4b2cf5033f",
+    "referenceHashes": {},
+    "plateHash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-29T21:39:33",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/ep1/CB_Scene_BuzzingNook_anchor.jpeg",
+   "packageRevision": 3,
+   "outcome": "rejected",
+   "rejectedAt": "2026-08-30T06:57:49",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Rebind the previously approved identical Buzzing Nook plate to current package revision 4 after the script correction; preserve the visual source and spend nothing.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260830T065749/Ep2_S1_plate_candidate_fa092745.jpeg"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S1_plate_candidate_6f7c6cad.jpeg",
+   "hash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f",
+   "inputSignature": {
+    "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+    "briefHash": "21479ee10ee950ee829fe4d726e6bf09a717210ee70fdcc41f8c2c0dc53aab6c",
+    "referenceHashes": {},
+    "plateHash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-30T06:57:49",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/ep1/CB_Scene_BuzzingNook_anchor.jpeg",
+   "packageRevision": 4,
+   "approvedAt": "2026-08-30T06:57:50",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-08-30T12:55:26",
+   "archivedFile": "media/archive/scenelook_superseded/20260830T125526/Ep2_S1_plate_candidate_6f7c6cad.jpeg"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S1_plate_candidate_3fa7ea02.jpeg",
+   "hash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f",
+   "inputSignature": {
+    "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+    "briefHash": "8c69d7f32c639c572b70102d2d158dd43c9bcf85ecbb2849289fdf04528a4e24",
+    "referenceHashes": {},
+    "plateHash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-30T12:55:25",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/ep1/CB_Scene_BuzzingNook_anchor.jpeg",
+   "packageRevision": 5,
+   "approvedAt": "2026-08-30T12:55:26",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-08-30T20:48:02",
+   "archivedFile": "media/archive/scenelook_superseded/20260830T204802/Ep2_S1_plate_candidate_3fa7ea02.jpeg"
+  }
+ ],
  "departmentWork": {
   "look": {
    "approved": {
@@ -23,42 +106,203 @@
     "worker": "Cinematographer / DP",
     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
     "model": "gpt-5.5",
-    "preparedAt": "2026-08-28T14:16:12",
+    "preparedAt": "2026-08-30T20:48:02",
     "editedAt": null,
     "preparedBy": "specialist",
     "creativeDirectingStandardVersion": 4,
-    "sourceHash": "1b854a3c9244da243b8b9b6b2ea3f7de819df2f8ccf0168638df406c0c1ece33",
+    "sourceHash": "4329009f5d0fc0f55d287455f4df120e4e09bf0055f7f87f1fe3b75136ef578c",
     "output": {
-     "creativeIntent": "Create an environment-only Scene Look plate for the Buzzing Nook in morning: a cozy, active honeybee hideaway that feels like it is awake before the characters are. The space should gently “tell on” anyone moving through it, with tiny crunchy leaves, pollen dust, creaky comb shelves, twitchy flowers and buzzing details that make the nook feel like a comic witness rather than a neutral room.",
-     "storyOfPlace": "The Buzzing Nook is a small sheltered alcove inside a living garden-hive hybrid: part hollow tree root, part wildflower den, part handmade bee pantry. It should feel lovingly used, warm, and safe, with a protected honeycomb area implied as the place of temptation and boundary. Nothing should feel villainous or dangerous; the comedy comes from how sensitive, busy and noise-making the nook is. The environment remembers touch: bent petals, scattered pollen, brittle leaf chips, sticky honey glints, tiny wax smears, and sleepy morning bee activity all suggest that even a careful step could betray a secret.",
-     "paletteAndLighting": "Morning light is warm, saturated and golden, filtered through leaves and translucent amber honeycomb. Use a soft sunrise palette of honey gold, marigold, butter yellow, warm moss green, peachy wood tones, soft teal shadows and small lavender-blue cool notes in shaded pockets. Lighting should feel optimistic and edible: glowing rim through wax, dappled leaf shadows, pollen motes visible in sunbeams, and gentle bloom around honey surfaces. Contrast stays friendly and readable for ages 4–8: bright focal color accents, clear material separation, no murky darkness.",
-     "materialsAndAtmosphere": "Materials should be tactile and stylized-real: waxy honeycomb with subsurface amber glow; soft fuzzy moss; pliable flower petals; bark with rounded sculpted grooves; dry leaves that look crisp enough to crunch; pollen like fine golden powder; sticky honey strands and droplets catching light; tiny handmade bee objects from wax, twigs and petals. The atmosphere is alive with micro-motion cues frozen into the plate: suspended pollen, tiny drifting seed fluff, buzzing paths implied by curved specks, lightly bent grasses, and small vibration marks in delicate plants. Keep the design rounded, warm, and huggable with Pixar-caliber 3D CGI finish, real weight, appealing exaggeration and bold legibility.",
+     "creativeIntent": "Create a warm, safe, curiosity-filled environment look for “BUZZING NOOK”: a cozy little hideaway that feels alive with gentle hums, tiny vibrations, and friendly energy, without showing any characters. The space should invite a young audience to wonder what is making the nook buzz while remaining soft, legible, and comforting.",
+     "storyOfPlace": "The Buzzing Nook is a sheltered alcove tucked into a rounded crystal-and-wood interior, as if a small corner of the Crystal Bears’ world has become a humming nest of light, pollen, chimes, and glowing mineral growth. It feels handcrafted and well-loved: little shelves, smooth carved edges, honeycomb-like crystal pockets, and soft suspended decorations that suggest sound and motion through visual rhythm rather than danger.",
+     "paletteAndLighting": "Warm saturated children’s-animation palette: golden honey, amber, peach, soft coral, rose quartz, creamy ivory, and small accents of turquoise and lavender crystal. Lighting is cozy and luminous, with diffused amber glow from within crystal honeycomb clusters, soft bounce light across rounded surfaces, and visible floating dust/pollen motes that catch the light. Overall atmosphere: sunny, snug, magical, and gently buzzing.",
+     "materialsAndAtmosphere": "Materials should feel tactile and inviting: polished translucent crystals, matte carved wood, plush moss pads, rounded clay details, woven fiber cords, softly glowing resin, and tiny metallic chimes with dulled safe edges. Atmosphere should communicate a low friendly hum through environmental design: faint vibration ripples on hanging charms, glowing crystal cells, pollen motes, and rounded bee-inspired forms, with no threatening insects or sharp silhouettes.",
      "continuityRules": [
-      "Environment-only plate: no Keen, no Fuzzby, no Zenny, no character silhouettes, no sleeping body shapes, no faces hidden in props.",
-      "Do not compose a story shot or stage an action beat; present the scene-wide environment look for approval.",
-      "The Buzzing Nook must feel like a living comic witness: many small objects should plausibly make sound if touched.",
-      "Honeycomb presence may be included as an environmental feature, but it must not become a character prop gag or a completed story moment.",
-      "Maintain warm morning mood, safe preschool-friendly comedy, and saturated readable color throughout the space."
+      "Environment-only Scene Look plate: no characters, no creatures, no silhouettes, no hands, no faces.",
+      "Do not create a final story shot or character staging; this is a scene-wide environment, palette, material, light, and atmosphere reference.",
+      "Original 3D CGI animation look for ages 4-8: polished, warm, bold, readable, tactile, and emotionally safe.",
+      "All forms must be rounded, soft, and child-friendly; avoid horror, cluttered darkness, sharp hazards, or realistic insect swarms.",
+      "Keep the buzzing idea visual and whimsical through light, vibration motifs, chimes, pollen, and glowing crystal honeycomb forms."
      ],
-     "providerPrompt": "Environment-only Scene Look plate for an original 3D CGI animated preschool comedy, Pixar-caliber finish, ages 4–8. Create the BUZZING NOOK in MORNING: a cozy living garden-hive alcove inside rounded tree roots and wildflowers, part hollow root den, part bee pantry, part honeycomb nook. No characters, no animals, no faces, no silhouettes. The space feels awake and like a comic witness that would betray a secret: crisp dry leaf chips on the floor, pollen dust, tiny creaky wax shelves, bendy petals, fuzzy moss pads, twig-and-wax handmade details, sticky honey droplets and thin honey strands, translucent amber honeycomb surfaces, rounded bark grooves, warm root walls, small flowers and grasses lightly bent as if they might twitch or buzz. Include suspended pollen motes, soft drifting seed fluff, implied tiny bee-buzz trails as delicate environmental specks only, no actual bees. Palette: honey gold, marigold, butter yellow, warm moss green, peach wood, soft teal shadows, tiny lavender-blue cool notes in shaded pockets. Lighting: warm saturated sunrise filtering through leaves and translucent honeycomb, dappled leaf shadows, gentle bloom around honey, visible golden sunbeams, friendly soft contrast, bright readable shapes. Materials are tactile stylized-real: waxy glowing honeycomb, fuzzy moss, pliable petals, crisp leaves, powdered pollen, sticky reflective honey, rounded sculpted bark. Mood is safe, funny, tempting, cozy, and alive, with bold legible staging as an environment design plate, not an action shot. High-quality 3D animated feature look, appealing rounded forms, real material weight, warm atmosphere, no text, no signage, no watermark."
+     "providerPrompt": "Environment-only Scene Look plate for an original 3D CGI animated children’s series, ages 4-8, Pixar-caliber warmth and tactile material quality. Design a cozy “Buzzing Nook”: a small rounded alcove carved from honey-colored wood and rose-quartz crystal, filled with soft amber internal glow, translucent honeycomb-like crystal pockets, plush moss pads, woven cords, rounded clay shelves, tiny safe metallic chimes, glowing resin details, floating golden pollen motes, and subtle visual vibration motifs suggesting a gentle friendly hum. Palette of golden honey, amber, peach, coral, rose quartz, creamy ivory, with small turquoise and lavender crystal accents. Lighting is warm, saturated, diffused, magical, and comforting, with soft bounce light and luminous crystal glow. Child-safe rounded shapes, bold readable design, polished 3D CGI, cozy magical atmosphere. No characters, no creatures, no faces, no insects swarming, no final shot staging, no text, no logos."
     },
-    "packageRevision": 1,
+    "packageRevision": 7,
     "inputSignature": {
      "stage": "look",
      "model": "gpt-5.5",
      "skillHashes": {
       "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
      },
-     "canonProfileDigest": "ad66d6b3f85538c03ee5ef6dd10f5c18dedd265ff29e2db6d86d78a4154e4116",
-     "sceneContextHash": "88e1fc69569fb0fd830dea0be594bdd5a179bcea1103d1614174be8894aa86ec"
+     "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+     "sceneContextHash": "ce8c336eb96013853276612c4e22f092eaff22bcbb3c05f5bb3cc3d9d0788624"
     },
     "outcome": "approved",
-    "decisionAt": "2026-08-28T14:16:12",
+    "decisionAt": "2026-08-30T20:48:02",
     "reviewedBy": "StudioAI",
     "note": "Automatically prepared for the selected Scene Look source."
    },
    "candidate": null,
-   "history": []
+   "history": [
+    {
+     "department": "Look Development",
+     "worker": "Cinematographer / DP",
+     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+     "model": "gpt-5.5",
+     "preparedAt": "2026-08-28T14:16:12",
+     "editedAt": null,
+     "preparedBy": "specialist",
+     "creativeDirectingStandardVersion": 4,
+     "sourceHash": "1b854a3c9244da243b8b9b6b2ea3f7de819df2f8ccf0168638df406c0c1ece33",
+     "output": {
+      "creativeIntent": "Create an environment-only Scene Look plate for the Buzzing Nook in morning: a cozy, active honeybee hideaway that feels like it is awake before the characters are. The space should gently “tell on” anyone moving through it, with tiny crunchy leaves, pollen dust, creaky comb shelves, twitchy flowers and buzzing details that make the nook feel like a comic witness rather than a neutral room.",
+      "storyOfPlace": "The Buzzing Nook is a small sheltered alcove inside a living garden-hive hybrid: part hollow tree root, part wildflower den, part handmade bee pantry. It should feel lovingly used, warm, and safe, with a protected honeycomb area implied as the place of temptation and boundary. Nothing should feel villainous or dangerous; the comedy comes from how sensitive, busy and noise-making the nook is. The environment remembers touch: bent petals, scattered pollen, brittle leaf chips, sticky honey glints, tiny wax smears, and sleepy morning bee activity all suggest that even a careful step could betray a secret.",
+      "paletteAndLighting": "Morning light is warm, saturated and golden, filtered through leaves and translucent amber honeycomb. Use a soft sunrise palette of honey gold, marigold, butter yellow, warm moss green, peachy wood tones, soft teal shadows and small lavender-blue cool notes in shaded pockets. Lighting should feel optimistic and edible: glowing rim through wax, dappled leaf shadows, pollen motes visible in sunbeams, and gentle bloom around honey surfaces. Contrast stays friendly and readable for ages 4–8: bright focal color accents, clear material separation, no murky darkness.",
+      "materialsAndAtmosphere": "Materials should be tactile and stylized-real: waxy honeycomb with subsurface amber glow; soft fuzzy moss; pliable flower petals; bark with rounded sculpted grooves; dry leaves that look crisp enough to crunch; pollen like fine golden powder; sticky honey strands and droplets catching light; tiny handmade bee objects from wax, twigs and petals. The atmosphere is alive with micro-motion cues frozen into the plate: suspended pollen, tiny drifting seed fluff, buzzing paths implied by curved specks, lightly bent grasses, and small vibration marks in delicate plants. Keep the design rounded, warm, and huggable with Pixar-caliber 3D CGI finish, real weight, appealing exaggeration and bold legibility.",
+      "continuityRules": [
+       "Environment-only plate: no Keen, no Fuzzby, no Zenny, no character silhouettes, no sleeping body shapes, no faces hidden in props.",
+       "Do not compose a story shot or stage an action beat; present the scene-wide environment look for approval.",
+       "The Buzzing Nook must feel like a living comic witness: many small objects should plausibly make sound if touched.",
+       "Honeycomb presence may be included as an environmental feature, but it must not become a character prop gag or a completed story moment.",
+       "Maintain warm morning mood, safe preschool-friendly comedy, and saturated readable color throughout the space."
+      ],
+      "providerPrompt": "Environment-only Scene Look plate for an original 3D CGI animated preschool comedy, Pixar-caliber finish, ages 4–8. Create the BUZZING NOOK in MORNING: a cozy living garden-hive alcove inside rounded tree roots and wildflowers, part hollow root den, part bee pantry, part honeycomb nook. No characters, no animals, no faces, no silhouettes. The space feels awake and like a comic witness that would betray a secret: crisp dry leaf chips on the floor, pollen dust, tiny creaky wax shelves, bendy petals, fuzzy moss pads, twig-and-wax handmade details, sticky honey droplets and thin honey strands, translucent amber honeycomb surfaces, rounded bark grooves, warm root walls, small flowers and grasses lightly bent as if they might twitch or buzz. Include suspended pollen motes, soft drifting seed fluff, implied tiny bee-buzz trails as delicate environmental specks only, no actual bees. Palette: honey gold, marigold, butter yellow, warm moss green, peach wood, soft teal shadows, tiny lavender-blue cool notes in shaded pockets. Lighting: warm saturated sunrise filtering through leaves and translucent honeycomb, dappled leaf shadows, gentle bloom around honey, visible golden sunbeams, friendly soft contrast, bright readable shapes. Materials are tactile stylized-real: waxy glowing honeycomb, fuzzy moss, pliable petals, crisp leaves, powdered pollen, sticky reflective honey, rounded sculpted bark. Mood is safe, funny, tempting, cozy, and alive, with bold legible staging as an environment design plate, not an action shot. High-quality 3D animated feature look, appealing rounded forms, real material weight, warm atmosphere, no text, no signage, no watermark."
+     },
+     "packageRevision": 1,
+     "inputSignature": {
+      "stage": "look",
+      "model": "gpt-5.5",
+      "skillHashes": {
+       "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      },
+      "canonProfileDigest": "ad66d6b3f85538c03ee5ef6dd10f5c18dedd265ff29e2db6d86d78a4154e4116",
+      "sceneContextHash": "88e1fc69569fb0fd830dea0be594bdd5a179bcea1103d1614174be8894aa86ec"
+     },
+     "outcome": "superseded",
+     "decisionAt": "2026-08-28T14:16:12",
+     "reviewedBy": "StudioAI",
+     "note": "Automatically prepared for the selected Scene Look source.",
+     "supersededAt": "2026-08-29T21:39:33"
+    },
+    {
+     "department": "Look Development",
+     "worker": "Cinematographer / DP",
+     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+     "model": "gpt-5.5",
+     "preparedAt": "2026-08-29T21:39:33",
+     "editedAt": null,
+     "preparedBy": "specialist",
+     "creativeDirectingStandardVersion": 4,
+     "sourceHash": "6e76c99f077e51841927e3a3cc3bf598f5d6d645bef5487efe5645959f9ae073",
+     "output": {
+      "creativeIntent": "Create a candidate environment-only Scene Look plate for the BUZZING NOOK in warm morning: a cozy, living little hideaway where sweetness feels inviting and forbidden, and where the environment itself seems gently alert enough to reveal any tiny disturbance. The place should feel safe, soft, comic, and full of snack-sized temptation without becoming threatening.",
+      "storyOfPlace": "The BUZZING NOOK is a small woodland alcove shaped by moss, woven twigs, rounded bark, curled leaves, honey-warm wax, pollen dust, and tiny dew beads. It feels like a natural breakfast corner built by bees and softened by time: a tucked-away nook where a honeycomb prize could plausibly hang nearby, where a brittle twig, a pollen puff, a trembling leaf, or a dew drop might accidentally announce movement. The environment should suggest a world that reacts gently to touch: springy moss, ticklish pollen, sleepy air currents, and rounded forms that make every tiny sound feel visible.",
+      "paletteAndLighting": "Golden morning calm. Use saturated honey yellows, warm amber, soft beeswax cream, mossy greens, tender leaf greens, pale pollen gold, warm bark browns, and tiny cool dew highlights. Lighting is low, gentle, and early-morning luminous: soft sun filtering through leaves, dappled highlights, glowing translucent honey and wax, mild volumetric pollen sparkle, and plush ambient bounce. Contrast should remain friendly and legible for ages 4-8, with no harsh shadows or spooky darkness.",
+      "materialsAndAtmosphere": "Materials are tactile and rounded: velvety moss, slightly fuzzy leaf edges, matte bark ridges, bendy twigs, sticky glossy honey, translucent wax cells, powdery pollen, glassy dew, and soft airborne specks. The atmosphere is cozy, sleepy, buzzing, and alive in a subtle way. Everything should have real 3D weight and appealing squash-and-stretch readiness, but this plate must remain an environment look study, not an action beat.",
+      "continuityRules": [
+       "Environment-only plate: no characters, no silhouettes, no body parts, no faces, no footprints belonging to visible characters.",
+       "Do not stage an action moment or compose for a specific shot; this is scene-wide look development for the BUZZING NOOK.",
+       "Keep the nook inviting, warm, and safe; any sense of exposure should come from gentle environmental responsiveness, not danger.",
+       "Honeycomb, honey, pollen, dew, twigs, leaves, bark, and moss must feel integrated into one cozy woodland nook rather than separate prop inserts.",
+       "Maintain original high-quality 3D CGI family-animation styling with bold readable forms, warm saturated light, tactile materials, and appealing rounded shapes."
+      ],
+      "providerPrompt": "Environment-only Scene Look plate for an original high-quality 3D CGI animated preschool/family series, location: BUZZING NOOK, morning. Create a cozy miniature woodland nook formed from rounded bark, woven twigs, soft moss cushions, curled green leaves, translucent beeswax honeycomb forms, glossy amber honey, powdery golden pollen, and sparkling dew beads. The nook feels gently alive and responsive, as if tiny disturbances could make pollen puff, leaves quiver, dew tremble, and twigs softly creak, but show no action and no characters. Warm golden morning sunlight filters through overhead leaves with soft dappled highlights, honey-colored bounce light, mild volumetric pollen sparkle, and friendly plush shadows. Palette: honey yellow, amber, beeswax cream, moss green, tender leaf green, warm bark brown, pale pollen gold, tiny cool dew highlights. Materials: velvety moss, matte ridged bark, bendy twig fibers, fuzzy leaf edges, sticky glossy honey, translucent wax cells, powdery pollen, clear glassy dew. Mood: inviting, sleepy, sweet, safe, comic, snack-sized temptation in a living nook. Bold legible shapes, rounded appealing forms, tactile 3D weight, warm saturated light, no text, no characters, no animals, no faces, no visible action, no shot-specific staging."
+     },
+     "packageRevision": 3,
+     "inputSignature": {
+      "stage": "look",
+      "model": "gpt-5.5",
+      "skillHashes": {
+       "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      },
+      "canonProfileDigest": "ad66d6b3f85538c03ee5ef6dd10f5c18dedd265ff29e2db6d86d78a4154e4116",
+      "sceneContextHash": "f5588b23429e7bba3509b3c0e457806fc0024ce5cc7dac7ef937e42490fd4b0f"
+     },
+     "outcome": "superseded",
+     "decisionAt": "2026-08-29T21:39:33",
+     "reviewedBy": "StudioAI",
+     "note": "Automatically prepared for the selected Scene Look source.",
+     "supersededAt": "2026-08-30T06:57:33"
+    },
+    {
+     "department": "Look Development",
+     "worker": "Cinematographer / DP",
+     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+     "model": "gpt-5.5",
+     "preparedAt": "2026-08-30T06:57:33",
+     "editedAt": null,
+     "preparedBy": "specialist",
+     "creativeDirectingStandardVersion": 4,
+     "sourceHash": "2a059e002ad3dc1e3e87352412cd73e1baf4e60a33e6ecf35b20b227e2a00112",
+     "output": {
+      "creativeIntent": "Establish the Buzzing Nook as a warm, tempting morning hideaway where the meadow itself feels ready to give away the smallest mistake. The environment should hold comic suspense without showing any characters: honey feels reachable, the nook feels soft and safe, but every petal, dew bead, grass blade, seed puff, and buzzing flower suggests it could accidentally become an alarm.",
+      "storyOfPlace": "A tucked-away golden meadow alcove has grown around a prized honeycomb. It is not a formal home or a built set; it is a naturally shaped nook made from clover arches, soft moss, curled leaves, wildflowers, rounded stones, and a small honey shelf in the roots of an old friendly tree. The place feels recently quiet after busy buzzing activity, with tiny environmental clues of life everywhere: pollen dust, honey glints, flattened moss, sleepy flower heads, and delicate dew lines waiting to tremble.",
+      "paletteAndLighting": "Morning light is warm, saturated, and golden, with honey-amber highlights, fresh clover greens, butter-yellow pollen, peachy sun haze, soft lavender-blue shadows, and small turquoise accents in dew and shaded leaves. Lighting should feel tender and luminous, like sun filtered through tall grass and petals. The honeycomb should catch the brightest warm glow, while the rest of the nook stays softly dappled and breathable.",
+      "materialsAndAtmosphere": "Use tactile 3D CGI materials with appealing preschool readability: plush moss, waxy honeycomb, sticky translucent honey, velvety petals, fuzzy seed heads, soft grass, rounded bark, smooth pebbles, and sparkling dew. Atmosphere should be cozy and alive but not busy: gentle suspended pollen motes, faint honey haze, and visible quietness. Shapes should be rounded, safe, and charming, with enough delicate environmental detail to imply that a sneeze, step, or wobble could set everything rustling.",
+      "continuityRules": [
+       "Environment-only plate: no characters, no body parts, no silhouettes, no faces, no sleeping figure, no animal stand-ins.",
+       "Do not compose a narrative shot or stage action; present the scene-wide look of the location for approval.",
+       "Preserve the selected treatment: the meadow must feel like the alarm system, with soft natural objects ready to rustle, buzz, wobble, drip, or puff pollen.",
+       "Keep the honeycomb visually tempting and important, but do not make it a throne-room or object-only world; it belongs naturally inside the meadow nook.",
+       "Zenny’s calm should be implied only through the environment’s still, balanced areas, not through any character symbol or explicit placement marker قKeep all forms bold, rounded, legible, warm, and age-appropriate for original high-quality 3D CGI animation ages 4–8 قAvoid danger, darkness, sharp realism, cluttered botanical accuracy, or overly sophisticated fantasy detailing قMorning must read clearly through golden filtered light, dew sparkle, and soft cool shadows."
+      ],
+      "providerPrompt": "Create one environment-only Scene Look plate for an original high-quality 3D CGI animated preschool film, ages 4–8. Location: BUZZING NOOK, morning. Design a cozy secret meadow alcove that feels like a soft natural alarm system surrounding a tempting honeycomb: clover arches, tall grass, velvety wildflowers, fuzzy seed heads, rounded bark roots, plush moss, smooth pebbles, dew beads, pollen dust, and a small golden honeycomb tucked into a friendly old tree-root honey shelf. The whole place should feel warm, safe, funny, and suspenseful without showing any characters or action: every delicate petal, dew line, grass blade, and pollen puff looks like it could rustle, wobble, buzz, drip, or betray a tiny mistake. Palette: honey amber, saturated clover green, butter-yellow pollen, peach morning haze, soft lavender-blue shadows, and small turquoise dew accents. Lighting: luminous golden morning sun filtered through grass and petals, dappled highlights, glowing honey, breathable soft shade, suspended pollen motes. Materials: tactile appealing 3D CGI with plush moss, waxy honeycomb, sticky translucent honey, velvety petals, fuzzy seed heads, soft grass, rounded bark, smooth stones, sparkling dew. Mood: cozy breath-holding stillness, playful comic tension, gentle warmth. No characters, no creatures, no faces, no silhouettes, no body parts, no narrative action, no text, no logos, no UI, no photorealism, no sharp danger, no dark mood."
+     },
+     "packageRevision": 4,
+     "inputSignature": {
+      "stage": "look",
+      "model": "gpt-5.5",
+      "skillHashes": {
+       "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      },
+      "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+      "sceneContextHash": "51647e97c55f6f260c4dd76ff75ce2005fd1050438473b2aaadb702ae4f7e6c2"
+     },
+     "outcome": "superseded",
+     "decisionAt": "2026-08-30T06:57:33",
+     "reviewedBy": "StudioAI",
+     "note": "Automatically prepared for the selected Scene Look source.",
+     "supersededAt": "2026-08-30T12:55:25"
+    },
+    {
+     "department": "Look Development",
+     "worker": "Cinematographer / DP",
+     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+     "model": "gpt-5.5",
+     "preparedAt": "2026-08-30T12:55:25",
+     "editedAt": null,
+     "preparedBy": "specialist",
+     "creativeDirectingStandardVersion": 4,
+     "sourceHash": "d4767afb0370428d8e45d17bc4172fb2d7fb7bd37edcef2eaddd817a70bc5414",
+     "output": {
+      "creativeIntent": "Environment-only candidate Scene Look for “BUZZING NOOK”: a warm morning honey hideaway where every friendly natural surface feels capable of making an enormous tiny sound. The place should feel inviting, cozy and safe for ages 4–8, but comedically over-sensitive: dew, pollen, crunchy leaves and exposed honeycomb all seem ready to betray anyone trying too hard to be quiet.",
+      "storyOfPlace": "The Buzzing Nook is a small bear-scale pocket in a flowering woodland, nested among rounded roots, moss pillows, broad leaves, honey-wax shelves and pollen-dusted blossoms. A prized honeycomb is integrated into the nook’s natural architecture rather than staged as a character prop: visible as part of the environment, glowing with morning sweetness. The nook feels lived-in by gentle buzzing life and sleepy morning softness, but no characters or creatures are present in the plate.",
+      "paletteAndLighting": "Warm saturated morning palette: honey amber, soft golden yellow, moss green, clover green, pale leaf turquoise, creamy wax, warm bark brown, tiny lavender-blue shadow accents. Lighting is low, tender morning sunlight with glowing rim sparkle through dew and pollen haze; soft bounce light keeps the set cheerful and readable. Highlights should make sticky honey and dew glint without becoming harsh or realistic-photo cold.",
+      "materialsAndAtmosphere": "Tactile original 3D CGI materials: translucent sticky honey, matte creamy beeswax, plush moss, velvety leaves, rounded bark, crunchy dry leaf flakes, brittle seed pods, powdery pollen dust, bead-like dew, soft airborne pollen motes. Atmosphere is cozy, buzzing, and hyper-audible in feeling: the environment visually suggests CRUNCH, POP, drip, tickle, sparkle and tiny rustles through material detail, while remaining calm and child-friendly.",
+      "continuityRules": [
+       "Environment-only plate: no characters, no creatures, no body parts, no silhouettes, no footprints, no readable text, no logos.",
+       "Do not stage a gag or action moment; this is a scene-wide look reference for the Buzzing Nook environment, palette, materials, light and atmosphere.",
+       "The honeycomb may be visible as an environmental feature, but it must not feel like the point-of-view character or a magical object.",
+       "Keep shapes bold, rounded, legible and tactile for ages 4–8; no danger, gloom, sharp realism or horror atmosphere.",
+       "The nook should feel like an active comic accomplice through crunchy, sticky, pollen-heavy surfaces, not through animated effects or character reactions in the plate."
+      ],
+      "providerPrompt": "Create one environment-only Scene Look plate for an original feature-quality 3D CGI animated children’s series, ages 4–8: “BUZZING NOOK,” a cozy bear-scale morning pocket in a flowering woodland. Show a warm, inviting nook formed by rounded tree roots, plush moss cushions, broad velvety leaves, pollen-dusted blossoms, creamy waxy honeycomb built naturally into the nook, small amber honey drips, crunchy dry leaf flakes, brittle seed pods, bead-like dew and floating pollen motes. The environment should visually feel comedically over-sensitive to sound — surfaces that suggest tiny CRUNCH, POP, drip, rustle and tickle — while staying calm, safe and charming. Palette: honey amber, golden pollen yellow, moss and clover green, pale leaf turquoise, warm bark brown, creamy beeswax, with soft lavender-blue shadow accents. Lighting: warm saturated morning sunlight, gentle rim sparkle on dew and honey, soft bounce fill, glowing pollen haze, cheerful readable shadows. Materials must be tactile and stylized: translucent sticky honey, matte wax, plush moss, rounded bark, powdery pollen, glassy dew, soft leaves. Original 3D CGI animation look with real weight, squash-and-stretch-friendly forms, bold legible design, warm saturated light. No characters, no creatures, no body parts, no silhouettes, no footprints, no readable text, no logos, no action staging, no dark mood, no photorealistic harshness."
+     },
+     "packageRevision": 5,
+     "inputSignature": {
+      "stage": "look",
+      "model": "gpt-5.5",
+      "skillHashes": {
+       "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      },
+      "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+      "sceneContextHash": "b65eeaea7377384c52827e4e532672fc2593d7c6f2db99e27e3e7ad837c35309"
+     },
+     "outcome": "superseded",
+     "decisionAt": "2026-08-30T12:55:25",
+     "reviewedBy": "StudioAI",
+     "note": "Automatically prepared for the selected Scene Look source.",
+     "supersededAt": "2026-08-30T20:48:02"
+    }
+   ]
   }
  }
 }

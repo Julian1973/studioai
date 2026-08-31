@@ -1,4 +1,5 @@
 import http.client
+import base64
 import hashlib
 import importlib.util
 import json
@@ -26,6 +27,102 @@ def _load_server_module(name="cb_studio_serve_auth_test"):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def test_episode_script_registry_sync_publishes_and_verifies_exact_pointer(monkeypatch):
+    module = _load_server_module("cb_studio_registry_sync_test")
+    expected = "sha256:" + "c" * 64
+    calls = []
+
+    def fake_reindex():
+        calls.append("reindex")
+        return [{"number": 2, "scriptVersionId": expected}]
+
+    monkeypatch.setattr(module, "reindex_episodes", fake_reindex)
+    record = module.synchronize_episode_script_registry("Ep2", expected)
+
+    assert calls == ["reindex"]
+    assert record["scriptVersionId"] == expected
+
+
+def test_episode_script_registry_sync_refuses_unpublished_pointer(monkeypatch):
+    module = _load_server_module("cb_studio_registry_sync_refusal_test")
+    expected = "sha256:" + "c" * 64
+    monkeypatch.setattr(
+        module,
+        "reindex_episodes",
+        lambda: [{"number": 2, "scriptVersionId": "sha256:" + "a" * 64}],
+    )
+
+    with pytest.raises(RuntimeError, match="episode registry synchronization failed"):
+        module.synchronize_episode_script_registry("Ep2", expected)
+
+
+def test_render_upload_decoder_accepts_bounded_mp4_and_webm_only():
+    module = _load_server_module("cb_studio_render_decode_test")
+    mp4 = b"\x00\x00\x00\x18ftypisom" + b"\x00" * 24
+    webm = b"\x1aE\xdf\xa3" + b"\x00" * 24
+    assert module.decode_video_upload(base64.b64encode(mp4).decode())[1] == ".mp4"
+    assert module.decode_video_upload(base64.b64encode(webm).decode())[1] == ".webm"
+    with pytest.raises(ValueError, match="only readable MP4 and WebM"):
+        module.decode_video_upload(base64.b64encode(b"not-video").decode())
+
+
+def test_canonical_engine_module_reloads_changed_source(monkeypatch, tmp_path):
+    module = _load_server_module("cb_studio_live_module_test")
+    module_name = "studio_live_engine_fixture"
+    source = tmp_path / f"{module_name}.py"
+    source.write_text("VALUE = 'first'\n")
+    monkeypatch.setattr(module, "CBGEN", tmp_path)
+    sys.modules.pop(module_name, None)
+    try:
+        first = module._canonical_engine_module(module_name)
+        assert first.VALUE == "first"
+
+        time.sleep(0.01)
+        source.write_text("VALUE = 'second-version'\n")
+        second = module._canonical_engine_module(module_name)
+
+        assert second is first
+        assert second.VALUE == "second-version"
+    finally:
+        sys.modules.pop(module_name, None)
+
+
+def test_relay_opening_frame_is_not_exposed_as_watch_result(monkeypatch, tmp_path):
+    module = _load_server_module("cb_studio_relay_media_test")
+    media = tmp_path / "media"
+    shots = media / "shots"
+    shots.mkdir(parents=True)
+    (shots / "EpT_S1.SH1_final_frame.png").write_bytes(b"previous-final-frame")
+    monkeypatch.setattr(module, "MEDIA", media)
+    monkeypatch.setattr(module.cb_asset_registry, "shot_media_from_registry", lambda *args: {})
+
+    class Renderer:
+        @staticmethod
+        def timing_slate_status(*_args):
+            return {"current": False, "approved": False, "reason": "missing"}
+
+        @staticmethod
+        def lineage_status(*_args):
+            return {"current": True, "reasonCodes": []}
+
+        @staticmethod
+        def post_status(*_args):
+            return {"candidate": {"exists": False}, "approved": {"exists": False}}
+
+    monkeypatch.setattr(module, "_canonical_cb_render", lambda: Renderer)
+    package = {
+        "creativeDirectingStandardVersion": 4,
+        "shots": [{"shotId": "S1.SH2", "sourceType": "relay", "sourceShotId": "S1.SH1"}],
+        "continuityLedger": [{"shotId": "S1.SH2", "status": "designed"}],
+    }
+
+    result = module.shot_media_map(package, "1", "EpT")["shots"]["S1.SH2"]
+
+    assert result["keyframe"].endswith("EpT_S1.SH1_final_frame.png")
+    assert result["finalFrame"] is None
+    assert result["clip"] is None
 
 
 @pytest.fixture()
@@ -92,6 +189,34 @@ def test_episode_retry_skips_completed_scene_direction_packages(monkeypatch, tmp
     module._queue_episode_storyboards("Ep2")
 
     assert calls == ["1", "3"]
+
+
+def test_episode_retry_rebuilds_and_archives_storyboard_from_stale_script(monkeypatch,
+                                                                          tmp_path):
+    module = _load_server_module("cb_studio_retry_stale_scene_test")
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    stale = tmp_path / "cb-output/creative/Ep2_scene1_storyboard.json"
+    stale.parent.mkdir(parents=True)
+    stale.write_text(json.dumps({
+        "sourceScript": {"scriptVersionId": "sha256:old"},
+    }))
+    monkeypatch.setattr(module.cb_scripts, "ScriptStore", lambda *_args, **_kwargs: type(
+        "Store", (), {"current": lambda self, *_args, **_kwargs: {
+            "scriptVersionId": "sha256:new1234567890",
+        }})())
+    monkeypatch.setattr(cb_intake, "scene_roster", lambda episode: {
+        "scenes": [{"sceneNumber": 1}]})
+    calls = []
+    monkeypatch.setattr(module, "_start", lambda job_id, gate, scene, args: (
+        calls.append(scene) or job_id))
+
+    module._queue_episode_storyboards("Ep2")
+
+    assert calls == ["1"]
+    archived = (stale.parent / "archive/script-new123456789" /
+                "Ep2_scene1_storyboard.json")
+    assert archived.exists()
+    assert json.loads(archived.read_text())["sourceScript"]["scriptVersionId"] == "sha256:old"
 
 
 def test_uncached_director_builds_are_serialized_across_different_shots(monkeypatch):
@@ -286,10 +411,10 @@ def test_director_entry_and_facade_share_the_authenticated_session(studio):
         if session["status"] == "ready_to_review":
             assert session["decisionActions"]
     else:
-        assert session["primaryAction"]["id"] in {
-            "build-keyframe", "build-voice", "prepare-render", "open-inspector",
-            "open-provider-setup", "run-quality-review", "build-master", "run-final-review",
-        }
+            assert session["primaryAction"]["id"] in {
+                "direct-scene", "build-keyframe", "build-voice", "prepare-render", "open-inspector",
+                "open-provider-setup", "run-quality-review", "build-master", "run-final-review",
+            }
 
     origin = f"http://127.0.0.1:{port}"
     status, _, body = _request(

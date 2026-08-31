@@ -6,6 +6,7 @@ import pytest
 
 import cb_db
 import cb_departments
+import cb_emission_conformance
 import cb_prompt_lab
 import cb_render
 
@@ -82,7 +83,7 @@ End state: Fuzzby holds the pose screen left while Zenny remains screen right wi
 [Maintain Consistency]
 Keep both identities, relative scale, flower ownership, screen direction, light direction and audio relationships stable.
 [Audio]
-Use @Audio1 exactly. Fuzzby speaks in English; Zenny remains silent and her mouth stays closed. Preserve ambience and action effects. The track has cues at 1.6-3.9s and 8.2-9.1s; these are audio cues, not storyboard stages."""
+Use @Audio1 exactly. Fuzzby speaks in English; Zenny remains silent and her mouth stays closed. Preserve ambience and action effects. The track has cues at 1.6-3.9s and 8.2-9.1s; these are audio cues, not storyboard stages.""" + "\n" + cb_emission_conformance.SINGLE_INSTANCE_DIALOGUE_LOCK
     references = [
         {"assetTag": "@图1", "role": "opening_frame"},
         {"assetTag": "@图2", "role": "character_identity"},
@@ -133,7 +134,7 @@ End state: Fuzzby holds the readable pose screen left while Zenny remains silent
 [Global Supplement]
 Throughout, keep identity, relative scale, flower ownership, axis, light direction and the final handoff stable.
 [Audio]
-Use @Audio1 exactly for Fuzzby. Zenny remains silent with her mouth closed; preserve meadow ambience and action effects."""
+Use @Audio1 exactly for Fuzzby. Zenny remains silent with her mouth closed; preserve meadow ambience and action effects.""" + "\n" + cb_emission_conformance.SINGLE_INSTANCE_DIALOGUE_LOCK
     result = cb_prompt_lab.analyze_seedance_prompt_contract(
         prompt,
         reference_contract=[
@@ -170,7 +171,7 @@ Phase 1: Camera: wide-to-medium group composition. Action: Aida turns her attent
 [Global Supplement]
 Throughout, keep identity, relative scale, prop ownership, camera axis and final handoff stable.
 [Audio]
-@Audio1 guides dialogue timing and mouth shapes. No extra voices. Seedance may generate non-verbal ambience and SFX."""
+@Audio1 guides dialogue timing and mouth shapes. No extra voices. Seedance may generate non-verbal ambience and SFX.""" + "\n" + cb_emission_conformance.SINGLE_INSTANCE_DIALOGUE_LOCK
     result = cb_prompt_lab.analyze_seedance_prompt_contract(
         prompt,
         reference_contract=[
@@ -216,7 +217,7 @@ Shot 1: Camera: Medium two-shot at Keen's eye height, a very slight settling pus
 [Global Supplement]
 Exactly one Keen and one Keen's Mum throughout; no duplicates of either character.
 [Audio]
-Use @Audio1 as the timing and mouth-shape guide for dialogue performance. Final approved dialogue will be restored in post. No extra voices. No music. No watermark."""
+Use @Audio1 unchanged as the sole audible dialogue performance and the authority for timing and mouth shapes. No extra voices. No music. No watermark.""" + "\n" + cb_emission_conformance.SINGLE_INSTANCE_DIALOGUE_LOCK
     result = cb_prompt_lab.analyze_seedance_prompt_contract(
         prompt,
         reference_contract=[

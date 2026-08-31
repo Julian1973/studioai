@@ -49,6 +49,8 @@ import subprocess
 import sys
 import uuid
 
+import cb_audio_authority
+
 HELD = 1.6   # held last frame (tension beat)
 DELIVERY_FPS = 24.0
 DELIVERY_AUDIO_HZ = 48000
@@ -758,11 +760,13 @@ def _asset_record(actual_path, final_path, probe=False):
 
 
 def replace_guide_dialogue(video, approved_voice, out):
-    """Keep Seedance's sound bed and lay the approved full-shot voice over it.
+    """Replace a provider guide soundtrack with the approved HEAR master.
 
-    The approved HEAR performance is padded to the picture duration. Seedance remains
-    responsible for non-verbal SFX, ambience and music; its guide voice is instructed
-    away at generation time and is kept only as transport evidence when present.
+    Provider audio is audit evidence, not a safe production bed: a video model can embed
+    synthesized speech in the same stream as its SFX and music. Mixing any percentage of
+    that stream beneath @Audio1 can therefore create duplicate dialogue. Dialogue review
+    media uses the approved master exclusively; non-dialogue stems must be added through a
+    separately verified post lane.
     """
     duration = _dur(video)
     if duration <= 0 or not approved_voice or not os.path.exists(approved_voice):
@@ -770,12 +774,9 @@ def replace_guide_dialogue(video, approved_voice, out):
     cmd = [
         "ffmpeg", "-y", "-i", str(video), "-i", str(approved_voice),
         "-filter_complex",
-        (f"[0:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
-         "volume=0.35[seedance_bed];"
-         f"[1:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
-         f"apad,atrim=0:{duration:.6f}[dialogue];"
-         "[seedance_bed][dialogue]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0[mix]"),
-        "-map", "0:v:0", "-map", "[mix]", "-c:v", "copy",
+        (f"[1:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
+         f"apad,atrim=0:{duration:.6f}[dialogue]"),
+        "-map", "0:v:0", "-map", "[dialogue]", "-c:v", "copy",
         "-c:a", "aac", "-ar", str(DELIVERY_AUDIO_HZ), "-ac", "2",
         "-b:a", "256k", "-movflags", "+faststart", str(out),
     ]
@@ -814,7 +815,7 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
         post_sources = []
         audio_provenance = []
         for index, (shot, clip) in enumerate(zip(shots, clips), start=1):
-            if shot.get("dialogueLines"):
+            if cb_audio_authority.spoken_dialogue_lines(shot):
                 voice = shot.get("approvedVoice")
                 provenance = shot.get("audioProvenance") or {}
                 if not voice or not os.path.exists(voice):

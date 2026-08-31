@@ -229,6 +229,7 @@ def test_reference_manifest_exposes_keyframe_and_animation_in_provider_order(
     package = {
         "shots": [{
             "shotId": "S1.SH1", "sourceType": "opener",
+            "dialogueLines": [{"speaker": "Fuzzby", "exactText": "Hello."}],
             "keyframeReferenceSlots": {
                 "@图1": "Fuzzby", "@图2": "scene plate"},
             "referenceSlots": {

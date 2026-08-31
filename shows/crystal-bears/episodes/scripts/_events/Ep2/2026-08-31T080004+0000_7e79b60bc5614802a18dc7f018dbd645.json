@@ -1,0 +1,21 @@
+{
+ "schemaVersion": 1,
+ "eventId": "7e79b60bc5614802a18dc7f018dbd645",
+ "kind": "script-dialogue-corrected",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:51394de3a828babe4883ad845b72f82ff3b233af32dc5f0502035c43e0ea8c7d",
+ "previousScriptVersionId": "sha256:ce92b79487e594f0d7492866f1683a1dfc4049ee9d50048ffd2cf3dc6f6aa230",
+ "title": "Bo's Big Day V2",
+ "displayFile": "Ep2_Bo_s_Big_Day_V2.txt",
+ "activatedAt": "2026-08-31T08:00:04+00:00",
+ "activatedBy": "Julian",
+ "changeScope": {
+  "kind": "dialogue-correction",
+  "scene": "2",
+  "shotId": "S2.SH2",
+  "dialogueOccurrenceId": "dialogue-occurrence:sha256:c74b3225d10a78784943a9a4f84046aa024ae3823cd875698327ef80f989476f",
+  "speaker": "Aida",
+  "previousExactText": "8\tBless you. Sounds like someone has been sniffing around Fuzzby’s honeycomb. Keen? Come with me",
+  "correctedExactText": "Bless you. Sounds like someone has been sniffing around Fuzzby’s honeycomb. Keen? Come with me"
+ }
+}

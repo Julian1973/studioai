@@ -520,6 +520,29 @@ def test_gate5_mechanically_attaches_big_comedy_staging_inside_a_packed_unit(mon
     assert result[0].performanceContract.comedyStaging.model_dump() == staging.model_dump()
 
 
+def test_gate5_retries_once_when_performance_pass_drops_a_shot(monkeypatch):
+    shots = [_card("S1.SH1"), _card("S1.SH2")]
+    calls = []
+
+    def fake(system, user, schema, label="", **kwargs):
+        assert schema is C.PerformancePass
+        calls.append(user)
+        ids = ["S1.SH1"] if len(calls) == 1 else ["S1.SH1", "S1.SH2"]
+        return C.PerformancePass(shots=[C.PerformanceCard(
+            shotId=shot_id, physicalPerformance="The body settles visibly.",
+            animationTiming="One clear anticipation, action and landing.",
+            performanceContract=_performance_contract()) for shot_id in ids])
+
+    monkeypatch.setattr(cb_llm, "structured", fake)
+    result = C.gate5_performance(
+        "Ep1", 1, _treatment("A"), C.SceneDirection(scene=_scene(), beats=[_beat()]),
+        shots, log=lambda *args, **kwargs: None)
+
+    assert [shot.shotId for shot in result] == ["S1.SH1", "S1.SH2"]
+    assert len(calls) == 2
+    assert "DROPPED/DUPLICATED/REORDERED" in calls[1]
+
+
 def test_production_detail_refuses_a_missing_shot_instead_of_inventing_fallback(monkeypatch):
     def fake(system, user, schema, label="", **kwargs):
         if schema is C.ProductionPass:
@@ -877,6 +900,30 @@ def test_dialogue_assignment_repairs_only_a_unique_long_hash_abbreviation():
     result = C._assign_dialogue_occurrences([_card()], [voice], [detail])
 
     assert result[0].dialogueOccurrenceIds == [full]
+
+
+def test_dialogue_assignment_repairs_invented_hashes_by_same_shot_order():
+    first = C.VoicePerformance(
+        dialogueOccurrenceId="dialogue-occurrence:sha256:first", beatId="1.B1",
+        speaker="KEEN", exactDialogue="We'll see.", dramaticIntention="tease",
+        subtext="friendly", relationshipTarget="Fuzzby", emotionalEntry="amused",
+        emotionalExit="amused", operativeWords=["see"], pace="quiet", rhythm="simple",
+        pauses="brief", breaths="natural", nonVerbalActions="walk",
+        elevenLabsV3Direction="muttered playful challenge",
+        physicalActionRelationship="walking away", expectedTiming="2s")
+    second = first.model_copy(update={
+        "dialogueOccurrenceId": "dialogue-occurrence:sha256:second",
+        "speaker": "ZENNY", "exactDialogue": "Ommmm.",
+    })
+    detail = _detail(occurrence_ids=[
+        "dialogue-occurrence:sha256:invented-one",
+        "dialogue-occurrence:sha256:invented-two",
+    ])
+
+    result = C._assign_dialogue_occurrences([_card()], [first, second], [detail])
+
+    assert result[0].dialogueOccurrenceIds == [
+        first.dialogueOccurrenceId, second.dialogueOccurrenceId]
 
 
 # ── the rejected exemplar feeds the room; no provider access ────────────────────────────

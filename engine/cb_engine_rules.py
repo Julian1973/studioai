@@ -9,6 +9,8 @@ import math
 import pathlib
 import re
 
+import cb_audio_authority
+
 
 HERE = pathlib.Path(__file__).resolve().parent
 BEAT_COST_PATH = HERE / "config" / "beat_costs.json"
@@ -91,6 +93,25 @@ def travel_traversal_boilerplate(shot, direction):
         "recover it. Let the subject drift off-centre, then reframe to recover it. Use "
         "occasional foreground elements to wipe across the lens."
     )
+
+
+def repeated_contact_boilerplate(shot, direction):
+    """Make repeated impacts separately readable and visibly escalating."""
+    count = next((int(item.get("count", 1)) for item in infer_timing_beats(shot, direction)
+                  if item["type"] == "impact"), 0)
+    if count <= 1:
+        return ""
+    clauses = [
+        "Repeated-contact escalation: separate the first and second contacts with a "
+        "readable recovery between them.",
+        "The first contact is small and contained.",
+        "The second contact is larger than the first, with a stronger visible cause, "
+        "reaction and recovery.",
+    ]
+    if count >= 3:
+        clauses.append(
+            "The third contact is larger than the second and completes the escalation.")
+    return " ".join(clauses)
 
 
 def sailing_departure_boilerplate(shot, direction):
@@ -284,7 +305,8 @@ def action_unit_report(shot, direction, prompt=""):
             re.search(r"\bno cuts?\b|\bno handheld\b", prompt_text, re.I)):
         errors.append("R14 action unit incorrectly prohibits cuts or handheld camera")
 
-    dialogue = list(shot.get("dialogueLines") or [])
+    dialogue = cb_audio_authority.route_lines(
+        shot.get("dialogueLines") or [])["spokenDialogue"]
     dialogue_owners = {}
     for internal_shot in internal:
         directions = list(internal_shot.get("dialogueDirections") or [])
@@ -300,7 +322,8 @@ def action_unit_report(shot, direction, prompt=""):
             r"(?:Shot|Phase)\s+(\d+):\s*(.*?)(?=\n(?:Shot|Phase)\s+\d+:|\nWitness staging:|\n\[|\Z)",
             raw_prompt, re.I | re.S)
     }
-    for line_number, line in enumerate(dialogue, start=1):
+    for fallback_number, line in enumerate(dialogue, start=1):
+        line_number = int(line.get("_sourceDialogueIndex") or fallback_number)
         exact = _line_text(line)
         speaker = _norm(line.get("speaker"))
         owner = dialogue_owners.get(line_number)

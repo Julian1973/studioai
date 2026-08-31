@@ -25,6 +25,8 @@ COMPILER_VERSION = "voice-director-v1"
 _TAG_RE = re.compile(r"\[([^\]]+)\]")
 _WORD_RE = re.compile(r"[A-Za-z0-9']+")
 _SEGMENT_RE = re.compile(r"[^.!?…\n]+[.!?…]*|\n+")
+_SCRIPT_NUMBER_RE = re.compile(r"^\s*\d+\s*\t")
+_TRAILING_STAGE_NOTE_RE = re.compile(r"\s*\([^)]*\)\s*$")
 
 
 class VoiceContractError(RuntimeError):
@@ -50,8 +52,17 @@ def rulebook():
     return _load(RULEBOOK_PATH)
 
 
+def _spoken_text(text):
+    """Return only provider-spoken text, excluding script metadata and action notes."""
+    value = _SCRIPT_NUMBER_RE.sub("", str(text or "")).strip()
+    return _TRAILING_STAGE_NOTE_RE.sub("", value).strip()
+
+
 def _words(text):
-    return [word.casefold() for word in _WORD_RE.findall(_TAG_RE.sub("", str(text or "")))]
+    return [
+        word.casefold()
+        for word in _WORD_RE.findall(_TAG_RE.sub("", _spoken_text(text)))
+    ]
 
 
 def _locked_text(line):
@@ -109,9 +120,11 @@ def post_direction_audit(line, locked_line, card, register):
            str(locked_line.get("speaker") or "").casefold(),
            "Character matches the locked script speaker.")
     locked_text = _locked_text(locked_line)
-    _check(checks, "exact-dialogue-lock",
-           _words(line.get("exactDialogue")) == _words(locked_text),
-           "Exact dialogue preserves every locked script word.")
+    exact_dialogue_locked = _words(line.get("exactDialogue")) == _words(locked_text)
+    _check(checks, "exact-dialogue-lock", exact_dialogue_locked,
+           "Exact dialogue preserves every locked script word."
+           if exact_dialogue_locked else
+           "Exact dialogue must preserve every locked script word.")
 
     recipes = line.get("takeRecipes") or []
     _check(checks, "recipe-count", 1 <= len(recipes) <= 3,
@@ -122,14 +135,27 @@ def post_direction_audit(line, locked_line, card, register):
     for recipe in recipes:
         text = str(recipe.get("performedText") or "")
         recipe_id = recipe.get("recipeId") or "unnamed"
-        _check(checks, f"script-fidelity:{recipe_id}",
-               _words(text) == _words(locked_text),
-               f"{recipe_id} preserves every locked script word.")
+        recipe_words_locked = _words(text) == _words(locked_text)
+        _check(checks, f"script-fidelity:{recipe_id}", recipe_words_locked,
+               f"{recipe_id} preserves every locked script word."
+               if recipe_words_locked else
+               f"{recipe_id} must preserve every locked script word.")
         spoken_text = _TAG_RE.sub("", text).strip()
         locked_spoken_text = _TAG_RE.sub("", locked_text).strip()
-        deliberately_interrupted = locked_spoken_text.endswith(("—", "--", "...", "…"))
+        deliberately_interrupted = (
+            locked_spoken_text.endswith(("—", "--", "...", "…")) or
+            bool(locked_line.get("sfxInterrupted"))
+        )
+        source_intentionally_unpunctuated = False
+        if not deliberately_interrupted:
+            try:
+                emission.require_complete_sentence(
+                    locked_spoken_text, context=f"locked dialogue {recipe_id}")
+            except emission.EmissionConformanceError:
+                source_intentionally_unpunctuated = (
+                    _words(spoken_text) == _words(locked_spoken_text))
         try:
-            if not deliberately_interrupted:
+            if not deliberately_interrupted and not source_intentionally_unpunctuated:
                 emission.require_complete_sentence(
                     spoken_text, context=f"voice recipe {recipe_id}")
             sentence_complete = True

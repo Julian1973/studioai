@@ -607,7 +607,7 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
                                 duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False,
                                 production_route=None, model_id=None,
                                 comparison_run_id=None, generate_audio=True,
-                                progress_callback=None):
+                                progress_callback=None, operation_mode=None):
     _require_production_route(production_route, "generate_video_seedance_ref")
     """Seedance reference-to-video through the exact selected capability-gated transport.
 
@@ -618,9 +618,10 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     fal 2.0 comparison inside cb_render's ordinary approval and candidate path.
     raw_prompt=True sends the prompt STRING verbatim (the DEFINITIVE bible prose already carries REFERENCE LAW / AUDIO /
     NEGATIVES — no JSON envelope, so nothing can contradict it). Otherwise the legacy path wraps prose into JSON.
-    video_urls: used only by the ruled video-extension continuity mode. Ordinary render
-    continuity remains keyframe handoff; a populated video reference must be disclosed in
-    the sealed envelope and capability-checked before upload."""
+    video_urls: used only by a disclosed video-extension or video-editing operation. Ordinary
+    render continuity remains keyframe handoff; a populated video reference must be disclosed
+    in the sealed envelope and capability-checked before upload. ``operation_mode`` must name
+    that operation explicitly so an edit can never be recorded as an extension."""
     if isinstance(image_urls, str):
         image_urls = [image_urls]
     else:
@@ -642,8 +643,14 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     }
     if comparison_run_id:
         contract_kwargs["comparison_run_id"] = comparison_run_id
+    if operation_mode and operation_mode not in ("video-extension", "video-editing"):
+        raise cb_providers.ProviderCapabilityError(
+            f"unsupported Seedance video operation: {operation_mode}")
+    if operation_mode and not video_urls:
+        raise cb_providers.ProviderCapabilityError(
+            f"{operation_mode} requires an existing video input")
     if not comparison_run_id and video_urls:
-        contract_kwargs["mode"] = "video-extension"
+        contract_kwargs["mode"] = operation_mode or "video-extension"
     contract = contract_builder(**contract_kwargs)
     _pr = (str(prompt) if raw_prompt or contract["transport"] == "byteplus-async" else
            _seedance_json_prompt(
@@ -668,6 +675,7 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
             resolution=resolution, duration=str(duration), seconds=seconds, fast=False,
             num_image_refs=len(image_urls), num_audio_refs=len(audio_urls),
             num_video_refs=len(video_urls),
+            operationMode=contract["mode"],
             returnedDuration=(task or {}).get("duration"),
             completionTokens=((task or {}).get("usage") or {}).get("completion_tokens"))
         return str(outp)
@@ -1059,6 +1067,11 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
             }
             for item in voice_segments
         ],
+        # Preserve the provider's character-level timing. Voice segment envelopes have
+        # occasionally ended before the final spoken words; keeping the alignment lets
+        # downstream assembly audit that condition instead of silently clipping dialogue.
+        "alignment": payload.get("alignment"),
+        "normalizedAlignment": payload.get("normalized_alignment"),
     }
     timing_path.write_text(
         json.dumps(timing_payload, indent=2, ensure_ascii=False) + "\n",

@@ -770,6 +770,8 @@ def intake_status(episode="Ep1"):
         out["hasScript"] = True
         out["scriptName"] = current.get("displayFile") or spath.name
         out["scriptVersionId"] = current["scriptVersionId"]
+        out["previousScriptVersionId"] = current.get("previousScriptVersionId")
+        out["scriptChangeScope"] = current.get("changeScope")
     except Refused:
         pass
     try:
@@ -802,6 +804,13 @@ def intake_status(episode="Ep1"):
                 out["candidate"].get("inputSignature"), "story-intake", story_inputs))
     pkgs = canonical_package_glob(episode)
     if pkgs:
+        # A numbering/whitespace cleanup changes presentation only. It must not
+        # reopen an approved episode or send the reviewer back through Story &
+        # Direction; creative script changes continue through the normal hashes.
+        format_only_cleanup = (
+            (current.get("changeScope") or {}).get("kind") ==
+            "dialogue-format-cleanup"
+        )
         pkg = json.loads(pkgs[-1].read_text())
         if not out["productionPolicy"]:
             out["productionPolicy"] = pkg.get("productionPolicy")
@@ -816,9 +825,10 @@ def intake_status(episode="Ep1"):
         out["canonicalBeatPackageDigest"] = expected_content["digest"]
         out["canonicalCurrent"] = bool(
             story_inputs and out["canonLockCurrent"] and out["canonEpisodeReady"] and
-            cb_lineage.signature_matches(
-                pkg.get("inputSignature"), "beat-package-input", story_inputs) and
-            source_report["ok"] and pkg.get("contentSignature") == expected_content)
+            ((format_only_cleanup and source_report["ok"]) or
+             (cb_lineage.signature_matches(
+                 pkg.get("inputSignature"), "beat-package-input", story_inputs) and
+              source_report["ok"] and pkg.get("contentSignature") == expected_content)))
     return out
 
 

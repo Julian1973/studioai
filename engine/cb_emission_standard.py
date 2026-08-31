@@ -124,6 +124,7 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
     if not (
         _has(prompt, r"\bNo music\b")
         or _has(prompt, r"Seedance may generate non-verbal music, ambience and SFX")
+        or _has(prompt, r"Seedance 2\.5 must provide instrumental music, ambience and non-verbal SFX")
     ):
         add("FIX", "audio-policy", "Music/SFX policy is absent.",
             "State either No music or the approved Seedance non-verbal music/SFX policy.",

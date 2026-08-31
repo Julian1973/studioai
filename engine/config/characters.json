@@ -987,6 +987,36 @@
     "promptRole": "the smaller, calm, deadpan bee",
     "isBee": true
   },
+  "Bo's Mum": {
+    "_status": "LOCKED audio-only recurring guest. The approved Episode 2 script requires her voice from offscreen and explicitly forbids her appearing in frame.",
+    "anchor": "engine/media/shots/Ep2_3.B1.S1_HEAR_LOCKED_1b6f22e1.mp3",
+    "voiceId": "GGlVrqwKgiFPcO2pSZRz",
+    "sizeRank": 1.6,
+    "size": "adult squirrel; offscreen-only in the approved Episode 2 script",
+    "cadence": "warm, practical and gently encouraging; makes leaving sound ordinary without pushing Bo",
+    "key_features": "offscreen voice presence only; never render a body, silhouette, shadow, paw or reflection",
+    "bible": {
+      "character": "Bo's Mum",
+      "title": "The Offscreen Nudge",
+      "essence": "A warm practical voice from elsewhere in the hollow who gives Bo an ordinary reason to begin despite his anxiety.",
+      "voice": "ElevenLabs v3 voice ID GGlVrqwKgiFPcO2pSZRz, established by the approved Episode 2 HEAR asset.",
+      "speech": "Warm, domestic and matter-of-fact. She does not dramatise Bo's departure or speak additional words.",
+      "staging": "Offscreen-only. She may be heard but can never appear in frame, cast a shadow, enter a reflection or articulate visually.",
+      "dos": [
+        "Use the locked ElevenLabs v3 voice identity for her exact approved dialogue",
+        "Keep her entirely offscreen",
+        "Let her practical warmth contrast with Bo's internal anxiety"
+      ],
+      "donts": [
+        "Do not show or design Bo's Mum",
+        "Do not substitute Keen's Mum or another character's identity",
+        "Do not invent additional dialogue"
+      ]
+    },
+    "promptRole": "Bo's offscreen mother voice",
+    "offscreenOnly": true,
+    "isBee": false
+  },
   "Keen's Mum": {
     "turnaround": "../cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
     "anchor": "../cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",

@@ -137,11 +137,13 @@
     "Zenny": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
     "Keen's Mum": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3"},
     "Squeaky": {"tier": "recurring-guest", "status": "locked", "voiceMode": "nonverbal-sfx"},
-    "Bo": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3"}
+    "Bo": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Bo's Mum": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3", "presenceMode": "offscreen-only"}
   },
   "characterAliases": {
     "HOWIE": "Howey",
-    "SQUEEKY": "Squeaky"
+    "SQUEEKY": "Squeaky",
+    "BO'S MUM": "Bo's Mum"
   },
   "scriptChecks": {
     "forbiddenPatterns": [

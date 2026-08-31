@@ -1,0 +1,21 @@
+{
+ "schemaVersion": 1,
+ "eventId": "72d7af34040b439492856721d4da32bf",
+ "kind": "script-dialogue-corrected",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:3f413e84aa8f9a4d26bf7a7157196c5927c822788e69585b7af1113e8fcab76e",
+ "previousScriptVersionId": "sha256:7b0b15bbd86734bb2a743b169050acef77331f52a2a8b7681e4bbc9087889d7d",
+ "title": "Bo's Big Day V2",
+ "displayFile": "Ep2_Bo_s_Big_Day_V2.txt",
+ "activatedAt": "2026-08-30T10:42:47+00:00",
+ "activatedBy": "Julian",
+ "changeScope": {
+  "kind": "dialogue-correction",
+  "scene": "1",
+  "shotId": "S1.SH2",
+  "dialogueOccurrenceId": "dialogue-occurrence:sha256:f0887a4cdfa5ea9a7bbf61cd893b5b8b7272438c216b51ea3afd42678c540c56",
+  "speaker": "Keen",
+  "previousExactText": "Oh, Ah, Hi Fuzzby … ACHOO!",
+  "correctedExactText": "ACHOO! … Oh, Ah, Hi Fuzzby"
+ }
+}

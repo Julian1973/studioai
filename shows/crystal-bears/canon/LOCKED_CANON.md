@@ -125,7 +125,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
 > All voice IDs confirmed 2026-06-19 (`XEiPrIitaegdirIGkODX` = Zenny; Keen's Mum = `J4zlKWvIIVHQN0EIvCc4`). Per-character ElevenLabs V3 settings (Stability/Similarity/Staggeration) live in `crystal-bears-voice`.
 
 **Other named characters seen in scripts (status to confirm):**
-- **Bo's Mum** — appears alongside Bo in an example episode. No assets in the library yet; needs her own stub + Julian's confirmation once Bo's entry is filled in.
+- **Bo's Mum** — locked as an offscreen-only recurring guest for Episode 2. ElevenLabs v3 voice `GGlVrqwKgiFPcO2pSZRz` is established by the approved HEAR asset; she must never appear visually.
 - **The Great Oak** — the world's wisdom-keeper (sentient tree). Canon environment-character; deep resonant voice.
 
 > The cast-lock check (`cb_director._script_roster`) reads `characters.json` dynamically — no hardcoded name list to amend. The `crystal-bears-continuity` skill's checklist wording ("cast lock — only the 7 bears + Fuzzby + Zenny, plus approved guests Squeaky/Keen's Mum") is updated to include Bo in the same commit as his stub.

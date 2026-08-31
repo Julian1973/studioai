@@ -52,6 +52,7 @@ touches a spend token. Its only external calls are OpenAI text calls via cb_llm.
     python3 cb_creative.py migrate   [episode]
 """
 import datetime
+import fcntl
 import hashlib
 import json
 import os
@@ -1477,7 +1478,7 @@ def _validate_gate4_production_units(shots, beats):
 
 
 def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
-                          heart=None, review_notes="", log=print):
+                          heart=None, review_notes="", ambition_brief="", log=print):
     notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (redesign the SEQUENCE — never patch "
              f"wording): {review_notes}" if review_notes else "")
     sc = cb_llm.structured_with_repair(
@@ -1571,6 +1572,9 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
         f"{treatment.model_dump_json()}\n\n"
         + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
            f"{heart.model_dump_json()}\n\n" if heart else "")
+        + (f"HUMAN-LOCKED ITERATION BRIEF (literal production constraints; preserve them "
+           f"unless they conflict with script or canon):\n{ambition_brief}\n\n"
+           if ambition_brief else "")
         + f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
         f"THE BEATS:\n" + "\n".join(b.model_dump_json() for b in sd.beats)
         + f"{notes}\n\nshotId = 'S{scene_num}.SH<n>' in sequence order.",
@@ -1670,9 +1674,16 @@ def gate5_performance(episode, scene_num, treatment, sd, shots,
     expected_ids = [shot.shotId for shot in shots]
     returned_ids = [shot.shotId for shot in pp.shots]
     if returned_ids != expected_ids:
-        raise RuntimeError(
+        message = (
             "PERFORMANCE PASS DROPPED/DUPLICATED/REORDERED shots - expected "
             f"{expected_ids}, got {returned_ids}")
+        if not review_notes:
+            log(f"  [director] gate5_perf_s{scene_num}: {message} - rerunning once",
+                flush=True)
+            return gate5_performance(
+                episode, scene_num, treatment, sd, shots,
+                review_notes=message, log=log)
+        raise RuntimeError(message)
 
     beats_by_id = {beat.beatId: beat for beat in sd.beats}
     big_beats = {
@@ -1936,6 +1947,18 @@ def _assign_dialogue_occurrences(shots, voices, details):
         detail = detail_by_id.get(shot.shotId)
         if detail is None:
             continue
+        eligible_expected = [
+            voice.dialogueOccurrenceId for voice in voices
+            if voice.beatId in shot.beatIds
+        ]
+        # Production Detail can preserve the correct line count and order while
+        # inventing occurrence hashes. The immutable VoicePerformance sequence proves
+        # the sole legal mapping only when every known ID already agrees positionally.
+        if (len(detail.dialogueOccurrenceIds) == len(eligible_expected) and
+                all(occurrence_id not in owner_by_id or occurrence_id == expected_id
+                    for occurrence_id, expected_id in
+                    zip(detail.dialogueOccurrenceIds, eligible_expected))):
+            detail.dialogueOccurrenceIds = list(eligible_expected)
         normalized_ids = []
         for occurrence_id in detail.dialogueOccurrenceIds:
             matches = [expected_id for expected_id in expected
@@ -2505,6 +2528,22 @@ def build_scene_direction_card(vision, scene, beats, shots, voices, details):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # THE SCENE RUN — Gates 0-6 + production detail
 # ─────────────────────────────────────────────────────────────────────────────────────────
+def _serial_scene_director(fn):
+    def locked(scene_num, episode="Ep1", brief=None, log=print):
+        lock_path = ROOT / "cb-output" / "state" / "episode-scene-director.lock"
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(lock_path, "a+") as lock_file:
+            log(f"SCENE {scene_num} — queued for the Director text pass")
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                log(f"SCENE {scene_num} — Director text pass started")
+                return fn(scene_num, episode, brief=brief, log=log)
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+    return locked
+
+
+@_serial_scene_director
 def run_scene(scene_num, episode="Ep1", brief=None, log=print):
     ready = gate0_readiness(episode, scene_num, brief, log=log)
     source_pkg = ready["scriptPackage"]
@@ -2537,7 +2576,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
     sd = gate3_beats(episode, scene_num, vision, selection, treatment, ready,
                      heart=heart, log=log)
     shots = gate4_shot_conference(episode, scene_num, selection, treatment, sd,
-                                  heart=heart, log=log)
+                                  heart=heart, ambition_brief=ready["brief"], log=log)
     shots = gate5_performance(episode, scene_num, treatment, sd, shots, log=log)
     voices = gate5_voice(episode, scene_num, sd, shots, log=log)
 
@@ -2556,7 +2595,8 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
             sd = gate3_beats(episode, scene_num, vision, selection, treatment, ready,
                               heart=heart, review_notes=notes, log=log)
         shots = gate4_shot_conference(episode, scene_num, selection, treatment, sd,
-                                        heart=heart, review_notes=notes, log=log)
+                                      heart=heart, review_notes=notes,
+                                      ambition_brief=ready["brief"], log=log)
         shots = gate5_performance(episode, scene_num, treatment, sd, shots, log=log)
         voices = gate5_voice(episode, scene_num, sd, shots, log=log)
 

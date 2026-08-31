@@ -1081,7 +1081,8 @@ def test_approved_take_flows_to_next_shot_through_inherited_see_frame():
     assert 'shRun("rescreen-keyframe",next.shotId' in APP
     assert 'shRun("select-previous",next.shotId' in APP
     assert 'openShotOutcome("keyframe",nextIndex)' in APP
-    assert "Use previous approved final frame · no generation cost" in APP
+    assert "Use last frame from ${_esc(previousShot)} · no generation cost" in APP
+    assert "const previousShot=hasPrevious?((pShots()[PSHOT_I-1]||{}).shotId" in APP
     assert "Continue to HEAR" in APP
     assert "Continue to WATCH" in APP
 

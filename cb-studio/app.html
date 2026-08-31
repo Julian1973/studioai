@@ -6091,20 +6091,24 @@ function shOpeningFrameChoices(tok,s){
   const maxCost=build.estimatedMaxUsd!=null?Number(build.estimatedMaxUsd):(fallback==null?null:fallback*conservativeCalls);
   const genCost=maxCost!=null?(" · up to $"+maxCost.toFixed(3)):"";
   const hasPrevious=PSHOT_I>0;
+  const previousShot=hasPrevious?((pShots()[PSHOT_I-1]||{}).shotId||"previous shot"):"";
   const buildLabel="Build keyframe";
   return `<div class="ofc">
+    ${hasPrevious?`<div class="ofc-row"><button class="btn" onclick="shRun('select-previous','${_esc(tok)}')">Use last frame from ${_esc(previousShot)} · no generation cost</button></div>`:""}
     <div class="ofc-row"><button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${_esc(tok)}'})">${_esc(buildLabel+genCost)}</button>
       <button class="btn ghost" onclick="document.getElementById('ofcUpload_${_esc(tok)}').click()">Upload keyframe · no generation cost</button>
       <input type="file" id="ofcUpload_${_esc(tok)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)"/></div>
     <details class="ofc-alternatives"><summary>Use an existing image instead</summary><div class="ofc-alternatives-body">
       <div class="ofc-row"><button class="btn ghost" onclick="shOpenFrameLibrary('${_esc(tok)}')">Choose from Asset Library · no generation cost</button></div>
-      ${hasPrevious?`<div class="ofc-row"><button class="btn ghost" onclick="shRun('select-previous','${_esc(tok)}')">Use previous approved final frame · no generation cost</button></div>`:""}
     </div></details>
   </div>`;
 }
 function keyframeDecisionSourceActions(tok){
   const inputId=`decisionKfUpload_${tok}`.replaceAll(".","_");
+  const hasPrevious=PSHOT_I>0;
+  const previousShot=hasPrevious?((pShots()[PSHOT_I-1]||{}).shotId||"previous shot"):"";
   return `<div style="display:grid;gap:8px;width:100%">
+    ${hasPrevious?`<button class="btn" onclick="shRun('select-previous','${_esc(tok)}')">Use last frame from ${_esc(previousShot)} · no generation cost</button>`:""}
     <button class="btn ghost" onclick="document.getElementById('${_esc(inputId)}').click()">Upload replacement keyframe</button>
     <input type="file" id="${_esc(inputId)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)">
     <button class="btn ghost" onclick="shOpenFrameLibrary('${_esc(tok)}')">Choose library image</button>

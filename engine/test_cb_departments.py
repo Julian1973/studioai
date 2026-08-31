@@ -1206,6 +1206,41 @@ def test_animation_slots_append_all_required_continuity_props(monkeypatch):
     assert slots["@Audio1"] == "voice track"
 
 
+def test_animation_slots_append_shot_scoped_location_angles_without_changing_see():
+    shot = {
+        "shotId": "S3.SH3",
+        "charactersInFrame": ["Bo", "Keen"],
+        "referenceSlots": {
+            "@图1": "opening keyframe",
+            "@图2": "Bo",
+            "@图3": "Keen",
+            "@图4": "scene plate",
+            "@Audio1": "voice track",
+        },
+    }
+    pkg = {
+        "continuityLedger": [{
+            "shotId": "S3.SH3",
+            "additionalAnimationReferenceRoles": [
+                "location:Bo hollow reverse view",
+                "location:S3.SH1 approved room composition",
+            ],
+        }],
+    }
+
+    slots = R._effective_reference_slots(pkg, shot, "referenceSlots", "3", "Ep2")
+
+    assert slots["@图5"] == "location:Bo hollow reverse view"
+    assert slots["@图6"] == "location:S3.SH1 approved room composition"
+    assert shot["referenceSlots"] == {
+        "@图1": "opening keyframe",
+        "@图2": "Bo",
+        "@图3": "Keen",
+        "@图4": "scene plate",
+        "@Audio1": "voice track",
+    }
+
+
 def test_animation_slots_remove_stale_audio_for_seedance_only_sfx():
     shot = {
         "shotId": "S1.SH1",

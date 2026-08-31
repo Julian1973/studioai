@@ -65,6 +65,7 @@ approximates "is it funny").
     python3 cb_render.py seedance-status <scene> <shotId> [episode]
     python3 cb_render.py save-seedance   <scene> <shotId> "<prompt text>" [episode]
     python3 cb_render.py restore-seedance <scene> <shotId> [episode]
+    python3 cb_render.py bind-location-reference <scene> <shotId> <label> <path> [episode]
     python3 cb_render.py check-structure  <scene> <shotId> [episode]
     python3 cb_render.py continuity-mode  <scene> <shotId> <keyframe-handoff|video-extension> [episode]
     python3 cb_render.py prompt-bank
@@ -2456,21 +2457,36 @@ def _effective_reference_slots(pkg, shot, slots_key, scene, episode):
             characters=shot.get("charactersInFrame") or [],
         )
 
-    # Required continuity props are first-class provider authorities, not optional prose.
-    # Append them to every animation bundle after resolving the shot's ordinary roles so
-    # explicit package slots, relay-generated slots and approved Director contracts all
-    # receive the same protection. The provider attachment planner will then place these
-    # semantic roles in its stable project-wide order.
+    # Extra approved location angles support reverse coverage without replacing the
+    # scene plate or changing the separately-approved opening keyframe contract.
+    ledger = _ledger(pkg, shot.get("shotId")) if pkg.get("continuityLedger") else {}
+    additional_roles = [
+        str(role or "").strip()
+        for role in ledger.get("additionalAnimationReferenceRoles") or []
+        if str(role or "").strip()
+    ]
     existing_roles = {
         str(role or "").strip().casefold() for role in slots.values()
     }
-    required_props = _required_prop_reference_roles(shot, scene, episode)
     image_numbers = [
         int(match.group(1))
         for key in slots
         if (match := re.fullmatch(r"@图(\d+)", str(key)))
     ]
     next_slot = max(image_numbers, default=0) + 1
+    for role in additional_roles:
+        if role.casefold() in existing_roles:
+            continue
+        slots[f"@图{next_slot}"] = role
+        existing_roles.add(role.casefold())
+        next_slot += 1
+
+    # Required continuity props are first-class provider authorities, not optional prose.
+    # Append them to every animation bundle after resolving the shot's ordinary roles so
+    # explicit package slots, relay-generated slots and approved Director contracts all
+    # receive the same protection. The provider attachment planner will then place these
+    # semantic roles in its stable project-wide order.
+    required_props = _required_prop_reference_roles(shot, scene, episode)
     for role in required_props:
         if role.casefold() in existing_roles:
             continue
@@ -2515,9 +2531,13 @@ def _animation_reference_contract(attachment_plan, shot, audio_path=None):
             typed_role = "closing_frame"
             controls = "the exact approved final button composition and held end state"
             scope = "continuity"
-        elif role == "scene plate":
+        elif role == "scene plate" or role.startswith("location:"):
             typed_role = "location"
-            controls = "the approved scene geography, world, light, materials and atmosphere"
+            controls = (
+                "the approved scene geography, world, light, materials and atmosphere"
+                if role == "scene plate" else
+                f"supplementary approved geography only: {role.split(':', 1)[1]}"
+            )
             scope = "episode"
         elif role.startswith("prop:"):
             prop_id = role.split(":", 1)[1].replace("_", " ")
@@ -2560,7 +2580,8 @@ _NON_IDENTITY_IMAGE_ROLES = {
 
 def _is_non_identity_image_role(role):
     role = str(role or "").strip()
-    return role in _NON_IDENTITY_IMAGE_ROLES or role.startswith("prop:")
+    return (role in _NON_IDENTITY_IMAGE_ROLES or role.startswith("prop:")
+            or role.startswith("location:"))
 
 
 def _reference_slot_policy():
@@ -2659,6 +2680,16 @@ def _slot_path_for_role(role, anchor_path, scene, episode, characters_cfg, shot=
             raise Refused(f"REFUSED — {role} is not approved and available yet")
     elif role == "scene plate":
         path = _plate_path(scene, episode)
+    elif str(role).startswith("location:"):
+        candidates = cb_asset_registry.resolve_assets(
+            episode, scene, shot_id=(shot or {}).get("shotId"),
+            kinds={"reference_image"})
+        matches = [item for item in candidates if str(item.get("role") or "") == role]
+        if not matches:
+            raise Refused(
+                f"REFUSED — approved supplementary location reference {role!r} is not "
+                f"registered for {episode} scene {scene}")
+        path = matches[0]["path"]
     elif role == "Bo vision plate":
         candidates = cb_asset_registry.resolve_assets(
             episode, scene, shot_id=(shot or {}).get("shotId"),
@@ -7020,6 +7051,36 @@ def save_watch_director_feedback(scene, shot_id, feedback, episode="Ep1",
     return ledger["watchDirectorFeedback"]
 
 
+def bind_animation_location_reference(scene, shot_id, label, source_path,
+                                      episode="Ep1", reviewed_by="Julian", log=print):
+    """Attach an approved supplementary geography angle to WATCH only.
+
+    The opening keyframe and primary scene plate keep their existing authority. This
+    reference may clarify reverse coverage, furniture and traversable floor space, but it
+    never supplies cast identity or changes SEE approval.
+    """
+    pkg, path = load_pkg(scene, episode)
+    _shot(pkg, shot_id)
+    clean_label = re.sub(r"\s+", " ", str(label or "").strip())
+    if not clean_label:
+        raise Refused("REFUSED — a supplementary location reference needs a label")
+    role = f"location:{clean_label}"
+    rec = cb_asset_registry.register_asset(
+        episode=episode, scene=scene, shot_id=shot_id, kind="reference_image",
+        role=role, path=source_path, status="approved",
+        label=clean_label, source="Director-approved supplementary geography",
+        metadata={"assetUse": "supplementary_location", "reviewedBy": reviewed_by},
+    )
+    ledger = _ledger(pkg, shot_id)
+    roles = ledger.setdefault("additionalAnimationReferenceRoles", [])
+    if role not in roles:
+        roles.append(role)
+    ledger["pendingSpendAuth"] = None
+    _save(pkg, path)
+    log(f"ANIMATION LOCATION REFERENCE BOUND — {shot_id}: {clean_label} (no media generated)")
+    return rec
+
+
 # ── THE SEEDANCE STRUCTURE CHECK (Julian's directive, 2026-07-19) ───────────────────────
 # FREE. ZERO PROVIDER CALLS. ZERO COST. Reports exactly what firing would do right now,
 # without firing. Only a missing PROVIDER-REQUIRED input (no anchor, no references, no
@@ -10312,6 +10373,9 @@ if __name__ == "__main__":
             save_seedance_working(pos[0], pos[1], pos[2], episode=ep(3))
         elif cmd == "restore-seedance":
             restore_seedance_working(pos[0], pos[1], episode=ep(2))
+        elif cmd == "bind-location-reference":
+            bind_animation_location_reference(
+                pos[0], pos[1], pos[2], pos[3], episode=ep(4))
         elif cmd == "check-structure":
             print(json.dumps(check_seedance_structure(pos[0], pos[1], ep(2)), indent=1))
         elif cmd == "continuity-mode":

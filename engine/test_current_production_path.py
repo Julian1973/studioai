@@ -11,6 +11,7 @@ from test_golden_path import (world, _approve_animation_direction,
                               _approve_director_review,
                               _cinematography_output,
                               _fixture_reference_contract,
+                              _lock_scene_cut,
                               _voice_direction_output,
                               _test_seedance_25_contract)
 
@@ -231,6 +232,7 @@ def test_current_path_reaches_an_approved_master_without_provider_spend(
                        log=lambda *a, **k: None)
         _approve_director_review("review-animation", sid)
 
+    _lock_scene_cut("9", "EpT")
     master = R.stitch_scene("9", "EpT", log=lambda *a, **k: None)
     assert pathlib.Path(master).exists()
     _approve_director_review("review-final")

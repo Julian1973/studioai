@@ -965,6 +965,8 @@ body{background:var(--bg);color:var(--ink)}
 .kf-current{position:relative}.kf-current-tag{position:absolute;z-index:2;top:12px;left:12px;display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:5px;background:rgba(10,11,16,.88);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:11px;font-weight:800}.kf-current-tag span{color:var(--ok)}
 .kf-revision{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:7px;background:var(--surface2)}.kf-revision-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.kf-revision-title{font-size:12px;font-weight:800}.kf-revision-count{color:var(--muted);font-size:10px}.kf-revision-flow{display:grid;grid-template-columns:128px minmax(0,1fr);gap:12px;align-items:center}.kf-previous{position:relative}.kf-previous img{display:block;width:128px;aspect-ratio:16/9;object-fit:cover;border-radius:5px;filter:saturate(.72);border:1px solid var(--danger)}.kf-previous-label{position:absolute;left:5px;bottom:5px;padding:3px 5px;border-radius:3px;background:rgba(10,11,16,.86);color:#fff;font-size:9px;font-weight:800}.kf-change{font-size:12px;line-height:1.45;color:var(--muted)}.kf-change b{display:block;margin-bottom:4px;color:var(--ink)}.kf-no-current{padding:10px 12px;border-left:3px solid var(--danger);background:var(--dangerbg);font-size:12px;line-height:1.45;color:var(--text)}
 .shot-context{margin-bottom:14px;padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}.shot-context-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.shot-context-id{font-size:13px;font-weight:850}.shot-context-state{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:10px}.shot-context-state b{color:var(--ok)}.shot-glance{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:10px;align-items:stretch;margin-bottom:8px}.shot-duration{display:grid;place-content:center;padding:10px;border:1px solid var(--brand);border-radius:6px;background:var(--brandbg);text-align:center}.shot-duration b{font-size:22px;line-height:1;color:var(--ink)}.shot-duration span{margin-top:4px;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}.shot-job{display:grid;align-content:center;gap:3px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface2)}.shot-job span,.shot-dialogue-window span{color:var(--hint);font-size:9px;font-weight:850;text-transform:uppercase}.shot-job b{font-size:11px;line-height:1.4}.shot-dialogue-window{display:grid;align-content:center;gap:3px;min-width:130px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface2)}.shot-dialogue-window b{font-size:11px}.shot-state-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.shot-state{min-width:0;padding:9px;border-left:2px solid var(--line);background:var(--surface2)}.shot-state.current{border-left-color:var(--brand);background:var(--brandbg)}.shot-state-label{display:block;margin-bottom:4px;color:var(--hint);font-size:9px;font-weight:850;text-transform:uppercase}.shot-state-text{display:-webkit-box;overflow:hidden;color:var(--muted);font-size:10.5px;line-height:1.4;-webkit-box-orient:vertical;-webkit-line-clamp:3}.shot-context-locks{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.shot-context-locks span{padding:4px 6px;border:1px solid var(--line);border-radius:4px;color:var(--muted);font-size:9px}.shot-context-locks .locked{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.scene-look-done{display:flex;align-items:center;gap:9px;margin-bottom:12px;padding:10px 11px;border-left:3px solid var(--ok);background:var(--okbg);color:var(--text);font-size:11px;line-height:1.4}.scene-look-done b{color:var(--ok)}
+.scene-next-step{display:grid;gap:8px;padding:12px;border:1px solid var(--brand);border-radius:6px;background:var(--brandbg)}.scene-next-step-label{color:var(--brandink);font-size:9px;font-weight:900;text-transform:uppercase}.scene-next-step-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:800}.scene-next-step-meta span:last-child{color:var(--brandink);white-space:nowrap}.scene-next-step-purpose{color:var(--muted);font-size:11px;line-height:1.45}.scene-next-primary{min-height:48px!important;background:var(--brand)!important;color:#140d20!important;font-weight:900!important}.scene-next-secondary{font-size:11px!important;color:var(--muted)!important}
 @keyframes directorFade{from{opacity:0}to{opacity:1}}@keyframes directorSlide{from{transform:translateX(22px);opacity:.75}to{transform:translateX(0);opacity:1}}
 @media(max-width:900px){.focus-workspace.result-first{display:flex;max-width:780px}.focus-workspace.result-first .wcol-artefact{order:1}.focus-workspace.result-first .wcol-decision{order:2;position:static}.focus-workspace.result-first .focus-context{order:3}.watch-stage{grid-template-columns:minmax(0,1fr)}.watch-candidate-grid{grid-template-columns:minmax(0,1fr);padding:10px}.watch-change-below{margin:0 10px 10px}.director-chat{top:auto;left:0;width:100%;height:min(78dvh,720px);padding:16px max(14px,env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));border-left:0;border-top:1px solid var(--line);animation:directorRise .2s ease-out}.kf-revision-flow{grid-template-columns:96px minmax(0,1fr)}.kf-previous img{width:96px}.shot-glance{grid-template-columns:82px minmax(0,1fr)}.shot-dialogue-window{grid-column:1/-1}.shot-state-flow{grid-template-columns:1fr}.shot-state-text{-webkit-line-clamp:2}.stage-audio-placeholder{grid-template-columns:42px minmax(0,1fr);padding:14px}.stage-audio-play{width:42px;height:42px}.stage-audio-placeholder .btn{grid-column:1/-1;width:100%}@keyframes directorRise{from{transform:translateY(22px);opacity:.75}to{transform:translateY(0);opacity:1}}}
 @keyframes stage-spin{to{transform:rotate(360deg)}}
@@ -3723,6 +3725,40 @@ async function pStoryboardDecide(verdict){
 // never shot composition, camera position, character pose or movement (those stay owned by
 // each approved storyboard shot). Never assumes the plate file's mere presence on disk means
 // approval — SH_SCENELOOK.status is always a real, server-computed decision state. ──
+function firstSceneShot(){
+  return pShots()[0]||((PSB&&PSB.shots)||[])[0]||{};
+}
+function sceneLookNextStepHTML(){
+  const shot=firstSceneShot();
+  const shotId=shot.shotId||`S${SH_SC}.SH1`;
+  const duration=Number(shot.durationSec||shot.targetDurationSec||0);
+  const purpose=shot.purpose||"Review the opening composition and character continuity for the scene's first production shot.";
+  return `<div class="scene-next-step" aria-label="Next production decision">
+    <span class="scene-next-step-label">Next decision</span>
+    <span class="scene-next-step-meta"><span>Shot 1 · ${_esc(shotId)}</span><span>${duration?_esc(duration.toFixed(duration%1?1:0))+"s":"Keyframe"}</span></span>
+    <span class="scene-next-step-purpose">${_esc(purpose)}</span>
+  </div>`;
+}
+async function continueSceneLookToFirstKeyframe(){
+  const needsHandover=!(SH_PKG&&Array.isArray(SH_PKG.shots)&&SH_PKG.shots.length)||
+    !!(SH_STATE&&SH_STATE.packageCurrent===false);
+  if(needsHandover){
+    showStageWorking("Preparing Shot 1", "The approved scene direction is being handed into production. No approval or provider spend is required.");
+    try{
+      const response=await fetch(BASE+"/api/storyboard-handover",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({episode:SH_EP,scene:String(SH_SC)})});
+      const result=await response.json();
+      if(!response.ok||!result.ok)throw new Error(result.error||"production handover failed");
+      await pLoadAll();
+    }catch(error){
+      showToast("Could not prepare Shot 1: "+String(error&&error.message||error),false);
+      renderWorkspaceBody();
+      return;
+    }
+  }
+  PSHOT_I=0;
+  openShotOutcome("keyframe",0);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
 function renderSceneLookStage(){
   const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
   const sl=SH_SCENELOOK||{status:"none"};
@@ -3736,7 +3772,7 @@ function renderSceneLookStage(){
   const slRate=(RATES||{})["seedream5pro_image"];
   const slCostTxt=slRate?` — $${slRate.usd}`:"";
   const GEN_LABEL=`◈ Generate Scene ${_esc(SH_SC)} Look Plate — one image${slCostTxt}`;
-  let body="", decVersion="—", decActions=[];
+  let body="", decTitle="Scene Look", decVersion="—", decActions=[];
   if(sl.status=="none"){
     body=`<div class="artefact-empty"><div style="color:var(--muted)">No Scene Look plate yet for this scene.</div></div>`;
     decActions=[slSourceChoices(GEN_LABEL,false)];
@@ -3749,15 +3785,23 @@ function renderSceneLookStage(){
       decActions=[`<span class="dec-caption">Its signed inputs changed. Clear it, then generate from current direction.</span>`,
         `<button class="btn" onclick="directorStartRejection('scenelook',null,'')">Discuss rebuild</button>`];
     } else if(sl.status=="working"){
-      decVersion="Working world anchor · current";
-      decActions=[`<span class="dec-caption">Used behind the first keyframe; no prompt or plate approval required.</span>`,
-        `<button class="btn" onclick="openStageOutcome('keyframe')">Continue to First Keyframe</button>`,
-        `<button class="btn ghost" onclick="directorStartRejection('scenelook',null,'')">Reject / Discuss</button>`];
+      const shot=firstSceneShot(),shotId=shot.shotId||`S${SH_SC}.SH1`;
+      decTitle="Continue to Shot 1";
+      decVersion=`${shotId} · Scene Look complete`;
+      body=`<div class="scene-look-done"><b>✓ Scene Look complete</b><span>This world image will be attached automatically to Shot 1.</span></div>${body}`;
+      decActions=[sceneLookNextStepHTML(),
+        `<button class="btn scene-next-primary" onclick="continueSceneLookToFirstKeyframe()">Continue to Shot 1 Keyframe →</button>`,
+        `<button class="btn ghost scene-next-secondary" onclick="directorStartRejection('scenelook',null,'')">Discuss or change Scene Look</button>`];
+      document.getElementById("workspace").classList.add("result-first");
     } else if(sl.status=="approved"){
-      decVersion="Approved · current";
-      decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
-        `<button class="btn" onclick="openStageOutcome('keyframe')">Continue to First Keyframe</button>`,
+      const shot=firstSceneShot(),shotId=shot.shotId||`S${SH_SC}.SH1`;
+      decTitle="Continue to Shot 1";
+      decVersion=`${shotId} · Scene Look approved`;
+      body=`<div class="scene-look-done"><b>✓ Scene Look approved</b><span>This world image will be attached automatically to Shot 1.</span></div>${body}`;
+      decActions=[sceneLookNextStepHTML(),
+        `<button class="btn scene-next-primary" onclick="continueSceneLookToFirstKeyframe()">Continue to Shot 1 Keyframe →</button>`,
         `<div style="margin-top:8px">${slSourceChoices(`↻ Regenerate — ${GEN_LABEL.replace('◈ ','')}`,true)}</div>`];
+      document.getElementById("workspace").classList.add("result-first");
     } else if(sl.status=="stale"){
       decVersion="World inputs changed";
       decActions=[`<div class="dec-caption" style="color:var(--warn)">The location, lighting or style input changed. Rebuild the world anchor; its proof will be the next keyframe.</div>`,
@@ -3773,7 +3817,7 @@ function renderSceneLookStage(){
     `<div class="histrow"><span class="stbadge" style="color:var(${h.status=="approved"?"--ok":"--danger"});background:var(${h.status=="approved"?"--okbg":"--dangerbg"})">${_esc(h.status||"")}</span>
      <span class="histmeta">${_esc(h.reviewedBy||"")} · ${_esc((h.approvedAt||h.rejectedAt||h.generatedAt||"").slice(0,16))}</span>
      ${h.rejectedNote?`<div class="histnote">${_esc(h.rejectedNote)}</div>`:""}</div>`).join("");
-  dec.innerHTML=decisionShell("Scene Look", decVersion, decActions, history)+
+  dec.innerHTML=decisionShell(decTitle, decVersion, decActions, history)+
     `<details class="techdetails"><summary>Technical details</summary>
       <div class="techmeta">plate hash ${_esc((sl.plateHash||"—").slice(0,12))}</div>
       <div class="techmeta">source storyboard md5 ${_esc((sl.sourceStoryboardMd5||"—").slice(0,12))}${sl.sourceStoryboardMd5&&sl.liveStoryboardMd5&&sl.sourceStoryboardMd5!=sl.liveStoryboardMd5?" (superseded by current "+_esc((sl.liveStoryboardMd5||"").slice(0,12))+")":""}</div>
@@ -4735,10 +4779,13 @@ function renderShotStage(mode){
   SH_RSEQ++; const mySeq=SH_RSEQ;
   const shots=pShots();
   if(!shots.length){
-    art.innerHTML=`<div class="artefact-empty"><div style="color:var(--muted)">Nothing designed yet for this scene.</div></div>`;
-    dec.innerHTML=decisionShell(PSTAGES.find(p=>p.id==(mode=="keyframe"?"keyframe":mode)).name,"—",
-      [`<div class="dec-caption">Approve the Story & Direction department's storyboard to hand it directly into production.</div>`,
-       `<button class="btn" onclick="openStageOutcome('storyboard')">Open Story &amp; Direction</button>`],"");
+    const storyboardApproved=!!(PSB&&PSB.approvalState==="approved");
+    art.innerHTML=`<div class="artefact-empty"><div style="color:var(--muted)">${storyboardApproved?"Shot 1 is ready to be prepared from the approved scene direction.":"Scene Direction must be approved before Shot 1 can be prepared."}</div></div>`;
+    dec.innerHTML=decisionShell(storyboardApproved?"Prepare Shot 1":"Scene Direction required","—",
+      storyboardApproved
+        ?[sceneLookNextStepHTML(),`<button class="btn scene-next-primary" onclick="continueSceneLookToFirstKeyframe()">Prepare Shot 1 &amp; open Keyframe →</button>`]
+        :[`<div class="dec-caption">Review and approve Scene Direction once. The Studio will then prepare the production shots automatically.</div>`,
+          `<button class="btn" onclick="openStageOutcome('storyboard')">Open Scene Direction</button>`],"");
     return;
   }
   if(PSHOT_I>=shots.length)PSHOT_I=shots.length-1;

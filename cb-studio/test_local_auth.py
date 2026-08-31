@@ -326,6 +326,114 @@ def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatc
         "production-package",
         {**package_inputs, "storyboardSha256": approved_storyboard_sha},
     )
+    approved_record = json.loads(storyboard_path.read_text())
+    approval_log = list(approved_record.get("approvalLog") or [])
+
+    repaired = module._ensure_storyboard_handover({"episode": "Ep1", "scene": "3"})
+
+    assert repaired["ok"] is True
+    assert repaired["approvalPreserved"] is True
+    assert json.loads(storyboard_path.read_text()).get("approvalLog") == approval_log
+
+
+def test_approved_scene_handover_preserves_exact_unchanged_shots(monkeypatch, tmp_path):
+    module = _load_server_module("cb_studio_serve_unchanged_handover_test")
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module, "OUT", tmp_path / "cb-output")
+    monkeypatch.setattr(
+        module, "scene_lineage",
+        lambda package, scene, episode="Ep1": {"current": True})
+    creative = module.OUT / "creative"
+    creative.mkdir(parents=True)
+    shots = [
+        {"shotId": "S3.SH1", "purpose": "Open the room"},
+        {"shotId": "S3.SH2", "purpose": "Reveal Bo"},
+    ]
+    storyboard_signature = {
+        "kind": "scene-storyboard",
+        "inputs": {"sceneNumber": "3"},
+        "digest": "approved-direction",
+    }
+    storyboard_path = creative / "Ep1_scene3_storyboard.json"
+    storyboard_path.write_text(json.dumps({
+        "episodeId": "Ep1",
+        "sceneNumber": "3",
+        "approvalState": "approved",
+        "approvalLog": [{"state": "approved", "by": "Julian"}],
+        "inputSignature": storyboard_signature,
+        "shots": shots,
+    }))
+    card_hashes = module._storyboard_creative_card_hashes(
+        json.loads(storyboard_path.read_text()))
+    old_storyboard_sha = "1" * 64
+    package_inputs = {
+        "scriptVersionId": "sha256:" + "a" * 64,
+        "storyboardSha256": old_storyboard_sha,
+        "creativeCardHashes": card_hashes,
+    }
+    package_path = module.OUT / "Ep1_scene3_production_package.json"
+    package_path.write_text(json.dumps({
+        "episode": "Ep1",
+        "sceneNumber": 3,
+        "revision": 4,
+        "sourceStoryboard": {
+            "path": str(storyboard_path),
+            "md5": "stale",
+            "sha256": old_storyboard_sha,
+            "inputSignature": storyboard_signature,
+            "creativeCardHashes": card_hashes,
+        },
+        "inputSignature": cb_lineage.dependency_signature(
+            "production-package", package_inputs),
+        "validation": {"passed": True},
+        "shots": [{"shotId": shot["shotId"]} for shot in shots],
+        "continuityLedger": [{"shotId": "S3.SH1", "keyframeApproval": {"state": "approved"}}],
+    }))
+
+    result = module._ensure_storyboard_handover({"episode": "Ep1", "scene": "3"})
+
+    assert result["approvalPreserved"] is True
+    assert result["handover"]["carriedForward"] == ["S3.SH1", "S3.SH2"]
+    assert result["handover"]["reset"] == []
+    written = json.loads(package_path.read_text())
+    assert written["continuityLedger"] == [
+        {"shotId": "S3.SH1", "keyframeApproval": {"state": "approved"}}]
+    assert written["handover"]["resetChangedShots"] == []
+    assert written["sourceStoryboard"]["sha256"] == cb_lineage.sha256_file(storyboard_path)
+    assert written["inputSignature"]["inputs"]["storyboardSha256"] == cb_lineage.sha256_file(
+        storyboard_path)
+
+
+def test_approved_scene_handover_rebuilds_when_one_shot_changed(monkeypatch, tmp_path):
+    module = _load_server_module("cb_studio_serve_changed_handover_test")
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module, "OUT", tmp_path / "cb-output")
+    creative = module.OUT / "creative"
+    creative.mkdir(parents=True)
+    storyboard_path = creative / "Ep1_scene3_storyboard.json"
+    storyboard_path.write_text(json.dumps({
+        "approvalState": "approved",
+        "inputSignature": {"digest": "same-direction"},
+        "shots": [{"shotId": "S3.SH1", "purpose": "changed"}],
+    }))
+    package_path = module.OUT / "Ep1_scene3_production_package.json"
+    package_path.write_text(json.dumps({
+        "revision": 1,
+        "validation": {"passed": True},
+        "sourceStoryboard": {
+            "inputSignature": {"digest": "same-direction"},
+            "creativeCardHashes": {"S3.SH1": "old-card-hash"},
+        },
+        "shots": [{"shotId": "S3.SH1"}],
+    }))
+    monkeypatch.setattr(
+        module, "_promote_approved_storyboard",
+        lambda path, ep, sc, package: {"revision": 2, "reset": ["S3.SH1"]})
+
+    result = module._ensure_storyboard_handover({"episode": "Ep1", "scene": "3"})
+
+    assert result["handover"]["reset"] == ["S3.SH1"]
+    assert json.loads(package_path.read_text())["revision"] == 1
 
 
 def test_launch_token_establishes_http_only_session_and_cleans_url(studio):

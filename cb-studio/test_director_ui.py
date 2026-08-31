@@ -158,6 +158,9 @@ def test_director_analysis_step_exposes_scene_storyboard_review_when_scene_packa
     assert '"/api/storyboard-approve"' in JS
     assert "scene-storyboard-snapshot" in SERVER
     assert "_snapshot_storyboard_handover" in SERVER
+    assert 'self.path == "/api/storyboard-handover"' in SERVER
+    assert "_ensure_storyboard_handover" in SERVER
+    assert '"approvalPreserved": True' in SERVER
     assert "production package source storyboard signature is stale" in SERVER
 
 

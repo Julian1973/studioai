@@ -1335,6 +1335,58 @@ def _sync_package_storyboard_provenance(package, storyboard_path, storyboard):
     return source_storyboard
 
 
+def _storyboard_creative_card_hashes(storyboard):
+    return {
+        shot["shotId"]: hashlib.sha256(json.dumps(
+            shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        for shot in (storyboard.get("shots") or [])
+        if shot.get("shotId")
+    }
+
+
+def _carry_forward_unchanged_approved_scene(storyboard_path, episode, scene, storyboard):
+    """Refresh provenance when the approved scene's directed shot cards are unchanged."""
+    package_path = OUT / f"{episode}_scene{scene}_production_package.json"
+    if not package_path.exists():
+        return None
+    package, package_digest = cb_db.read_json_document(ROOT, package_path)
+    if not (package.get("validation") or {}).get("passed"):
+        return None
+
+    package_shots = [
+        shot.get("shotId") for shot in (package.get("shots") or [])
+        if shot.get("shotId")
+    ]
+    live_hashes = _storyboard_creative_card_hashes(storyboard)
+    source_storyboard = package.get("sourceStoryboard") or {}
+    stored_hashes = source_storyboard.get("creativeCardHashes") or {}
+    if (not package_shots or set(package_shots) != set(live_hashes) or
+            any(stored_hashes.get(shot_id) != live_hashes.get(shot_id)
+                for shot_id in package_shots)):
+        return None
+    if source_storyboard.get("inputSignature") != storyboard.get("inputSignature"):
+        return None
+
+    _sync_package_storyboard_provenance(package, storyboard_path, storyboard)
+    lineage = scene_lineage(package, scene, episode)
+    if not lineage.get("current"):
+        return None
+
+    handover = package.setdefault("handover", {})
+    handover["carriedForwardUnchangedShots"] = list(package_shots)
+    handover["resetChangedShots"] = []
+    handover["rule"] = "every approved scene creative-card hash must be unchanged"
+    cb_db.atomic_write_json(
+        ROOT, package_path, package, expected_digest=package_digest)
+    return {
+        "revision": package.get("revision"),
+        "path": str(package_path),
+        "carriedForward": list(package_shots),
+        "reset": [],
+        "archivedPrevious": None,
+    }
+
+
 def _url_from_abs(abs_path):
     """Converts an ABSOLUTE filesystem path (as stored in continuityLedger's keyframeApproval/
     keyframeCandidate 'path' fields) into a servable /engine/media/... URL, the same
@@ -2046,6 +2098,75 @@ def _snapshot_storyboard_handover(storyboard_path, episode, scene):
     }
 
 
+def _promote_approved_storyboard(path, ep, sc, package):
+    """Compile an already-approved scene into production without recording a new approval."""
+    signature_kind = ((package.get("inputSignature") or {}).get("kind") or "")
+    if signature_kind == "scene-storyboard-snapshot":
+        return _snapshot_storyboard_handover(path, ep, sc)
+
+    import cb_handover
+    shot_ids = [
+        shot.get("shotId") for shot in (package.get("shots") or [])
+        if shot.get("shotId")
+    ]
+    preview, _ = cb_handover.promote_to_canonical(
+        str(path), sc, shot_ids, ep, dry_run=True, log=lambda *a, **k: None)
+    if not (preview.get("validation") or {}).get("passed"):
+        issues = [
+            issue for issue in (preview.get("validation") or {}).get("issues", [])
+            if issue.get("severity") == "ERROR"
+        ]
+        raise RuntimeError(
+            "production handover validation failed" +
+            (f": {issues[0].get('code')}" if issues else "")
+        )
+    promoted, archived = cb_handover.promote_to_canonical(
+        str(path), sc, shot_ids, ep, dry_run=False, log=lambda *a, **k: None)
+    # The canonical compiler may normalize operational storyboard metadata during the
+    # handover. Bind the live package to the final on-disk approved storyboard bytes so
+    # the UI cannot create a valid package and immediately classify it as stale.
+    storyboard, _ = cb_db.read_json_document(ROOT, path)
+    package_path = OUT / f"{ep}_scene{sc}_production_package.json"
+    live_package, live_digest = cb_db.read_json_document(ROOT, package_path)
+    _sync_package_storyboard_provenance(live_package, path, storyboard)
+    cb_db.atomic_write_json(
+        ROOT, package_path, live_package, expected_digest=live_digest)
+    promoted = live_package
+    return {
+        "revision": promoted.get("revision"),
+        "carriedForward": (promoted.get("handover") or {}).get(
+            "carriedForwardUnchangedShots", []),
+        "reset": (promoted.get("handover") or {}).get("resetChangedShots", []),
+        "archivedPrevious": str(archived) if archived else None,
+    }
+
+
+def _ensure_storyboard_handover(d):
+    """Repair a missing production handover from the current human-approved storyboard."""
+    ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+    sc = str(d.get("scene", "")).strip()
+    if not _SHOT_TOKEN.match(ep) or not _SHOT_TOKEN.match(sc):
+        raise ValueError("episode and scene must be plain tokens")
+    with cb_db.scene_lease(ROOT, ep, sc, "serve.storyboard-handover"):
+        path = ROOT / "cb-output" / "creative" / f"{ep}_scene{sc}_storyboard.json"
+        if not path.exists():
+            raise FileNotFoundError("no storyboard")
+        package, _ = cb_db.read_json_document(ROOT, path)
+        if package.get("approvalState") != "approved":
+            raise StoryboardApprovalRefused(
+                "Scene Direction needs Julian's approval before Shot 1 can be prepared")
+        try:
+            handover = _carry_forward_unchanged_approved_scene(
+                path, ep, sc, package)
+            if handover is None:
+                handover = _promote_approved_storyboard(path, ep, sc, package)
+        except Exception as exc:
+            raise StoryboardApprovalRefused(
+                f"The approved Scene Direction could not be prepared for production: {exc}"
+            ) from exc
+        return {"ok": True, "handover": handover, "approvalPreserved": True}
+
+
 def _storyboard_approval(d):
     """Apply a storyboard decision and its production handover under one scene lease."""
     ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
@@ -2084,35 +2205,7 @@ def _storyboard_approval(d):
         handover = None
         if target == "scene" and verdict == "approved":
             try:
-                signature_kind = ((package.get("inputSignature") or {}).get("kind") or "")
-                if signature_kind == "scene-storyboard-snapshot":
-                    handover = _snapshot_storyboard_handover(path, ep, sc)
-                else:
-                    import cb_handover
-                    shot_ids = [
-                        shot.get("shotId") for shot in (package.get("shots") or [])
-                        if shot.get("shotId")
-                    ]
-                    preview, _ = cb_handover.promote_to_canonical(
-                        str(path), sc, shot_ids, ep, dry_run=True, log=lambda *a, **k: None)
-                    if not (preview.get("validation") or {}).get("passed"):
-                        issues = [
-                            issue for issue in (preview.get("validation") or {}).get("issues", [])
-                            if issue.get("severity") == "ERROR"
-                        ]
-                        raise RuntimeError(
-                            "production handover validation failed" +
-                            (f": {issues[0].get('code')}" if issues else "")
-                        )
-                    promoted, archived = cb_handover.promote_to_canonical(
-                        str(path), sc, shot_ids, ep, dry_run=False, log=lambda *a, **k: None)
-                    handover = {
-                        "revision": promoted.get("revision"),
-                        "carriedForward": (promoted.get("handover") or {}).get(
-                            "carriedForwardUnchangedShots", []),
-                        "reset": (promoted.get("handover") or {}).get("resetChangedShots", []),
-                        "archivedPrevious": str(archived) if archived else None,
-                    }
+                handover = _promote_approved_storyboard(path, ep, sc, package)
             except Exception as exc:
                 cb_db.atomic_write_bytes(
                     ROOT, path, original_bytes, expected_digest=decision_digest)
@@ -4353,6 +4446,20 @@ class H(http.server.SimpleHTTPRequestHandler):
             # creative note in the user's own words; no compiler fields exposed.
             try:
                 self._json(200, _storyboard_approval(self._body()))
+            except FileNotFoundError as e:
+                self._json(404, {"error": str(e)})
+            except (StoryboardApprovalRefused, cb_db.SceneBusy, cb_db.StateConflict) as e:
+                self._json(409, {"error": str(e)})
+            except ValueError as e:
+                self._json(400, {"error": str(e)})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        if self.path == "/api/storyboard-handover":
+            # Non-decision repair: compile the current human-approved scene into its shot
+            # package without adding another approval or contacting a media provider.
+            try:
+                self._json(200, _ensure_storyboard_handover(self._body()))
             except FileNotFoundError as e:
                 self._json(404, {"error": str(e)})
             except (StoryboardApprovalRefused, cb_db.SceneBusy, cb_db.StateConflict) as e:

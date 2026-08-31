@@ -220,7 +220,13 @@ def test_scene_review_exposes_the_simple_director_journey():
     assert "function openPhaseOutcome(id)" in APP
     assert "openPhaseOutcome('${step.id}')" in APP
     assert '>Build Scene World</button>' in APP
-    assert '>Continue to First Keyframe</button>' in APP
+    assert "function continueSceneLookToFirstKeyframe()" in APP
+    assert 'Continue to Shot 1 Keyframe →</button>' in APP
+    assert 'BASE+"/api/storyboard-handover"' in APP
+    assert "SH_STATE&&SH_STATE.packageCurrent===false" in APP
+    assert "No approval or provider spend is required" in APP
+    assert "Prepare Shot 1 &amp; open Keyframe →" in APP
+    assert "Approve the Story & Direction department's storyboard" not in APP
     assert "openDisclosureModal('scenelook'" in APP
     assert "openDisclosureModal('keyframe'" in APP
     assert "s.beatCodes&&s.beatCodes.length" in APP

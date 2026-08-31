@@ -1092,6 +1092,13 @@ def test_fire_preserves_the_current_watch_screen_while_work_runs():
     assert 'showInlineSourceProgress(opts.progressLabel||stageWorkingLabel(cmd))' in APP
 
 
+def test_watch_reports_each_candidate_while_the_batch_is_rendering():
+    assert 'candidateStates=Array.from({length:expected}' in APP
+    assert 'candidate${expected===1?"":"s"} returned' in APP
+    assert 'watch-candidate-status' in APP
+    assert 'Live provider status' in APP
+
+
 def test_story_direction_exposes_episode_architecture_and_audience_information():
     for phrase in (
         "storyArchitecture", "Episode story truth", "Theme proved through action",

@@ -9333,6 +9333,106 @@ def approve_shot(scene, shot_id, candidate=1, episode="Ep1", reviewed_by="Julian
     return str(harvest)
 
 
+def recover_approved_shot(scene, shot_id, episode="Ep1", log=print):
+    """Restore a dropped ledger approval from independent immutable evidence.
+
+    Package promotion must not erase a completed human decision. Recovery is deliberately
+    stricter than ordinary media discovery: the approved asset registry, the candidate's
+    human-review sidecar, and the append-only approved prompt-bank record must all name the
+    same shot, candidate path, candidate number, and provider batch. File existence alone
+    can never create an approval.
+    """
+    with cb_db.scene_lease(HERE.parent, episode, str(scene),
+                           f"cb_render.recover-approved:{shot_id}"):
+        pkg, path = load_pkg(scene, episode)
+        led = _ledger(pkg, shot_id)
+        if (led.get("status") == "approved" and led.get("approvedTake") and
+                led.get("harvestFrame")):
+            return led["approvedTake"]
+
+        assets = cb_asset_registry.resolve_assets(
+            episode, scene, shot_id=shot_id,
+            kinds={"approved_take", "final_frame"}, include_global=False)
+        approved_takes = [item for item in assets
+                          if item.get("shotId") == shot_id and
+                          item.get("kind") == "approved_take" and
+                          item.get("status") == "approved"]
+        final_frames = [item for item in assets
+                        if item.get("shotId") == shot_id and
+                        item.get("kind") == "final_frame" and
+                        item.get("status") == "approved"]
+        if len(approved_takes) != 1 or len(final_frames) != 1:
+            raise Refused(
+                f"REFUSED — {shot_id} recovery needs exactly one registry-approved take "
+                "and final frame")
+
+        take = pathlib.Path(approved_takes[0]["path"]).resolve()
+        harvest = pathlib.Path(final_frames[0]["path"]).resolve()
+        if not take.is_file() or not harvest.is_file():
+            raise Refused(f"REFUSED — {shot_id} recovery media is missing from disk")
+
+        review_path = pathlib.Path(str(take) + ".review.json")
+        if not review_path.is_file():
+            raise Refused(f"REFUSED — {shot_id} recovery has no human-review sidecar")
+        review = json.loads(review_path.read_text(encoding="utf-8"))
+        candidate = review.get("candidate")
+        batch_id = str(review.get("batchId") or "")
+        if (review.get("shotId") != shot_id or not isinstance(candidate, int) or
+                candidate < 1 or not batch_id or
+                "human review only" not in str(review.get("note") or "").lower()):
+            raise Refused(f"REFUSED — {shot_id} human-review sidecar is incomplete")
+
+        prompt_records = [
+            item for item in cb_prompt_bank.load_records()
+            if item.get("episode") == episode and str(item.get("scene")) == str(scene)
+            and item.get("shotId") == shot_id and item.get("outcome") == "approved"
+            and item.get("approved") is True and item.get("candidate") == candidate
+            and pathlib.Path(item.get("candidatePath") or "").resolve() == take
+            and str((item.get("metadata") or {}).get("batchId") or "") == batch_id
+        ]
+        if len(prompt_records) != 1:
+            raise Refused(
+                f"REFUSED — {shot_id} recovery needs one matching approved prompt-bank record")
+        prompt_record = prompt_records[0]
+
+        recovered_at = _now()
+        recovery = {
+            "source": "registry+human-review+prompt-bank",
+            "recoveredAt": recovered_at,
+            "takeAssetId": approved_takes[0].get("assetId"),
+            "finalFrameAssetId": final_frames[0].get("assetId"),
+            "reviewSidecar": str(review_path),
+            "promptRecordId": prompt_record.get("recordId"),
+            "promptHash": prompt_record.get("promptHash"),
+            "batchId": batch_id,
+            "candidate": candidate,
+        }
+        led.setdefault("approvalRecoveryHistory", []).append(recovery)
+        led.update({
+            "status": "approved",
+            "approvedTake": str(take),
+            "approvedCandidate": candidate,
+            "harvestFrame": str(harvest),
+            "batchId": batch_id,
+            "approval": {
+                "approved": True,
+                "candidate": candidate,
+                "reviewed_by": "Julian",
+                "at": review.get("at") or prompt_record.get("bankedAt"),
+                "source": "recovered-audited-provider-approval",
+                "contentHash": _sha256_file(take),
+                "harvestHash": _sha256_file(harvest),
+                "promptRecordId": prompt_record.get("recordId"),
+                "promptHash": prompt_record.get("promptHash"),
+                "batchId": batch_id,
+                "recoveredAt": recovered_at,
+            },
+        })
+        _save(pkg, path)
+    log(f"RECOVERED APPROVAL — {shot_id} candidate {candidate}; relay frame restored")
+    return str(take)
+
+
 def reject_shot(scene, shot_id, correction, category="other", episode="Ep1",
                 reviewed_by="Julian", log=print):
     """Reject the WHOLE candidate batch: every candidate archived (never deleted) with the

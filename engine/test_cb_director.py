@@ -1,3 +1,5 @@
+import contextlib
+import json
 import pathlib
 
 import cb_canon
@@ -7,6 +9,64 @@ import cb_render
 
 
 SHOT_ID = "S1.SH1"
+
+
+def test_recover_approved_shot_requires_matching_registry_review_and_prompt_bank(
+        tmp_path, monkeypatch):
+    take = tmp_path / "Ep2_S2.SH1_c2.mp4"
+    take.write_bytes(b"approved-video")
+    harvest = tmp_path / "Ep2_S2.SH1_final_frame.png"
+    harvest.write_bytes(b"approved-final-frame")
+    review = {
+        "shotId": "S2.SH1",
+        "batchId": "S2.SH1-b1-proof",
+        "candidate": 2,
+        "at": "2026-08-31T08:00:06",
+        "note": "human review only - the machine never approves creative quality",
+    }
+    pathlib.Path(str(take) + ".review.json").write_text(json.dumps(review))
+    package = {
+        "shots": [{"shotId": "S2.SH1"}],
+        "continuityLedger": [{
+            "shotId": "S2.SH1", "status": "designed",
+            "approvedTake": None, "harvestFrame": None,
+        }],
+    }
+    assets = [
+        {"assetId": "take-id", "shotId": "S2.SH1", "kind": "approved_take",
+         "status": "approved", "path": str(take)},
+        {"assetId": "frame-id", "shotId": "S2.SH1", "kind": "final_frame",
+         "status": "approved", "path": str(harvest)},
+    ]
+    prompt_record = {
+        "recordId": "prompt-id", "episode": "Ep2", "scene": "2",
+        "shotId": "S2.SH1", "outcome": "approved", "approved": True,
+        "candidate": 2, "candidatePath": str(take), "promptHash": "prompt-hash",
+        "bankedAt": "2026-08-31T07:37:41Z",
+        "metadata": {"batchId": "S2.SH1-b1-proof"},
+    }
+    saved = []
+    monkeypatch.setattr(cb_render.cb_db, "scene_lease",
+                        lambda *args, **kwargs: contextlib.nullcontext())
+    monkeypatch.setattr(cb_render, "load_pkg",
+                        lambda scene, episode: (package, tmp_path / "pkg.json"))
+    monkeypatch.setattr(cb_render, "_save", lambda pkg, path: saved.append((pkg, path)))
+    monkeypatch.setattr(cb_render.cb_asset_registry, "resolve_assets",
+                        lambda *args, **kwargs: assets)
+    monkeypatch.setattr(cb_render.cb_prompt_bank, "load_records", lambda: [prompt_record])
+
+    recovered = cb_render.recover_approved_shot("2", "S2.SH1", episode="Ep2")
+
+    ledger = package["continuityLedger"][0]
+    assert recovered == str(take.resolve())
+    assert ledger["status"] == "approved"
+    assert ledger["approvedCandidate"] == 2
+    assert ledger["approvedTake"] == str(take.resolve())
+    assert ledger["harvestFrame"] == str(harvest.resolve())
+    assert ledger["approval"]["source"] == "recovered-audited-provider-approval"
+    assert ledger["approval"]["promptRecordId"] == "prompt-id"
+    assert ledger["approvalRecoveryHistory"][-1]["batchId"] == "S2.SH1-b1-proof"
+    assert saved
 
 
 def test_prepare_render_refreshes_stale_cinematography_before_sealing(monkeypatch):

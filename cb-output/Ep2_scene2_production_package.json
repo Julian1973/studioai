@@ -954,7 +954,7 @@
    "beatCodes": [
     "2.B1"
    ],
-   "status": "designed",
+   "status": "approved",
    "shotRole": "coverage",
    "establishJob": null,
    "buttonChange": null,
@@ -991,8 +991,8 @@
      }
     ]
    },
-   "approvedTake": null,
-   "harvestFrame": null,
+   "approvedTake": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH1_c2.mp4",
+   "harvestFrame": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH1_final_frame.png",
    "departmentWork": {
     "voice": {
      "approved": null,
@@ -1030,6 +1030,34 @@
      },
      "history": []
     }
+   },
+   "approvalRecoveryHistory": [
+    {
+     "source": "registry+human-review+prompt-bank",
+     "recoveredAt": "2026-08-31T13:55:15",
+     "takeAssetId": "8f065726b0fdf0ff1583ae9e",
+     "finalFrameAssetId": "eb186097b498dc812dc954c0",
+     "reviewSidecar": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH1_c2.mp4.review.json",
+     "promptRecordId": "fbbe609e687ff6f5b262e3fc",
+     "promptHash": "af9cda9790c3beb59402d41f28516eb6b47564fe62a5334b282927a46071a2e4",
+     "batchId": "S2.SH1-b1-20260831T075515-183776fa",
+     "candidate": 2
+    }
+   ],
+   "approvedCandidate": 2,
+   "batchId": "S2.SH1-b1-20260831T075515-183776fa",
+   "approval": {
+    "approved": true,
+    "candidate": 2,
+    "reviewed_by": "Julian",
+    "at": "2026-08-31T08:00:06",
+    "source": "recovered-audited-provider-approval",
+    "contentHash": "447a83961d2ead2727d9591f073b7cf717062dce0599d50a0057787e5123b4fe",
+    "harvestHash": "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62",
+    "promptRecordId": "fbbe609e687ff6f5b262e3fc",
+    "promptHash": "af9cda9790c3beb59402d41f28516eb6b47564fe62a5334b282927a46071a2e4",
+    "batchId": "S2.SH1-b1-20260831T075515-183776fa",
+    "recoveredAt": "2026-08-31T13:55:15"
    }
   },
   {
@@ -1736,7 +1764,34 @@
      "SHuZ9GyczU4QEDzU4QU4"
     ]
    },
-   "voPackageRevision": 3
+   "voPackageRevision": 3,
+   "voiceApproval": {
+    "approved": true,
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+    "at": "2026-08-31T13:38:01",
+    "reviewedBy": "Julian",
+    "packageRevision": 3,
+    "inputSignature": {
+     "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+     "dialogueHash": "cda7354e60b8005eadb0a7b88b947e1764ce47104598bf0583016a075434b978",
+     "performanceHash": "61724816a832eeee397e17d38883c973d606a8d04c8bcb1bbd31b000a47affd2",
+     "voiceCardsHash": "490318f1d5890e5156c05acf0ec5ea507e2399054d22cab997aa03fabbf21d98",
+     "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+     "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+     "voiceCompilerVersion": "voice-director-v1",
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4",
+      "TCRj5m2u9xhZHJ8h9pMv",
+      "SHuZ9GyczU4QEDzU4QU4",
+      "TCRj5m2u9xhZHJ8h9pMv",
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    "contentHash": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+    "rawContentHash": "39b134388831d2eebbb6d9ee835a78873aa4ebe82e004a9a29788083ee66534c",
+    "timingContentHash": "d99805ce029410dff3e91c65bb1292d196cff591f44b864551aa52d0d287ceb6",
+    "placementContentHash": "2568a57019073ffacd7f1c2a8ab01ca2929d1ff75bc812729bbccd3277ced921"
+   }
   }
  ],
  "validation": {

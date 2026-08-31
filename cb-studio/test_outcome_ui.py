@@ -490,6 +490,8 @@ def test_watch_has_two_screen_progress_and_prompt_revision_history():
     assert 'function watchProductionSurfaceHTML(' in APP
     assert '1 · APPROVED START' in APP
     assert '2 · WATCH RESULT' in APP
+    assert 'const openingUrl=media.openingFrame||media.keyframe;' in APP
+    assert 'Last frame from ${openingSource}' in APP
     assert 'function watchJobCopy(job)' in APP
     assert 'Polling Seedance API' in APP
     assert 'Submitted to Seedance 2.5' in APP

@@ -4585,13 +4585,16 @@ function watchProductionSurfaceHTML(shot,led,media,resultHTML,currentPrompt){
   const liveJob=activeWatchJob(shot.shotId),durableJob=durableWatchJob(led);
   const job=liveJob&&durableJob?{...liveJob,...durableJob,step:liveJob.step||durableJob.step}:(liveJob||durableJob);
   const hasResult=!!((media.candidates||[]).length||media.clip||media.finalFrame);
-  const opening=media.keyframe
-    ?`<img src="${BASE}${_esc(media.keyframe)}?v=${MEDIA_V}" alt="Approved opening keyframe for ${_esc(shot.shotId)}">`
+  const openingUrl=media.openingFrame||media.keyframe;
+  const openingSource=media.openingFrameSourceShotId||null;
+  const openingLabel=openingSource?`Last frame from ${openingSource}`:"Opening keyframe";
+  const opening=openingUrl
+    ?`<img src="${BASE}${_esc(openingUrl)}?v=${MEDIA_V}" alt="${_esc(openingLabel)} for ${_esc(shot.shotId)}">`
     :`<div class="watch-waiting"><b>Opening keyframe unavailable</b><small>WATCH remains protected until the approved opening state is present.</small></div>`;
   const result=job
     ?`${hasResult?`<div class="watch-live-results">${resultHTML}</div>`:""}${watchLiveProgressHTML(job,hasResult)}`
     :resultHTML;
-  return `<div class="watch-stage"><section class="watch-screen watch-opening"><div class="watch-screen-head"><span>1 · APPROVED START</span><span>Opening keyframe</span></div><div class="watch-screen-media">${opening}</div></section><section class="watch-screen watch-result" id="watchResultScreen"><div class="watch-screen-head"><span>2 · WATCH RESULT</span><span id="watchResultState">${job?"Rendering":hasResult?"Current take":"Awaiting render"}</span></div><div class="watch-screen-media ${job&&hasResult?'has-live-result':''}" id="watchResultMedia">${result}</div></section></div>${watchRevisionHistoryHTML(led,currentPrompt)}`;
+  return `<div class="watch-stage"><section class="watch-screen watch-opening"><div class="watch-screen-head"><span>1 · APPROVED START</span><span>${_esc(openingLabel)}</span></div><div class="watch-screen-media">${opening}</div></section><section class="watch-screen watch-result" id="watchResultScreen"><div class="watch-screen-head"><span>2 · WATCH RESULT</span><span id="watchResultState">${job?"Rendering":hasResult?"Current take":"Awaiting render"}</span></div><div class="watch-screen-media ${job&&hasResult?'has-live-result':''}" id="watchResultMedia">${result}</div></section></div>${watchRevisionHistoryHTML(led,currentPrompt)}`;
 }
 function shotDialogueWindow(shot){
   const routed=routeShotAudio(shot),lines=routed.spokenDialogue;

@@ -1387,6 +1387,8 @@ def shot_media_map(pkg, scene, episode="Ep1"):
         record.setdefault("keyframe", None)
         record.setdefault("keyframeCandidate", None)
         record.setdefault("keyframeApproved", None)
+        record.setdefault("openingFrame", None)
+        record.setdefault("openingFrameSourceShotId", None)
         record.setdefault("clip", None)
         record.setdefault("finalFrame", None)
         record.setdefault("candidates", [])
@@ -1410,8 +1412,21 @@ def shot_media_map(pkg, scene, episode="Ep1"):
         # downstream amendment is waiting for review. This is visual evidence only;
         # approval and provider spend remain separate state.
         if s.get("sourceType") == "relay" and s.get("sourceShotId"):
-            relay_frame = shots_dir / f"{episode}_{s['sourceShotId']}_final_frame.png"
-            record["keyframe"] = record.get("keyframe") or _url(relay_frame)
+            source_id = s["sourceShotId"]
+            source_media = registry_shots.get(source_id) or {}
+            relay_frame = (
+                source_media.get("finalFrame") or
+                _url(shots_dir / f"{episode}_{source_id}_final_frame.png")
+            )
+            # The previous shot's landing frame is the relay's authoritative opening
+            # evidence. Prefer it over any copied/stale keyframe record on this shot.
+            record["openingFrame"] = relay_frame
+            record["openingFrameSourceShotId"] = source_id if relay_frame else None
+            record["keyframe"] = relay_frame or record.get("keyframe")
+        else:
+            record["openingFrame"] = (
+                record.get("keyframeApproved") or record.get("keyframe")
+            )
         shots[sid] = record
     timing_path = MEDIA / f"{episode}_Scene{scene}_timing_slate.mp4"
     if not timing_path.exists():

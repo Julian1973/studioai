@@ -96,7 +96,11 @@ def test_relay_opening_frame_is_not_exposed_as_watch_result(monkeypatch, tmp_pat
     shots.mkdir(parents=True)
     (shots / "EpT_S1.SH1_final_frame.png").write_bytes(b"previous-final-frame")
     monkeypatch.setattr(module, "MEDIA", media)
-    monkeypatch.setattr(module.cb_asset_registry, "shot_media_from_registry", lambda *args: {})
+    monkeypatch.setattr(
+        module.cb_asset_registry,
+        "shot_media_from_registry",
+        lambda *args: {"S1.SH2": {"keyframe": "/engine/media/shots/stale-copy.png"}},
+    )
 
     class Renderer:
         @staticmethod
@@ -120,7 +124,9 @@ def test_relay_opening_frame_is_not_exposed_as_watch_result(monkeypatch, tmp_pat
 
     result = module.shot_media_map(package, "1", "EpT")["shots"]["S1.SH2"]
 
-    assert result["keyframe"].endswith("EpT_S1.SH1_final_frame.png")
+    assert result["openingFrame"].endswith("EpT_S1.SH1_final_frame.png")
+    assert result["openingFrameSourceShotId"] == "S1.SH1"
+    assert result["keyframe"] == result["openingFrame"]
     assert result["finalFrame"] is None
     assert result["clip"] is None
 

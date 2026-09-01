@@ -1,20 +1,22 @@
 {
- "approved": null,
- "candidate": {
-  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_ff9d9499.png",
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_9f4bee15.png",
   "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
   "inputSignature": {
    "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
-   "briefHash": "3612e07f42f1137637d61330441d81bd0c746caa7aace09971f1c6d3cc581831",
+   "briefHash": "583157c3f12a8be613bab957ceafdeaf6674e2d7daace6c9a4faae0645ea0c8c",
    "referenceHashes": {},
    "plateHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
   },
   "referencePath": null,
-  "generatedAt": "2026-09-01T15:48:22",
+  "generatedAt": "2026-09-01T23:36:31",
   "source": "library",
   "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/CB_Crystal_Woods_Forked_Trail_Clearing_plate.png",
-  "packageRevision": 3
+  "packageRevision": 1,
+  "approvedAt": "2026-09-01T23:36:41",
+  "reviewedBy": "Julian"
  },
+ "candidate": null,
  "history": [
   {
    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_4fa3331e.png",
@@ -53,6 +55,26 @@
    "reviewedBy": "Julian",
    "rejectedNote": "Replaced by a different Scene Plate source selected by Julian.",
    "rejectedArchivedFile": "media/archive/scenelook_rejected/20260901T154816/Ep2_S4_plate_candidate_4dd87d57.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_ff9d9499.png",
+   "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+   "inputSignature": {
+    "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+    "briefHash": "3612e07f42f1137637d61330441d81bd0c746caa7aace09971f1c6d3cc581831",
+    "referenceHashes": {},
+    "plateHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-09-01T15:48:22",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/CB_Crystal_Woods_Forked_Trail_Clearing_plate.png",
+   "packageRevision": 3,
+   "outcome": "rejected",
+   "rejectedAt": "2026-09-01T23:34:58",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Stale after V4 S4 direction scaffold; reselecting the same library plate against the current package.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260901T233458/Ep2_S4_plate_candidate_ff9d9499.png"
   }
  ],
  "departmentWork": {
@@ -62,24 +84,24 @@
     "worker": "Cinematographer / DP",
     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
     "model": "gpt-5.4",
-    "preparedAt": "2026-09-01T14:23:24",
+    "preparedAt": "2026-09-01T23:36:31",
     "editedAt": null,
     "preparedBy": "specialist",
-    "creativeDirectingStandardVersion": 4,
-    "sourceHash": "6811ba5b2fde1a2b319f261f7b4ecbbb37ccc03bce8e6ec63009d28d1e94d68f",
+    "creativeDirectingStandardVersion": 0,
+    "sourceHash": "76339a54c2562eb357fc7ff9e0d78d5d9234ce8dbdca19416797ff77de555c68",
     "output": {
-     "creativeIntent": "A forest path that feels inviting enough for play yet quietly pressurizing in depth: a child-scaled woodland corridor where temporary relief could happen, but where the forward route toward a social destination never stops being present. The place should carry emotional elasticity—capable of giggles, hesitation, and a small honest confession—without becoming threatening or magical. The environment must support the feeling that coping can briefly work here, then run out, while the path ahead still asks something of you.",
-     "storyOfPlace": "Daytime forest path leading toward the Learning Circle somewhere ahead but not visible as a destination landmark. The path is narrow enough to feel personal and slightly compressed, with a gentle forward bend and layered depth created by trunks, low branches, saplings, roots, and brush that subtly pinch the route at intervals. This is a familiar children’s woodland, not wilderness: walked often, soft underfoot, full of natural details a child might notice or play with—fallen leaves, conkers, fern clusters, smooth stones, mossy roots, bark textures, tiny branch snags. The world should suggest recent use and belonging without showing people: a path worn by small repeated journeys. Branch structure matters because someone could plausibly be half-hidden through it later, but for this plate there are no characters and no staged reveal. The path itself is the social problem in space: always present, always continuing, never overwhelming.",
-     "paletteAndLighting": "Warm saturated daylight filtered through a leafy canopy, with optimistic amber-gold sunlight mixed with soft green bounce from foliage. Color script should balance comfort and pressure: honeyed path earth, vivid leaf greens, warm bark browns, mossy olives, touches of chestnut and muted berry tones in forest details. Lighting is dappled and alive, with patterned sun patches across the ground and trunks, but avoid harsh contrast or ominous shadow design. Deeper space should cool slightly and grow denser, so the route ahead feels less certain without becoming dark. Atmosphere is clean and breathable with a faint luminous haze in the distance to separate depth planes and keep the scene readable in premium animated feature style.",
-     "materialsAndAtmosphere": "Original 3D CGI animated woodland materials with tactile clarity and stylized realism: chunky bark with soft edge wear, velvety moss, springy leaf litter, compacted earth path, occasional exposed roots, matte stones, delicate fern translucency, pliable twigs, glossy conkers tucked among leaves. Everything should feel touchable and weighted, suitable for expressive family animation with real-world material response but simplified readability. The atmosphere is calm, gentle, and slightly anticipatory rather than enchanted—subtle movement implied in leaves and grasses, air warmed by sun, no fog bank, no mist fantasy, no menace. Keep the environment emotionally receptive: a place where small physical sensations and noticed details matter.",
+     "creativeIntent": "A welcoming original 3D CGI animated environment for ages 4–8, designed as a clean Scene Look plate that establishes emotional warmth, safety, wonder, and playful believability without any character presence. The frame should feel premium and cinematic in a family-animation way: readable shapes, inviting scale, simple visual hierarchy, and tactile charm. The environment must support real weight and physical credibility while remaining stylized, soft-edged, and emotionally open.",
+     "storyOfPlace": "An appealing storybook world caught in a calm, present-tense moment, as if the space is waiting for friends to enter. The location should suggest daily life, curiosity, and adventure through environment details alone: clear pathways, friendly silhouettes, gently exaggerated proportions, and purposeful set dressing that implies use without clutter. The place should feel lived-in but pristine, safe yet magical, grounded in a child-readable reality rather than fantasy chaos. No specific canon location is provided, so the world should read as broadly versatile and original, suitable for a warm-hearted animated series.",
+     "paletteAndLighting": "Warm saturated light is the governing principle. Use a sun-kissed family-animation palette with honey golds, soft amber highlights, cheerful sky blues, leafy fresh greens, and controlled pops of coral or red for visual life. Lighting should feel buoyant, optimistic, and directional, with soft global illumination, gentle contact shadows, clean color separation, and a luminous atmosphere that keeps forms legible. Avoid harsh noir contrast, bleak desaturation, muddy mids, or realistic photographic gloom. The light should wrap appealingly across surfaces, creating depth and comfort while preserving bold readability for young viewers.",
+     "materialsAndAtmosphere": "Materials should be tactile, simplified, and beautifully rendered in original 3D CGI: painted wood grain, rounded stone, soft plaster, clean glass, matte ceramics, shaped foliage, brushed fabric accents, and subtly stylized natural textures. Surfaces should show believable wear only in a charming, gentle way—smoothed edges, polished touch points, sun-softened paint—never grime or decay. Atmosphere should be fresh and lightly cinematic, with a delicate sense of air perspective, soft volumetric bloom in the light, and a crisp, inviting cleanliness. The world should feel touchable, safe, and full of handcrafted care.",
      "continuityRules": [
-      "Environment-only plate: no characters, no silhouettes, no props belonging to characters, no implied recent action marks that anchor blocking.",
-      "Do not compose a shot around character placement; provide the scene-wide look of the forest path only.",
-      "Maintain original 3D CGI animation for ages 4-8, Pixar-caliber craft, warm saturated light, bold legible forms, stylized realism.",
-      "Path must remain the dominant organizing element in the environment, readable from foreground into depth and subtly compressed by surrounding growth.",
-      "Forest should feel familiar, child-scaled, and safe, never eerie, haunted, epic, or fantastical-magical in design language alone, no threatening darkness or sharp menace, no hidden eyes or suggestive creatures, no ominous symbolism, no fairy-tale sparkle effects, no storm cues, no exaggerated peril or mystery, no overgrown nightmare tunnel, no high fantasy ruins or decorative worldbuilding that shifts attention away from the emotional realism of an ordinary woodland path, no threatening darkness or sharp menace, no hidden eyes or suggestive creatures, no ominous symbolism, no fairy-tale sparkle effects, no storm cues, no exaggerated peril or mystery, no overgrown nightmare tunnel, no high fantasy ruins or decorative worldbuilding that shifts attention away from the emotional realism of an ordinary woodland path, no threatening darkness or sharp menace, no hidden eyes or suggestive creatures, no ominous symbolism, no fairy-tale sparkle effects, no storm cues, no exaggerated peril or mystery, no overgrown nightmare tunnel, no high fantasy ruins or decorative worldbuilding that shifts attention away from the emotional realism of an ordinary woodland path, no threatening darkness or sharp menace, no hidden eyes or suggestive creatures, no ominous symbolism, no fairy-tale sparkle effects, no storm cues, no exaggerated peril or mystery, no overgrown nightmare tunnel, no high fantasy ruins or decorative worldbuilding that shifts attention away from the emotional realism of an ordinary woodland path."
+      "Environment only; no characters, animals, silhouettes, reflections of people, or implied figure presence in frame.",
+      "Do not compose a hero shot around any character position; the plate must function as a scene-wide look reference rather than a staged performance moment.",
+      "Maintain original 3D CGI family-feature quality, not 2D, not painterly concept art, not photoreal live action.",
+      "Warm saturated illumination, bold readable forms, and child-friendly visual clarity are mandatory.",
+      "Keep the setting original and generic enough to support later storyboarding, with no dependence on unspecified canon details or franchise mimicry."
      ],
-     "providerPrompt": "Environment-only scene look plate for an original 3D CGI animated film for ages 4-8, premium feature quality, stylized realism, warm saturated daylight. A familiar FOREST PATH in daytime, child-scaled woodland, inviting but gently pressurizing in depth. Narrow earthen path with soft wear from repeated small-foot journeys, winding forward through layered trunks, saplings, low branches, roots, ferns, moss, leaf litter, smooth stones and scattered conkers. The route should feel slightly compressed by surrounding growth so the path ahead remains an active presence, but the forest must still feel safe, breathable and emotionally receptive, never scary or magical. Warm amber-gold sunlight filters through leafy canopy, creating lively dappled patches on the ground and bark, with soft green bounce light and a slightly cooler, denser falloff in deeper space. Materials are tactile and touchable: chunky bark, velvety moss, springy leaves, compacted soil, matte stones, translucent fern edges, pliable twigs, glossy chestnut conkers. Subtle atmospheric depth haze for clean plane separation. No characters, no character props, no destination building, no signage, no overt story action, no fantasy effects, no menace. The image should communicate a place where playful relief could briefly happen and then run out while the path still continues ahead."
+     "providerPrompt": "Environment-only Scene Look plate for an original 3D CGI animated series for ages 4–8, Pixar-caliber in overall finish and appeal, with real weight, tactile materials, soft stylization, and warm saturated light. Create a welcoming storybook environment with friendly architecture and/or natural forms, clear pathways, rounded silhouettes, and purposeful set dressing that suggests daily life, curiosity, and adventure without clutter. No characters, no animals, no figure silhouettes, no reflections of people, no performance staging. The image should function as a scene-wide environment look reference only. Use a premium family-animation palette: honey gold sunlight, soft amber highlights, cheerful sky blues, fresh greens, and restrained coral accents. Lighting is sunny, optimistic, directional, and gently cinematic, with soft global illumination, clean color separation, subtle volumetric atmosphere, and appealing contact shadows that keep every form legible. Materials are tactile and stylized: painted wood, rounded stone, soft plaster, clean glass, matte ceramic, shaped foliage, and charming handcrafted textures with gentle believable wear only, never dirt or decay. Overall mood: safe, magical, emotionally open, polished, inviting, and production-ready, with bold readable staging through environment design alone, original IP identity, high-end 3D CGI render, no text, no logos, no split screen, no concept sheet layout."
     },
     "packageRevision": 1,
     "inputSignature": {
@@ -89,15 +111,56 @@
       "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
      },
      "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
-     "sceneContextHash": "dbef0abe255a72926dfe047e086659037dc64001ef02b1f3b80cce6c1126a368"
+     "sceneContextHash": "5f89f6a4787e00f6c39053a750f79b53e1df75707b37140466c50594c060a45a"
     },
     "outcome": "approved",
-    "decisionAt": "2026-09-01T14:23:24",
+    "decisionAt": "2026-09-01T23:36:31",
     "reviewedBy": "StudioAI",
     "note": "Automatically prepared for the selected Scene Look source."
    },
    "candidate": null,
-   "history": []
+   "history": [
+    {
+     "department": "Look Development",
+     "worker": "Cinematographer / DP",
+     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+     "model": "gpt-5.4",
+     "preparedAt": "2026-09-01T14:23:24",
+     "editedAt": null,
+     "preparedBy": "specialist",
+     "creativeDirectingStandardVersion": 4,
+     "sourceHash": "6811ba5b2fde1a2b319f261f7b4ecbbb37ccc03bce8e6ec63009d28d1e94d68f",
+     "output": {
+      "creativeIntent": "A forest path that feels inviting enough for play yet quietly pressurizing in depth: a child-scaled woodland corridor where temporary relief could happen, but where the forward route toward a social destination never stops being present. The place should carry emotional elasticity—capable of giggles, hesitation, and a small honest confession—without becoming threatening or magical. The environment must support the feeling that coping can briefly work here, then run out, while the path ahead still asks something of you.",
+      "storyOfPlace": "Daytime forest path leading toward the Learning Circle somewhere ahead but not visible as a destination landmark. The path is narrow enough to feel personal and slightly compressed, with a gentle forward bend and layered depth created by trunks, low branches, saplings, roots, and brush that subtly pinch the route at intervals. This is a familiar children’s woodland, not wilderness: walked often, soft underfoot, full of natural details a child might notice or play with—fallen leaves, conkers, fern clusters, smooth stones, mossy roots, bark textures, tiny branch snags. The world should suggest recent use and belonging without showing people: a path worn by small repeated journeys. Branch structure matters because someone could plausibly be half-hidden through it later, but for this plate there are no characters and no staged reveal. The path itself is the social problem in space: always present, always continuing, never overwhelming.",
+      "paletteAndLighting": "Warm saturated daylight filtered through a leafy canopy, with optimistic amber-gold sunlight mixed with soft green bounce from foliage. Color script should balance comfort and pressure: honeyed path earth, vivid leaf greens, warm bark browns, mossy olives, touches of chestnut and muted berry tones in forest details. Lighting is dappled and alive, with patterned sun patches across the ground and trunks, but avoid harsh contrast or ominous shadow design. Deeper space should cool slightly and grow denser, so the route ahead feels less certain without becoming dark. Atmosphere is clean and breathable with a faint luminous haze in the distance to separate depth planes and keep the scene readable in premium animated feature style.",
+      "materialsAndAtmosphere": "Original 3D CGI animated woodland materials with tactile clarity and stylized realism: chunky bark with soft edge wear, velvety moss, springy leaf litter, compacted earth path, occasional exposed roots, matte stones, delicate fern translucency, pliable twigs, glossy conkers tucked among leaves. Everything should feel touchable and weighted, suitable for expressive family animation with real-world material response but simplified readability. The atmosphere is calm, gentle, and slightly anticipatory rather than enchanted—subtle movement implied in leaves and grasses, air warmed by sun, no fog bank, no mist fantasy, no menace. Keep the environment emotionally receptive: a place where small physical sensations and noticed details matter.",
+      "continuityRules": [
+       "Environment-only plate: no characters, no silhouettes, no props belonging to characters, no implied recent action marks that anchor blocking.",
+       "Do not compose a shot around character placement; provide the scene-wide look of the forest path only.",
+       "Maintain original 3D CGI animation for ages 4-8, Pixar-caliber craft, warm saturated light, bold legible forms, stylized realism.",
+       "Path must remain the dominant organizing element in the environment, readable from foreground into depth and subtly compressed by surrounding growth.",
+       "Forest should feel familiar, child-scaled, and safe, never eerie, haunted, epic, or fantastical-magical in design language alone, no threatening darkness or sharp menace, no hidden eyes or suggestive creatures, no ominous symbolism, no fairy-tale sparkle effects, no storm cues, no exaggerated peril or mystery, no overgrown nightmare tunnel, no high fantasy ruins or decorative worldbuilding that shifts attention away from the emotional realism of an ordinary woodland path, no threatening darkness or sharp menace, no hidden eyes or suggestive creatures, no ominous symbolism, no fairy-tale sparkle effects, no storm cues, no exaggerated peril or mystery, no overgrown nightmare tunnel, no high fantasy ruins or decorative worldbuilding that shifts attention away from the emotional realism of an ordinary woodland path, no threatening darkness or sharp menace, no hidden eyes or suggestive creatures, no ominous symbolism, no fairy-tale sparkle effects, no storm cues, no exaggerated peril or mystery, no overgrown nightmare tunnel, no high fantasy ruins or decorative worldbuilding that shifts attention away from the emotional realism of an ordinary woodland path, no threatening darkness or sharp menace, no hidden eyes or suggestive creatures, no ominous symbolism, no fairy-tale sparkle effects, no storm cues, no exaggerated peril or mystery, no overgrown nightmare tunnel, no high fantasy ruins or decorative worldbuilding that shifts attention away from the emotional realism of an ordinary woodland path."
+      ],
+      "providerPrompt": "Environment-only scene look plate for an original 3D CGI animated film for ages 4-8, premium feature quality, stylized realism, warm saturated daylight. A familiar FOREST PATH in daytime, child-scaled woodland, inviting but gently pressurizing in depth. Narrow earthen path with soft wear from repeated small-foot journeys, winding forward through layered trunks, saplings, low branches, roots, ferns, moss, leaf litter, smooth stones and scattered conkers. The route should feel slightly compressed by surrounding growth so the path ahead remains an active presence, but the forest must still feel safe, breathable and emotionally receptive, never scary or magical. Warm amber-gold sunlight filters through leafy canopy, creating lively dappled patches on the ground and bark, with soft green bounce light and a slightly cooler, denser falloff in deeper space. Materials are tactile and touchable: chunky bark, velvety moss, springy leaves, compacted soil, matte stones, translucent fern edges, pliable twigs, glossy chestnut conkers. Subtle atmospheric depth haze for clean plane separation. No characters, no character props, no destination building, no signage, no overt story action, no fantasy effects, no menace. The image should communicate a place where playful relief could briefly happen and then run out while the path still continues ahead."
+     },
+     "packageRevision": 1,
+     "inputSignature": {
+      "stage": "look",
+      "model": "gpt-5.4",
+      "skillHashes": {
+       "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      },
+      "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+      "sceneContextHash": "dbef0abe255a72926dfe047e086659037dc64001ef02b1f3b80cce6c1126a368"
+     },
+     "outcome": "superseded",
+     "decisionAt": "2026-09-01T14:23:24",
+     "reviewedBy": "StudioAI",
+     "note": "Automatically prepared for the selected Scene Look source.",
+     "supersededAt": "2026-09-01T23:36:31"
+    }
+   ]
   }
  }
 }

@@ -205,10 +205,18 @@ def _storyboard_status(scene, episode, intake):
     try:
         scene_number = int("".join(ch for ch in str(scene) if ch.isdigit()) or "0")
         changed_scene = int("".join(ch for ch in str(scope.get("scene")) if ch.isdigit()) or "0")
+        from_scene = int("".join(ch for ch in str(scope.get("fromScene")) if ch.isdigit()) or "0")
+        through_scene = int("".join(ch for ch in str(scope.get("throughScene")) if ch.isdigit()) or "0")
     except (TypeError, ValueError):
-        scene_number = changed_scene = 0
+        scene_number = changed_scene = from_scene = through_scene = 0
+    outside_replaced_scene_range = bool(
+        scope.get("kind") == "scene-range-replacement" and scene_number and
+        ((from_scene and scene_number < from_scene) or
+         (through_scene and scene_number > through_scene))
+    )
     scoped_previous = bool(
-        ((scope.get("kind") == "dialogue-format-cleanup") or
+        (outside_replaced_scene_range or
+         (scope.get("kind") == "dialogue-format-cleanup") or
          (scope.get("kind") == "dialogue-correction" and scene_number and
           changed_scene and scene_number < changed_scene)) and
         source_version)

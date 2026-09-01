@@ -1,7 +1,7 @@
 {
  "episode": "Ep2",
  "canonVersion": "1.0",
- "builtAt": "2026-09-01T13:49:00",
+ "builtAt": "2026-09-01T23:23:24",
  "sources": {
   "showBible": {
    "path": "shows/crystal-bears/canon/LOCKED_CANON.md",
@@ -57,7 +57,7 @@
   },
   "scriptPackage": {
    "path": "cb-output/Ep2_Bo_and_the_Brave_Step_beat_package.json",
-   "sha256": "78ba911d0d5b2dca3057a0d03012677398bd6458b8e2bfdce77520b8267da8a1"
+   "sha256": "f333506fe4f76ad92dacbbc61d9e30aa3926add5b4435235fed724cd5b07d332"
   }
  },
  "gaps": [],

@@ -189,9 +189,16 @@ BO/KEEN
 
 POOF! The tail does The Thing again.
 
+BO & KEEN
+Together.
+
 BO
 3,2,1 …
 POOF! The tail does The Thing again. Bo giggles.
+
+BO
+I’m STILL worried about going to the Learning Circle.
+He slowly sits on a nearby fallen log. Keen gently sits on a fallen log beside him.
 
 AIDA
 Every single time.
@@ -206,14 +213,20 @@ BEAT.
         {"i": 0, "scene": 4, "type": "dialogue", "speaker": "Bo/Keen",
          "text": "3, 2, 1 …", "voiceTreatment": "group_chorus",
          "chorusMembers": ["Bo", "Keen"]},
-        {"i": 2, "scene": 4, "type": "dialogue", "speaker": "Bo",
+        {"i": 2, "scene": 4, "type": "dialogue", "speaker": "Bo/Keen",
+         "text": "Together.", "voiceTreatment": "group_chorus",
+         "chorusMembers": ["Bo", "Keen"]},
+        {"i": 3, "scene": 4, "type": "dialogue", "speaker": "Bo",
          "text": "3,2,1 …"},
-        {"i": 4, "scene": 4, "type": "dialogue", "speaker": "Aida",
+        {"i": 5, "scene": 4, "type": "dialogue", "speaker": "Bo",
+         "text": "I’m STILL worried about going to the Learning Circle."},
+        {"i": 7, "scene": 4, "type": "dialogue", "speaker": "Aida",
          "text": "Every single time."},
     ]
     assert action == [
         "POOF! The tail does The Thing again.",
         "POOF! The tail does The Thing again. Bo giggles.",
+        "He slowly sits on a nearby fallen log. Keen gently sits on a fallen log beside him.",
         "BEAT.",
     ]
 

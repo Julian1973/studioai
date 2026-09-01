@@ -160,6 +160,85 @@ def test_scoped_correction_does_not_carry_the_changed_scene(tmp_path, monkeypatc
                       "storyboard-script-version-mismatch"}
 
 
+def test_scene_range_replacement_keeps_storyboard_before_replaced_range_current(
+        tmp_path, monkeypatch):
+    inputs = {
+        "scriptVersionId": "sha256:" + "1" * 64,
+        "beatPackageDigest": "old-beat-digest",
+        "sceneNumber": "3",
+        "sourceBeatIds": ["beat-3"],
+        "shotIds": ["S3.SH1"],
+    }
+    storyboard = {
+        "sceneNumber": "3", "approvalState": "approved",
+        "sourceScript": {"scriptVersionId": inputs["scriptVersionId"]},
+        "beats": [{"sourceBeatId": "beat-3"}],
+        "shots": [{"shotId": "S3.SH1"}],
+        "inputSignature": cb_lineage.dependency_signature(
+            "scene-storyboard-snapshot", inputs),
+    }
+    path = tmp_path / "storyboard.json"
+    path.write_text(json.dumps(storyboard), encoding="utf-8")
+    monkeypatch.setattr(cb_render, "_storyboard_path", lambda scene, episode: path)
+    intake = {
+        "canonicalCurrent": True,
+        "scriptVersionId": "sha256:" + "4" * 64,
+        "previousScriptVersionId": inputs["scriptVersionId"],
+        "scriptChangeScope": {
+            "kind": "scene-range-replacement",
+            "fromScene": "4",
+            "throughScene": "8",
+        },
+        "canonicalBeatPackageDigest": "new-beat-digest",
+        "canonProfileDigests": {"storyboard": None},
+    }
+
+    _storyboard, current, reason = cb_state._storyboard_status("3", "Ep2", intake)
+
+    assert current is True
+    assert reason is None
+
+
+def test_scene_range_replacement_marks_replaced_scene_storyboard_stale(
+        tmp_path, monkeypatch):
+    inputs = {
+        "scriptVersionId": "sha256:" + "1" * 64,
+        "beatPackageDigest": "old-beat-digest",
+        "sceneNumber": "4",
+        "sourceBeatIds": ["beat-4"],
+        "shotIds": ["S4.SH1"],
+    }
+    storyboard = {
+        "sceneNumber": "4", "approvalState": "approved",
+        "sourceScript": {"scriptVersionId": inputs["scriptVersionId"]},
+        "beats": [{"sourceBeatId": "beat-4"}],
+        "shots": [{"shotId": "S4.SH1"}],
+        "inputSignature": cb_lineage.dependency_signature(
+            "scene-storyboard-snapshot", inputs),
+    }
+    path = tmp_path / "storyboard.json"
+    path.write_text(json.dumps(storyboard), encoding="utf-8")
+    monkeypatch.setattr(cb_render, "_storyboard_path", lambda scene, episode: path)
+    intake = {
+        "canonicalCurrent": True,
+        "scriptVersionId": "sha256:" + "4" * 64,
+        "previousScriptVersionId": inputs["scriptVersionId"],
+        "scriptChangeScope": {
+            "kind": "scene-range-replacement",
+            "fromScene": "4",
+            "throughScene": "8",
+        },
+        "canonicalBeatPackageDigest": "new-beat-digest",
+        "canonProfileDigests": {"storyboard": None},
+    }
+
+    _storyboard, current, reason = cb_state._storyboard_status("4", "Ep2", intake)
+
+    assert current is False
+    assert reason in {"storyboard-input-signature-mismatch",
+                      "storyboard-script-version-mismatch"}
+
+
 def test_same_scene_amendment_identifies_only_the_named_shot():
     old = "sha256:" + "1" * 64
     intake = {

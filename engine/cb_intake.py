@@ -258,7 +258,7 @@ _PAREN_ONLY_RE = re.compile(r"^\s*\(.*\)\s*$")
 _CONTD_RE = re.compile(r"\s*\(CONT'D\)\s*$", re.IGNORECASE)
 _APOS_RE = re.compile("[‘’ʼ′]")   # curly/prime apostrophe variants
 _GROUP_CUE_RE = re.compile(
-    r"^\s*(?:\d+\s*)?(.+?\s*/\s*.+?)(?:\s+\(CONT'D\))?\s*$", re.IGNORECASE)
+    r"^\s*(?:\d+\s*)?(.+?\s*(?:/|&)\s*.+?)(?:\s+\(CONT'D\))?\s*$", re.IGNORECASE)
 
 
 def _norm_apos(s):
@@ -330,7 +330,7 @@ def parse_script(text, roster=None, log=print):
         if not group:
             return None
         members = []
-        for raw_name in group.group(1).split("/"):
+        for raw_name in re.split(r"\s*(?:/|&)\s*", group.group(1)):
             canonical = name_by_upper.get(raw_name.strip().upper())
             if not canonical or canonical == "ALL":
                 return None
@@ -416,7 +416,13 @@ def parse_script(text, roster=None, log=print):
                 stage_bleed = (re.match(
                     r"^(?:[A-Z][A-Z'’-]{1,}[.!?…]+\s+(?:The|A|An|His|Her|Their)\s+[a-z]|"
                     r"BEAT\.\s*$)", cand, re.IGNORECASE) if text_lines else None)
-                if bleed or stage_bleed:
+                third_person_action_bleed = (re.match(
+                    r"^(?:He|She|They)\s+(?:slowly|gently|quickly|smiles?|glances?|"
+                    r"looks?|sits?|stands?|walks?|moves?|turns?|places?|gives?|takes?|"
+                    r"stares?|freezes?|softens?|nods?|shrugs?|reaches?|leans?|steps?|"
+                    r"continues?|holds?|grips?)\b", cand, re.IGNORECASE)
+                    if text_lines else None)
+                if bleed or stage_bleed or third_person_action_bleed:
                     log(f"ACTION-BLEED GUARD fired — stopped {speaker}'s dialogue before "
                         f"a directly-following, no-blank-line action sentence: {cand!r}")
                     break

@@ -56,11 +56,16 @@ def test_later_scene_dialogue_correction_keeps_earlier_package_current(tmp_path,
     assert status["scriptCurrent"] is True
 
 
-def test_edit_in_scene_three_keeps_other_scene_package_current(tmp_path, monkeypatch):
+def test_edit_in_scene_three_keeps_every_other_scene_package_current(tmp_path, monkeypatch):
     old_text = (
         "INT. COVE - DAY 1\n\nKEEN\nOne.\n\n"
         "INT. CLEARING - DAY 2\n\nKEEN\nTwo.\n\n"
-        "INT. OAK - DAY 3\n\nBO\nThree.\n")
+        "INT. OAK - DAY 3\n\nBO\nThree.\n\n"
+        "EXT. PATH - DAY 4\n\nKEEN\nFour.\n\n"
+        "EXT. PATH - DAY 5\n\nKEEN\nFive.\n\n"
+        "INT. CIRCLE - DAY 6\n\nBO\nSix.\n\n"
+        "INT. CIRCLE - DAY 7\n\nBO\nSeven.\n\n"
+        "EXT. GARDEN - DAY 8\n\nKEEN\nEight.\n")
     new_text = old_text.replace("Three.", "Three changed.")
     old_source = tmp_path / "old-script.txt"
     new_source = tmp_path / "new-script.txt"
@@ -86,7 +91,8 @@ def test_edit_in_scene_three_keeps_other_scene_package_current(tmp_path, monkeyp
     monkeypatch.setattr(cb_render, "ROOT", tmp_path)
     monkeypatch.setattr(cb_render, "SCRIPT_STORE", _Store(current))
 
-    assert cb_render.lineage_status(package, "1", "Ep2")["current"] is True
+    for scene in ("1", "2", "4", "5", "6", "7", "8"):
+        assert cb_render.lineage_status(package, scene, "Ep2")["current"] is True
     assert cb_render.lineage_status(package, "3", "Ep2")["current"] is False
 
 

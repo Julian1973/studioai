@@ -2269,9 +2269,11 @@ async function sceneRoster(episode){
   try{
     const ep=episode||SH_EP||((CUR&&CUR.number)?("Ep"+CUR.number):"Ep1");
     const j=await (await fetch(BASE+"/api/scene-roster?episode="+encodeURIComponent(ep),{cache:"no-store"})).json();
-    return (j.scenes||[]).map(s=>({scene:String(s.sceneNumber),
+    const rows=(j.scenes&&j.scenes.length)?j.scenes:(j.carriedScenes||[]);
+    return rows.map(s=>({scene:String(s.sceneNumber),
                                      name:s.location?(s.location+(s.time?" — "+s.time:"")):("Scene "+s.sceneNumber),
-                                     location:s.location||"",plate:null,beatCount:s.beatCount||0}))
+                                     location:s.location||"",plate:null,beatCount:s.beatCount||0,
+                                     shotCount:s.shotCount||0,carried:!!s.carried}))
       .sort((a,b)=>(parseInt(a.scene)||0)-(parseInt(b.scene)||0));
   }catch(e){return [];}
 }
@@ -2644,7 +2646,7 @@ async function loadBoard(){
       let latestFrame=null;
       for(const s of shots){ const m=media[s.shotId]; if(m&&(m.finalFrame||m.keyframe)) latestFrame=m.finalFrame||m.keyframe; }
       if(!latestFrame&&r.plate) latestFrame="/engine/media/"+r.plate;
-      return Object.assign({},r,{bundle,stages,latestFrame,status:sceneCardStatus(stages)});
+      return Object.assign({},r,{bundle,stages,latestFrame,status:sceneCardStatus(stages),carried:!!r.carried});
     });
   }finally{ BOARD_LOADING=false; }
 }
@@ -2959,8 +2961,11 @@ function renderBoardBody(){
   const createButton=runningSceneJobs||!incomplete?"":`<div style="display:flex;justify-content:flex-end;margin:0 0 12px">
     <button type="button" class="btn" onclick="startEpisodeProduction()">Retry unfinished scene directions</button>
   </div>`;
+  const carriedBanner=(BOARD_SCENES||[]).some(s=>s.carried)
+    ?outcomePanelHTML({tone:"review",kicker:"Recovered production",title:"Earlier scene work is still here",body:"The active script needs Story & Direction refreshed, but existing scene packages remain available for review and next-step handoff.",actions:[{label:"Run Story & Direction",onclick:"storyIntakeRun()"},{label:"Script",onclick:"go('script')",kind:"secondary"}]})
+    :"";
   el.className="";
-  el.innerHTML=createButton+boardStoryboardProgressHTML()+triage+bar+(shown.length?`<div class="sceneboard">${shown.map(sceneCardHTML).join("")}</div>`
+  el.innerHTML=carriedBanner+createButton+boardStoryboardProgressHTML()+triage+bar+(shown.length?`<div class="sceneboard">${shown.map(sceneCardHTML).join("")}</div>`
                                 :outcomePanelHTML({title:"No scenes match this filter",body:"Clear the filter to return to every available production outcome.",actions:[{label:"Show all scenes",onclick:"BOARD_FILTER='all';renderBoardBody()"}]}));
   startStoryboardBoardPoll();
 }

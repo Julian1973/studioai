@@ -132,6 +132,35 @@ def episode_vision_path(episode):
     return CREATIVE_OUT / f"{episode}_episode_vision.json"
 
 
+def carried_scene_roster(episode):
+    scenes = []
+    for pkg_path in sorted(OUT.glob(f"{episode}_scene*_production_package.json")):
+        try:
+            pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        number = str(pkg.get("sceneNumber") or "").strip()
+        if not number:
+            match = re.search(r"_scene(\d+)_production_package\.json$", pkg_path.name)
+            number = match.group(1) if match else ""
+        if not number:
+            continue
+        scenes.append({
+            "sceneNumber": number,
+            "location": pkg.get("sceneName") or "",
+            "time": pkg.get("time") or "",
+            "beatCount": len(pkg.get("beats") or []),
+            "shotCount": len(pkg.get("shots") or []),
+            "package": pkg_path.name,
+            "carried": True,
+            "reason": "existing-production-package",
+        })
+    return sorted(
+        scenes,
+        key=lambda item: int(item["sceneNumber"])
+        if str(item["sceneNumber"]).isdigit() else str(item["sceneNumber"]))
+
+
 # ── scene roster — the Scene Board's ONLY source of "which scenes exist" ────────────────
 def scene_roster(episode="Ep1"):
     """Read-only view of the CANONICAL beat package's own scenes, for the Studio's Scene
@@ -142,11 +171,13 @@ def scene_roster(episode="Ep1"):
     pkgs = canonical_package_glob(episode)
     if not pkgs:
         return {"episode": episode, "hasPackage": False, "package": None, "scenes": [],
+                "carriedScenes": carried_scene_roster(episode),
                 "reason": "story-intake-not-approved"}
     status = intake_status(episode)
     if not status.get("canonicalCurrent"):
         return {"episode": episode, "hasPackage": False, "package": pkgs[-1].name,
-                "scenes": [], "reason": "canonical-beat-package-stale",
+                "scenes": [], "carriedScenes": carried_scene_roster(episode),
+                "reason": "canonical-beat-package-stale",
                 "canonicalCurrent": False}
     pkg_path = pkgs[-1]
     pkg = json.loads(pkg_path.read_text())

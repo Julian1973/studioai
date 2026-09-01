@@ -1,5 +1,13 @@
 # Emission Conformance Matrix
 
+> **T49 (2026-09-01, RESTRUCTURE_SPEC_PROJECTS.md):** the per-archetype manifest checks and the two
+> preflight triggers (feature introducers → R16; retroactive pride → R12) are no longer spelled in
+> `engine/cb_emission_standard.py`. They are this project's own law — `projects/crystal-bears/laws/emission_checks.json`
+> (declared as `laws.emissionChecks` in the project profile) — evaluated by the engine exactly as before.
+> Edit the checks there; the labels in the tables below are the `label` fields of that file. A project
+> that declares no checks file runs only the structural "2-4 named shots with end states" check.
+
+
 Canonical contract: `AAA_PROMPT_STANDARD.md`, Part 8, `aaa-part-8-v2.1`.
 `IMPLEMENTED+TESTED` means a deterministic check and regression test exist. `OPEN`
 means the control is missing, advisory-only, or has not yet declared and tested that it

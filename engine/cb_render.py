@@ -670,8 +670,9 @@ def _episode_character_state(character, shot, scene, episode):
     A transition shot keeps the incoming identity reference; the action and explicit prop
     reference create the new state. Subsequent shots inherit the new identity reference.
     """
-    if _norm(character) != _norm("Keen") or str(episode) != "Ep1":
-        return None
+    # T51: no character or episode is named here — a character has an identity state when the
+    # project's continuity.json declares characterStates for it in this episode, and the text
+    # markers that reveal a state come from the project's continuity_rules.json (stateMarkers).
     text = _shot_continuity_text(shot or {})
     try:
         continuity = json.loads(pathlib.Path(P.CONTINUITY).read_text())
@@ -679,6 +680,8 @@ def _episode_character_state(character, shot, scene, episode):
         continuity = {}
     records = (((continuity.get(str(episode)) or {}).get("characterStates") or {})
                .get(_resolve_char(character, _characters_cfg())) or [])
+    if not records:
+        return None
     try:
         scene_number = int(str(scene))
     except (TypeError, ValueError):
@@ -704,26 +707,28 @@ def _episode_character_state(character, shot, scene, episode):
         transition_order = tuple(map(int, transition_match.groups()))
         shot_order = tuple(map(int, shot_match.groups()))
         if shot_order[0] == transition_order[0] and shot_order <= transition_order:
-            return ((scene_record or {}).get("incomingState") or
-                    (scene_record or {}).get("wristbandState"))
+            return ((scene_record or {}).get("incomingState") or _record_state(scene_record))
         if shot_order[0] == transition_order[0]:
-            return ((scene_record or {}).get("afterTransitionState") or
-                    (scene_record or {}).get("wristbandState"))
+            return ((scene_record or {}).get("afterTransitionState") or _record_state(scene_record))
 
-    if any(marker in text for marker in (
-            "crystal-set wristbands", "aquamarine stones seated",
-            "wearing the crystal-set", "wristbands now contain")):
-        return "crystal-set-wristbands"
-    if any(marker in text for marker in (
-            "bare wrists", "wrists remain bare", "wrists are still bare",
-            "in keen's paws only", "may put on the inherited wristbands")):
-        return "no-cuffs"
-    if any(marker in text for marker in (
-            "now wearing the inherited wristbands", "wearing the inherited wristbands",
-            "worn, vacant bands", "vacant wristbands")):
-        return "vacant-wristbands"
+    import project_laws
+    marked = project_laws.state_from_markers(text)
+    if marked:
+        return marked
+    return _record_state(scene_record)
 
-    return (scene_record or {}).get("wristbandState")
+
+def _record_state(record):
+    """The declared state of a continuity record: `state`, or the project's own legacy key name
+    (Crystal Bears wrote `wristbandState`) — any key ending in "State" that is not one of the
+    transition fields."""
+    record = record or {}
+    if record.get("state"):
+        return record["state"]
+    for key, value in record.items():
+        if key.endswith("State") and key not in ("incomingState", "afterTransitionState") and value:
+            return value
+    return None
 
 
 def _provider_identity_record(name, characters_cfg, usage="keyframe", *, shot=None,
@@ -2607,14 +2612,18 @@ def _animation_reference_contract(attachment_plan, shot, audio_path=None):
 _NON_IDENTITY_IMAGE_ROLES = {
     "scene plate", "opening keyframe", "previous shot final frame",
     OPENING_COMPOSITION_ROLE, CLOSING_COMPOSITION_ROLE,
-    POSED_INTEGRATION_ROLE, CHARACTER_SCALE_CONTROL_ROLE, "Bo vision plate",
+    POSED_INTEGRATION_ROLE, CHARACTER_SCALE_CONTROL_ROLE,
 }
+# A registered supplementary staging image for an inner vision / dream / flashback: the role
+# is "<subject> vision plate" (Crystal Bears registers "Bo vision plate"); any project may
+# register its own under the same suffix.
+_VISION_PLATE_SUFFIX = " vision plate"
 
 
 def _is_non_identity_image_role(role):
     role = str(role or "").strip()
     return (role in _NON_IDENTITY_IMAGE_ROLES or role.startswith("prop:")
-            or role.startswith("location:"))
+            or role.startswith("location:") or role.endswith(_VISION_PLATE_SUFFIX))
 
 
 def _reference_slot_policy():
@@ -2746,7 +2755,7 @@ def _slot_path_for_role(role, anchor_path, scene, episode, characters_cfg, shot=
                 f"REFUSED — approved supplementary location reference {role!r} is not "
                 f"registered for {episode} scene {scene}")
         path = matches[0]["path"]
-    elif role == "Bo vision plate":
+    elif str(role).endswith(_VISION_PLATE_SUFFIX):
         candidates = cb_asset_registry.resolve_assets(
             episode, scene, shot_id=(shot or {}).get("shotId"),
             kinds={"reference_image"})
@@ -3589,6 +3598,21 @@ def apply_scoped_dialogue_correction(scene, shot_id, old_occurrence_id, old_exac
     return record
 
 
+def _dialogue_binding_text(lines):
+    """The performance binding for a corrected spoken plan, derived from the lines themselves:
+    every chorus occurrence (a line with chorusMembers) is named as a synchronous chorus of its
+    own members — never a show-specific sentence spelled in code."""
+    parts = ["Perform only the ordered approved dialogue occurrences."]
+    for index, line in enumerate(lines, start=1):
+        members = [str(m) for m in (line.get("chorusMembers") or []) if str(m).strip()]
+        if members:
+            position = "opening" if index == 1 else f"line {index}"
+            parts.append(f"The {position} occurrence is a synchronous "
+                         f"{'-and-'.join(members)} chorus.")
+    parts.append("Screenplay action, sound labels and BEAT are silent.")
+    return " ".join(parts)
+
+
 def apply_scoped_voice_contract_correction(scene, shot_id, corrected_lines,
                                            script_version_id,
                                            previous_script_version_id,
@@ -3661,9 +3685,7 @@ def apply_scoped_voice_contract_correction(scene, shot_id, corrected_lines,
         previous_end = end
 
     shot["dialogueLines"] = normalized
-    shot["dialogueBinding"] = (
-        "Perform only the ordered approved dialogue occurrences. The opening countdown is "
-        "a synchronous Bo-and-Keen chorus. Screenplay action, sound labels and BEAT are silent.")
+    shot["dialogueBinding"] = _dialogue_binding_text(normalized)
     shot["voiceDirectorBrief"] = [{
         "dialogueOccurrenceId": line["dialogueOccurrenceId"],
         "sourceEventId": line["sourceEventId"],
@@ -7865,6 +7887,7 @@ def _require_engine_rules(pkg, shot, direction=None, cinematography=None):
 
 def _seedance_pipeline_task(shot, specialist, attached_contract):
     """Translate current signed Studio direction into the generic zero-spend compiler contract."""
+    import project_laws
     specialist = specialist or {}
     provider_prompt = str(specialist.get("providerPrompt") or "")
     provider_prompt = _hide_dialogue_timing_ranges_for_prompt_check(provider_prompt)
@@ -7936,8 +7959,9 @@ def _seedance_pipeline_task(shot, specialist, attached_contract):
         + emission.SINGLE_INSTANCE_DIALOGUE_LOCK + "\n" +
         "\n".join(emission.dialogue_placement_line(line)
                   for line in spoken_lines) +
-        "\nSeedance may generate non-dialogue ambience, foley, comedy impacts, wing "
-        "buzzes, pollen poofs, plant movement, and low supportive underscore."
+        "\nSeedance may generate non-dialogue ambience, foley, comedy impacts, "
+        + project_laws.nonverbal_sound_palette("designed sound effects")
+        + ", and low supportive underscore."
         if dialogue else
         "No dialogue. Seedance may generate ambience, foley, designed sound effects, "
         "and low supportive underscore."

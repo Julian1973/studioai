@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Authoritative, zero-spend production readiness for Crystal Bears Studio.
+"""Authoritative, zero-spend production readiness for the studio.
 
 The renderer owns approval freshness. This module only composes those checks into one scene
 and per-shot state document for the API, preflight report and UI. It never mutates a package

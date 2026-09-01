@@ -14,7 +14,8 @@ declared in the profile does not exist as far as the engine is concerned.
     CONFIG            the canon/ data directory
     CHARS / LOCATIONS / CONTINUITY / EPISODE_ARC / GAG_LOCKS / BANNED_VOCABULARY / IDENTITY_PACKS
     VOICE_CARDS / SFX_LIBRARY / SFX_DIR / BEAT_COSTS / LOCK_POLICY / CANON_LOCK / REFERENCE_SLOT_POLICY
-    STYLE_LAW / WING_LAW / FORBIDDEN_ELEMENTS / EMISSION_CHECKS / CAST_VOCABULARY   (None if undeclared)
+    STYLE_LAW / WING_LAW / FORBIDDEN_ELEMENTS / EMISSION_CHECKS / CAST_VOCABULARY / CONTINUITY_RULES
+                      (None if undeclared)
     CREATIVE          the project's creative/ (taste canons, exemplars, corpus)
     LEARNING / EXEMPLARS / DAILIES_LIBRARY / VOICE_REGISTERS / VOICE_RULEBOOK / VOICE_PLAYBOOK
     ASSETS            the project's reference media root (turnarounds, plates) — None if undeclared
@@ -79,6 +80,7 @@ WING_LAW = _s(_LAWS.get("wingLaw"))
 FORBIDDEN_ELEMENTS = _s(_LAWS.get("forbiddenElements"))
 EMISSION_CHECKS = _s(_LAWS.get("emissionChecks"))
 CAST_VOCABULARY = _s(_LAWS.get("castVocabulary"))
+CONTINUITY_RULES = _s(_LAWS.get("continuityRules"))
 
 CREATIVE = _s(PROFILE.creative_root)
 LEARNING = _s(PROFILE.creative_path("learning"))

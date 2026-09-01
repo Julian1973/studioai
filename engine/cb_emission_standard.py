@@ -18,6 +18,25 @@ class Finding:
     deduction: float
 
 
+def _project_emission_checks() -> dict:
+    """laws/emission_checks.json for the active project, or {} (T49)."""
+    try:
+        import project_laws
+        return project_laws.emission_checks()
+    except Exception:
+        return {}
+
+
+def _project_preflight() -> dict:
+    pf = _project_emission_checks().get("preflight")
+    return pf if isinstance(pf, dict) else {}
+
+
+def _project_archetype_checks(archetype: str) -> list:
+    items = (_project_emission_checks().get("archetypes") or {}).get(archetype) or []
+    return [i for i in items if isinstance(i, dict)]
+
+
 def _has(text: str, pattern: str) -> bool:
     return bool(re.search(pattern, text, re.I | re.M | re.S))
 
@@ -64,7 +83,9 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
                 "Give every reference a negative scope.", 2.0)
             break
 
-    feature = _has(prompt, r"moustache|mustache|new visible feature|pollen marks|smears")
+    # T49: the words that mark a salient new feature are the PROJECT's own (laws/emission_checks.json).
+    _pf = _project_preflight()
+    feature = bool(_pf.get("featureIntroducers")) and _has(prompt, str(_pf["featureIntroducers"]))
     if feature and not _has(prompt, r"ATTRIBUTE OWNERSHIP"):
         add("FATAL", "R16", "A salient feature is introduced without an ownership block.",
             "Name the feature owner and explicitly keep every other character clean.", 2.0)
@@ -120,7 +141,7 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
         # otherwise valid direction before the compiler can apply the typed rule.
         add("POLISH", "button-hold", "No protected post-line hold is visible in the specialist draft.",
             "The deterministic emitter must add holds to non-immediate recognition/reaction lines.", 0.25)
-    if _has(prompt, r"double .*tuck|Nailed it") and not _has(
+    if _pf.get("retroactivePride") and _has(prompt, str(_pf["retroactivePride"])) and not _has(
             prompt, r"(?:checks?|checking|eyes dart|looks? (?:left|down)|pats? (?:himself|his))"):
         add("FIX", "R12", "Retroactive pride has no self-check before the emotion.",
             "Show the character verify their state before performing pride.", 0.75)
@@ -160,55 +181,25 @@ def manifest_checks(archetype: str, prompt: str) -> dict:
 
     check("2-4 named shots with end states", value=2 <= len(shots) <= 4 and
           all(_has(shot, r"End state:\s*\S") for shot in shots))
-    if archetype == "false-triumph-chase":
-        check("four shots", value=len(shots) == 4)
-        check("three parallax speeds", r"three (?:parallax )?speeds|world passes at three speeds")
-        check("passing landmarks", r"passes .*?(?:flower|stem|bloom).*?(?:vanish|disappear).*?behind")
-        check("scale change and camera surge", r"pulls ahead.*?(?:shrink|smaller).*?camera surges")
-        check("foreground lens wipe", r"foreground .*wipe.*?(?:lens|frame)")
-        check("three escalating contacts", r"three .*contacts.*?(?:worse|larger|increas)|first .*second .*third")
-        check("maximum-load cut", r"maximum (?:leaf )?load|loaded spring.*End state")
-        check("isolated full aerial", value=len(shots) >= 3 and _has(shots[2], r"full aerial|every rotation"))
-        check("self-check before pride", value=len(shots) >= 4 and _has(shots[3], r"checks?|eyes dart|looks down|pats his"))
-        check("dialogue and post-line hold", value=len(shots) >= 4 and "{" in shots[3] and _has(shots[3], r"full beat after"))
-        check("held witness payoff", value=len(shots) >= 4 and _has(shots[3], r"cut to .*Zenny|witness") and _has(shots[3], r"hold"))
-        check("acting left, witness right", r"frame-left.*frame-right|stages screen-left.*screen-right")
-        check("action exclusions lifted", value=not _has(prompt, r"\bno cuts\b|\bno handheld\b"))
-        check("no duplicated shot action", value=not _has(prompt, r"Story lock:|Gag action \(|Physics \("))
-    elif archetype == "reveal-and-deadpan-verdict":
-        check("attribute ownership", r"ATTRIBUTE OWNERSHIP.*?only.*?(?:clean|no pollen)")
-        check("feature absent in opening", r"no (?:pollen )?(?:mark|moustache).*?(?:upper lip|face)|faces? .*clean")
-        check("overcommitted arrival", r"launches? .*too hard|overshoots?.*arrives? .*faster than .*stop")
-        check("cut before reveal", r"Cut before (?:he|the).*?(?:withdraw|result|visible)")
-        check("close reveal and presentation", r"close-up.*?(?:reveal|pulls).*?(?:present|chin)")
-        check("non-owner remains clean", r"Zenny.*?(?:face|fur).*?clean")
-        check("eye-line feature and back", r"eyes .*?(?:moustache|feature).*?(?:back|meet)")
-        check("micro-tell before line", r"corner .*mouth|micro-tell|nearly losing")
-        check("hold after line", r"hold.*?full beat after")
-        check("harvestable end state", r"End state:.*?harvest")
-    elif archetype == "escalation-into-verdict":
-        check("attribute ownership", r"ATTRIBUTE OWNERSHIP")
-        check(
-            "opening from previous end",
-            r"(?:opening|first) frame.*?(?:final frame of the previous|previous shot(?:'s|’s) approved final frame)",
-        )
-        check("correction worsens feature", r"wipe.*?(?:wider|worse|messier)")
-        check("self evidence before panic", r"looks? .*?(?:paw|body).*?(?:panic|expression drops)")
-        check(
-            "contacts escalate",
-            r"(?:first|clips? a flower)[\s\S]*?(?:a )?second harder[\s\S]*?(?:doubles|larger)",
-        )
-        check("button pose before line and hold", r"pose .*?(?:lands|holds).*?before .*?speaks.*?full beat after")
-        check("reactor cut after line", r"after .*?line .*?(?:finished|ends).*?cut to Zenny")
-        check("turn names both states", r"eye-roll[\s\S]{0,180}?softens[\s\S]{0,80}?into[\s\S]{0,80}?smile")
-    elif archetype == "environment-turn":
-        check("two environment states, same geometry", r"BOTH states.*?Geometry.*?identical|TWO states.*?identical geometry")
-        check("world changes first", r"environment before either character reacts|world .*?before .*?character")
-        check("vegetation posture changes", r"flowers .*?(?:furl|droop|clos)|vegetation .*?posture")
-        check("physical betrayal before cover line", r"wings? hitch.*?(?:exhales?|rebrands?).*?\{")
-        check("reader stills and listens", r"Zenny.*?(?:stills?|quiet).*?listen")
-        check("hold after quiet line", r"Hold .*?after the line ends")
-        check("final still hold and fade", r"(?:no further movement|nothing else acts).*?(?:fade|Slow fade)")
+    # T49: the per-archetype checks are the PROJECT's own (laws/emission_checks.json → archetypes);
+    # the engine only evaluates them. A project with no checks for an archetype runs the structural
+    # check above and nothing else.
+    for item in _project_archetype_checks(archetype):
+        label = str(item.get("label") or "check")
+        if "shotCount" in item:
+            check(label, value=len(shots) == int(item["shotCount"]))
+        elif "shot" in item:
+            i = int(item["shot"])
+            ok = len(shots) > i and _has(shots[i], str(item.get("pattern") or ""))
+            if ok and item.get("brace"):
+                ok = "{" in shots[i]
+            if ok and item.get("andPattern"):
+                ok = _has(shots[i], str(item["andPattern"]))
+            check(label, value=ok)
+        elif "notPattern" in item:
+            check(label, value=not _has(prompt, str(item["notPattern"])))
+        else:
+            check(label, str(item.get("pattern") or ""))
     passed = sum(1 for _, ok in checks if ok)
     return {
         "archetype": archetype,

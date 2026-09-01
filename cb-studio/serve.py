@@ -642,6 +642,35 @@ def _load_workbench_state():
     return _empty_workbench_state()
 
 
+def _asset_group_tokens(group, generic):
+    """Tokens that file an asset-library entry under a group: the engine's generic words plus the
+    project's own (cast_vocabulary.json -> assetGroupTokens.<group>) — never a show's place or prop
+    names spelled here."""
+    try:
+        import project_laws
+        own = [str(t).casefold() for t in
+               ((project_laws.cast_vocabulary().get("assetGroupTokens") or {}).get(group) or [])]
+    except Exception:
+        own = []
+    return tuple(dict.fromkeys([*generic, *own]))
+
+
+def _pronunciation_only_message(canonical_text, provider_spelling):
+    """The 409 body for an edit that only re-spells a name the provider layer already pronounces:
+    names the project's own override pair, never a spelling hard-coded here."""
+    try:
+        import project_laws
+        overrides = project_laws.pronunciation_overrides()
+    except Exception:
+        overrides = {}
+    for name, spoken in overrides.items():
+        if name in str(canonical_text or "") and spoken in str(provider_spelling or ""):
+            return (f"Keep {name} in Approved spoken words. ElevenLabs already receives "
+                    f"{spoken} from the performance-prompt layer.")
+    return ("Keep the canonical spelling in Approved spoken words. ElevenLabs already receives "
+            "the pronunciation override from the performance-prompt layer.")
+
+
 def _workbench_key(project, episode, scene):
     return f"{project or ACTIVE_PROJECT_ID}:{episode or 'Ep1'}:{scene or '1'}"
 
@@ -654,7 +683,7 @@ def _project_workbench_state(project=None, episode="Ep1", scene="1"):
         "project": project,
         "episode": episode,
         "scene": scene,
-        "activeBeatId": "moustache",
+        "activeBeatId": None,
         "beatState": {},
         "updatedAt": None,
     })
@@ -2403,6 +2432,29 @@ def _storyboard_approval(d):
 # chokepoint; it was never actually reachable and has been removed.
 #
 # Approved EXACT files the UI fetches by name (case-insensitive):
+def _project_design_roster():
+    roster = {"episodeTitles": {}, "characters": [], "locations": [], "props": [],
+              "workbench": {}, "editorClips": []}
+    path = ACTIVE_SHOW.creative_path("designRoster")
+    if path and path.exists():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            data = {}
+        for key in roster:
+            if isinstance(data.get(key), type(roster[key])):
+                roster[key] = data[key]
+    # episodes/episodes.json is the episode index of record; its titles win over the roster's.
+    try:
+        for entry in json.loads(pathlib.Path(EPISODES_INDEX).read_text(encoding="utf-8")):
+            number, title = entry.get("number"), entry.get("title")
+            if number and title:
+                roster["episodeTitles"][f"Ep{number}"] = str(title)
+    except (OSError, ValueError, TypeError, AttributeError):
+        pass
+    return roster
+
+
 def _project_registry():
     """T45: THE REGISTRY IS projects/*/profile.json. Every engine-valid project is listed from its own
     profile (paths derived, never hand-typed); cb-studio/data/projects.json only contributes
@@ -2740,6 +2792,12 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if self.path == "/api/show-profile":
             return self._json(200, SHOW_PROFILE_STATUS)
+        if self.path.startswith("/api/project-roster"):
+            # T50: the Design tab's characters / locations / props / episode titles are the
+            # project's own (creative.designRoster + episodes/episodes.json) — never spelled in
+            # director.js. A project without a roster file gets empty lists, never another
+            # project's cast.
+            return self._json(200, _project_design_roster())
         # [removed 2026-07-16 cutover: /api/pipeline — handled by the 410 gate above]
         if self.path.startswith("/api/learning"):
             # THE CREATIVE LEARNING SYSTEM, read-only view (2026-07-17): evidence counts,
@@ -3466,10 +3524,10 @@ class H(http.server.SimpleHTTPRequestHandler):
                     )):
                         group = "characters"
                     elif not group and ("/locations/" in haystack or "/houses/" in haystack or any(
-                        token in haystack for token in ("scene", "plate", "pier", "cove", "rainforest", "island", "house", "sanctuary", "meadow")
+                        token in haystack for token in _asset_group_tokens("scenes", ("scene", "plate", "location"))
                     )):
                         group = "scenes"
-                    elif not group and any(token in haystack for token in ("wristband", "pendant", "bowl", "wand", "satchel", "sailboat", "net", "prop")):
+                    elif not group and any(token in haystack for token in _asset_group_tokens("props", ("prop",))):
                         group = "props"
                     elif not group:
                         group = "references"
@@ -5056,9 +5114,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                             compare_voice_text(provider_spelling) ==
                             compare_voice_text(new_text)):
                         self._json(409, {
-                            "error": (
-                                "Keep Aida in Approved spoken words. ElevenLabs already "
-                                "receives Ada from the performance-prompt layer."),
+                            "error": _pronunciation_only_message(old_text, provider_spelling),
                             "pronunciationOnly": True,
                             "canonicalText": old_text.strip(),
                             "providerText": provider_spelling,

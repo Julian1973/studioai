@@ -14,14 +14,16 @@ import json
 import os
 from pathlib import Path
 
+import sys as _sys, pathlib as _pl
+_sys.path.insert(0, str(_pl.Path(__file__).resolve().parents[3] / "engine"))
+import paths as P  # noqa: E402 — the project profile is the only path authority (T44/T45)
 import cb_departments as departments
 import cb_emission_standard as standard
 import cb_render
 import pathlib
-import paths as P  # the project profile is the only path authority (T44/T45)
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[3]   # projects/<id>/tools/ → repo root
 PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene1_production_package.json"
 SOURCE = Path(os.environ.get(
     "CB_DIRECTOR_RECORDS_SOURCE",

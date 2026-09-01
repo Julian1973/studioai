@@ -6,6 +6,9 @@ HERE = Path(__file__).resolve().parent
 HTML = (HERE / "director.html").read_text(encoding="utf-8")
 CSS = (HERE / "director.css").read_text(encoding="utf-8")
 JS = (HERE / "director.js").read_text(encoding="utf-8")
+# T50 (2026-09-01): the show's own cast/locations/props/workbench beats are PROJECT data
+# (creative/design_roster.json, served by /api/project-roster) — never spelled in director.js.
+ROSTER = (HERE.parent / "projects" / "crystal-bears" / "creative" / "design_roster.json").read_text(encoding="utf-8")
 APP = (HERE / "app.html").read_text(encoding="utf-8")
 SERVER = (HERE / "serve.py").read_text(encoding="utf-8")
 ROOM = (HERE / "room.html").read_text(encoding="utf-8")
@@ -135,7 +138,9 @@ def test_director_hash_routes_to_requested_episode_and_preserves_it():
     assert 'if (app.episode !== previousEpisode)' in JS
     assert "function renderEpisodeContext()" in JS
     assert '$("#pipeline-title").textContent = `Ep ${number}`' in JS
-    assert 'Ep2: "Bo\'s Big Day"' in JS
+    # T50: episode titles come from the project (episodes.json / design_roster.json), not the JS
+    assert "Bo's Big Day" in ROSTER and "Big Day" not in JS
+    assert "episodeTitles[app.episode] || `Episode ${number}`" in JS
     assert '$("#nav-episode-title").textContent = title' in JS
     assert '!["upload", "style", "analysis"].includes(app.pipelineStep)' in JS
     assert 'id="nav-episode-label"' in HTML
@@ -475,20 +480,23 @@ def test_shot_context_sits_above_see_hear_watch_and_carries_continuity_refs():
 
 
 def test_scene_three_keeps_keen_wrist_states_distinct():
+    # T50: the wrist-state prop entries and Keen's wardrobes are PROJECT roster data (design_roster.json)
+    # rendered by the same generic Design views — the JS itself names no character.
     assert "session.sceneContinuityRules" in JS
-    assert "Before approved 3.B3" in JS
-    assert "Mum visibly fits both cuffs in the approved 3.B3 take" in JS
-    assert "Keen Bare-Wrist State" in JS
-    assert "CB_Keen_nocuffs_front-back.jpeg" in JS
-    assert "Keen's Father's Wristbands — Vacant" in JS
-    assert "CB_Keen_turnaround_vacant_cuffs.png" in JS
-    assert "After approved 3.B3–9.B2" in JS
-    assert "Keen's Father's Wristbands — Aquamarine Charged" in JS
-    assert "CB_Keen_wristband_crystal.jpeg" in JS
+    assert "Before approved 3.B3" in ROSTER
+    assert "Mum visibly fits both cuffs in the approved 3.B3 take" in ROSTER
+    assert "Keen Bare-Wrist State" in ROSTER
+    assert "CB_Keen_nocuffs_front-back.jpeg" in ROSTER
+    assert "Keen's Father's Wristbands — Vacant" in ROSTER
+    assert "CB_Keen_turnaround_vacant_cuffs.png" in ROSTER
+    assert "After approved 3.B3–9.B2" in ROSTER
+    assert "Keen's Father's Wristbands — Aquamarine Charged" in ROSTER
+    assert "CB_Keen_wristband_crystal.jpeg" in ROSTER
     assert "only Aida's visible crystal installation changes them to crystal-set" in CONTINUITY
-    assert "Keen — Pier Departure, Bare Wrists" in JS
-    assert "Keen — Vacant Wristbands, No Crystals" in JS
-    assert "Keen — Charged Wristbands, Aquamarine Stones" in JS
+    assert "Keen — Pier Departure, Bare Wrists" in ROSTER
+    assert "Keen — Vacant Wristbands, No Crystals" in ROSTER
+    assert "Keen — Charged Wristbands, Aquamarine Stones" in ROSTER
+    assert "Keen" not in JS.replace("keenWristbands", "")
 
 
 def test_left_rail_has_project_asset_libraries():
@@ -726,13 +734,13 @@ def test_three_signoff_relay_and_parallel_scene_board_are_present():
     assert "submitAction(action, note)" in JS
     assert ".relay-grid" in CSS
     assert ".relay-card.locked" in CSS
-    assert "sceneOneContract" in JS
+    assert "workbenchContract()" in JS and "/api/project-roster" in JS
     assert "Script" in JS and "Direction" in JS and "Keyframes" in JS and "Generate" in JS and "Review" in JS
-    assert "Fuzzby’s Pollination Lesson" in JS
-    assert "Pollen Moustache" in JS
+    assert "Fuzzby’s Pollination Lesson" in ROSTER and "Pollination Lesson" not in JS
+    assert "Pollen Moustache" in ROSTER
     assert "Visible proof" in JS
     assert "Director Check" in JS
-    assert "Two clear upper-lip pollen curls" in JS
+    assert "Two clear upper-lip pollen curls" in ROSTER
     assert "Builder Mode · prompt segment and reference roles" in JS
     assert "Generation + Review" in JS
     assert "Approve $${cost} & render" in JS
@@ -751,15 +759,15 @@ def test_scene_workbench_is_active_beat_driven():
     assert "Shot: ${esc(beat.shot)} • ${esc(beat.range)} • ${esc(beat.priority)} beat" in JS
     assert "beat.promptSegment || requestPromptText(session)" in JS
     assert "beat.reviewNote || beat.visibleProof" in JS
-    assert "Generate Chase Keyframe" in JS
-    assert "Generate False-Triumph Anchor" in JS
-    assert "Generate Moustache Setup Keyframe" in JS
-    assert "Generate Moustache Reveal Keyframe" in JS
-    assert "Generate Zenny Reaction Keyframe" in JS
-    assert "Generate Final Payoff Keyframe" in JS
-    assert "Clear bee-height chase lane" in JS
-    assert "No moustache exists in setup frame" in JS
-    assert "Two clear upper-lip pollen curls" in JS
+    assert "Generate Chase Keyframe" in ROSTER
+    assert "Generate False-Triumph Anchor" in ROSTER
+    assert "Generate Moustache Setup Keyframe" in ROSTER
+    assert "Generate Moustache Reveal Keyframe" in ROSTER
+    assert "Generate Zenny Reaction Keyframe" in ROSTER and "Zenny" not in JS
+    assert "Generate Final Payoff Keyframe" in ROSTER
+    assert "Clear bee-height chase lane" in ROSTER
+    assert "No moustache exists in setup frame" in ROSTER
+    assert "Two clear upper-lip pollen curls" in ROSTER
     assert ".beat-card.selected" in CSS
     assert ".workbench-beat-frame" in CSS
     assert ".keyframe-substates" in CSS

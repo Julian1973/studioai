@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The live specialist workers behind Crystal Bears Studio departments.
+"""The live specialist workers behind the studio departments.
 
 This is deliberately not a second production pipeline.  It contains the people: each
 worker reads the existing approved shot contract and the relevant repository skill,
@@ -29,6 +29,17 @@ RUNTIME_START = "<!-- RUNTIME_WORKER_START -->"
 RUNTIME_END = "<!-- RUNTIME_WORKER_END -->"
 DIRECTOR_GRAMMAR_PACK = HERE / "grammar_pack.json"
 
+
+
+def _offscreen_only_rule():
+    """T51: the characters locked offscreen-only are the PROJECT's own (laws/cast_vocabulary.json →
+    offscreenOnly); the sentence is built here, no name is spelled."""
+    import project_laws
+    names = project_laws.offscreen_only()
+    if not names:
+        return ""
+    verb = "is" if len(names) == 1 else "are"
+    return f"{' and '.join(names)} {verb} locked offscreen-only and can never appear in charactersInFrame. "
 
 def director_grammar_pack():
     """Load versioned Director law as data; never let a worker improvise it."""
@@ -893,7 +904,7 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
                 "visible during that beat in charactersInFrame, including a character seen inside "
                 "a vision, and list speaking characters who remain outside the image in "
                 "offscreenCharacters. A character merely named in dialogue is not present. "
-                "Bo's Mum is locked offscreen-only and can never appear in charactersInFrame. "
+                + _offscreen_only_rule() +
                 "Do not invent events or dialogue to complete it. Every scene "
                 "needs at least one beat, and its first "
                 "beat's own firstEventIndex must equal that scene's own first event "

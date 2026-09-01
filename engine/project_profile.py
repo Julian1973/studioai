@@ -77,6 +77,7 @@ class LawsProfile(BaseModel):
     forbiddenElements: Optional[str] = None
     emissionChecks: Optional[str] = None
     castVocabulary: Optional[str] = None
+    continuityRules: Optional[str] = None
 
 
 class CreativeProfile(BaseModel):
@@ -89,6 +90,7 @@ class CreativeProfile(BaseModel):
     voiceRegisters: Optional[str] = None
     voiceRulebook: Optional[str] = None
     voicePlaybook: Optional[str] = None
+    designRoster: Optional[str] = None    # the studio Design tab's cast/locations/props presentation (T50)
 
 
 class AssetsProfile(BaseModel):
@@ -271,7 +273,7 @@ class LoadedShowProfile:
     def laws_paths(self) -> dict[str, pathlib.Path]:
         out = {}
         laws = self.profile.laws
-        for key in ("style", "forbiddenElements", "emissionChecks", "castVocabulary"):
+        for key in ("style", "forbiddenElements", "emissionChecks", "castVocabulary", "continuityRules"):
             rel = getattr(laws, key, None)
             if rel:
                 out[key] = self.resolve(rel, f"laws.{key}")

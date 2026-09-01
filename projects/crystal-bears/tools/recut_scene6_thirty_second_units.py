@@ -12,7 +12,7 @@ import shutil
 import sys
 
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
+ROOT = pathlib.Path(__file__).resolve().parents[3]   # projects/<id>/tools/ → repo root
 ENGINE = ROOT / "engine"
 sys.path.insert(0, str(ENGINE))
 

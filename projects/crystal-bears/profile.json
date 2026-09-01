@@ -29,7 +29,9 @@
       "appliesWhen": "any cast member has physiology.wings in laws/cast_vocabulary.json (isBee in canon/characters.json is the legacy signal)"
     },
     "castVocabulary": "laws/cast_vocabulary.json",
-    "forbiddenElements": "laws/forbidden_elements.json"
+    "forbiddenElements": "laws/forbidden_elements.json",
+    "continuityRules": "laws/continuity_rules.json",
+    "emissionChecks": "laws/emission_checks.json"
   },
   "episodes": {
     "scripts": "episodes/scripts",
@@ -43,7 +45,8 @@
     "dailiesLibrary": "creative/learning/DAILIES_LIBRARY.jsonl",
     "voiceRegisters": "creative/VOICE_ARCHETYPE_REGISTERS.json",
     "voiceRulebook": "creative/VOICE_DIRECTOR_RULEBOOK.json",
-    "voicePlaybook": "creative/learning/VOICE_PLAYBOOK.json"
+    "voicePlaybook": "creative/learning/VOICE_PLAYBOOK.json",
+    "designRoster": "creative/design_roster.json"
   },
   "assets": {
     "root": "assets"
@@ -51,5 +54,5 @@
   "showBible": "SHOW_BIBLE.md",
   "docs": "docs",
   "chairs": "chairs",
-  "_note": "Authoritative project manifest (T44). Every path the engine reads for this project is declared here and resolved by engine/paths.py \u2014 no module builds a project path by hand. engineAdapter is on its way out (T55: capability flags)."
+  "_note": "Authoritative project manifest (T44). Every path the engine reads for this project is declared here and resolved by engine/paths.py — no module builds a project path by hand. engineAdapter is on its way out (T55: capability flags)."
 }

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Build a lip-sync-safe, episode-to-date post preview from approved media.
+"""Build a lip-sync-safe, episode-to-date post preview from approved media (Crystal Bears Ep1).
+
+Project tool — it names this project's own Ep1 shots and review cuts, so it lives with the
+project (T48), not in the studio's generic tools/.
 
 This is deliberately a review build. It never changes approved sources or writes
 approval state. Picture and native audio remain paired throughout the conform.
@@ -14,7 +17,7 @@ import subprocess
 import sys
 
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = pathlib.Path(__file__).resolve().parents[3]   # projects/<id>/tools -> repo root
 sys.path.insert(0, str(ROOT / "engine"))
 import paths as P  # noqa: E402 — the project profile is the only path authority (T45)
 OUT = ROOT / P.OUTPUT_REL / "review" / "episode_post_pass"

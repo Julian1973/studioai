@@ -85,7 +85,7 @@
         "image-to-video": "seedance_i2v_per_sec"
       },
       "fallbackModelId": null,
-      "disableReason": "Retired for this project. Crystal Bears is Seedance 2.5-only and must never fall back to a 2.0 paid route."
+      "disableReason": "Retired for this studio. Production is Seedance 2.5-only and must never fall back to a 2.0 paid route."
     },
     {
       "modelId": "byteplus-seedance-2.0",

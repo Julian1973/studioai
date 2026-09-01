@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Immutable canon registry and zero-spend readiness checks for Crystal Bears.
+"""Immutable canon registry and zero-spend readiness checks for the active project.
 
 The lock file records hashes, never media bytes or provider secrets. A source, character
 reference, location plate or compatibility copy that changes becomes visible immediately;
@@ -494,9 +494,12 @@ def _character_status(policy: dict, manifest: dict, root: pathlib.Path) -> list[
             gaps.append(str(record.get("_status") or "declared stub; canon completion required"))
 
         creative_gaps = []
-        call = record.get("crystalCall") or {}
-        if call.get("callStatus") == "proposed-pending-approval":
-            creative_gaps.append("Crystal Call is proposed and still needs human approval")
+        # T51: any character sub-record that declares itself proposed-pending-approval is a creative
+        # gap; the field's name is the project's own (e.g. Crystal Bears' crystalCall), never spelled here.
+        for _key, _sub in record.items():
+            if isinstance(_sub, dict) and _sub.get("callStatus") == "proposed-pending-approval":
+                _label = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", str(_key)).title()
+                creative_gaps.append(f"{_label} is proposed and still needs human approval")
         optional_count = performance_gaps.get(name, 0)
         if optional_count:
             creative_gaps.append(

@@ -113,120 +113,40 @@
     { id: "rough-cut", label: "Rough Cut", phase: "Production", step: 10 },
   ];
 
-  const episodeTitles = {
-    Ep1: "The Adventure Begins",
-    Ep2: "Bo's Big Day",
-  };
-
-  const characterRoster = [
-    {
-      name: "Zenny",
-      scenes: "1-10",
-      status: "ready",
-      role: "Calm, graceful Crystal Bear, precise and composed counterpart to Fuzzby",
-      identity: "Small anthropomorphic bear with soft lavender-purple fur, smooth oval face, almond-shaped eyes, small rounded nose, soft rounded cheeks and neat arched eyebrows.",
-      reference: "Generate Reference Sheet",
-      wardrobes: [{ label: "Zenny — Rainforest/Crystal Cove Default", scenes: "1-10", state: "regen", initial: "Z" }],
-    },
-    {
-      name: "Aida",
-      scenes: "2, 6, 7, 8, 9, 10",
-      status: "ready",
-      role: "Wise, serene leader of the Crystal Bears, healer and guide",
-      identity: "Medium-sized cream-white anthropomorphic bear with a graceful oval face, large gentle almond-shaped eyes, soft rounded nose and elegant arched eyebrows.",
-      reference: "Generate Reference Sheet",
-      wardrobes: [{ label: "Aida — Crystal Cove Default", scenes: "2, 6, 7, 8, 9, 10", state: "regen", initial: "A" }],
-    },
-    {
-      name: "Keen",
-      scenes: "3, 4, 7, 8, 9, 10",
-      status: "pending",
-      role: "Protagonist, brave young bear setting out on his first adventure",
-      identity: "Small-to-medium young bear with warm mid-brown fur, round youthful face, wide bright eyes, small button nose and full rounded cheeks.",
-      reference: "Generate a wardrobe first",
-      wardrobes: [
-        { label: "Keen — Pier Departure, Bare Wrists", scenes: "3", state: "gen", initial: "K" },
-        { label: "Keen — Vacant Wristbands, No Crystals", scenes: "3, 4, 7, 8", state: "gen", initial: "K" },
-        { label: "Keen — Charged Wristbands, Aquamarine Stones", scenes: "9, 10", state: "gen", initial: "K" },
-      ],
-    },
-    {
-      name: "Keen's Mum",
-      scenes: "3",
-      status: "pending",
-      role: "Keen's devoted and proud mother, emotional at her son's departure",
-      identity: "Medium warm mid-brown bear with a warm oval face, soft wide eyes, rounded nose, full cheeks and gentle rounded jawline.",
-      reference: "Generate a wardrobe first",
-      wardrobes: [{ label: "Keen's Mum — Pier Farewell", scenes: "3", state: "gen", initial: "K" }],
-    },
-    {
-      name: "Howey",
-      scenes: "6, 7, 8, 9, 10",
-      status: "pending",
-      role: "Crystal Bear, enthusiastic and protective member of the group",
-      identity: "Medium teal-blue bear with a broad round face, large round eyes, wide flat nose, full cheeks and strong rounded jawline.",
-      reference: "Generate a wardrobe first",
-      wardrobes: [{ label: "Howey — Crystal Cove Default", scenes: "6, 7, 8, 9, 10", state: "gen", initial: "H" }],
-    },
-    {
-      name: "Misty",
-      scenes: "6, 7, 8, 9, 10",
-      status: "pending",
-      role: "Crystal Bear, warm and expressive member of the group",
-      identity: "Small-to-medium silver-grey bear with a soft oval face, wide expressive eyes, delicate rounded nose and soft full cheeks.",
-      reference: "Generate a wardrobe first",
-      wardrobes: [{ label: "Misty — Crystal Cove Default", scenes: "6, 7, 8, 9, 10", state: "gen", initial: "M" }],
-    },
-    {
-      name: "Luna",
-      scenes: "6, 7, 8, 9, 10",
-      status: "pending",
-      role: "Crystal Bear, quiet and gentle member of the group",
-      identity: "Small deep indigo-navy bear with a delicate oval face, soft half-moon eyes, small pointed nose and slender rounded jawline.",
-      reference: "Generate a wardrobe first",
-      wardrobes: [{ label: "Luna — Crystal Cove Default", scenes: "6, 7, 8, 9, 10", state: "gen", initial: "L" }],
-    },
-    {
-      name: "Sunny",
-      scenes: "8, 9, 10",
-      status: "pending",
-      role: "Crystal Bear, bright and enthusiastic member of the group",
-      identity: "Small bright yellow bear with a round cheerful face, large sparkling eyes, small button nose and high expressive eyebrows.",
-      reference: "Generate a wardrobe first",
-      wardrobes: [{ label: "Sunny — Crystal Cove Default", scenes: "8, 9, 10", state: "gen", initial: "S" }],
-    },
-    {
-      name: "Amie",
-      scenes: "8, 9, 10",
-      status: "pending",
-      role: "Crystal Bear, warm and welcoming member of the group",
-      identity: "Small rose-pink bear with a soft round face, wide warm eyes, soft rounded nose, full cheeks and gentle rounded jawline.",
-      reference: "Generate a wardrobe first",
-      wardrobes: [{ label: "Amie — Crystal Cove Default", scenes: "8, 9, 10", state: "gen", initial: "A" }],
-    },
-    {
-      name: "Squeaky",
-      scenes: "4, 7, 8, 9, 10",
-      status: "pending",
-      role: "Friendly dolphin companion who guides Keen through the storm and is rescued by him",
-      identity: "Atlantic bottlenose dolphin with streamlined body, rounded melon forehead, short beak, bright side-set eyes and silver-grey dorsal colouring.",
-      reference: "Generate a wardrobe first",
-      wardrobes: [
-        { label: "Squeaky — Open Water, Healthy", scenes: "4", state: "gen", initial: "S" },
-        { label: "Squeaky — Storm, Entangled", scenes: "7", state: "gen", initial: "S" },
-        { label: "Squeaky — Post-Rescue, Free", scenes: "8, 9, 10", state: "gen", initial: "S" },
-      ],
-    },
-    {
-      name: "Fuzzby",
-      scenes: "0",
-      status: "ready",
-      role: "Needs canon role imported into this EP1 package",
-      identity: "Identity present in existing reference image; fixed physical-trait text still needs to be completed in the package.",
-      reference: "Generate Reference Sheet",
-      wardrobes: [{ label: "Default look", scenes: "-", state: "regen", initial: "F" }],
-    },
-  ];
+  // The project's Design-tab roster (characters / locations / props / episode titles) is PROJECT
+  // data — projects/<id>/creative/design_roster.json served by /api/project-roster — never a show's
+  // cast spelled in this file (T50). Empty until loaded; a project without one shows an empty Design tab.
+  const designRoster = { episodeTitles: {}, characters: [], locations: [], props: [], workbench: {}, editorClips: [] };
+  const editorClips = designRoster.editorClips;
+  const WORKBENCH_GATES = ["Script", "Direction", "Keyframes", "Generate", "Review"];
+  function workbenchContract() {
+    const contract = designRoster.workbench?.[app.episode]?.[String(app.scene)] || {};
+    return {
+      title: contract.title || `Scene ${app.scene}`,
+      promise: contract.promise || "",
+      gates: Array.isArray(contract.gates) && contract.gates.length ? contract.gates : WORKBENCH_GATES,
+      beats: Array.isArray(contract.beats) ? contract.beats : [],
+    };
+  }
+  const characterRoster = designRoster.characters;
+  const locationRoster = designRoster.locations;
+  const propRoster = designRoster.props;
+  const episodeTitles = designRoster.episodeTitles;
+  async function loadProjectRoster() {
+    try {
+      const data = await api(`/api/project-roster?project=${encodeURIComponent(await projectId())}`);
+      Object.assign(designRoster.episodeTitles, data.episodeTitles || {});
+      designRoster.workbench = data.workbench || {};
+      editorClips.splice(0, editorClips.length, ...(data.editorClips || []));
+      characterRoster.splice(0, characterRoster.length, ...(data.characters || []));
+      locationRoster.splice(0, locationRoster.length, ...(data.locations || []).map((item) => (
+        Array.isArray(item) ? { name: item[0], mood: item[1], scenes: item[2], prompt: item[3] } : item)));
+      propRoster.splice(0, propRoster.length, ...(data.props || []).map((item) => (
+        Array.isArray(item) ? { name: item[0], scenes: item[1], status: item[2], prompt: item[3] } : item)));
+    } catch (error) {
+      console.warn("project roster unavailable", error);
+    }
+  }
 
   const styleFamilies = [
     {
@@ -267,182 +187,13 @@
     ["21:9", "Ultrawide"],
   ];
 
-  const propRoster = [
-    ["Aida's Rose Quartz Pendant", "2, 6, 9", "Generated", "A smooth polished rose quartz crystal pendant hanging on a fine natural cord, pale semi-translucent pink stone with a soft warm inner glow."],
-    ["Crystal Singing Bowl and Wand", "2", "Draft", "A clear polished quartz crystal singing bowl with a padded cloth-tipped wooden wand, isolated on a neutral grey studio backdrop."],
-    ["Keen Bare-Wrist State", "Before approved 3.B3", "Required", "Keen remains bare-wristed until Mum visibly fits both cuffs in the approved 3.B3 take. No wristbands, bands, bracelets, cuffs, straps, crystals or glow appear before that fitting."],
-    ["Keen's Father's Wristbands — Vacant", "After approved 3.B3–9.B2", "Required", "Exactly two inherited aged-gold open cuffs, one on each wrist, with blank settings. No crystals, aquamarine stones or glow until Aida visibly installs the crystals."],
-    ["Keen's Father's Wristbands — Aquamarine Charged", "9, 10", "Locked Later", "The same inherited wristbands only after the end-of-episode gift beat: aquamarine stones seated in the bands with a controlled crystal glow."],
-    ["Keen's Small Sailboat", "3, 4, 7", "Draft", "A compact wooden single-mast sailboat with plain white sail, rope rigging and natural wood grain."],
-    ["Keen's Satchel", "3, 4", "Draft", "A small worn canvas traveller's satchel with buckled flap closure and shoulder strap."],
-    ["Drift Net", "7", "Draft", "A ragged discarded fishing drift net, frayed and tangled with weathered dark grey-green mesh."],
-  ];
+  
 
-  const locationRoster = [
-    ["Deep Within the Rainforest", "Warm, lush, playful, gently ominous as storm approaches", "1", "A dense tropical rainforest interior with towering flowers, drifting pollen, dappled golden sunlight and a cooler storm shift."],
-    ["Crystal Cove – Aida's Sanctuary", "Serene, mystical, meditative, softly glowing", "2", "A sheltered coastal cove with calm turquoise water, pale sand, rose quartz crystals and a carved crystal bowl."],
-    ["Keen's Island – The Pier", "Tender, bittersweet, hopeful, quietly emotional", "3", "A modest wooden pier, compact sailboat, soft green island hills and bright reflective water."],
-    ["At Sea", "Adventurous, open, then stormy and dangerous", "4, 7", "Open ocean clean plates that move from hopeful daylight to rough storm water and low steel-grey skies."],
-  ];
+  
 
-  const editorClips = ["S1 C2", "S1 C3", "S1 C4", "S1 C5", "S1 C6", "S2 C1"];
+  
 
-  const sceneOneContract = {
-    title: "Scene 1 — Fuzzby’s Pollination Lesson",
-    promise: "Fuzzby’s joyful performance of expertise becomes increasingly visible failure, while Zenny’s restrained amusement shows that she sees and loves exactly who he is.",
-    gates: ["Script", "Direction", "Keyframes", "Generate", "Review"],
-    beats: [
-      {
-        id: "chase",
-        n: 1,
-        title: "Chase",
-        range: "00.0–04.2s",
-        priority: "required",
-        reviewStatus: "delivered",
-        shot: "SH1A",
-        keyframe: "Flower-corridor chase starting composition",
-        cta: "Generate Chase Keyframe",
-        intent: "Fuzzby pursues pollen through the corridor.",
-        scriptTruth: "Fuzzby enters as joyful chaos, trying to look expert while barely controlling the route.",
-        visibleProof: "The audience sees a clear bee-height chase lane and two escalating near-misses.",
-        startState: "Open flower corridor ahead; Fuzzby already overcommitted; Zenny clean and outside his path.",
-        actionPath: "Drone-like pursuit → two near-misses → flower contact setup.",
-        endState: "Fuzzby is still moving forward with room for the first crash.",
-        camera: "Bee-height chase camera, slightly late, no confusing cuts.",
-        checklist: [
-          "Clear bee-height chase lane",
-          "Two near-misses have room to stage",
-          "Zenny has safe parallel route",
-          "Camera axis is readable",
-        ],
-        failConditions: ["No static hovering", "No early crash", "No lost corridor route"],
-        promptSegment: "Chase prompt segment: bee-height drone pursuit, open corridor, two readable near-misses, Zenny safely parallel.",
-        reviewNote: "Chase route is readable and has room for escalation.",
-      },
-      {
-        id: "triumph",
-        n: 2,
-        title: "False Triumph",
-        range: "04.2–08.8s",
-        priority: "required",
-        reviewStatus: "delivered",
-        shot: "SH1A",
-        keyframe: "Fuzzby chest-out post-recoil hover",
-        cta: "Generate False-Triumph Anchor",
-        intent: "Fuzzby converts a crash into a proud finish.",
-        scriptTruth: "The leaf recoil accidentally gives Fuzzby a gymnast-style recovery he pretends was planned.",
-        visibleProof: "Flower scoop, springy leaf impact, recoil rotation, chest-out hover.",
-        startState: "Fuzzby dives too hard into a flower.",
-        actionPath: "Face contact → leaf bend → recoil → tucked rotation → proud hover.",
-        endState: "Fuzzby is upright, proud and physically unsettled.",
-        camera: "Hold the cause chain and settle on the false triumph.",
-        checklist: [
-          "Leaf recoil cause is visible",
-          "Fuzzby has a clear chest-forward hover",
-          "Minor instability remains readable",
-          "Space exists for later flower action",
-        ],
-        failConditions: ["No random impact", "No painful collision", "No missing leaf recoil"],
-        promptSegment: "False Triumph prompt segment: flower scoop, springy leaf recoil, tucked rotation and proud hover with residual wobble.",
-        reviewNote: "False triumph reads as accidental success rather than real competence.",
-      },
-      {
-        id: "moustache",
-        n: 3,
-        title: "Pollen Moustache",
-        range: "08.8–16.2s",
-        priority: "blocking",
-        reviewStatus: "weak",
-        shot: "SH1B",
-        keyframe: "Moustache Setup",
-        secondaryKeyframe: "Moustache Reveal",
-        cta: "Generate Moustache Setup Keyframe",
-        ctaAfterSetup: "Generate Moustache Reveal Keyframe",
-        intent: "Escalate Fuzzby’s false expertise into a readable visual joke.",
-        scriptTruth: "Fuzzby gets two pollen curls on his upper lip and presents them as authority.",
-        visibleProof: "The pollen moustache must read before Zenny reacts.",
-        startState: "Fuzzby centre-left; separate target flower centre-right; Zenny frame-left and outside his travel route.",
-        actionPath: "Forward arc → face contacts target flower → pollen transfers → same-path return → presentation hold → Zenny reacts.",
-        endState: "Two upper-lip pollen curls are visible, target flower remains visible, Fuzzby holds proudly.",
-        camera: "Medium-wide, warm corridor, target flower and return position both readable.",
-        timing: "Reveal hold around 0.8s before Zenny response.",
-        checklist: [
-          "Separate target flower visible",
-          "Fuzzby’s forward route to flower is clear",
-          "Zenny remains outside Fuzzby’s route",
-          "Camera keeps flower, Fuzzby and Zenny readable",
-          "No moustache exists in setup frame",
-        ],
-        revealChecklist: [
-          "Two clear upper-lip pollen curls",
-          "Target flower remains visible in background",
-          "Fuzzby is in planned reveal position",
-          "Fuzzby holds proudly before Zenny reacts",
-          "Zenny’s eye-line lands on moustache first",
-        ],
-        failConditions: ["Fuzzby backs into Zenny", "Full-face pollen mask", "Target flower missing", "Zenny reacts too early"],
-        recommendedFix: "Generate the Moustache Setup keyframe, then the Moustache Reveal keyframe, and use them as anchors for a dedicated 7.4-second Seedance shot.",
-        promptSegment: "Moustache Setup prompt segment: Fuzzby centre-left, separate target flower centre-right, Zenny outside route, no moustache yet. Reveal segment: same flower remains visible, two upper-lip pollen curls, proud hold before Zenny reacts.",
-        reviewNote: "Target flower and upper-lip moustache are unclear; route drifted toward Zenny instead of returning to the reveal position.",
-      },
-      {
-        id: "zenny",
-        n: 4,
-        title: "Zenny Reaction",
-        range: "14.0–16.2s",
-        priority: "required",
-        reviewStatus: "not-started",
-        shot: "SH1B",
-        keyframe: "Restrained, affectionate deadpan",
-        cta: "Generate Zenny Reaction Keyframe",
-        intent: "Zenny’s deadpan lands after the evidence.",
-        scriptTruth: "Zenny judges the accident with restraint and affection.",
-        visibleProof: "Her eyes move from moustache to Fuzzby before the response lands.",
-        startState: "Moustache visible; Fuzzby presenting; Zenny close but outside route.",
-        actionPath: "Evidence read → eye move → almost-smile → deadpan response.",
-        endState: "Zenny’s affection is visible without broad mugging.",
-        camera: "Relationship composition; no cut before the joke reads.",
-        checklist: [
-          "Moustache has already been established",
-          "Zenny remains almost still",
-          "Eye movement is directed to moustache, then Fuzzby",
-          "One mouth corner only just lifts",
-          "Reaction has no broad expression or early action",
-        ],
-        failConditions: ["Reaction before reveal", "Broad cartoon laugh", "Zenny blocking target flower"],
-        promptSegment: "Zenny Reaction prompt segment: moustache already established, Zenny almost still, eyes to moustache then Fuzzby, tiny mouth-corner lift only.",
-        reviewNote: "Reaction must wait until the moustache is visually established.",
-      },
-      {
-        id: "payoff",
-        n: 5,
-        title: "Final Warmth",
-        range: "16.2–29.0s",
-        priority: "polish",
-        reviewStatus: "not-started",
-        shot: "SH1C",
-        keyframe: "Shared final pose",
-        cta: "Generate Final Payoff Keyframe",
-        intent: "Fuzzby worsens the mess and Zenny loves him anyway.",
-        scriptTruth: "A second failure becomes a warm character button.",
-        visibleProof: "Fuzzby pops out more pollen-covered; Zenny eye-roll softens into love.",
-        startState: "Fuzzby still marked with pollen; Zenny clear of the route.",
-        actionPath: "Wipe-smear → overcommit → flower contacts → pop-up pose → softened eye-roll.",
-        endState: "Golden dust hangs between Fuzzby and Zenny’s smiling eye-roll.",
-        camera: "Follow causal tumble, then hold the final relationship frame.",
-        checklist: [
-          "Fuzzby is visibly more pollen-covered",
-          "Final pose keeps both characters readable",
-          "Zenny’s eye-roll softens into affection",
-          "Golden dust hangs between them",
-          "The shot ends on a usable handoff frame",
-        ],
-        failConditions: ["Random cuts", "No worsening", "No loving soften"],
-        promptSegment: "Final Warmth prompt segment: Fuzzby worsens the pollen mess, pops into final readable pose, Zenny eye-roll softens into love, held handoff frame.",
-        reviewNote: "Final warmth depends on a held two-character payoff, not more random chaos.",
-      },
-    ],
-  };
+  
 
   async function projectId() {
     if (app.project) return app.project;
@@ -1524,7 +1275,12 @@
   }
 
   function currentBeat() {
-    return workbenchBeats().find((beat) => beat.id === app.activeBeatId) || workbenchBeats()[2];
+    const beats = workbenchBeats();
+    return beats.find((beat) => beat.id === app.activeBeatId) || beats[2] || beats[0] || {
+      id: "none", n: 0, title: "No beat contract", range: "", priority: "", reviewStatus: "pending",
+      shot: "", keyframe: "", cta: "Generate Keyframe", intent: "", scriptTruth: "", visibleProof: "",
+      directorChecks: [], promptSegment: "", reviewNote: "",
+    };
   }
 
   function persistedBeat(beat) {
@@ -1533,7 +1289,7 @@
   }
 
   function workbenchBeats() {
-    return sceneOneContract.beats.map(persistedBeat);
+    return workbenchContract().beats.map(persistedBeat);
   }
 
   function shotKeyForBeat(beat) {
@@ -1728,39 +1484,12 @@
   }
 
   function libraryAssetUrlForName(name, kind = "character") {
+    // T50: reference thumbnails come from the project's own design roster (imageUrl per item),
+    // never a show's asset paths spelled here.
     const compact = slugAssetName(name);
-    const characterMap = {
-      zenny: "/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
-      aida: "/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
-      keen: "/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
-      keensmum: "/cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
-      howey: "/cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
-      misty: "/cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
-      luna: "/cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
-      sunny: "/cb-seed/assets/final_turnarounds/CB_Sunny.jpeg",
-      amie: "/cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
-      squeaky: "/cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
-      fuzzby: "/cb-seed/assets/CB_Fuzzby_full_turnaround.png",
-    };
-    const propMap = {
-      aidasrosequartzpendant: "/cb-seed/assets/CB_Aida_anchor.png",
-      crystalsingingbowlandwand: "/cb-seed/assets/ep1/CB_Scene_CrystalCove_anchor.jpeg",
-      keenbarewriststate: "/cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
-      keensfatherswristbandsvacant: "/cb-seed/assets/ep1/CB_Keen_turnaround_vacant_cuffs.png",
-      keensfatherswristbandsaquamarinecharged: "/cb-seed/assets/ep1/CB_Keen_wristband_crystal.jpeg",
-      keenssmallsailboat: "/cb-seed/assets/ep1/CB_Scene_KeenPier_1.jpeg",
-      keenssatchel: "/cb-seed/assets/CB_Keen_anchor.jpeg",
-      driftnet: "/cb-seed/assets/ep1/CB_Scene_KeenPier_5.jpeg",
-    };
-    const sceneMap = {
-      deepwithintherainforest: "/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
-      crystalcoveaidassanctuary: "/cb-seed/assets/ep1/CB_Scene_CrystalCove_anchor.jpeg",
-      keensislandthepier: "/cb-seed/assets/CB_Pier_plate.png",
-      atsea: "/cb-seed/assets/ep1/CB_Scene_KeenPier_5.jpeg",
-    };
-    if (kind === "prop") return propMap[compact] || "";
-    if (kind === "scene") return sceneMap[compact] || "";
-    return characterMap[compact] || "";
+    const pool = kind === "prop" ? propRoster : kind === "scene" ? locationRoster : characterRoster;
+    const item = pool.find((entry) => slugAssetName(entry.name) === compact);
+    return (item && item.imageUrl) || "";
   }
 
   function renderAssetLibraryHeading(kicker, title, copy, actions = "") {
@@ -1813,13 +1542,13 @@
     }
     if (kind === "scenes") {
       return [...locationRoster.map((item) => ({
-        key: slugAssetName(item[0]), name: item[0], mood: item[1], scenes: item[2],
-        prompt: item[3], imageUrl: libraryAssetUrlForName(item[0], "scene"),
+        key: slugAssetName(item.name), name: item.name, mood: item.mood, scenes: item.scenes,
+        prompt: item.prompt, imageUrl: libraryAssetUrlForName(item.name, "scene"),
       })), ...drafts.added.scenes].filter(visible).map(applyDrafts);
     }
     return [...propRoster.map((item) => ({
-      key: slugAssetName(item[0]), name: item[0], scenes: item[1], status: item[2],
-      prompt: item[3], imageUrl: libraryAssetUrlForName(item[0], "prop"),
+      key: slugAssetName(item.name), name: item.name, scenes: item.scenes, status: item.status,
+      prompt: item.prompt, imageUrl: libraryAssetUrlForName(item.name, "prop"),
     })), ...drafts.added.props].filter(visible).map(applyDrafts);
   }
 
@@ -2584,7 +2313,7 @@
         : activeGate === "Review"
           ? "Approve delivered beats or create targeted fixes."
           : "Complete direction before keyframes.";
-    return { activeGate, completed, total: sceneOneContract.gates.length, next };
+    return { activeGate, completed, total: workbenchContract().gates.length, next };
   }
 
   function relayStage(session) {
@@ -2906,7 +2635,7 @@
     const beats = workbenchBeats().map((item) => displayBeatState(item, session));
     const primary = workbenchPrimaryAction(session, beat);
     const gateState = workbenchGateState(session);
-    const gates = sceneOneContract.gates.map((gate, index) => {
+    const gates = workbenchContract().gates.map((gate, index) => {
       const active = (session.phase === "keyframe" && gate === "Keyframes") || (["voice", "animation"].includes(session.phase) && gate === "Generate") || (session.phase === "review" && gate === "Review");
       const complete = index < 2 || (gate === "Keyframes" && ["voice", "animation", "review", "final"].includes(session.phase));
       return `<button type="button" class="${active ? "active" : complete ? "complete" : ""}" data-workbench-gate="${esc(gate.toLowerCase())}">
@@ -2915,9 +2644,9 @@
     }).join("");
     host.innerHTML = `<div class="workbench-top">
       <div>
-        <span class="stage-label">${esc(app.projectName || "")} / Episode 1 / Scene 1</span>
-        <h2>${esc(sceneOneContract.title)}</h2>
-        <p>${esc(sceneOneContract.promise)}</p>
+        <span class="stage-label">${esc(app.projectName || "")} / Episode ${esc(String(app.episode || "").replace(/^Ep/i, ""))} / Scene ${esc(String(app.scene || ""))}</span>
+        <h2>${esc(workbenchContract().title)}</h2>
+        <p>${esc(workbenchContract().promise)}</p>
       </div>
       <span class="workbench-status ${esc(session.phase || beat.reviewStatus)}">${esc(workbenchStatusLabel(session, beat))}</span>
     </div>
@@ -3365,7 +3094,7 @@
   }
 
   function renderAssetGenerationCard(item, index) {
-    const [name, scenes, status, prompt] = item;
+    const { name, scenes, status, prompt } = item;
     const ready = status === "Generated";
     return `<article class="generation-card ${ready ? "approved" : ""}">
       <div class="asset-thumb" aria-hidden="true">${esc(name.charAt(0))}</div>
@@ -3399,7 +3128,7 @@
   }
 
   function renderLocationCard(location) {
-    const [name, mood, scenes, prompt] = location;
+    const { name, mood, scenes, prompt } = location;
     const angles = ["Top-Down", "Wide", "Close-Up", "Low-Angle"];
     return `<article class="location-card">
       <div class="location-head">
@@ -3581,7 +3310,7 @@
     <div class="audio-grid">
       <section class="control-panel">
         <span class="field-label">Voice Selection</span>
-        <select aria-label="Voice selection"><option>Select character voice</option><option>Fuzzby</option><option>Zenny</option><option>Keen</option></select>
+        <select aria-label="Voice selection"><option>Select character voice</option>${characterRoster.map((character) => `<option>${esc(character.name)}</option>`).join("")}</select>
         <button type="button" class="secondary" disabled>Preview Voice</button>
       </section>
       <section class="control-panel">
@@ -5139,8 +4868,9 @@
 
   async function init() {
     readHash();
-    renderEpisodeContext();
     bindEvents();
+    await loadProjectRoster();
+    renderEpisodeContext();
     await loadRoster();
     if (!app.explicitLocation && app.view === "director" && app.directorBoard?.nextDecision) {
       app.scene = String(app.directorBoard.nextDecision.scene);

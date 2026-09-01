@@ -5,7 +5,7 @@ import paths as P  # T45: scratch worlds use the project layout
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "engine" / "tools" / "recut_scene6_thirty_second_units.py"
+SCRIPT = ROOT / "projects" / "crystal-bears" / "tools" / "recut_scene6_thirty_second_units.py"   # T51: a Crystal Bears one-off lives in its project
 
 
 def test_scene6_recut_script_preserves_all_beats_and_dialogue():

@@ -1,4 +1,4 @@
-"""Deterministic opening-frame blocking for the Crystal Bears render path.
+"""Deterministic opening-frame blocking for the render path.
 
 This module never calls a media provider. It converts a typed DP layout, the current
 scene plate and locked visual sources into deterministic 16:9 frames whose pixel

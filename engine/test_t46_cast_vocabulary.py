@@ -91,12 +91,7 @@ def test_no_cast_name_is_spelled_in_live_engine_code():
             code = line.split("#", 1)[0]
             if re.search(names, code):
                 offenders.append(f"{rel}:{n}: {stripped[:100]}")
-    # Remaining live sites are Phase-3 tickets (T48 continuity rule, T49 emission checks, T50 prompts, T51 gaps).
-    owned = ("cb_scene_package.py",            # T48 continuity carry rule
-             "cb_emission_standard.py",         # T49 emission checks
-             "cb_creative.py", "cb_director_chat.py",   # T50 system prompts
-             "cb_canon.py",                     # T51 gap strings
-             "cb_readback.py", "import_scene1_director_records.py", "recut_scene",  # T51 one-off scripts
-             )
+    # T48–T51 closed every remaining live site; nothing is owned by a later ticket any more.
+    owned = ()
     unexplained = [o for o in offenders if not any(k in o for k in owned)]
     assert not unexplained, "cast names in live engine code:\n" + "\n".join(unexplained)

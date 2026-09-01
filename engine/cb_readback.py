@@ -170,7 +170,7 @@ THE BRIEF. It is not a mood reference and not one input among several — it is 
 LOCKED visual truth of this shot, and the brief's whole job is to start from it and move.
 
 THIS IS THE REAL FAILURE IT EXISTS TO CATCH, FROM ONE REAL MORNING:
-  The approved frame showed two bees hovering side by side, facing camera, at the same
+  The approved frame showed two characters hovering side by side, facing camera, at the same
   distance, in an open sunlit meadow with sky above them.
   The brief described a chase from behind one of them, low, inside a narrow corridor of
   towering flowers, with the second character a speck far away at the limit of focus.

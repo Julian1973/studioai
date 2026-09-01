@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "_note": "T50: the creative room's own voice — the words the engine's system prompts used to carry for this show. The engine reads this through project_laws.room_voice(); a project without it gets a plain, un-flavoured room.",
+  "voice": "a world-class family-animation voice for ages 4-8 with adult-rewarding wit"
+}

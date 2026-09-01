@@ -122,25 +122,23 @@ def infer_archetype(prompt: str, metadata: dict[str, Any] | None = None) -> str:
     text = str(prompt or "").lower()
     parsed = parse_prompt_structure(prompt)
     markers = parsed.get("markers") or {}
-    if ("moustache" in text or "mustache" in text or
-            ("attribute ownership" in markers and "upper lip" in text)):
-        return "reveal-and-deadpan-verdict"
-    if ("triple twist" in text or "double tuck" in text or "buzz crash" in text or
-            ("pops vertically" in text and "eye-roll" in text)):
-        return "escalation-into-verdict"
-    if ("chase" in text or "pursuit" in text or "near-miss" in text or
-            ("three speeds" in text and "maximum load" in text)):
-        return "false-triumph-chase"
-    if ("storm" in text or "thunder" in text or
-            ("turns" in text and "world" in text) or
-            ("environment" in text and "both states" in text)):
-        return "environment-turn"
-    if markers.get("Dialogue Language") and parsed.get("shotCount", 0) >= 2:
-        return "dialogue-departure"
-    if "vision" in text and "pier" in text:
-        return "vision-memory"
-    if "crystal-bowl" in text or "crystal bowl" in text or "ritual" in text:
-        return "ritual-glow"
+    # T51: the archetype signals (which words mean which gag shape) are the PROJECT's own
+    # (laws/emission_checks.json → archetypeSignals, tried in order); the engine only evaluates them.
+    import project_laws
+    for rule in project_laws.archetype_signals():
+        if rule.get("requireMarker"):
+            if markers.get(str(rule["requireMarker"])) and parsed.get("shotCount", 0) >= int(rule.get("minShots") or 0):
+                return str(rule["archetype"])
+            continue
+        if any(str(t).lower() in text for t in (rule.get("any") or [])):
+            return str(rule["archetype"])
+        for group in (rule.get("allGroups") or []):
+            if not isinstance(group, dict):
+                continue
+            ok_markers = all(str(m).lower() in {k.lower() for k in markers} for m in (group.get("markers") or []))
+            ok_text = all(str(t).lower() in text for t in (group.get("text") or []))
+            if ok_markers and ok_text and (group.get("markers") or group.get("text")):
+                return str(rule["archetype"])
     return "unclassified"
 
 

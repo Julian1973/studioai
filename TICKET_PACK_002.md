@@ -41,19 +41,19 @@ DoD: the six consumers read the file; the Crystal Bears file reproduces today's 
 projects/crystal-bears/canon/characters.json (`species`, `physiology.wings`), engine/project_profile.py (`laws.wingLaw.appliesWhen` → physiology), engine/cb_render.py:5752 → `laws/forbidden_elements.json`. `isBee` kept as a derived alias for one release with a deprecation note in the Show Bible.
 DoD: no code path tests `isBee` or the word "bee"; forbidden elements render per project; safety rule green. Verified — with one deviation: species/physiology live in laws/cast_vocabulary.json, NOT in characters.json, because characters.json is under the canon lock (lock_policy.json) and editing it would mark canon as drifted; the species map was derived from each character's own canon prose (Bo is a squirrel, Squeaky a dolphin). `isBee` and "bee in avoid" remain as LEGACY fallbacks inside project_laws.has_wings so shipped negatives stay byte-identical (Bo still counts as winged via his `avoid` text — recorded in the vocabulary file for Julian's ruling at T61). Also moved this pass, found by the new guard test: the Scene-10 single-subject-anchor override (→ reference_slot_policy.json identityOverrides), Zenny's mantra-chant performance note (→ vocalCues), the comedy-contract default wording (→ comedyDefaults), a prompt example naming Zenny.
 
-**T48 · Continuity carry rules as data** ⏳ OPEN — blocked by T44
+**T48 · Continuity carry rules as data** ✅ DONE (2026-09-01 — `laws/continuity_rules.json`: keen-wristband cases + stateMarkers; cb_scene_package/cb_render read `project_laws.continuity_constraints` / `state_from_markers`)
 projects/crystal-bears/canon/continuity.json, engine/cb_scene_package.py:168-204. The Keen wristband branch becomes `{"whenCast":["Keen"],"carry":"…"}` applied generically.
 DoD: Scene packages for Ep1/Ep2 byte-identical to baseline; `grep -n keen engine/cb_scene_package.py` zero. Verified.
 
-**T49 · Emission checks as data** ⏳ OPEN — blocked by T44
+**T49 · Emission checks as data** ✅ DONE (2026-09-01 — `laws/emission_checks.json`: preflight triggers, archetype checks DSL, archetypeSignals; matrix doc notes the ids)
 projects/crystal-bears/laws/emission_checks.json (new), engine/cb_emission_standard.py:67/174-209, docs/EMISSION_CONFORMANCE_MATRIX.md. Every regex becomes a named check `{id, pattern, level, rationale}`; the module runs the project's list; structural checks stay in code.
 DoD: `test_cb_emission_standard.py` passes unchanged; the matrix doc lists the checks by id; the module contains no character or gag word. Verified.
 
-**T50 · System prompts name the project, taste comes from the project** ⏳ OPEN — blocked by T44
+**T50 · System prompts name the project, taste comes from the project** ✅ DONE (2026-09-01 — `chairs/room.json` voice + `P.PROJECT_NAME`; the studio Design tab's cast/locations/props/workbench/episode titles moved to `creative/design_roster.json` served by `/api/project-roster` — director.js names no character)
 engine/cb_creative.py:1067, engine/cb_director_chat.py:198, projects/crystal-bears/chairs/ (new). "You are the {role} of the {project.name} creative room…" + the show's taste paragraph appended from `chairs/<role>.md`.
 DoD: the assembled system prompt for Crystal Bears is byte-identical to today's; the module contains no show name. Verified.
 
-**T51 · Gap strings, docstrings, comments** ⏳ OPEN — blocked by T46–T50
+**T51 · Gap strings, docstrings, comments** ✅ DONE (2026-09-01 — vision-plate role generic (`* vision plate`), chorus binding derived from chorusMembers, non-verbal sound palette + asset-group tokens + pronunciation message from cast_vocabulary.json, workbench default beat null, Ep1 preview tool → projects/crystal-bears/tools/; Phase-3 grep zero in live code)
 engine/cb_canon.py:498; docstrings in cb_gen.py, cb_layout.py, cb_safety.py, cb_state.py, cb_departments.py, cb_post.py:28/80. "Crystal Bears" → "the active project" (rule 7); the Crystal Call gap moves to the project's creative/ as a declared gap.
 DoD: the spec's Phase-3 grep returns ZERO lines across engine/ studio/ studio-ui/ dailies/ tools/. Verified.
 

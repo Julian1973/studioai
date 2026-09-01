@@ -197,7 +197,7 @@ def chat(episode, scene, shot_id, stage, message, issue="", reviewer="Julian"):
                 "inspectionFrames": len(review_frames),
             }
     system = (
-        "You are Direct, the Crystal Bears conversational shot Director inside a professional "
+        f"You are Direct, the {P.PROJECT_NAME} conversational shot Director inside a professional "
         "animation review desk. Follow the FilmAgent directing discipline: accept ONE plain "
         "creative note, reshape only the affected shot instructions, and never redesign the "
         "shot. Discuss the visible creative result plainly and specifically. Protect "

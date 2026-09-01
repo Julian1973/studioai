@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "_note": "T48: shot-visible continuity constraints the engine used to derive in code (cb_scene_package._continuity_constraints), now this project's own law. Each rule applies when the beat's locked text contains `whenTextContains`; its cases are tried IN ORDER and the first match supplies the constraint text. Case keys: whenNotContains (all absent), whenContainsAny (any present), beatIndexAtLeast, default. Text matching is case-insensitive over beatCode/storyBeat/emotionalIntent/kidRead/adultRead plus the action text.",
+  "rules": [
+    {
+      "id": "keen-wristbands",
+      "label": "Keen wristband state",
+      "severity": "critical",
+      "whenTextContains": "keen",
+      "cases": [
+        {
+          "whenNotContains": [
+            "wristband"
+          ],
+          "beatIndexAtLeast": 6,
+          "state": "Keen is now wearing both inherited wristbands as aged-gold open cuffs with blank settings, one cuff on each wrist. No crystals, no aquamarine stones and no glow appear in or on them."
+        },
+        {
+          "whenNotContains": [
+            "wristband"
+          ],
+          "state": "Keen starts this scene with bare wrists. No wristbands, bands, bracelets, cuffs, crystals or straps appear on either wrist."
+        },
+        {
+          "whenContainsAny": [
+            "slips them onto his wrists",
+            "puts the wristbands on"
+          ],
+          "state": "Keen may put on the inherited wristbands in this shot. They are worn, aged-gold open cuffs with blank settings only: no crystals, no aquamarine stones and no glow."
+        },
+        {
+          "whenContainsAny": [
+            "wristbands land in keen",
+            "holds the wristbands"
+          ],
+          "state": "The wristbands are in Keen's paws only. His wrists remain bare until the later shot where he puts them on. The bands are vacant: no crystals or aquamarine stones."
+        },
+        {
+          "whenContainsAny": [
+            "brings out",
+            "father"
+          ],
+          "state": "Mum introduces the inherited wristbands as aged-gold open cuffs with blank settings. Keen's wrists are still bare in this shot. No crystals, aquamarine stones or glow."
+        },
+        {
+          "default": true,
+          "state": "Wristband continuity must remain explicit: Keen has no aquamarine stones or crystal glow in this scene."
+        }
+      ]
+    }
+  ],
+  "stateMarkers": [
+    {
+      "state": "crystal-set-wristbands",
+      "markers": [
+        "crystal-set wristbands",
+        "aquamarine stones seated",
+        "wearing the crystal-set",
+        "wristbands now contain"
+      ]
+    },
+    {
+      "state": "no-cuffs",
+      "markers": [
+        "bare wrists",
+        "wrists remain bare",
+        "wrists are still bare",
+        "in keen's paws only",
+        "may put on the inherited wristbands"
+      ]
+    },
+    {
+      "state": "vacant-wristbands",
+      "markers": [
+        "now wearing the inherited wristbands",
+        "wearing the inherited wristbands",
+        "worn, vacant bands",
+        "vacant wristbands"
+      ]
+    }
+  ],
+  "_stateMarkersNote": "Identity-state markers: the first entry whose markers appear in a shot's continuity text names the character's state for that shot (cb_render._episode_character_state). Tried in order."
+}

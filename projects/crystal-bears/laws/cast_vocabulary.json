@@ -107,5 +107,39 @@
       "Release into Zenny's affectionate judgement."
     ],
     "emotionalHeart": "Zenny sees the full mess without rejecting Fuzzby; her restrained amusement turns his failure into affection."
+  },
+  "offscreenOnly": [
+    "Bo's Mum"
+  ],
+  "complexitySignals": [
+    "moustache",
+    "mustache",
+    "flower",
+    "stamen"
+  ],
+  "nonverbalSoundPalette": [
+    "wing buzzes",
+    "pollen poofs",
+    "plant movement"
+  ],
+  "assetGroupTokens": {
+    "scenes": [
+      "pier",
+      "cove",
+      "rainforest",
+      "island",
+      "house",
+      "sanctuary",
+      "meadow"
+    ],
+    "props": [
+      "wristband",
+      "pendant",
+      "bowl",
+      "wand",
+      "satchel",
+      "sailboat",
+      "net"
+    ]
   }
 }

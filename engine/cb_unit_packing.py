@@ -10,9 +10,10 @@ MAX_STAGES_PER_UNIT = 3
 MAX_INTERNAL_SHOTS_PER_UNIT = 3
 HANDOFF_HOLD_SECONDS = 1.0
 
+# T51: generic keywords; the project adds its own gag words (project_laws.complexity_signals).
 COMPLEXITY_KEYWORDS = (
-    "chase", "tumble", "crash", "collision", "reveal", "moustache", "mustache",
-    "flower", "stamen", "gymnastic", "physical comedy", "fast", "drone",
+    "chase", "tumble", "crash", "collision", "reveal",
+    "gymnastic", "physical comedy", "fast", "drone",
 )
 
 EMOTIONAL_CONTINUITY_KEYWORDS = (
@@ -75,7 +76,7 @@ def _unit_row(unit):
         "packingJudgement", "transitionReason"))
     text += " " + " ".join(str(_value(stage, key) or "") for stage in stages
                             for key in ("purpose", "primaryEvent", "observableEndState"))
-    complexity_hits = sorted({word for word in COMPLEXITY_KEYWORDS
+    complexity_hits = sorted({word for word in __import__("project_laws").complexity_signals(COMPLEXITY_KEYWORDS)
                               if word in text.casefold()})
     emotional_hits = sorted({word for word in EMOTIONAL_CONTINUITY_KEYWORDS
                              if word in text.casefold()})

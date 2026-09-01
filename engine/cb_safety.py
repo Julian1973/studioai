@@ -1,4 +1,4 @@
-"""Runtime safety layer for the single Crystal Bears production path.
+"""Runtime safety layer for the single production path.
 
 Installed by cb_render after its implementation functions are defined. Paid handoffs consume
 only current, signed specialist direction. Direction is machine-authored production input, not

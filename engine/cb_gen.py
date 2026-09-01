@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Crystal Bears — local generation module (the app's provider layer).
+The active project's local generation module (the app's provider layer).
 
 Wires the crew's prompts to the real APIs, locally (no Replit):
   - generate_image()  -> Seedream 5.0 Pro keyframes through BytePlus ModelArk
-  - generate_video_seedance_ref() -> the capability-gated Seedance video adapter. Crystal Bears
+  - generate_video_seedance_ref() -> the capability-gated Seedance video adapter. The project
                          targets Seedance 2.5 through BytePlus ModelArk; the historical fal 2.0
                          route is retained as code evidence but disabled in the provider registry.
   - generate_video()  -> Veo 3.1 (veo-3.1-generate-preview) [Camera i2v] — unused in production; CLI/manual-only.
@@ -48,7 +48,7 @@ _load_env()
 # of that decision, not rewritten — see IMAGE_PROVIDER below for the current, superseding decision.
 IMAGE_MODEL = os.environ.get("CB_IMAGE_MODEL", "gemini-3.1-flash-image")  # NB2 — the A/B winner for the cascade
 
-# Crystal Bears production images are fixed to the official BytePlus ModelArk Seedream
+# Production images are fixed to the official BytePlus ModelArk Seedream
 # 5.0 Pro endpoint. The older fal/Nano Banana implementations remain below only as
 # historical code; generate_image() cannot route production work to them.
 IMAGE_PROVIDER = os.environ.get("CB_IMAGE_PROVIDER", "seedream")
@@ -385,14 +385,14 @@ def _require_production_route(production_route, op):
 def generate_image(prompt, refs=None, aspect="16:9", out="keyframe.png",
                    model=None, image_size="2K", production_route=None):
     _require_production_route(production_route, "generate_image")
-    """Generate a Crystal Bears production image through Seedream 5 Pro only.
+    """Generate a production image for the active project through Seedream 5 Pro only.
 
     The older Nano Banana implementation remains below for archive/reproducibility work, but
     it is not an authorized SEE or keyframe production route.
     """
     if model or IMAGE_PROVIDER != "seedream":
         raise RuntimeError(
-            "REFUSED — Crystal Bears SEE/keyframe production is locked to Seedream 5 Pro "
+            "REFUSED — SEE/keyframe production is locked to Seedream 5 Pro "
             f"({SEEDREAM_ENDPOINT}); model overrides and CB_IMAGE_PROVIDER fallbacks are disabled.")
     return _generate_image_seedream(prompt, refs, aspect, out, image_size)
 
@@ -620,7 +620,7 @@ def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
     _require_production_route(production_route, "generate_video_seedance")
     del prompt, keyframe, resolution, duration, generate_audio, out, end_image, production_route
     raise cb_providers.ProviderCapabilityError(
-        "the legacy Seedance image-to-video entry point is retired; Crystal Bears is "
+        "the legacy Seedance image-to-video entry point is retired; this studio is "
         "Seedance 2.5-only and no provider was contacted")
 
 # ── ElevenLabs — TTS (V3 master) + Voice Changer (S2S) ───────────────────────

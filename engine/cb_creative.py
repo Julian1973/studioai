@@ -1065,8 +1065,11 @@ def _mind(role, taste_keys, charge):
     worker_contracts = "\n\n".join(cb_departments.load_runtime_skill(
         k, CREATIVE_DIRECTING_STANDARD_VERSION)
                                       for k in worker_keys)
-    return (f"You are the {role} of the Crystal Bears creative room — a world-class family-"
-            f"animation voice for ages 4-8 with adult-rewarding wit. The show's OWN world "
+    # T50: the room is named after the ACTIVE PROJECT and speaks in that project's own voice
+    # (chairs/room.json); nothing here names a show.
+    import project_laws
+    return (f"You are the {role} of the {P.PROJECT_NAME} creative room — "
+            f"{project_laws.room_voice()}. The show's OWN world "
             f"never names or imitates a real filmmaker or studio — no character, line, "
             f"on-screen reference or plot point may cite one. Separately, and only as your "
             f"OWN private craft direction never surfaced in the show itself, your department "

@@ -158,54 +158,15 @@ def _continuity_constraints(beat: dict[str, Any]) -> list[dict[str, str]]:
         "beatCode", "storyBeat", "emotionalIntent", "kidRead", "adultRead",
     ))
     text += " " + _action_text(beat)
-    text_l = text.casefold()
     beat_code = str(beat.get("beatCode") or "")
     try:
         beat_index = int(beat_code.split(".B", 1)[1].split(".", 1)[0])
     except Exception:
         beat_index = 0
-    constraints: list[dict[str, str]] = []
-    if "keen" in text_l:
-        if "wristband" not in text_l and beat_index >= 6:
-            state = (
-                "Keen is now wearing both inherited wristbands as aged-gold open cuffs "
-                "with blank settings, one cuff on each wrist. "
-                "No crystals, no aquamarine stones and no glow appear in or on them."
-            )
-        elif "wristband" not in text_l:
-            state = (
-                "Keen starts this scene with bare wrists. No wristbands, bands, "
-                "bracelets, cuffs, crystals or straps appear on either wrist."
-            )
-        elif "slips them onto his wrists" in text_l or "puts the wristbands on" in text_l:
-            state = (
-                "Keen may put on the inherited wristbands in this shot. They are worn, "
-                "aged-gold open cuffs with blank settings only: no crystals, no "
-                "aquamarine stones and no glow."
-            )
-        elif "wristbands land in keen" in text_l or "holds the wristbands" in text_l:
-            state = (
-                "The wristbands are in Keen's paws only. His wrists remain bare until "
-                "the later shot where he puts them on. The bands are vacant: no crystals "
-                "or aquamarine stones."
-            )
-        elif "brings out" in text_l or "father" in text_l:
-            state = (
-                "Mum introduces the inherited wristbands as aged-gold open cuffs with "
-                "blank settings. Keen's wrists "
-                "are still bare in this shot. No crystals, aquamarine stones or glow."
-            )
-        else:
-            state = (
-                "Wristband continuity must remain explicit: Keen has no aquamarine "
-                "stones or crystal glow in this scene."
-            )
-        constraints.append({
-            "label": "Keen wristband state",
-            "value": state,
-            "severity": "critical",
-        })
-    return constraints
+    # T48: the rules are the PROJECT's own (laws/continuity_rules.json); the engine only evaluates
+    # them against the beat's locked text. A project with no rules adds no constraints.
+    import project_laws
+    return project_laws.continuity_constraints(text, beat_index)
 
 
 def _reference_slots(characters: list[str], *, opener: bool,

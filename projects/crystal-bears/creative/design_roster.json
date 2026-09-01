@@ -1,0 +1,503 @@
+{
+  "_note": "The studio's Design tab roster for this project (T50, 2026-09-01): moved verbatim out of cb-studio/director.js. Characters/locations/props presented in the Character Portraits, Locations and Props pipeline views. episodeTitles supplements episodes/episodes.json. workbench[episode][scene] is the Scene Workbench contract (title, promise, beats with keyframe CTAs / visible proof / director checks); editorClips is the Rough Cut bin placeholder.",
+  "episodeTitles": {
+    "Ep1": "The Adventure Begins",
+    "Ep2": "Bo's Big Day"
+  },
+  "characters": [
+    {
+      "name": "Zenny",
+      "scenes": "1-10",
+      "status": "ready",
+      "role": "Calm, graceful Crystal Bear, precise and composed counterpart to Fuzzby",
+      "identity": "Small anthropomorphic bear with soft lavender-purple fur, smooth oval face, almond-shaped eyes, small rounded nose, soft rounded cheeks and neat arched eyebrows.",
+      "reference": "Generate Reference Sheet",
+      "wardrobes": [
+        {
+          "label": "Zenny — Rainforest/Crystal Cove Default",
+          "scenes": "1-10",
+          "state": "regen",
+          "initial": "Z"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg"
+    },
+    {
+      "name": "Aida",
+      "scenes": "2, 6, 7, 8, 9, 10",
+      "status": "ready",
+      "role": "Wise, serene leader of the Crystal Bears, healer and guide",
+      "identity": "Medium-sized cream-white anthropomorphic bear with a graceful oval face, large gentle almond-shaped eyes, soft rounded nose and elegant arched eyebrows.",
+      "reference": "Generate Reference Sheet",
+      "wardrobes": [
+        {
+          "label": "Aida — Crystal Cove Default",
+          "scenes": "2, 6, 7, 8, 9, 10",
+          "state": "regen",
+          "initial": "A"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_Aida.jpeg"
+    },
+    {
+      "name": "Keen",
+      "scenes": "3, 4, 7, 8, 9, 10",
+      "status": "pending",
+      "role": "Protagonist, brave young bear setting out on his first adventure",
+      "identity": "Small-to-medium young bear with warm mid-brown fur, round youthful face, wide bright eyes, small button nose and full rounded cheeks.",
+      "reference": "Generate a wardrobe first",
+      "wardrobes": [
+        {
+          "label": "Keen — Pier Departure, Bare Wrists",
+          "scenes": "3",
+          "state": "gen",
+          "initial": "K"
+        },
+        {
+          "label": "Keen — Vacant Wristbands, No Crystals",
+          "scenes": "3, 4, 7, 8",
+          "state": "gen",
+          "initial": "K"
+        },
+        {
+          "label": "Keen — Charged Wristbands, Aquamarine Stones",
+          "scenes": "9, 10",
+          "state": "gen",
+          "initial": "K"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_Keen.jpeg"
+    },
+    {
+      "name": "Keen's Mum",
+      "scenes": "3",
+      "status": "pending",
+      "role": "Keen's devoted and proud mother, emotional at her son's departure",
+      "identity": "Medium warm mid-brown bear with a warm oval face, soft wide eyes, rounded nose, full cheeks and gentle rounded jawline.",
+      "reference": "Generate a wardrobe first",
+      "wardrobes": [
+        {
+          "label": "Keen's Mum — Pier Farewell",
+          "scenes": "3",
+          "state": "gen",
+          "initial": "K"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg"
+    },
+    {
+      "name": "Howey",
+      "scenes": "6, 7, 8, 9, 10",
+      "status": "pending",
+      "role": "Crystal Bear, enthusiastic and protective member of the group",
+      "identity": "Medium teal-blue bear with a broad round face, large round eyes, wide flat nose, full cheeks and strong rounded jawline.",
+      "reference": "Generate a wardrobe first",
+      "wardrobes": [
+        {
+          "label": "Howey — Crystal Cove Default",
+          "scenes": "6, 7, 8, 9, 10",
+          "state": "gen",
+          "initial": "H"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_Howey.jpeg"
+    },
+    {
+      "name": "Misty",
+      "scenes": "6, 7, 8, 9, 10",
+      "status": "pending",
+      "role": "Crystal Bear, warm and expressive member of the group",
+      "identity": "Small-to-medium silver-grey bear with a soft oval face, wide expressive eyes, delicate rounded nose and soft full cheeks.",
+      "reference": "Generate a wardrobe first",
+      "wardrobes": [
+        {
+          "label": "Misty — Crystal Cove Default",
+          "scenes": "6, 7, 8, 9, 10",
+          "state": "gen",
+          "initial": "M"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_Misty.jpeg"
+    },
+    {
+      "name": "Luna",
+      "scenes": "6, 7, 8, 9, 10",
+      "status": "pending",
+      "role": "Crystal Bear, quiet and gentle member of the group",
+      "identity": "Small deep indigo-navy bear with a delicate oval face, soft half-moon eyes, small pointed nose and slender rounded jawline.",
+      "reference": "Generate a wardrobe first",
+      "wardrobes": [
+        {
+          "label": "Luna — Crystal Cove Default",
+          "scenes": "6, 7, 8, 9, 10",
+          "state": "gen",
+          "initial": "L"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_Luna.jpeg"
+    },
+    {
+      "name": "Sunny",
+      "scenes": "8, 9, 10",
+      "status": "pending",
+      "role": "Crystal Bear, bright and enthusiastic member of the group",
+      "identity": "Small bright yellow bear with a round cheerful face, large sparkling eyes, small button nose and high expressive eyebrows.",
+      "reference": "Generate a wardrobe first",
+      "wardrobes": [
+        {
+          "label": "Sunny — Crystal Cove Default",
+          "scenes": "8, 9, 10",
+          "state": "gen",
+          "initial": "S"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_Sunny.jpeg"
+    },
+    {
+      "name": "Amie",
+      "scenes": "8, 9, 10",
+      "status": "pending",
+      "role": "Crystal Bear, warm and welcoming member of the group",
+      "identity": "Small rose-pink bear with a soft round face, wide warm eyes, soft rounded nose, full cheeks and gentle rounded jawline.",
+      "reference": "Generate a wardrobe first",
+      "wardrobes": [
+        {
+          "label": "Amie — Crystal Cove Default",
+          "scenes": "8, 9, 10",
+          "state": "gen",
+          "initial": "A"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_Amie.jpeg"
+    },
+    {
+      "name": "Squeaky",
+      "scenes": "4, 7, 8, 9, 10",
+      "status": "pending",
+      "role": "Friendly dolphin companion who guides Keen through the storm and is rescued by him",
+      "identity": "Atlantic bottlenose dolphin with streamlined body, rounded melon forehead, short beak, bright side-set eyes and silver-grey dorsal colouring.",
+      "reference": "Generate a wardrobe first",
+      "wardrobes": [
+        {
+          "label": "Squeaky — Open Water, Healthy",
+          "scenes": "4",
+          "state": "gen",
+          "initial": "S"
+        },
+        {
+          "label": "Squeaky — Storm, Entangled",
+          "scenes": "7",
+          "state": "gen",
+          "initial": "S"
+        },
+        {
+          "label": "Squeaky — Post-Rescue, Free",
+          "scenes": "8, 9, 10",
+          "state": "gen",
+          "initial": "S"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg"
+    },
+    {
+      "name": "Fuzzby",
+      "scenes": "0",
+      "status": "ready",
+      "role": "Needs canon role imported into this EP1 package",
+      "identity": "Identity present in existing reference image; fixed physical-trait text still needs to be completed in the package.",
+      "reference": "Generate Reference Sheet",
+      "wardrobes": [
+        {
+          "label": "Default look",
+          "scenes": "-",
+          "state": "regen",
+          "initial": "F"
+        }
+      ],
+      "imageUrl": "/cb-seed/assets/CB_Fuzzby_full_turnaround.png"
+    }
+  ],
+  "locations": [
+    {
+      "name": "Deep Within the Rainforest",
+      "mood": "Warm, lush, playful, gently ominous as storm approaches",
+      "scenes": "1",
+      "prompt": "A dense tropical rainforest interior with towering flowers, drifting pollen, dappled golden sunlight and a cooler storm shift.",
+      "imageUrl": "/cb-seed/assets/locations/deep_rainforest_flower_meadow.png"
+    },
+    {
+      "name": "Crystal Cove – Aida's Sanctuary",
+      "mood": "Serene, mystical, meditative, softly glowing",
+      "scenes": "2",
+      "prompt": "A sheltered coastal cove with calm turquoise water, pale sand, rose quartz crystals and a carved crystal bowl.",
+      "imageUrl": "/cb-seed/assets/ep1/CB_Scene_CrystalCove_anchor.jpeg"
+    },
+    {
+      "name": "Keen's Island – The Pier",
+      "mood": "Tender, bittersweet, hopeful, quietly emotional",
+      "scenes": "3",
+      "prompt": "A modest wooden pier, compact sailboat, soft green island hills and bright reflective water.",
+      "imageUrl": "/cb-seed/assets/CB_Pier_plate.png"
+    },
+    {
+      "name": "At Sea",
+      "mood": "Adventurous, open, then stormy and dangerous",
+      "scenes": "4, 7",
+      "prompt": "Open ocean clean plates that move from hopeful daylight to rough storm water and low steel-grey skies.",
+      "imageUrl": "/cb-seed/assets/ep1/CB_Scene_KeenPier_5.jpeg"
+    }
+  ],
+  "props": [
+    {
+      "name": "Aida's Rose Quartz Pendant",
+      "scenes": "2, 6, 9",
+      "status": "Generated",
+      "prompt": "A smooth polished rose quartz crystal pendant hanging on a fine natural cord, pale semi-translucent pink stone with a soft warm inner glow.",
+      "imageUrl": "/cb-seed/assets/CB_Aida_anchor.png"
+    },
+    {
+      "name": "Crystal Singing Bowl and Wand",
+      "scenes": "2",
+      "status": "Draft",
+      "prompt": "A clear polished quartz crystal singing bowl with a padded cloth-tipped wooden wand, isolated on a neutral grey studio backdrop.",
+      "imageUrl": "/cb-seed/assets/ep1/CB_Scene_CrystalCove_anchor.jpeg"
+    },
+    {
+      "name": "Keen Bare-Wrist State",
+      "scenes": "Before approved 3.B3",
+      "status": "Required",
+      "prompt": "Keen remains bare-wristed until Mum visibly fits both cuffs in the approved 3.B3 take. No wristbands, bands, bracelets, cuffs, straps, crystals or glow appear before that fitting.",
+      "imageUrl": "/cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg"
+    },
+    {
+      "name": "Keen's Father's Wristbands — Vacant",
+      "scenes": "After approved 3.B3–9.B2",
+      "status": "Required",
+      "prompt": "Exactly two inherited aged-gold open cuffs, one on each wrist, with blank settings. No crystals, aquamarine stones or glow until Aida visibly installs the crystals.",
+      "imageUrl": "/cb-seed/assets/ep1/CB_Keen_turnaround_vacant_cuffs.png"
+    },
+    {
+      "name": "Keen's Father's Wristbands — Aquamarine Charged",
+      "scenes": "9, 10",
+      "status": "Locked Later",
+      "prompt": "The same inherited wristbands only after the end-of-episode gift beat: aquamarine stones seated in the bands with a controlled crystal glow.",
+      "imageUrl": "/cb-seed/assets/ep1/CB_Keen_wristband_crystal.jpeg"
+    },
+    {
+      "name": "Keen's Small Sailboat",
+      "scenes": "3, 4, 7",
+      "status": "Draft",
+      "prompt": "A compact wooden single-mast sailboat with plain white sail, rope rigging and natural wood grain.",
+      "imageUrl": "/cb-seed/assets/ep1/CB_Scene_KeenPier_1.jpeg"
+    },
+    {
+      "name": "Keen's Satchel",
+      "scenes": "3, 4",
+      "status": "Draft",
+      "prompt": "A small worn canvas traveller's satchel with buckled flap closure and shoulder strap.",
+      "imageUrl": "/cb-seed/assets/CB_Keen_anchor.jpeg"
+    },
+    {
+      "name": "Drift Net",
+      "scenes": "7",
+      "status": "Draft",
+      "prompt": "A ragged discarded fishing drift net, frayed and tangled with weathered dark grey-green mesh.",
+      "imageUrl": "/cb-seed/assets/ep1/CB_Scene_KeenPier_5.jpeg"
+    }
+  ],
+  "workbench": {
+    "Ep1": {
+      "1": {
+        "title": "Scene 1 — Fuzzby’s Pollination Lesson",
+        "promise": "Fuzzby’s joyful performance of expertise becomes increasingly visible failure, while Zenny’s restrained amusement shows that she sees and loves exactly who he is.",
+        "gates": [
+          "Script",
+          "Direction",
+          "Keyframes",
+          "Generate",
+          "Review"
+        ],
+        "beats": [
+          {
+            "id": "chase",
+            "n": 1,
+            "title": "Chase",
+            "range": "00.0–04.2s",
+            "priority": "required",
+            "reviewStatus": "delivered",
+            "shot": "SH1A",
+            "keyframe": "Flower-corridor chase starting composition",
+            "cta": "Generate Chase Keyframe",
+            "intent": "Fuzzby pursues pollen through the corridor.",
+            "scriptTruth": "Fuzzby enters as joyful chaos, trying to look expert while barely controlling the route.",
+            "visibleProof": "The audience sees a clear bee-height chase lane and two escalating near-misses.",
+            "startState": "Open flower corridor ahead; Fuzzby already overcommitted; Zenny clean and outside his path.",
+            "actionPath": "Drone-like pursuit → two near-misses → flower contact setup.",
+            "endState": "Fuzzby is still moving forward with room for the first crash.",
+            "camera": "Bee-height chase camera, slightly late, no confusing cuts.",
+            "checklist": [
+              "Clear bee-height chase lane",
+              "Two near-misses have room to stage",
+              "Zenny has safe parallel route",
+              "Camera axis is readable"
+            ],
+            "failConditions": [
+              "No static hovering",
+              "No early crash",
+              "No lost corridor route"
+            ],
+            "promptSegment": "Chase prompt segment: bee-height drone pursuit, open corridor, two readable near-misses, Zenny safely parallel.",
+            "reviewNote": "Chase route is readable and has room for escalation."
+          },
+          {
+            "id": "triumph",
+            "n": 2,
+            "title": "False Triumph",
+            "range": "04.2–08.8s",
+            "priority": "required",
+            "reviewStatus": "delivered",
+            "shot": "SH1A",
+            "keyframe": "Fuzzby chest-out post-recoil hover",
+            "cta": "Generate False-Triumph Anchor",
+            "intent": "Fuzzby converts a crash into a proud finish.",
+            "scriptTruth": "The leaf recoil accidentally gives Fuzzby a gymnast-style recovery he pretends was planned.",
+            "visibleProof": "Flower scoop, springy leaf impact, recoil rotation, chest-out hover.",
+            "startState": "Fuzzby dives too hard into a flower.",
+            "actionPath": "Face contact → leaf bend → recoil → tucked rotation → proud hover.",
+            "endState": "Fuzzby is upright, proud and physically unsettled.",
+            "camera": "Hold the cause chain and settle on the false triumph.",
+            "checklist": [
+              "Leaf recoil cause is visible",
+              "Fuzzby has a clear chest-forward hover",
+              "Minor instability remains readable",
+              "Space exists for later flower action"
+            ],
+            "failConditions": [
+              "No random impact",
+              "No painful collision",
+              "No missing leaf recoil"
+            ],
+            "promptSegment": "False Triumph prompt segment: flower scoop, springy leaf recoil, tucked rotation and proud hover with residual wobble.",
+            "reviewNote": "False triumph reads as accidental success rather than real competence."
+          },
+          {
+            "id": "moustache",
+            "n": 3,
+            "title": "Pollen Moustache",
+            "range": "08.8–16.2s",
+            "priority": "blocking",
+            "reviewStatus": "weak",
+            "shot": "SH1B",
+            "keyframe": "Moustache Setup",
+            "secondaryKeyframe": "Moustache Reveal",
+            "cta": "Generate Moustache Setup Keyframe",
+            "ctaAfterSetup": "Generate Moustache Reveal Keyframe",
+            "intent": "Escalate Fuzzby’s false expertise into a readable visual joke.",
+            "scriptTruth": "Fuzzby gets two pollen curls on his upper lip and presents them as authority.",
+            "visibleProof": "The pollen moustache must read before Zenny reacts.",
+            "startState": "Fuzzby centre-left; separate target flower centre-right; Zenny frame-left and outside his travel route.",
+            "actionPath": "Forward arc → face contacts target flower → pollen transfers → same-path return → presentation hold → Zenny reacts.",
+            "endState": "Two upper-lip pollen curls are visible, target flower remains visible, Fuzzby holds proudly.",
+            "camera": "Medium-wide, warm corridor, target flower and return position both readable.",
+            "timing": "Reveal hold around 0.8s before Zenny response.",
+            "checklist": [
+              "Separate target flower visible",
+              "Fuzzby’s forward route to flower is clear",
+              "Zenny remains outside Fuzzby’s route",
+              "Camera keeps flower, Fuzzby and Zenny readable",
+              "No moustache exists in setup frame"
+            ],
+            "revealChecklist": [
+              "Two clear upper-lip pollen curls",
+              "Target flower remains visible in background",
+              "Fuzzby is in planned reveal position",
+              "Fuzzby holds proudly before Zenny reacts",
+              "Zenny’s eye-line lands on moustache first"
+            ],
+            "failConditions": [
+              "Fuzzby backs into Zenny",
+              "Full-face pollen mask",
+              "Target flower missing",
+              "Zenny reacts too early"
+            ],
+            "recommendedFix": "Generate the Moustache Setup keyframe, then the Moustache Reveal keyframe, and use them as anchors for a dedicated 7.4-second Seedance shot.",
+            "promptSegment": "Moustache Setup prompt segment: Fuzzby centre-left, separate target flower centre-right, Zenny outside route, no moustache yet. Reveal segment: same flower remains visible, two upper-lip pollen curls, proud hold before Zenny reacts.",
+            "reviewNote": "Target flower and upper-lip moustache are unclear; route drifted toward Zenny instead of returning to the reveal position."
+          },
+          {
+            "id": "zenny",
+            "n": 4,
+            "title": "Zenny Reaction",
+            "range": "14.0–16.2s",
+            "priority": "required",
+            "reviewStatus": "not-started",
+            "shot": "SH1B",
+            "keyframe": "Restrained, affectionate deadpan",
+            "cta": "Generate Zenny Reaction Keyframe",
+            "intent": "Zenny’s deadpan lands after the evidence.",
+            "scriptTruth": "Zenny judges the accident with restraint and affection.",
+            "visibleProof": "Her eyes move from moustache to Fuzzby before the response lands.",
+            "startState": "Moustache visible; Fuzzby presenting; Zenny close but outside route.",
+            "actionPath": "Evidence read → eye move → almost-smile → deadpan response.",
+            "endState": "Zenny’s affection is visible without broad mugging.",
+            "camera": "Relationship composition; no cut before the joke reads.",
+            "checklist": [
+              "Moustache has already been established",
+              "Zenny remains almost still",
+              "Eye movement is directed to moustache, then Fuzzby",
+              "One mouth corner only just lifts",
+              "Reaction has no broad expression or early action"
+            ],
+            "failConditions": [
+              "Reaction before reveal",
+              "Broad cartoon laugh",
+              "Zenny blocking target flower"
+            ],
+            "promptSegment": "Zenny Reaction prompt segment: moustache already established, Zenny almost still, eyes to moustache then Fuzzby, tiny mouth-corner lift only.",
+            "reviewNote": "Reaction must wait until the moustache is visually established."
+          },
+          {
+            "id": "payoff",
+            "n": 5,
+            "title": "Final Warmth",
+            "range": "16.2–29.0s",
+            "priority": "polish",
+            "reviewStatus": "not-started",
+            "shot": "SH1C",
+            "keyframe": "Shared final pose",
+            "cta": "Generate Final Payoff Keyframe",
+            "intent": "Fuzzby worsens the mess and Zenny loves him anyway.",
+            "scriptTruth": "A second failure becomes a warm character button.",
+            "visibleProof": "Fuzzby pops out more pollen-covered; Zenny eye-roll softens into love.",
+            "startState": "Fuzzby still marked with pollen; Zenny clear of the route.",
+            "actionPath": "Wipe-smear → overcommit → flower contacts → pop-up pose → softened eye-roll.",
+            "endState": "Golden dust hangs between Fuzzby and Zenny’s smiling eye-roll.",
+            "camera": "Follow causal tumble, then hold the final relationship frame.",
+            "checklist": [
+              "Fuzzby is visibly more pollen-covered",
+              "Final pose keeps both characters readable",
+              "Zenny’s eye-roll softens into affection",
+              "Golden dust hangs between them",
+              "The shot ends on a usable handoff frame"
+            ],
+            "failConditions": [
+              "Random cuts",
+              "No worsening",
+              "No loving soften"
+            ],
+            "promptSegment": "Final Warmth prompt segment: Fuzzby worsens the pollen mess, pops into final readable pose, Zenny eye-roll softens into love, held handoff frame.",
+            "reviewNote": "Final warmth depends on a held two-character payoff, not more random chaos."
+          }
+        ]
+      }
+    }
+  },
+  "editorClips": [
+    "S1 C2",
+    "S1 C3",
+    "S1 C4",
+    "S1 C5",
+    "S1 C6",
+    "S2 C1"
+  ]
+}

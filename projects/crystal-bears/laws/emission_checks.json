@@ -1,0 +1,277 @@
+{
+ "schemaVersion": 1,
+ "_note": "T49: the emission-conformance checks the engine used to carry in code (cb_emission_standard.manifest_checks + two preflight triggers), now this project's own law. `preflight.featureIntroducers` marks a salient new feature that needs an ATTRIBUTE OWNERSHIP block (R16); `preflight.retroactivePride` marks a pride beat that needs a self-check first (R12). `archetypes.<name>` is a list of checks tried in order: {label, pattern} regex over the whole prompt; {label, notPattern}; {label, shotCount}; {label, shot: i, pattern[, andPattern][, brace]} regex over shot i; {label, shotsWithEndStates}. Regexes are Python, case-insensitive, multiline, dotall.",
+ "preflight": {
+  "featureIntroducers": "moustache|mustache|new visible feature|pollen marks|smears",
+  "retroactivePride": "double .*tuck|Nailed it"
+ },
+ "archetypes": {
+  "false-triumph-chase": [
+   {
+    "label": "four shots",
+    "shotCount": 4
+   },
+   {
+    "label": "three parallax speeds",
+    "pattern": "three (?:parallax )?speeds|world passes at three speeds"
+   },
+   {
+    "label": "passing landmarks",
+    "pattern": "passes .*?(?:flower|stem|bloom).*?(?:vanish|disappear).*?behind"
+   },
+   {
+    "label": "scale change and camera surge",
+    "pattern": "pulls ahead.*?(?:shrink|smaller).*?camera surges"
+   },
+   {
+    "label": "foreground lens wipe",
+    "pattern": "foreground .*wipe.*?(?:lens|frame)"
+   },
+   {
+    "label": "three escalating contacts",
+    "pattern": "three .*contacts.*?(?:worse|larger|increas)|first .*second .*third"
+   },
+   {
+    "label": "maximum-load cut",
+    "pattern": "maximum (?:leaf )?load|loaded spring.*End state"
+   },
+   {
+    "label": "isolated full aerial",
+    "shot": 2,
+    "pattern": "full aerial|every rotation"
+   },
+   {
+    "label": "self-check before pride",
+    "shot": 3,
+    "pattern": "checks?|eyes dart|looks down|pats his"
+   },
+   {
+    "label": "dialogue and post-line hold",
+    "shot": 3,
+    "brace": true,
+    "pattern": "full beat after"
+   },
+   {
+    "label": "held witness payoff",
+    "shot": 3,
+    "pattern": "cut to .*Zenny|witness",
+    "andPattern": "hold"
+   },
+   {
+    "label": "acting left, witness right",
+    "pattern": "frame-left.*frame-right|stages screen-left.*screen-right"
+   },
+   {
+    "label": "action exclusions lifted",
+    "notPattern": "\\bno cuts\\b|\\bno handheld\\b"
+   },
+   {
+    "label": "no duplicated shot action",
+    "notPattern": "Story lock:|Gag action \\(|Physics \\("
+   }
+  ],
+  "reveal-and-deadpan-verdict": [
+   {
+    "label": "attribute ownership",
+    "pattern": "ATTRIBUTE OWNERSHIP.*?only.*?(?:clean|no pollen)"
+   },
+   {
+    "label": "feature absent in opening",
+    "pattern": "no (?:pollen )?(?:mark|moustache).*?(?:upper lip|face)|faces? .*clean"
+   },
+   {
+    "label": "overcommitted arrival",
+    "pattern": "launches? .*too hard|overshoots?.*arrives? .*faster than .*stop"
+   },
+   {
+    "label": "cut before reveal",
+    "pattern": "Cut before (?:he|the).*?(?:withdraw|result|visible)"
+   },
+   {
+    "label": "close reveal and presentation",
+    "pattern": "close-up.*?(?:reveal|pulls).*?(?:present|chin)"
+   },
+   {
+    "label": "non-owner remains clean",
+    "pattern": "Zenny.*?(?:face|fur).*?clean"
+   },
+   {
+    "label": "eye-line feature and back",
+    "pattern": "eyes .*?(?:moustache|feature).*?(?:back|meet)"
+   },
+   {
+    "label": "micro-tell before line",
+    "pattern": "corner .*mouth|micro-tell|nearly losing"
+   },
+   {
+    "label": "hold after line",
+    "pattern": "hold.*?full beat after"
+   },
+   {
+    "label": "harvestable end state",
+    "pattern": "End state:.*?harvest"
+   }
+  ],
+  "escalation-into-verdict": [
+   {
+    "label": "attribute ownership",
+    "pattern": "ATTRIBUTE OWNERSHIP"
+   },
+   {
+    "label": "opening from previous end",
+    "pattern": "(?:opening|first) frame.*?(?:final frame of the previous|previous shot(?:'s|’s) approved final frame)"
+   },
+   {
+    "label": "correction worsens feature",
+    "pattern": "wipe.*?(?:wider|worse|messier)"
+   },
+   {
+    "label": "self evidence before panic",
+    "pattern": "looks? .*?(?:paw|body).*?(?:panic|expression drops)"
+   },
+   {
+    "label": "contacts escalate",
+    "pattern": "(?:first|clips? a flower)[\\s\\S]*?(?:a )?second harder[\\s\\S]*?(?:doubles|larger)"
+   },
+   {
+    "label": "button pose before line and hold",
+    "pattern": "pose .*?(?:lands|holds).*?before .*?speaks.*?full beat after"
+   },
+   {
+    "label": "reactor cut after line",
+    "pattern": "after .*?line .*?(?:finished|ends).*?cut to Zenny"
+   },
+   {
+    "label": "turn names both states",
+    "pattern": "eye-roll[\\s\\S]{0,180}?softens[\\s\\S]{0,80}?into[\\s\\S]{0,80}?smile"
+   }
+  ],
+  "environment-turn": [
+   {
+    "label": "two environment states, same geometry",
+    "pattern": "BOTH states.*?Geometry.*?identical|TWO states.*?identical geometry"
+   },
+   {
+    "label": "world changes first",
+    "pattern": "environment before either character reacts|world .*?before .*?character"
+   },
+   {
+    "label": "vegetation posture changes",
+    "pattern": "flowers .*?(?:furl|droop|clos)|vegetation .*?posture"
+   },
+   {
+    "label": "physical betrayal before cover line",
+    "pattern": "wings? hitch.*?(?:exhales?|rebrands?).*?\\{"
+   },
+   {
+    "label": "reader stills and listens",
+    "pattern": "Zenny.*?(?:stills?|quiet).*?listen"
+   },
+   {
+    "label": "hold after quiet line",
+    "pattern": "Hold .*?after the line ends"
+   },
+   {
+    "label": "final still hold and fade",
+    "pattern": "(?:no further movement|nothing else acts).*?(?:fade|Slow fade)"
+   }
+  ]
+ },
+ "archetypeSignals": [
+  {
+   "archetype": "reveal-and-deadpan-verdict",
+   "any": [
+    "moustache",
+    "mustache"
+   ],
+   "allGroups": [
+    {
+     "markers": [
+      "attribute ownership"
+     ],
+     "text": [
+      "upper lip"
+     ]
+    }
+   ]
+  },
+  {
+   "archetype": "escalation-into-verdict",
+   "any": [
+    "triple twist",
+    "double tuck",
+    "buzz crash"
+   ],
+   "allGroups": [
+    {
+     "text": [
+      "pops vertically",
+      "eye-roll"
+     ]
+    }
+   ]
+  },
+  {
+   "archetype": "false-triumph-chase",
+   "any": [
+    "chase",
+    "pursuit",
+    "near-miss"
+   ],
+   "allGroups": [
+    {
+     "text": [
+      "three speeds",
+      "maximum load"
+     ]
+    }
+   ]
+  },
+  {
+   "archetype": "environment-turn",
+   "any": [
+    "storm",
+    "thunder"
+   ],
+   "allGroups": [
+    {
+     "text": [
+      "turns",
+      "world"
+     ]
+    },
+    {
+     "text": [
+      "environment",
+      "both states"
+     ]
+    }
+   ]
+  },
+  {
+   "archetype": "dialogue-departure",
+   "requireMarker": "Dialogue Language",
+   "minShots": 2
+  },
+  {
+   "archetype": "vision-memory",
+   "allGroups": [
+    {
+     "text": [
+      "vision",
+      "pier"
+     ]
+    }
+   ]
+  },
+  {
+   "archetype": "ritual-glow",
+   "any": [
+    "crystal-bowl",
+    "crystal bowl",
+    "ritual"
+   ]
+  }
+ ],
+ "_archetypeSignalsNote": "cb_prompt_bank.infer_archetype: rules tried in order; a rule matches when any `any` term is in the prompt text, or every term of one `allGroups` entry is present (markers = parsed prompt markers, text = prompt text); `requireMarker` rules need that parsed marker plus at least minShots shots."
+}

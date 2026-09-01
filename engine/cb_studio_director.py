@@ -26,9 +26,11 @@ _SENSITIVE_PROGRESS = re.compile(
     r"(?:api[-_ ]?key|authorization|bearer|secret|spend[-_ ]?token|launch[-_ ]?token)\s*[:=]",
     re.IGNORECASE,
 )
+# T51: the generic complexity signals; the project adds its own gag words (laws/cast_vocabulary.json →
+# complexitySignals, e.g. Crystal Bears' moustache/flower/stamen) through project_laws.complexity_signals().
 _COMPLEXITY_SIGNALS = (
-    "chase", "tumble", "crash", "collision", "reveal", "moustache", "mustache",
-    "flower", "stamen", "gymnastic", "physical comedy", "fast", "drone",
+    "chase", "tumble", "crash", "collision", "reveal",
+    "gymnastic", "physical comedy", "fast", "drone",
 )
 
 
@@ -395,7 +397,9 @@ def _production_advisories(shot: dict[str, Any], session_phase: str,
         for stage in (shot.get("storyboardStagePlanApproved") or shot.get("stagePlan") or [])
         if isinstance(stage, dict)
         for key in ("purpose", "primaryEvent", "observableEndState"))
-    signals = sorted({signal for signal in _COMPLEXITY_SIGNALS if signal in text.casefold()})
+    import project_laws
+    signals = sorted({signal for signal in project_laws.complexity_signals(_COMPLEXITY_SIGNALS)
+                      if signal in text.casefold()})
     duration = float(shot.get("durationSec") or 0)
     if (session_phase == "animation" and duration > 15 and len(signals) >= 2):
         context = (

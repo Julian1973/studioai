@@ -9,7 +9,7 @@ import pathlib
 import shutil
 
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
+ROOT = pathlib.Path(__file__).resolve().parents[3]   # projects/<id>/tools/ → repo root
 import sys  # noqa: E402
 sys.path.insert(0, str(ROOT / "engine"))
 import paths as P  # noqa: E402 — the project profile is the only path authority (T45)

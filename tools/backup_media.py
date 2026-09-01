@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Back up irreplaceable Crystal Bears production data to Google Drive.
+"""Back up the active project's irreplaceable production data to Google Drive.
 
 Confirmed gap: engine/media/ (rendered clips, keyframes, plates, settle/re-mint frames — 453MB as of this
 writing) is gitignored by design (generated output, not source) and was found to have ZERO off-machine

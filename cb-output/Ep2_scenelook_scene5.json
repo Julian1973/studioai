@@ -1,0 +1,21 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S5_plate_candidate_bf8cae92.png",
+  "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+  "inputSignature": {
+   "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+   "briefHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "referenceHashes": {},
+   "plateHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-02T00:08:42",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_9f4bee15.png",
+  "approvedAt": "2026-09-02T00:08:42",
+  "reviewedBy": "StudioAI",
+  "selectionNote": "Approved zero-cost library binding: S5 is FOREST PATH CONTINUOUS from S4, so it inherits the approved S4 forest path scene plate."
+ },
+ "candidate": null,
+ "history": []
+}

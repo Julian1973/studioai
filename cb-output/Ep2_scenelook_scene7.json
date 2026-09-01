@@ -1,0 +1,21 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S7_plate_candidate_c3422c41.png",
+  "hash": "8ccffc25c1badb5b7f36d8b914d1022f9ee046cfc8307ddc2a40ebac489f9a0c",
+  "inputSignature": {
+   "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+   "briefHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "referenceHashes": {},
+   "plateHash": "8ccffc25c1badb5b7f36d8b914d1022f9ee046cfc8307ddc2a40ebac489f9a0c"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-02T00:08:43",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/locations/crystal_woods_learning_circle.png",
+  "approvedAt": "2026-09-02T00:08:43",
+  "reviewedBy": "StudioAI",
+  "selectionNote": "Approved zero-cost library binding: Scene 7 is LEARNING CIRCLE LATER, so it keeps the Learning Circle plate."
+ },
+ "candidate": null,
+ "history": []
+}

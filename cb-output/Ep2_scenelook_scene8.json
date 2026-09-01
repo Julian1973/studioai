@@ -1,0 +1,21 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S8_plate_candidate_e2be237e.jpeg",
+  "hash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f",
+  "inputSignature": {
+   "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+   "briefHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "referenceHashes": {},
+   "plateHash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-02T00:08:43",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/ep1/CB_Scene_BuzzingNook_anchor.jpeg",
+  "approvedAt": "2026-09-02T00:08:43",
+  "reviewedBy": "StudioAI",
+  "selectionNote": "Temporary approved zero-cost fallback: closest existing garden/honeycomb library plate for Keen garden evening; replace if a bespoke Keen garden plate is supplied."
+ },
+ "candidate": null,
+ "history": []
+}

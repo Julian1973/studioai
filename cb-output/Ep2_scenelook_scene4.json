@@ -1,21 +1,60 @@
 {
  "approved": null,
  "candidate": {
-  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_4fa3331e.png",
-  "hash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b",
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_ff9d9499.png",
+  "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
   "inputSignature": {
    "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
    "briefHash": "3612e07f42f1137637d61330441d81bd0c746caa7aace09971f1c6d3cc581831",
    "referenceHashes": {},
-   "plateHash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b"
+   "plateHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
   },
   "referencePath": null,
-  "generatedAt": "2026-09-01T14:23:24",
+  "generatedAt": "2026-09-01T15:48:22",
   "source": "library",
-  "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/locations/crystal_woods_forest_path.png",
-  "packageRevision": 1
+  "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/CB_Crystal_Woods_Forked_Trail_Clearing_plate.png",
+  "packageRevision": 3
  },
- "history": [],
+ "history": [
+  {
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_4fa3331e.png",
+   "hash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b",
+   "inputSignature": {
+    "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+    "briefHash": "3612e07f42f1137637d61330441d81bd0c746caa7aace09971f1c6d3cc581831",
+    "referenceHashes": {},
+    "plateHash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-09-01T14:23:24",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/locations/crystal_woods_forest_path.png",
+   "packageRevision": 1,
+   "outcome": "rejected",
+   "rejectedAt": "2026-09-01T15:36:15",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Replaced by a newly generated Scene Plate selected by Julian.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260901T153615/Ep2_S4_plate_candidate_4fa3331e.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_4dd87d57.png",
+   "hash": "88eb46ec21683398986ab74e33321e87c8f8050dade5f72a52f8b9c9189529a6",
+   "inputSignature": {
+    "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+    "briefHash": "3612e07f42f1137637d61330441d81bd0c746caa7aace09971f1c6d3cc581831",
+    "referenceHashes": {},
+    "plateHash": "88eb46ec21683398986ab74e33321e87c8f8050dade5f72a52f8b9c9189529a6"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-09-01T15:38:10",
+   "packageRevision": 3,
+   "outcome": "rejected",
+   "rejectedAt": "2026-09-01T15:48:16",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Replaced by a different Scene Plate source selected by Julian.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260901T154816/Ep2_S4_plate_candidate_4dd87d57.png"
+  }
+ ],
  "departmentWork": {
   "look": {
    "approved": {

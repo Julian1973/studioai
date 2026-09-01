@@ -6,6 +6,7 @@ geometry can be inspected before and after a paid keyframe request.
 """
 from __future__ import annotations
 
+import copy
 import io
 import math
 import pathlib
@@ -61,6 +62,20 @@ def character_cutout(turnaround_path: str | pathlib.Path) -> Image.Image:
     if not isinstance(isolated, Image.Image):
         isolated = Image.open(io.BytesIO(isolated))
     return _largest_alpha_subject(isolated.convert("RGBA"))
+
+
+def _rendered_character_cutout(character: dict[str, Any], target_axis_height: int,
+                               angle: float) -> Image.Image:
+    """Build the exact transformed cutout used by layout fitting and rendering."""
+    cutout = character_cutout(character["turnaroundPath"])
+    resized_width = max(1, int(round(
+        cutout.width * target_axis_height / cutout.height)))
+    cutout = cutout.resize(
+        (resized_width, target_axis_height), Image.Resampling.LANCZOS)
+    if angle:
+        cutout = cutout.rotate(
+            angle, resample=Image.Resampling.BICUBIC, expand=True)
+    return cutout
 
 
 def posed_character_cutout(pose_path: str | pathlib.Path) -> Image.Image:
@@ -128,6 +143,45 @@ def validate_layout(layout: dict[str, Any], characters: dict[str, dict[str, Any]
             raise LayoutError(f"{name} would be vertically cropped by the authored layout")
 
 
+def fit_frame_safety(layout: dict[str, Any],
+                     characters: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Clamp centres so transformed cutouts remain inside the production frame."""
+    fitted = copy.deepcopy(layout)
+    reference = fitted.get("referenceCharacter")
+    reference_height = float((characters.get(reference) or {}).get("heightIn") or 0)
+    reference_fraction = float(fitted.get("referenceHeightFraction") or 0)
+    if reference_height <= 0:
+        validate_layout(fitted, characters)
+        return fitted
+    frame_width, frame_height = 2048, 1152
+    desired_reference_pixels = frame_height * reference_fraction
+    pixels_per_inch = max(1, int(round(
+        desired_reference_pixels / reference_height)))
+    for placement in fitted.get("placements") or []:
+        name = placement.get("character")
+        character = characters.get(name) or {}
+        height = float(character.get("heightIn") or 0)
+        apparent = float(placement.get("apparentScale", 1.0))
+        fraction = reference_fraction * height / reference_height * apparent
+        target_axis_height = int(round(pixels_per_inch * height * apparent))
+        angle = float(placement.get("bodyAngleDegrees", 0.0))
+        transformed = _rendered_character_cutout(
+            character, target_axis_height, angle)
+        horizontal_half = transformed.width / (2 * frame_width)
+        vertical_half = transformed.height / (2 * frame_height)
+        x_lower, x_upper = 0.02 + horizontal_half, 0.98 - horizontal_half
+        y_lower = max(0.02 + fraction / 2, 0.02 + vertical_half)
+        y_upper = min(0.98 - fraction / 2, 0.98 - vertical_half)
+        if x_lower > x_upper or y_lower > y_upper:
+            raise LayoutError(f"{name} cannot fit in frame at the authored apparent scale")
+        placement["centerX"] = round(
+            min(max(float(placement["centerX"]), x_lower), x_upper), 4)
+        placement["centerY"] = round(
+            min(max(float(placement["centerY"]), y_lower), y_upper), 4)
+    validate_layout(fitted, characters)
+    return fitted
+
+
 def render_composition_master(
         plate_path: str | pathlib.Path,
         characters: dict[str, dict[str, Any]],
@@ -167,14 +221,8 @@ def render_composition_master(
         target_axis_height = int(round(
             pixels_per_inch * float(character["heightIn"]) *
             float(placement.get("apparentScale", 1.0))))
-        cutout = character_cutout(character["turnaroundPath"])
-        resized_width = max(1, int(round(cutout.width * target_axis_height / cutout.height)))
-        cutout = cutout.resize(
-            (resized_width, target_axis_height), Image.Resampling.LANCZOS)
         angle = float(placement.get("bodyAngleDegrees", 0.0))
-        if angle:
-            cutout = cutout.rotate(
-                angle, resample=Image.Resampling.BICUBIC, expand=True)
+        cutout = _rendered_character_cutout(character, target_axis_height, angle)
 
         centre_x = int(round(float(placement["centerX"]) * width))
         centre_y = int(round(float(placement["centerY"]) * height))

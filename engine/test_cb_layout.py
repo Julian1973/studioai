@@ -118,6 +118,52 @@ def test_same_depth_layout_refuses_perspective_scale_drift():
         cb_layout.validate_layout(layout, characters)
 
 
+def test_fit_frame_safety_clamps_rotated_cinematography_overflow(
+        monkeypatch, tmp_path):
+    bo = tmp_path / "Bo.png"
+    keen = tmp_path / "Keen.png"
+    bo.write_bytes(b"bo")
+    keen.write_bytes(b"keen")
+    cutouts = {
+        str(bo): _cutout((80, 150, 240, 255)),
+        str(keen): _cutout((50, 180, 230, 255)),
+    }
+    monkeypatch.setattr(
+        cb_layout, "character_cutout", lambda path: cutouts[str(path)].copy())
+    characters = {
+        "Bo": {"heightIn": 30, "turnaroundPath": str(bo)},
+        "Keen": {"heightIn": 57, "turnaroundPath": str(keen)},
+    }
+    layout = {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Bo",
+        "referenceHeightFraction": 0.42,
+        "sameDepth": False,
+        "placements": [
+            {"character": "Bo", "centerX": 0.61, "centerY": 0.62,
+             "apparentScale": 1.0, "depthPlane": 1,
+             "bodyAngleDegrees": -12},
+            {"character": "Keen", "centerX": 0.36, "centerY": 0.61,
+             "apparentScale": 0.94, "depthPlane": 2,
+             "bodyAngleDegrees": 8},
+        ],
+    }
+
+    fitted = cb_layout.fit_frame_safety(layout, characters)
+
+    assert fitted["placements"][0]["centerY"] == 0.62
+    assert fitted["placements"][1]["centerY"] < 0.61
+    cb_layout.validate_layout(fitted, characters)
+
+    plate = tmp_path / "plate.png"
+    Image.new("RGB", (1600, 900), (80, 140, 90)).save(plate)
+    _, geometry = cb_layout.render_composition_master(plate, characters, fitted)
+    keen_geometry = next(
+        item for item in geometry["characters"] if item["character"] == "Keen")
+    assert keen_geometry["renderedBoundsPx"][1] >= 0
+    assert keen_geometry["renderedBoundsPx"][3] <= 1152
+
+
 def test_local_geometry_screen_blocks_gross_size_drift(monkeypatch, tmp_path):
     monkeypatch.setattr(
         cb_layout, "_foreground_alpha",

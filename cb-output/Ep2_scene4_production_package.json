@@ -947,24 +947,24 @@
       "worker": "Cinematographer / DP",
       "skill": "skills/crystal-bears-cinematographer/SKILL.md",
       "model": "gpt-5.4",
-      "preparedAt": "2026-09-01T14:49:58",
-      "editedAt": null,
+      "preparedAt": "2026-09-01T16:07:43",
+      "editedAt": "2026-09-01T16:14:43",
       "preparedBy": "specialist",
       "creativeDirectingStandardVersion": 4,
-      "sourceHash": "7925e46bc2adda6c32e0bfae3e75f6e45fd904f1e4411db576daccbae674e2a9",
+      "sourceHash": "d117878c6afa94ab9d8062d19e5be019033c6f620070eeaa58312d1e5726ab6a",
       "output": {
        "shotId": "S4.SH1",
-       "audienceRead": "We arrive already moving at Bo's height inside the game, so the path feels temporarily manageable; the frame must already contain the pressure of the road ahead and the branch-pocket that will later hold his stop.",
-       "composition": "Low lateral tracking two-shot in a compressed forest corridor, Bo carried as the emotional anchor at center-right foreground and Keen just off his left shoulder at matching travel pace. Use branch veils as soft near-foreground edges rather than blockage, keeping a readable tunnel of path receding behind and ahead of Bo. Favor a slightly front-right quarter on Bo so his body read, satchel presence, and the forward corridor all coexist in one frame.",
-       "lensAndCameraRelationship": "Moderately wide lens feel, roughly 32mm full-frame equivalent, camera at Bo eye-to-chest height, traveling parallel with the pair along the path. Perspective should feel intimate and inside their stride without caricatured distortion; enough width to hold both opening characters, the branch veil, and lead room down the path while preserving the later ability for travel to die naturally at Bo's abrupt stop.",
-       "lightingAndDepth": "Dappled daylight filtered through dense canopy, gently warmed within the branch pocket, with soft shafts and moving leaf breakup across the ground and fur. Background depth should remain layered and legible, but the immediate path pocket is slightly more enclosed than the wider forest beyond. Foreground branches and mossy trunks give soft depth brackets; keep the receding path luminous enough to play as quiet pressure.",
+       "audienceRead": "We are already inside Bo's moving coping game at his eye level, sharing a playful side-by-side rhythm that still leaves the path ahead present as pressure.",
+       "composition": "Low traveling two-shot favoring Bo at center-right foreground and Keen at left-midground, framed through a soft branch veil overhead and frame edges, with the forest path receding behind and ahead in dappled layered depth; keep Bo as the emotional anchor and preserve open corridor space in the direction of travel so the frame can later absorb his sudden stop and seated collapse without changing geography.",
+       "lensAndCameraRelationship": "Moderately wide animated lens feel, roughly 32mm full-frame equivalent, camera at Bo's height on a gentle lateral travel matching their walk; close enough for body-read and satchel presence, wide enough to retain the path pocket, fallen log territory, and branch entry zone for Aida. Mild perspective separation is welcome but avoid distortion or heroic emphasis.",
+       "lightingAndDepth": "Warm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.",
        "geography": [
-        "Camera tracks beside Bo and Keen on their right side at Bo's height, moving in the same direction as their walk.",
-        "Bo holds the center-right foreground lane; Keen travels slightly screen-left of Bo, close enough for shared play without overlap.",
-        "The path runs diagonally from lower-left foreground toward upper-right background, staying visibly open ahead through the frame.",
-        "A fallen log sits ahead on Bo's side of the path corridor, reachable without changing camera side later.",
-        "Thin branch veils hang in the near foreground frame-left and upper frame, creating the pocket Aida will later descend through.",
-        "The deeper forest stands on both sides of the path with mossy trunks and crystal growths, but the corridor itself remains clear for performance travel."
+        "Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.",
+        "Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.",
+        "The open path continues past them and stays readable behind Bo through center-right background depth.",
+        "A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.",
+        "Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.",
+        "Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing."
        ],
        "charactersInFrame": [
         "Bo",
@@ -975,49 +975,49 @@
        "openingFrameLayout": {
         "aspectRatio": "16:9",
         "referenceCharacter": "Bo",
-        "referenceHeightFraction": 0.46,
+        "referenceHeightFraction": 0.42,
         "sameDepth": false,
         "placements": [
          {
           "character": "Bo",
           "centerX": 0.61,
-          "centerY": 0.63,
+          "centerY": 0.62,
           "apparentScale": 1.0,
           "depthPlane": 1,
-          "bodyAngleDegrees": -18.0,
-          "facing": "screen-right along the path, attention held forward along the travel line",
-          "pose": "walking in anticipation, body braced mid-countdown with satchel carried and tail readying for the shared game"
+          "bodyAngleDegrees": -12.0,
+          "facing": "screen-right along the path with slight inward awareness toward Keen",
+          "pose": "walking anticipation with body braced for the next counted tail-poof, satchel carried and readable"
          },
          {
           "character": "Keen",
-          "centerX": 0.42,
-          "centerY": 0.61,
-          "apparentScale": 1.14,
-          "depthPlane": 1,
-          "bodyAngleDegrees": -12.0,
-          "facing": "screen-right along the path, subtly angled toward Bo",
-          "pose": "walking alongside Bo in upbeat anticipation, matching pace and leaving Bo clear as the focal read"
+          "centerX": 0.36,
+          "centerY": 0.5716,
+          "apparentScale": 0.94,
+          "depthPlane": 2,
+          "bodyAngleDegrees": 8.0,
+          "facing": "screen-right toward shared travel and Bo",
+          "pose": "walking alongside in upbeat supportive anticipation, keeping pace beside Bo"
          }
         ]
        },
        "negativeSpace": [
-        "Hold open lead space frame-right and upper-right for the path pressure that Bo is moving toward.",
-        "Keep a readable empty corridor behind and slightly beyond Bo for the later seated hold on the same axis.",
-        "Reserve branch-veiled space frame-left upper-midground for Aida's later entrance through the existing foliage pocket."
+        "Hold open travel space frame-right and center-right for the path pressure and Bo's later stop at the fallen log.",
+        "Keep frame-left upper-left branch veil readable and lightly open for Aida's later descent entrance.",
+        "Reserve a clear seated pocket around Bo's future stop point so the later trio can settle without a camera reset."
        ],
        "referenceUse": [
-        "Bind Keen identity to the supplied Keen turnaround reference.",
-        "Bind Bo identity to the supplied Bo turnaround reference.",
-        "Bind satchel design, scale, leather color, strap, and clasp details to the supplied Bo's satchel reference.",
-        "Bind forest palette, mossy trunks, crystal growths, dappled daylight, and path geometry to the supplied scene look/environment reference."
+        "@1 Keen turnaround for exact Keen identity, proportions, fur color, and cuff details.",
+        "@2 Bo turnaround for exact Bo identity, proportions, tail scale, and facial/body design.",
+        "@3 Bo's satchel for exact prop design, leather color, clasp, strap, and scale.",
+        "@4 Scene look/environment for forest-path materials, branch veil density, dappled daylight palette, and crystal woodland treatment."
        ],
        "continuityProtections": [
-        "Opening frame must include exactly Bo and Keen only; Aida is not yet visible.",
-        "Maintain camera on Bo's front-right quarter side so the later seated continuity can remain on the same side.",
-        "Keep the path ahead readable through the opening frame; do not crowd it with trunks or character overlap.",
-        "Satchel must already be present on Bo and readable as a carried object, but not yet crushed in a shutdown hold state because that belongs later in the performance arc."
+        "Open on Bo and Keen already in motion at Bo's height; do not stage a fresh start or frontal presentation.",
+        "Keep the path legible behind and beyond Bo from frame one so belonging-pressure is built into the composition.",
+        "Preserve branch-veiled left-side entry geography for Aida; her later arrival must feel like joining the same pocket, not entering a new setup.",
+        "Maintain enough foreground-to-midground clearance that the camera's travel can visibly die with Bo's abrupt stop without reframing the scene's logic."
        ],
-       "providerPrompt": "S4.SH1 opening keyframe, 16:9 animated cinematic frame in Crystal Bears canon style. Use the supplied references in plan order: Keen turnaround for Keen identity, Bo turnaround for Bo identity, Bo's satchel sheet for satchel design and scale, forest scene look for environment palette/materials/light. At Bo's height inside a branch-veiled forest path, camera already traveling parallel beside the characters on their right side, intimate moderately wide lens feel around 32mm full-frame equivalent. Opening frame shows only Bo and Keen mid-walk during the countdown game, with Bo as emotional anchor at center-right foreground and Keen slightly screen-left beside him, both fully readable with lead room. Bo is a small reddish squirrel with his canon proportions from reference, carrying the referenced brown leather satchel; he is in a playable anticipation state, braced mid-countdown and preparing for the tail-poof game while still moving, not frozen into a big acted payoff. Keen matches pace supportively, upbeat and close but not overlapping or stealing focus. Preserve a clear receding path corridor running diagonally toward frame-right background so the audience feels the pressure of where Bo is headed. Include soft near-foreground branch veils and overhead limbs framing the pocket, mossy trunks, exposed roots, and subtle crystal growths from the approved scene look. Lighting is dappled daylight, gently warmed within the enclosed pocket, with soft shafts, leaf breakup, and layered forest depth; keep the path luminous and legible. Composition should feel intimate, playful for the moment, and already carrying the possibility of an abrupt stop later. No Aida visible yet, no reset angle, no exaggerated distortion, no blocked performance corridor, no loss of path readability."
+       "providerPrompt": "16:9 animated feature-film keyframe, opening frame for a continuous forest-path shot at Bo's height, camera already traveling sideways beside two characters in motion. Use @2 for Bo exact identity and proportions: small reddish-brown squirrel with very large fluffy tail, center-right foreground, emotional anchor, walking with a slight body brace as if anticipating the next counted tail-poof, not a frozen gag pose, satchel visible and carried using the exact design from @3. Use @1 for Keen exact identity and proportions: bright blue bear with gold arm cuffs, left-midground beside Bo on the same path, matching his pace with upbeat supportive anticipation. Build the environment from @4: enclosed enchanted forest path with moss, roots, flowers, subtle crystals, dense overhead foliage, warm dappled daylight, and a soft branch veil framing the top and edges. Composition is a low traveling two-shot with a moderately wide lens feel, preserving readable path depth behind and ahead of Bo, with open travel space frame-right and a fallen-log area implied ahead on Bo's side for his later stop. Aida is not yet in frame, but keep the upper-left/frame-left branch veil readable as her later descent entrance zone. Light should be gently warmed inside this sheltered pocket, with soft green ambient fill, layered depth, clean character separation, and no theatrical spotlighting. Keep silhouettes readable, expressions playable but not overperformed, and preserve a clear unobstructed performance corridor for the continuous shot to evolve from playful movement into stillness."
       },
       "packageRevision": 3,
       "inputSignature": {
@@ -1029,7 +1029,7 @@
        },
        "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
        "shotContractHash": "4034193dd9b041ded04a4d4cc6f875050f78b35eb72c4676520ba7a8581b1583",
-       "sceneLookHash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b",
+       "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
        "references": [
         {
          "slot": "@图1",
@@ -1061,12 +1061,141 @@
          "role": "scene plate",
          "view": null,
          "sameCharacterGroup": null,
-         "hash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b"
+         "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
         }
        ]
-      }
+      },
+      "editedBy": "StudioAI exact render safety fit"
      },
-     "history": []
+     "history": [
+      {
+       "department": "Cinematography",
+       "worker": "Cinematographer / DP",
+       "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+       "model": "gpt-5.4",
+       "preparedAt": "2026-09-01T14:49:58",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 4,
+       "sourceHash": "7925e46bc2adda6c32e0bfae3e75f6e45fd904f1e4411db576daccbae674e2a9",
+       "output": {
+        "shotId": "S4.SH1",
+        "audienceRead": "We arrive already moving at Bo's height inside the game, so the path feels temporarily manageable; the frame must already contain the pressure of the road ahead and the branch-pocket that will later hold his stop.",
+        "composition": "Low lateral tracking two-shot in a compressed forest corridor, Bo carried as the emotional anchor at center-right foreground and Keen just off his left shoulder at matching travel pace. Use branch veils as soft near-foreground edges rather than blockage, keeping a readable tunnel of path receding behind and ahead of Bo. Favor a slightly front-right quarter on Bo so his body read, satchel presence, and the forward corridor all coexist in one frame.",
+        "lensAndCameraRelationship": "Moderately wide lens feel, roughly 32mm full-frame equivalent, camera at Bo eye-to-chest height, traveling parallel with the pair along the path. Perspective should feel intimate and inside their stride without caricatured distortion; enough width to hold both opening characters, the branch veil, and lead room down the path while preserving the later ability for travel to die naturally at Bo's abrupt stop.",
+        "lightingAndDepth": "Dappled daylight filtered through dense canopy, gently warmed within the branch pocket, with soft shafts and moving leaf breakup across the ground and fur. Background depth should remain layered and legible, but the immediate path pocket is slightly more enclosed than the wider forest beyond. Foreground branches and mossy trunks give soft depth brackets; keep the receding path luminous enough to play as quiet pressure.",
+        "geography": [
+         "Camera tracks beside Bo and Keen on their right side at Bo's height, moving in the same direction as their walk.",
+         "Bo holds the center-right foreground lane; Keen travels slightly screen-left of Bo, close enough for shared play without overlap.",
+         "The path runs diagonally from lower-left foreground toward upper-right background, staying visibly open ahead through the frame.",
+         "A fallen log sits ahead on Bo's side of the path corridor, reachable without changing camera side later.",
+         "Thin branch veils hang in the near foreground frame-left and upper frame, creating the pocket Aida will later descend through.",
+         "The deeper forest stands on both sides of the path with mossy trunks and crystal growths, but the corridor itself remains clear for performance travel."
+        ],
+        "charactersInFrame": [
+         "Bo",
+         "Keen"
+        ],
+        "canonicalStyleVersion": "v1.0.0",
+        "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+        "openingFrameLayout": {
+         "aspectRatio": "16:9",
+         "referenceCharacter": "Bo",
+         "referenceHeightFraction": 0.46,
+         "sameDepth": false,
+         "placements": [
+          {
+           "character": "Bo",
+           "centerX": 0.61,
+           "centerY": 0.63,
+           "apparentScale": 1.0,
+           "depthPlane": 1,
+           "bodyAngleDegrees": -18.0,
+           "facing": "screen-right along the path, attention held forward along the travel line",
+           "pose": "walking in anticipation, body braced mid-countdown with satchel carried and tail readying for the shared game"
+          },
+          {
+           "character": "Keen",
+           "centerX": 0.42,
+           "centerY": 0.61,
+           "apparentScale": 1.14,
+           "depthPlane": 1,
+           "bodyAngleDegrees": -12.0,
+           "facing": "screen-right along the path, subtly angled toward Bo",
+           "pose": "walking alongside Bo in upbeat anticipation, matching pace and leaving Bo clear as the focal read"
+          }
+         ]
+        },
+        "negativeSpace": [
+         "Hold open lead space frame-right and upper-right for the path pressure that Bo is moving toward.",
+         "Keep a readable empty corridor behind and slightly beyond Bo for the later seated hold on the same axis.",
+         "Reserve branch-veiled space frame-left upper-midground for Aida's later entrance through the existing foliage pocket."
+        ],
+        "referenceUse": [
+         "Bind Keen identity to the supplied Keen turnaround reference.",
+         "Bind Bo identity to the supplied Bo turnaround reference.",
+         "Bind satchel design, scale, leather color, strap, and clasp details to the supplied Bo's satchel reference.",
+         "Bind forest palette, mossy trunks, crystal growths, dappled daylight, and path geometry to the supplied scene look/environment reference."
+        ],
+        "continuityProtections": [
+         "Opening frame must include exactly Bo and Keen only; Aida is not yet visible.",
+         "Maintain camera on Bo's front-right quarter side so the later seated continuity can remain on the same side.",
+         "Keep the path ahead readable through the opening frame; do not crowd it with trunks or character overlap.",
+         "Satchel must already be present on Bo and readable as a carried object, but not yet crushed in a shutdown hold state because that belongs later in the performance arc."
+        ],
+        "providerPrompt": "S4.SH1 opening keyframe, 16:9 animated cinematic frame in Crystal Bears canon style. Use the supplied references in plan order: Keen turnaround for Keen identity, Bo turnaround for Bo identity, Bo's satchel sheet for satchel design and scale, forest scene look for environment palette/materials/light. At Bo's height inside a branch-veiled forest path, camera already traveling parallel beside the characters on their right side, intimate moderately wide lens feel around 32mm full-frame equivalent. Opening frame shows only Bo and Keen mid-walk during the countdown game, with Bo as emotional anchor at center-right foreground and Keen slightly screen-left beside him, both fully readable with lead room. Bo is a small reddish squirrel with his canon proportions from reference, carrying the referenced brown leather satchel; he is in a playable anticipation state, braced mid-countdown and preparing for the tail-poof game while still moving, not frozen into a big acted payoff. Keen matches pace supportively, upbeat and close but not overlapping or stealing focus. Preserve a clear receding path corridor running diagonally toward frame-right background so the audience feels the pressure of where Bo is headed. Include soft near-foreground branch veils and overhead limbs framing the pocket, mossy trunks, exposed roots, and subtle crystal growths from the approved scene look. Lighting is dappled daylight, gently warmed within the enclosed pocket, with soft shafts, leaf breakup, and layered forest depth; keep the path luminous and legible. Composition should feel intimate, playful for the moment, and already carrying the possibility of an abrupt stop later. No Aida visible yet, no reset angle, no exaggerated distortion, no blocked performance corridor, no loss of path readability."
+       },
+       "packageRevision": 3,
+       "inputSignature": {
+        "stage": "cinematography",
+        "model": "gpt-5.4",
+        "skillHashes": {
+         "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+         "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+        },
+        "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+        "shotContractHash": "4034193dd9b041ded04a4d4cc6f875050f78b35eb72c4676520ba7a8581b1583",
+        "sceneLookHash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b",
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图2",
+          "role": "Keen",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "26151202911f2d373133dc0cc7c6e6d693c5bb77f6f4a67b1de7637fd9a1e166",
+          "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图1",
+          "role": "Bo",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "1c5e0e06b97b361f0c64bcbb8a0a3400193d993098800e002cc2b9a33171268d",
+          "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图3",
+          "role": "prop:satchel",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1"
+         },
+         {
+          "slot": "@图4",
+          "sourceSlot": "@图4",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b"
+         }
+        ]
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-01T16:07:18",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      }
+     ]
     }
    }
   }

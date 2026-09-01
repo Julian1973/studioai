@@ -5324,22 +5324,26 @@ function renderShotStage(mode){
   if(workspace){workspace.classList.toggle("result-first",resultFirst);workspace.classList.toggle("see-workspace",mode==="keyframe");}
 }
 function currentProductionDirection(stage,shotId){
-  const inputs=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs;
-  if(inputs){
-    if(stage==="look"&&inputs.look&&inputs.look.prompt)return inputs.look;
-    const shot=inputs.shots&&inputs.shots[shotId];
-    if(stage==="cinematography"&&shot&&shot.keyframePrompt)return shot;
-    if(stage==="voice"&&shot&&Array.isArray(shot.voiceLines)&&shot.voiceLines.length)return shot;
-    if(stage==="animation"&&shot&&shot.animationPrompt)return shot;
-  }
   // The package is durable authority. A completed specialist job can be current before
   // the derived preflight cache refreshes; that cache lag must not start preparation again.
   const led=shotId?shLedger(shotId):null;
   const work=led&&led.departmentWork&&led.departmentWork[stage];
-  const record=work&&(work.candidate||work.approved),output=record&&record.output;
-  if(stage==="cinematography"&&output&&(output.providerPrompt||output.keyframePrompt))return output;
-  if(stage==="voice"&&output&&Array.isArray(output.lines))return {...output,voiceLines:output.lines};
-  if(stage==="animation"&&output&&output.providerPrompt)return {...output,animationPrompt:output.providerPrompt};
+  const records=work?[work.candidate,work.approved].filter(Boolean):[];
+  for(const record of records){
+    const output=record.output;
+    if(stage==="cinematography"){
+      const signature=record.inputSignature||{};
+      const currentRevision=SH_PKG&&SH_PKG.revision;
+      const currentPlateHash=SH_SCENELOOK&&SH_SCENELOOK.active&&SH_SCENELOOK.active.hash;
+      if(currentRevision!=null&&record.packageRevision!=null&&Number(record.packageRevision)!==Number(currentRevision))continue;
+      if(currentPlateHash&&signature.sceneLookHash&&signature.sceneLookHash!==currentPlateHash)continue;
+    }
+    if(stage==="cinematography"&&output&&(output.providerPrompt||output.keyframePrompt))return output;
+    if(stage==="voice"&&output&&Array.isArray(output.lines))return {...output,voiceLines:output.lines};
+    if(stage==="animation"&&output&&output.providerPrompt)return {...output,animationPrompt:output.providerPrompt};
+  }
+  const inputs=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs;
+  if(stage==="look"&&inputs&&inputs.look&&inputs.look.prompt)return inputs.look;
   return null;
 }
 function directionLabel(stage){
@@ -5351,6 +5355,16 @@ function directionPrepFailure(stage,message){
     <h3>Could not prepare the ${_esc(directionLabel(stage))}</h3>
     <div class="dec-caption">${_esc(message||"The specialist brief did not complete. No media was generated and no media spend occurred.")}</div>
     <div style="display:flex;justify-content:flex-end;margin-top:20px"><button class="btn" onclick="closeM()">Close</button></div>`;
+}
+function showKeyframeScenePlateHold(){
+  const sheet=document.getElementById("sheet");if(!sheet)return;
+  const awaiting=!!(SH_SCENELOOK&&SH_SCENELOOK.candidate);
+  sheet.innerHTML=`<button class="x" onclick="closeM()">×</button>
+    <h3>${awaiting?"Resolve the selected Scene Plate first":"A current Scene Plate is required"}</h3>
+    <div class="dec-caption">${awaiting?"The selected image is not current against this scene. Review it and choose approve, replace or reject before building the keyframe.":"S4.SH1 cannot build a keyframe until this scene has a current Scene Plate."}</div>
+    <div class="dec-caption" style="margin-top:10px">When the plate is current, StudioAI will prepare fresh Cinematography direction against that exact image and return to keyframe cost review.</div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn ghost" onclick="closeM()">Close</button><button class="btn" onclick="closeM();openStageOutcome('scenelook')">Review Scene Plate</button></div>`;
+  document.getElementById("modal").classList.add("show");
 }
 async function prepareDirectionThen(stage,shotId,resume){
   if(currentProductionDirection(stage,shotId)){await resume();return;}
@@ -5400,6 +5414,7 @@ async function prepareDirectionThen(stage,shotId,resume){
 }
 async function openDisclosureModal(kind,ctx){
   ctx=ctx||{}; await fetchRates();
+  if(kind==="keyframe"&&!shSceneLookOk()){showKeyframeScenePlateHold();return;}
   if((kind==="voice"||kind==="voice-regen")&&ctx.shotId){
     const cached=SH_VOICE_CACHE[ctx.shotId];
     if(!cached||cached.loading||cached.error)await shLoadVoiceWork(ctx.shotId);
@@ -5431,8 +5446,9 @@ async function openDisclosureModal(kind,ctx){
     if(!(refsState.keyframe&&refsState.keyframe.ready)||!keyframeRefs.length){
       alert("The exact keyframe references are not all ready. Nothing was fired or spent.");return;
     }
-    const inp=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.shots&&SH_PREFLIGHT.productionInputs.shots[ctx.shotId];
-    if(!inp||!inp.keyframePrompt){alert("Cinematography direction is still being prepared.");return;}
+    const inp=currentProductionDirection("cinematography",ctx.shotId);
+    const keyframePrompt=inp&&(inp.keyframePrompt||inp.providerPrompt);
+    if(!inp||!keyframePrompt){alert("Cinematography direction is still being prepared.");return;}
     const build=(refsState&&refsState.keyframeBuild)||{},unit=estCost("seedream5pro_image",{refs:1});
     const calls=Number.isFinite(Number(build.maxMediaCalls))?Number(build.maxMediaCalls):1;
     const maximum=build.estimatedMaxUsd!=null?Number(build.estimatedMaxUsd):(unit!=null?unit*calls:null);
@@ -5442,7 +5458,7 @@ async function openDisclosureModal(kind,ctx){
       :(build.providerModelId||"Seedream 5 Pro");
     rows=[["Model",modelLabel],
           ["Format","16:9 still opening frame"],
-          ["Creative target",inp.keyframePromptHeadline||"A performance-ready opening stage"],
+          ["Creative target",inp.keyframePromptHeadline||inp.audienceRead||"A performance-ready opening stage"],
           ["Provider references",keyframeRefs.length+" exact ordered assets shown below"],
           ["Keyframe owns","Identity, canon scale, world, starting camera and light, loose staging, clear action space"],
           ["Animation owns","Facial acting, wing cadence, exact poses, movement, contact, recovery and camera evolution"],
@@ -5454,7 +5470,7 @@ async function openDisclosureModal(kind,ctx){
           ["Your next decision","Accept or iterate the finished keyframe"]];
     const refCards=keyframeRefs.map(item=>`<article class="refcard"><img class="refmedia zoom" data-cap="${_esc(refSlotLabel(item.slot)+' · '+(item.role||'reference'))}" src="${BASE}${_esc(item.url)}?v=${MEDIA_V}" alt="${_esc(item.role||'Keyframe reference')}"><div class="refcopy"><div class="refslot">${_esc(refSlotLabel(item.slot))}</div><div class="refrole">${_esc(item.role||'Reference')}${item.identity&&item.identity.view?` · ${_esc(item.identity.view)} identity view`:""}</div><div class="reffile">${_esc(item.fileName||'')}</div></div></article>`).join("");
     extra=`<section class="refpanel prefire-refs" aria-label="Exact keyframe references"><div class="refhead"><div><div class="reftitle">Exact references sent in this order</div><div class="refsummary">Isolated turnaround views grouped by character, plus the locked scene world</div></div><span class="refstate">${keyframeRefs.length}/${keyframeRefs.length} ready</span></div><div class="refgrid">${refCards}</div></section>
-      <details class="techdetails prefire-prompt" open><summary>Exact prompt sent to the image model</summary><pre class="techpre">${_esc(inp.keyframePrompt)}</pre></details>`;
+      <details class="techdetails prefire-prompt" open><summary>Exact prompt sent to the image model</summary><pre class="techpre">${_esc(keyframePrompt)}</pre></details>`;
     confirmLabel="Build keyframe";
     confirm=()=>{closeM();shRun('build-keyframe',ctx.shotId);};
   } else if(kind=="voice"){

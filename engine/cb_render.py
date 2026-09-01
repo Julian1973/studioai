@@ -1363,7 +1363,8 @@ def save_opening_frame_layout(scene, shot_id, layout, episode="Ep1",
         raise Refused(f"REFUSED — invalid opening-frame layout: {exc}") from exc
     characters_cfg = _characters_cfg()
     character_inputs = {}
-    for supplied_name in (shot.get("charactersInFrame") or []):
+    for supplied_name in (shot.get("openingCharactersInFrame") or
+                          shot.get("charactersInFrame") or []):
         name = _resolve_char(supplied_name, characters_cfg)
         profile = characters_cfg.get(name) or {}
         character_inputs[name] = {
@@ -3629,6 +3630,24 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                 name: (chars.get(_resolve_char(name, chars)) or {}).get("heightIn")
                 for name in (shot.get("charactersInFrame") or [])}
             result = cb_departments.prepare_cinematography(context, images, log=log)
+            opening_cast = list(dict.fromkeys(
+                shot.get("openingCharactersInFrame") or
+                shot.get("charactersInFrame") or []))
+            layout_characters = {}
+            for supplied_name in opening_cast:
+                name = _resolve_char(supplied_name, chars)
+                layout_characters[name] = {
+                    "heightIn": (chars.get(name) or {}).get("heightIn"),
+                    "turnaroundPath": _char_ref(name, chars),
+                }
+            authored_layout = result.openingFrameLayout.model_dump()
+            fitted_layout = cb_layout.fit_frame_safety(
+                authored_layout, layout_characters)
+            if fitted_layout != authored_layout:
+                result = cb_departments.CinematographyDirection.model_validate({
+                    **result.model_dump(), "openingFrameLayout": fitted_layout})
+                log("CINEMATOGRAPHY LAYOUT — fitted frame safety bounds before saving "
+                    "(zero media spend)")
         elif stage == "voice":
             voice_lines = [
                 dict(line) for line in cb_audio_authority.spoken_dialogue_lines(shot)

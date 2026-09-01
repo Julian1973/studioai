@@ -749,6 +749,22 @@ def test_scene_plate_library_replacement_archives_pending_candidate_first():
     assert "slSelectReplacement('select-scenelook-upload',j.sourcePath" in APP
     assert 'shRun("reject-scenelook",null,{' in APP
     assert 'afterJob:job=>{if(job&&job.status==="done")install();}' in APP
+
+
+def test_keyframe_cost_review_uses_durable_cinematography_direction():
+    assert 'const inp=currentProductionDirection("cinematography",ctx.shotId);' in APP
+    assert 'const keyframePrompt=inp&&(inp.keyframePrompt||inp.providerPrompt);' in APP
+    assert 'inp.keyframePromptHeadline||inp.audienceRead||"A performance-ready opening stage"' in APP
+    assert '${_esc(keyframePrompt)}</pre></details>' in APP
+
+
+def test_keyframe_build_explains_pending_scene_plate_and_rebuilds_stale_direction():
+    assert 'if(kind==="keyframe"&&!shSceneLookOk()){showKeyframeScenePlateHold();return;}' in APP
+    assert 'The selected image is not current against this scene.' in APP
+    assert '>Review Scene Plate</button>' in APP
+    assert 'signature.sceneLookHash!==currentPlateHash' in APP
+    assert 'SH_SCENELOOK.active&&SH_SCENELOOK.active.hash' in APP
+    assert 'record.packageRevision' in APP
     assert 'The current plate stays protected until you approve its replacement.' in APP
 
 
@@ -781,7 +797,7 @@ def test_fire_uses_durable_department_direction_during_preflight_cache_lag():
     direction_end = APP.index("function directionLabel", direction_start)
     direction = APP[direction_start:direction_end]
     assert "const led=shotId?shLedger(shotId):null" in direction
-    assert "work.candidate||work.approved" in direction
+    assert "[work.candidate,work.approved].filter(Boolean)" in direction
     assert "animationPrompt:output.providerPrompt" in direction
 
     modal_start = APP.index("function openAnimationConfirmModal")

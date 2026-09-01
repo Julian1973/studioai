@@ -195,6 +195,59 @@ def test_natural_master_duration_uses_available_thirty_second_slate():
         cb_audio_timing.natural_master_duration(30.01)
 
 
+def test_text_to_dialogue_is_preserved_and_rebased_inside_thirty_second_slate(tmp_path):
+    raw = tmp_path / "dialogue.mp3"
+    _silent_audio(raw, 29.53)
+    timing = cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({
+        "audioSha256": cb_audio_timing.file_sha256(raw),
+        "endpoint": "/v1/text-to-dialogue/with-timestamps",
+        "voiceSegments": [
+            {"dialogueInputIndex": 0, "startTimeSec": 0, "endTimeSec": 2.32},
+            {"dialogueInputIndex": 1, "startTimeSec": 2.32, "endTimeSec": 29.53},
+        ],
+    }), encoding="utf-8")
+
+    result = cb_audio_timing.render_timed_dialogue_master(
+        raw, timing,
+        [{"startSec": 1.2, "endSec": 2.4}, {"startSec": 5.8, "endSec": 8.5}],
+        30, tmp_path / "master.wav")
+
+    assert result["assemblyMode"] == "continuous-dialogue-performance"
+    assert result["authoredPerformanceTargetStartSec"] == pytest.approx(1.2)
+    assert result["performanceTargetStartSec"] == pytest.approx(0.47, abs=.03)
+    assert result["performanceTargetEndSec"] <= 30.001
+    assert result["performanceStartShiftSec"] == pytest.approx(-0.73, abs=.03)
+    assert result["placements"][1]["targetEndSec"] <= 30.001
+
+
+def test_group_chorus_uses_rebuilt_segments_not_stale_character_alignment(tmp_path):
+    raw = tmp_path / "chorus.mp3"
+    _silent_audio(raw, 4)
+    timing = cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({
+        "audioSha256": cb_audio_timing.file_sha256(raw),
+        "endpoint": "/v1/text-to-dialogue/with-timestamps",
+        "groupChorusResolved": True,
+        "voiceSegments": [
+            {"dialogueInputIndex": 0, "startTimeSec": 0, "endTimeSec": 1},
+            {"dialogueInputIndex": 1, "startTimeSec": 1, "endTimeSec": 4},
+        ],
+        "alignment": {
+            "characters": ["a", "b"],
+            "character_start_times_seconds": [0, 1],
+            "character_end_times_seconds": [1, 5],
+        },
+    }), encoding="utf-8")
+
+    result = cb_audio_timing.render_timed_dialogue_master(
+        raw, timing,
+        [{"startSec": 0, "endSec": 1}, {"startSec": 1, "endSec": 4}],
+        4, tmp_path / "master.wav")
+
+    assert result["placements"][-1]["targetEndSec"] == pytest.approx(4)
+
+
 def test_final_line_tolerance_never_clips_audio_past_the_master(tmp_path):
     raw = tmp_path / "raw.mp3"
     _silent_audio(raw, 3.84)

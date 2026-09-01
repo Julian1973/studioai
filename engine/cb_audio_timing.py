@@ -206,7 +206,11 @@ def _source_ranges(timing, expected_count):
         raise AudioTimingError(
             "ElevenLabs timing metadata does not map one source range to every approved line"
         )
-    aligned = _character_aligned_ranges(timing, raw, expected_count)
+    # Group-chorus replacement rebuilds the segment ranges against the new mixed
+    # audio. The original character alignment belongs to the pre-replacement file
+    # and must not override those current ranges.
+    aligned = None if timing.get("groupChorusResolved") else _character_aligned_ranges(
+        timing, raw, expected_count)
     if aligned is not None:
         return aligned
     return [tuple(grouped[index]) for index in range(expected_count)]
@@ -263,6 +267,12 @@ def _needs_continuous_assembly(raw_audio_path, timing, ranges):
     """
     if not ranges:
         return False
+    # ElevenLabs Text-to-Dialogue returns one directed conversation. Its ranges
+    # identify turns inside that performance; they are not isolated clips to be
+    # moved back onto authored estimates. Preserve the provider's acting and pauses
+    # even when its timestamp envelope happens to cover the complete audio file.
+    if "text-to-dialogue" in str(timing.get("endpoint") or "").lower():
+        return True
     raw_duration = _probe_duration(raw_audio_path)
     covered_start = min(start for start, _ in ranges)
     covered_end = max(end for _, end in ranges)
@@ -283,8 +293,15 @@ def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, 
     except (TypeError, ValueError) as exc:
         raise AudioTimingError("dialogue line 1 has no approved start anchor") from exc
     raw_duration = _probe_duration(raw_audio)
+    authored_target_start = target_start
     target_end = target_start + raw_duration
-    if target_start < 0 or target_end > duration_sec + WINDOW_TOLERANCE_SEC:
+    if target_end > duration_sec and raw_duration <= duration_sec:
+        # The returned performance already contains the actors' natural pauses.
+        # Use available headroom at the front of the slate instead of clipping the
+        # final line or rejecting an already-paid take.
+        target_start = max(0.0, duration_sec - raw_duration)
+        target_end = target_start + raw_duration
+    if target_start < 0 or target_end > duration_sec + 0.001:
         raise AudioTimingError(
             f"continuous dialogue performance needs {target_end:.2f}s but the shot is "
             f"{duration_sec:.2f}s")
@@ -329,8 +346,10 @@ def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, 
         "dialogueTimingPath": str(timing_path),
         "dialogueTimingSha256": file_sha256(timing_path),
         "durationSec": duration_sec,
+        "authoredPerformanceTargetStartSec": authored_target_start,
         "performanceTargetStartSec": target_start,
         "performanceTargetEndSec": target_end,
+        "performanceStartShiftSec": target_start - authored_target_start,
         "placements": placements,
         "outputPath": str(out),
         "outputSha256": file_sha256(out),

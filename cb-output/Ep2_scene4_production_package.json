@@ -3259,13 +3259,315 @@
      "dialogueStartChanges": []
     }
    ],
-   "voPath": null,
-   "voGeneratedFrom": null,
-   "voRawPath": null,
-   "voTimingPath": null,
-   "voPlacementPath": null,
-   "voInputSignature": null,
-   "voPackageRevision": null,
+   "voPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_54d5241a.wav",
+   "voGeneratedFrom": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:b66279148d0115bc657e049b6f721801e30d8769f3d6ae5ab5b5d4a660463ca4",
+     "sourceEventId": "script-event:sha256:56d49e7a2047d0d4d8d9d052fb9791f6a19787453b3f125db12a3c12c0d517b6",
+     "speaker": "Bo/Keen",
+     "text": "[excited] 3, 2, 1 …",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Silence and moving forest path.",
+     "compiledHash": "e46cceff837564e11fdb1f58fc7093b5f8f369e8ab14fd4625cfbed77cbf21cf",
+     "recipeId": "S4.SH1-L1-T1",
+     "voiceTreatment": "group_chorus",
+     "chorusMembers": [
+      "Bo",
+      "Keen"
+     ],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB",
+      "TCRj5m2u9xhZHJ8h9pMv"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:82738998fafc3c0cdbf3b9ded31acb5ace40b9e3a7c47dc4d2625c7842081369",
+     "sourceEventId": "script-event:sha256:6132391c5744a5fcadd3ddd7fe46893f15358e91763abbc704482b1a1fd4c61e",
+     "speaker": "Bo",
+     "text": "[quietly] I’m STILL worried about going to the Learning Circle.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "[excited] 3, 2, 1 …",
+     "compiledHash": "4cd74f0aa75a02a1e2d02d0bcb3291b17bed5e2da5bbf2e3e6bd151c5bb788c0",
+     "recipeId": "S4.SH1-L2-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:622751e7ca822c2a3b3c1b981c1da34b106f404192f8151d6523c30b4e5dbb2e",
+     "sourceEventId": "script-event:sha256:7379df0e1d4d7508a8e3de2f9033db0ebb1af0ffc6f6d3688b5f60fce23bb76e",
+     "speaker": "Bo",
+     "text": "[nervous] They all know each other.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "[quietly] I’m STILL worried about going to the Learning Circle.",
+     "compiledHash": "995da80b678ca6c6ad0a7b0b16e9a772f3b71feba44e722cf5e7efa4673315ba",
+     "recipeId": "S4.SH1-L3-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b3ba475a2c72a5569dbd3adbde06977107885371be77f1f89647e3dbc45d9c0",
+     "sourceEventId": "script-event:sha256:68de2b0038b27e674df5c06361be5f2efa130b17ae6692a8ece2d95786e414e5",
+     "speaker": "Bo",
+     "text": "[quietly] But I don’t know them, and they don't know me.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "[nervous] They all know each other.",
+     "compiledHash": "23677dbde2d3f80719befa23783061365362b10bc9f7ec2673ba716a91d2968e",
+     "recipeId": "S4.SH1-L4-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:e746fed8302017a81926552953c009d5e3f2b685367f676b10fdd6c6506f5134",
+     "sourceEventId": "script-event:sha256:f382562fc42b14c13b7a1ee85f74038b3a7b875bedf50cd1312e0e3e80145291",
+     "speaker": "Aida",
+     "text": "[softly] Tricky trees.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "[quietly] But I don’t know them, and they don't know me.",
+     "compiledHash": "25fc1ca7319d41867ecb7436f5ddfcd6cc0d3153c551a0dc2f480c43f2b1c4f7",
+     "recipeId": "S4.SH1-L5-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fd9e66270fd5e8b09f547dd0bc3527e2d280d6673c9f612874cf34522a1e2870",
+     "sourceEventId": "script-event:sha256:2dbd391ab3242934894aa0594ec95c9d0a4eb25562b98b92da7c692d001b1155",
+     "speaker": "Keen",
+     "text": "[quietly] Bo, this is Aida.",
+     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "[softly] Tricky trees.",
+     "compiledHash": "ec102971b4437be5c9182c7ad18c65227f5b8e8fb599dfa7dead5582d64ee474",
+     "recipeId": "S4.SH1-L6-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "TCRj5m2u9xhZHJ8h9pMv"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:15b364030922a20dc9b0d90f4f01fef7eee753f85909872f64632cb68ae58fb0",
+     "sourceEventId": "script-event:sha256:7d7ca19fc0fe2602f92c0b0e203b5d51d15b84049defe33336f1ae9dcf9bc3c9",
+     "speaker": "Aida",
+     "text": "[softly] You packed your bag.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "[quietly] Bo, this is Aida.",
+     "compiledHash": "6724acf9eb2ef13a9c8249268dcdbc4adb988385a701ab083dd7b75809dfed65",
+     "recipeId": "S4.SH1-L7-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:e827b6904e5bc726b074c2a33279f41089d5a533ea212e40a36824fccf69a503",
+     "sourceEventId": "script-event:sha256:cf43657bf9952da46322662111834db5a77c27980bdff3672a8b8e1bb9285edf",
+     "speaker": "Bo",
+     "text": "[quietly] Four times.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "[softly] You packed your bag.",
+     "compiledHash": "ec95bf447b771c40774116dfaf448dbc297df92f1f07becb688fab4384209ef9",
+     "recipeId": "S4.SH1-L8-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:b48ec0ea4adea59def0f20db7ce2aca0617046fbb1e51b748003c678aa3df3a9",
+     "sourceEventId": "script-event:sha256:ef0959512b69eb02b468e5f66c026fc7b3463d51fcbb3801b9f919076ac6eb9a",
+     "speaker": "Aida",
+     "text": "[softly] [warmly] I would have done five.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "[quietly] Four times.",
+     "compiledHash": "534082f8137c8a22e325fba6094af4ef218fd47d4f562421241f1c21f5fc089f",
+     "recipeId": "S4.SH1-L9-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:dbbd4a6ba7fdece7005487575876c45ba07ed4a5714186e4bb28b9a2f36a0b7f",
+     "sourceEventId": "script-event:sha256:b847842b44111af6387f8f484894b73cdd0548f990a95a1430807129a0e4896d",
+     "speaker": "Bo",
+     "text": "[curious] You get scared too?",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "[softly] [warmly] I would have done five.",
+     "compiledHash": "8ca49f884fdf590b12e52c7231bba10821b0e547001a178928860798add2de13",
+     "recipeId": "S4.SH1-L10-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:deefbd8cd3c21a1e332b33661899f2864fd5ec64b290a9139ff88f2016dc5d61",
+     "sourceEventId": "script-event:sha256:a8a48370b98487161c7cef31b4b45726d7947d266e52741cab3634f0c29e6c82",
+     "speaker": "Aida",
+     "text": "[softly] Every single time.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "[curious] You get scared too?",
+     "compiledHash": "4731eb389c556af4b319cb868f6723f4da558a9c9cbd86e0664f183e20e125c7",
+     "recipeId": "S4.SH1-L11-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d4163d7ade24be11aeecbd2ba2a3dd0d7776e8bbc7b3f9111b6e3bf231ba0ceb",
+     "sourceEventId": "script-event:sha256:04674705c1603ac53bb6bb285db7b28f6197a8f084643584208263525a589243",
+     "speaker": "Bo",
+     "text": "[curious] But you still go?",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "[softly] Every single time.",
+     "compiledHash": "a52b61e8733bec31ec75a459c6ec637e080c693c606113bd876be1e9b436f159",
+     "recipeId": "S4.SH1-L12-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:335059e16a3614af54b69cdda19312b8e6d1826443f341c222ed071db524fbf9",
+     "sourceEventId": "script-event:sha256:797e7a517f9a600df1fd6da53fdc00ef5f46cac12e7296c43cbd362ea5218b73",
+     "speaker": "Aida",
+     "text": "[quietly] Every single time.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "[curious] But you still go?",
+     "compiledHash": "3795abec9a6e73234e0b2f88ed0017017a2420b2bc106db7653a6fb601d53c1e",
+     "recipeId": "S4.SH1-L13-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    }
+   ],
+   "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_bb8db604_chorus.mp3",
+   "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_bb8db604_chorus.mp3.dialogue.json",
+   "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_54d5241a.wav.timing.json",
+   "voInputSignature": {
+    "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+    "dialogueHash": "01cded761d74b24355f6ebb0ed4bf3a3388abd283d0e0323cacab406dce261e5",
+    "performanceHash": "84a2aa401b38802e5549df9c2a6e385a3199c3f97499e21c3320a544e6774db2",
+    "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+    "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+    "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+    "voiceCompilerVersion": "voice-director-v1",
+    "voiceIds": [
+     "AAF2q3NCwTrLMMkEnRLB",
+     "TCRj5m2u9xhZHJ8h9pMv",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "SHuZ9GyczU4QEDzU4QU4",
+     "TCRj5m2u9xhZHJ8h9pMv",
+     "SHuZ9GyczU4QEDzU4QU4",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "SHuZ9GyczU4QEDzU4QU4",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "SHuZ9GyczU4QEDzU4QU4",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "SHuZ9GyczU4QEDzU4QU4"
+    ]
+   },
+   "voPackageRevision": 3,
    "voiceRejections": [
     {
      "outcome": "rejected",

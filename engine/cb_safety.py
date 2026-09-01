@@ -306,10 +306,12 @@ def install(m):
         if current_record and stage == "voice":
             try:
                 shot = m._shot(pkg, shot_id)
+                projected, spoken_lines = m.cb_audio_authority.route_voice_direction(
+                    current_record.get("output") or {}, shot.get("dialogueLines") or [])
                 direction = m.cb_departments.VoiceDirection.model_validate(
-                    current_record.get("output") or {})
+                    projected)
                 m.cb_departments.validate_voice_direction(
-                    direction, m.cb_audio_authority.spoken_dialogue_lines(shot))
+                    direction, spoken_lines)
             except (KeyError, TypeError, ValueError, RuntimeError) as exc:
                 contract_error = str(exc)
                 current_source, current_record = None, None
@@ -509,10 +511,12 @@ def install(m):
             elif stage == "voice":
                 try:
                     shot = m._shot(pkg, shot_id)
+                    projected, spoken_lines = m.cb_audio_authority.route_voice_direction(
+                        existing.get("output") or {}, shot.get("dialogueLines") or [])
                     direction = m.cb_departments.VoiceDirection.model_validate(
-                        existing.get("output") or {})
+                        projected)
                     m.cb_departments.validate_voice_direction(
-                        direction, shot.get("dialogueLines") or [])
+                        direction, spoken_lines)
                 except (KeyError, TypeError, ValueError, RuntimeError) as exc:
                     invalidation_reason = f"voice contract failed: {exc}"
             elif stage == "animation":
@@ -1131,7 +1135,7 @@ def install(m):
                     "toSec": retimed_duration,
                     "reason": (
                         "Preserve the approved final dialogue take without clipping or "
-                        "time compression, with one second of landing room."),
+                        "time compression, using the available landing room."),
                     "source": "ElevenLabs-v3-natural-performance",
                     "providerCalled": False,
                     "dialogueStartChanges": (cascade or {}).get("changes", []),

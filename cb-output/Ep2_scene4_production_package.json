@@ -226,7 +226,7 @@
    "establishJob": null,
    "buttonChange": null,
    "frameSource": null,
-   "durationSec": 27.0,
+   "durationSec": 30.0,
    "purpose": "Deliver the entire scene as one accumulating emotional event in a single compressed path pocket, where playful motion fails in real time and Aida is discovered inside that same felt geography.",
    "performanceAssignment": "Performance phases: anticipation: Bo Moving beside Keen, Bo braces through each counted beat, then begins joining the rhythm himself as his body prepares for the next tail-poof instead of recoiling from it; action: Bo Bo triggers the tail-poof on purpose more than once while still walking, opens into brief giggles, then abruptly halts, drops onto the fallen log, grips the satchel tight, tucks in, and later lifts his attention toward Aida when she notices the bag; reaction: Aida Aida climbs down through the branch veil slightly caught by twigs, brushes herself clear, sits beside Bo with space left between them, fixes on the satchel rather than his face, and holds her grounded stillness as Bo turns toward her; settle: ENVIRONMENT Wind moves gently through the leaves around the seated trio as the path remains open behind Bo and the group holds the silence without breaking the pocket. Cause and effect: The counted walking rhythm lets Bo prepare for and repeat the tail-poof as shared play, which opens him briefly; when that momentum runs out, his forward travel stops instantly, gravity drops him to the log, and his paws tighten on the satchel. Aida's branch-snag softens her arrival, her seated distance avoids crowding, and the untouched path plus moving leaves keep the pressure present while Bo's body eases from clenched to less shut. Visible turn: Bo shifts from laughing through the poof to visibly folded worry, then from folded isolation to cautious receptiveness once Aida notices his effort and calmly stays with the question. Land on: Bo remains seated in the same branch-veiled pocket with the path still ahead, satchel no longer crushed at maximum tension, and his posture reading quieter and more open rather than cured or ready to spring up. Acting freedom: Animators may vary the exact cadence of the repeated poofs, the size of Bo's giggle leaks, Keen's tiny settle beside him, Aida's twig-clearing business, and the amount of final loosening in Bo's paws, so long as the opening relief is real but temporary, the stop is sudden, Aida never crowds, and the final hold stays unresolved.",
    "camera": "One continuous branch-veiled forest-path unit at Bo's height: start already travelling beside him mid-countdown as his tail-poof bursts inside forward motion, let the camera's travel die exactly when he stops and sits clutching his satchel,",
@@ -1028,7 +1028,7 @@
         "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
        },
        "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
-       "shotContractHash": "4034193dd9b041ded04a4d4cc6f875050f78b35eb72c4676520ba7a8581b1583",
+       "shotContractHash": "5a963215356a206a1b74e80127c427dc230b59e30e0cf484ea37d6b5fac3aca6",
        "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
        "references": [
         {
@@ -1065,7 +1065,13 @@
         }
        ]
       },
-      "editedBy": "StudioAI exact render safety fit"
+      "editedBy": "StudioAI exact render safety fit",
+      "durationCarryForward": {
+       "at": "2026-09-01T16:37:48",
+       "fromSec": 27.0,
+       "newDurationSec": 30.0,
+       "reason": "Approved direction carried across timing-only retime"
+      }
      },
      "history": [
       {
@@ -1196,8 +1202,1571 @@
        "invalidationReason": "direct inputs changed before replacement preparation"
       }
      ]
+    },
+    "voice": {
+     "approved": null,
+     "candidate": {
+      "department": "Voice",
+      "worker": "Voice Director",
+      "skill": "skills/crystal-bears-voice-director/SKILL.md",
+      "model": "gpt-5.4",
+      "preparedAt": "2026-09-01T16:25:31",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "26f3a0c3b164757647c7ea9e74003f18c900eaf7c14a79d178945fddc89d906e",
+      "output": {
+       "shotId": "S4.SH1",
+       "sceneIntention": "One unbroken emotional path: shared play gives Bo a brief way through embarrassment, then collapses into a body-first confession of belonging fear; Aida joins without crowding, notices effort instead of diagnosing feeling, and her calm steadiness lets Bo test whether scared can coexist with still going.",
+       "lines": [
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:9ceeadde957ea106460445f17e189fc81fa52b67a37205ad6faf1dff388944bb",
+         "sourceEventId": "script-event:sha256:ad56dac171ba4c465968a7ccaf9d0b0c41057141c93d9683fd680c36c9454795",
+         "speaker": "Keen",
+         "character": "Keen",
+         "exactDialogue": "3,2,1 …",
+         "performedText": "[excited] 3,2,1 …",
+         "dramaticIntention": "Turn Bo's feared reaction into a simple shared game he can ride instead of brace against.",
+         "subtext": "I'm keeping this light so you don't have to feel alone in it.",
+         "cadenceAndBreath": "Bright counted propulsion; each number clean and quick, with a little lift into the ellipsis as he expects the poof.",
+         "timingAndBody": "Already moving beside Bo; this is in-step encouragement, not a presentational callout.",
+         "archetypeId": "chaos-chant",
+         "performanceQuestions": {
+          "intention": "Can Keen make the countdown feel like an invitation rather than pressure?",
+          "subtext": "I'm with you in this.",
+          "thoughtBefore": "Here it comes again—let's make it fun first.",
+          "changeDuring": "The line exits with anticipatory lift toward the poof.",
+          "operativeWords": [
+           "3,2,1"
+          ]
+         },
+         "physicalState": "Walking, energized, companionable forward motion.",
+         "emotionalState": {
+          "entry": "playfully excited",
+          "exit": "expectant"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "The body keeps the rhythm so the voice can sound like movement made audible.",
+         "previousText": "None.",
+         "startsAtSec": 1.2,
+         "estimatedDurationSec": 1.2,
+         "pauseReasons": [
+          "Ellipsis leaves room for the anticipated tail-poof reaction."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "excited",
+           "purpose": "Gives the countdown buoyant forward energy so it reads as shared play, not management."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L1-T1",
+           "label": "Primary",
+           "performedText": "[excited] 3,2,1 …",
+           "primary": true,
+           "takesCount": 3
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:d08afaf5bd292870a999f905198f72d39a0bd5341883cf90f65a4d54613c264a",
+         "sourceEventId": "script-event:sha256:582c991d6def71bfd6340805e3d0922f355e139b0d6d16fb8cf7efe29654d7a3",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo",
+         "performedText": "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again. [laughs] Bo",
+         "dramaticIntention": "Bo tries on mastery over the embarrassing body event by joining and repeating the rhythm himself.",
+         "subtext": "If I perform it before it happens to me, maybe it won't own me.",
+         "cadenceAndBreath": "Starts a little braced then quickly catches the game; 'POOF!' pops out clean; the descriptive phrase tumbles with delighted disbelief; end on a small involuntary laugh leaking through the word 'Bo.'",
+         "timingAndBody": "Still walking through repeated poofs; let the vocal rhythm feel body-led and slightly interrupted by bursts of movement.",
+         "archetypeId": "chaos-chant",
+         "performanceQuestions": {
+          "intention": "Can Bo sound like he's discovering he can trigger the joke on purpose?",
+          "subtext": "Look, I can do this too—maybe I'm okay.",
+          "thoughtBefore": "Maybe if I join in, it won't feel so embarrassing.",
+          "changeDuring": "Nervous participation turns into real brief giggle-release.",
+          "operativeWords": [
+           "POOF",
+           "again and again",
+           "Bo"
+          ]
+         },
+         "physicalState": "In motion, tail-poofing repeatedly, body bouncing between brace and release.",
+         "emotionalState": {
+          "entry": "nervous but trying",
+          "exit": "briefly delighted and open"
+         },
+         "listener": "Keen",
+         "bodyVoiceRelationship": "The voice rides the poof rhythm; laughter is caused by the body finding temporary relief.",
+         "previousText": "3,2,1 …",
+         "startsAtSec": 2.7,
+         "estimatedDurationSec": 3.3,
+         "pauseReasons": [
+          "Micro-break after the countdown to let the poof land physically.",
+          "Laugh interruption at the end comes from genuine release, not commentary."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "playfully",
+           "purpose": "Marks the moment Bo actively joins the game and briefly rebrands embarrassment as play."
+          },
+          {
+           "tag": "laughs",
+           "purpose": "Lets a real giggle leak through at the end so the relief feels earned and temporary."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L2-T1",
+           "label": "Primary",
+           "performedText": "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again. [laughs] Bo",
+           "primary": true,
+           "takesCount": 4
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:0c94860e8f33fe7e3313d296ad53903a9894591e60bcb8edc3ca455d6501db0b",
+         "sourceEventId": "script-event:sha256:96e953e5d905dec76cc26c93a3d8558d16e7208402083c01b0b88a4ffda462f1",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "I’m STILL worried about going to the to the Learning Circle.",
+         "performedText": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
+         "dramaticIntention": "Admit the game didn't solve the real fear.",
+         "subtext": "I wanted the laughing to fix this, but it didn't.",
+         "cadenceAndBreath": "After a felt silence, start low and contained; stress 'STILL'; let the doubled 'to the' happen without correction, a caught mind outrunning itself.",
+         "timingAndBody": "This follows the abrupt stop and seated fold; satchel clutched, eyes more down-path than at Keen.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Can Bo let the truth out without trying to make it neat?",
+          "subtext": "The problem is bigger than the joke.",
+          "thoughtBefore": "That was fun for a second... and it changed nothing.",
+          "changeDuring": "He moves from hiding inside silence to finally naming the fear.",
+          "operativeWords": [
+           "STILL",
+           "Learning Circle"
+          ]
+         },
+         "physicalState": "Seated hard on the log, tucked in, gripping the satchel.",
+         "emotionalState": {
+          "entry": "collapsed inward",
+          "exit": "exposed"
+         },
+         "listener": "Keen",
+         "bodyVoiceRelationship": "The body has stopped before the voice can catch up; speech comes from compression, not projection.",
+         "previousText": "3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo",
+         "startsAtSec": 8.3,
+         "estimatedDurationSec": 2.2,
+         "pauseReasons": [
+          "Prior silence is the physical comedown after play fails."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "quietly",
+           "purpose": "Keeps the confession body-small and truthful after the abrupt collapse into stillness."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L3-T1",
+           "label": "Primary",
+           "performedText": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
+           "primary": true,
+           "takesCount": 4
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:aecef6799f577e77bf8713cdf2fcce3290621ce6e04682613e8bdef1f63fb0c6",
+         "sourceEventId": "script-event:sha256:66978bf46ac8880b38bb10319b1565fd282aae3e6f151e7868ffef4db9d1a817",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "They all know each other. Beat. But I don’t know them, and they don't know me.",
+         "performedText": "[softly] They all know each other. [sighs] Beat. But I don’t know them, and they don't know me.",
+         "dramaticIntention": "Move from naming the event he fears to naming the social loneliness underneath it.",
+         "subtext": "I'm afraid of arriving where everyone else already belongs.",
+         "cadenceAndBreath": "First sentence simple and resigned. Take a small breath-sigh before 'Beat.' Then the second thought lands more plainly than emotionally, because the clarity hurts.",
+         "timingAndBody": "Remain folded; this isn't to win comfort, it's the explanation he can't hold back anymore.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Can Bo reveal the belonging fear without becoming melodramatic?",
+          "subtext": "I'll be the one outside the circle.",
+          "thoughtBefore": "It's not just the place—it's the people already in it.",
+          "changeDuring": "The line deepens from observation into vulnerable self-placement outside the group.",
+          "operativeWords": [
+           "all",
+           "don’t know",
+           "me"
+          ]
+         },
+         "physicalState": "Still tucked, grip beginning to shift from crush to hold.",
+         "emotionalState": {
+          "entry": "ashamed and guarded",
+          "exit": "plainly vulnerable"
+         },
+         "listener": "Keen",
+         "bodyVoiceRelationship": "The breath does the emotional work; the body stays shut while the voice finally explains why.",
+         "previousText": "I’m STILL worried about going to the to the Learning Circle.",
+         "startsAtSec": 11.3,
+         "estimatedDurationSec": 3.7,
+         "pauseReasons": [
+          "Internal beat after the first sentence marks the thought becoming more personal."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "softly",
+           "purpose": "Prevents the explanation from hardening into complaint; it stays tender and exposed."
+          },
+          {
+           "tag": "sighs",
+           "purpose": "Carries the weight of the internal beat before he admits the deeper belonging fear."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L4-T1",
+           "label": "Primary",
+           "performedText": "[softly] They all know each other. [sighs] Beat. But I don’t know them, and they don't know me.",
+           "primary": true,
+           "takesCount": 4
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:7f8c98141447cdf11f01cb53190ce512215b51fbd7d1fd8bc4c2e2ad3ee47897",
+         "sourceEventId": "script-event:sha256:8199fdf7e9061fd2151d45cbdb5712a066402f3442f3a70321d369bcd76045aa",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "Tricky trees.",
+         "performedText": "[deadpan] Tricky trees.",
+         "dramaticIntention": "Defuse formality and announce herself through small shared reality, not authority.",
+         "subtext": "I know this is delicate, and I'm not here to make it heavier.",
+         "cadenceAndBreath": "Dry, exact, unhurried; let the warmth appear only on the release of 'trees.'",
+         "timingAndBody": "She is brushing off the twig snag as she settles; the line should feel incidental but perfectly timed.",
+         "archetypeId": "deadpan-affection",
+         "performanceQuestions": {
+          "intention": "Can Aida make the branch mishap soften the room rather than steal it?",
+          "subtext": "We can enter this gently.",
+          "thoughtBefore": "Well, the forest made my entrance for me.",
+          "changeDuring": "The dryness melts by a degree into approachable warmth.",
+          "operativeWords": [
+           "Tricky",
+           "trees"
+          ]
+         },
+         "physicalState": "Finishing her branch-clear, lowering into a respectful seated space.",
+         "emotionalState": {
+          "entry": "matter-of-fact",
+          "exit": "gently warm"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "The body absorbs the awkwardness so the voice can stay calm and unembarrassed.",
+         "previousText": "They all know each other. Beat. But I don’t know them, and they don't know me.",
+         "startsAtSec": 16.3,
+         "estimatedDurationSec": 0.8,
+         "pauseReasons": [],
+         "tagPurposes": [
+          {
+           "tag": "deadpan",
+           "purpose": "Uses dry understatement to dissolve any grand entrance and keep the pocket safe."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L5-T1",
+           "label": "Primary",
+           "performedText": "[deadpan] Tricky trees.",
+           "primary": true,
+           "takesCount": 3
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:be902fee96a290543bd5a5a75ebf0fb8b3cc3928d13d15baeb378a3e5822f132",
+         "sourceEventId": "script-event:sha256:70d13052d2839feb6b2ffa083eee145f5fd9df473771bfe1893683c952c397f8",
+         "speaker": "Keen",
+         "character": "Keen",
+         "exactDialogue": "Bo, this is Aida.",
+         "performedText": "[quietly] Bo, this is Aida.",
+         "dramaticIntention": "Make the introduction small enough not to break the pocket Aida just created.",
+         "subtext": "This is safe; no performance required.",
+         "cadenceAndBreath": "Gentle and spare, no salesmanship. Tiny placement on 'Aida' to offer connection, not push it.",
+         "timingAndBody": "Keen has already settled supportively nearby; keep it from the side, without leaning in.",
+         "archetypeId": "quiet-warning",
+         "performanceQuestions": {
+          "intention": "Can Keen introduce Aida without turning the moment formal?",
+          "subtext": "You don't have to brace for this.",
+          "thoughtBefore": "Okay, now that it feels safe, I can name her.",
+          "changeDuring": "The line relaxes into the name.",
+          "operativeWords": [
+           "Bo",
+           "Aida"
+          ]
+         },
+         "physicalState": "Seated, careful, containing his earlier energy.",
+         "emotionalState": {
+          "entry": "protective",
+          "exit": "reassuring"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "His quieter body lets the voice reduce pressure instead of adding social demand.",
+         "previousText": "Tricky trees.",
+         "startsAtSec": 17.6,
+         "estimatedDurationSec": 0.9,
+         "pauseReasons": [],
+         "tagPurposes": [
+          {
+           "tag": "quietly",
+           "purpose": "Keeps the introduction from sounding ceremonial or intrusive in Bo's vulnerable pocket."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L6-T1",
+           "label": "Primary",
+           "performedText": "[quietly] Bo, this is Aida.",
+           "primary": true,
+           "takesCount": 3
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:8b2c9e81fd63758b13c0dce04478726f7e2d55fe761cbebdd0f9ae2e02637636",
+         "sourceEventId": "script-event:sha256:20c234a44fedda69fe881fde0d48b95987eaf765fce753af7d136c566a337c8f",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "You packed your bag.",
+         "performedText": "[quietly] You packed your bag.",
+         "dramaticIntention": "Notice concrete effort instead of interrogating emotion.",
+         "subtext": "I see what you already did to try to be ready.",
+         "cadenceAndBreath": "Low-pressure observation, not a question. Place 'packed' with mild respect, and 'bag' gently so the satchel becomes the bridge.",
+         "timingAndBody": "Her eyes are on the satchel, not Bo's face; respectful space remains intact.",
+         "archetypeId": "deadpan-affection",
+         "performanceQuestions": {
+          "intention": "Can Aida make being seen feel relieving rather than exposing?",
+          "subtext": "Your effort counts.",
+          "thoughtBefore": "Start with what's true and visible.",
+          "changeDuring": "The line exits with a trace of warmth that invites response.",
+          "operativeWords": [
+           "packed",
+           "bag"
+          ]
+         },
+         "physicalState": "Still, grounded, seated with room between them.",
+         "emotionalState": {
+          "entry": "observant",
+          "exit": "affirming"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Because her body doesn't crowd him, the voice can land as a quiet fact instead of pressure.",
+         "previousText": "Bo, this is Aida.",
+         "startsAtSec": 19.0,
+         "estimatedDurationSec": 0.9,
+         "pauseReasons": [],
+         "tagPurposes": [
+          {
+           "tag": "quietly",
+           "purpose": "Lets the observation feel private and non-invasive, preserving Bo's fragile openness."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L7-T1",
+           "label": "Primary",
+           "performedText": "[quietly] You packed your bag.",
+           "primary": true,
+           "takesCount": 4
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:9611831565e8bfd90992cf8e741fb46942b7fd4a640bf2495a02db950d7d0fd2",
+         "sourceEventId": "script-event:sha256:3b4393c29d77c725219e43867b2190736205313802955ae8ff0a47393a043707",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "Four times.",
+         "performedText": "[quietly] Four times.",
+         "dramaticIntention": "Answer quickly because he feels seen accurately and can't help revealing the extent of his effort.",
+         "subtext": "I really tried to get ready.",
+         "cadenceAndBreath": "Small, immediate, almost before he means to say it; no joke push, just truthful specificity.",
+         "timingAndBody": "First slight lift of attention toward Aida; paws still on the satchel.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Can Bo let the number come out as vulnerable fact, not punchline?",
+          "subtext": "Please notice I was trying.",
+          "thoughtBefore": "She noticed. She really noticed.",
+          "changeDuring": "He shifts from shut-down to first cautious engagement.",
+          "operativeWords": [
+           "Four"
+          ]
+         },
+         "physicalState": "Still seated and guarded, but attention turning outward.",
+         "emotionalState": {
+          "entry": "surprised to be seen",
+          "exit": "tentatively connected"
+         },
+         "listener": "Aida",
+         "bodyVoiceRelationship": "The body remains protective, but the voice slips out more quickly now that someone named the effort.",
+         "previousText": "You packed your bag.",
+         "startsAtSec": 20.1,
+         "estimatedDurationSec": 0.5,
+         "pauseReasons": [],
+         "tagPurposes": [
+          {
+           "tag": "quietly",
+           "purpose": "Keeps the admission intimate and earnest rather than comic or boastful."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L8-T1",
+           "label": "Primary",
+           "performedText": "[quietly] Four times.",
+           "primary": true,
+           "takesCount": 3
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:be1de01acc2e659b826802a3dc1e4681beb0ba20e1c17fad24523d46aab1798e",
+         "sourceEventId": "script-event:sha256:a0f0ca5baffee0f96c62b15650005baa6dca1484d5efae0be14d97d7cb021a64",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "I would have done five.",
+         "performedText": "[calm] I would have done five.",
+         "dramaticIntention": "Meet his effort with deadpan solidarity, not consolation.",
+         "subtext": "Scared people can be practical and still go; you're not strange to me.",
+         "cadenceAndBreath": "Matter-of-fact, dry, no wink. Let 'five' land as a simple escalation, warm on the exit.",
+         "timingAndBody": "No lean-in, no grin broadening the joke; she stays grounded so the humor shelters him.",
+         "archetypeId": "deadpan-affection",
+         "performanceQuestions": {
+          "intention": "Can Aida bond through precision rather than reassurance language?",
+          "subtext": "I belong in this feeling with you.",
+          "thoughtBefore": "Let's stand beside his effort, not above it.",
+          "changeDuring": "The line turns tiny humor into companionship.",
+          "operativeWords": [
+           "would",
+           "five"
+          ]
+         },
+         "physicalState": "Settled and still, eyes still near the satchel line before lifting lightly.",
+         "emotionalState": {
+          "entry": "dryly supportive",
+          "exit": "warmly aligned"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Her physical stillness lets the dry line feel safe instead of performative.",
+         "previousText": "Four times.",
+         "startsAtSec": 20.8,
+         "estimatedDurationSec": 1.1,
+         "pauseReasons": [],
+         "tagPurposes": [
+          {
+           "tag": "calm",
+           "purpose": "Keeps the deadpan solidarity grounded so the humor reduces pressure instead of playing for a laugh."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L9-T1",
+           "label": "Primary",
+           "performedText": "[calm] I would have done five.",
+           "primary": true,
+           "takesCount": 4
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:553ba6e9faf58e1b69ddfd808fbd85ee28c695e21129c6a8b4bbf6b00e7fc264",
+         "sourceEventId": "script-event:sha256:681e4e40424612444c8cc43115dd3f4477563e47099844acf2305b53a6ab668c",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "You get scared too?",
+         "performedText": "[quietly] You get scared too?",
+         "dramaticIntention": "Test whether this calm person truly shares his fear, or only understands it from outside.",
+         "subtext": "If you're scared too, maybe being scared doesn't exile me.",
+         "cadenceAndBreath": "Careful, upward, almost afraid of hoping. Keep 'too' operative and searching.",
+         "timingAndBody": "He turns a little more toward Aida here; this is the first real reach.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Can Bo make the question a risk, not a casual follow-up?",
+          "subtext": "Tell me I'm not the only one built like this.",
+          "thoughtBefore": "Wait—do you actually know this feeling?",
+          "changeDuring": "The line opens from curiosity into hope he doesn't want to overcommit to.",
+          "operativeWords": [
+           "scared",
+           "too"
+          ]
+         },
+         "physicalState": "Less clenched, attention lifted, satchel held lower.",
+         "emotionalState": {
+          "entry": "cautious",
+          "exit": "hopeful but protected"
+         },
+         "listener": "Aida",
+         "bodyVoiceRelationship": "The body loosens just enough to let the question travel toward her.",
+         "previousText": "I would have done five.",
+         "startsAtSec": 22.5,
+         "estimatedDurationSec": 0.8,
+         "pauseReasons": [],
+         "tagPurposes": [
+          {
+           "tag": "quietly",
+           "purpose": "Preserves the tenderness of Bo's first genuine reach toward Aida."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L10-T1",
+           "label": "Primary",
+           "performedText": "[quietly] You get scared too?",
+           "primary": true,
+           "takesCount": 4
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:c5c1db3eb21229a7269bd9c6ef7f5dbc93d27deb6b865800d521f4f0b7b282b7",
+         "sourceEventId": "script-event:sha256:56e30c48f449c7a124e0bf7af50719b53ab978925a8a16c41f8e9a4951cdf9b1",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "Every single time.",
+         "performedText": "[calm] Every single time.",
+         "dramaticIntention": "Answer with complete simplicity so Bo doesn't have to doubt her truthfulness.",
+         "subtext": "Yes. Fully. You're not alone in this pattern.",
+         "cadenceAndBreath": "Plain and steady, with no softening apology. 'Every' and 'time' bookend certainty.",
+         "timingAndBody": "Hold still; the power is that she does not rush to soothe beyond the fact.",
+         "archetypeId": "deadpan-affection",
+         "performanceQuestions": {
+          "intention": "Can Aida make certainty feel sheltering?",
+          "subtext": "I won't flinch away from the reality of fear.",
+          "thoughtBefore": "He needs the truth, not a polished comfort line.",
+          "changeDuring": "No internal turn—its steadiness is the gift.",
+          "operativeWords": [
+           "Every",
+           "time"
+          ]
+         },
+         "physicalState": "Grounded, open, unmoving.",
+         "emotionalState": {
+          "entry": "certain",
+          "exit": "steadily warm"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Her body remains relaxed and uninsistent, making the line trustworthy.",
+         "previousText": "You get scared too?",
+         "startsAtSec": 23.5,
+         "estimatedDurationSec": 0.8,
+         "pauseReasons": [
+          "Leave a tiny absorbent space after the line for Bo to take it in."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "calm",
+           "purpose": "Makes the admission sound lived-in and trustworthy rather than dramatic or pitying."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L11-T1",
+           "label": "Primary",
+           "performedText": "[calm] Every single time.",
+           "primary": true,
+           "takesCount": 3
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:54a906703699a3f26205ab3f90d22e54ad43c8d4748eefdaf5fcb4da63bcaee7",
+         "sourceEventId": "script-event:sha256:448b97275a411f283e3c4dcf5b8d1d4e2c061f662e8178b6b40caa6d74863445",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "But you still go?",
+         "performedText": "[softly] But you still go?",
+         "dramaticIntention": "Reach for the possibility that courage might include fear rather than erase it.",
+         "subtext": "Tell me the path can stay hard and still be possible.",
+         "cadenceAndBreath": "Gentle, immediate after the absorbent beat; 'still' carries the line's hinge.",
+         "timingAndBody": "This is more open than the previous questions, but still careful—he doesn't spring up emotionally.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Can Bo ask for a model of living with fear rather than escaping it?",
+          "subtext": "Maybe I don't have to wait to stop being scared.",
+          "thoughtBefore": "If fear stays, what makes going possible?",
+          "changeDuring": "The question shifts him from identification toward action.",
+          "operativeWords": [
+           "still",
+           "go"
+          ]
+         },
+         "physicalState": "Seated, quieter, posture eased but unresolved.",
+         "emotionalState": {
+          "entry": "absorbing hope",
+          "exit": "seeking permission"
+         },
+         "listener": "Aida",
+         "bodyVoiceRelationship": "The body stays seated in the problem while the voice reaches toward a future action.",
+         "previousText": "Every single time.",
+         "startsAtSec": 24.9,
+         "estimatedDurationSec": 0.8,
+         "pauseReasons": [],
+         "tagPurposes": [
+          {
+           "tag": "softly",
+           "purpose": "Keeps the question vulnerable and sincere as Bo tests a new possibility."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L12-T1",
+           "label": "Primary",
+           "performedText": "[softly] But you still go?",
+           "primary": true,
+           "takesCount": 4
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:7e9be7767046bc95527e622885d012054b3e1a0580ce12e792e2480fd72eacaf",
+         "sourceEventId": "script-event:sha256:f097b5fde07d34a52eac12d9c56410a111c99db91456a48bd45b3828106b9b5a",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "Every single time. BEAT.",
+         "performedText": "[calm] Every single time. [exhales] BEAT.",
+         "dramaticIntention": "Confirm the answer without fanfare, then let silence do the rest of the work.",
+         "subtext": "Yes—and you don't need a bigger speech than that.",
+         "cadenceAndBreath": "Same certainty as before, maybe even simpler. Small release after the sentence, then leave the beat alive rather than empty.",
+         "timingAndBody": "Stay grounded beside him with respectful space; this lands the scene and must not sound solved.",
+         "archetypeId": "deadpan-affection",
+         "performanceQuestions": {
+          "intention": "Can Aida let repetition become reassurance through steadiness alone?",
+          "subtext": "I'm staying calm inside this truth so you can too.",
+          "thoughtBefore": "He needs the answer again, unchanged.",
+          "changeDuring": "The spoken certainty yields to shared silence.",
+          "operativeWords": [
+           "Every",
+           "single",
+           "time",
+           "BEAT"
+          ]
+         },
+         "physicalState": "Seated, still, quietly present.",
+         "emotionalState": {
+          "entry": "calm certainty",
+          "exit": "held warmth in silence"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Her still body allows the exhale and ensuing silence to become shelter rather than closure.",
+         "previousText": "But you still go?",
+         "startsAtSec": 25.9,
+         "estimatedDurationSec": 0.7,
+         "pauseReasons": [
+          "The final beat must open into held silence that carries through scene end."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "calm",
+           "purpose": "Maintains her grounded, matter-of-fact truthfulness on the repeated answer."
+          },
+          {
+           "tag": "exhales",
+           "purpose": "Releases into the final held silence so the moment lands as lived-in calm, not a buttoned lesson."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L13-T1",
+           "label": "Primary",
+           "performedText": "[calm] Every single time. [exhales] BEAT.",
+           "primary": true,
+           "takesCount": 4
+          }
+         ]
+        }
+       ]
+      },
+      "packageRevision": 3,
+      "inputSignature": {
+       "stage": "voice",
+       "model": "gpt-5.4",
+       "skillHashes": {
+        "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
+       },
+       "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+       "shotContractHash": "5a963215356a206a1b74e80127c427dc230b59e30e0cf484ea37d6b5fac3aca6",
+       "dialogueHash": "6e9f76d1e67e0ccaef5e4eac8e01bb1a3108bd22bc0794282e4bebdfb0f30036",
+       "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+       "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+       "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+       "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+       "voiceCompilerVersion": "voice-director-v1",
+       "voiceIds": [
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4"
+       ]
+      },
+      "durationCarryForward": {
+       "at": "2026-09-01T16:37:48",
+       "fromSec": 27.0,
+       "newDurationSec": 30.0,
+       "reason": "Approved direction carried across timing-only retime"
+      }
+     },
+     "history": []
     }
-   }
+   },
+   "keyframeCandidates": [
+    {
+     "candidateId": "A",
+     "label": "A - Seedream 5 Pro",
+     "provider": "byteplus",
+     "model": "dola-seedream-5-0-pro-260628",
+     "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
+     "generatedAt": "2026-09-01T16:22:07",
+     "source": "generated",
+     "inputSignature": {
+      "cardHash": "03851c6a9c87e698788385caa5c9df9eb549bb2121a595121088be27d24a918d",
+      "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+      "referenceHashes": {
+       "CB_Keen.jpeg": "b02f4c314f09a8ae5cc505aff970d24a",
+       "CB_Bo.png": "68076f0b3779ee745be0ac0473db13d8",
+       "CB_Bo_satchel.png": "977d88cb8e75812f5d89a399a31adb82",
+       "Ep2_S4_plate_candidate_ff9d9499.png": "f97b4176595fce9356cf30f3ddaa9489"
+      },
+      "briefHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+      "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045"
+     },
+     "promptContract": {
+      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nWe are already inside Bo's moving coping game at his eye level, sharing a playful side-by-side rhythm that still leaves the path ahead present as pressure.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=prop:satchel; @图4=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the exact satchel prop authority; inherit design, material, construction and scale only; ignore its background and labels.\n- @图4 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ lower-right area; walking anticipation with body braced for the next counted tail-poof, satchel carried and readable; facing screen-right along the path with slight inward awareness toward Keen.\n- Keen @ middle-left area; walking alongside in upbeat supportive anticipation, keeping pace beside Bo; facing screen-right toward shared travel and Bo.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nCamera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.\nBo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.\nThe open path continues past them and stays readable behind Bo through center-right background depth.\nA fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.\nOverhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.\nAida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nHold open travel space frame-right and center-right for the path pressure and Bo's later stop at the fallen log.\nKeep frame-left upper-left branch veil readable and lightly open for Aida's later descent entrance.\nReserve a clear seated pocket around Bo's future stop point so the later trio can settle without a camera reset.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nModerately wide animated lens feel, roughly 32mm full-frame equivalent, camera at Bo's height on a gentle lateral travel matching their walk; close enough for body-read and satchel presence, wide enough to retain the path pocket, fallen log territory, and branch entry zone for Aida. Mild perspective separation is welcome but avoid distortion or heroic emphasis.\n\n[Light]\nWarm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nOpen on Bo and Keen already in motion at Bo's height; do not stage a fresh start or frontal presentation.\nKeep the path legible behind and beyond Bo from frame one so belonging-pressure is built into the composition.\nPreserve branch-veiled left-side entry geography for Aida; her later arrival must feel like joining the same pocket, not entering a new setup.\nMaintain enough foreground-to-midground clearance that the camera's travel can visibly die with Bo's abrupt stop without reframing the scene's logic.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No unapproved extra cast, props or body-mounted loads; include only the required referenced satchel with its approved owner. Preserve the locked Scene Look.",
+      "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+      "provider": "seedream",
+      "providerModelId": "dola-seedream-5-0-pro-260628",
+      "modelVersion": "dola-seedream-5-0-pro-260628",
+      "directionContract": {
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "lightingAndDepth": "Warm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.",
+       "geography": [
+        "Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.",
+        "Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.",
+        "The open path continues past them and stays readable behind Bo through center-right background depth.",
+        "A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.",
+        "Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.",
+        "Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing."
+       ],
+       "charactersInFrame": [
+        "Bo",
+        "Keen"
+       ],
+       "emptySections": []
+      },
+      "contractHash": "73a02907142a90ca728a7dad2c03833517f505a5b8e9950e0e9d83eac52fcdcc"
+     },
+     "geometryScreening": {
+      "status": "fail",
+      "reason": "one or more subjects drifted outside authored position or size tolerances",
+      "candidateSize": [
+       2816,
+       1584
+      ],
+      "positionTolerance": 0.12,
+      "heightScaleTolerance": [
+       0.75,
+       1.25
+      ],
+      "matches": [
+       {
+        "character": "Bo",
+        "passed": false,
+        "positionDelta": 0.0524,
+        "heightScaleAgainstLayout": 1.449,
+        "expectedCenter": [
+         0.61,
+         0.62
+        ],
+        "actualCenter": [
+         0.5922,
+         0.5707
+        ],
+        "expectedHeightFraction": 0.4514,
+        "actualHeightFraction": 0.654,
+        "detectedBoundsPx": [
+         1333,
+         386,
+         2002,
+         1422
+        ]
+       },
+       {
+        "character": "Keen",
+        "passed": false,
+        "positionDelta": 0.047,
+        "heightScaleAgainstLayout": 0.7188,
+        "expectedCenter": [
+         0.36,
+         0.5716
+        ],
+        "actualCenter": [
+         0.3343,
+         0.5322
+        ],
+        "expectedHeightFraction": 0.8168,
+        "actualHeightFraction": 0.5871,
+        "detectedBoundsPx": [
+         578,
+         378,
+         1305,
+         1308
+        ]
+       }
+      ],
+      "detectedComponentCount": 2,
+      "method": "local-u2net-foreground-geometry-v1",
+      "zeroSpend": true,
+      "providerCalled": false
+     },
+     "conformanceScreening": {
+      "status": "fail",
+      "reason": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
+      "checkedAt": "2026-09-01T16:22:07",
+      "screenVersion": 2,
+      "validatorModel": "gpt-5.4-mini",
+      "mediaProviderCalled": false,
+      "referenceHashes": {
+       "CB_Keen.jpeg": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+       "CB_Bo.png": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+       "CB_Bo_satchel.png": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
+       "Ep2_S4_plate_candidate_ff9d9499.png": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+      },
+      "candidateSha256": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
+      "review": {
+       "verdict": "block",
+       "expectedCharacters": [
+        "Bo",
+        "Keen"
+       ],
+       "detectedCharacters": [
+        "Keen",
+        "Bo"
+       ],
+       "expectedSubjectCount": 2,
+       "subjectCount": 2,
+       "summary": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
+       "identityAndDistinguishability": {
+        "score": 2,
+        "visibleEvidence": "Both named characters are visible and distinct: Keen is the blue bear with pale crown tuft and gold cuffs; Bo is the orange squirrel with cream muzzle, tall tufted ears, and a large curled tail.",
+        "correction": "Keep both characters clearly separated and preserve each character’s canonical colors, tufting, cuffs, tail, and facial structure without borrowing features."
+       },
+       "relativeScaleAndGeography": {
+        "score": 1,
+        "visibleEvidence": "The two characters are in the same forest environment, but Bo dominates the foreground more than the specified 0.42 frame placement and Keen sits farther left/back than the authored screen geography; the planned side-by-side staging is only approximate.",
+        "correction": "Reposition Bo to screen-right at the authored mid-foreground size and place Keen to screen-left slightly behind him, maintaining the intended side-by-side travel spacing."
+       },
+       "anatomyAndSilhouette": {
+        "score": 2,
+        "visibleEvidence": "Both figures have readable, complete anatomy and silhouettes: Keen’s bear form is intact, and Bo’s squirrel form shows the large fluffy curled tail, upright ears, and small body proportions.",
+        "correction": "Preserve the full tail volume, ear points, and clean limb shapes; avoid any malformed paws or cropped anatomy."
+       },
+       "actionReadyComposition": {
+        "score": 1,
+        "visibleEvidence": "The image is action-ready in a forest path setting, but Bo’s pose and satchel read more like a generic traveling character than the specified walking anticipation with readable satchel support; Keen’s supportive walk is present but not strongly matched in staging.",
+        "correction": "Adjust both characters into a clearer walking-anticipation pose along the path, with Bo’s satchel reading only if the contract permits, and Keen aligned in upbeat supportive pace beside him."
+       },
+       "forbiddenContent": {
+        "score": 0,
+        "visibleEvidence": "Bo has a visible brown satchel/body-mounted bag crossing the torso, which is explicitly forbidden as a generic backpack or satchel.",
+        "correction": "Remove Bo’s satchel entirely and ensure no body-mounted bags, dangling loads, text, logos, or watermarks appear."
+       },
+       "recommendedCorrection": "Remove Bo’s satchel, then shift Bo to the authored screen-right foreground and Keen to the authored screen-left slightly rear position, keeping both in a clear walking-anticipation side-by-side forest path composition with no extra props."
+      }
+     },
+     "packageRevision": 3,
+     "contentHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec"
+    },
+    {
+     "candidateId": "B",
+     "label": "B - Nano Banana 2",
+     "provider": "google",
+     "model": "gemini-3.1-flash-image",
+     "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_B_286cbd03.png",
+     "generatedAt": "2026-09-01T16:22:40",
+     "source": "generated",
+     "inputSignature": {
+      "cardHash": "03851c6a9c87e698788385caa5c9df9eb549bb2121a595121088be27d24a918d",
+      "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+      "referenceHashes": {
+       "CB_Keen.jpeg": "b02f4c314f09a8ae5cc505aff970d24a",
+       "CB_Bo.png": "68076f0b3779ee745be0ac0473db13d8",
+       "CB_Bo_satchel.png": "977d88cb8e75812f5d89a399a31adb82",
+       "Ep2_S4_plate_candidate_ff9d9499.png": "f97b4176595fce9356cf30f3ddaa9489"
+      },
+      "briefHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+      "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045"
+     },
+     "promptContract": {
+      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nWe are already inside Bo's moving coping game at his eye level, sharing a playful side-by-side rhythm that still leaves the path ahead present as pressure.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=prop:satchel; @图4=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the exact satchel prop authority; inherit design, material, construction and scale only; ignore its background and labels.\n- @图4 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ lower-right area; walking anticipation with body braced for the next counted tail-poof, satchel carried and readable; facing screen-right along the path with slight inward awareness toward Keen.\n- Keen @ middle-left area; walking alongside in upbeat supportive anticipation, keeping pace beside Bo; facing screen-right toward shared travel and Bo.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nCamera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.\nBo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.\nThe open path continues past them and stays readable behind Bo through center-right background depth.\nA fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.\nOverhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.\nAida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nHold open travel space frame-right and center-right for the path pressure and Bo's later stop at the fallen log.\nKeep frame-left upper-left branch veil readable and lightly open for Aida's later descent entrance.\nReserve a clear seated pocket around Bo's future stop point so the later trio can settle without a camera reset.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nModerately wide animated lens feel, roughly 32mm full-frame equivalent, camera at Bo's height on a gentle lateral travel matching their walk; close enough for body-read and satchel presence, wide enough to retain the path pocket, fallen log territory, and branch entry zone for Aida. Mild perspective separation is welcome but avoid distortion or heroic emphasis.\n\n[Light]\nWarm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nOpen on Bo and Keen already in motion at Bo's height; do not stage a fresh start or frontal presentation.\nKeep the path legible behind and beyond Bo from frame one so belonging-pressure is built into the composition.\nPreserve branch-veiled left-side entry geography for Aida; her later arrival must feel like joining the same pocket, not entering a new setup.\nMaintain enough foreground-to-midground clearance that the camera's travel can visibly die with Bo's abrupt stop without reframing the scene's logic.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No unapproved extra cast, props or body-mounted loads; include only the required referenced satchel with its approved owner. Preserve the locked Scene Look.",
+      "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+      "provider": "seedream",
+      "providerModelId": "dola-seedream-5-0-pro-260628",
+      "modelVersion": "dola-seedream-5-0-pro-260628",
+      "directionContract": {
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "lightingAndDepth": "Warm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.",
+       "geography": [
+        "Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.",
+        "Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.",
+        "The open path continues past them and stays readable behind Bo through center-right background depth.",
+        "A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.",
+        "Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.",
+        "Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing."
+       ],
+       "charactersInFrame": [
+        "Bo",
+        "Keen"
+       ],
+       "emptySections": []
+      },
+      "contractHash": "73a02907142a90ca728a7dad2c03833517f505a5b8e9950e0e9d83eac52fcdcc"
+     },
+     "geometryScreening": {
+      "status": "fail",
+      "reason": "one or more subjects drifted outside authored position or size tolerances",
+      "candidateSize": [
+       2752,
+       1536
+      ],
+      "positionTolerance": 0.12,
+      "heightScaleTolerance": [
+       0.75,
+       1.25
+      ],
+      "matches": [
+       {
+        "character": "Bo",
+        "passed": true,
+        "positionDelta": 0.0262,
+        "heightScaleAgainstLayout": 1.0601,
+        "expectedCenter": [
+         0.61,
+         0.62
+        ],
+        "actualCenter": [
+         0.6105,
+         0.6462
+        ],
+        "expectedHeightFraction": 0.4514,
+        "actualHeightFraction": 0.4785,
+        "detectedBoundsPx": [
+         1382,
+         625,
+         1978,
+         1360
+        ]
+       },
+       {
+        "character": "Keen",
+        "passed": false,
+        "positionDelta": 0.0174,
+        "heightScaleAgainstLayout": 0.6918,
+        "expectedCenter": [
+         0.36,
+         0.5716
+        ],
+        "actualCenter": [
+         0.351,
+         0.5566
+        ],
+        "expectedHeightFraction": 0.8168,
+        "actualHeightFraction": 0.5651,
+        "detectedBoundsPx": [
+         673,
+         421,
+         1259,
+         1289
+        ]
+       }
+      ],
+      "detectedComponentCount": 2,
+      "method": "local-u2net-foreground-geometry-v1",
+      "zeroSpend": true,
+      "providerCalled": false
+     },
+     "conformanceScreening": {
+      "status": "fail",
+      "reason": "Two subjects are present and both are recognizable, but the opening frame misses the authored geography and contains a forbidden prop on Bo. Keen is placed left of Bo rather than following the contract, and Bo’s satchel is visible despite the no-body-mounted-bag constraint. Relative size is broadly acceptable.",
+      "checkedAt": "2026-09-01T16:22:40",
+      "screenVersion": 2,
+      "validatorModel": "gpt-5.4-mini",
+      "mediaProviderCalled": false,
+      "referenceHashes": {
+       "CB_Keen.jpeg": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+       "CB_Bo.png": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+       "CB_Bo_satchel.png": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
+       "Ep2_S4_plate_candidate_ff9d9499.png": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+      },
+      "candidateSha256": "9c65f4df56ba342488ebabe31b5f93bf4a8b18dd29fecbca41575778a0a9b89f",
+      "review": {
+       "verdict": "revise",
+       "expectedCharacters": [
+        "Bo",
+        "Keen"
+       ],
+       "detectedCharacters": [
+        "Keen",
+        "Bo"
+       ],
+       "expectedSubjectCount": 2,
+       "subjectCount": 2,
+       "summary": "Two subjects are present and both are recognizable, but the opening frame misses the authored geography and contains a forbidden prop on Bo. Keen is placed left of Bo rather than following the contract, and Bo’s satchel is visible despite the no-body-mounted-bag constraint. Relative size is broadly acceptable.",
+       "identityAndDistinguishability": {
+        "score": 2,
+        "visibleEvidence": "Keen visibly matches the blue bear reference with pale crown tuft and gold wrist cuffs; Bo visibly matches the orange squirrel reference with cream muzzle, tall ears, and very large curled tail. No third character or obvious identity swap is present.",
+        "correction": "Keep both character identities unchanged."
+       },
+       "relativeScaleAndGeography": {
+        "score": 1,
+        "visibleEvidence": "Both characters appear in a similar foreground plane, with Keen standing to the left of Bo instead of Keen being slightly farther back and left of Bo. The intended screen-right travel arrangement and Bo-centered geography are not followed.",
+        "correction": "Reposition to the authored layout: Bo at center-right in the foreground, Keen left of Bo and slightly behind him."
+       },
+       "anatomyAndSilhouette": {
+        "score": 2,
+        "visibleEvidence": "Bo’s tail is large and fluffy, ears are pointed, and body proportions read as squirrel-like rather than bear-like. Keen’s silhouette is readable with bear anatomy intact; no malformed limbs are evident.",
+        "correction": "Preserve the current character anatomies and silhouettes."
+       },
+       "actionReadyComposition": {
+        "score": 1,
+        "visibleEvidence": "The frame is a readable story setup, but the characters are not aligned to the requested walking-anticipation composition along the path, and Bo’s satchel is prominent rather than excluded.",
+        "correction": "Stage both characters in a side-by-side walking-anticipation pose oriented screen-right, with Keen slightly behind Bo and Bo’s satchel removed from view."
+       },
+       "forbiddenContent": {
+        "score": 0,
+        "visibleEvidence": "Bo is carrying a visible satchel, which is forbidden by the contract. No text or watermark is visible.",
+        "correction": "Remove Bo’s satchel entirely; ensure no body-mounted bag or dangling load appears."
+       },
+       "recommendedCorrection": "Recompose the keyframe with Bo leading at center-right and Keen slightly left/back on the same path, keep both identities as-is, and remove Bo’s satchel so no body-mounted bag is visible."
+      }
+     },
+     "packageRevision": 3,
+     "contentHash": "9c65f4df56ba342488ebabe31b5f93bf4a8b18dd29fecbca41575778a0a9b89f"
+    }
+   ],
+   "keyframeCandidate": {
+    "candidateId": "A",
+    "label": "A - Seedream 5 Pro",
+    "provider": "byteplus",
+    "model": "dola-seedream-5-0-pro-260628",
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
+    "generatedAt": "2026-09-01T16:22:07",
+    "source": "generated",
+    "inputSignature": {
+     "cardHash": "03851c6a9c87e698788385caa5c9df9eb549bb2121a595121088be27d24a918d",
+     "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+     "referenceHashes": {
+      "CB_Keen.jpeg": "b02f4c314f09a8ae5cc505aff970d24a",
+      "CB_Bo.png": "68076f0b3779ee745be0ac0473db13d8",
+      "CB_Bo_satchel.png": "977d88cb8e75812f5d89a399a31adb82",
+      "Ep2_S4_plate_candidate_ff9d9499.png": "f97b4176595fce9356cf30f3ddaa9489"
+     },
+     "briefHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+     "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+     "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045"
+    },
+    "promptContract": {
+     "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nWe are already inside Bo's moving coping game at his eye level, sharing a playful side-by-side rhythm that still leaves the path ahead present as pressure.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=prop:satchel; @图4=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the exact satchel prop authority; inherit design, material, construction and scale only; ignore its background and labels.\n- @图4 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ lower-right area; walking anticipation with body braced for the next counted tail-poof, satchel carried and readable; facing screen-right along the path with slight inward awareness toward Keen.\n- Keen @ middle-left area; walking alongside in upbeat supportive anticipation, keeping pace beside Bo; facing screen-right toward shared travel and Bo.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nCamera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.\nBo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.\nThe open path continues past them and stays readable behind Bo through center-right background depth.\nA fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.\nOverhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.\nAida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nHold open travel space frame-right and center-right for the path pressure and Bo's later stop at the fallen log.\nKeep frame-left upper-left branch veil readable and lightly open for Aida's later descent entrance.\nReserve a clear seated pocket around Bo's future stop point so the later trio can settle without a camera reset.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nModerately wide animated lens feel, roughly 32mm full-frame equivalent, camera at Bo's height on a gentle lateral travel matching their walk; close enough for body-read and satchel presence, wide enough to retain the path pocket, fallen log territory, and branch entry zone for Aida. Mild perspective separation is welcome but avoid distortion or heroic emphasis.\n\n[Light]\nWarm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nOpen on Bo and Keen already in motion at Bo's height; do not stage a fresh start or frontal presentation.\nKeep the path legible behind and beyond Bo from frame one so belonging-pressure is built into the composition.\nPreserve branch-veiled left-side entry geography for Aida; her later arrival must feel like joining the same pocket, not entering a new setup.\nMaintain enough foreground-to-midground clearance that the camera's travel can visibly die with Bo's abrupt stop without reframing the scene's logic.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No unapproved extra cast, props or body-mounted loads; include only the required referenced satchel with its approved owner. Preserve the locked Scene Look.",
+     "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+     "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+     "provider": "seedream",
+     "providerModelId": "dola-seedream-5-0-pro-260628",
+     "modelVersion": "dola-seedream-5-0-pro-260628",
+     "directionContract": {
+      "canonicalStyleVersion": "v1.0.0",
+      "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+      "lightingAndDepth": "Warm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.",
+      "geography": [
+       "Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.",
+       "Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.",
+       "The open path continues past them and stays readable behind Bo through center-right background depth.",
+       "A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.",
+       "Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.",
+       "Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing."
+      ],
+      "charactersInFrame": [
+       "Bo",
+       "Keen"
+      ],
+      "emptySections": []
+     },
+     "contractHash": "73a02907142a90ca728a7dad2c03833517f505a5b8e9950e0e9d83eac52fcdcc"
+    },
+    "geometryScreening": {
+     "status": "fail",
+     "reason": "one or more subjects drifted outside authored position or size tolerances",
+     "candidateSize": [
+      2816,
+      1584
+     ],
+     "positionTolerance": 0.12,
+     "heightScaleTolerance": [
+      0.75,
+      1.25
+     ],
+     "matches": [
+      {
+       "character": "Bo",
+       "passed": false,
+       "positionDelta": 0.0524,
+       "heightScaleAgainstLayout": 1.449,
+       "expectedCenter": [
+        0.61,
+        0.62
+       ],
+       "actualCenter": [
+        0.5922,
+        0.5707
+       ],
+       "expectedHeightFraction": 0.4514,
+       "actualHeightFraction": 0.654,
+       "detectedBoundsPx": [
+        1333,
+        386,
+        2002,
+        1422
+       ]
+      },
+      {
+       "character": "Keen",
+       "passed": false,
+       "positionDelta": 0.047,
+       "heightScaleAgainstLayout": 0.7188,
+       "expectedCenter": [
+        0.36,
+        0.5716
+       ],
+       "actualCenter": [
+        0.3343,
+        0.5322
+       ],
+       "expectedHeightFraction": 0.8168,
+       "actualHeightFraction": 0.5871,
+       "detectedBoundsPx": [
+        578,
+        378,
+        1305,
+        1308
+       ]
+      }
+     ],
+     "detectedComponentCount": 2,
+     "method": "local-u2net-foreground-geometry-v1",
+     "zeroSpend": true,
+     "providerCalled": false
+    },
+    "conformanceScreening": {
+     "status": "fail",
+     "reason": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
+     "checkedAt": "2026-09-01T16:22:07",
+     "screenVersion": 2,
+     "validatorModel": "gpt-5.4-mini",
+     "mediaProviderCalled": false,
+     "referenceHashes": {
+      "CB_Keen.jpeg": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+      "CB_Bo.png": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+      "CB_Bo_satchel.png": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
+      "Ep2_S4_plate_candidate_ff9d9499.png": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+     },
+     "candidateSha256": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
+     "review": {
+      "verdict": "block",
+      "expectedCharacters": [
+       "Bo",
+       "Keen"
+      ],
+      "detectedCharacters": [
+       "Keen",
+       "Bo"
+      ],
+      "expectedSubjectCount": 2,
+      "subjectCount": 2,
+      "summary": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
+      "identityAndDistinguishability": {
+       "score": 2,
+       "visibleEvidence": "Both named characters are visible and distinct: Keen is the blue bear with pale crown tuft and gold cuffs; Bo is the orange squirrel with cream muzzle, tall tufted ears, and a large curled tail.",
+       "correction": "Keep both characters clearly separated and preserve each character’s canonical colors, tufting, cuffs, tail, and facial structure without borrowing features."
+      },
+      "relativeScaleAndGeography": {
+       "score": 1,
+       "visibleEvidence": "The two characters are in the same forest environment, but Bo dominates the foreground more than the specified 0.42 frame placement and Keen sits farther left/back than the authored screen geography; the planned side-by-side staging is only approximate.",
+       "correction": "Reposition Bo to screen-right at the authored mid-foreground size and place Keen to screen-left slightly behind him, maintaining the intended side-by-side travel spacing."
+      },
+      "anatomyAndSilhouette": {
+       "score": 2,
+       "visibleEvidence": "Both figures have readable, complete anatomy and silhouettes: Keen’s bear form is intact, and Bo’s squirrel form shows the large fluffy curled tail, upright ears, and small body proportions.",
+       "correction": "Preserve the full tail volume, ear points, and clean limb shapes; avoid any malformed paws or cropped anatomy."
+      },
+      "actionReadyComposition": {
+       "score": 1,
+       "visibleEvidence": "The image is action-ready in a forest path setting, but Bo’s pose and satchel read more like a generic traveling character than the specified walking anticipation with readable satchel support; Keen’s supportive walk is present but not strongly matched in staging.",
+       "correction": "Adjust both characters into a clearer walking-anticipation pose along the path, with Bo’s satchel reading only if the contract permits, and Keen aligned in upbeat supportive pace beside him."
+      },
+      "forbiddenContent": {
+       "score": 0,
+       "visibleEvidence": "Bo has a visible brown satchel/body-mounted bag crossing the torso, which is explicitly forbidden as a generic backpack or satchel.",
+       "correction": "Remove Bo’s satchel entirely and ensure no body-mounted bags, dangling loads, text, logos, or watermarks appear."
+      },
+      "recommendedCorrection": "Remove Bo’s satchel, then shift Bo to the authored screen-right foreground and Keen to the authored screen-left slightly rear position, keeping both in a clear walking-anticipation side-by-side forest path composition with no extra props."
+     }
+    },
+    "packageRevision": 3,
+    "contentHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec"
+   },
+   "selectedKeyframeCandidateId": null,
+   "keyframeABTest": {
+    "createdAt": "2026-09-01T16:22:40",
+    "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+    "referenceHashes": [
+     "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+     "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+     "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
+     "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+    ],
+    "candidateIds": [
+     "A",
+     "B"
+    ],
+    "selectionRequired": true
+   },
+   "voicePlacementFailure": null,
+   "durationRetimes": [
+    {
+     "at": "2026-09-01T16:37:47",
+     "fromSec": 27.0,
+     "toSec": 30.0,
+     "reason": "Preserve the approved final dialogue take without clipping or time compression, using the available landing room.",
+     "source": "ElevenLabs-v3-natural-performance",
+     "providerCalled": false,
+     "dialogueStartChanges": []
+    }
+   ],
+   "voPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_48fc70b3.wav",
+   "voGeneratedFrom": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:9ceeadde957ea106460445f17e189fc81fa52b67a37205ad6faf1dff388944bb",
+     "sourceEventId": "script-event:sha256:ad56dac171ba4c465968a7ccaf9d0b0c41057141c93d9683fd680c36c9454795",
+     "speaker": "Keen",
+     "text": "[excited] 3,2,1 …",
+     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "None.",
+     "compiledHash": "deded96a579a5c3de10784947b797939db32585e2a58bcc0cf0dd707279fc3a0",
+     "recipeId": "S4.SH1-L1-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "TCRj5m2u9xhZHJ8h9pMv"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d08afaf5bd292870a999f905198f72d39a0bd5341883cf90f65a4d54613c264a",
+     "sourceEventId": "script-event:sha256:582c991d6def71bfd6340805e3d0922f355e139b0d6d16fb8cf7efe29654d7a3",
+     "speaker": "Bo",
+     "text": "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "3,2,1 …",
+     "compiledHash": "1cd99f2994a0842c31677ae56f372675da7ce4a7b68b0592b47ed168aa503182",
+     "recipeId": "S4.SH1-L2-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:0c94860e8f33fe7e3313d296ad53903a9894591e60bcb8edc3ca455d6501db0b",
+     "sourceEventId": "script-event:sha256:96e953e5d905dec76cc26c93a3d8558d16e7208402083c01b0b88a4ffda462f1",
+     "speaker": "Bo",
+     "text": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo",
+     "compiledHash": "f38e88093e5bed3c9a8c3958cb1b4b6c0b212fb8d345dd74c17d0ebdba0f8643",
+     "recipeId": "S4.SH1-L3-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:aecef6799f577e77bf8713cdf2fcce3290621ce6e04682613e8bdef1f63fb0c6",
+     "sourceEventId": "script-event:sha256:66978bf46ac8880b38bb10319b1565fd282aae3e6f151e7868ffef4db9d1a817",
+     "speaker": "Bo",
+     "text": "[softly] They all know each other. [sighs] Beat. But I don’t know them, and they don't know me.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "I’m STILL worried about going to the to the Learning Circle.",
+     "compiledHash": "aef2a9d3d1df1d2b422088346e8bfacbcd5484a225e531c55359dd878a660a4d",
+     "recipeId": "S4.SH1-L4-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:7f8c98141447cdf11f01cb53190ce512215b51fbd7d1fd8bc4c2e2ad3ee47897",
+     "sourceEventId": "script-event:sha256:8199fdf7e9061fd2151d45cbdb5712a066402f3442f3a70321d369bcd76045aa",
+     "speaker": "Aida",
+     "text": "[deadpan] Tricky trees.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "They all know each other. Beat. But I don’t know them, and they don't know me.",
+     "compiledHash": "450b86f149c5aa8f21f57c560a7ab5fe52522a8d896c52d8902e7199f7a2fa97",
+     "recipeId": "S4.SH1-L5-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:be902fee96a290543bd5a5a75ebf0fb8b3cc3928d13d15baeb378a3e5822f132",
+     "sourceEventId": "script-event:sha256:70d13052d2839feb6b2ffa083eee145f5fd9df473771bfe1893683c952c397f8",
+     "speaker": "Keen",
+     "text": "[quietly] Bo, this is Aida.",
+     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Tricky trees.",
+     "compiledHash": "7d59d314cfa1e6d5011401afc57f31c8ba9bf1baf40caa9b1b47f2798144e5f9",
+     "recipeId": "S4.SH1-L6-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "TCRj5m2u9xhZHJ8h9pMv"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:8b2c9e81fd63758b13c0dce04478726f7e2d55fe761cbebdd0f9ae2e02637636",
+     "sourceEventId": "script-event:sha256:20c234a44fedda69fe881fde0d48b95987eaf765fce753af7d136c566a337c8f",
+     "speaker": "Aida",
+     "text": "[quietly] You packed your bag.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "Bo, this is Aida.",
+     "compiledHash": "7c94611ebed0a2b2befe4a7029d470b7c69d5b4c162e6cf907dbc098d9a70e7f",
+     "recipeId": "S4.SH1-L7-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:9611831565e8bfd90992cf8e741fb46942b7fd4a640bf2495a02db950d7d0fd2",
+     "sourceEventId": "script-event:sha256:3b4393c29d77c725219e43867b2190736205313802955ae8ff0a47393a043707",
+     "speaker": "Bo",
+     "text": "[quietly] Four times.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "You packed your bag.",
+     "compiledHash": "16afeccc28c2d3775ff2844692ba9309208de4b11a1ecd07e6b6b014a6839f1a",
+     "recipeId": "S4.SH1-L8-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:be1de01acc2e659b826802a3dc1e4681beb0ba20e1c17fad24523d46aab1798e",
+     "sourceEventId": "script-event:sha256:a0f0ca5baffee0f96c62b15650005baa6dca1484d5efae0be14d97d7cb021a64",
+     "speaker": "Aida",
+     "text": "[calm] I would have done five.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "Four times.",
+     "compiledHash": "8c47aee4da8252fab568a553cca385b22c88d226cd01e6eaee6811e758f35bd5",
+     "recipeId": "S4.SH1-L9-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:553ba6e9faf58e1b69ddfd808fbd85ee28c695e21129c6a8b4bbf6b00e7fc264",
+     "sourceEventId": "script-event:sha256:681e4e40424612444c8cc43115dd3f4477563e47099844acf2305b53a6ab668c",
+     "speaker": "Bo",
+     "text": "[quietly] You get scared too?",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "I would have done five.",
+     "compiledHash": "47d2cbb5aeff27c02585a009e3384e494fea366487531e0b841421d2c7b08dca",
+     "recipeId": "S4.SH1-L10-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c5c1db3eb21229a7269bd9c6ef7f5dbc93d27deb6b865800d521f4f0b7b282b7",
+     "sourceEventId": "script-event:sha256:56e30c48f449c7a124e0bf7af50719b53ab978925a8a16c41f8e9a4951cdf9b1",
+     "speaker": "Aida",
+     "text": "[calm] Every single time.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "You get scared too?",
+     "compiledHash": "02d929e5bfe5444a6e060654d7228bf7139288d8a8411f5119954661bf210c1e",
+     "recipeId": "S4.SH1-L11-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:54a906703699a3f26205ab3f90d22e54ad43c8d4748eefdaf5fcb4da63bcaee7",
+     "sourceEventId": "script-event:sha256:448b97275a411f283e3c4dcf5b8d1d4e2c061f662e8178b6b40caa6d74863445",
+     "speaker": "Bo",
+     "text": "[softly] But you still go?",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Every single time.",
+     "compiledHash": "1421718468ee04acb980303b9207ad7f4ba7b16b352be54efb2f1a7ecb3b941e",
+     "recipeId": "S4.SH1-L12-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:7e9be7767046bc95527e622885d012054b3e1a0580ce12e792e2480fd72eacaf",
+     "sourceEventId": "script-event:sha256:f097b5fde07d34a52eac12d9c56410a111c99db91456a48bd45b3828106b9b5a",
+     "speaker": "Aida",
+     "text": "[calm] Every single time. [exhales] BEAT.",
+     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.45,
+      "similarity_boost": 0.9,
+      "style": 0.15
+     },
+     "previousText": "But you still go?",
+     "compiledHash": "57bac3e046c8236802804433d427abcdc1ba4e5d88ccefe5c9418dfe611b7b6b",
+     "recipeId": "S4.SH1-L13-T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    }
+   ],
+   "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8de25da7.mp3",
+   "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8de25da7.mp3.dialogue.json",
+   "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_48fc70b3.wav.timing.json",
+   "voInputSignature": {
+    "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+    "dialogueHash": "05db32e0ddc91312fdfb02d3a9355e2982a5418cdc0d9228ac336e4a009d68c8",
+    "performanceHash": "8e084946f2b4a0d7c0ce0c483583c555c5d4c9a490eb8f4a499739288d526318",
+    "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+    "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+    "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+    "voiceCompilerVersion": "voice-director-v1",
+    "voiceIds": [
+     "TCRj5m2u9xhZHJ8h9pMv",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "SHuZ9GyczU4QEDzU4QU4",
+     "TCRj5m2u9xhZHJ8h9pMv",
+     "SHuZ9GyczU4QEDzU4QU4",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "SHuZ9GyczU4QEDzU4QU4",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "SHuZ9GyczU4QEDzU4QU4",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "SHuZ9GyczU4QEDzU4QU4"
+    ]
+   },
+   "voPackageRevision": 3
   }
  ],
  "validation": {

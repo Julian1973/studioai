@@ -190,8 +190,31 @@ def test_internal_overlap_cannot_be_hidden_by_extending_shot(tmp_path):
 
 def test_natural_master_duration_uses_available_thirty_second_slate():
     assert cb_audio_timing.natural_master_duration(29.6) == 30
+    assert cb_audio_timing.natural_master_duration(29.66) == 30
     with pytest.raises(cb_audio_timing.AudioTimingError, match="30s maximum"):
-        cb_audio_timing.natural_master_duration(29.66)
+        cb_audio_timing.natural_master_duration(30.01)
+
+
+def test_final_line_tolerance_never_clips_audio_past_the_master(tmp_path):
+    raw = tmp_path / "raw.mp3"
+    _silent_audio(raw, 3.84)
+    timing = cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({
+        "audioSha256": cb_audio_timing.file_sha256(raw),
+        "voiceSegments": [{
+            "dialogueInputIndex": 0, "startTimeSec": 0, "endTimeSec": 3.84,
+        }],
+    }), encoding="utf-8")
+
+    with pytest.raises(cb_audio_timing.AudioTimingError, match="only 3.10s remains"):
+        cb_audio_timing.render_timed_dialogue_master(
+            raw, timing, [{"startSec": 25.9, "endSec": 26.6}], 29,
+            tmp_path / "clipped.wav")
+
+    result = cb_audio_timing.render_timed_dialogue_master(
+        raw, timing, [{"startSec": 25.9, "endSec": 26.6}], 30,
+        tmp_path / "complete.wav")
+    assert result["placements"][0]["targetEndSec"] == pytest.approx(29.74, abs=.02)
 
 
 def test_one_dialogue_segment_can_be_replaced_without_changing_master_duration(tmp_path):

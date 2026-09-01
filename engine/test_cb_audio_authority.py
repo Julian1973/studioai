@@ -83,6 +83,42 @@ def test_standalone_laughter_remains_seedance_sfx():
     assert routed["seedanceSfxCues"][0]["kinds"] == ["laughter"]
 
 
+def test_trailing_third_person_giggle_routes_out_of_spoken_dialogue():
+    source = line("3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo giggles.")
+    source["speaker"] = "Bo"
+
+    routed = A.route_lines([source])
+
+    assert routed["spokenDialogue"][0]["exactText"] == (
+        "3,2,1… POOF! The tail does ‘The Thing’ again and again.")
+    assert routed["seedanceSfxCues"][0]["kinds"] == ["laughter"]
+    assert routed["seedanceSfxCues"][0]["authoredCue"] == "Bo giggles."
+
+
+def test_existing_voice_direction_is_projected_to_spoken_lane_without_laugh_tag():
+    source = line("3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo giggles.")
+    source["speaker"] = "Bo"
+    direction = {"lines": [{
+        "dialogueOccurrenceId": source["dialogueOccurrenceId"],
+        "exactDialogue": source["exactText"],
+        "performedText": (
+            "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again. "
+            "[laughs] Bo"),
+        "takeRecipes": [{
+            "performedText": (
+                "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again. "
+                "[laughs] Bo")
+        }],
+    }]}
+
+    projected, spoken = A.route_voice_direction(direction, [source])
+
+    expected = "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again."
+    assert spoken[0]["exactText"] == expected.removeprefix("[playfully] ")
+    assert projected["lines"][0]["performedText"] == expected
+    assert projected["lines"][0]["takeRecipes"][0]["performedText"] == expected
+
+
 def test_sustained_meditation_tone_routes_only_to_seedance_sfx():
     source = line("oooohhhhhhhhmmmmmmmmmmmm", start=6.0, end=10.5)
     source["speaker"] = "Zenny"

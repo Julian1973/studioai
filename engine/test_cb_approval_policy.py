@@ -193,8 +193,8 @@ def test_voice_direction_freshness_excludes_seedance_only_sfx(tmp_path, monkeypa
         render.cb_departments.VoiceDirection, "model_validate",
         lambda output: output)
     monkeypatch.setattr(
-        render.cb_audio_authority, "spoken_dialogue_lines",
-        lambda current_shot: [spoken])
+        render.cb_audio_authority, "route_voice_direction",
+        lambda direction, original_lines: (direction, [spoken]))
     monkeypatch.setattr(
         render.cb_departments, "validate_voice_direction",
         lambda direction, lines: checked.setdefault("lines", lines))

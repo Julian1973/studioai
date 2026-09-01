@@ -11459,6 +11459,40 @@
       "source": "cb-seed/assets",
       "status": "approved",
       "url": "/cb-seed/assets/CB_Crystal_Woods_Willow_Arch_Path_plate.png"
+    },
+    {
+      "assetId": "a5352bc0a0fca1e0ebd2bbda",
+      "bindingKey": "Ep2|4|S4.SH1|keyframe_candidate|keyframe_candidate",
+      "displayType": "image",
+      "episode": "Ep2",
+      "kind": "keyframe_candidate",
+      "label": "S4.SH1 keyframe_candidate",
+      "metadata": {},
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
+      "registeredAt": "2026-09-01T15:23:08Z",
+      "role": "keyframe_candidate",
+      "scene": "4",
+      "shotId": "S4.SH1",
+      "source": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_scene4_production_package.json",
+      "status": "candidate",
+      "url": "/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png"
+    },
+    {
+      "assetId": "243a2b4de4e7ba2a6524f3af",
+      "bindingKey": "Ep2|4|S4.SH1|voice|voice_track",
+      "displayType": "audio",
+      "episode": "Ep2",
+      "kind": "voice",
+      "label": "S4.SH1 voice_track",
+      "metadata": {},
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_48fc70b3.wav",
+      "registeredAt": "2026-09-01T15:38:14Z",
+      "role": "voice_track",
+      "scene": "4",
+      "shotId": "S4.SH1",
+      "source": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_scene4_production_package.json",
+      "status": "approved",
+      "url": "/engine/media/shots/Ep2_S4.SH1_vo_candidate_48fc70b3.wav"
     }
   ],
   "deletedBindingKeys": [

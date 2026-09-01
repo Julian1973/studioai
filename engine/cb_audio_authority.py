@@ -6,12 +6,26 @@ _TAG = re.compile(r"\[(snor(?:e|es|ing)?|snort(?:s|ing)?|sneez(?:e|es|ing)|laugh
 _PERFORMANCE_TAG = re.compile(r"\[[^\]]+\]")
 _SCRIPT_NUMBER = re.compile(r"^\s*\d+\s*\t")
 _TRAILING_STAGE_NOTE = re.compile(r"\s*\([^)]*\)\s*$")
+_NONVERBAL_ACTION = r"laugh(?:s|ed|ing)?|giggl(?:e|es|ed|ing)|snort(?:s|ed|ing)?|sneez(?:e|es|ed|ing)|snor(?:e|es|ed|ing)"
 _SOUND = re.compile(
     r"\b(?:z{3,}|a+h+c+h+o+o+|achoo+|ha(?:\s*ha)+|snor(?:e|es|ing)|"
     r"snort(?:s|ing)?|sneez(?:e|es|ing)|laugh(?:s|ing)?|giggl(?:e|es|ing)|"
     r"o{2,}h{2,}m{2,})\b[!.…]*",
     re.I,
 )
+
+
+def _trailing_nonverbal_action(text, speaker):
+    """Split a trailing third-person action accidentally stored as dialogue."""
+    actor = str(speaker or "").strip()
+    if not actor:
+        return text, None
+    match = re.search(
+        rf"(?:^|(?<=[.!?…]))\s*({re.escape(actor)}\s+(?:{_NONVERBAL_ACTION})[.!?…]*)\s*$",
+        text, re.I)
+    if not match:
+        return text, None
+    return text[:match.start(1)].strip(), match.group(1).strip()
 
 
 def _kind(value):
@@ -36,11 +50,15 @@ def route_line(line):
     # route to Seedance below.
     provider_text = _SCRIPT_NUMBER.sub("", original).strip()
     provider_text = _TRAILING_STAGE_NOTE.sub("", provider_text).strip()
+    provider_text, trailing_action = _trailing_nonverbal_action(
+        provider_text, line.get("speaker"))
     tag_matches = list(_TAG.finditer(provider_text))
     sound_matches = list(_SOUND.finditer(provider_text))
     matches = tag_matches + sound_matches
-    kinds = list(dict.fromkeys(_kind(match.group(0)) for match in matches))
-    if not matches:
+    kinds = list(dict.fromkeys(
+        [_kind(trailing_action)] if trailing_action else []
+        + [_kind(match.group(0)) for match in matches]))
+    if not matches and not trailing_action:
         return {**line, "scriptExactText": original, "exactText": provider_text}, None
     # A leading authored vocal event followed by words is one ordered performance,
     # not two independently timed assets. Keep it verbatim in @Audio1 so Seedance
@@ -72,7 +90,7 @@ def route_line(line):
         spoken = ""
     cue = None
     if kinds:
-        authored_cue = original.strip()
+        authored_cue = trailing_action or original.strip()
         meditation_note = (
             f' Perform Zenny\'s meditation mantra chant of "Ohhmmmmmm" using the exact '
             f'authored phonetic cue "{authored_cue}" as one continuous, warm, unstrained '
@@ -146,12 +164,29 @@ def route_voice_direction(direction, original_lines):
             continue
         record = {**item, "exactDialogue": locked["exactText"]}
         performed, _ = route_line({"exactText": item.get("performedText") or locked["exactText"]})
-        record["performedText"] = (performed or {}).get("exactText") or locked["exactText"]
+        record["performedText"] = _project_performed_text(
+            (performed or {}).get("exactText"), locked["exactText"])
         recipes = []
         for recipe in item.get("takeRecipes") or []:
             recipe_text, _ = route_line({"exactText": recipe.get("performedText") or record["performedText"]})
-            recipes.append({**recipe, "performedText": (recipe_text or {}).get("exactText") or record["performedText"]})
+            recipes.append({**recipe, "performedText": _project_performed_text(
+                (recipe_text or {}).get("exactText"), locked["exactText"])})
         if recipes:
             record["takeRecipes"] = recipes
         projected.append(record)
     return {**direction, "lines": projected}, spoken
+
+
+def _project_performed_text(performed_text, locked_text):
+    """Preserve acting tags only when provider words still match the spoken lane."""
+    candidate = str(performed_text or "").strip()
+    locked = str(locked_text or "").strip()
+    candidate_words = re.findall(r"[A-Za-z0-9']+", _PERFORMANCE_TAG.sub(" ", candidate))
+    locked_words = re.findall(r"[A-Za-z0-9']+", _PERFORMANCE_TAG.sub(" ", locked))
+    if [word.casefold() for word in candidate_words] == [word.casefold() for word in locked_words]:
+        return candidate or locked
+    safe_tags = [
+        match.group(0) for match in _PERFORMANCE_TAG.finditer(candidate)
+        if not _TAG.fullmatch(match.group(0))
+    ]
+    return (("".join(safe_tags) + " ") if safe_tags else "") + locked

@@ -782,6 +782,11 @@ def test_keyframe_references_remain_open_during_live_polling():
     assert 'return `<details class="techdetails" open><summary>References &amp; checks' in APP
 
 
+def test_completed_job_dismissal_persists_by_job_id():
+    assert 'localStorage.setItem("cb_dismissed_job:"+id,"1")' in APP
+    assert 'localStorage.getItem("cb_dismissed_job:"+lastJobId)' in APP
+
+
 def test_keyframe_confirmation_formats_multi_provider_model_ids():
     assert 'Object.entries(build.providerModelId).map(([key,value])=>key+" · "+value).join(" + ")' in APP
 

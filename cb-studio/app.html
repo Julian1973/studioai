@@ -3515,7 +3515,10 @@ function renderJobBanner(){
   // completely blank with no trace of what happened, even for a fast, informative,
   // by-design refusal (e.g. an unconfirmed billing profile). SH_LAST_JOB (set in
   // shPollStart) carries that outcome here until dismissed or superseded by the next fire.
-  if(SH_LAST_JOB&&String(SH_LAST_JOB.scene)==String(SH_SC)){
+  const lastJobId=SH_LAST_JOB&&String(SH_LAST_JOB.jobId||SH_LAST_JOB.id||"");
+  let lastJobDismissed=false;
+  try{lastJobDismissed=!!(lastJobId&&localStorage.getItem("cb_dismissed_job:"+lastJobId));}catch(e){}
+  if(SH_LAST_JOB&&String(SH_LAST_JOB.scene)==String(SH_SC)&&!lastJobDismissed){
     el.innerHTML=shJobHTML(SH_LAST_JOB)+
       `<button class="btn ghost" style="margin:-6px 0 10px;padding:4px 12px;font-size:12px" onclick="shDismissLastJob()">Dismiss</button>`;
     return;
@@ -6608,7 +6611,11 @@ function shPollStart(){
   SH_POLL=setInterval(_shPollTick,2500);
 }
 if(SH_JOB)setTimeout(()=>shPollStart(),0);
-function shDismissLastJob(){SH_LAST_JOB=null;renderJobBanner();}
+function shDismissLastJob(){
+  const id=SH_LAST_JOB&&String(SH_LAST_JOB.jobId||SH_LAST_JOB.id||"");
+  try{if(id)localStorage.setItem("cb_dismissed_job:"+id,"1");}catch(e){}
+  SH_LAST_JOB=null;renderJobBanner();
+}
 function shJobHTML(j){
   // Two refusals are EXPECTED, informative behaviour, never a malfunction: the no-token spend DISCLOSURE
   // (the designed step 1) and the unconfirmed-billing-profile hard block — both render amber, not red.

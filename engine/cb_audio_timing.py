@@ -141,11 +141,13 @@ def cascade_retime_for_natural_performance(raw_audio_path, timing_path, dialogue
 
 def natural_master_duration(required_duration_sec, maximum_duration_sec=30.0,
                             landing_room_sec=MIN_LANDING_ROOM_SEC):
-    """Choose a whole-second slate that preserves the take and landing room."""
+    """Choose a whole-second slate, preferring landing room without rejecting a fitting take."""
     required = float(required_duration_sec)
     maximum = float(maximum_duration_sec)
     target = float(math.ceil(required + float(landing_room_sec)))
     if target > maximum + 0.001:
+        if required <= maximum + 0.001:
+            return maximum
         raise AudioTimingError(
             f"natural performance requires {required:.2f}s plus "
             f"{landing_room_sec:.2f}s landing room in a {maximum:g}s maximum")
@@ -386,7 +388,8 @@ def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
             raise AudioTimingError(
                 f"dialogue line {index + 1}'s start anchor is not before the next line"
             )
-        if source_duration > available_duration + WINDOW_TOLERANCE_SEC:
+        tolerance = WINDOW_TOLERANCE_SEC if position + 1 < len(authored) else 0.0
+        if source_duration > available_duration + tolerance:
             raise AudioTimingError(
                 f"dialogue line {index + 1}'s approved take is {source_duration:.2f}s but only "
                 f"{available_duration:.2f}s remains before the next approved start; reject or "

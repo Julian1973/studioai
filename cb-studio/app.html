@@ -1840,6 +1840,8 @@ function renderEpisodes(){
   const cards=EPISODES.map(e=>{
     const legacyReady=e.package||e.shotPackage;
     const ready=e.packageCurrent===undefined?legacyReady:!!e.packageCurrent;
+    const hasCarried=!!e.stalePackage;
+    const navigable=ready||hasCarried;
     const awaiting=e.storyIntakeState==="awaiting-review", isB=e.unit==="beat";
     const ct=ready?(e.beatCount||e.shotCount):(awaiting?e.proposalBeatCount:null);
     const st=ready?(isB?["--ok","--okbg","Beats ready"]:["--ok","--okbg","Shot list ready"])
@@ -1847,7 +1849,7 @@ function renderEpisodes(){
     const summary=awaiting
       ?`Proposed: ${_esc(e.proposedTitle||"Story & Direction")} — ${_esc(e.proposedLogline||"review the episode direction and beats")}`
       :_esc(e.logline||"(script uploaded — not yet broken into beats)");
-    const actionLabel=ready?"Open scenes":awaiting?"Review Story & Direction":e.script?"Run Story & Direction":"Add script";
+    const actionLabel=navigable?"Open scenes":awaiting?"Review Story & Direction":e.script?"Run Story & Direction":"Add script";
     const episodeArt=assetSrc(e.coverImage||(CURRENT_PROJECT&&CURRENT_PROJECT.episodeCoverImage)||(CURRENT_PROJECT&&CURRENT_PROJECT.coverImage));
     return `<article class="epcard">
       <div class="epthumb">${episodeArt?`<img src="${_attr(episodeArt)}" alt="" loading="lazy"/>`:''}<span class="epthumb-label">Episode ${String(e.number).padStart(2,'0')}</span></div>
@@ -1855,6 +1857,7 @@ function renderEpisodes(){
       <div class="t">${_esc(e.title||"(unnamed)")} <button type="button" class="iconbtn" onclick="renameEp(${e.number})" title="Rename episode" aria-label="Rename Episode ${e.number}">✎</button></div><div class="l">${summary}</div>
       <span class="stat" style="color:${v(st[0])};background:${v(st[1])}">${_esc(st[2])}${ct?" · "+ct+(ready&&!isB?" shots":" beats"):""}${awaiting&&e.proposalSceneCount?" · "+e.proposalSceneCount+" scenes":""}</span>
       <div class="epactions"><button type="button" class="btn" onclick="openEpisode(${e.number})">${_esc(actionLabel)}</button>
+        ${awaiting&&navigable?`<button type="button" class="btn ghost" onclick="openEpisode(${e.number},true).then(()=>openStoryIntakePanel())">Review Story &amp; Direction</button>`:""}
         ${e.script?`<button type="button" class="btn ghost" onclick="openEpisodeScript(${e.number})">Script</button>`:""}</div></div></article>`;
   }).join("");
   const byNewestEpisode=(items)=>[...(items||[])].sort((a,b)=>Number(b.number||0)-Number(a.number||0));
@@ -2724,7 +2727,8 @@ function storyReferenceCheckHTML(state,intake){
     const data=(state&&state.references)||(loading?{loading:true}:null);
     body=referenceManifestHTML(shotId,"keyframe",data)+referenceManifestHTML(shotId,"animation",data);
   }
-  const lineage=!!(intake&&intake.canonicalCurrent)?"Current approved Scene 1 package · read only":"Carried Scene 1 package · read only · stale against the active script";
+  const lineCurrent=!!(state&&state.references&&state.references.lineage&&state.references.lineage.current);
+  const lineage=lineCurrent?"Current approved Scene 1 package · read only":"Carried Scene 1 package · read only";
   return `<section class="storyrefcheck" aria-label="Reference Check">
     <div class="storyrefhead"><div><div class="storyreftitle">Reference Check · ${_esc(shotId)}</div><div class="storyrefmeta">${lineage}</div></div>${selector}</div>
     ${body}
@@ -2769,6 +2773,11 @@ async function fetchStoryIntake(){
     SH_STORY_INTAKE=await r.json();
   }catch(e){SH_STORY_INTAKE={error:"Can't reach the studio server."};}
   finally{SH_STORY_INTAKE_LOADING=false;}
+}
+async function openStoryIntakePanel(){
+  BOARD_SCENES=[]; SCENE_ROSTER=null; SH_STORY_INTAKE=null; resetStoryReferenceCheck();
+  await fetchStoryIntake();
+  renderBoardBody();
 }
 function storyIntakeProgressHTML(job){
   if(!job)return "";
@@ -2967,7 +2976,7 @@ function renderBoardBody(){
     <button type="button" class="btn" onclick="startEpisodeProduction()">Retry unfinished scene directions</button>
   </div>`;
   const carriedBanner=(BOARD_SCENES||[]).some(s=>s.carried)
-    ?outcomePanelHTML({tone:"review",kicker:"Recovered production",title:"Earlier scene work is still here",body:"The active script needs Story & Direction refreshed, but existing scene packages remain available for review and next-step handoff.",actions:[{label:"Run Story & Direction",onclick:"storyIntakeRun()"},{label:"Script",onclick:"go('script')",kind:"secondary"}]})
+    ?outcomePanelHTML({tone:"review",kicker:"Recovered production",title:"Earlier scene work is still here",body:"The active script needs Story & Direction refreshed, but existing scene packages remain available for review and next-step handoff.",actions:[{label:"Review Story & Direction",onclick:"openStoryIntakePanel()"},{label:"Script",onclick:"go('script')",kind:"secondary"}]})
     :"";
   el.className="";
   el.innerHTML=carriedBanner+createButton+boardStoryboardProgressHTML()+triage+bar+(shown.length?`<div class="sceneboard">${shown.map(sceneCardHTML).join("")}</div>`

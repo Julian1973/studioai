@@ -196,8 +196,12 @@ def test_stale_story_direction_keeps_carried_scene_work_visible():
     assert "def carried_scene_roster(episode):" in INTAKE
     assert '"carriedScenes": carried_scene_roster(episode)' in INTAKE
     assert "j.carriedScenes||[]" in APP
+    assert "const hasCarried=!!e.stalePackage;" in APP
+    assert 'const actionLabel=navigable?"Open scenes"' in APP
     assert "Recovered production" in APP
     assert "Earlier scene work is still here" in APP
+    assert 'onclick:"openStoryIntakePanel()"' in APP
+    assert "stale against the active script" not in APP
 
 
 def test_explicit_hash_navigation_reloads_the_requested_scene():

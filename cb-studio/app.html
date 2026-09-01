@@ -1921,7 +1921,7 @@ async function saveEp(){
   if(DOC){body.docData=DOC.data; body.docName=DOC.name;}
   const r=await fetch(BASE+"/api/episode",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const j=await r.json();
-  if(j.ok){EPISODES=j.episodes;openEpisode(+num);}else{alert("Error: "+(j.error||"failed"));}
+  if(j.ok){EPISODES=j.episodes;if(typeof showToast==="function")showToast("Script saved — preparing every scene",true);openEpisode(+num);}else{alert("Error: "+(j.error||"failed"));}
 }
 
 async function renderScript(){
@@ -2031,7 +2031,7 @@ async function uploadScriptHere(){
   try{const r=await fetch(BASE+"/api/episode",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json();
     if(!j.ok){alert('Upload error: '+(j.error||'failed'));return;}
     window._scriptDoc=null;EPISODES=j.episodes||EPISODES;CUR=EPISODES.find(e=>e.number==CUR.number)||CUR;
-    if(typeof showToast=="function")showToast('✓ Script saved — ready for the Director',true);
+    if(typeof showToast=="function")showToast('Script saved — preparing every scene automatically',true);
     renderTop();renderNav();renderScript();
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
@@ -2083,6 +2083,7 @@ const PPHASES=[
   {id:"hear",name:"Hear",glyph:"♪",members:["voice"]},
   {id:"watch",name:"Watch",glyph:"►",members:["animation","continuity","final"]}
 ];
+const PRODUCER_PHASES=PPHASES.filter(phase=>phase.id!=="direction");
 const STATE_LABEL={ready:"Ready",generating:"Working",awaiting:"Ready for review",
                     approved:"Current",rejected:"Needs attention",blocked:"Needs attention",locked:"Waiting"};
 const STATE_COLOR={ready:"--brandink",generating:"--info",awaiting:"--honey",approved:"--ok",
@@ -2117,7 +2118,7 @@ function phaseTarget(phase,stages){
 }
 function sceneMilestonePathHTML(active){
   const stages=currentStages(),activePhase=productionPhase(active);
-  const steps=PPHASES;
+  const steps=PRODUCER_PHASES;
   const rows=steps.map((step,index)=>{
     const state=phaseState(step,stages),complete=state==="approved",current=activePhase&&step.id===activePhase.id;
     const stateLabel=complete?"Complete":current?"Current":state==="ready"?"Ready":state==="awaiting"?"Review":(["blocked","rejected"].includes(state)?"Needs attention":"Waiting");
@@ -3279,7 +3280,7 @@ function renderStageRail(){
   const focused=pFocusedStage();
   const focusedPhase=productionPhase(focused);
   const parts=[];
-  PPHASES.forEach((phase,i)=>{
+  PRODUCER_PHASES.forEach((phase,i)=>{
     // Downstream phases are waiting, not failing, while the shared script is unapproved.
     // Showing four warning states makes a clean production dependency look like four errors.
     const st=phase.id!=="direction"&&pStatus("script")!=="approved"?"locked":corridorPhaseState(phase,stages);
@@ -3289,14 +3290,14 @@ function renderStageRail(){
       <div class="pglyph">${STATE_GLYPH[st]}</div><div class="pname">${_esc(phase.name)}</div>
       <div class="pstate" style="color:var(${STATE_COLOR[st]})">${_esc(STATE_LABEL[st])}</div>
     </button>`);
-    if(i<PPHASES.length-1){ parts.push(`<div class="pconn ${st=="approved"?'fill':''}"></div>`); }
+    if(i<PRODUCER_PHASES.length-1){ parts.push(`<div class="pconn ${st=="approved"?'fill':''}"></div>`); }
   });
-  const completed=PPHASES.filter(phase=>phase.id!=="direction"&&pStatus("script")!=="approved"?false:corridorPhaseState(phase,stages)==="approved").length;
+  const completed=PRODUCER_PHASES.filter(phase=>pStatus("script")!=="approved"?false:corridorPhaseState(phase,stages)==="approved").length;
   const currentName=(focusedPhase||{}).name||((PSTAGES.find(stage=>stage.id===focused)||{}).name||"Production");
-  const progress=Math.round((completed/Math.max(1,PPHASES.length))*100);
+  const progress=Math.round((completed/Math.max(1,PRODUCER_PHASES.length))*100);
   return `<details class="praildetails" open><summary aria-label="Production workflow">
       <span class="prailsummary-label">Production progress</span>
-      <span class="prailsummary-state">Current: ${_esc(currentName)} · ${completed}/${PPHASES.length} complete</span>
+      <span class="prailsummary-state">Current: ${_esc(currentName)} · ${completed}/${PRODUCER_PHASES.length} complete</span>
       <span class="prailchevron" aria-hidden="true">⌄</span>
       <span class="prailbar" aria-hidden="true"><i style="width:${progress}%"></i></span>
     </summary><div class="prail">${parts.join("")}</div></details>`;
@@ -3342,6 +3343,21 @@ function completedSceneAudioHTML(){
   </section>`;
 }
 
+let DIRECTION_PREPARING=false;
+async function ensureAutomaticSceneDirection(){
+  if(DIRECTION_PREPARING||!PSB||PSB.approvalState!=="awaiting-human-storyboard-approval")return false;
+  if(jobFor("creative",SH_SC,SH_EP))return false;
+  DIRECTION_PREPARING=true;
+  try{
+    const r=await fetch(BASE+"/api/direction-prepare",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({episode:SH_EP,scene:String(SH_SC)})});
+    const j=await r.json();
+    if(!r.ok||!j.ok){PSB_ERR=(j&&j.error)||"Scene Direction could not be prepared.";return false;}
+    showToast("Scene Direction prepared — SEE is ready",true);
+    return true;
+  }catch(e){PSB_ERR="Can't reach the Studio while preparing Scene Direction.";return false;}
+  finally{DIRECTION_PREPARING=false;}
+}
+
 async function renderControl(){
   const view=document.getElementById("view");
   // Background job completion refreshes must keep the reviewed shot visible. Clearing the
@@ -3349,6 +3365,7 @@ async function renderControl(){
   // reviewer's visual position before the returned candidate was projected.
   if(!view.querySelector("#workspace"))view.innerHTML=`<div class="coming">Loading scene…</div>`;
   await pLoadAll();
+  if(await ensureAutomaticSceneDirection())await pLoadAll();
   const focusedStage=pFocusedStage(),focusedPhase=productionPhase(focusedStage);
   const focusedStageName=((PSTAGES.find(item=>item.id===focusedStage)||{}).name)||"Production";
   view.innerHTML=`<div class="wtop">
@@ -3757,24 +3774,22 @@ function renderStoryboardStage(){
      <span class="histmeta">${_esc(h.by||"")} · ${_esc((h.at||"").slice(0,16))}</span>${h.note?`<div class="histnote">${_esc(h.note)}</div>`:""}</div>`).join("");
   let actions=[];
   if(st=="awaiting"||st=="rejected"){
-    actions=[`<textarea id="pSbNote" class="pfeedback" placeholder="A note for the record (optional on approve, helpful on reject)"></textarea>`,
-      `<div class="mobile-split" style="margin-top:10px">
-        <button class="btn" onclick="pStoryboardDecide('approved')">Accept direction</button>
-        <button class="btn ghost" onclick="directorStartRejection('storyboard',null,'')">Reject / Discuss</button>
-      </div>`];
+    actions=[`<span class="dec-caption">Direction is prepared automatically from the scene script before production begins.</span>`,
+      `<button class="btn" onclick="renderControl()">Retry preparation</button>`,
+      `<button class="btn ghost" onclick="directorStartRejection('storyboard',null,'')">Discuss a correction</button>`];
   } else if(st=="approved"){
-    actions=[`<span class="dec-caption">${badge("approved")}</span>`,
-      `<button class="btn" onclick="openStageOutcome('scenelook')">Build Scene World</button>`];
+    actions=[`<span class="dec-caption">Prepared from the active scene script. No producer approval is required here.</span>`,
+      `<button class="btn" onclick="openStageOutcome('scenelook')">Continue to SEE →</button>`];
   } else if(st=="generating"){
     actions=[`<span class="dec-caption">${badge(st)}</span>`,`<button class="btn ghost" onclick="renderControl()">Refresh progress</button>`];
   } else {
     actions=[`<span class="dec-caption">${badge(st,pStatusSub("storyboard"))}</span>`,
       `<button class="btn" onclick="resolveCurrentDirection()">Resolve episode Story &amp; Direction</button>`];
   }
-  dec.innerHTML=decisionShell("Scene Direction", "v"+((PSB.sceneDirectionCard&&PSB.sceneDirectionCard.version)||"1"), actions, history);
+  dec.innerHTML=decisionShell("Scene prepared", "v"+((PSB.sceneDirectionCard&&PSB.sceneDirectionCard.version)||"1"), actions, "");
   dec.insertAdjacentHTML("beforeend",`<div class="deptpanel"><div class="deptperson"><div class="deptavatar">D</div><div>
-    <div class="deptname">Director</div><div class="deptmeta">Story & Direction · Pete Docter / Andrew Stanton influences</div></div></div>
-    <div class="dec-caption">The real Creative Room loads the Director and Cinematographer SKILL.md contracts while drafting. Approval now hands the storyboard directly to production and preserves every unchanged shot's existing work.</div></div>`);
+    <div class="deptname">Director preparation</div><div class="deptmeta">Built automatically before SEE, HEAR and WATCH</div></div></div>
+    <div class="dec-caption">Use Ask Director only when this scene needs a correction. Unchanged scenes and approved production work remain in place.</div></div>`);
 }
 async function pFireCreative(){
   try{

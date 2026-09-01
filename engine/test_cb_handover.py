@@ -1263,6 +1263,12 @@ def test_current_packing_contract_requires_showrunner_acceptance():
     with pytest.raises(H.HandoverRefused, match="Showrunner did not approve"):
         H._validate_unit_packing_contract(storyboard)
 
+    storyboard["automaticPreparation"] = {
+        "mode": "script-to-scene-direction",
+        "humanGates": ["see", "hear", "watch"],
+    }
+    H._validate_unit_packing_contract(storyboard)
+
 
 if __name__ == "__main__":
     import subprocess

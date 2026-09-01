@@ -1093,6 +1093,18 @@ def _stream(jobId, args):
     finally:
         with _JOB_LOCK:
             PROCS.pop(jobId, None)
+        # Script Direction is preparation, not a producer decision.  Successful text-only
+        # intake and scene-direction jobs therefore complete their local handover before the
+        # browser is told the job is done.  SEE, HEAR and WATCH retain their human gates.
+        try:
+            _finalize_automatic_direction(job)
+        except Exception as exc:
+            with _JOB_LOCK:
+                detail = f"Automatic Direction preparation failed: {exc}"
+                job["status"] = "failed"
+                job["step"] = detail
+                job["error"] = detail
+                job["log"] = (job.get("log", "") + "\n" + detail).strip()
         # THE central completion point for every gate action fired from the studio (keyframes, clips, voice,
         # retakes, ...) — reindex here regardless of outcome (done/failed/stopped can all have left new files
         # on disk) so the UI's next media-index.json fetch reflects reality instead of the stale server-start snapshot.
@@ -1165,10 +1177,12 @@ def _queue_episode_storyboards(episode):
     import cb_intake
     roster = cb_intake.scene_roster(episode)
     try:
-        active_script_version = cb_scripts.ScriptStore(
+        active_script = cb_scripts.ScriptStore(
             ROOT, show_id=ACTIVE_SHOW.profile.showId).current(
-                episode, required=True)["scriptVersionId"]
+                episode, required=True)
+        active_script_version = active_script["scriptVersionId"]
     except (cb_scripts.ScriptStoreError, studio_profile.ShowProfileError):
+        active_script = None
         active_script_version = None
     jobs = []
     for scene in roster.get("scenes") or []:
@@ -1187,6 +1201,35 @@ def _queue_episode_storyboards(episode):
             if (not active_script_version or
                     storyboard_script_version == active_script_version):
                 continue
+            # An episode-level version id changes when one scene changes. Compare the
+            # actual source content for this scene before replacing its direction. This is
+            # the same scene-local invariant used by production lineage: changing Scene 3
+            # must not rebuild Scenes 1, 2 or 4-8.
+            source = storyboard.get("sourceScript") or {}
+            source_path = (ROOT / str(source.get("contentPath") or "")).resolve()
+            active_path = (ROOT / str((active_script or {}).get("contentPath") or "")).resolve()
+            production_path = (ROOT / "cb-output" /
+                               f"{episode}_scene{number}_production_package.json")
+            if production_path.exists():
+                try:
+                    import cb_render
+                    production = json.loads(production_path.read_text(encoding="utf-8"))
+                    if cb_render.lineage_status(
+                            production, number, episode).get("current"):
+                        continue
+                except (OSError, ValueError, cb_render.Refused):
+                    pass
+            try:
+                source_path.relative_to(ROOT.resolve())
+                active_path.relative_to(ROOT.resolve())
+                old_digest = cb_intake.scene_source_digests(
+                    source_path.read_text(encoding="utf-8")).get(number)
+                new_digest = cb_intake.scene_source_digests(
+                    active_path.read_text(encoding="utf-8")).get(number)
+            except (OSError, TypeError, ValueError, cb_intake.Refused):
+                old_digest = new_digest = None
+            if production_path.exists() and old_digest and old_digest == new_digest:
+                continue
             archive_dir = (storyboard_path.parent / "archive" /
                            f"script-{str(active_script_version).replace('sha256:', '')[:12]}")
             archive_dir.mkdir(parents=True, exist_ok=True)
@@ -1198,6 +1241,110 @@ def _queue_episode_storyboards(episode):
             "creative:scene", number,
             ["cb_creative.py", "scene", number, episode]))
     return jobs
+
+
+def _prepare_scene_direction_for_production(episode, scene):
+    """Promote a generated scene direction as automatic script preparation.
+
+    The compiler still uses ``approvalState=approved`` as its historical handover token,
+    but the record explicitly identifies this as automatic preparation rather than a
+    human creative decision. Human authority begins at SEE, HEAR and WATCH.
+    """
+    import cb_intake
+    path = ROOT / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
+    with cb_db.scene_lease(ROOT, episode, scene, "serve.automatic-direction-handover"):
+        package, digest = cb_db.read_json_document(ROOT, path)
+        if package.get("approvalState") == "approved":
+            try:
+                handover = _carry_forward_unchanged_approved_scene(
+                    path, episode, scene, package)
+                if handover is None:
+                    handover = _promote_approved_storyboard(
+                        path, episode, scene, package)
+            except Exception:
+                handover = None
+            return {"alreadyPrepared": True, "handover": handover}
+        if package.get("approvalState") != "awaiting-human-storyboard-approval":
+            raise StoryboardApprovalRefused(
+                "Scene Direction is not a current generated candidate")
+        source = package.get("sourceScript") or {}
+        current = cb_scripts.ScriptStore(
+            ROOT, show_id=ACTIVE_SHOW.profile.showId).current(
+                episode, required=True)
+        if source.get("scriptVersionId") != current.get("scriptVersionId"):
+            try:
+                source_path = (ROOT / str(source.get("contentPath") or "")).resolve()
+                current_path = (ROOT / str(current.get("contentPath") or "")).resolve()
+                source_path.relative_to(ROOT.resolve())
+                current_path.relative_to(ROOT.resolve())
+                old_digest = cb_intake.scene_source_digests(
+                    source_path.read_text(encoding="utf-8")).get(str(scene))
+                new_digest = cb_intake.scene_source_digests(
+                    current_path.read_text(encoding="utf-8")).get(str(scene))
+            except (OSError, TypeError, ValueError, cb_intake.Refused):
+                old_digest = new_digest = None
+            if not old_digest or old_digest != new_digest:
+                raise StoryboardApprovalRefused(
+                    "Scene Direction belongs to an older version of this scene and must be regenerated")
+        original = path.read_bytes()
+        stamp = time.strftime("%Y-%m-%dT%H:%M:%S")
+        package["approvalState"] = "approved"
+        package["automaticPreparation"] = {
+            "mode": "script-to-scene-direction",
+            "preparedBy": "Studio Director",
+            "preparedAt": stamp,
+            "humanDecisionRequired": False,
+            "humanGates": ["see", "hear", "watch"],
+        }
+        package.setdefault("approvalLog", []).append({
+            "target": "scene", "state": "prepared", "note":
+            "Prepared automatically from the active scene script before production.",
+            "at": stamp, "by": "Studio Director",
+        })
+        written_digest = cb_db.atomic_write_json(
+            ROOT, path, package, expected_digest=digest)
+        try:
+            handover = _promote_approved_storyboard(
+                path, episode, scene, package)
+        except Exception:
+            cb_db.atomic_write_bytes(
+                ROOT, path, original, expected_digest=written_digest)
+            raise
+        return {"prepared": True, "handover": handover}
+
+
+def _finalize_automatic_direction(job):
+    """Complete zero-media Direction preparation for a successful background job."""
+    if job.get("status") != "finalizing":
+        return None
+    gate = str(job.get("gate") or "")
+    args = list(job.get("args") or [])
+    if gate == "storyintake":
+        episode = str(args[-1] if args else "Ep1")
+        import cb_intake
+        status = cb_intake.intake_status(episode)
+        candidate = status.get("candidate") or {}
+        if (status.get("candidateCurrent") and
+                candidate.get("approvalState") == "awaiting-human-approval"):
+            record = cb_intake.decide_intake(
+                episode, "approve",
+                note="Prepared automatically from the active script before scene production.",
+                reviewed_by="Studio Director")
+            reindex_episodes()
+            queued = _queue_episode_storyboards(episode)
+            job["automaticDirection"] = {
+                "episodePrepared": True, "sceneJobs": queued, "record": record}
+            job["step"] = "Episode Direction prepared; scene directions queued."
+            return job["automaticDirection"]
+        return None
+    if gate == "creative:scene":
+        episode = str(args[-1] if args else "Ep1")
+        scene = str(job.get("scene") or "")
+        prepared = _prepare_scene_direction_for_production(episode, scene)
+        job["automaticDirection"] = prepared
+        job["step"] = "Scene Direction prepared; SEE is ready."
+        return prepared
+    return None
 
 def write_script(seed, episode="Ep1"):
     """GATE 0 — the Writers' Room: turn a seed into a finished, scored, LOCKED screenplay (cb_writer)."""
@@ -3518,8 +3665,18 @@ class H(http.server.SimpleHTTPRequestHandler):
                 )
                 fname = current["displayFile"]
                 eps = reindex_episodes()
+                episode = f"Ep{num}"
+                import cb_intake as _CBI
+                direction_status = _CBI.intake_status(episode)
+                direction_job = None
+                if not direction_status.get("canonicalCurrent"):
+                    direction_job = _start(
+                        _jid(f"storyintake_{episode}"), "storyintake", "-",
+                        ["cb_intake.py", "run", episode])
                 self._json(200, {"ok": True, "script": fname,
                                   "scriptVersionId": current["scriptVersionId"],
+                                  "directionPreparationJobId": direction_job,
+                                  "directionPreparation": "automatic",
                                   "episodes": eps})
             except Exception as e:
                 self._json(400, {"error": str(e)})
@@ -4470,6 +4627,28 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(400, {"error": str(e)})
             except Exception as e:
                 self._json(500, {"error": str(e)})
+            return
+        if self.path == "/api/direction-prepare":
+            # Legacy/self-healing path for scene candidates created before Direction became
+            # automatic. This is local text/package preparation only: no media provider and
+            # no SEE, HEAR or WATCH approval is performed.
+            try:
+                d = self._body()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                sc = str(d.get("scene") or "").strip()
+                if not _SHOT_TOKEN.match(ep) or not _SHOT_TOKEN.match(sc):
+                    raise ValueError("valid episode and scene required")
+                self._json(200, {"ok": True,
+                                 "direction": _prepare_scene_direction_for_production(ep, sc),
+                                 "zeroMediaSpend": True})
+            except FileNotFoundError as e:
+                self._json(404, {"error": str(e), "zeroMediaSpend": True})
+            except (StoryboardApprovalRefused, cb_db.SceneBusy, cb_db.StateConflict) as e:
+                self._json(409, {"error": str(e), "zeroMediaSpend": True})
+            except ValueError as e:
+                self._json(400, {"error": str(e), "zeroMediaSpend": True})
+            except Exception as e:
+                self._json(500, {"error": str(e), "zeroMediaSpend": True})
             return
         if self.path == "/api/learning-promote":
             # THE EXPLICIT 'Promote to Creative Memory' ACTION — never silent, never automatic

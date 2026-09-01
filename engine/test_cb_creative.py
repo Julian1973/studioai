@@ -754,7 +754,7 @@ def test_top_level_approvalState_is_sole_gate_a_authority(monkeypatch, tmp_path)
         H.promote(str(draft_top_approved_nested), str(pkg), dry_run=True)
 
 
-def test_production_detail_added_only_after_pass(monkeypatch):
+def test_production_detail_is_prepared_after_the_creative_sequence_freezes(monkeypatch):
     record = []
     _isolated(monkeypatch, record)
     pkg = C.run_scene(1, "Ep1", log=lambda *a, **k: None)
@@ -769,8 +769,8 @@ def test_production_detail_added_only_after_pass(monkeypatch):
                                           returnTo="gate4")
     _isolated(monkeypatch, record2, review_script=fail)
     pkg2 = C.run_scene(1, "Ep1", log=lambda *a, **k: None)
-    assert pkg2["escalation"] and pkg2["productionDetail"] == []      # never on a failed scene
-    assert not any(s == "ProductionPass" for _, s, _ in record2)
+    assert pkg2["escalation"] and pkg2["productionDetail"]
+    assert any(s == "ProductionPass" for _, s, _ in record2)
 
 
 # ── gate 6: adversarial, treatment-compared, capped, escalates ──────────────────────────
@@ -835,12 +835,12 @@ def test_verbatim_dialogue_snap_and_voice_lock(monkeypatch):
 
 
 def test_canonical_voice_occurrence_restores_exact_words_after_acting_pass(monkeypatch):
-    occurrence = "dialogue-occurrence:digest-1"
+    occurrence = "dialogue-occurrence:sha256:digest-1"
     locked = {"dialogueOccurrenceId": occurrence, "sourceEventId": "event-1",
               "sourceEventIndex": 3, "beatId": "1.B1", "sourceBeatId": "source-1",
               "speaker": "FUZZBY", "exactText": "ZZZZZ …"}
     voice = C.VoicePerformance(
-        dialogueOccurrenceId="digest-1", speaker="FUZZBY", exactDialogue="ZZZZ …",
+        dialogueOccurrenceId="dialogue-occurrence:digest-1", speaker="FUZZBY", exactDialogue="ZZZZ …",
         dramaticIntention="sleep deeply", subtext="none", relationshipTarget="room",
         emotionalEntry="asleep", emotionalExit="asleep", operativeWords=["ZZZZ"],
         pace="slow", rhythm="even", pauses="natural", breaths="sleep breaths",

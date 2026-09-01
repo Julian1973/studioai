@@ -242,7 +242,8 @@ def test_scene_review_exposes_the_simple_director_journey():
     assert "function phaseTarget(phase,stages)" in APP
     assert "function openPhaseOutcome(id)" in APP
     assert "openPhaseOutcome('${step.id}')" in APP
-    assert '>Build Scene World</button>' in APP
+    assert 'Continue to SEE →</button>' in APP
+    assert 'const PRODUCER_PHASES=PPHASES.filter(phase=>phase.id!=="direction")' in APP
     assert "function continueSceneLookToFirstKeyframe()" in APP
     assert 'Continue to Shot 1 Keyframe →</button>' in APP
     assert 'BASE+"/api/storyboard-handover"' in APP
@@ -260,6 +261,22 @@ def test_scene_review_exposes_the_simple_director_journey():
     assert "storyboard-working" in APP
     assert "stopped on protection" in APP
     assert "Retry unfinished scene directions" in APP
+
+
+def test_direction_is_automatic_preparation_before_human_media_gates():
+    assert 'if(await ensureAutomaticSceneDirection())await pLoadAll();' in APP
+    assert 'BASE+"/api/direction-prepare"' in APP
+    assert 'Prepared from the active scene script. No producer approval is required here.' in APP
+    assert 'Built automatically before SEE, HEAR and WATCH' in APP
+    direction_stage = APP[APP.index("function renderStoryboardStage"):
+                          APP.index("async function pFireCreative")]
+    assert "pStoryboardDecide('approved')" not in direction_stage
+    assert 'Continue to SEE →' in direction_stage
+    assert 'if self.path == "/api/direction-prepare"' in SERVER
+    assert 'def _finalize_automatic_direction(job):' in SERVER
+    assert 'humanGates": ["see", "hear", "watch"]' in SERVER
+    assert 'directionPreparation": "automatic"' in SERVER
+    assert 'old_digest == new_digest' in SERVER
 
 
 def test_approved_watch_takes_open_the_scene_directors_seat():
@@ -458,7 +475,7 @@ def test_identity_screening_keeps_the_keyframe_visible_for_review():
     assert 'Approve revision ${kfInfo.revision}' in APP
     assert 'approveKeyframeAdvisory' in APP
     assert 'hard canon, reference, lineage and file-integrity checks' in APP.lower()
-    assert '>Reject / Discuss</button>' in APP
+    assert "directorStartRejection('keyframe'" in APP
     assert 'class="review-warning"' in APP
 
 

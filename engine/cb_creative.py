@@ -40,8 +40,8 @@ THE v2 GATES
 
 THE SPLIT CONTRACT: a lean Creative Storyboard Card carries the idea; Production Detail
 (continuity, dialogue timing, reference roles, keyframe need, ≤3 protections) is added
-ONLY after the creative sequence passes. Detail exists because it serves the idea, never
-because a schema contains a box.
+after the creative sequence freezes. Advisory escalation remains visible but does not turn
+Direction into a producer approval gate. Detail exists because it serves the idea.
 
 This module NEVER calls a media provider, never compiles a Seedance prompt and never
 touches a spend token. Its only external calls are OpenAI text calls via cb_llm.
@@ -1397,6 +1397,9 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
                 f"SUPERVISION CONTRACT MISSING - {beat.beatId} needs typed emotion and "
                 "comedy intent")
         participant_names = {_norm(name) for name in beat.participatingCharacters}
+        if str(beat.comedyContract.straightCharacter or "").strip().lower() in {
+                "null", "none", "n/a", "not applicable"}:
+            beat.comedyContract.straightCharacter = None
         if _norm(beat.emotionContract.owner) not in participant_names:
             raise RuntimeError(
                 f"EMOTION CONTRACT UNKNOWN OWNER - {beat.beatId} names "
@@ -1824,10 +1827,10 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
             # Provider output may preserve the immutable digest while dropping this
             # repository-owned namespace. Restore the namespace mechanically; never ask
             # a creative model to author source identity.
-            if (voice.dialogueOccurrenceId and
-                    occurrence_id.endswith(voice.dialogueOccurrenceId) and
-                    occurrence_id.rsplit(voice.dialogueOccurrenceId, 1)[0] ==
-                    "dialogue-occurrence:"):
+            returned_occurrence = str(voice.dialogueOccurrenceId or "")
+            if (returned_occurrence and
+                    occurrence_id.rsplit(":", 1)[-1] ==
+                    returned_occurrence.rsplit(":", 1)[-1]):
                 voice.dialogueOccurrenceId = occurrence_id
             if voice.dialogueOccurrenceId != occurrence_id:
                 raise RuntimeError(
@@ -1990,10 +1993,10 @@ def _assign_dialogue_occurrences(shots, voices, details):
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
-# PRODUCTION DETAIL — added ONLY after the creative sequence passes
+# PRODUCTION DETAIL — added after the creative sequence is frozen
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cast=None,
-                       opener_shot_id=None):
+                       opener_shot_id=None, validation_note=None):
     """Author the executable production layer without changing an approved creative card.
     The true opener is identified by ID so a scoped regeneration cannot accidentally erase
     a later shot's inherited state. Missing details, boundary fields, cast members or timing
@@ -2031,7 +2034,7 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
     pd = cb_llm.structured(
         _mind("DIRECTOR AND CINEMATOGRAPHER, PRODUCTION PASS",
               ["directorTaste", "cinematographyTaste"],
-              "The creative sequence has PASSED. Add the production layer only: "
+              "The creative sequence is frozen for production preparation. Add the production layer only; preserve advisory Showrunner notes without rewriting the scene: "
               "human-readable continuityIn/Out and dialogueTiming review prose; typed "
               "continuityInState/continuityOutState; numeric dialogueTimings; reference "
               "roles (which references anchor identity/environment); and AT MOST three "
@@ -2066,7 +2069,9 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
           "these):\n"
         + "\n".join(f"{v.dialogueOccurrenceId} | beat {v.beatId} | {v.speaker}: "
                     f"{v.exactDialogue} | {v.expectedTiming}" for v in voices)
-        + cast_block,
+        + cast_block
+        + (("\n\nTHE PREVIOUS PRODUCTION-DETAIL DRAFT WAS REFUSED. Correct only this typed contract error and return the complete detail set again:\n" +
+            str(validation_note)) if validation_note else ""),
         ProductionPass, label=f"production_detail_s{scene_num}")
     returned_ids = [detail.shotId for detail in pd.details]
     if returned_ids != expected_shot_ids:
@@ -2246,8 +2251,8 @@ def _shots_hash(pkg):
 
 def regenerate_production_detail(storyboard_path, out_path, log=print, only_shot_id=None):
     """Regenerates ONLY ProductionDetail (now including intendedDurationRange) from a
-    FROZEN, already Gate-6-passed, already Gate-A-approved storyboard's Creative Shot
-    Cards — never reruns Gates 0-4, never revises a shot, never generates a new
+    FROZEN storyboard's Creative Shot Cards, including automatically prepared scenes
+    that retain advisory Showrunner notes. It never reruns Gates 0-4, revises a shot, or generates a new
     treatment. Proves the creative cards are byte-for-byte unchanged via _shots_hash
     before/after, and refuses (raises) if they ever differ.
 
@@ -2302,6 +2307,11 @@ def regenerate_production_detail(storyboard_path, out_path, log=print, only_shot
     out = json.loads(json.dumps(src))              # deep copy — the frozen source untouched
     out["productionDetail"] = [d.model_dump() for d in merged]
     out["durationValidation"] = validation
+    scene = Scene(**out["scene"])
+    beats = [Beat(**beat) for beat in out.get("beats", [])]
+    out["dialogueContract"] = _scene_dialogue_contract(beats, voices, merged)
+    out["sceneDirectionCard"] = build_scene_direction_card(
+        out.get("vision") or {}, scene, beats, all_shots, voices, merged)
     if "approvalState" in out.get("scene", {}):     # travels the Gate-A ambiguity fix
         out["scene"]["sourceApprovalState"] = out["scene"].pop("approvalState")
 
@@ -2600,15 +2610,20 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
         shots = gate5_performance(episode, scene_num, treatment, sd, shots, log=log)
         voices = gate5_voice(episode, scene_num, sd, shots, log=log)
 
-    escalation, details = None, []
+    escalation = None
     if review and not review.passes:
         escalation = ("UNRESOLVED after the permitted complete creative revisions — "
                       "escalated for human direction, not endlessly rewritten: "
                       + (("; ".join(i.issue for i in review.issues[:3])) or
                           review.judgement[:400]))
         log("ESCALATION — " + escalation)
-    else:
+    try:
         details = production_detail(episode, scene_num, sd, shots, voices, log=log)
+    except RuntimeError as exc:
+        log(f"PRODUCTION DETAIL REFUSED — {exc} — rerunning once with the exact contract error")
+        details = production_detail(
+            episode, scene_num, sd, shots, voices, log=log,
+            validation_note=str(exc))
 
     storyboard_inputs = {
         "scriptVersionId": script_version,

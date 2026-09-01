@@ -629,7 +629,9 @@ def _validate_unit_packing_contract(storyboard):
     current_contract = storyboard.get("unitPackingContractVersion") == 1
     if not current_contract and "unitPackingAudit" not in storyboard:
         return
-    if not storyboard.get("packingPasses"):
+    automatic = ((storyboard.get("automaticPreparation") or {}).get("mode") ==
+                 "script-to-scene-direction")
+    if not storyboard.get("packingPasses") and not automatic:
         raise HandoverRefused(
             "REFUSED - the Showrunner did not approve the 30-second production-unit packing")
     try:
@@ -973,6 +975,12 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
     if continuity_out is None:
         raise HandoverRefused(
             f"REFUSED - {sb_shot['shotId']} has no continuityOutState")
+    characters_in_frame = _characters_in_frame(
+        sb_shot, visible_cast, characters_cfg)
+    for voice in shot_voices:
+        speaker = str(voice.get("speaker") or "").strip()
+        if speaker in visible_cast and speaker not in characters_in_frame:
+            characters_in_frame.append(speaker)
 
     shot = cb_engine.Shot(
         shotId=sb_shot["shotId"], beatCode=sb_shot["beatIds"][0],
@@ -990,7 +998,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
         visualPayoff=sb_shot["closingImage"],
         physicalStaging=physical_staging, physicalStagings=physical_stagings,
         prohibited=list(pd.get("essentialProviderProtections") or [])[:3],
-        charactersInFrame=_characters_in_frame(sb_shot, visible_cast, characters_cfg),
+        charactersInFrame=characters_in_frame,
         offscreenSpeakers=_offscreen_speakers(shot_voices, characters_cfg),
         continuityIn=continuity_in,
         continuityOut=continuity_out)

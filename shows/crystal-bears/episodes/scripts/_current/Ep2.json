@@ -8,14 +8,17 @@
  "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48.json",
  "displayFile": "Ep2_Bo_s_Big_Day_V3.txt",
  "title": "Bo's Big Day V3",
- "activationId": "a2e85d3c5e634f7bb973791f878cbbb8",
- "activatedAt": "2026-09-01T15:53:54+00:00",
+ "activationId": "11342ddaf34542579042bb1d41e071a8",
+ "activatedAt": "2026-09-01T16:37:42+00:00",
  "activatedBy": "Julian",
- "previousScriptVersionId": "sha256:9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
+ "previousScriptVersionId": "sha256:c0d0abe03e8cd64a04d935c01e79729fd78ae777aa394174d80df76ffde74213",
  "changeScope": {
-  "kind": "voice-contract-correction",
+  "kind": "dialogue-correction",
   "scene": "4",
   "shotId": "S4.SH1",
-  "summary": "Shared countdown, remove carryover text, and separate the confession beat."
+  "dialogueOccurrenceId": "dialogue-occurrence:sha256:70a243a21ad08e88b89657075aa958f4470f3fd03adc0e1a7f2326f4fc98af43",
+  "speaker": "Keen",
+  "previousExactText": "Bo, this is Ada",
+  "correctedExactText": "Bo, this is Aida."
  }
 }

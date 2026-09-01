@@ -4977,6 +4977,21 @@ class H(http.server.SimpleHTTPRequestHandler):
                         raise ValueError("oldExactText and newExactText are required")
                     if old_text.strip() == new_text:
                         raise ValueError("the corrected words are unchanged")
+                    provider_spelling = _CBR.cb_gen._eleven_voice_text(old_text).strip()
+                    compare_voice_text = lambda value: re.sub(
+                        r"[.!?…]+$", "", str(value or "").strip()).casefold()
+                    if (provider_spelling != old_text.strip() and
+                            compare_voice_text(provider_spelling) ==
+                            compare_voice_text(new_text)):
+                        self._json(409, {
+                            "error": (
+                                "Keep Aida in Approved spoken words. ElevenLabs already "
+                                "receives Ada from the performance-prompt layer."),
+                            "pronunciationOnly": True,
+                            "canonicalText": old_text.strip(),
+                            "providerText": provider_spelling,
+                        })
+                        return
                     current = SCRIPT_STORE.current(ep, required=True)
                     script_path = SCRIPT_STORE.content_path(ep)
                     script_text = script_path.read_text(encoding="utf-8")
@@ -5010,12 +5025,19 @@ class H(http.server.SimpleHTTPRequestHandler):
                         scene, sid, occurrence_id, old_text, new_text,
                         version["scriptVersionId"], current.get("scriptVersionId"), ep,
                         reviewed_by="Julian")
+                    voice_job = _start(
+                        _jid(f"department_voice_{sid}"),
+                        f"department:voice:{sid}", scene,
+                        ["cb_render.py", "department-prepare", scene,
+                         "voice", sid, ep])
                     self._json(200, {"ok": True, "scriptVersionId": version["scriptVersionId"],
                                      "dialogueOccurrenceId": occurrence_id,
                                      "speaker": speaker, "providerCalled": False,
                                      "changeScope": change_scope,
                                      "affectedScene": scene, "affectedShotId": sid,
                                      "amendment": amendment,
+                                     "jobId": voice_job,
+                                     "voiceDirectionPreparing": True,
                                      "preservedStages": ["direction", "scenelook", "keyframe"],
                                      "invalidatedStages": ["voice", "animation", "continuity", "final"],
                                      "next": "review-hear"})

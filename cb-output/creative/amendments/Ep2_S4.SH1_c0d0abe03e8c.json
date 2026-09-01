@@ -1,0 +1,755 @@
+{
+ "schemaVersion": 1,
+ "approvalState": "approved",
+ "approvedAt": "2026-09-01T17:27:02",
+ "approvedBy": "Julian",
+ "kind": "dialogue-correction",
+ "scene": "4",
+ "shotId": "S4.SH1",
+ "scriptVersionId": "sha256:c0d0abe03e8cd64a04d935c01e79729fd78ae777aa394174d80df76ffde74213",
+ "previousScriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48",
+ "baseScriptVersionId": "sha256:9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
+ "previousDialogueOccurrenceId": "dialogue-occurrence:sha256:fd9e66270fd5e8b09f547dd0bc3527e2d280d6673c9f612874cf34522a1e2870",
+ "dialogueOccurrenceId": "dialogue-occurrence:sha256:70a243a21ad08e88b89657075aa958f4470f3fd03adc0e1a7f2326f4fc98af43",
+ "previousSourceEventId": "script-event:sha256:2dbd391ab3242934894aa0594ec95c9d0a4eb25562b98b92da7c692d001b1155",
+ "sourceEventId": "script-event:sha256:30977cca3b22e311452faa2d6914ddb9ed3b49b36b1091d001a20cd10a340602",
+ "previousExactText": "Bo, this is Aida.",
+ "correctedExactText": "Bo, this is Ada",
+ "shot": {
+  "shotId": "S4.SH1",
+  "beatCode": "4.B1",
+  "beatCodes": [
+   "4.B1",
+   "4.B2",
+   "4.B3",
+   "4.B4",
+   "4.B5"
+  ],
+  "shotRole": "coverage",
+  "establishJob": null,
+  "buttonChange": null,
+  "frameSource": null,
+  "durationSec": 30.0,
+  "purpose": "Deliver the entire scene as one accumulating emotional event in a single compressed path pocket, where playful motion fails in real time and Aida is discovered inside that same felt geography.",
+  "performanceAssignment": "Performance phases: anticipation: Bo Moving beside Keen, Bo braces through each counted beat, then begins joining the rhythm himself as his body prepares for the next tail-poof instead of recoiling from it; action: Bo Bo triggers the tail-poof on purpose more than once while still walking, opens into brief giggles, then abruptly halts, drops onto the fallen log, grips the satchel tight, tucks in, and later lifts his attention toward Aida when she notices the bag; reaction: Aida Aida climbs down through the branch veil slightly caught by twigs, brushes herself clear, sits beside Bo with space left between them, fixes on the satchel rather than his face, and holds her grounded stillness as Bo turns toward her; settle: ENVIRONMENT Wind moves gently through the leaves around the seated trio as the path remains open behind Bo and the group holds the silence without breaking the pocket. Cause and effect: The counted walking rhythm lets Bo prepare for and repeat the tail-poof as shared play, which opens him briefly; when that momentum runs out, his forward travel stops instantly, gravity drops him to the log, and his paws tighten on the satchel. Aida's branch-snag softens her arrival, her seated distance avoids crowding, and the untouched path plus moving leaves keep the pressure present while Bo's body eases from clenched to less shut. Visible turn: Bo shifts from laughing through the poof to visibly folded worry, then from folded isolation to cautious receptiveness once Aida notices his effort and calmly stays with the question. Land on: Bo remains seated in the same branch-veiled pocket with the path still ahead, satchel no longer crushed at maximum tension, and his posture reading quieter and more open rather than cured or ready to spring up. Acting freedom: Animators may vary the exact cadence of the repeated poofs, the size of Bo's giggle leaks, Keen's tiny settle beside him, Aida's twig-clearing business, and the amount of final loosening in Bo's paws, so long as the opening relief is real but temporary, the stop is sudden, Aida never crowds, and the final hold stays unresolved.",
+  "camera": "One continuous branch-veiled forest-path unit at Bo's height: start already travelling beside him mid-countdown as his tail-poof bursts inside forward motion, let the camera's travel die exactly when he stops and sits clutching his satchel,",
+  "openingPose": "At Bo's height on the branch-veiled forest path, the camera is already travelling beside him as his body is mid-poof reaction inside Keen's ongoing countdown, with the path ahead slipping past in dappled depth.",
+  "sourceType": "opener",
+  "sourceShotId": null,
+  "motionContinuityRequired": false,
+  "cutInMotivation": "A cut would weaken the scene because the meaning is the unbroken drain from play into stuckness inside one exact geography; the audience must feel the relief run out in Bo's body rather than be handed a new dialogue phase.",
+  "dialogueBinding": "Perform only the ordered approved dialogue occurrences. The opening countdown is a synchronous Bo-and-Keen chorus. Screenplay action, sound labels and BEAT are silent.",
+  "dialogueLines": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:b66279148d0115bc657e049b6f721801e30d8769f3d6ae5ab5b5d4a660463ca4",
+    "sourceEventId": "script-event:sha256:56d49e7a2047d0d4d8d9d052fb9791f6a19787453b3f125db12a3c12c0d517b6",
+    "speaker": "Bo/Keen",
+    "exactText": "3, 2, 1 …",
+    "delivery": "Together, playful and perfectly synchronized; one shared countdown only.",
+    "startSec": 1.2,
+    "endSec": 2.4,
+    "voiceTreatment": "group_chorus",
+    "chorusMembers": [
+     "Bo",
+     "Keen"
+    ],
+    "performanceText": "[excited] 3, 2, 1 …"
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:82738998fafc3c0cdbf3b9ded31acb5ace40b9e3a7c47dc4d2625c7842081369",
+    "sourceEventId": "script-event:sha256:6132391c5744a5fcadd3ddd7fe46893f15358e91763abbc704482b1a1fd4c61e",
+    "speaker": "Bo",
+    "exactText": "I’m STILL worried about going to the Learning Circle.",
+    "delivery": "Quiet admission after the play stops; worry catches in the middle without rushing.",
+    "startSec": 5.8,
+    "endSec": 8.5,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[quietly] I’m STILL worried about going to the Learning Circle."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:622751e7ca822c2a3b3c1b981c1da34b106f404192f8151d6523c30b4e5dbb2e",
+    "sourceEventId": "script-event:sha256:7379df0e1d4d7508a8e3de2f9033db0ebb1af0ffc6f6d3688b5f60fce23bb76e",
+    "speaker": "Bo",
+    "exactText": "They all know each other.",
+    "delivery": "Small and certain, looking down the path.",
+    "startSec": 9.2,
+    "endSec": 10.6,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[nervous] They all know each other."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b3ba475a2c72a5569dbd3adbde06977107885371be77f1f89647e3dbc45d9c0",
+    "sourceEventId": "script-event:sha256:68de2b0038b27e674df5c06361be5f2efa130b17ae6692a8ece2d95786e414e5",
+    "speaker": "Bo",
+    "exactText": "But I don’t know them, and they don't know me.",
+    "delivery": "After a real beat, the private fear comes out plainly.",
+    "startSec": 11.3,
+    "endSec": 14.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[quietly] But I don’t know them, and they don't know me."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:e746fed8302017a81926552953c009d5e3f2b685367f676b10fdd6c6506f5134",
+    "sourceEventId": "script-event:sha256:f382562fc42b14c13b7a1ee85f74038b3a7b875bedf50cd1312e0e3e80145291",
+    "speaker": "Aida",
+    "exactText": "Tricky trees.",
+    "delivery": "Soft, lightly self-aware arrival; never loud.",
+    "startSec": 15.0,
+    "endSec": 15.8,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[softly] Tricky trees."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:70a243a21ad08e88b89657075aa958f4470f3fd03adc0e1a7f2326f4fc98af43",
+    "sourceEventId": "script-event:sha256:30977cca3b22e311452faa2d6914ddb9ed3b49b36b1091d001a20cd10a340602",
+    "speaker": "Keen",
+    "exactText": "Bo, this is Ada",
+    "delivery": "Bo, this is Ada",
+    "startSec": 16.3,
+    "endSec": 17.3,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[quietly] Bo, this is Aida."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:15b364030922a20dc9b0d90f4f01fef7eee753f85909872f64632cb68ae58fb0",
+    "sourceEventId": "script-event:sha256:7d7ca19fc0fe2602f92c0b0e203b5d51d15b84049defe33336f1ae9dcf9bc3c9",
+    "speaker": "Aida",
+    "exactText": "You packed your bag.",
+    "delivery": "Low, empathetic recognition with a settled downward ending; it is not a question.",
+    "startSec": 18.0,
+    "endSec": 19.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[softly] You packed your bag."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:e827b6904e5bc726b074c2a33279f41089d5a533ea212e40a36824fccf69a503",
+    "sourceEventId": "script-event:sha256:cf43657bf9952da46322662111834db5a77c27980bdff3672a8b8e1bb9285edf",
+    "speaker": "Bo",
+    "exactText": "Four times.",
+    "delivery": "A small honest answer, slightly embarrassed.",
+    "startSec": 19.5,
+    "endSec": 20.1,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[quietly] Four times."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:b48ec0ea4adea59def0f20db7ce2aca0617046fbb1e51b748003c678aa3df3a9",
+    "sourceEventId": "script-event:sha256:ef0959512b69eb02b468e5f66c026fc7b3463d51fcbb3801b9f919076ac6eb9a",
+    "speaker": "Aida",
+    "exactText": "I would have done five.",
+    "delivery": "Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing.",
+    "startSec": 20.7,
+    "endSec": 22.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[softly] [warmly] I would have done five."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:dbbd4a6ba7fdece7005487575876c45ba07ed4a5714186e4bb28b9a2f36a0b7f",
+    "sourceEventId": "script-event:sha256:b847842b44111af6387f8f484894b73cdd0548f990a95a1430807129a0e4896d",
+    "speaker": "Bo",
+    "exactText": "You get scared too?",
+    "delivery": "Genuine surprised question; hope enters because he feels less alone.",
+    "startSec": 22.7,
+    "endSec": 23.7,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[curious] You get scared too?"
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:deefbd8cd3c21a1e332b33661899f2864fd5ec64b290a9139ff88f2016dc5d61",
+    "sourceEventId": "script-event:sha256:a8a48370b98487161c7cef31b4b45726d7947d266e52741cab3634f0c29e6c82",
+    "speaker": "Aida",
+    "exactText": "Every single time.",
+    "delivery": "Quiet agreement, then leave a short clean gap.",
+    "startSec": 24.2,
+    "endSec": 25.1,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[softly] Every single time."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:d4163d7ade24be11aeecbd2ba2a3dd0d7776e8bbc7b3f9111b6e3bf231ba0ceb",
+    "sourceEventId": "script-event:sha256:04674705c1603ac53bb6bb285db7b28f6197a8f084643584208263525a589243",
+    "speaker": "Bo",
+    "exactText": "But you still go?",
+    "delivery": "Hopeful follow-up question after the gap; do not flatten the question mark.",
+    "startSec": 25.9,
+    "endSec": 26.9,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[curious] But you still go?"
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:335059e16a3614af54b69cdda19312b8e6d1826443f341c222ed071db524fbf9",
+    "sourceEventId": "script-event:sha256:797e7a517f9a600df1fd6da53fdc00ef5f46cac12e7296c43cbd362ea5218b73",
+    "speaker": "Aida",
+    "exactText": "Every single time.",
+    "delivery": "Quiet certainty and solidarity, followed by a held silent beat.",
+    "startSec": 27.6,
+    "endSec": 28.6,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "[quietly] Every single time."
+   }
+  ],
+  "visualPayoff": "Bo seated on the fallen log with branches framing him in the foreground and the path still receding behind him, satchel held but no longer crushed tight, his gaze resting into the space ahead while Aida sits steady beside him.",
+  "physicalStaging": null,
+  "physicalStagings": [],
+  "prohibited": [
+   "Keep the shot as one unbroken continuous unit whose camera travel visibly dies with Bo's stop; a reset setup would invalidate the scene's core meaning.",
+   "Maintain the path ahead readable behind Bo through the seated section; losing that background pressure breaks the belonging-fear staging.",
+   "Aida must enter from the existing branch veil slightly snagged and settle with visible respectful space from Bo; a clean announced entrance or crowding changes her dramatic function."
+  ],
+  "charactersInFrame": [
+   "Bo",
+   "Keen",
+   "Aida"
+  ],
+  "offscreenSpeakers": [],
+  "requiredPropReferences": [
+   "satchel"
+  ],
+  "openingCharactersInFrame": [
+   "Bo",
+   "Keen"
+  ],
+  "closingCharactersInFrame": null,
+  "continuityIn": null,
+  "continuityOut": {
+   "lighting": "Dappled daylight, slightly more enclosed and gently warmed within the branch pocket, with soft leaf movement continuing.",
+   "cameraSide": "Bo front-right quarter at seated height in the compressed path pocket.",
+   "characters": [
+    {
+     "character": "Bo",
+     "screenZone": "center-right foreground on the log",
+     "facing": "toward the open path with a slight turn toward Aida",
+     "pose": "seated, posture eased from tight tuck, satchel held low in both paws",
+     "expression": "quiet, thoughtful, cautiously more open",
+     "visibleMarks": [],
+     "heldProps": [
+      "satchel"
+     ]
+    },
+    {
+     "character": "Keen",
+     "screenZone": "left-midground beside Bo with breathing room",
+     "facing": "toward Bo",
+     "pose": "seated and folded in supportively without leaning onto him",
+     "expression": "gentle, attentive",
+     "visibleMarks": [],
+     "heldProps": []
+    },
+    {
+     "character": "Aida",
+     "screenZone": "center-left midground beside Bo",
+     "facing": "toward Bo",
+     "pose": "seated steadily after climbing in, relaxed and grounded",
+     "expression": "calm, matter-of-fact warmth",
+     "visibleMarks": [
+      "leaf behind ear"
+     ],
+     "heldProps": []
+    }
+   ]
+  },
+  "continuityProseIn": "",
+  "continuityProseOut": "Bo remains seated on the fallen log in the same branch-veiled path pocket, no longer crushed fully inward. Keen stays seated nearby with respectful space. Aida sits beside Bo after entering through the branches, the leaf still caught behind her ear. Dappled daylight and gentle leaf-wind continue, with the path ahead still open as pressure behind Bo.",
+  "dialogueTimingProse": "Single continuous shot. Keen's countdown begins shortly after travel is already established; Bo joins the game and poofs in brisk rhythm. After the abrupt stop, protect a felt silence before Bo's first admission, then another hold within his second line. Aida's branch-snag business resolves before 'Tricky trees.' Keen introduces her only after the pocket feels safe. Aida notices the satchel, Bo answers quickly, Aida replies without hurry. After 'You get scared too?' and the first 'Every single time,' leave a tiny absorbent beat before Bo's follow-up. The final 'Every single time' lands simply, followed by a held silence to the scene end.",
+  "referenceRolesProse": "Character identity and acting specificity anchor to Bo, Keen, and Aida references. Forest-path geography, branch veils, fallen log, dappled daylight, and path pressure anchor to the approved scene look/environment references.",
+  "principalPerformanceApproved": "Bo governs throughout: tentative participation becomes surprised giggling, then abrupt compression, satchel-clutching confession, wary curiosity toward Aida, and finally a quieter, more open stillness. Keen shifts from playful propulsion to careful proximity. Aida arrives slightly awkward, observant first, then quietly exact.",
+  "physicalPerformanceApproved": "Bo rides the moving game from guarded participation into real little laugh-bursts, then the same body abruptly withholds motion, folds onto the log, clamps the satchel, and only gradually reopens through Aida's accurate notice. Keen begins as light forward propulsion, then drops into nearby, non-crowding support. Aida enters slightly snagged by the branches, clears herself without fuss, sits with respectful space, and lets stillness become shelter.",
+  "animationTimingApproved": "Keep the opening poof rhythm brisk and buoyant with clear recoil and repeat, then let motion die all at once when Bo stops so the silence feels physical. Hold long enough on Bo's compressed sit and on the final shared stillness for the thought-change to register; Aida's entrance and settling should be unhurried, with tiny branch business before calm lands.",
+  "performanceContractApproved": {
+   "beatOwner": "4.B4",
+   "playableIntention": "Bo borrows Keen's game to outrun embarrassment, fails to keep outrunning the bigger fear, then tests whether steadiness can coexist with being scared and stays still long enough for the answer to change him.",
+   "phases": [
+    {
+     "phase": "anticipation",
+     "performer": "Bo",
+     "observableAction": "Moving beside Keen, Bo braces through each counted beat, then begins joining the rhythm himself as his body prepares for the next tail-poof instead of recoiling from it."
+    },
+    {
+     "phase": "action",
+     "performer": "Bo",
+     "observableAction": "Bo triggers the tail-poof on purpose more than once while still walking, opens into brief giggles, then abruptly halts, drops onto the fallen log, grips the satchel tight, tucks in, and later lifts his attention toward Aida when she notices the bag."
+    },
+    {
+     "phase": "reaction",
+     "performer": "Aida",
+     "observableAction": "Aida climbs down through the branch veil slightly caught by twigs, brushes herself clear, sits beside Bo with space left between them, fixes on the satchel rather than his face, and holds her grounded stillness as Bo turns toward her."
+    },
+    {
+     "phase": "settle",
+     "performer": "ENVIRONMENT",
+     "observableAction": "Wind moves gently through the leaves around the seated trio as the path remains open behind Bo and the group holds the silence without breaking the pocket."
+    }
+   ],
+   "physicalCauseAndEffect": "The counted walking rhythm lets Bo prepare for and repeat the tail-poof as shared play, which opens him briefly; when that momentum runs out, his forward travel stops instantly, gravity drops him to the log, and his paws tighten on the satchel. Aida's branch-snag softens her arrival, her seated distance avoids crowding, and the untouched path plus moving leaves keep the pressure present while Bo's body eases from clenched to less shut.",
+   "visibleEmotionalTurn": "Bo shifts from laughing through the poof to visibly folded worry, then from folded isolation to cautious receptiveness once Aida notices his effort and calmly stays with the question.",
+   "requiredLanding": "Bo remains seated in the same branch-veiled pocket with the path still ahead, satchel no longer crushed at maximum tension, and his posture reading quieter and more open rather than cured or ready to spring up.",
+   "performanceFreedom": "Animators may vary the exact cadence of the repeated poofs, the size of Bo's giggle leaks, Keen's tiny settle beside him, Aida's twig-clearing business, and the amount of final loosening in Bo's paws, so long as the opening relief is real but temporary, the stop is sudden, Aida never crowds, and the final hold stays unresolved.",
+   "characterTruths": [
+    {
+     "character": "Bo",
+     "canonTrait": "Fear shows in body-first compression; he is not cured by play, only briefly relieved by it.",
+     "playableWant": "He wants the path and what waits at the end of it to feel manageable enough to keep going.",
+     "pressureResponse": "Under pressure he first tries the game, then collapses inward physically before he can fully explain himself, and later risks small re-engagement when accurately seen.",
+     "observableSignature": "Repeated prepared tail-poofs in motion, sudden stop, folded sit, tight satchel grip, down-path stare, then a small lift of attention and slight release in the paws.",
+     "substitutionTest": "This performance belongs to Bo because the whole beat is his specific move from body embarrassment to belonging fear; replacing him with Keen or Aida would erase the tucked satchel-clutching shutdown that defines the scene's heart."
+    },
+    {
+     "character": "Aida",
+     "canonTrait": "Her stillness makes space safe, and she enters as warm grounded presence rather than authority display.",
+     "playableWant": "She wants to join Bo's pocket without increasing his sense of being watched.",
+     "pressureResponse": "She reduces pressure by absorbing a small environmental awkwardness, sitting with space, and noticing a concrete effort instead of pronouncing on his feelings.",
+     "observableSignature": "Unhurried descent, brushing off twigs, leaf left caught behind the ear, measured sit with room between bodies, eyes dropping to the satchel, then held steady stillness.",
+     "substitutionTest": "Only Aida can make this entrance mean shelter through stillness; if Keen did the same actions it would read as continued peer support, and if another character entered with more energy the frame would lose the earned calm."
+    }
+   ],
+   "comedyStaging": null
+  },
+  "characterTruthsApproved": [
+   {
+    "character": "Bo",
+    "canonTrait": "Fear shows in body-first compression; he is not cured by play, only briefly relieved by it.",
+    "playableWant": "He wants the path and what waits at the end of it to feel manageable enough to keep going.",
+    "pressureResponse": "Under pressure he first tries the game, then collapses inward physically before he can fully explain himself, and later risks small re-engagement when accurately seen.",
+    "observableSignature": "Repeated prepared tail-poofs in motion, sudden stop, folded sit, tight satchel grip, down-path stare, then a small lift of attention and slight release in the paws.",
+    "substitutionTest": "This performance belongs to Bo because the whole beat is his specific move from body embarrassment to belonging fear; replacing him with Keen or Aida would erase the tucked satchel-clutching shutdown that defines the scene's heart."
+   },
+   {
+    "character": "Aida",
+    "canonTrait": "Her stillness makes space safe, and she enters as warm grounded presence rather than authority display.",
+    "playableWant": "She wants to join Bo's pocket without increasing his sense of being watched.",
+    "pressureResponse": "She reduces pressure by absorbing a small environmental awkwardness, sitting with space, and noticing a concrete effort instead of pronouncing on his feelings.",
+    "observableSignature": "Unhurried descent, brushing off twigs, leaf left caught behind the ear, measured sit with room between bodies, eyes dropping to the satchel, then held steady stillness.",
+    "substitutionTest": "Only Aida can make this entrance mean shelter through stillness; if Keen did the same actions it would read as continued peer support, and if another character entered with more energy the frame would lose the earned calm."
+   }
+  ],
+  "comedyStagingApproved": null,
+  "comedyStagingsApproved": [],
+  "comedyContractsApproved": [
+   {
+    "beatCode": "4.B1",
+    "mode": "SMALL",
+    "mechanism": "restraint → release with movement-against-stillness turned into counted body-play",
+    "comicOwner": "Bo",
+    "straightCharacter": "Keen",
+    "setup": "Keen turns the feared tail-poof into a simple countdown game while they move along the path.",
+    "expectation": "The countdown should lead to another embarrassing involuntary reaction.",
+    "disruption": "Bo starts triggering and repeating it as play, so the thing he dreads becomes briefly funny and shared.",
+    "button": "Bo's own giggle confirms the shift from humiliation to game.",
+    "hold": "Let the tiny aftermath of the poof and giggle register before pushing onward.",
+    "physicalStaging": null
+   },
+   {
+    "beatCode": "4.B2",
+    "mode": "NONE",
+    "mechanism": "none",
+    "comicOwner": null,
+    "straightCharacter": null,
+    "setup": "",
+    "expectation": "",
+    "disruption": "",
+    "button": "",
+    "hold": "",
+    "physicalStaging": null
+   },
+   {
+    "beatCode": "4.B3",
+    "mode": "SMALL",
+    "mechanism": "status-softening through environmental participation and deadpan observation",
+    "comicOwner": "Aida",
+    "straightCharacter": "Bo",
+    "setup": "Aida enters a tender, vulnerable moment from the branchy path space rather than being ceremonially presented.",
+    "expectation": "A steady elder arrival could turn formal or solemn.",
+    "disruption": "The branches betray that formality first, and Aida answers the snag with a dry little 'Tricky trees.' before quietly noticing Bo's overpacked effort.",
+    "button": "'I would have done five.'",
+    "hold": "Give the branch awkwardness and Bo's 'Four times.' a small beat so the warmth can land without rushing into advice.",
+    "physicalStaging": null
+   },
+   {
+    "beatCode": "4.B4",
+    "mode": "NONE",
+    "mechanism": "none",
+    "comicOwner": null,
+    "straightCharacter": null,
+    "setup": "",
+    "expectation": "",
+    "disruption": "",
+    "button": "",
+    "hold": "",
+    "physicalStaging": null
+   },
+   {
+    "beatCode": "4.B5",
+    "mode": "NONE",
+    "mechanism": "none",
+    "comicOwner": null,
+    "straightCharacter": null,
+    "setup": "",
+    "expectation": "",
+    "disruption": "",
+    "button": "",
+    "hold": "",
+    "physicalStaging": null
+   }
+  ],
+  "emotionContractsApproved": [
+   {
+    "beatCode": "4.B1",
+    "owner": "Bo",
+    "entryState": "Embarrassed and braced against his body doing 'The Thing.'",
+    "pressure": "He is still headed toward the Learning Circle, and the path ahead keeps the social problem active even while he plays.",
+    "choiceOrRealisation": "He lets the countdown pull him into participating instead of only defending himself from the reaction.",
+    "exitState": "Surprised into real giggles, looser for a moment but not settled.",
+    "observableEvidence": "His body reacts mid-movement, he joins the countdown, the poof repeats, and he giggles instead of collapsing inward.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "The giggles are relief, not cure; the path and the underlying worry remain present."
+   },
+   {
+    "beatCode": "4.B2",
+    "owner": "Bo",
+    "entryState": "Briefly buoyed by play but still carrying the original worry underneath.",
+    "pressure": "The borrowed game-energy fades while the Learning Circle remains ahead, and the fear of being the only outsider presses back in.",
+    "choiceOrRealisation": "He stops pretending the tail is the whole issue and admits the loneliness underneath it.",
+    "exitState": "Collapsed inward but more truthful, exposed rather than hidden behind the game.",
+    "observableEvidence": "He stops moving, sits, clutches the satchel, looks down, and speaks about everyone else already knowing each other.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "Bo has finally named the core fear, but nothing has yet answered it."
+   },
+   {
+    "beatCode": "4.B3",
+    "owner": "Bo",
+    "entryState": "Folded in on himself, expecting the social world to confirm he is behind everyone else.",
+    "pressure": "A new adult presence could make him feel more watched or more out of place if she enters too strongly.",
+    "choiceOrRealisation": "He stays in the exchange long enough to answer honestly when Aida notices the bag.",
+    "exitState": "A little less defended, newly aware that someone has seen effort where he expected only fear to be visible.",
+    "observableEvidence": "He remains seated and compressed but answers 'Four times,' accepting her notice instead of retreating from it.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "Being seen for preparation softens him, but he still needs to know whether fear itself makes him different from everyone else."
+   },
+   {
+    "beatCode": "4.B4",
+    "owner": "Bo",
+    "entryState": "Softened by being seen, but still convinced steadiness and fear probably do not coexist.",
+    "pressure": "If Aida says no, his fear remains proof that he does not belong yet.",
+    "choiceOrRealisation": "He risks asking the comparison question out loud and then listens when the answer does not protect him from fear but includes him within it.",
+    "exitState": "Quietly altered, not solved; thinking instead of only freezing.",
+    "observableEvidence": "He looks to Aida and asks if she gets scared too, then asks how she still goes, and he does not argue when she repeats the answer.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "The new idea has entered him, but he has not acted on it yet; it needs a held settling beat."
+   },
+   {
+    "beatCode": "4.B5",
+    "owner": "Bo",
+    "entryState": "Quietly altered by Aida's admission but not yet visibly forward-moving.",
+    "pressure": "The path to the Learning Circle is still there, unchanged, and the old fear could easily close him again if the silence is rushed.",
+    "choiceOrRealisation": "He does not hide from the pause; he sits inside it and absorbs that bravery may happen alongside fear every time.",
+    "exitState": "Held, quieter, and more open.",
+    "observableEvidence": "He remains seated, present, and thinking into the path rather than curling away from it while the wind moves through the leaves.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "Bo has not moved yet; what has changed is the meaning of staying still."
+   }
+  ],
+  "cinematographyContractApproved": {
+   "storyPointOfView": "Bo's shrinking capacity governs the frame from first moving relief through the held final silence.",
+   "emotionalDistanceStart": "Close and participatory, borrowing Bo's temporary game-energy.",
+   "emotionalDistanceEnd": "Close but steadier, intimate enough to watch thought replace collapse without prying it open.",
+   "revealStrategy": "Let the path pressure remain visible from the start, reveal only gradually that the body problem is really a belonging problem, then discover Aida through the existing branches instead of announcing her.",
+   "shotScale": "Begins in close travelling medium-close body play, settles into compressed medium intimacy, then tightens modestly for the meaning-turn without isolating everyone into singles.",
+   "lensIntent": "Slightly wide-normal intimacy to keep bodies, branches, and the problem-path legible together while preserving Bo's pocketed feeling.",
+   "cameraHeight": "Consistently at Bo's seated and walking eye level so the path feels socially looming rather than overseen.",
+   "composition": "Asymmetrical pocket composition with Bo weighted against open path depth; branches act as partial veils and Aida must enter the pre-existing arrangement rather than re-balance it.",
+   "depthStrategy": "Foreground bodies compressed together, branch veils in midground, path receding as the active pressure plane in background throughout.",
+   "cameraBehavior": "Travels with the countdown, then visibly coasts to a stop with Bo and remains allied to his stuckness; only motivated internal reframes occur when Aida physically joins the pocket and when finer emotional reading becomes necessary.",
+   "focusStrategy": "Keep Bo's body and face primary at first, then deepen enough to preserve the path as readable pressure; selectively favor whoever changes the meaning without dropping the geography away.",
+   "lightingFunction": "Dappled daylight starts playful in motion, then feels more filtered and enclosed once Bo sits; Aida's presence warms the same light slightly without changing time of day or relieving the path's pressure.",
+   "paletteFunction": "Natural greens and warm woodland browns stay continuous; the emotional shift comes from enclosure and gentle warming, not a palette jump.",
+   "performanceVisibility": "Body compression, satchel grip, tail residue, eye-lines to the path, and Aida's specific noticing all remain readable within shared frames; no coverage pattern hides the thought process.",
+   "editorialPurpose": "Create one unbroken experiential arc from comic release to vulnerable confession to quiet reframing, resisting any reset into a tidy talk scene.",
+   "memorableLandingImage": "Bo still seated in the same pressured path pocket, not cured and not moving, but no longer folded shut as the wind breathes through the leaves.",
+   "providerInstruction": "One continuous branch-veiled forest-path unit at Bo's height: start already travelling beside him mid-countdown as his tail-poof bursts inside forward motion, let the camera's travel die exactly when he stops and sits clutching his satchel,"
+  },
+  "performanceBudgetApproved": {
+   "emotionalTurnCount": 1,
+   "propStateChangeCount": 2,
+   "dialogueHeavy": true,
+   "silentActingReserveSec": 4.5,
+   "landingHoldSec": 2.0,
+   "minimumHonestDurationSec": 27.0,
+   "decision": "single-unit",
+   "rationale": "All five beats form one same-geography emotional event whose core meaning is the continuous drain from play into confession and shared fear. The honest performance fits under 30 seconds with three causal stages and three motivated views; splitting would risk a false reset into separate 'game' and 'dialogue' jobs."
+  },
+  "storyIntentApproved": {
+   "narrativeFunction": "Convert Bo's body-based worry into its true belonging meaning, then crack his false belief by showing that steadiness and fear coexist.",
+   "primaryAudienceFeeling": "Relieved into play, then quietly held through vulnerable recognition.",
+   "secondaryAudienceFeeling": "A small laugh at Aida's awkward entrance and overpacking exchange that keeps the heart beat from turning solemn.",
+   "outerAction": "Keen runs a countdown game as they walk; Bo poofs and giggles; he stops and sits on a log; Aida climbs in from the ridge, sits, notices the packed bag, and answers Bo's question.",
+   "innerAction": "Bo borrows play to outrun worry, fails to keep outrunning it, admits the social fear, then tests whether fear excludes him and begins to accept that it does not.",
+   "performanceDirection": "Bo's giggles are surprised leaks, not cure; when the worry returns his body folds before his voice does. Keen tries to stay lightly playful until he sees Bo needs company instead. Aida reads details first, speaks plainly, and never inflates herself into authority.",
+   "mutedRead": "A child can understand: game works for a moment, Bo stops and folds inward, Keen stays with him, Aida arrives a bit awkwardly, notices his over-prepared bag, and her calm answer changes how he holds himself.",
+   "environmentPressure": "The path ahead stays visible as a social threshold; branch veils compress the frame and wind in the leaves presses on the pauses rather than decorating them.",
+   "soundStory": "Counted pulses and poof bursts create the moving game, then fall away into leaf-wind and held hush so Aida's hinge line lands into near-silence.",
+   "motifUse": "Compression versus small release governs the whole scene: tail poof, satchel clutch, tucked sitting shape, then tiny openings in Bo's laugh, answer, look up, and final stillness.",
+   "thoughtChangeAndCut": "Do not cut while the game is still creating relief or while Bo's stop is still becoming confession. Reframe only when Aida has physically joined the pocket and the thought shifts from private hurt to being accurately seen. Hold after the second 'Every single time' because the new idea has arrived and movement would interrupt absorption.",
+   "mustUnderstand": "Bo is not really stopped by the tail alone; he fears everyone else already belongs, and Aida's shared fear makes him less alone without removing the hard path.",
+   "mustNotKnowYet": "The audience must not feel reassured in advance that Aida has the answer before Bo risks asking; her meaning should be earned inside the moment.",
+   "reactionBeat": "Bo's look at Aida after 'I would have done five' changes her from outsider pressure into someone safe enough to ask the real question.",
+   "relationshipDistance": "Keen sits near but leaves breathing room; Aida also leaves space at first and earns closeness emotionally rather than physically crowding Bo.",
+   "relationshipPowerDynamic": "Keen offers peer support without leadership; Aida lowers authority by arriving snagged and by observing rather than pronouncing, so Bo can meet her answer instead of receiving a lesson.",
+   "touchOrAvoidance": "No comforting touch is needed; the scene is about chosen proximity and respectful space around Bo's compressed body.",
+   "eyelineRule": "Bo's main eyeline is down the path when fear dominates; it lifts to Aida only after she notices him accurately, then returns to the path differently in the final hold.",
+   "silhouetteRead": "Bo reads as a tucked, satchel-clutching shape against the path depth; Keen's shape folds alongside; Aida's seated stillness widens the pocket without overwhelming it.",
+   "silenceRule": "Protect the pause after Bo's social fear confession and especially after the final 'Every single time'; no one fills those spaces with added reassurance.",
+   "scoreInstruction": "If score is present, let playful counted energy thin away quickly after Bo stops; stay sparse or absent under Aida's observation and leave the hinge line mostly to wind, allowing any musical note to arrive only as a gentle after-resonance in the held final beat."
+  },
+  "targetDurationSecApproved": 27,
+  "storyboardStagePlanApproved": [
+   {
+    "stageNumber": 1,
+    "beatIds": [
+     "4.B1"
+    ],
+    "purpose": "Turn Bo's feared tail-poof into moving shared play so relief is felt physically in forward travel.",
+    "primaryEvent": "Keen's countdown pulls Bo into triggering the tail-poof on purpose, and Bo joins fully enough to giggle while they keep moving down the path.",
+    "emotionalOrComicTurn": "Embarrassment flips into brief genuine fun.",
+    "cameraAndTransition": "Begin already travelling with the count underway, close to Bo's body so each poof lands as a little involuntary burst inside motion; stay continuous because cutting would turn the relief into coverage instead of bodily momentum.",
+    "observableEndState": "Bo is still moving, looser and giggling, with the path ahead visible beyond him."
+   },
+   {
+    "stageNumber": 2,
+    "beatIds": [
+     "4.B2"
+    ],
+    "purpose": "Let the game physically run out without resetting the scene, revealing the belonging fear underneath.",
+    "primaryEvent": "Bo suddenly stops, sits on the fallen log, grips his satchel, and admits he is still worried because everyone else already knows each other and he does not.",
+    "emotionalOrComicTurn": "The play thins into exposure; the problem shifts from body-trait embarrassment to social exclusion.",
+    "cameraAndTransition": "The camera's travel dies with Bo rather than correcting to a fresh setup; settle into the same branch-veiled pocket with the path still pressing in depth, and let Keen fold into Bo's space inside the held frame because a cut here would falsely separate relief from collapse.",
+    "observableEndState": "Bo sits compressed on the log, clutching the satchel and staring down the path, with Keen beside but not crowding him."
+   },
+   {
+    "stageNumber": 3,
+    "beatIds": [
+     "4.B3",
+     "4.B4",
+     "4.B5"
+    ],
+    "purpose": "Have Aida earn entry through the existing geography, then turn Bo's fear by sharing it and leave space for the new thought to settle.",
+    "primaryEvent": "Aida is discovered through the already-present branches, slightly snagged and leaf-marked; she notices Bo's packed bag, shares the small joke, answers that she gets scared every single time too, and the group holds the silence while Bo stays present with the path.",
+    "emotionalOrComicTurn": "The frame warms from watched vulnerability into shared, survivable fear without losing the pressure ahead.",
+    "cameraAndTransition": "Stay in the same compressed geography; motivate one internal reframing only as Aida physically enters and sits, then hold through the hinge line and the wind beat because introducing her with a new setup would make her ceremonial instead of quietly found.",
+    "observableEndState": "Bo remains seated with the path ahead unchanged, but his posture is no longer collapsed shut as the wind moves gently through the leaves."
+   }
+  ],
+  "storyboardInternalShotPlanApproved": [
+   {
+    "shotNumber": 1,
+    "purpose": "Embed the audience inside Bo's borrowed game-energy so the tail-poof relief is felt as motion, not observed from safety.",
+    "framingAndCamera": "A close travelling side-front view at Bo's height, moving with him along the branchy path; Bo dominates foreground with Keen pulsing in and out beside him, and the path streams ahead in dappled depth behind partial leaf veils.",
+    "storyAction": "The count is already underway. Keen says, \"3,2,1 …\" Bo makes his tail do 'The Thing' on command, then joins: \"3,2,1 … POOF!\" The tail does 'The Thing' again and again. Bo giggles.",
+    "performanceFocus": "Bo's surprise at his own successful participation — giggles as little escapes, not confidence restored; Keen keeps the game buoyant without overexplaining it.",
+    "landingImage": "Mid-travel after another poof, Bo's body opened by the laugh for one fleeting beat while the path still stretches ahead beyond him.",
+    "cutReason": "Cut internally only when the moving relief has given everything it can and Bo's body abruptly withholds forward motion; staying in the same travel framing would blur the crucial emotional stop."
+   },
+   {
+    "shotNumber": 2,
+    "purpose": "Make the death of motion itself Bo's emotional event and preserve the path as active social pressure while he confesses.",
+    "framingAndCamera": "A settled medium-compressed pocket from just off Bo's front quarter at log height, as if the travelling camera coasted to a stop with him; Bo foreground-right on the log, Keen easing into frame beside him, branches crossing midground, open path receding past Bo in background depth.",
+    "storyAction": "Bo suddenly stops, smile gone, sits, grips his satchel tightly and says, \"I’m STILL worried about going to the to the Learning Circle.\" Keen gently sits beside him and gives space. Bo stares down the path: \"They all know each other. Beat. But I don’t know them, and they don't know me.\" Leaves rustle above; Aida climbs down from the ridge through the branches, brushing twigs away, leaf stuck behind her ear: \"Tricky trees.\" Keen smiles: \"Bo, this is Ada\"",
+    "performanceFocus": "Bo compresses before words — sit, grip, tuck, eyes down-path. Keen attempts to remain in game-energy, then softens into simple companionship. Aida's entrance reads the room before speaking; the leaf snag keeps her human-sized, not authoritative.",
+    "landingImage": "Aida newly seated with a little space left between her and Bo inside the same branch pocket, Bo turned just enough to look up at her, satchel still clutched, path still visible behind.",
+    "cutReason": "Cut internally only once Aida has physically earned a place in the pocket and the scene needs a finer emotional read for her specific noticing; remaining this wide would weaken the meaning-change carried by her observation and Bo's test question."
+   },
+   {
+    "shotNumber": 3,
+    "purpose": "Let Aida's precise observation and repeated truth alter Bo without reopening the scene into formal dialogue coverage.",
+    "framingAndCamera": "A tighter three-quarter two-and-a-half shot favoring Bo and Aida at seated height, with Keen present at edge or softened depth, branches still veiling the frame and the path lane still open behind Bo's shoulder.",
+    "storyAction": "Aida notices the satchel: \"You packed your bag.\" Bo answers, \"Four times.\" Aida replies, \"I would have done five.\" Bo looks at her and softens. Then: \"You get scared too?\" / \"Every single time.\" / \"But you still go?\" / \"Every single time. BEAT.\" Wind moves gently through the trees.",
+    "performanceFocus": "Aida never soothes broadly; she notices specifics, then answers plainly. Bo tests the impossible idea and, after the second answer, stays with it instead of retreating. Keen remains quiet support, not a third speaker.",
+    "landingImage": "Bo seated on the log in profile-three-quarter, satchel loosened slightly in his paws, gaze resting into the unchanged path space beyond the branches while Aida's grounded stillness holds beside him.",
+    "cutReason": "No further cut; the hinge line and held wind beat need uninterrupted settling time, and another view would instruct feeling instead of letting Bo absorb it."
+   }
+  ],
+  "transitionType": "CONTINUOUS",
+  "providerBoundaryReasonApproved": "scene_end",
+  "providerBoundaryExplanationApproved": "The scene's emotional event completes on the held wind beat after Aida's repeated truth; anything following begins a new dramatic movement and needs a fresh unit.",
+  "voiceDirectorBrief": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:b66279148d0115bc657e049b6f721801e30d8769f3d6ae5ab5b5d4a660463ca4",
+    "sourceEventId": "script-event:sha256:56d49e7a2047d0d4d8d9d052fb9791f6a19787453b3f125db12a3c12c0d517b6",
+    "speaker": "Bo/Keen",
+    "exactDialogue": "3, 2, 1 …",
+    "elevenLabsV3Direction": "Together, playful and perfectly synchronized; one shared countdown only.",
+    "startSec": 1.2,
+    "endSec": 2.4,
+    "voiceTreatment": "group_chorus",
+    "chorusMembers": [
+     "Bo",
+     "Keen"
+    ]
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:82738998fafc3c0cdbf3b9ded31acb5ace40b9e3a7c47dc4d2625c7842081369",
+    "sourceEventId": "script-event:sha256:6132391c5744a5fcadd3ddd7fe46893f15358e91763abbc704482b1a1fd4c61e",
+    "speaker": "Bo",
+    "exactDialogue": "I’m STILL worried about going to the Learning Circle.",
+    "elevenLabsV3Direction": "Quiet admission after the play stops; worry catches in the middle without rushing.",
+    "startSec": 5.8,
+    "endSec": 8.5,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:622751e7ca822c2a3b3c1b981c1da34b106f404192f8151d6523c30b4e5dbb2e",
+    "sourceEventId": "script-event:sha256:7379df0e1d4d7508a8e3de2f9033db0ebb1af0ffc6f6d3688b5f60fce23bb76e",
+    "speaker": "Bo",
+    "exactDialogue": "They all know each other.",
+    "elevenLabsV3Direction": "Small and certain, looking down the path.",
+    "startSec": 9.2,
+    "endSec": 10.6,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b3ba475a2c72a5569dbd3adbde06977107885371be77f1f89647e3dbc45d9c0",
+    "sourceEventId": "script-event:sha256:68de2b0038b27e674df5c06361be5f2efa130b17ae6692a8ece2d95786e414e5",
+    "speaker": "Bo",
+    "exactDialogue": "But I don’t know them, and they don't know me.",
+    "elevenLabsV3Direction": "After a real beat, the private fear comes out plainly.",
+    "startSec": 11.3,
+    "endSec": 14.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:e746fed8302017a81926552953c009d5e3f2b685367f676b10fdd6c6506f5134",
+    "sourceEventId": "script-event:sha256:f382562fc42b14c13b7a1ee85f74038b3a7b875bedf50cd1312e0e3e80145291",
+    "speaker": "Aida",
+    "exactDialogue": "Tricky trees.",
+    "elevenLabsV3Direction": "Soft, lightly self-aware arrival; never loud.",
+    "startSec": 15.0,
+    "endSec": 15.8,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:70a243a21ad08e88b89657075aa958f4470f3fd03adc0e1a7f2326f4fc98af43",
+    "sourceEventId": "script-event:sha256:30977cca3b22e311452faa2d6914ddb9ed3b49b36b1091d001a20cd10a340602",
+    "speaker": "Keen",
+    "exactDialogue": "Bo, this is Ada",
+    "elevenLabsV3Direction": "Gentle introduction that leaves the emotional space with Bo.",
+    "startSec": 16.3,
+    "endSec": 17.3,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:15b364030922a20dc9b0d90f4f01fef7eee753f85909872f64632cb68ae58fb0",
+    "sourceEventId": "script-event:sha256:7d7ca19fc0fe2602f92c0b0e203b5d51d15b84049defe33336f1ae9dcf9bc3c9",
+    "speaker": "Aida",
+    "exactDialogue": "You packed your bag.",
+    "elevenLabsV3Direction": "Low, empathetic recognition with a settled downward ending; it is not a question.",
+    "startSec": 18.0,
+    "endSec": 19.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:e827b6904e5bc726b074c2a33279f41089d5a533ea212e40a36824fccf69a503",
+    "sourceEventId": "script-event:sha256:cf43657bf9952da46322662111834db5a77c27980bdff3672a8b8e1bb9285edf",
+    "speaker": "Bo",
+    "exactDialogue": "Four times.",
+    "elevenLabsV3Direction": "A small honest answer, slightly embarrassed.",
+    "startSec": 19.5,
+    "endSec": 20.1,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:b48ec0ea4adea59def0f20db7ce2aca0617046fbb1e51b748003c678aa3df3a9",
+    "sourceEventId": "script-event:sha256:ef0959512b69eb02b468e5f66c026fc7b3463d51fcbb3801b9f919076ac6eb9a",
+    "speaker": "Aida",
+    "exactDialogue": "I would have done five.",
+    "elevenLabsV3Direction": "Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing.",
+    "startSec": 20.7,
+    "endSec": 22.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:dbbd4a6ba7fdece7005487575876c45ba07ed4a5714186e4bb28b9a2f36a0b7f",
+    "sourceEventId": "script-event:sha256:b847842b44111af6387f8f484894b73cdd0548f990a95a1430807129a0e4896d",
+    "speaker": "Bo",
+    "exactDialogue": "You get scared too?",
+    "elevenLabsV3Direction": "Genuine surprised question; hope enters because he feels less alone.",
+    "startSec": 22.7,
+    "endSec": 23.7,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:deefbd8cd3c21a1e332b33661899f2864fd5ec64b290a9139ff88f2016dc5d61",
+    "sourceEventId": "script-event:sha256:a8a48370b98487161c7cef31b4b45726d7947d266e52741cab3634f0c29e6c82",
+    "speaker": "Aida",
+    "exactDialogue": "Every single time.",
+    "elevenLabsV3Direction": "Quiet agreement, then leave a short clean gap.",
+    "startSec": 24.2,
+    "endSec": 25.1,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:d4163d7ade24be11aeecbd2ba2a3dd0d7776e8bbc7b3f9111b6e3bf231ba0ceb",
+    "sourceEventId": "script-event:sha256:04674705c1603ac53bb6bb285db7b28f6197a8f084643584208263525a589243",
+    "speaker": "Bo",
+    "exactDialogue": "But you still go?",
+    "elevenLabsV3Direction": "Hopeful follow-up question after the gap; do not flatten the question mark.",
+    "startSec": 25.9,
+    "endSec": 26.9,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:335059e16a3614af54b69cdda19312b8e6d1826443f341c222ed071db524fbf9",
+    "sourceEventId": "script-event:sha256:797e7a517f9a600df1fd6da53fdc00ef5f46cac12e7296c43cbd362ea5218b73",
+    "speaker": "Aida",
+    "exactDialogue": "Every single time.",
+    "elevenLabsV3Direction": "Quiet certainty and solidarity, followed by a held silent beat.",
+    "startSec": 27.6,
+    "endSec": 28.6,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   }
+  ],
+  "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Bo, @图3 only for Keen, @图4 only for Aida, @图5 only for prop:satchel and @图6 only for the path set.\n\nBegin exactly on @图1, the approved opening frame — one continuous branch-veiled forest-path unit at Bo's height: start already travelling beside him mid-countdown as his tail-poof bursts inside forward motion, let the camera's travel die exactly when he stops and sits clutching his satchel,. Performance phases: anticipation: Bo Moving beside Keen, Bo braces through each counted beat, then begins joining the rhythm himself as his body prepares for the next tail-poof instead of recoiling from it; action: Bo Bo triggers the tail-poof on purpose more than once while still walking, opens into brief giggles, then abruptly halts, drops onto the fallen log, grips the satchel tight, tucks in, and later lifts his attention toward Aida when she notices the bag; reaction: Aida Aida climbs down through the branch veil slightly caught by twigs, brushes herself clear, sits beside Bo with space left between them, fixes on the satchel rather than his face, and holds her grounded stillness as Bo turns toward her; settle: ENVIRONMENT Wind moves gently through the leaves around the seated trio as the path remains open behind Bo and the group holds the silence without breaking the pocket. Cause and effect: The counted walking rhythm lets Bo prepare for and repeat the tail-poof as shared play, which opens him briefly; when that momentum runs out, his forward travel stops instantly, gravity drops him to the log, and his paws tighten on the satchel. Aida's branch-snag softens her arrival, her seated distance avoids crowding, and the untouched path plus moving leaves keep the pressure present while Bo's body eases from clenched to less shut. Visible turn: Bo shifts from laughing through the poof to visibly folded worry, then from folded isolation to cautious receptiveness once Aida notices his effort and calmly stays with the question. Land on: Bo remains seated in the same branch-veiled pocket with the path still ahead, satchel no longer crushed at maximum tension, and his posture reading quieter and more open rather than cured or ready to spring up. Acting freedom: Animators may vary the exact cadence of the repeated poofs, the size of Bo's giggle leaks, Keen's tiny settle beside him, Aida's twig-clearing business, and the amount of final loosening in Bo's paws, so long as the opening relief is real but temporary, the stop is sudden, Aida never crowds, and the final hold stays unresolved. Bo seated on the fallen log with branches framing him in the foreground and the path still receding behind him, satchel held but no longer crushed tight, his gaze resting into the space ahead while Aida sits steady beside him.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Keen and Bo and Aida. Preserve character identity and relative scale. Keep leaf behind ear visible.",
+  "promptWords": 486,
+  "referenceSlots": {
+   "@图1": "opening keyframe",
+   "@图2": "Bo",
+   "@图3": "Keen",
+   "@图4": "Aida",
+   "@图5": "prop:satchel",
+   "@图6": "scene plate",
+   "@Audio1": "voice track"
+  },
+  "audioBrief": "SHOT S4.SH1 — voice-only performance for @Audio1.\nBo/Keen: \"3, 2, 1 …\" — Together, playful and perfectly synchronized; one shared countdown only. Target 1.2-2.4s.\nBo: \"I’m STILL worried about going to the Learning Circle.\" — Quiet admission after the play stops; worry catches in the middle without rushing. Target 5.8-8.5s.\nBo: \"They all know each other.\" — Small and certain, looking down the path. Target 9.2-10.6s.\nBo: \"But I don’t know them, and they don't know me.\" — After a real beat, the private fear comes out plainly. Target 11.3-14s.\nAida: \"Tricky trees.\" — Soft, lightly self-aware arrival; never loud. Target 15-15.8s.\nKeen: \"Bo, this is Ada\" — Gentle introduction that leaves the emotional space with Bo. Target 16.3-17.3s.\nAida: \"You packed your bag.\" — Low, empathetic recognition with a settled downward ending; it is not a question. Target 18-19s.\nBo: \"Four times.\" — A small honest answer, slightly embarrassed. Target 19.5-20.1s.\nAida: \"I would have done five.\" — Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing. Target 20.7-22s.\nBo: \"You get scared too?\" — Genuine surprised question; hope enters because he feels less alone. Target 22.7-23.7s.\nAida: \"Every single time.\" — Quiet agreement, then leave a short clean gap. Target 24.2-25.1s.\nBo: \"But you still go?\" — Hopeful follow-up question after the gap; do not flatten the question mark. Target 25.9-26.9s.\nAida: \"Every single time.\" — Quiet certainty and solidarity, followed by a held silent beat. Target 27.6-28.6s.\nPreserve the exact words. No narration, ad-libs, action labels, sound effects or music.",
+  "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: At Bo (@图1, squirrel)'s height on the branch-veiled forest path, the camera is already travelling beside him as his body is mid-poof reaction inside Keen (@图2, bear)'s ongoing countdown, with the path ahead slipping past in dappled depth.\n\n@图3 is the sole visual authority for Bo's satchel; use its identity and construction only, never its background or staging. Keep it with Bo in frame one in the physically plausible carried or worn state implied by the shot.\n\n@图4 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+  "keyframePromptWords": 172,
+  "keyframeReferenceSlots": {
+   "@图1": "Bo",
+   "@图2": "Keen",
+   "@图3": "prop:satchel",
+   "@图4": "scene plate"
+  },
+  "internalConstraints": "Hard constraints: Keep the shot as one unbroken continuous unit whose camera travel visibly dies with Bo's stop; a reset setup would invalidate the scene's core meaning; Maintain the path ahead readable behind Bo through the seated section; losing that background pressure breaks the belonging-fear staging; no Aida must enter from the existing branch veil slightly snagged and settle with visible respectful space from Bo; a clean announced entrance or crowding changes her dramatic function; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+ }
+}

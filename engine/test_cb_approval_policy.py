@@ -535,20 +535,20 @@ def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatc
     package, shot, _ = _pkg(tmp_path)
     shot["dialogueLines"] = [{
         "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
-        "speaker": "Fuzzby", "exactText": "I still feel him... every day.",
+        "speaker": "Fuzzby", "exactText": "Bo, this is Aida.",
     }]
     ledger = render._ledger(package, shot["shotId"])
     ledger["workingVoice"] = {"lines": [{
         "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
-        "speaker": "Fuzzby", "text": "[quietly] I still feel him, every day.",
+        "speaker": "Fuzzby", "text": "[empathetically] Bo, this is Ada...",
     }]}
     directed = {
         "shotId": shot["shotId"], "sceneIntention": "Connected memory.",
         "lines": [{
             "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
             "speaker": "Fuzzby", "character": "Fuzzby",
-            "exactDialogue": "I still feel him... every day.",
-            "performedText": "[angry] I still feel him... every day.",
+            "exactDialogue": "Bo, this is Aida.",
+            "performedText": "Bo, this is Aida.",
             "dramaticIntention": "Keep the thought connected.", "subtext": "Memory lives on.",
             "cadenceAndBreath": "Quiet and connected.", "timingAndBody": "Stay still.",
             "archetypeId": "held-heart", "performanceQuestions": {
@@ -560,10 +560,10 @@ def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatc
             "listener": "Zenny", "bodyVoiceRelationship": "Still body.",
             "previousText": "A quiet look.", "startsAtSec": 1.0,
             "estimatedDurationSec": 2.0, "pauseReasons": [],
-            "tagPurposes": [{"tag": "angry", "purpose": "Superseded direction"}],
+            "tagPurposes": [],
             "takeRecipes": [{"recipeId": "A", "label": "Primary",
-                              "performedText": "[angry] I still feel him... every day.",
-                              "primary": True, "takesCount": 1}],
+                              "performedText": "Bo, this is Aida.",
+                              "primary": True, "takesCount": 2}],
         }],
     }
     ledger.setdefault("departmentWork", {}).setdefault(
@@ -576,4 +576,4 @@ def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatc
 
     emitted = render._approved_voice_lines(package, shot)
 
-    assert emitted[0]["text"] == "[quietly] I still feel him, every day."
+    assert emitted[0]["text"] == "[empathetically] Bo, this is Ada..."

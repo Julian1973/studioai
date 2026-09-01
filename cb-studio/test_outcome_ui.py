@@ -79,7 +79,9 @@ def test_dialogue_correction_reopens_only_hear_and_watch_without_redriving_story
     assert '"story-intake:correction", scene' not in SERVER[correction:correction + 5000]
     assert '"providerCalled": False' in SERVER
     assert '"next": "review-hear"' in SERVER
-    assert 'Direction and SEE preserved; HEAR and WATCH reopened' in APP
+    assert '"voiceDirectionPreparing": True' in SERVER
+    assert '["cb_render.py", "department-prepare", scene,' in SERVER
+    assert "Words corrected — rebuilding this shot's HEAR direction" in APP
     assert '&st=voice&shot=' in APP
     assert 'location.reload();' not in re.search(
         r"async function shCorrectDialogue\(.*?\n\}", APP, re.DOTALL
@@ -97,9 +99,13 @@ def test_hear_exposes_words_and_provider_prompt_as_separate_editable_layers():
     assert "2 · ElevenLabs v3 performance prompt" in APP
     assert "Changing them creates a scoped dialogue revision for this shot" in APP
     assert "Adapt phonetic spelling, pronunciation, cadence, pauses, breath" in APP
+    assert "The saved ElevenLabs performance prompt is the provider text used when you fire" in APP
+    assert "The paid path uses only the approved Voice specialist performance above" not in APP
     assert "Save ElevenLabs prompt" in APP
     assert "voicePanelHTML(tok,SH_VOICE_CACHE[tok])" in APP
     assert "await shLoadVoiceWork(tok)" in APP
+    assert '"pronunciationOnly": True' in SERVER
+    assert "Canon stays Aida · ElevenLabs receives Ada" in APP
 
 
 def test_keyframe_review_decision_rail_exposes_upload_and_library_sources():

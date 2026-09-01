@@ -5188,7 +5188,7 @@ function renderShotStage(mode){
       // THE VOICE WORKING-PROMPT CONTROL (2026-07-19, contained inside this existing Voice
       // stage): shown alongside, never replacing, the generate/regenerate action above —
       // editing/saving here never calls cb_gen, only the button above ever spends.
-      body += `<div class="dec-caption" style="margin-top:14px">The paid path uses only the approved Voice specialist performance above. Legacy working-prompt overrides are disabled for production.</div>`;
+      body += `<div class="dec-caption" style="margin-top:14px">The saved ElevenLabs performance prompt is the provider text used when you fire. Change pronunciation, cadence, acting, pauses and tags there without changing the approved script words. Saving never generates audio.</div>`;
     } else if(sfxCues.length){
       body=`<div class="stage-empty-media" style="min-height:150px"><div><b>No ElevenLabs track is required for this shot.</b><div style="margin-top:8px">All authored vocal events are non-verbal Seedance 2.5 SFX.</div></div></div>${sfxPanel}${slatePanel}`;
       decVersion="Seedance 2.5 SFX only · no ElevenLabs spend";
@@ -5946,10 +5946,22 @@ async function shCorrectDialogue(tok,occurrenceId,speaker,oldExactText,proposedT
     showStageWorking("Saving the correction","StudioAI is versioning the exact words and reopening only this shot's HEAR and WATCH stages. No media provider will run.");
     const r=await fetch(BASE+"/api/script-dialogue-correction",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,dialogueOccurrenceId:occurrenceId,speaker,oldExactText,newExactText:corrected})});
     const j=await r.json();
-    if(!j.ok){renderWorkspaceBody();alert("Couldn't correct the script: "+(j.error||"failed"));return;}
+    if(!j.ok){
+      delete SH_VOICE_CACHE[tok];delete SH_VOICE_DIRTY[tok];
+      if(j.pronunciationOnly){
+        if(typeof showToast=="function")showToast("Canon stays Aida · ElevenLabs receives Ada",true);
+        await renderControl();
+        alert(j.error||"Use the ElevenLabs performance prompt for pronunciation.");
+      }else{renderWorkspaceBody();alert("Couldn't correct the script: "+(j.error||"failed"));}
+      return;
+    }
     delete SH_VOICE_CACHE[tok];delete SH_VOICE_DIRTY[tok];
-    if(typeof showToast=="function")showToast("Words corrected — Direction and SEE preserved; HEAR and WATCH reopened",true);
+    if(typeof showToast=="function")showToast("Words corrected — rebuilding this shot's HEAR direction",true);
     location.hash=`p=${encodeURIComponent(PROJ.slug)}&pg=pipeline&ep=${encodeURIComponent(String(SH_EP).replace(/^Ep/i,""))}&sc=${encodeURIComponent(String(SH_SC))}&st=voice&shot=${encodeURIComponent(tok)}`;
+    if(j.jobId){
+      SH_JOB=j.jobId;shRememberJob(j.jobId);SH_LAST_JOB=null;SH_AFTER_JOB=null;SH_POLL_MISSES=0;
+      shPollStart();
+    }
     await renderControl();
   }catch(e){alert("Can't reach the studio server. Reload and try again.");}
 }

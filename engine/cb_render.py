@@ -3368,6 +3368,12 @@ def apply_scoped_dialogue_correction(scene, shot_id, old_occurrence_id, old_exac
     if len(matches) != 1:
         raise Refused(
             f"REFUSED — {shot_id} does not contain exactly one matching approved dialogue occurrence")
+    line_index = (shot.get("dialogueLines") or []).index(matches[0])
+    voice_work = (ledger.get("departmentWork") or {}).get("voice") or {}
+    voice_source = voice_work.get("candidate") or voice_work.get("approved")
+    if not voice_source:
+        voice_source = next((record for record in reversed(voice_work.get("history") or [])
+                             if (record.get("output") or {}).get("lines")), None)
 
     import cb_intake  # lazy import keeps the render module's startup dependency acyclic
     script_path = SCRIPT_STORE.content_path(episode)
@@ -3393,8 +3399,12 @@ def apply_scoped_dialogue_correction(scene, shot_id, old_occurrence_id, old_exac
         "exactText": new_exact_text,
     })
     delivery = str(line.get("delivery") or "")
-    prefix = re.match(r"^\s*((?:\[[^\]]+\]\s*)+)", delivery)
-    line["delivery"] = ((prefix.group(1) if prefix else "") + new_exact_text).strip()
+    if old_exact_text in delivery:
+        line["delivery"] = delivery.replace(old_exact_text, new_exact_text)
+    performance_text = str(line.get("performanceText") or "")
+    if old_exact_text in performance_text:
+        line["performanceText"] = performance_text.replace(
+            old_exact_text, new_exact_text)
 
     def replace_exact(value):
         return value.replace(old_exact_text, new_exact_text) if isinstance(value, str) else value
@@ -3410,6 +3420,36 @@ def apply_scoped_dialogue_correction(scene, shot_id, old_occurrence_id, old_exac
             })
     shot["audioBrief"] = replace_exact(shot.get("audioBrief"))
 
+    carried_voice = None
+    if voice_source:
+        carried_voice = json.loads(json.dumps(voice_source))
+        carried_lines = ((carried_voice.get("output") or {}).get("lines") or [])
+        if len(carried_lines) == len(shot.get("dialogueLines") or []):
+            carried_line = carried_lines[line_index]
+            if carried_line.get("speaker") == matches[0].get("speaker"):
+                old_performed = str(carried_line.get("performedText") or old_exact_text)
+                leading_tags = " ".join(re.findall(r"\[[^\]]+\]", old_performed))
+                new_performed = (leading_tags + " " + new_exact_text).strip()
+                carried_line.update({
+                    "dialogueOccurrenceId": event["dialogueOccurrenceId"],
+                    "sourceEventId": event["sourceEventId"],
+                    "exactDialogue": new_exact_text,
+                    "performedText": new_performed,
+                })
+                for recipe in carried_line.get("takeRecipes") or []:
+                    recipe["performedText"] = new_performed
+                if line_index + 1 < len(carried_lines):
+                    carried_lines[line_index + 1]["previousText"] = new_performed
+                carried_voice.update({
+                    "preparedAt": _now(),
+                    "scopedDialogueCarryForward": True,
+                    "carriedDialogueIndex": line_index,
+                })
+            else:
+                carried_voice = None
+        else:
+            carried_voice = None
+
     now = _now()
     for stage in ("voice", "animation", "review-animation"):
         work = (ledger.get("departmentWork") or {}).get(stage)
@@ -3423,6 +3463,8 @@ def apply_scoped_dialogue_correction(scene, shot_id, old_occurrence_id, old_exac
                                  "decisionAt": now, "reviewedBy": reviewed_by})
                 work.setdefault("history", []).append(archived)
             work[key] = None
+    if carried_voice:
+        voice_work["candidate"] = carried_voice
 
     ledger["voiceApproval"] = None
     ledger["workingVoice"] = None
@@ -3449,7 +3491,15 @@ def apply_scoped_dialogue_correction(scene, shot_id, old_occurrence_id, old_exac
 
     amendment_dir = ROOT / "cb-output" / "creative" / "amendments"
     amendment_dir.mkdir(parents=True, exist_ok=True)
-    amendment_path = amendment_dir / f"{episode}_{shot_id}_{script_version_id.split(':')[-1][:12]}.json"
+    transition_id = hashlib.sha256(json.dumps({
+        "at": now,
+        "fromScript": previous_script_version_id,
+        "toScript": script_version_id,
+        "fromOccurrence": old_occurrence_id,
+        "toOccurrence": event["dialogueOccurrenceId"],
+    }, sort_keys=True).encode("utf-8")).hexdigest()[:8]
+    amendment_path = amendment_dir / (
+        f"{episode}_{shot_id}_{script_version_id.split(':')[-1][:12]}_{transition_id}.json")
     amendment_doc = {
         "schemaVersion": 1,
         "approvalState": "approved",

@@ -7,7 +7,6 @@ observable media: keyframes, performances, animation takes and final masters. Pa
 remain audit provenance; validity is decided from the exact inputs an artefact actually depends
 on. No provider is called from this module by itself.
 """
-import copy
 import hashlib
 import json
 import math
@@ -38,36 +37,6 @@ def selected_voice_recipe(recipes, selected, candidates, current_compiled_hash=N
         if same_compiler_record or same_provider_text:
             return recipe
     return None
-
-
-def apply_working_voice_to_direction(direction, working_voice):
-    """Audit the human-visible HEAR prompt, not a superseded Director recipe."""
-    working_by_occurrence = {
-        line.get("dialogueOccurrenceId"): line
-        for line in ((working_voice or {}).get("lines") or [])
-        if line.get("dialogueOccurrenceId") and str(line.get("text") or "").strip()
-    }
-    if not working_by_occurrence:
-        return direction
-    effective = copy.deepcopy(direction)
-    for line in effective.get("lines") or []:
-        working = working_by_occurrence.get(line.get("dialogueOccurrenceId"))
-        if not working:
-            continue
-        text = str(working["text"]).strip()
-        line["performedText"] = text
-        for recipe in line.get("takeRecipes") or []:
-            recipe["performedText"] = text
-        tags = list(dict.fromkeys(
-            value.strip().casefold()
-            for value in re.findall(r"\[([^\]]+)\]", text)
-            if value.strip()
-        ))
-        line["tagPurposes"] = [
-            {"tag": tag, "purpose": "Julian-approved HEAR performance direction."}
-            for tag in tags
-        ]
-    return effective
 
 
 def install(m):
@@ -505,6 +474,23 @@ def install(m):
         if existing and stage in direction_stages:
             expected = department_input_signature(
                 pkg, stage, shot_id, scene, episode)
+            if stage == "voice" and existing.get("scopedDialogueCarryForward"):
+                try:
+                    shot = m._shot(pkg, shot_id)
+                    projected, spoken_lines = m.cb_audio_authority.route_voice_direction(
+                        existing.get("output") or {}, shot.get("dialogueLines") or [])
+                    direction = m.cb_departments.VoiceDirection.model_validate(projected)
+                    m.cb_departments.validate_voice_direction(direction, spoken_lines)
+                    existing["inputSignature"] = expected
+                    existing["packageRevision"] = pkg.get("revision")
+                    existing.pop("scopedDialogueCarryForward", None)
+                    existing.pop("carriedDialogueIndex", None)
+                    save_extra(); m._save(pkg, path)
+                    log("VOICE DIRECTION — carried the current acting direction across "
+                        "the scoped word change; no model or media provider called")
+                    return existing
+                except (KeyError, TypeError, ValueError, RuntimeError):
+                    pass
             invalidation_reason = None
             if existing.get("inputSignature") != expected:
                 invalidation_reason = "direct inputs changed before replacement preparation"
@@ -619,8 +605,6 @@ def install(m):
         if not locked:
             return []
         ledger = m._ledger(pkg, shot["shotId"])
-        output = apply_working_voice_to_direction(
-            output, ledger.get("workingVoice"))
         try:
             track = m.cb_voice_director.compile_track(output, locked)
         except m.cb_voice_director.VoiceContractError as exc:
@@ -978,8 +962,6 @@ def install(m):
             direction, shot.get("dialogueLines") or [])
         if not spoken_lines:
             return None
-        direction = apply_working_voice_to_direction(
-            direction, ledger.get("workingVoice"))
         m._require_confirmed_billing("elevenlabs")
         try:
             compiled_track = m.cb_voice_director.compile_track(direction, spoken_lines)

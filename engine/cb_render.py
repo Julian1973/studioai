@@ -731,15 +731,15 @@ def _provider_identity_record(name, characters_cfg, usage="keyframe", *, shot=No
     """Resolve one character's complete, uncropped turnaround provider attachment."""
     canonical, pack = _identity_pack_for(name, characters_cfg)
     shot_id = str((shot or {}).get("shotId") or "")
-    if str(scene) == "10" and canonical in {"Fuzzby", "Zenny"}:
-        # Scene 10 holds the bees tiny and airborne in a full-cast beach walk.  The normal
-        # multi-angle turnaround sheet has repeatedly blurred Fuzzby/Zenny identity in this
-        # specific composition, so use the locked single-subject anchors as the provider's
-        # character identity source for this scene.
-        anchor = pathlib.Path(P.ASSETS) / f"CB_{canonical}_anchor.png"
+    override = _identity_override_for(canonical, scene, episode)
+    if override:
+        # T46: a scene-scoped identity override is the PROJECT's own ruling (reference_slot_policy.json
+        # → identityOverrides), e.g. Crystal Bears' Scene 10 single-subject anchors for the two bees
+        # whose multi-angle turnarounds kept blurring in that full-cast composition.
+        anchor = pathlib.Path(P.ASSETS) / str(override.get("file") or "").replace("{name}", canonical)
         if not anchor.exists():
             raise Refused(
-                f"REFUSED — Scene 10 bee anchor is missing for {canonical}: {anchor.name}")
+                f"REFUSED — scene {scene} identity anchor is missing for {canonical}: {anchor.name}")
         return {
             "schemaVersion": cb_identity.IDENTITY_PACK_SCHEMA_VERSION,
             "character": canonical,
@@ -756,7 +756,7 @@ def _provider_identity_record(name, characters_cfg, usage="keyframe", *, shot=No
             "singleSubject": True,
             "singleCharacterIdentity": True,
             "turnaroundAuthority": False,
-            "sceneScopedIdentityAnchor": shot_id or "scene-10",
+            "sceneScopedIdentityAnchor": shot_id or f"scene-{scene}",
             "distinguishingFeatures": list((pack or {}).get("distinguishingFeatures") or []),
             "mustNotBorrow": list((pack or {}).get("mustNotBorrow") or []),
         }
@@ -2626,6 +2626,29 @@ def _reference_slot_policy():
     return policy if isinstance(policy, dict) else {}
 
 
+def _comedy_default(key, fallback):
+    """T46: the show's own comedy-contract defaults (laws/cast_vocabulary.json → comedyDefaults); a
+    project without them gets the generic wording."""
+    import project_laws
+    return project_laws.comedy_default(key, fallback)
+
+
+def _identity_override_for(canonical, scene, episode="Ep1"):
+    """The project's scene-scoped identity override for one character, or None."""
+    for item in (_reference_slot_policy().get("identityOverrides") or []):
+        if not isinstance(item, dict):
+            continue
+        scenes = {str(s) for s in (item.get("scenes") or [])}
+        episodes = {str(e) for e in (item.get("episodes") or [])}
+        if scenes and str(scene) not in scenes:
+            continue
+        if episodes and str(episode) not in episodes:
+            continue
+        if canonical in set(item.get("characters") or []):
+            return item
+    return None
+
+
 def _stable_reference_role_key(role, usage, characters_cfg):
     """Return the project-level semantic attachment order for one logical role."""
     policy = _reference_slot_policy()
@@ -4079,22 +4102,22 @@ def save_department_candidate(scene, stage, text=None, lines=None, shot_id=None,
                     "interpretation": {
                         "jokeOrAche": str(
                             creative_shot.get("purpose") or output.get("dramaticBeat") or
-                            "Pride is contradicted by visible evidence."),
+                            _comedy_default("jokeOrAche", "The intent is contradicted by visible evidence.")),
                         "mechanism": " ".join(
                             str(item.get("mechanism") or "").strip()
                             for item in comedy if item.get("mechanism")),
                         "statusBefore": str(output.get("audienceBefore") or
-                                            "The audience expects competence."),
+                                            _comedy_default("statusBefore", "The audience expects competence.")),
                         "statusAfter": str(output.get("audienceAfter") or
-                                           "The audience sees affectionate failure."),
-                        "audienceProgression": [
-                            "Anticipate Fuzzby's performed competence.",
+                                           _comedy_default("statusAfter", "The audience sees affectionate failure.")),
+                        "audienceProgression": list(_comedy_default("audienceProgression", [
+                            "Anticipate the performed competence.",
                             "Read each physical contradiction and escalation.",
-                            "Release into Zenny's affectionate judgement.",
-                        ],
-                        "emotionalHeart": (
-                            "Zenny sees the full mess without rejecting Fuzzby; her restrained "
-                            "amusement turns his failure into affection."),
+                            "Release into the affectionate judgement.",
+                        ])),
+                        "emotionalHeart": str(_comedy_default("emotionalHeart", (
+                            "The witness sees the full mess without rejecting the performer; restrained "
+                            "amusement turns the failure into affection."))),
                     },
                     "gagClocks": [{
                         "beatCode": str(item.get("beatCode") or ""),
@@ -5743,15 +5766,12 @@ def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1",
         "imageNumber": 1, "role": "actual rendered keyframe candidate",
         "path": str(candidate_path),
     }]
-    forbidden = [
-        "extra or missing characters", "identity blending, swapping or cloning",
-        "incorrect relative size", "cropped or malformed anatomy",
-        "a copied turnaround, model-sheet, T-pose or spread-arm presentation pose",
-        "unnatural symmetrical limb placement or arms held out without story motivation",
-        "body-mounted bags, sacks, baskets or dangling loads",
-        "pendants, necklaces, medallions or crystals on either bee",
-        "text, logo or watermark",
-    ]
+    # T47: the forbidden-elements list is the PROJECT's own (laws/forbidden_elements.json); the
+    # winged-cast extras are added only when a winged character is actually in this frame.
+    import project_laws
+    _chars_cfg = _characters_cfg()
+    _winged_here = any(project_laws.has_wings(c, _chars_cfg.get(c, {})) for c in expected_cast)
+    forbidden = project_laws.keyframe_forbidden(_winged_here)
     for index, attachment in enumerate(attachment_plan, start=2):
         slot = attachment["slot"]
         role = attachment["role"]

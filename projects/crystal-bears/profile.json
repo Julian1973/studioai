@@ -26,8 +26,10 @@
     "style": "laws/style.txt",
     "wingLaw": {
       "file": "laws/wing_law.txt",
-      "appliesWhen": "any cast member has isBee=true in canon/characters.json"
-    }
+      "appliesWhen": "any cast member has physiology.wings in laws/cast_vocabulary.json (isBee in canon/characters.json is the legacy signal)"
+    },
+    "castVocabulary": "laws/cast_vocabulary.json",
+    "forbiddenElements": "laws/forbidden_elements.json"
   },
   "episodes": {
     "scripts": "episodes/scripts",

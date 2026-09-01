@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "_note": "T47: keyframe-integration forbidden elements the engine used to spell in code (cb_render), now this project's own law. Entries with 'appliesWhen': 'wings' are added only when a winged cast member is in frame.",
+  "always": [
+    "extra or missing characters",
+    "identity blending, swapping or cloning",
+    "incorrect relative size",
+    "cropped or malformed anatomy",
+    "a copied turnaround, model-sheet, T-pose or spread-arm presentation pose",
+    "unnatural symmetrical limb placement or arms held out without story motivation",
+    "body-mounted bags, sacks, baskets or dangling loads",
+    "text, logo or watermark"
+  ],
+  "winged": [
+    "pendants, necklaces, medallions or crystals on either bee"
+  ],
+  "animationNegatives": {
+    "audio": [["no_foreign_language_speech", "no foreign-language speech"],
+              ["no_invented_background_voices", "no invented background voices"]],
+    "winged": [["no_crystals_on_bees", "no crystals on the bees"],
+               ["wings_keep_moving", "wings continue moving while airborne"]],
+    "physics": [["no_body_inflation", "no body inflation"],
+                ["no_full_body_deflation", "no full-body deflation"]]
+  }
+}

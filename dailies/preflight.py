@@ -20,14 +20,14 @@ def _paths():
     return paths
 PLAYBOOK = pathlib.Path(__file__).resolve().parent / "playbook.json"
 
-# Appearance vocabulary that must NEVER sit near a character (identity law: canon
-# CLAUDE.md rule 5 / Bible Law 2 — identity comes only from reference images).
-# True IDENTITY descriptors only. Deliberately excluded: wings/antennae (motion anatomy
-# — the WING LAW directs their pose), size words (role labels like 'the larger bee' are
-# the engine's sanctioned name-avoidance), generic shape words. Word-bounded.
-APPEARANCE = r"\b(fur|furry|plush|striped?s?|yellow|golden|black|pink|rose(?:-gold)?|teal|lavender|violet|pearlescent|blue-grey|spectacles|glasses|bulbous|translucent|fuzzy|plump)\b"
-NAMES = r"(Fuzzby|Zenny|Aida|Sunny|Luna|Misty|Amie|Howey|Keen|Squeaky|Bo)"
-BEES = ("Fuzzby", "Zenny")
+# T46: the cast names, the appearance vocabulary and the proximity bans are the PROJECT's own law
+# (laws/cast_vocabulary.json, read through engine/project_laws.py) — nothing here names a character.
+# Appearance terms are identity descriptors only; the project's file deliberately excludes wings/antennae
+# (motion anatomy — the WING LAW directs their pose), size words (sanctioned role labels) and shape words.
+def _laws():
+    _paths()
+    import project_laws
+    return project_laws
 
 
 def dryrun(pkg: str, beat: str, ep: str = "Ep1") -> dict:
@@ -80,9 +80,12 @@ def checks(plan: dict, beat_meta: dict, playbook: dict) -> list:
         return findings
 
     # 1. Identity law — appearance words near a character name/label
-    for m in re.finditer(NAMES + r"[^.\n]{0,60}" + APPEARANCE, prompt, re.I):
-        add("BLOCK", "identity-text", f"appearance word near a character: '…{m.group(0)[:70]}…'",
-            "CLAUDE.md r5 / Bible Law 2: identity from reference images ONLY")
+    laws = _laws()
+    names_re, appearance_re = laws.names_regex(), laws.appearance_regex()
+    if names_re and appearance_re:
+        for m in re.finditer(names_re + r"[^.\n]{0,60}" + appearance_re, prompt, re.I):
+            add("BLOCK", "identity-text", f"appearance word near a character: '…{m.group(0)[:70]}…'",
+                "CLAUDE.md r5 / Bible Law 2: identity from reference images ONLY")
     # 2. Spoken words leaked into prompt text (must be 'the line in @Audio1')
     if re.search(r'[""][A-Za-z][^""]{3,}[""]', prompt) and "@Audio" in prompt:
         add("BLOCK", "spoken-words", "quoted dialogue text found in prompt — must be 'the line in @Audio1'",
@@ -105,9 +108,13 @@ def checks(plan: dict, beat_meta: dict, playbook: dict) -> list:
         add("BLOCK", "dialogue-overstuffed", f"{dialogue_words} words in {dur}s (> ~2w/s + slack) — SPLIT the beat",
             "pacing law: split to pace, never trim")
     # 7. Bees with crystals
-    for bee in BEES:
-        if re.search(bee + r"[^.\n]{0,140}crystal", prompt, re.I):
-            add("BLOCK", "bee-crystal", f"{bee} appears near 'crystal' — bees have NO crystal", "locked canon §3/§5")
+    for ban in laws.proximity_bans():
+        window = int(ban.get("window") or 140)
+        for who in ban.get("characters") or []:
+            if re.search(re.escape(str(who)) + r"[^.\n]{0," + str(window) + r"}" + re.escape(str(ban.get("term", ""))),
+                         prompt, re.I):
+                add("BLOCK", str(ban.get("id") or "proximity-ban"), f"{who} appears near '{ban.get('term')}' — {ban.get('reason', 'banned by the project')}",
+                    str(ban.get("source") or "project law"))
     # 8. Negatives / constraints present
     if not re.search(r"NEGATIVE|Do not|constraints", prompt, re.I):
         add("NOTE", "no-negatives", "no negatives/constraints section detected", "segprompt v3 shape")
@@ -144,13 +151,25 @@ def run(pkg: str, beat: str, ep: str = "Ep1") -> int:
 
 
 def selftest() -> int:
-    """Prove the brain catches the classic stupid outputs (no engine, no keys)."""
-    bad_plan = {"prompt": 'Fuzzby, a plump yellow bee with spectacles, says "Nailed it" while his crystal glows. '
-                          "Zenny hovers. 16:9.", "durationSec": 22}
-    bad_meta = {"durationSec": 22, "cuts": [{"dialogue": "word " * 60}], "speakers": ["Fuzzby"]}
+    """Prove the brain catches the classic stupid outputs (no engine, no keys). The sample text is
+    built from the ACTIVE PROJECT's own vocabulary (T46) — a project with no vocabulary is only
+    expected to catch the project-independent findings."""
+    laws = _laws()
+    names = laws.cast_names()
+    bans = laws.proximity_bans()
+    appearance = (laws.cast_vocabulary().get("appearanceTerms") or ["plump"])[:2]
+    who = names[0] if names else "Someone"
+    banned_term = str(bans[0].get("term")) if bans else "nothing"
+    bad_plan = {"prompt": f'{who}, a {" ".join(appearance)} character with spectacles, says "Nailed it" while '
+                          f'his {banned_term} glows. 16:9.', "durationSec": 22}
+    bad_meta = {"durationSec": 22, "cuts": [{"dialogue": "word " * 60}], "speakers": [who]}
     findings = checks(bad_plan, bad_meta, {"beat_duration_rule": {"min_s": 8, "max_s": 15}})
     ids = {f[1] for f in findings}
-    expect = {"identity-text", "law5-no-track", "no-references", "duration", "dialogue-overstuffed", "bee-crystal"}
+    expect = {"law5-no-track", "no-references", "duration", "dialogue-overstuffed"}
+    if names and laws.appearance_regex():
+        expect.add("identity-text")
+    if bans and who in (bans[0].get("characters") or []):
+        expect.add(str(bans[0].get("id") or "proximity-ban"))
     missing = expect - ids
     print(f"selftest findings: {sorted(ids)}")
     print("SELFTEST:", "PASS" if not missing else f"FAIL — missed {sorted(missing)}")

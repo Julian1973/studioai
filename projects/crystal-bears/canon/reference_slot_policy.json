@@ -3,13 +3,43 @@
   "policyVersion": "1.0.0",
   "project": "crystal-bears",
   "characterOrder": [
-    "Zenny", "Fuzzby", "Aida", "Sunny", "Luna", "Misty", "Amie",
-    "Howey", "Keen", "Keen's Mum", "Squeaky", "Bo"
+    "Zenny",
+    "Fuzzby",
+    "Aida",
+    "Sunny",
+    "Luna",
+    "Misty",
+    "Amie",
+    "Howey",
+    "Keen",
+    "Keen's Mum",
+    "Squeaky",
+    "Bo"
   ],
-  "keyframeRoleOrder": ["character_identity", "scene plate"],
+  "keyframeRoleOrder": [
+    "character_identity",
+    "scene plate"
+  ],
   "animationRoleOrder": [
-    "opening keyframe", "previous shot final frame", "character_identity", "scene plate"
+    "opening keyframe",
+    "previous shot final frame",
+    "character_identity",
+    "scene plate"
   ],
   "advisory": true,
-  "note": "Provider image numbers come from semantic project order, never object insertion order. Findings remain advisory."
+  "note": "Provider image numbers come from semantic project order, never object insertion order. Findings remain advisory.",
+  "identityOverrides": [
+    {
+      "scenes": [
+        "10"
+      ],
+      "characters": [
+        "Fuzzby",
+        "Zenny"
+      ],
+      "view": "single-subject-anchor",
+      "file": "CB_{name}_anchor.png",
+      "reason": "Scene 10 holds the bees tiny and airborne in a full-cast beach walk; the multi-angle turnaround sheet repeatedly blurred their identity in that composition, so the locked single-subject anchors are the provider's identity source for this scene (ruling recorded in code 2026-08, moved to data by T46)."
+    }
+  ]
 }

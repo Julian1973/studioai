@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "_note": "T46/T47 (RESTRUCTURE_SPEC_PROJECTS.md, 2026-09-01): every cast name, species term, appearance term, pronunciation and proximity ban the ENGINE used to carry in code, moved here as this project's own data. The engine reads this file through paths.CAST_VOCABULARY; a project without one runs the generic checks only. Not yet under the canon lock (lock_policy.json) — Julian's call whether to add it at the next relock.",
+  "names": [
+    "Fuzzby",
+    "Zenny",
+    "Aida",
+    "Sunny",
+    "Luna",
+    "Misty",
+    "Amie",
+    "Howey",
+    "Keen",
+    "Squeaky",
+    "Bo"
+  ],
+  "species": {
+    "Aida": "bear",
+    "Sunny": "bear",
+    "Luna": "bear",
+    "Misty": "bear",
+    "Amie": "bear",
+    "Howey": "bear",
+    "Keen": "bear",
+    "Fuzzby": "bee",
+    "Zenny": "bee",
+    "Bo's Mum": "squirrel",
+    "Keen's Mum": "bear",
+    "Squeaky": "dolphin",
+    "Bo": "squirrel"
+  },
+  "physiology": {
+    "Fuzzby": {
+      "wings": true
+    },
+    "Zenny": {
+      "wings": true
+    }
+  },
+  "speciesFallbackTerms": [
+    "squirrel",
+    "dolphin",
+    "bee",
+    "bear"
+  ],
+  "appearanceTerms": [
+    "fur",
+    "furry",
+    "plush",
+    "stripe",
+    "stripes",
+    "striped",
+    "yellow",
+    "golden",
+    "black",
+    "pink",
+    "rose",
+    "rose-gold",
+    "teal",
+    "lavender",
+    "violet",
+    "pearlescent",
+    "blue-grey",
+    "spectacles",
+    "glasses",
+    "bulbous",
+    "translucent",
+    "fuzzy",
+    "plump"
+  ],
+  "pronunciation": {
+    "Aida": "Ada"
+  },
+  "proximityBans": [
+    {
+      "id": "bee-crystal",
+      "characters": [
+        "Fuzzby",
+        "Zenny"
+      ],
+      "term": "crystal",
+      "window": 140,
+      "reason": "bees have NO crystal",
+      "source": "locked canon §3/§5"
+    }
+  ],
+  "retakeTerms": {
+    "continuity": [
+      "pollen"
+    ]
+  },
+  "reviewQuestions": {
+    "performance": "Do Zenny's restraint and Fuzzby's chaos feel affectionate rather than mechanical?"
+  },
+  "_physiologyNote": "Bo is deliberately NOT listed under physiology: his canon `avoid` text says 'bee wings', and the engine's legacy winged test ('bee' in avoid) therefore treated him as winged for the animation negatives. Listing {\"wings\": false} would change his shipped negatives — Julian's call at the next relock (T61).",
+  "_speciesNote": "Derived 2026-09-01 from each character's own canon prose (size/key_features/promptRole/bible title) with the engine's original fallback — the same answer the engine gave before T46, recorded once so it is data, not inference.",
+  "vocalCues": {
+    "meditation mantra chant": "Perform Zenny's meditation mantra chant of \"Ohhmmmmmm\" using the exact authored phonetic cue \"{cue}\" as one continuous, warm, unstrained ooh-to-mmm tone with no extra syllables."
+  },
+  "comedyDefaults": {
+    "jokeOrAche": "Pride is contradicted by visible evidence.",
+    "statusBefore": "The audience expects competence.",
+    "statusAfter": "The audience sees affectionate failure.",
+    "audienceProgression": [
+      "Anticipate Fuzzby's performed competence.",
+      "Read each physical contradiction and escalation.",
+      "Release into Zenny's affectionate judgement."
+    ],
+    "emotionalHeart": "Zenny sees the full mess without rejecting Fuzzby; her restrained amusement turns his failure into affection."
+  }
+}

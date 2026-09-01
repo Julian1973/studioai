@@ -1005,25 +1005,11 @@ def _character_species(name, characters_cfg):
     deterministic fallback over their identity prose instead of assuming every non-bee
     character is a bear.
     """
-    record = characters_cfg.get(name, {})
-    species = str(record.get("species") or "").strip().lower()
-    if species:
-        return species
-    if record.get("isBee"):
-        return "bee"
-    # Species comes from positive identity evidence. Negative canon such as
-    # Bo's "avoid bee wings" must never turn him into a bee.
-    identity = " ".join(str(record.get(key) or "") for key in (
-        "size", "key_features", "promptRole",
-    )).lower()
-    bible = record.get("bible") or {}
-    identity += " " + " ".join(str(bible.get(key) or "") for key in (
-        "title", "whoTheyAre",
-    )).lower()
-    for candidate in ("squirrel", "dolphin", "bee", "bear"):
-        if re.search(rf"\b{candidate}s?\b", identity):
-            return candidate
-    return "character"
+    # T46: typed canon > the project's vocabulary map > legacy isBee > the project's fallback terms.
+    # Species comes from positive identity evidence — negative canon such as "avoid bee wings" never
+    # turns a character into a bee (project_laws.species_of keeps that rule).
+    import project_laws
+    return project_laws.species_of(name, characters_cfg.get(name, {}))
 
 
 def _inline_bindings(text, shot, characters_cfg, start=2, characters=None):
@@ -1118,16 +1104,16 @@ def _conditional_constraints(shot, characters_cfg):
     (audio, winged cast, gag physics, ground contact). '2D/flat animation' is carried by the
     style line's own positive statement rather than injected."""
     out = []
+    # T47: the negative phrases are the PROJECT's own (laws/forbidden_elements.json → animationNegatives);
+    # the engine only decides WHICH group a shot triggers.
+    import project_laws
     if shot.dialogueLines:                                       # trigger: audio-bearing shot
-        out += [("no_foreign_language_speech", "no foreign-language speech"),
-                ("no_invented_background_voices", "no invented background voices")]
-    if any("bee" in str(characters_cfg.get(c, {}).get("avoid", "")).lower()
+        out += project_laws.animation_negatives("audio")
+    if any(project_laws.has_wings(c, characters_cfg.get(c, {}))
            for c in shot.charactersInFrame):                     # trigger: winged cast in frame
-        out += [("no_crystals_on_bees", "no crystals on the bees"),
-                ("wings_keep_moving", "wings continue moving while airborne")]
+        out += project_laws.animation_negatives("winged")
     if _shot_physical_stagings(shot):                            # trigger: gag physics contract
-        out += [("no_body_inflation", "no body inflation"),
-                ("no_full_body_deflation", "no full-body deflation")]
+        out += project_laws.animation_negatives("physics")
     text = " ".join([shot.performanceAssignment or "", shot.openingPose or "",
                       shot.visualPayoff or ""])
     if re.search(r"\b(land(?:s|ing)?|ground|floor|stands?|sits?|perch(?:es)?|crash(?:es)?|"

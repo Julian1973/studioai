@@ -33,13 +33,13 @@ DoD: the UI runs with `crystal-bears` removed from every .js/.html/.py under cb-
 
 ## CANON OUT OF CODE (P1) — Phase 3
 
-**T46 · Cast vocabulary as data** ⏳ OPEN — blocked by T44
+**T46 · Cast vocabulary as data** ✅ DONE (2026-09-01)
 projects/crystal-bears/laws/cast_vocabulary.json (new); dailies/preflight.py L20-22/100-102; engine/cb_gen.py:67 + app.html:5964 (pronunciation); engine/cb_engine.py:1000-1027 (species candidates); engine/cb_prompt_lab.py:226-300 (matchTerms); engine/cb_quality.py:129.
 DoD: the six consumers read the file; the Crystal Bears file reproduces today's behaviour byte-for-byte (goldens + preflight fixtures). Verified.
 
-**T47 · Species and physiology in characters.json** ⏳ OPEN — blocked by T46
+**T47 · Species and physiology — as project law, not in characters.json** ✅ DONE (2026-09-01)
 projects/crystal-bears/canon/characters.json (`species`, `physiology.wings`), engine/project_profile.py (`laws.wingLaw.appliesWhen` → physiology), engine/cb_render.py:5752 → `laws/forbidden_elements.json`. `isBee` kept as a derived alias for one release with a deprecation note in the Show Bible.
-DoD: no code path tests `isBee` or the word "bee"; forbidden elements render per project; safety rule green. Verified.
+DoD: no code path tests `isBee` or the word "bee"; forbidden elements render per project; safety rule green. Verified — with one deviation: species/physiology live in laws/cast_vocabulary.json, NOT in characters.json, because characters.json is under the canon lock (lock_policy.json) and editing it would mark canon as drifted; the species map was derived from each character's own canon prose (Bo is a squirrel, Squeaky a dolphin). `isBee` and "bee in avoid" remain as LEGACY fallbacks inside project_laws.has_wings so shipped negatives stay byte-identical (Bo still counts as winged via his `avoid` text — recorded in the vocabulary file for Julian's ruling at T61). Also moved this pass, found by the new guard test: the Scene-10 single-subject-anchor override (→ reference_slot_policy.json identityOverrides), Zenny's mantra-chant performance note (→ vocalCues), the comedy-contract default wording (→ comedyDefaults), a prompt example naming Zenny.
 
 **T48 · Continuity carry rules as data** ⏳ OPEN — blocked by T44
 projects/crystal-bears/canon/continuity.json, engine/cb_scene_package.py:168-204. The Keen wristband branch becomes `{"whenCast":["Keen"],"carry":"…"}` applied generically.

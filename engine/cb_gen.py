@@ -64,9 +64,11 @@ FAL = "https://queue.fal.run"
 BYTEPLUS_ARK_KEY = os.environ.get("BYTEPLUS_ARK_API_KEY", "")
 BYTEPLUS_ARK = "https://ark.ap-southeast.bytepluses.com"
 
-# Canon keeps the character name "Aida". ElevenLabs pronounces that spelling
-# incorrectly, so only the provider-facing voice text uses the phonetic "Ada".
-ELEVEN_PRONUNCIATION_OVERRIDES = {"Aida": "Ada"}
+# T46: the provider-facing pronunciation fixes are the PROJECT's own (laws/cast_vocabulary.json →
+# "pronunciation", e.g. Crystal Bears keeps "Aida" in canon while ElevenLabs receives "Ada"). Canon text
+# is never changed; only the voice text sent to the provider is.
+import project_laws as _laws
+ELEVEN_PRONUNCIATION_OVERRIDES = _laws.pronunciation_overrides()
 
 
 def _eleven_voice_text(text):

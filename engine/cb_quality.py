@@ -126,7 +126,9 @@ def _performance_dimension(state, pkg):
         "performance", "clear",
         "Every current rendered performance has a character-specific director review.",
         [f"{len(shots)} of {len(shots)} shot performances reviewed"],
-        "Do Zenny's restraint and Fuzzby's chaos feel affectionate rather than mechanical?",
+        __import__("project_laws").review_question(
+            "performance",
+            "Do the characters' contrasting temperaments feel affectionate rather than mechanical?"),
     )
 
 

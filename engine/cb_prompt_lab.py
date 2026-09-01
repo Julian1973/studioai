@@ -223,7 +223,7 @@ _CORRELATION_AXES = {
             "label": "Camera and edit",
             "sources": (("camera",),),
             "promptTags": ("camera", "composition"),
-            "matchTerms": ("front", "held", "reframe", "dolly", "zenny", "frame"),
+            "matchTerms": ("front", "held", "reframe", "dolly", "frame"), "castNames": True,
             "feedbackTopics": ("camera-and-composition",),
             "ratingDimension": "cameraAndEdit",
         },
@@ -232,7 +232,7 @@ _CORRELATION_AXES = {
             "label": "Opening and continuity",
             "sources": (("openingPose",), ("continuityProseOut",)),
             "promptTags": ("continuity", "composition"),
-            "matchTerms": ("opening", "positions", "distance", "alone", "frame", "pollen"),
+            "matchTerms": ("opening", "positions", "distance", "alone", "frame"), "projectTerms": "continuity",
             "feedbackTopics": ("camera-and-composition",),
             "ratingDimension": "compositionAndContinuity",
         },
@@ -241,7 +241,7 @@ _CORRELATION_AXES = {
             "label": "Character and world lock",
             "sources": (("referenceRolesProse",),),
             "promptTags": ("identity", "look"),
-            "matchTerms": ("reference", "fuzzby", "zenny", "identity", "proportions", "world"),
+            "matchTerms": ("reference", "identity", "proportions", "world"), "castNames": True,
             "feedbackTopics": ("identity-and-references",),
             "ratingDimension": "identityAndReferenceUse",
         },
@@ -297,7 +297,7 @@ _CORRELATION_AXES = {
             "label": "Character and world lock",
             "sources": (("referenceRolesProse",),),
             "promptTags": ("identity", "look"),
-            "matchTerms": ("reference", "identity", "proportions", "fuzzby", "zenny", "world"),
+            "matchTerms": ("reference", "identity", "proportions", "world"), "castNames": True,
             "feedbackTopics": ("identity-and-references",),
             "ratingDimension": "identityAndReferenceUse",
         },
@@ -938,6 +938,18 @@ def _correlation_tokens(text):
     }
 
 
+def _axis_match_terms(axis):
+    """T46: an axis's generic terms plus, when it asks for them, the PROJECT's cast names and its own
+    continuity/retake vocabulary (laws/cast_vocabulary.json) — no character name is spelled here."""
+    import project_laws
+    terms = list(axis.get("matchTerms") or ())
+    if axis.get("castNames"):
+        terms += [n.lower() for n in project_laws.cast_names()]
+    if axis.get("projectTerms"):
+        terms += project_laws.retake_terms(str(axis["projectTerms"]))
+    return tuple(terms)
+
+
 def _prompt_evidence(analysis, prompt_tags, wish_text, match_terms=()):
     """Locate exact prompt clauses by declared craft tags and lexical overlap."""
     wish_tokens = _correlation_tokens(" ".join(match_terms)) or _correlation_tokens(wish_text)
@@ -1046,7 +1058,7 @@ def build_direction_correlation(shot, analysis, artifact_type, *, selected=None,
                 })
         wish_text = " ".join(item["text"] for item in sources)
         prompt_evidence = _prompt_evidence(
-            analysis, axis["promptTags"], wish_text, axis.get("matchTerms") or ())
+            analysis, axis["promptTags"], wish_text, _axis_match_terms(axis))
         if not prompt_applies_to_render:
             prompt_evidence["status"] = "direction-only"
 

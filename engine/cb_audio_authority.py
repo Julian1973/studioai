@@ -105,12 +105,15 @@ def route_line(line):
     cue = None
     if kinds:
         authored_cue = trailing_action or original.strip()
-        meditation_note = (
-            f' Perform Zenny\'s meditation mantra chant of "Ohhmmmmmm" using the exact '
-            f'authored phonetic cue "{authored_cue}" as one continuous, warm, unstrained '
-            "ooh-to-mmm tone with no extra syllables."
-            if "meditation mantra chant" in kinds else ""
-        )
+        # T46: a per-kind performance note is the PROJECT's own (laws/cast_vocabulary.json →
+        # vocalCues[kind], with {cue} standing for the authored phonetic cue); no character is named here.
+        import project_laws
+        meditation_note = ""
+        for kind in kinds:
+            template = project_laws.vocal_cue(kind)
+            if template:
+                meditation_note = " " + template.replace("{cue}", authored_cue)
+                break
         cue = {
             "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
             "sourceEventId": line.get("sourceEventId"),

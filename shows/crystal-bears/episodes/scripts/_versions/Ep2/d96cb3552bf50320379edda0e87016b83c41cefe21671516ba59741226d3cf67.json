@@ -1,0 +1,11 @@
+{
+ "schemaVersion": 1,
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67",
+ "algorithm": "sha256",
+ "sha256": "d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67",
+ "byteLength": 10090,
+ "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67.txt",
+ "createdAt": "2026-09-01T21:54:29+00:00",
+ "sourceName": "pasted-text-scene-4-onward.txt"
+}

@@ -1,0 +1,19 @@
+{
+ "schemaVersion": 1,
+ "eventId": "972bd099b2ee4b5382319038097808c8",
+ "kind": "script-scene-range-replaced",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67",
+ "previousScriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48",
+ "title": "Bo's Big Day V4",
+ "displayFile": "Ep2_Bo_s_Big_Day_V4.txt",
+ "activatedAt": "2026-09-01T21:54:29+00:00",
+ "activatedBy": "Julian",
+ "changeScope": {
+  "kind": "scene-range-replacement",
+  "fromScene": "4",
+  "throughScene": "8",
+  "reason": "User supplied corrected script text from Scene 4 onward",
+  "previousScriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48"
+ }
+}

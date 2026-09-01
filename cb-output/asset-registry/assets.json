@@ -11529,21 +11529,21 @@
       "url": "/engine/media/shots/Ep2_S4.SH1_c1.mp4"
     },
     {
-      "assetId": "b7b7fbfbd26ce390ce707728",
+      "assetId": "80d9158342084eae03428f56",
       "bindingKey": "Ep2|4|S4.SH1|approved_take|approved_take",
       "displayType": "video",
       "episode": "Ep2",
       "kind": "approved_take",
       "label": "S4.SH1 approved_take",
       "metadata": {},
-      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
-      "registeredAt": "2026-09-01T21:05:45Z",
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_edit_42937fa3.mp4",
+      "registeredAt": "2026-09-01T21:38:24Z",
       "role": "approved_take",
       "scene": "4",
       "shotId": "S4.SH1",
       "source": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_scene4_production_package.json",
       "status": "approved",
-      "url": "/engine/media/shots/Ep2_S4.SH1_c1.mp4"
+      "url": "/engine/media/shots/Ep2_S4.SH1_edit_42937fa3.mp4"
     },
     {
       "assetId": "c90a81cb69e538772569933a",

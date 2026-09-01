@@ -4932,7 +4932,7 @@ function scenePlateSourceActionsHTML(hasPlate){
   const rate=(RATES||{})["seedream5pro_image"];
   const cost=rate?` · $${rate.usd}`:"";
   return `<div class="scene-plate-actions" aria-label="Change Scene Plate source">
-    <button type="button" class="btn ghost" onclick="openDisclosureModal('scenelook',{regenerate:${!!hasPlate}})">Generate${_esc(cost)}</button>
+    <button type="button" class="btn ghost" onclick="startScenePlateGeneration(${!!hasPlate})">Generate${_esc(cost)}</button>
     <button type="button" class="btn ghost" onclick="document.getElementById('seePlateUpload').click()">Upload</button>
     <input type="file" id="seePlateUpload" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="slUpload(this)">
     <button type="button" class="btn ghost" onclick="slLibrary()">Use library</button>
@@ -6254,11 +6254,24 @@ async function shOpenFrameLibraryPick(tok,path,outcome){
 // for plain Generate). Selecting a reference is never approval.
 function slSourceChoices(genLabel,regenerate){
   return `<div class="ofc">
-    <div class="ofc-row"><button class="btn" onclick="openDisclosureModal('scenelook',{regenerate:${!!regenerate}})">${genLabel}</button></div>
+    <div class="ofc-row"><button class="btn" onclick="startScenePlateGeneration(${!!regenerate})">${genLabel}</button></div>
     <div class="ofc-row"><button class="btn ghost" onclick="document.getElementById('slUpload').click()">⇧ Upload image — no generation cost</button>
       <input type="file" id="slUpload" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="slUpload(this)"/></div>
     <div class="ofc-row"><button class="btn ghost" onclick="slLibrary()">▤ Choose from library — no generation cost</button></div>
   </div>`;
+}
+function startScenePlateGeneration(regenerate){
+  const pending=!!(SH_SCENELOOK&&(SH_SCENELOOK.candidate||SH_SCENELOOK.activeSource==="working"||SH_SCENELOOK.status==="working"));
+  if(!pending){openDisclosureModal('scenelook',{regenerate:!!regenerate});return;}
+  if(!confirm("Generate a replacement Scene Plate? The current working candidate will move to History first. Any separately approved plate remains protected. No generation starts until you review the cost and press Build scene world."))return;
+  shRun("reject-scenelook",null,{
+    correction:"Replaced by a newly generated Scene Plate selected by Julian.",
+    preserveView:true,
+    progressLabel:"Moving the current Scene Plate candidate to History",
+    afterJob:job=>{
+      if(job&&job.status==="done")openDisclosureModal('scenelook',{regenerate:true});
+    }
+  });
 }
 async function slUpload(input){
   // THE NON-GENERATION SCENE LOOK UPLOAD (2026-07-19 — "still not letting me upload a
@@ -6293,7 +6306,7 @@ async function slLibrary(){
   try{HS=await fetch(BASE+"/api/houses",{cache:"no-store"}).then(r=>r.json());}catch(e){}
   const groups=[];
   const uploaded=(L.uploadedRefs||[]).map(r=>({file:u(r.file),name:r.name}));
-  if(uploaded.length)groups.push(["Uploaded scene references",uploaded]);
+  if(uploaded.length)groups.push(["Your supplied scene plates",uploaded]);
   const scenePlates=(L.scenes||[]).filter(s=>s.plate).map(s=>({file:'engine/media/'+s.plate,name:'Scene '+s.scene+' · '+(s.name||s.locationId)}));
   if(scenePlates.length)groups.push(["Episode scene plates",scenePlates]);
   const manifestItems=Object.entries(L.manifest||{}).filter(([k])=>k[0]!=='_').map(([lid,e])=>({file:'cb-seed/assets/locations/'+e.file,name:(e.name||lid)}));
@@ -6314,7 +6327,7 @@ async function slLibrary(){
     : `<div class="artefact-empty"><div style="color:var(--muted)">No location, house or uploaded scene references exist yet — add one from the Scenes or Houses tab.</div></div>`;
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
     <h3>Reference library</h3>
-    <div class="dec-caption" style="margin-bottom:4px">The same locations, houses and uploaded scene references shown in the Scenes/Houses tabs. Click one to use it directly as Scene ${_esc(SH_SC)}'s Look Plate candidate — no generation cost, awaiting your approval.</div>
+    <div class="dec-caption" style="margin-bottom:4px">The same locations, houses and supplied scene plates shown in the Scenes/Houses tabs. Click one to use it directly as Scene ${_esc(SH_SC)}'s Look Plate candidate — no generation cost, awaiting your approval.</div>
     ${body}
     <div style="display:flex;justify-content:flex-end;margin-top:20px"><button class="btn ghost" onclick="closeM()">Cancel</button></div>`;
   document.getElementById("modal").classList.add("show");

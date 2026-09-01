@@ -730,10 +730,20 @@ def test_see_stage_is_visual_first_and_demotes_repeated_context():
 def test_see_scene_plate_can_be_generated_uploaded_or_selected_from_library():
     assert 'function scenePlateSourceActionsHTML(hasPlate)' in APP
     assert 'aria-label="Change Scene Plate source"' in APP
-    assert "openDisclosureModal('scenelook',{regenerate:${!!hasPlate}})" in APP
+    assert 'onclick="startScenePlateGeneration(${!!hasPlate})"' in APP
     assert 'id="seePlateUpload"' in APP and 'onchange="slUpload(this)"' in APP
     assert 'onclick="slLibrary()">Use library</button>' in APP
     assert 'The current plate stays protected until you approve its replacement.' in APP
+
+
+def test_scene_plate_generate_iterates_a_pending_candidate_before_disclosure():
+    assert 'function startScenePlateGeneration(regenerate)' in APP
+    assert 'SH_SCENELOOK.candidate||SH_SCENELOOK.activeSource==="working"||SH_SCENELOOK.status==="working"' in APP
+    assert 'shRun("reject-scenelook",null,{' in APP
+    assert 'Moving the current Scene Plate candidate to History' in APP
+    assert "openDisclosureModal('scenelook',{regenerate:true})" in APP
+    assert 'No generation starts until you review the cost' in APP
+    assert 'groups.push(["Your supplied scene plates",uploaded])' in APP
 
 
 def test_keyframe_references_remain_open_during_live_polling():

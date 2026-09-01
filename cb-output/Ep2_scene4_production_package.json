@@ -1008,7 +1008,7 @@
      }
     ]
    },
-   "approvedTake": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+   "approvedTake": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_edit_42937fa3.mp4",
    "harvestFrame": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_final_frame.png",
    "departmentWork": {
     "cinematography": {
@@ -4677,186 +4677,9 @@
    },
    "approval": {
     "approved": true,
-    "candidate": 1,
+    "source": "seedance-video-edit",
     "reviewed_by": "Julian",
-    "at": "2026-09-01T21:48:23",
-    "packageRevision": 3,
-    "inputSignature": {
-     "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
-     "shotContractHash": "ff3c5e0f1c9e851e4ec6832ceae54148905877d5c29c78d44e4ef8970a35c01c",
-     "animationDirectionSignature": {
-      "stage": "animation",
-      "model": "gpt-5.4",
-      "skillHashes": {
-       "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
-      },
-      "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
-      "shotContractHash": "ff3c5e0f1c9e851e4ec6832ceae54148905877d5c29c78d44e4ef8970a35c01c",
-      "shotHash": "853107ee21569de453505f0bea173c082fb542ffdcbe39fd2686c05c354c45eb",
-      "openingFrameHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
-      "openingStageContractHash": "941ff36f0dd9f1144d4c6cbaddddfd27b0b9933193a712cfebd24568e40f5fb1",
-      "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
-      "referenceOrder": [
-       "@图1",
-       "@图2",
-       "@图3",
-       "@图4",
-       "@图5",
-       "@图6"
-      ],
-      "referenceBindings": [
-       {
-        "slot": "@图1",
-        "sourceSlot": "@图1",
-        "role": "opening keyframe",
-        "view": null,
-        "sameCharacterGroup": null
-       },
-       {
-        "slot": "@图2",
-        "sourceSlot": "@图4",
-        "role": "Aida",
-        "view": "complete-turnaround",
-        "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1"
-       },
-       {
-        "slot": "@图3",
-        "sourceSlot": "@图3",
-        "role": "Keen",
-        "view": "complete-turnaround",
-        "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0"
-       },
-       {
-        "slot": "@图4",
-        "sourceSlot": "@图2",
-        "role": "Bo",
-        "view": "complete-turnaround",
-        "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2"
-       },
-       {
-        "slot": "@图5",
-        "sourceSlot": "@图5",
-        "role": "prop:satchel",
-        "view": null,
-        "sameCharacterGroup": null
-       },
-       {
-        "slot": "@图6",
-        "sourceSlot": "@图6",
-        "role": "scene plate",
-        "view": null,
-        "sameCharacterGroup": null
-       }
-      ],
-      "referenceHashes": [
-       "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
-       "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
-       "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
-       "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
-       "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
-       "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
-      ],
-      "voiceHash": "0a4ec698e2faca860c66a6e0354f2f2338b14050f85c27d32ddeaddfad3a0c77",
-      "voiceApprovalSignature": {
-       "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
-       "dialogueHash": "01cded761d74b24355f6ebb0ed4bf3a3388abd283d0e0323cacab406dce261e5",
-       "performanceHash": "520b7c7fb37af579e210435f36305ade487d19652df5786fbd8f49f42c3ebf8c",
-       "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
-       "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
-       "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
-       "voiceCompilerVersion": "voice-director-v1",
-       "pronunciationOverrides": {
-        "Aida": "Ada"
-       },
-       "voiceIds": [
-        "AAF2q3NCwTrLMMkEnRLB",
-        "TCRj5m2u9xhZHJ8h9pMv",
-        "AAF2q3NCwTrLMMkEnRLB",
-        "AAF2q3NCwTrLMMkEnRLB",
-        "AAF2q3NCwTrLMMkEnRLB",
-        "SHuZ9GyczU4QEDzU4QU4",
-        "TCRj5m2u9xhZHJ8h9pMv",
-        "SHuZ9GyczU4QEDzU4QU4",
-        "AAF2q3NCwTrLMMkEnRLB",
-        "SHuZ9GyczU4QEDzU4QU4",
-        "AAF2q3NCwTrLMMkEnRLB",
-        "SHuZ9GyczU4QEDzU4QU4",
-        "AAF2q3NCwTrLMMkEnRLB",
-        "SHuZ9GyczU4QEDzU4QU4"
-       ]
-      },
-      "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
-     },
-     "promptHash": "680917499bc6cd3afb4ef138e83a49cf6caddbd49cd354e452a0dcc5eaeace4b",
-     "audioReferencePolicy": "guide",
-     "openingFrameHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
-     "references": [
-      {
-       "slot": "@图1",
-       "sourceSlot": "@图1",
-       "role": "opening keyframe",
-       "view": null,
-       "sameCharacterGroup": null,
-       "hash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec"
-      },
-      {
-       "slot": "@图2",
-       "sourceSlot": "@图4",
-       "role": "Aida",
-       "view": "complete-turnaround",
-       "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
-       "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
-      },
-      {
-       "slot": "@图3",
-       "sourceSlot": "@图3",
-       "role": "Keen",
-       "view": "complete-turnaround",
-       "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
-       "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
-      },
-      {
-       "slot": "@图4",
-       "sourceSlot": "@图2",
-       "role": "Bo",
-       "view": "complete-turnaround",
-       "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2",
-       "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
-      },
-      {
-       "slot": "@图5",
-       "sourceSlot": "@图5",
-       "role": "prop:satchel",
-       "view": null,
-       "sameCharacterGroup": null,
-       "hash": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1"
-      },
-      {
-       "slot": "@图6",
-       "sourceSlot": "@图6",
-       "role": "scene plate",
-       "view": null,
-       "sameCharacterGroup": null,
-       "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
-      }
-     ],
-     "audioHash": "0a4ec698e2faca860c66a6e0354f2f2338b14050f85c27d32ddeaddfad3a0c77",
-     "durationSec": 30.0,
-     "comparisonModelId": null,
-     "comparisonRunId": null,
-     "executionPlanHash": "6add82312a8a44fb9a9edadbf2108cd9bb93f86b346b340a07ee43b599abd497",
-     "provider": "byteplus",
-     "providerModelId": "dreamina-seedance-2-5-260628",
-     "modelVersion": "2.5-260628",
-     "transport": "byteplus-async",
-     "endpoint": "/api/v3/contents/generations/tasks",
-     "resolution": "480p",
-     "capabilityVerifiedAt": "2026-08-16",
-     "tier": "standard"
-    },
-    "contentHash": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
-    "harvestHash": "04ccf2237849d4a24c0e09940b8853cf04d1fe9c52a048345b3c383dfef24035",
-    "batchId": "S4.SH1-b1-20260901T194423-cb3ddd22"
+    "at": "2026-09-01T22:38:09"
    },
    "approvedCandidate": 1,
    "candidatePaths": [
@@ -6011,59 +5834,7 @@
     }
    ],
    "pendingEditSpendAuth": null,
-   "editWork": {
-    "status": "candidate-pending",
-    "batchId": "S4.SH1-edit-20260901T221934-b6d1c26f",
-    "sourcePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
-    "sourceSha256": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
-    "prompt": "Strictly edit @Video1 only. Apply this correction only from 0.70s to 5.00s: During Bo and Keen's opening '3, 2, 1 …' countdown, Bo's tail starts normal and smaller through '3' and '2'. Exactly on the spoken count of '1', Bo's tail pops into one sudden oversized round puff for the comic beat, then naturally deflates and settles back to normal smaller squirrel-tail volume by 4.50 seconds. Only Bo's tail timing and volume change. Preserve the exact body motion, faces, dialogue, timing, Keen, camera, satchel, forest, lighting, and every frame after 5.00 seconds.\nKeep every frame outside that time window unchanged. Preserve the original cast identities, proportions, wardrobe, props, geography, lighting, camera axis, lens, camera motion, action timing and opening and closing states. Do not introduce a new shot, cut, transition, character, prop, caption, subtitle, watermark or alternative performance. Match motion continuously at both edit boundaries. @Audio1 remains the sole authority for exact spoken words, voice identity, cadence, delivery, breath, pauses, mouth timing and silence. Do not replace, reinterpret or add dialogue. Listeners remain silent and closed-mouth. ",
-    "promptSha256": "02ed182520f6afb076137a4068506bb90deab6abf81960cd93a6dc0c7ef0d087",
-    "correction": "During Bo and Keen's opening '3, 2, 1 …' countdown, Bo's tail starts normal and smaller through '3' and '2'. Exactly on the spoken count of '1', Bo's tail pops into one sudden oversized round puff for the comic beat, then naturally deflates and settles back to normal smaller squirrel-tail volume by 4.50 seconds. Only Bo's tail timing and volume change. Preserve the exact body motion, faces, dialogue, timing, Keen, camera, satchel, forest, lighting, and every frame after 5.00 seconds.",
-    "startSec": 0.7,
-    "endSec": 5.0,
-    "disclosure": {
-     "operation": "Edit approved take",
-     "shotId": "S4.SH1",
-     "sourceSha256": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
-     "window": "0.70-5.00s",
-     "startSec": 0.7,
-     "endSec": 5.0,
-     "correction": "During Bo and Keen's opening '3, 2, 1 …' countdown, Bo's tail starts normal and smaller through '3' and '2'. Exactly on the spoken count of '1', Bo's tail pops into one sudden oversized round puff for the comic beat, then naturally deflates and settles back to normal smaller squirrel-tail volume by 4.50 seconds. Only Bo's tail timing and volume change. Preserve the exact body motion, faces, dialogue, timing, Keen, camera, satchel, forest, lighting, and every frame after 5.00 seconds.",
-     "provider": "byteplus",
-     "providerModelId": "dreamina-seedance-2-5-260628",
-     "modelVersion": "2.5-260628",
-     "resolution": "480p",
-     "durationSec": 30.0,
-     "candidateCount": 1,
-     "maximumCostUsd": 3.123,
-     "audioAuthority": "ElevenLabs v3 @Audio1",
-     "originalPreserved": true
-    },
-    "startedAt": "2026-09-01T22:19:34",
-    "providerProgress": {
-     "event": "downloaded",
-     "taskId": "cgt-20260902051939-vblvk",
-     "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_edit_42937fa3.mp4",
-     "outputBytes": 13888176,
-     "at": "2026-09-01T22:30:30"
-    },
-    "providerTaskId": "cgt-20260902051939-vblvk",
-    "candidatePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_edit_42937fa3.mp4",
-    "candidateSha256": "ec2a26019834e00037fe1a42c10d64aa656f8cb9b84c4b1795d4cd0b382ff1a4",
-    "completedAt": "2026-09-01T22:30:30",
-    "audioProvenance": {
-     "candidate": "edit",
-     "providerGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_edit_42937fa3.mp4",
-     "providerGuideSha256": "ec2a26019834e00037fe1a42c10d64aa656f8cb9b84c4b1795d4cd0b382ff1a4",
-     "reviewPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_edit_42937fa3.mp4",
-     "reviewSha256": "ec2a26019834e00037fe1a42c10d64aa656f8cb9b84c4b1795d4cd0b382ff1a4",
-     "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav",
-     "approvedMasterSha256": "0a4ec698e2faca860c66a6e0354f2f2338b14050f85c27d32ddeaddfad3a0c77",
-     "providerGuideRemoved": false,
-     "approvedHearRestored": false,
-     "providerFinalMixPreserved": true
-    }
-   },
+   "editWork": null,
    "editHistory": [
     {
      "status": "rejected",
@@ -6120,6 +5891,17 @@
      "rejectedAt": "2026-09-01T22:18:21",
      "reviewedBy": "Julian",
      "rejection": "Tail timing is wrong: Bo's tail should begin normal/small, puff big only on the count of one, then settle back to normal."
+    },
+    {
+     "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+     "sha256": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
+     "supersededBy": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_edit_42937fa3.mp4",
+     "at": "2026-09-01T22:38:08",
+     "correction": "During Bo and Keen's opening '3, 2, 1 …' countdown, Bo's tail starts normal and smaller through '3' and '2'. Exactly on the spoken count of '1', Bo's tail pops into one sudden oversized round puff for the comic beat, then naturally deflates and settles back to normal smaller squirrel-tail volume by 4.50 seconds. Only Bo's tail timing and volume change. Preserve the exact body motion, faces, dialogue, timing, Keen, camera, satchel, forest, lighting, and every frame after 5.00 seconds.",
+     "window": [
+      0.7,
+      5.0
+     ]
     }
    ]
   }

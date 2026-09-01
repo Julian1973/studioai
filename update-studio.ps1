@@ -47,13 +47,27 @@ if (Test-Path -LiteralPath "requirements.txt") { $requirementsBefore = (Get-File
 
 Say "Fetching origin"
 git fetch --prune origin | Out-Host
-Say "Switching to $Branch"
+# A bundle beside this script (studio-update.bundle) carries commits that have not reached GitHub
+# yet — a hand-delivered update. It is fetched too, and wins when it is ahead of origin.
+$bundle = Join-Path $studioRoot "studio-update.bundle"
+$source = "origin/$Branch"
+if (Test-Path -LiteralPath $bundle) {
+    Say "Fetching hand-delivered update from studio-update.bundle"
+    git fetch $bundle "refs/heads/${Branch}:refs/remotes/bundle/$Branch" | Out-Host
+    $originHas = (git rev-parse --verify --quiet "origin/$Branch")
+    if (-not $originHas -or (git merge-base --is-ancestor "origin/$Branch" "bundle/$Branch"; $LASTEXITCODE -eq 0)) {
+        $source = "bundle/$Branch"
+    }
+}
+Say "Switching to $Branch (from $source)"
 if ((git branch --list $Branch).Trim()) {
     git checkout $Branch | Out-Host
 } else {
-    git checkout -b $Branch --track "origin/$Branch" | Out-Host
+    git checkout -b $Branch $source | Out-Host
+    if ($source -eq "origin/$Branch") { git branch --set-upstream-to "origin/$Branch" $Branch | Out-Null }
 }
-git merge --ff-only "origin/$Branch" | Out-Host
+git merge --ff-only $source | Out-Host
+if ($source -like "bundle/*") { Say "This update came from the bundle — publish it with:  git push -u origin $Branch" }
 # symlinks written as text files by an older checkout become real links on re-checkout
 git checkout -- . 2>$null
 

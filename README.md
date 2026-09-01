@@ -68,10 +68,12 @@ The researched Seedance 2.5 scene-generation, provider-migration and delivery pl
 
 - `cb-studio/` — production command centre and local API.
 - `engine/` — planning, validation, generation, safety, approvals, cost controls and post.
-- `shows/crystal-bears/` — show-specific canon, scripts, laws and production state.
+- `projects/<project>/` — ONE FOLDER PER SHOW: its show bible, canon, laws, scripts, episodes and
+  production output. `projects/crystal-bears/` is the first project. (`shows/` is a compatibility
+  link to `projects/` for one release — see RESTRUCTURE_SPEC_PROJECTS.md.)
 - `skills/` — runtime production-department contracts, including the Seedance Production
   Director.
-- `cb-output/` — production packages and evidence.
+- `cb-output/` — compatibility link to `projects/crystal-bears/episodes/output/` (packages and evidence).
 - `tools/` — canon, media and field-audit utilities.
 
 The root Node/Replit files are an older, unrelated interactive project retained from the

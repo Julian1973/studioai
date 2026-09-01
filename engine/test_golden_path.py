@@ -513,13 +513,13 @@ def world(monkeypatch, tmp_path):
     # _require_current_scenelook before reaching _plate_path at all). The real plate file is
     # created below, alongside the scenelook approval record it's read from.
     # THE SCENE LOOK CANON FALLBACK (2026-07-19): _compile_scenelook_prompt reads
-    # {root}/shows/crystal-bears/canon/locations.json for episode "EpT" scene "9" — this
+    # {root}/projects/crystal-bears/canon/locations.json for episode "EpT" scene "9" — this
     # world has no such file by default, so every path through keyframe_shot (which always
     # calls _require_current_scenelook first) refused with "no canon environment data
     # found," unrelated to whatever each test actually exercises downstream. A minimal,
     # synthetic (not real-show) entry closes that gate the same way the real production
-    # shows/crystal-bears/canon/locations.json now does for Ep1.
-    canon_dir = tmp_path / "shows" / "crystal-bears" / "canon"
+    # projects/crystal-bears/canon/locations.json now does for Ep1.
+    canon_dir = tmp_path / "projects" / "crystal-bears" / "canon"
     canon_dir.mkdir(parents=True, exist_ok=True)
     json.dump({"EpT": {"9": {
         "look": "A synthetic test meadow with oversized flowers.",
@@ -1451,12 +1451,12 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
               "Fuzzby rockets toward a springy leaf as Zenny watches from her petal.\n\n"
               "FUZZBY\nNailed it.\n")
     store = ScriptStore(
-        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
+        tmp_path, script_root=tmp_path / "projects/crystal-bears/episodes/scripts")
     current = store.store(
         "Ep1", script, "Script To Master", source_name="script.txt",
         activated_by="TestReviewer", activated_at="2026-07-30T00:00:00+00:00")
 
-    characters_path = tmp_path / "shows" / "crystal-bears" / "canon" / "characters.json"
+    characters_path = tmp_path / "projects" / "crystal-bears" / "canon" / "characters.json"
     characters_path.parent.mkdir(parents=True, exist_ok=True)
     characters_path.write_text(json.dumps(CFG, indent=1))
     episodes = tmp_path / "cb-studio" / "data" / "episodes.json"
@@ -1655,7 +1655,7 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
         lambda path, record: {
             "status": "pass", "reason": "synthetic fixture geometry",
             "zeroSpend": True, "providerCalled": False})
-    locations = tmp_path / "shows" / "crystal-bears" / "canon" / "locations.json"
+    locations = tmp_path / "projects" / "crystal-bears" / "canon" / "locations.json"
     locations.write_text(json.dumps({"Ep1": {"1": {
         "look": "Crystal Cove meadow at bee scale.", "lighting": "Warm daylight.",
         "weather": "Clear.", "colorTemperature": "Warm.",

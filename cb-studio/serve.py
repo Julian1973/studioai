@@ -69,10 +69,10 @@ def _canonical_cb_state():
 ACTIVE_SHOW = studio_profile.load_show_profile(ROOT)
 SHOW_PROFILE_STATUS = studio_profile.capability_report(ACTIVE_SHOW)
 CANON_CONFIG = ACTIVE_SHOW.canon_paths["characters"].parent
-SCRIPTS = (
-    DATA / "scripts" if ACTIVE_SHOW.profile.showId == studio_profile.DEFAULT_SHOW_ID
-    else DATA / "shows" / ACTIVE_SHOW.profile.showId / "scripts"
-)
+# T43 (2026-09-01): ONE script store per project — the profile's episodes.scripts. The old
+# cb-studio/data/scripts copy (which drifted from the tenant copy by two lines, T42) is gone;
+# a compatibility symlink stands at its old path for one release.
+SCRIPTS = ACTIVE_SHOW.scripts_path
 SCRIPTS.mkdir(parents=True, exist_ok=True)
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT, show_id=ACTIVE_SHOW.profile.showId)
 PORT = int(os.environ.get("CB_STUDIO_PORT", "8765"))
@@ -2400,8 +2400,8 @@ _APPROVED_FILES = {
     "/cb-studio/board.html",              # Studio board / rough-cut entry
     "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
     "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
-    f"/shows/{ACTIVE_SHOW.profile.showId}/canon/characters.json",
-    f"/shows/{ACTIVE_SHOW.profile.showId}/canon/locked_canon.md",
+    f"/projects/{ACTIVE_SHOW.profile.showId}/canon/characters.json",
+    f"/projects/{ACTIVE_SHOW.profile.showId}/canon/locked_canon.md",
 }                                         # add a new project's showBibleFile / configBase characters.json here if it differs
 _MEDIA_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico",
               ".mp4", ".webm", ".mov", ".m4v", ".mp3", ".wav", ".m4a", ".ogg",
@@ -5271,6 +5271,17 @@ class H(http.server.SimpleHTTPRequestHandler):
 
 def main():
     os.chdir(ROOT)
+    # T43 (2026-09-01): refuse to serve from a checkout whose compatibility links are not
+    # real links (a Windows clone without symlink support turns each into a text file).
+    sys.path.insert(0, str(ROOT / "tools"))
+    import check_links
+    _broken = check_links.broken_links(ROOT)
+    if _broken:
+        print("COMPATIBILITY LINKS BROKEN — the studio cannot run safely from this checkout:")
+        for _line in _broken:
+            print("  " + _line)
+        print(check_links.FIX)
+        sys.exit(2)
     # Jobs used to live only in the Python dictionary above. Restore their durable
     # ledger first, and close any row left running by a previous process honestly.
     interrupted = cb_db.interrupt_running_jobs(ROOT, server_key=SERVER_KEY)

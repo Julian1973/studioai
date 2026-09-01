@@ -166,12 +166,12 @@ def test_raw_exemplar_dump_does_not_return():
 def test_ex005_remains_linked_to_7d5762e():
     """The REAL registry (not a fixture): the active EX-005 principle points at the
     verified structural change."""
-    real = json.load(open(L.ROOT / "shows/crystal-bears/creative/learning/"
+    real = json.load(open(L.ROOT / "projects/crystal-bears/creative/learning/"
                                     "ACTIVE_CREATIVE_MEMORY.json"))
     rec = next(r for r in real["principles"] if r["principleId"] == "acm-213b111d")
     assert rec["appliedSourceRef"] == "7d5762e"
     assert rec["destinationSource"] == "creative-room workflow"
-    pats = json.load(open(L.ROOT / "shows/crystal-bears/creative/learning/"
+    pats = json.load(open(L.ROOT / "projects/crystal-bears/creative/learning/"
                                      "PATTERN_LIBRARY.json"))["patterns"]
     for pid in ("pat-6ee4b7fd", "pat-c63c3a1f"):         # stay inactive
         assert next(p for p in pats if p["patternId"] == pid)["maturity"] != "approved-principle"

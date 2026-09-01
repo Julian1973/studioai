@@ -12,18 +12,26 @@ engine/_director_pass/
 cb-studio/data/media-index.json
 cb-studio/data/episodes.json
 engine/cost_ledger.jsonl
+projects/*/episodes/output/state/
 cb-output/state/
 cb-studio/data/project-workbench-state.json
+projects/*/episodes/output/research/
 cb-output/research/
+projects/*/episodes/output/logs/
 cb-output/logs/
+projects/*/episodes/output/director-chat/
 cb-output/director-chat/
+projects/*/episodes/output/creative/archive/
 cb-output/creative/archive/
+projects/*/episodes/output/archive/
 cb-output/archive/
+projects/*/episodes/output/asset-registry/.*.tmp
 cb-output/asset-registry/.*.tmp
 
 # Real Crystal Bears assets, but too large for git without LFS (~790MB combined, 2026-07-08) — backed up
 # instead via tools/backup_media.py (to the 5t external drive), not tracked here.
 /cb-seed/
+/projects/*/assets/
 /archive/
 /cb_pages/
 

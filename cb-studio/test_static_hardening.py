@@ -49,8 +49,8 @@ ALLOWED = [
     "/cb-studio/app.html",
     "/engine/config/characters.json",
     "/CRYSTAL_BEARS_LOCKED_CANON.md",
-    "/shows/crystal-bears/canon/characters.json",
-    "/shows/crystal-bears/canon/LOCKED_CANON.md",
+    "/projects/crystal-bears/canon/characters.json",
+    "/projects/crystal-bears/canon/LOCKED_CANON.md",
     "/cb-studio/data/episodes.json",
     "/cb-studio/data/media-index.json",
 ]

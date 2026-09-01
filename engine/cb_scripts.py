@@ -67,11 +67,10 @@ class ScriptStore:
                 self.script_root.relative_to(self.root)
             except ValueError as exc:
                 raise ScriptStoreError("script_root must remain inside the repository") from exc
-        self.studio_root = (
-            self.root / "cb-studio" / "data" / "scripts"
-            if self.show_id == studio_profile.DEFAULT_SHOW_ID
-            else self.root / "cb-studio" / "data" / "shows" / self.show_id / "scripts"
-        )
+        # T43 (2026-09-01): the studio no longer keeps its own copy of the scripts — the
+        # project's episodes/scripts IS the store. Kept as an alias so callers that still
+        # name studio_root keep working; both names point at the one home.
+        self.studio_root = self.script_root
         self.versions_root = self.script_root / "_versions"
         self.current_root = self.script_root / "_current"
         self.events_root = self.script_root / "_events"
@@ -144,7 +143,7 @@ class ScriptStore:
 
         previous = self.current(episode_id, verify=True, required=False)
         display_file = f"{episode_id}_{_slug(title)}.txt"
-        for base in (self.script_root, self.studio_root):
+        for base in {self.script_root, self.studio_root}:
             _atomic_write(base / display_file, raw)
             _atomic_write(base / f"{episode_id}.title", title.encode("utf-8"))
 

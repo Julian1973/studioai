@@ -75,7 +75,7 @@ import cb_lineage
 import cb_scripts
 import cb_unit_packing
 
-CREATIVE = ROOT / "shows" / "crystal-bears" / "creative"
+CREATIVE = ROOT / "projects" / "crystal-bears" / "creative"
 OUT = ROOT / "cb-output" / "creative"
 CANON_VERSION = "1.0"
 ENGINE_VERSION = "creative-room-2.2 (2026-08-01, story-to-screen supervision contracts)"
@@ -807,12 +807,12 @@ class ShowrunnerReview(BaseModel):
 # CANON SOURCES + GATE 0 READINESS
 # ─────────────────────────────────────────────────────────────────────────────────────────
 _CANON_SOURCES = {
-    "showBible": ROOT / "shows/crystal-bears/canon/LOCKED_CANON.md",
+    "showBible": ROOT / "projects/crystal-bears/canon/LOCKED_CANON.md",
     "studioBible": ROOT / "CRYSTAL_BEARS_STUDIO_BIBLE.md",
-    "characters": ROOT / "shows/crystal-bears/canon/characters.json",
-    "locations": ROOT / "shows/crystal-bears/canon/locations.json",
-    "continuity": ROOT / "shows/crystal-bears/canon/continuity.json",
-    "styleLaw": ROOT / "shows/crystal-bears/laws/style.txt",
+    "characters": ROOT / "projects/crystal-bears/canon/characters.json",
+    "locations": ROOT / "projects/crystal-bears/canon/locations.json",
+    "continuity": ROOT / "projects/crystal-bears/canon/continuity.json",
+    "styleLaw": ROOT / "projects/crystal-bears/laws/style.txt",
     "showrunnerTaste": CREATIVE / "SHOWRUNNER_TASTE_CANON.md",
     "directorTaste": CREATIVE / "DIRECTOR_TASTE_CANON.md",
     "cinematographyTaste": CREATIVE / "CINEMATOGRAPHY_TASTE_CANON.md",
@@ -2715,7 +2715,7 @@ def migrate(episode="Ep1", log=print):
     for name, rec in chars.items():
         if not isinstance(rec, dict) or not rec.get("bible"):
             continue
-        entry = {"provenance": {"source": "shows/crystal-bears/canon/characters.json",
+        entry = {"provenance": {"source": "projects/crystal-bears/canon/characters.json",
                                   "method": "mechanical field mapping", "at": _now()}}
         for field in _PERF_FIELDS:
             src = _BIBLE_MAP.get(field)

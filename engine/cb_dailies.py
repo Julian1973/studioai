@@ -13,7 +13,7 @@ import uuid
 from collections import Counter
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PATH = ROOT / "shows" / "crystal-bears" / "creative" / "learning" / "DAILIES_LIBRARY.jsonl"
+PATH = ROOT / "projects" / "crystal-bears" / "creative" / "learning" / "DAILIES_LIBRARY.jsonl"
 
 
 def _now():

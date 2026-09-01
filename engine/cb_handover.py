@@ -95,7 +95,7 @@ import cb_unit_packing
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
-CHARS = HERE.parent / "shows" / "crystal-bears" / "canon" / "characters.json"
+CHARS = HERE.parent / "projects" / "crystal-bears" / "canon" / "characters.json"
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 
 APPROVED_STATE = "approved"          # what /api/storyboard-approve writes at top level

@@ -4,7 +4,7 @@
 Confirmed gap: engine/media/ (rendered clips, keyframes, plates, settle/re-mint frames — 453MB as of this
 writing) is gitignored by design (generated output, not source) and was found to have ZERO off-machine
 backup — a local-disk failure would lose every paid-for render with no recovery path, unlike canon/code
-which are safely in git -> GitHub. shows/crystal-bears/canon/ is already git-backed; it's included here too
+which are safely in git -> GitHub. projects/crystal-bears/canon/ is already git-backed; it's included here too
 as a zero-cost belt-and-suspenders copy, not because it needed a new mechanism.
 
 Destination: the configured Google Drive Desktop folder under ``The Crystal Bears Final``. Never deletes or
@@ -44,7 +44,7 @@ DRIVE = os.path.dirname(BACKUP_ROOT)
 
 SOURCES = [
     ("engine/media", "media"),
-    ("shows/crystal-bears/canon", "canon"),
+    ("projects/crystal-bears/canon", "canon"),
     ("cb-output", "production-state"),
     # Added 2026-07-08 (workspace-clutter pass): these three are real, irreplaceable Crystal Bears assets
     # (cb-seed/ holds the locked character turnarounds cb_prompts.py references by filename — hand-curated,

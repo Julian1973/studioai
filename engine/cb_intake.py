@@ -48,13 +48,13 @@ import cb_db
 import cb_lineage
 import cb_scripts
 
-SCRIPTS = ROOT / "shows" / "crystal-bears" / "episodes" / "scripts"
+SCRIPTS = ROOT / "projects" / "crystal-bears" / "episodes" / "scripts"
 STUDIO_SCRIPTS = ROOT / "cb-studio" / "data" / "scripts"
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 OUT = ROOT / "cb-output"
 CREATIVE_OUT = OUT / "creative"
 EPISODES_JSON = ROOT / "cb-studio" / "data" / "episodes.json"
-CHARACTERS_JSON = ROOT / "shows" / "crystal-bears" / "canon" / "characters.json"
+CHARACTERS_JSON = ROOT / "projects" / "crystal-bears" / "canon" / "characters.json"
 ARCHIVE_DIR = OUT / "archive" / "story_intake_rejected"
 
 

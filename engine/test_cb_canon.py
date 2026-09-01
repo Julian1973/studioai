@@ -19,7 +19,7 @@ def _write(path, value):
 
 
 def _workspace(tmp_path):
-    canon = tmp_path / "shows" / "crystal-bears" / "canon"
+    canon = tmp_path / "projects" / "crystal-bears" / "canon"
     _write(canon / "LOCKED_CANON.md", "# Locked show\n")
     _write(tmp_path / "assets" / "keen.png", b"keen".decode())
     _write(tmp_path / "assets" / "squeaky.png", b"squeaky".decode())
@@ -49,11 +49,11 @@ def _workspace(tmp_path):
         "schemaVersion": 1,
         "showId": "crystal-bears",
         "sources": {
-            "showBible": "shows/crystal-bears/canon/LOCKED_CANON.md",
-            "characters": "shows/crystal-bears/canon/characters.json",
-            "locations": "shows/crystal-bears/canon/locations.json",
+            "showBible": "projects/crystal-bears/canon/LOCKED_CANON.md",
+            "characters": "projects/crystal-bears/canon/characters.json",
+            "locations": "projects/crystal-bears/canon/locations.json",
             "locationAssetManifest": "cb-seed/assets/locations/_manifest.json",
-            "characterPerformance": "shows/crystal-bears/canon/performance.json",
+            "characterPerformance": "projects/crystal-bears/canon/performance.json",
         },
         "profiles": {
             "story": ["showBible", "characters", "locations"],
@@ -105,7 +105,7 @@ def test_changed_source_and_asset_make_lock_stale(tmp_path):
     _workspace(tmp_path)
     cb_canon.write_lock(tmp_path, "Tester")
     (tmp_path / "assets" / "keen.png").write_text("changed", encoding="utf-8")
-    (tmp_path / "shows" / "crystal-bears" / "canon" /
+    (tmp_path / "projects" / "crystal-bears" / "canon" /
      "LOCKED_CANON.md").write_text("changed", encoding="utf-8")
 
     result = cb_canon.status(root=tmp_path)
@@ -122,7 +122,7 @@ def test_provider_identity_packs_are_locked_without_invalidating_story(tmp_path)
     baseline_story = baseline_status["profileDigests"]["story"]
 
     _write(tmp_path / "assets" / "keen-provider.png", "provider-safe-keen")
-    _write(tmp_path / "shows" / "crystal-bears" / "canon" / "identity_packs.json", {
+    _write(tmp_path / "projects" / "crystal-bears" / "canon" / "identity_packs.json", {
         "schemaVersion": 1,
         "characters": {
             "Keen": {
@@ -142,9 +142,9 @@ def test_provider_identity_packs_are_locked_without_invalidating_story(tmp_path)
         },
     })
     policy["sources"]["identityPacks"] = (
-        "shows/crystal-bears/canon/identity_packs.json")
+        "projects/crystal-bears/canon/identity_packs.json")
     policy["profiles"]["animation"] = ["characters", "identityPacks"]
-    _write(tmp_path / "shows" / "crystal-bears" / "canon" / "lock_policy.json", policy)
+    _write(tmp_path / "projects" / "crystal-bears" / "canon" / "lock_policy.json", policy)
 
     manifest = cb_canon.write_lock(tmp_path, "Tester")
     current = cb_canon.status(root=tmp_path)
@@ -227,11 +227,11 @@ def test_script_parser_maps_declared_alias_and_refuses_unknown_cue(monkeypatch):
 def test_repository_ep1_human_canon_decisions_are_locked():
     report = cb_canon.status("Ep1", root=ROOT)
     characters = json.loads(
-        (ROOT / "shows/crystal-bears/canon/characters.json").read_text(encoding="utf-8"))
+        (ROOT / "projects/crystal-bears/canon/characters.json").read_text(encoding="utf-8"))
     policy = json.loads(
-        (ROOT / "shows/crystal-bears/canon/lock_policy.json").read_text(encoding="utf-8"))
+        (ROOT / "projects/crystal-bears/canon/lock_policy.json").read_text(encoding="utf-8"))
     identity_packs = json.loads(
-        (ROOT / "shows/crystal-bears/canon/identity_packs.json").read_text(
+        (ROOT / "projects/crystal-bears/canon/identity_packs.json").read_text(
             encoding="utf-8"))
     script = (ROOT / report["scriptPath"]).read_text(encoding="utf-8")
 

@@ -39,11 +39,11 @@ import uuid
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
-LEARNING = ROOT / "shows" / "crystal-bears" / "creative" / "learning"
+LEARNING = ROOT / "projects" / "crystal-bears" / "creative" / "learning"
 EVIDENCE_P = LEARNING / "EVIDENCE_LIBRARY.json"
 PATTERNS_P = LEARNING / "PATTERN_LIBRARY.json"
 ACTIVE_P = LEARNING / "ACTIVE_CREATIVE_MEMORY.json"
-EXEMPLARS_P = ROOT / "shows" / "crystal-bears" / "creative" / "EXEMPLAR_LIBRARY.json"
+EXEMPLARS_P = ROOT / "projects" / "crystal-bears" / "creative" / "EXEMPLAR_LIBRARY.json"
 ARCHIVE_V1 = ROOT / "cb-output" / "creative" / "archive_process_v1"
 
 SOURCES = ("show canon", "character-performance canon", "relationship canon",

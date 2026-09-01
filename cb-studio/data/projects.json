@@ -17,8 +17,8 @@
       "episodeCoverImage": "/engine/media/Ep2_S2_plate_candidate_e7be89c0.png",
       "voiceProvider": "ElevenLabs (v3)",
       "musicStyle": "Warm orchestral with gentle motifs; each bear seeded to a musical note.",
-      "configBase": "shows/crystal-bears/canon",
-      "showBibleFile": "shows/crystal-bears/canon/LOCKED_CANON.md",
+      "configBase": "projects/crystal-bears/canon",
+      "showBibleFile": "projects/crystal-bears/canon/LOCKED_CANON.md",
       "episodesFile": "cb-studio/data/episodes.json",
       "mediaBase": "engine/media",
       "createdAt": "2026-06-24"

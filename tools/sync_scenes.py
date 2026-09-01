@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ONE SCENE SOURCE (T33 Ruling 3, 2026-07-02). The single source of truth for a scene's descriptive fields
 (location/look/definingFeature/lighting/etc.) is the beat package's own scenes[] array — the Director's Gate-1
-output. shows/crystal-bears/canon/locations.json (config/locations.json) is a CACHED SNAPSHOT of it, read by
+output. projects/crystal-bears/canon/locations.json (config/locations.json) is a CACHED SNAPSHOT of it, read by
 cb_prompts.scene_cfg() on every keyframe/plate/Seedance prompt build. Nothing previously kept that snapshot in
 sync: a beat-package scene edit could silently never reach any prompt at all, with no signal that it hadn't. Same
 discipline as sync_canon.py (source hash vs copy hash), extended to scene data.
@@ -13,7 +13,7 @@ import sys, os, json, glob, importlib.util
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENGINE = os.path.join(ROOT, "engine")
-LOCATIONS_PATH = os.path.join(ROOT, "shows", "crystal-bears", "canon", "locations.json")
+LOCATIONS_PATH = os.path.join(ROOT, "projects", "crystal-bears", "canon", "locations.json")
 
 
 def _load_cb_prompts():

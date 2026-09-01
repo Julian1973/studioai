@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """ONE CANON (Restructure Phase 1 / T28, Phase 3 repointed). The single source of truth is
-shows/crystal-bears/canon/LOCKED_CANON.md (root CRYSTAL_BEARS_LOCKED_CANON.md is now a compat
+projects/crystal-bears/canon/LOCKED_CANON.md (root CRYSTAL_BEARS_LOCKED_CANON.md is now a compat
 symlink to it). Every skills/*/references/ copy is GENERATED from it by this script, stamped,
 and hash-verified. Editing a copy is drift; this script shouts and fixes.
 
@@ -10,10 +10,10 @@ and hash-verified. Editing a copy is drift; this script shouts and fixes.
 import sys, os, glob, hashlib, json, shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "shows", "crystal-bears", "canon", "LOCKED_CANON.md")
-POLICY = os.path.join(ROOT, "shows", "crystal-bears", "canon", "lock_policy.json")
+SRC = os.path.join(ROOT, "projects", "crystal-bears", "canon", "LOCKED_CANON.md")
+POLICY = os.path.join(ROOT, "projects", "crystal-bears", "canon", "lock_policy.json")
 STAMP = ("<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is "
-         "/shows/crystal-bears/canon/LOCKED_CANON.md. Regenerate: python3 tools/sync_canon.py -->\n\n")
+         "/projects/crystal-bears/canon/LOCKED_CANON.md. Regenerate: python3 tools/sync_canon.py -->\n\n")
 
 def body(path):
     t = open(path, encoding="utf-8").read()

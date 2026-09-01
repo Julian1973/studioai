@@ -113,12 +113,12 @@ def load_show_profile(repo_root=None, show_id=None) -> LoadedShowProfile:
     root = pathlib.Path(repo_root or pathlib.Path(__file__).resolve().parent.parent).resolve()
     selected = validate_show_id(
         show_id if show_id is not None else os.environ.get("STUDIO_SHOW", DEFAULT_SHOW_ID))
-    shows_root = (root / "shows").resolve()
+    shows_root = (root / "projects").resolve()  # T43: projects/<id>/ (shows/ is a compatibility link)
     show_root = (shows_root / selected).resolve()
     try:
         show_root.relative_to(shows_root)
     except ValueError as exc:
-        raise ShowProfileError("selected show escapes the shows directory") from exc
+        raise ShowProfileError("selected project escapes the projects directory") from exc
     profile_path = show_root / "profile.json"
     try:
         raw_bytes = profile_path.read_bytes()

@@ -937,8 +937,8 @@ def _compile_scenelook_prompt(scene, episode="Ep1"):
     fields — camera framing is a shot-composition concern, never the plate's job (Julian's
     own scope line, and locations.json's own "look" text already says as much: "No
     characters, no homes, no extra props")."""
-    loc_path = HERE.parent / "shows" / "crystal-bears" / "canon" / "locations.json"
-    style_path = HERE.parent / "shows" / "crystal-bears" / "laws" / "style.txt"
+    loc_path = HERE.parent / "projects" / "crystal-bears" / "canon" / "locations.json"
+    style_path = HERE.parent / "projects" / "crystal-bears" / "laws" / "style.txt"
     locs = json.load(open(loc_path)) if loc_path.exists() else {}
     entry = (locs.get(episode) or {}).get(str(scene)) or {}
     style = style_path.read_text().strip() if style_path.exists() else ""
@@ -2618,7 +2618,7 @@ def _is_non_identity_image_role(role):
 
 
 def _reference_slot_policy():
-    path = ROOT / "shows" / "crystal-bears" / "canon" / "reference_slot_policy.json"
+    path = ROOT / "projects" / "crystal-bears" / "canon" / "reference_slot_policy.json"
     try:
         policy = json.loads(path.read_text())
     except (OSError, ValueError, TypeError):
@@ -3036,8 +3036,8 @@ def department_status(scene, shot_id=None, episode="Ep1", stage=None):
 
 
 def _scene_context(pkg, scene, episode):
-    loc_path = HERE.parent / "shows/crystal-bears/canon/locations.json"
-    style_path = HERE.parent / "shows/crystal-bears/laws/style.txt"
+    loc_path = HERE.parent / "projects/crystal-bears/canon/locations.json"
+    style_path = HERE.parent / "projects/crystal-bears/laws/style.txt"
     locs = json.load(open(loc_path)) if loc_path.exists() else {}
     sb_path = _declared_storyboard_path(pkg, scene, episode)
     sb = json.load(open(sb_path)) if sb_path.exists() else {}

@@ -16,7 +16,7 @@ def test_dependency_signature_is_stable_and_explainable():
 
 def test_script_store_preserves_old_versions_and_moves_only_pointer(tmp_path):
     store = ScriptStore(
-        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
+        tmp_path, script_root=tmp_path / "projects/crystal-bears/episodes/scripts")
     first = store.store("Ep1", "INT. ROOM 1\nFirst draft\n", "Pilot", activated_at="2026-01-01T00:00:00+00:00")
     second = store.store("Ep1", "INT. ROOM 1\nSecond draft\n", "Pilot", activated_at="2026-01-02T00:00:00+00:00")
 
@@ -30,7 +30,7 @@ def test_script_store_preserves_old_versions_and_moves_only_pointer(tmp_path):
 
 def test_script_store_deduplicates_identical_bytes_without_losing_history(tmp_path):
     store = ScriptStore(
-        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
+        tmp_path, script_root=tmp_path / "projects/crystal-bears/episodes/scripts")
     first = store.store("Ep2", "same bytes\n", "Old title", activated_at="2026-01-01T00:00:00+00:00")
     second = store.store("Ep2", "same bytes\n", "New title", activated_at="2026-01-02T00:00:00+00:00")
 
@@ -42,7 +42,7 @@ def test_script_store_deduplicates_identical_bytes_without_losing_history(tmp_pa
 
 def test_script_store_records_a_scoped_dialogue_correction(tmp_path):
     store = ScriptStore(
-        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
+        tmp_path, script_root=tmp_path / "projects/crystal-bears/episodes/scripts")
     first = store.store("Ep2", "SCENE 8\nOld line\n", "Episode")
     scope = {
         "kind": "dialogue-correction", "scene": "8", "shotId": "S8.SH2",
@@ -62,7 +62,7 @@ def test_script_store_records_a_scoped_dialogue_correction(tmp_path):
 
 def test_script_store_detects_content_tampering(tmp_path):
     store = ScriptStore(
-        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
+        tmp_path, script_root=tmp_path / "projects/crystal-bears/episodes/scripts")
     current = store.store("Ep3", "locked\n", "Locked", activated_at="2026-01-01T00:00:00+00:00")
     (tmp_path / current["contentPath"]).write_text("tampered\n")
 

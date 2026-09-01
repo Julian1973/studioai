@@ -49,20 +49,20 @@ def _scratch():
     d = pathlib.Path(tempfile.mkdtemp(prefix="cb_render_gensafety_"))
     (d / "cb-output" / "creative").mkdir(parents=True)
     (d / "engine" / "media" / "shots").mkdir(parents=True)
-    (d / "shows" / "crystal-bears" / "canon").mkdir(parents=True)
-    (d / "shows" / "crystal-bears" / "laws").mkdir(parents=True)
+    (d / "projects" / "crystal-bears" / "canon").mkdir(parents=True)
+    (d / "projects" / "crystal-bears" / "laws").mkdir(parents=True)
     return d
 
 
 def _write_locations(root, scene="1", episode="Ep1", look="a warm meadow"):
-    p = root / "shows" / "crystal-bears" / "canon" / "locations.json"
+    p = root / "projects" / "crystal-bears" / "canon" / "locations.json"
     p.write_text(json.dumps({episode: {scene: {"look": look, "lighting": "golden",
                                                 "weather": "clear", "colorTemperature": "warm",
                                                 "definingFeature": "flowers"}}}))
 
 
 def _write_style(root, text="Pixar-caliber 3D CGI."):
-    (root / "shows" / "crystal-bears" / "laws" / "style.txt").write_text(text)
+    (root / "projects" / "crystal-bears" / "laws" / "style.txt").write_text(text)
 
 
 def _write_storyboard(root, scene, episode, sh1_marker="v1", sh6_marker="v1"):

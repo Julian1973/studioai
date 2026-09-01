@@ -77,7 +77,7 @@ def emit(out: pathlib.Path) -> int:
         _write(out, "system_prompt__creative_room.txt", f"REFUSED: {exc}")
 
     count = 0
-    pkgs = sorted((ROOT / "cb-output").glob("Ep*_scene*_production_package.json"))
+    pkgs = sorted(pathlib.Path(P.OUTPUT).glob("Ep*_scene*_production_package.json"))
     for pkg_path in pkgs:
         m = re.match(r"(Ep\d+)_scene(\d+)_production_package\.json", pkg_path.name)
         if not m:
@@ -138,7 +138,7 @@ def emit(out: pathlib.Path) -> int:
                    _try(R._expanded_reference_blueprint, shot, "referenceSlots",
                         R._characters_cfg(), scene, episode))
             count += 1
-    _write(out, "MANIFEST.txt", "\n".join(sorted(p.name for p in out.iterdir())))
+    _write(out, "MANIFEST.txt", "\n".join(sorted(p.name for p in out.iterdir() if p.name != "MANIFEST.txt")))
     return count
 
 

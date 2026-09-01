@@ -958,7 +958,7 @@ def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
     reads back through cb_render._pkg_path (it delegates, so it sees the same patch)."""
     import cb_engine
     store = ScriptStore(
-        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
+        tmp_path, script_root=tmp_path / "projects/crystal-bears/episodes/scripts")
     current = store.store("Ep1", "fixture script\n", "Fixture",
                           activated_at="2026-01-01T00:00:00+00:00")
     event = {"i": 0, "scene": 1, "type": "dialogue",

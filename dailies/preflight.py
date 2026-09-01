@@ -104,7 +104,7 @@ def checks(plan: dict, beat_meta: dict, playbook: dict) -> list:
     if not re.search(r"NEGATIVE|Do not|constraints", prompt, re.I):
         add("NOTE", "no-negatives", "no negatives/constraints section detected", "segprompt v3 shape")
     # 9. Banned vocabulary (corrected-away ghosts)
-    banned_file = ROOT / "shows/crystal-bears/canon/banned_vocabulary.json"
+    banned_file = ROOT / "projects/crystal-bears/canon/banned_vocabulary.json"
     if banned_file.exists():
         try:
             for term in json.loads(banned_file.read_text()):

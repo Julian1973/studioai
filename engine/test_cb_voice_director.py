@@ -170,7 +170,7 @@ def test_group_chorus_binds_every_named_canon_voice():
 def test_bo_has_canon_voice_card_matching_character_registry():
     card = V.voice_cards()["characters"]["Bo"]
     character = json.loads(
-        (V.ROOT / "shows/crystal-bears/canon/characters.json").read_text(
+        (V.ROOT / "projects/crystal-bears/canon/characters.json").read_text(
             encoding="utf-8"))["Bo"]
 
     assert card["voiceId"] == "AAF2q3NCwTrLMMkEnRLB"

@@ -13,7 +13,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_LIBRARY = (
-    ROOT / "shows" / "crystal-bears" / "creative" / "learning"
+    ROOT / "projects" / "crystal-bears" / "creative" / "learning"
     / "EVIDENCE_LIBRARY.json"
 )
 

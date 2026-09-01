@@ -22,7 +22,7 @@ import cb_lineage  # noqa: E402
 
 PACKAGE = ROOT / "cb-output" / "Ep1_scene4_production_package.json"
 STORYBOARD = ROOT / "cb-output" / "creative" / "Ep1_scene4_storyboard.json"
-CHARS = ROOT / "shows" / "crystal-bears" / "canon" / "characters.json"
+CHARS = ROOT / "projects" / "crystal-bears" / "canon" / "characters.json"
 
 
 def _shot(records: list[dict], shot_id: str) -> dict:

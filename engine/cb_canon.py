@@ -18,8 +18,8 @@ from typing import Any, Iterable
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
-POLICY_REL = pathlib.Path("shows/crystal-bears/canon/lock_policy.json")
-MANIFEST_REL = pathlib.Path("shows/crystal-bears/canon/CANON_LOCK.json")
+POLICY_REL = pathlib.Path("projects/crystal-bears/canon/lock_policy.json")
+MANIFEST_REL = pathlib.Path("projects/crystal-bears/canon/CANON_LOCK.json")
 SCHEMA_VERSION = 1
 
 
@@ -540,7 +540,7 @@ def _episode_cast(root: pathlib.Path, episode: str) -> list[str]:
 
 
 def _script_text(root: pathlib.Path, episode: str) -> tuple[str | None, str | None]:
-    current = root / "shows" / "crystal-bears" / "episodes" / "scripts" / "_current" / f"{episode}.json"
+    current = root / "projects" / "crystal-bears" / "episodes" / "scripts" / "_current" / f"{episode}.json"
     try:
         record = json.loads(current.read_text(encoding="utf-8"))
         path = resolve_declared_path(record["contentPath"], root)

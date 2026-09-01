@@ -25,7 +25,7 @@ ROOT = HERE.parent
 # "Pixar-caliber" RETIRED 2026-07-31, carried over from the 8Th Hour tree's own retirement
 # (2026-07-21). It was banned because a hardcoded DUPLICATE of the show's style law used to
 # live directly in prompt-building source — real duplication, the destructive cutover's own
-# target. The style law now lives in ONE canonical file (shows/crystal-bears/laws/style.txt)
+# target. The style law now lives in ONE canonical file (projects/crystal-bears/laws/style.txt)
 # and is read at compile time, every time, never a hardcoded copy — so the phrase legitimately
 # reaches every real compiled prompt. This tree's OWN style.txt contains it, so the fingerprint
 # was guaranteed to fire on the first real package it ever saw, which is exactly what happened

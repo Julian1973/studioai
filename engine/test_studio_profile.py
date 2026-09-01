@@ -9,7 +9,7 @@ import studio_profile
 
 def _profile(root, show_id="moon-lanterns", *, adapter="moon-lanterns-v1",
              characters="canon/characters.json"):
-    show = root / "shows" / show_id
+    show = root / "projects" / show_id
     show.mkdir(parents=True)
     payload = {
         "showId": show_id,
@@ -68,13 +68,17 @@ def test_script_store_isolates_a_second_show(tmp_path):
     current = store.store("Ep1", "INT. MOON ROOM - NIGHT\nA lantern wakes.", "Awake")
 
     content = tmp_path / current["contentPath"]
-    assert content.is_relative_to(tmp_path / "shows/moon-lanterns/episodes/scripts")
-    assert not (tmp_path / "shows/crystal-bears/episodes/scripts").exists()
-    assert (tmp_path / "cb-studio/data/shows/moon-lanterns/scripts/Ep1_Awake.txt").exists()
+    assert content.is_relative_to(tmp_path / "projects/moon-lanterns/episodes/scripts")
+    assert not (tmp_path / "projects/crystal-bears/episodes/scripts").exists()
+    # T43: one script store per project — the display file lives in the project, and the
+    # studio keeps NO second copy anywhere under cb-studio/.
+    assert (tmp_path / "projects/moon-lanterns/episodes/scripts/Ep1_Awake.txt").exists()
+    assert not (tmp_path / "cb-studio/data/shows").exists()
+    assert not (tmp_path / "cb-studio/data/scripts").exists()
 
 
 def test_script_pointer_cannot_escape_the_active_show(tmp_path):
-    script_root = tmp_path / "shows/crystal-bears/episodes/scripts"
+    script_root = tmp_path / "projects/crystal-bears/episodes/scripts"
     store = cb_scripts.ScriptStore(tmp_path, script_root=script_root)
     current = store.store("Ep1", "A safe script.", "Safe")
     pointer = script_root / "_current" / "Ep1.json"

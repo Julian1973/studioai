@@ -1,6 +1,6 @@
-# 8th Hour Animation Studio
+# Studio Ai
 
-The canonical Crystal Bears production build: a human-directed, approval-gated AI
+A Agnostic Ai Studio helping to bring The canonical Crystal Bears production build: a human-directed, approval-gated AI
 animation pipeline from script to finished scene.
 
 It is designed around one principle: the models execute a resolved production plan. They

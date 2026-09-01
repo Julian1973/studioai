@@ -1,0 +1,456 @@
+{
+ "schemaVersion": 1,
+ "approvalState": "approved",
+ "approvedAt": "2026-08-31T23:59:06",
+ "approvedBy": "Julian",
+ "kind": "dialogue-correction",
+ "scene": "3",
+ "shotId": "S3.SH4",
+ "scriptVersionId": "sha256:9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
+ "previousScriptVersionId": "sha256:6773581284020b2f4ff13c5e1055c18eb6282c31bc216e75a2aed3ef1982b9ef",
+ "baseScriptVersionId": "sha256:7b0b15bbd86734bb2a743b169050acef77331f52a2a8b7681e4bbc9087889d7d",
+ "previousDialogueOccurrenceId": "dialogue-occurrence:sha256:77783c379c77335836643191331d80cc5d37f83abb4121a4acf16eafb8144264",
+ "dialogueOccurrenceId": "dialogue-occurrence:sha256:81ea694d31d7754abb4ef51bd5cfce0b27748895a637b7a27959dffc9a0ceb36",
+ "previousSourceEventId": "script-event:sha256:50bbade5e65fdefc5f916e4251919bdfac981f1cebded8e3e877e15d57819a49",
+ "sourceEventId": "script-event:sha256:4d4a04fdaeecde490eeea33143f074d0cbd58ae84875c345de4d26e61a46e120",
+ "previousExactText": "Im worried,  what if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?",
+ "correctedExactText": "Hi Keen, my name is Bo and I am really worried. What if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?",
+ "shot": {
+  "shotId": "S3.SH4",
+  "beatCode": "3.B4",
+  "beatCodes": [
+   "3.B4"
+  ],
+  "shotRole": "coverage",
+  "establishJob": null,
+  "buttonChange": null,
+  "frameSource": null,
+  "durationSec": 23.0,
+  "purpose": "Deliver the scene turn: the feared tail is seen and met with wonder instead of alarm.",
+  "performanceAssignment": "Performance phases: anticipation: Bo Bo leans forward with the conker close, paws tight and speech-driven motion spilling out faster than his posture can organize; action: Bo Bo’s tail expands suddenly; he grabs it with both paws, tries to hold it down, and is pulled off balance when it expands again; reaction: Keen Keen looks directly at the enlarged tail with widened eyes, lifted face, and still body, showing delight rather than alarm; settle: Bo Bo stops fighting as hard, loosens his grip on the tail, lowers his shoulders, and checks Keen’s face with a small uncertain look. Cause and effect: Bo’s body tightens around the exposed worry; the tail expands beyond his hands, forcing the frame and his balance wider, and Keen’s still delighted gaze interrupts Bo’s attempt to hide it. Visible turn: The enlarged tail changes from something Bo is wrestling to something he cautiously allows to be seen. Land on: Bo must end beside the enlarged tail with a softened grip and a questioning look toward Keen, not fully cured or hidden. Acting freedom: The tail’s exact bounce, Bo’s paw placement, and Keen’s facial micro-reaction may vary, but the second expansion must clearly overpower Bo’s control and Keen must read sincere before Bo softens.",
+  "camera": "Stay with Bo as he blurts the fear, let the tail’s poofs expand the frame and disturb the room, then hold Keen’s impressed stillness and Bo’s softened question long enough for shame to become curiosity.",
+  "openingPose": "Bo inside the hollow clutching the conker, angled toward Keen at the doorway as the private fear is about to spill out.",
+  "sourceType": "opener",
+  "sourceShotId": null,
+  "motionContinuityRequired": false,
+  "cutInMotivation": "A cut is stronger than remaining continuous because the next unit changes mechanism from awe-held vulnerability to release-laugh through Keen making himself the silly object. Staying in the same breath would rush Bo’s curiosity and flatten the comic reset.",
+  "dialogueBinding": "Bo's vocal beat performs per the approved voice design.",
+  "dialogueLines": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:81ea694d31d7754abb4ef51bd5cfce0b27748895a637b7a27959dffc9a0ceb36",
+    "sourceEventId": "script-event:sha256:4d4a04fdaeecde490eeea33143f074d0cbd58ae84875c345de4d26e61a46e120",
+    "speaker": "Bo",
+    "exactText": "Hi Keen, my name is Bo and I am really worried. What if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?",
+    "delivery": "[nervous] Hi Keen, my name is Bo and I am really worried. What if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?",
+    "startSec": 1.0,
+    "endSec": 10.8
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0ec00bfed75056e8f20f64ed58e9771d19861536c07fc248efab7f8aefaa8ce",
+    "sourceEventId": "script-event:sha256:b12df535dba02ee07579ed68dc15f440aba712e442a2b5189bc4f9739c96d1ba",
+    "speaker": "Bo",
+    "exactText": "Stop it! Please just be a normal tail!",
+    "delivery": "Stop it! [pause] PLEASE just be a NORMAL TAIL!",
+    "startSec": 11.5,
+    "endSec": 14.2
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:419a2549192db2f7c23679d404935929f5c57640d2c56e9c428b77f70d7b751f",
+    "sourceEventId": "script-event:sha256:59a477bd8415dc8c053ffe83d3e421783fbaced404387a1c54bc808b89e7529c",
+    "speaker": "Keen",
+    "exactText": "Whoa. Your tail is AMAZING.",
+    "delivery": "[quietly] 14\tWHOA. Your tail is AMAZING.",
+    "startSec": 16.2,
+    "endSec": 18.1
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:4a4bd1e5b095e455ce361ce7fb5c6bc52a8cac0dcf147372dcc6ee61dddfb0db",
+    "sourceEventId": "script-event:sha256:3ef4febf182299ee62a698dff03501ac0473b4992e87b724d12dbf49aa5271f8",
+    "speaker": "Bo",
+    "exactText": "…you think so?",
+    "delivery": "[quietly] 15\t…you THINK so?",
+    "startSec": 20.0,
+    "endSec": 21.2
+   }
+  ],
+  "visualPayoff": "Bo beside his enlarged tail with his grip loosened, looking toward Keen in uncertain calm.",
+  "physicalStaging": null,
+  "physicalStagings": [],
+  "prohibited": [
+   "The tail must visibly poof twice, with the second expansion overpowering Bo’s attempt to contain it.",
+   "Keen’s awe must read as sincere before Bo softens; it cannot be played as teasing or fixing.",
+   "End with Bo only cautiously softened, not cured or proudly displaying the tail."
+  ],
+  "charactersInFrame": [
+   "Bo",
+   "Keen"
+  ],
+  "offscreenSpeakers": [],
+  "requiredPropReferences": [],
+  "openingCharactersInFrame": null,
+  "closingCharactersInFrame": null,
+  "continuityIn": {
+   "lighting": "Warm hollow interior and doorway light continue unchanged, now holding both Bo’s vulnerability and Keen’s quiet presence.",
+   "cameraSide": "Interior threshold side, close enough to Bo for the blurt while keeping Keen in relation.",
+   "characters": [
+    {
+     "character": "Bo",
+     "screenZone": "inside hollow, foreground-to-middle depth",
+     "facing": "toward Keen with the conker guarded close",
+     "pose": "hunched and clutching, words about to outrun his body",
+     "expression": "embarrassed worry on the edge of spilling out",
+     "visibleMarks": [
+      "tail sprung from startle but contained"
+     ],
+     "heldProps": [
+      "conker"
+     ]
+    },
+    {
+     "character": "Keen",
+     "screenZone": "doorway threshold",
+     "facing": "toward Bo inside the hollow",
+     "pose": "patient soft stance with no forward step",
+     "expression": "open, listening, and careful",
+     "visibleMarks": [],
+     "heldProps": []
+    }
+   ]
+  },
+  "continuityOut": {
+   "lighting": "Same warm interior, with doorway light now reading as witness-light rather than threat.",
+   "cameraSide": "Bo-height interior shared frame that has yielded enough space for the enlarged tail.",
+   "characters": [
+    {
+     "character": "Bo",
+     "screenZone": "inside hollow beside his enlarged tail",
+     "facing": "toward Keen, checking his face",
+     "pose": "partly wrapped by the enlarged tail with paws loosened from the earlier grab",
+     "expression": "cautious disbelief softening out of shame",
+     "visibleMarks": [
+      "tail enlarged and softened after second poof"
+     ],
+     "heldProps": [
+      "conker"
+     ]
+    },
+    {
+     "character": "Keen",
+     "screenZone": "threshold, still outside the room’s center",
+     "facing": "toward Bo and the enlarged tail",
+     "pose": "still, open, and impressed without reaching in",
+     "expression": "sincere awe and care",
+     "visibleMarks": [],
+     "heldProps": []
+    }
+   ]
+  },
+  "continuityProseIn": "Bo carries in hugging the conker after being startled, with Keen still kindly waiting at the doorway. The room is now shared, but Bo has not yet exposed the real tail fear.",
+  "continuityProseOut": "The tail has poofed larger and been seen by Keen. Bo is no longer fighting it as hard; his grip has softened, and he looks toward Keen with cautious disbelief rather than full confidence.",
+  "dialogueTimingProse": "Bo’s fear spills early and lets “THING” meet the first tail burst. His plea rides the physical grab and failed compression into the second burst. Keen’s compliment waits through the silent impressed look and the tail follow-through; Bo’s question starts only once the compliment has visibly reached him.",
+  "referenceRolesProse": "Bo’s reference anchors the tail as his emotional and movement tell; Keen’s reference anchors bright curiosity made gentle. The hollow-oak scene look anchors warm interior continuity and the doorway witness position. The conker remains present but the tail becomes the truthful visual motif in this shot.",
+  "principalPerformanceApproved": "Bo’s shame becomes visible through attempts to control the tail; Keen’s awe must be still, sincere, and unshowy.",
+  "physicalPerformanceApproved": "Bo’s words spill faster than his body can manage: he clutches near the conker, then turns inward as his tail suddenly expands and takes over the room. He grabs at it, trying to compress it back down, but the second expansion defeats the tidy effort. Keen stays still and openly impressed; Bo’s grip loosens, his shoulders drop, and he looks back with cautious disbelief rather than immediate confidence.",
+  "animationTimingApproved": "Protect the spill, then make each tail expansion feel like a soft physical burst with follow-through in Bo’s balance. Hold Keen’s still reaction long enough to redirect the room, then let Bo’s release arrive slowly.",
+  "performanceContractApproved": {
+   "beatOwner": "3.B4",
+   "playableIntention": "Bo expects visible difference to cost him safety; Keen’s sincere stillness gives that visible difference a new possible meaning.",
+   "phases": [
+    {
+     "phase": "anticipation",
+     "performer": "Bo",
+     "observableAction": "Bo leans forward with the conker close, paws tight and speech-driven motion spilling out faster than his posture can organize."
+    },
+    {
+     "phase": "action",
+     "performer": "Bo",
+     "observableAction": "Bo’s tail expands suddenly; he grabs it with both paws, tries to hold it down, and is pulled off balance when it expands again."
+    },
+    {
+     "phase": "reaction",
+     "performer": "Keen",
+     "observableAction": "Keen looks directly at the enlarged tail with widened eyes, lifted face, and still body, showing delight rather than alarm."
+    },
+    {
+     "phase": "settle",
+     "performer": "Bo",
+     "observableAction": "Bo stops fighting as hard, loosens his grip on the tail, lowers his shoulders, and checks Keen’s face with a small uncertain look."
+    }
+   ],
+   "physicalCauseAndEffect": "Bo’s body tightens around the exposed worry; the tail expands beyond his hands, forcing the frame and his balance wider, and Keen’s still delighted gaze interrupts Bo’s attempt to hide it.",
+   "visibleEmotionalTurn": "The enlarged tail changes from something Bo is wrestling to something he cautiously allows to be seen.",
+   "requiredLanding": "Bo must end beside the enlarged tail with a softened grip and a questioning look toward Keen, not fully cured or hidden.",
+   "performanceFreedom": "The tail’s exact bounce, Bo’s paw placement, and Keen’s facial micro-reaction may vary, but the second expansion must clearly overpower Bo’s control and Keen must read sincere before Bo softens.",
+   "characterTruths": [
+    {
+     "character": "Bo",
+     "canonTrait": "Bo’s large fluffy tail is an emotional and movement anchor; under worry, paws pull close and the tail tells the truth bigger than his face.",
+     "playableWant": "Bo wants to make his tail small and socially manageable in front of the witness.",
+     "pressureResponse": "He pleads physically with the tail by grabbing, squeezing, and trying to contain it, then pauses when the witness does not recoil.",
+     "observableSignature": "Tight paws on tail fur, off-balance squirrel posture, shoulders lifted then dropping, eyeline checking Keen before trusting the moment.",
+     "substitutionTest": "Keen’s pressure tell is a gulp before a step; Bo’s canon tail makes the feeling physically larger than his control, so another character could not carry this beat."
+    },
+    {
+     "character": "Keen",
+     "canonTrait": "Keen’s courage is bright, curious, and relationship-forward, with action guided by visible feeling rather than swagger.",
+     "playableWant": "Keen wants Bo to know the tail can be looked at with delight, without turning Bo into a target.",
+     "pressureResponse": "He holds still instead of charging in, letting his impressed gaze arrive before any movement toward Bo.",
+     "observableSignature": "Open face, widened eyes, lifted chin, body quiet at the threshold, no grab for the tail and no laugh at Bo.",
+     "substitutionTest": "A deadpan or fixer character could make the tail a joke or a problem; Keen uniquely reframes it through eager, sincere wonder."
+    }
+   ],
+   "comedyStaging": null
+  },
+  "characterTruthsApproved": [
+   {
+    "character": "Bo",
+    "canonTrait": "Bo’s large fluffy tail is an emotional and movement anchor; under worry, paws pull close and the tail tells the truth bigger than his face.",
+    "playableWant": "Bo wants to make his tail small and socially manageable in front of the witness.",
+    "pressureResponse": "He pleads physically with the tail by grabbing, squeezing, and trying to contain it, then pauses when the witness does not recoil.",
+    "observableSignature": "Tight paws on tail fur, off-balance squirrel posture, shoulders lifted then dropping, eyeline checking Keen before trusting the moment.",
+    "substitutionTest": "Keen’s pressure tell is a gulp before a step; Bo’s canon tail makes the feeling physically larger than his control, so another character could not carry this beat."
+   },
+   {
+    "character": "Keen",
+    "canonTrait": "Keen’s courage is bright, curious, and relationship-forward, with action guided by visible feeling rather than swagger.",
+    "playableWant": "Keen wants Bo to know the tail can be looked at with delight, without turning Bo into a target.",
+    "pressureResponse": "He holds still instead of charging in, letting his impressed gaze arrive before any movement toward Bo.",
+    "observableSignature": "Open face, widened eyes, lifted chin, body quiet at the threshold, no grab for the tail and no laugh at Bo.",
+    "substitutionTest": "A deadpan or fixer character could make the tail a joke or a problem; Keen uniquely reframes it through eager, sincere wonder."
+   }
+  ],
+  "comedyStagingApproved": null,
+  "comedyStagingsApproved": [],
+  "comedyContractsApproved": [
+   {
+    "beatCode": "3.B4",
+    "mode": "SMALL",
+    "mechanism": "Concealment → revelation redirected into wonder",
+    "comicOwner": "Bo",
+    "straightCharacter": "Keen",
+    "setup": "Bo fears his tail will do the thing where others can see it.",
+    "expectation": "The tail’s action will confirm disaster and make Bo the joke.",
+    "disruption": "The tail does act out, but Keen receives it as amazing rather than ridiculous.",
+    "button": "15\t…you think so?",
+    "hold": "Hold briefly after Keen’s awe so Bo’s shame has time to become curiosity; do not rush into the next gag.",
+    "physicalStaging": null
+   }
+  ],
+  "emotionContractsApproved": [
+   {
+    "beatCode": "3.B4",
+    "owner": "Bo",
+    "entryState": "Socially exposed and trying to explain why the Learning Circle feels impossible.",
+    "pressure": "His feared tail behaviour happens immediately in front of the new witness.",
+    "choiceOrRealisation": "Bo stays present long enough to hear Keen’s wonder instead of fully hiding or ending the encounter.",
+    "exitState": "Unsure but newly curious; the tail may not only be a problem if someone can see it with delight.",
+    "observableEvidence": "Bo blurts the fear, pleads with his tail, then softens into the small, disbelieving question after Keen’s line.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "Keen’s awe remains in the room as a new possible meaning for the tail, but Bo’s fear is still visible."
+   }
+  ],
+  "cinematographyContractApproved": {
+   "storyPointOfView": "Bo’s feared visibility, transformed by Keen’s wonder.",
+   "emotionalDistanceStart": "Close to Bo’s embarrassment and spilling words.",
+   "emotionalDistanceEnd": "A little more open, able to hold Bo, the tail, and Keen’s kindness together.",
+   "revealStrategy": "Let Bo name the fear just before the tail proves it, then reveal Keen’s reaction as the meaning-changing information.",
+   "shotScale": "Begins intimate, expands to accommodate the tail, then settles into a shared emotional space.",
+   "lensIntent": "Make the tail feel undeniably present without turning Bo into a spectacle; keep Keen’s awe readable as safety.",
+   "cameraHeight": "Bo-height inside the hollow, yielding upward or backward only when the tail changes the room’s scale.",
+   "composition": "Before the poof, Bo is partially shielded by interior closeness; after the poof, the tail occupies the shared space between Bo and Keen.",
+   "depthStrategy": "The threshold remains behind Keen as social exposure, while the tail fills the middle depth Bo cannot control.",
+   "cameraBehavior": "Holds nervously through the blurt, gives ground when the tail expands, then becomes still for Keen’s awe.",
+   "focusStrategy": "Start on Bo’s exposed face and hands, shift to the tail’s state change, then return to Bo only after Keen’s line lands.",
+   "lightingFunction": "The same doorway light now illuminates a witness rather than a threat, making the tail visible without harshness.",
+   "paletteFunction": "Warm interior tones continue; the enlarged tail interrupts shape more than color, preserving sincerity over spectacle.",
+   "performanceVisibility": "Bo’s grip, Keen’s impressed stillness, and the tiny pause before Bo’s question must all be visible.",
+   "editorialPurpose": "Carry the central emotional reframe without cutting away from the vulnerability too soon.",
+   "memorableLandingImage": "Bo no longer fighting the tail as hard, testing whether Keen’s wonder might be true.",
+   "providerInstruction": "Stay with Bo as he blurts the fear, let the tail’s poofs expand the frame and disturb the room, then hold Keen’s impressed stillness and Bo’s softened question long enough for shame to become curiosity."
+  },
+  "performanceBudgetApproved": {
+   "emotionalTurnCount": 2,
+   "propStateChangeCount": 0,
+   "dialogueHeavy": true,
+   "silentActingReserveSec": 4.0,
+   "landingHoldSec": 2.0,
+   "minimumHonestDurationSec": 23.0,
+   "decision": "single-unit",
+   "rationale": "The fear line, two tail state changes, Keen’s awe, and Bo’s fragile response form one indispensable emotional turn that needs silence around the gasp and the reframe."
+  },
+  "storyIntentApproved": {
+   "narrativeFunction": "Expose the true fear and transform its meaning through one kind witness.",
+   "primaryAudienceFeeling": "Protective gasp.",
+   "secondaryAudienceFeeling": "Tender relief that Bo is not punished for being seen.",
+   "outerAction": "Bo blurts the Learning Circle fear; the tail poofs; Keen responds with awe; Bo begins to calm.",
+   "innerAction": "Bo expects rejection and discovers a first possible alternative: wonder.",
+   "performanceDirection": "Bo pleads with the tail as if it is betraying him; Keen should look delighted before speaking, so the line confirms an already visible response.",
+   "mutedRead": "Bo names distress physically, the tail grows beyond control, Keen looks amazed rather than alarmed, and Bo’s body loosens slightly.",
+   "environmentPressure": "The room can no longer hide the feared part of Bo; the doorway witness makes visibility unavoidable.",
+   "soundStory": "Protect a widened quiet around the tail action; Keen’s line should land into that quiet like fresh air, not like a cheer.",
+   "motifUse": "The tail replaces the conker as the truthful motif: the uncontrolled need interrupts the controllable switch.",
+   "thoughtChangeAndCut": "Bo changes from ‘this will make me unlikable’ to ‘maybe someone can see this differently’; cut only after that curiosity has visibly arrived.",
+   "mustUnderstand": "Keen thinks the tail is amazing sincerely, not as a strategy or joke at Bo’s expense.",
+   "mustNotKnowYet": "Bo is not cured or ready for the full Learning Circle; only this one witness has become safe.",
+   "reactionBeat": "Keen’s impressed stillness is the meaning-changing reaction.",
+   "relationshipDistance": "They remain separated by the room and threshold, but emotional distance narrows sharply.",
+   "relationshipPowerDynamic": "Bo is vulnerable; Keen holds power by witnessing gently and not exploiting it.",
+   "touchOrAvoidance": "Bo grabs the tail to control it; Keen avoids touching Bo or the tail, letting wonder do the work.",
+   "eyelineRule": "Keen’s eyeline should go to the tail with delight, then to Bo with care; Bo checks Keen’s face before believing any of it.",
+   "silhouetteRead": "A small figure tangled with a suddenly huge tail, met by a still figure at the doorway.",
+   "silenceRule": "Protect silence immediately after the tail’s second poof and after Keen’s awe so the turn can be felt.",
+   "scoreInstruction": "Withhold score through the tail panic; allow the faintest warm note after Keen’s awe if needed, staying beneath the held silence."
+  },
+  "targetDurationSecApproved": 23,
+  "storyboardStagePlanApproved": [
+   {
+    "stageNumber": 1,
+    "beatIds": [
+     "3.B4"
+    ],
+    "purpose": "Name the real social fear now that a safe witness is present.",
+    "primaryEvent": "Bo blurts that nobody may like him at the Learning Circle and fears his tail doing the thing, moving the problem from conker logic to being seen.",
+    "emotionalOrComicTurn": "The private delay becomes an exposed belonging fear.",
+    "cameraAndTransition": "Begin close enough to catch the blurt as a spill, with Keen still held in the doorway relation rather than cut away as judgment.",
+    "observableEndState": "Bo is visibly exposed in front of Keen, no longer hiding behind the conker game."
+   },
+   {
+    "stageNumber": 2,
+    "beatIds": [
+     "3.B4"
+    ],
+    "purpose": "Force the feared truth into the room physically.",
+    "primaryEvent": "Bo’s tail suddenly poofs, he grabs and pleads with it, and it poofs larger again instead of obeying.",
+    "emotionalOrComicTurn": "The thing he feared happens exactly when it matters; the room inhales.",
+    "cameraAndTransition": "Allow the tail movement to expand the frame and briefly disturb Bo’s attempt to stay small.",
+    "observableEndState": "The enlarged tail is undeniable in the room, with Bo struggling against it."
+   },
+   {
+    "stageNumber": 3,
+    "beatIds": [
+     "3.B4"
+    ],
+    "purpose": "Reframe shame through Keen’s sincere awe.",
+    "primaryEvent": "Keen stares impressed and says, “Whoa. Your tail is AMAZING,” causing Bo to pause his struggle, calm slightly, and ask, “…you think so?”",
+    "emotionalOrComicTurn": "The tail changes from disaster to wonder for one fragile moment.",
+    "cameraAndTransition": "Hold after Keen’s awe so the turn can cross Bo’s face and body before the next gag releases it.",
+    "observableEndState": "Bo is still with the tail, but his grip and face have softened into uncertain curiosity."
+   }
+  ],
+  "storyboardInternalShotPlanApproved": [
+   {
+    "shotNumber": 1,
+    "purpose": "Let Bo’s fear come out as a spill rather than a neat explanation.",
+    "framingAndCamera": "Close shared interior-threshold composition with Bo foregrounded and Keen present but not dominant.",
+    "storyAction": "Bo blurts, “Hi Keen, my name is Bo and I am really worried. What if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?”",
+    "performanceFocus": "Bo’s words outrun his tidiness; Keen listens without stepping in to solve.",
+    "landingImage": "Bo exposed in the warm room with Keen still holding the threshold.",
+    "cutReason": "New emotional information: the hidden fear is now spoken."
+   },
+   {
+    "shotNumber": 2,
+    "purpose": "Make the tail’s uncontrolled truth bigger than Bo’s control system.",
+    "framingAndCamera": "The frame widens or yields as the tail poofs, allowing its size to interrupt the previously tight room geometry.",
+    "storyAction": "The tail poofs twice its size; Bo grabs it and says, “Stop it! Please just be a normal tail!” before it poofs larger again.",
+    "performanceFocus": "Bo’s control fails physically: he tries to contain the tail as if politeness could make it obey.",
+    "landingImage": "Bo wrapped up in the enlarged tail’s presence, unable to make it normal.",
+    "cutReason": "Impact and new visual idea: the feared thing enters the frame and changes the scale of the room."
+   },
+   {
+    "shotNumber": 3,
+    "purpose": "Let Keen’s wonder rewrite the meaning of what everyone is looking at.",
+    "framingAndCamera": "Hold both the tail’s size and Keen’s face-line toward it, then settle on Bo’s softened response without rushing away.",
+    "storyAction": "Keen looks impressed and says, “Whoa. Your tail is AMAZING.” Bo pauses, calms a little, and asks, “…you think so?”",
+    "performanceFocus": "Keen’s still delight is the turn; Bo’s curiosity must arrive cautiously, not as instant confidence.",
+    "landingImage": "Bo’s grip relaxed against the tail, looking toward Keen with fragile uncertainty.",
+    "cutReason": "The hold is the point; no extra reaction cut is needed until the next unit changes the mechanism to Keen’s self-joke."
+   }
+  ],
+  "transitionType": "PLANNED_CUT",
+  "providerBoundaryReasonApproved": "duration_limit",
+  "providerBoundaryExplanationApproved": "This unit’s natural 23 seconds plus the next unit’s natural 22 seconds would exceed 30 seconds; both the awe hold and Keen’s demonstration require separate breathing room under one reference regime each.",
+  "voiceDirectorBrief": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:81ea694d31d7754abb4ef51bd5cfce0b27748895a637b7a27959dffc9a0ceb36",
+    "sourceEventId": "script-event:sha256:4d4a04fdaeecde490eeea33143f074d0cbd58ae84875c345de4d26e61a46e120",
+    "speaker": "Bo",
+    "exactDialogue": "Hi Keen, my name is Bo and I am really worried. What if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?",
+    "elevenLabsV3Direction": "[nervous] What if NOBODY likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?",
+    "expectedTiming": "Start as Bo clutches near the conker; let “THING” land just before or into the tail’s first soft burst.",
+    "physicalActionRelationship": "Voice tries to contain the confession while the body can’t; the line should feel like it accidentally summons the tail expansion."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0ec00bfed75056e8f20f64ed58e9771d19861536c07fc248efab7f8aefaa8ce",
+    "sourceEventId": "script-event:sha256:b12df535dba02ee07579ed68dc15f440aba712e442a2b5189bc4f9739c96d1ba",
+    "speaker": "Bo",
+    "exactDialogue": "Stop it! Please just be a normal tail!",
+    "elevenLabsV3Direction": "Stop it! [pause] PLEASE just be a NORMAL TAIL!",
+    "expectedTiming": "“Stop it!” lands on the first grab; “Please just be a normal tail!” rides the failed compression into the second burst.",
+    "physicalActionRelationship": "The pause is the physical grab; the plea should sound squeezed by the effort to compress the tail."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:419a2549192db2f7c23679d404935929f5c57640d2c56e9c428b77f70d7b751f",
+    "sourceEventId": "script-event:sha256:59a477bd8415dc8c053ffe83d3e421783fbaced404387a1c54bc808b89e7529c",
+    "speaker": "Keen",
+    "exactDialogue": "14\tWhoa. Your tail is AMAZING.",
+    "elevenLabsV3Direction": "[quietly] 14\tWHOA. Your tail is AMAZING.",
+    "expectedTiming": "Hold Keen’s silent reaction first; speak after the tail has completed its follow-through and Bo is braced for judgment.",
+    "physicalActionRelationship": "The voice’s stillness redirects the room; it must not compete with the tail’s size, only witness it."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:4a4bd1e5b095e455ce361ce7fb5c6bc52a8cac0dcf147372dcc6ee61dddfb0db",
+    "sourceEventId": "script-event:sha256:3ef4febf182299ee62a698dff03501ac0473b4992e87b724d12dbf49aa5271f8",
+    "speaker": "Bo",
+    "exactDialogue": "15\t…you think so?",
+    "elevenLabsV3Direction": "[quietly] 15\t…you THINK so?",
+    "expectedTiming": "After Keen’s compliment has had time to land; begin as Bo looks back rather than during the tail action.",
+    "physicalActionRelationship": "The voice follows the body’s slow release; no immediate confidence, just the first unclenching."
+   }
+  ],
+  "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Bo, @图3 only for Keen and @图4 only for the oak set.\n\nBegin exactly on @图1, the approved opening frame — stay with Bo as he blurts the fear, let the tail’s poofs expand the frame and disturb the room, then hold Keen’s impressed stillness and Bo’s softened question long enough for shame to become curiosity. Performance phases: anticipation: Bo Bo leans forward with the conker close, paws tight and speech-driven motion spilling out faster than his posture can organize; action: Bo Bo’s tail expands suddenly; he grabs it with both paws, tries to hold it down, and is pulled off balance when it expands again; reaction: Keen Keen looks directly at the enlarged tail with widened eyes, lifted face, and still body, showing delight rather than alarm; settle: Bo Bo stops fighting as hard, loosens his grip on the tail, lowers his shoulders, and checks Keen’s face with a small uncertain look. Cause and effect: Bo’s body tightens around the exposed worry; the tail expands beyond his hands, forcing the frame and his balance wider, and Keen’s still delighted gaze interrupts Bo’s attempt to hide it. Visible turn: The enlarged tail changes from something Bo is wrestling to something he cautiously allows to be seen. Land on: Bo must end beside the enlarged tail with a softened grip and a questioning look toward Keen, not fully cured or hidden. Acting freedom: The tail’s exact bounce, Bo’s paw placement, and Keen’s facial micro-reaction may vary, but the second expansion must clearly overpower Bo’s control and Keen must read sincere before Bo softens. Bo beside his enlarged tail with his grip loosened, looking toward Keen in uncertain calm.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Bo and Keen. Preserve character identity and relative scale. Keep tail sprung from startle but contained, tail enlarged and softened after second poof visible.",
+  "promptWords": 318,
+  "referenceSlots": {
+   "@图1": "opening keyframe",
+   "@图2": "Bo",
+   "@图3": "Keen",
+   "@图4": "scene plate",
+   "@Audio1": "voice track"
+  },
+  "audioBrief": "SHOT S3.SH4 — voice-only performance for @Audio1.\nBo: \"Hi Keen, my name is Bo and I am really worried. What if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?\" — [nervous] What if NOBODY likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?. Target 1.0-6.3s.\nBo: \"Stop it! Please just be a normal tail!\" — Stop it! [pause] PLEASE just be a NORMAL TAIL!. Target 8.1-11.0s.\nKeen: \"14\tWhoa. Your tail is AMAZING.\" — [quietly] 14\tWHOA. Your tail is AMAZING.. Target 14.4-16.4s.\nBo: \"15\t…you think so?\" — [quietly] 15\t…you THINK so?. Target 19.1-20.2s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+  "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Bo (@图1, bee) inside the hollow clutching the conker, angled toward Keen (@图2, bear) at the doorway as the private fear is about to spill out.\n\nContinuity in: Warm hollow interior and doorway light continue unchanged, now holding both Bo’s vulnerability and Keen’s quiet presence; Interior threshold side, close enough to Bo for the blurt while keeping Keen in relation. @图3 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nLiving performance lock: Bo, Keen has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+  "keyframePromptWords": 154,
+  "keyframeReferenceSlots": {
+   "@图1": "Bo",
+   "@图2": "Keen",
+   "@图3": "scene plate"
+  },
+  "internalConstraints": "Hard constraints: no The tail must visibly poof twice, with the second expansion overpowering Bo’s attempt to contain it; no Keen’s awe must read as sincere before Bo softens; it cannot be played as teasing or fixing; End with Bo only cautiously softened, not cured or proudly displaying the tail; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+ },
+ "timingRevision": {
+  "at": "2026-09-01T00:00:23",
+  "reviewedBy": "Julian",
+  "reason": "Longer greeting and worry need natural pauses before the tail reaction.",
+  "windowsSec": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:81ea694d31d7754abb4ef51bd5cfce0b27748895a637b7a27959dffc9a0ceb36",
+    "startSec": 1.0,
+    "endSec": 10.8
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0ec00bfed75056e8f20f64ed58e9771d19861536c07fc248efab7f8aefaa8ce",
+    "startSec": 11.5,
+    "endSec": 14.2
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:419a2549192db2f7c23679d404935929f5c57640d2c56e9c428b77f70d7b751f",
+    "startSec": 16.2,
+    "endSec": 18.1
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:4a4bd1e5b095e455ce361ce7fb5c6bc52a8cac0dcf147372dcc6ee61dddfb0db",
+    "startSec": 20.0,
+    "endSec": 21.2
+   }
+  ]
+ }
+}

@@ -1,0 +1,64 @@
+{
+ "approved": null,
+ "candidate": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S3_plate_candidate_73ac5622.png",
+  "hash": "0ed1e64a9adc904818947bd10a68012bccc7cc1f2de01fe407c70905358e5108",
+  "inputSignature": {
+   "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+   "briefHash": "b5fef9286b9fe62b4e2597f6622c1b692463e7fa3ab53aea6a80855c548f67f2",
+   "referenceHashes": {},
+   "plateHash": "0ed1e64a9adc904818947bd10a68012bccc7cc1f2de01fe407c70905358e5108"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-08-31T15:09:31",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/houses/CB_Bo_house-int-door-view.png",
+  "packageRevision": 1
+ },
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-08-31T15:09:31",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "creativeDirectingStandardVersion": 4,
+    "sourceHash": "79dad042fbee7694f97e299a9497ce627d18ff8573ae768559a684afa83b81d7",
+    "output": {
+     "creativeIntent": "Make Bo’s hollow oak feel like a beloved private refuge that has started gently pressuring him to leave. The room should read cosy, handmade, and safe at first glance, but the open doorway and school-ready objects should introduce a soft emotional pull toward the outside world.",
+     "storyOfPlace": "Bo lives inside an old hollow oak adapted into a child’s den: curved timber walls, root shelves, little cubbies, leaf textiles, polished knots used as hooks, and handmade storage for treasures. The space holds evidence of Bo’s delaying ritual — a conker kept like a lucky object, a ready satchel, small personal arrangements, and comforting nooks that invite hiding. Beyond the doorway is daytime Learning Circle brightness, not threatening, but more exposed than the warm interior.",
+     "paletteAndLighting": "Warm saturated daylight, honey amber wood, chestnut browns, soft moss greens, acorn tan, leaf gold, and small touches of gentle sky blue from outside. Interior light is cosy and bounced through wood and leaves; doorway light is clearer, brighter, and slightly cooler, creating a visible emotional threshold without harsh contrast. The look should be inviting for ages 4-8, never gloomy or frightening.",
+     "materialsAndAtmosphere": "Tactile original 3D CGI animation materials: rounded carved oak grain with softened edges, polished worn hand-touch areas, velvet moss pads, woven leaf mats, stitched fabric straps, smooth conkers, tiny wooden pegs, bark ridges, root curves, dust motes in warm air, and a faint living-tree freshness. Everything should feel safe, squeezable, and physically real, with playful handcrafted imperfection.",
+     "continuityRules": [
+      "Environment-only Scene Look plate: no characters, no silhouettes, no body parts, no visible tail, no acting, no character placement.",
+      "Do not create a composed story shot; present the scene-wide look, materials, color, light, and atmosphere of Bo’s hollow oak.",
+      "The hollow oak interior must feel like Bo’s safest private space, but the open doorway must visibly suggest the outside day and the pull of the Learning Circle.",
+      "Keep the doorway emotional but gentle: exposure, not danger.",
+      "Props may include a conker, satchel, cubbies, leaf textiles, hooks, shelves, and childlike handmade storage, but they must not become a gag or a mystery reveal setup."
+     ],
+     "providerPrompt": "Environment-only Scene Look plate for BO’S HOLLOW OAK, daytime, original feature-quality 3D CGI animation for ages 4-8. Design a cosy child’s room inside a living hollow oak: rounded carved timber walls, curving roots, soft bark ridges, polished knots, small cubbies, root shelves, wooden hooks, woven leaf mats, mossy cushions, stitched fabric details, a smooth conker kept as a treasured object, and a ready satchel near the room environment. Warm honey-amber interior light bounces softly through the oak, with saturated chestnut browns, moss greens, acorn tans, leaf golds, and tiny touches of clear sky blue from an open doorway. The doorway shows bright gentle daylight from outside, slightly cooler and more exposed than the interior, creating the feeling that the safe room is lovingly saying “not yet” while the outside world patiently waits. Materials should be tactile and physically believable: softened oak grain, velvety moss, woven leaves, hand-worn wood, dust motes in warm air, handcrafted imperfections, rounded child-safe forms. Atmosphere is intimate, safe, charming, and emotionally tender, with a subtle threshold tension but no fear. No characters, no silhouettes, no body parts, no tail, no acting, no camera/lens language, no story action, no text, no logos."
+    },
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+     "sceneContextHash": "5d70bcc6a78627f7efa774a5302eb249cade2b9fe670d0239fb3891246aad191"
+    },
+    "outcome": "approved",
+    "decisionAt": "2026-08-31T15:09:31",
+    "reviewedBy": "StudioAI",
+    "note": "Automatically prepared for the selected Scene Look source."
+   },
+   "candidate": null,
+   "history": []
+  }
+ }
+}

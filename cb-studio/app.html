@@ -1853,7 +1853,11 @@ function renderEpisodes(){
       <div class="epactions"><button type="button" class="btn" onclick="openEpisode(${e.number})">${_esc(actionLabel)}</button>
         ${e.script?`<button type="button" class="btn ghost" onclick="openEpisodeScript(${e.number})">Script</button>`:""}</div></div></article>`;
   }).join("");
-  const next=EPISODES.find(e=>e.storyIntakeState==="awaiting-review")||EPISODES.find(e=>e.packageCurrent)||EPISODES.find(e=>e.script)||EPISODES[0];
+  const byNewestEpisode=(items)=>[...(items||[])].sort((a,b)=>Number(b.number||0)-Number(a.number||0));
+  const next=EPISODES.find(e=>e.storyIntakeState==="awaiting-review")
+    ||byNewestEpisode(EPISODES).find(e=>e.packageCurrent)
+    ||byNewestEpisode(EPISODES).find(e=>e.script)
+    ||EPISODES[0];
   const title=(CURRENT_PROJECT&&CURRENT_PROJECT.name)||"Production";
   document.getElementById("view").innerHTML=`${productionSectionHeaderHTML(title,(CURRENT_PROJECT&&CURRENT_PROJECT.premise)||`${EPISODES.length} episodes in this production.`)}${productionLibraryHTML("episodes")}<div class="production-section-head"><div><h2>Episodes</h2><span>${EPISODES.length} episode${EPISODES.length===1?'':'s'} · open one to enter its scene pipeline</span></div>${next?`<button type="button" class="btn" onclick="openEpisode(${next.number})">Continue Episode ${next.number}</button>`:`<button type="button" class="btn" onclick="addForm()">＋ Add episode</button>`}</div><div class="epgrid">${cards}<button type="button" class="addcard" onclick="addForm()"><span style="font-size:26px">＋</span><span>Add episode</span></button></div>`;
 }

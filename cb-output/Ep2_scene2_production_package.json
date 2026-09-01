@@ -1066,7 +1066,7 @@
    "beatCodes": [
     "2.B2"
    ],
-   "status": "designed",
+   "status": "approved",
    "shotRole": "coverage",
    "establishJob": null,
    "buttonChange": null,
@@ -1101,8 +1101,8 @@
      }
     ]
    },
-   "approvedTake": null,
-   "harvestFrame": null,
+   "approvedTake": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+   "harvestFrame": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_final_frame.png",
    "keyframeCandidate": {
     "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_keyframe_candidate_c0e90422.png",
     "generatedAt": "2026-08-31T09:52:49",
@@ -1631,6 +1631,582 @@
        "invalidationReason": "direct inputs changed before replacement preparation"
       }
      ]
+    },
+    "cinematography": {
+     "approved": null,
+     "candidate": {
+      "department": "Cinematography",
+      "worker": "Cinematographer / DP",
+      "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-08-31T14:03:36",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "156284667ce8ee785bd9c353c2b3f37c129998703450c2b6de5be896a1cbae00",
+      "output": {
+       "shotId": "S2.SH2",
+       "audienceRead": "Aida’s sacred stillness is held at bowl height, but the frame is already giving her a warm, open path toward Keen’s messy arrival; the audience should feel the ritual becoming a caring mission rather than a broken ceremony.",
+       "composition": "Low seated-bowl-height coverage in 16:9. Aida anchors the calm near lower center-left beside the inactive crystal bowl and purple ritual mat, with the cottage and pink crystals receding behind her. The frame opens along a diagonal from Aida and the bowl toward the right clearing edge, where Keen is held small in depth at the edge of the path, leaving enough air and lead room for his sneezy approach without crowding Aida’s grounded center. The bowl remains visible but inactive, no hand returning to it.",
+       "lensAndCameraRelationship": "Gentle wide-normal animated feature lens, approximately 32–35mm equivalent, camera low near seated eye/bowl height with a slight three-quarter view across the clearing. Keep perspective soft and inviting, not distorted; Aida reads as the emotional anchor while Keen reads smaller because he is deeper on the travel axis, not because of canon scale change.",
+       "lightingAndDepth": "Warm ordinary morning light, inherited faint rose residue around the quiet bowl and nearby mist, with dew catching small highlights across the grass. Sun shafts from upper frame-right skim the clearing, creating soft depth layers through foliage, crystals, cottage, and path. The air around the bowl is still enough to feel sacred, while the right-side clearing edge is brighter and more active for the coming interruption.",
+       "geography": [
+        "Aida sits near lower center-left beside the inactive crystal bowl and purple ritual mat.",
+        "The bowl and mallet sit just in front of Aida, closer to camera than the cottage path.",
+        "The cottage and large pink crystals sit in mid-background behind Aida, slightly left of center.",
+        "The open path runs diagonally from Aida’s bowl space toward the frame-right clearing edge.",
+        "Keen starts deeper at the frame-right clearing edge on Aida’s eventual eyeline, outside the ritual circle.",
+        "Hold a clear performance corridor between Aida and Keen along the sunlit path.",
+        "Morning light enters from upper frame-right and rakes across dew, mist, crystals, and grass."
+       ],
+       "charactersInFrame": [
+        "Aida",
+        "Keen"
+       ],
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "openingFrameLayout": {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Aida",
+        "referenceHeightFraction": 0.34,
+        "sameDepth": false,
+        "placements": [
+         {
+          "character": "Aida",
+          "centerX": 0.39,
+          "centerY": 0.62,
+          "apparentScale": 1.0,
+          "depthPlane": 1,
+          "bodyAngleDegrees": 25.0,
+          "facing": "three-quarter toward the quiet bowl, attention just beginning to have room to lift toward frame-right",
+          "pose": "grounded seated anticipation beside the inactive bowl, calm and unhurried, holding the ritual space closed without restarting it"
+         },
+         {
+          "character": "Keen",
+          "centerX": 0.82,
+          "centerY": 0.58,
+          "apparentScale": 0.66,
+          "depthPlane": 2,
+          "bodyAngleDegrees": -35.0,
+          "facing": "toward Aida from the frame-right clearing edge",
+          "pose": "small in depth at the active edge of the path, eager but not yet performing a sneeze, outside the ritual circle"
+         }
+        ]
+       },
+       "negativeSpace": [
+        "Keep open air and grass between Aida and the frame-right clearing edge for Keen’s sneeze force and approach.",
+        "Hold empty space above and just right of the bowl for dew shimmer, mist ripple, and subtle light disturbance.",
+        "Do not fill the diagonal path corridor from Aida to Keen with foreground plants or props.",
+        "Keep the bowl’s immediate circle uncluttered so it reads inactive and no longer being played."
+       ],
+       "referenceUse": [
+        "Use @Aida for Aida’s exact character identity, robe, jewelry, hair, and canon proportions.",
+        "Use @Keen for Keen’s exact character identity, blue fur, white tuft, gold wrist bands, and canon proportions.",
+        "Use the Scene Look reference for the crystal clearing, cottage, warm morning palette, dew, mist, crystals, flowers, grass, bowl area, and material quality.",
+        "Do not use any reference image as a pose plate or sizing board; staging is governed by the openingFrameLayout."
+       ],
+       "continuityProtections": [
+        "Aida must not look startled, frantic, scolding, or mid-reach for the bowl.",
+        "The crystal bowl must read quiet and inactive, with faint rose residue only, not an active ritual restart.",
+        "Keen must read eager and sneeze-prone at the clearing edge, but the frame must not freeze a full sneeze action in the opening pose.",
+        "Protect Aida as the grounded center while leaving the path outward visually open."
+       ],
+       "providerPrompt": "Create one 16:9 cinematic animated keyframe for Ep2 Scene 2 Shot S2.SH2 using the supplied references in order: @Aida for Aida identity, @Keen for Keen identity, and the Scene Look for the warm crystal-forest clearing, cottage, pink crystals, dew, mist, purple flowers, honeycomb/pollen accents, and golden morning light. Camera is low at seated bowl height, gentle 32–35mm wide-normal perspective. Aida sits near lower center-left beside the inactive pink crystal singing bowl on the purple mat, calm and grounded, the ritual space still and faintly rose-lit; the mallet rests near the bowl and she is not restarting the ritual. Compose a clear diagonal path from Aida and the bowl toward the frame-right clearing edge. Keen appears smaller in depth at the far frame-right clearing edge on Aida’s eventual eyeline, outside the ritual circle, eager and readable but not yet locked into a sneeze pose; include a tiny hint of pollen near his nose without turning it into chaos. Leave open negative space along the path between them for later movement and environmental ripple. Warm sunbeams enter from upper right, dew sparkles softly, mist and light texture remain delicate. Mood: sacred stillness gently opening into playful forward motion. No scolding, no frantic reaction, no active bowl playing, no full sneeze freeze, no crowding of the travel corridor."
+      },
+      "packageRevision": 3,
+      "inputSignature": {
+       "stage": "cinematography",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+        "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+       },
+       "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+       "shotContractHash": "ab1b0867c3c8b46019773058fe5219e19c3695600a00939c5ab800bcc3884b8f",
+       "sceneLookHash": "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921",
+       "references": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图2",
+         "role": "Aida",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "604c38221823234148f458c625509ae3127b535eb4750076d0ed65825cbb6566",
+         "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图1",
+         "role": "Keen",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "26151202911f2d373133dc0cc7c6e6d693c5bb77f6f4a67b1de7637fd9a1e166",
+         "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+        },
+        {
+         "slot": "@图3",
+         "sourceSlot": "@图3",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921"
+        }
+       ]
+      }
+     },
+     "history": []
+    },
+    "animation": {
+     "approved": null,
+     "candidate": {
+      "department": "Animation",
+      "worker": "Seedance Production Director",
+      "skill": "skills/seedance-production-director/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-08-31T14:09:43",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "e74dcd7c4573f12c60c589b47c702b8b9fc50816af6d2afd7749a54d690e6b05",
+      "output": {
+       "shotId": "S2.SH2",
+       "durationSec": 18,
+       "taskMode": "reference-to-video",
+       "pacingMode": "timestamp",
+       "generationGoal": "Aida’s private ritual calm is opened by Keen’s sneezy off-camera interruption, turning the sacred recognition into a warm invitation toward shared movement.",
+       "deliveryPlan": "Use @图1 as the opening state, hold Aida and the inactive bowl long enough for Keen’s unseen sneeze to enter as a comic physical force, then widen the composition toward the clearing edge so Aida’s calm outward turn and Keen’s sneezy approach become the payoff.",
+       "creativeTranslation": {
+        "interpretation": {
+         "jokeOrAche": "The ache is Aida’s sacred recognition becoming responsibility; the joke is that the first call to action arrives as a huge helpless sneeze.",
+         "mechanism": "Protected stillness is punctured by bodily comedy, but Aida includes the interruption instead of correcting it.",
+         "statusBefore": "Aida holds a closed ritual circle beside the quiet bowl, with the air still faintly charged from the vision.",
+         "statusAfter": "The circle has opened toward Keen and the path outward, with the bowl left inactive and the mission gently begun.",
+         "audienceProgression": [
+          "Feel the quiet bowl space as protected and almost finished.",
+          "Laugh as Keen’s unseen sneeze visibly shakes the delicate air before he is explained.",
+          "Relax when Aida’s warmth turns the mess into belonging and forward motion."
+         ],
+         "emotionalHeart": "Aida’s kindness is spacious enough to turn interruption into invitation."
+        },
+        "gagClocks": [
+         {
+          "beatCode": "2.B2",
+          "mode": "BIG",
+          "setup": "Aida’s solemn bowl tone and rose-lit recognition establish a fragile hush where every sound matters.",
+          "anticipation": "Aida stays grounded beside the inactive bowl, attention lifted but not yet turned outward.",
+          "impact": "Keen’s off-camera double sneeze detonates the silence at full size, carrying the comic implication of honeycomb trouble without requiring an explanatory cutaway.",
+          "reaction": "Aida registers the sound with eyes and breath first, then stays calm instead of grabbing the bowl or scolding.",
+          "recoveryHold": "Hold on Aida’s small absorption of the first sneeze before opening toward Keen’s direction; let the audience register that she is choosing the interruption, not merely reacting to noise.",
+          "recoveryHoldSec": 2.4,
+          "button": "Keen’s eager off-camera answer is immediately swallowed by another sneeze, and Aida’s final blessing lands the joke with affection rather than correction.",
+          "retroactive": false,
+          "providerAction": "Hold Aida as the quiet center while Keen’s sneezy approach activates the clearing edge and the open path remains readable."
+         }
+        ],
+        "generationDesign": {
+         "packagingDecision": "single-unit",
+         "completeGagArcCount": 1,
+         "densityJudgement": "One compact BIG interruption arc with three clear causal stages: sacred stillness, outward reorientation, and sneezy companion reveal.",
+         "splitOrNonSplitRationale": "The action stays readable in one 18-second unit because Keen’s first force remains off-camera, Aida’s reaction owns the center, and the final reveal serves one payoff rather than a separate chase or travel beat.",
+         "handoffState": "Aida remains grounded beside the bowl, turned toward the lively edge of the clearing as the path outward sits open in morning light."
+        }
+       },
+       "dramaticBeat": "Turn Aida’s sacred recognition into playful forward motion when Keen’s sneeze opens the circle.",
+       "audienceBefore": "The audience is held in Aida’s quiet recognition beside the stilled bowl.",
+       "audienceAfter": "The audience understands the ritual has opened into a warm mission with Keen as the messy, eager companion.",
+       "beatOwner": "2.B2",
+       "performanceFreedom": "Keen’s sneeze recovery, nose-brushing, jog rhythm, and secondary body recoil may vary for comic life; Aida’s micro-pause, breath, and robe follow-through may breathe, provided she never becomes frantic or scolding.",
+       "performanceArc": "Aida moves from contained ritual stillness to widened calm inclusion; Keen moves from unseen comic force to visible sneezy companion.",
+       "physicalCauseAndEffect": "The quiet bowl space creates still air; Keen’s off-camera sneeze sends a visible ripple through dew and light texture. Aida’s body absorbs the disturbance without recoiling, and because she does not return her hand to the bowl, the ritual remains open. Her outward turn redirects the scene’s energy from closed ceremony toward shared movement.",
+       "cameraBehaviour": "Begin at bowl-height from the inherited Aida-centered side, let the sneeze loosen the frame without cutting to Keen, then widen and angle toward the clearing edge before cutting only for the final approach-and-hold view.",
+       "timingAndRhythm": "Protect the opening hush, let the double sneeze land as two broad comic impacts, give Aida’s recognition line readable air, then let Keen’s eager answer be interrupted by the final sneeze before a warm held landing.",
+       "landingBreath": "Hold the final outward-facing composition long enough for Aida’s small blessing, Keen’s recovery, and the opened path to register as the new state.",
+       "directionDensity": "guided",
+       "precisionReasons": [
+        "Keen’s first double sneeze must remain off-camera long enough for Aida and the ritual space to absorb the interruption before he is visually explained.",
+        "Aida must not restart the bowl or scold; her visible choice is to leave the ritual open and turn outward toward Keen.",
+        "@Audio1 is the sole authority for all spoken words, timing, voice identity, and mouth performance."
+       ],
+       "shotPlan": [
+        {
+         "shotNumber": 1,
+         "purpose": "Preserve the sacred stillness and let Keen’s unseen sneeze enter as physical comedy.",
+         "framingLensAndCamera": "Shot 1: medium close bowl-height view, useful 40mm lens, inherited from @图1 with Aida near center and the bowl low foreground; the camera holds steady, then gives a small breathing drift toward the sneeze direction without revealing Keen.",
+         "causalAction": "Aida’s settled recognition changes into spoken purpose, and Keen’s off-camera double sneeze physically interrupts the quiet before the frame identifies him.",
+         "observablePerformance": "Aida sits grounded beside the inactive bowl, one paw still near her heart at first; when the unseen sneezes hit, dew trembles, faint light texture shivers, the bowl surface gives a tiny ripple, and Aida shifts eyes and breath toward the sound without flinching broadly.",
+         "compositionLightAndMaterials": "Warm morning light falls from high screen right; pink crystals and bowl glass catch soft highlights; faint rose residue drains through mist; robe fabric and dew respond subtly, not violently.",
+         "landingImage": "The bowl space has visibly loosened—dew and light tremble, Aida’s attention has shifted toward the sound, and Keen remains an unseen comic force.",
+         "dialogueLineIndexes": [
+          1,
+          2
+         ],
+         "dialogueDirections": [
+          "Aida’s first @Audio1 line begins after the ritual hush has a short readable beat; her mouth performance stays quiet and purposeful.",
+          "Keen’s @Audio1 double sneeze is off-camera, broad, plush, and funny; Aida listens with her mouth closed during Keen’s sound."
+         ],
+         "holdAfterDialogue": false,
+         "gagBeatIds": [
+          "2.B2"
+         ]
+        },
+        {
+         "shotNumber": 2,
+         "purpose": "Show Aida choosing inclusion by opening the ritual circle toward Keen’s direction.",
+         "framingLensAndCamera": "Shot 2: medium three-quarter seated view, useful 35mm lens; camera gently widens and pans along Aida’s eyeline so the bowl stays low beside her while the clearing edge and path begin to enter frame.",
+         "causalAction": "Aida changes the circle’s orientation from closed around the bowl to open toward Keen’s direction while lightly blessing him, naming the honeycomb mischief, and calling him to come with her.",
+         "observablePerformance": "Aida turns from the bowl with a soft smile and contained breath, keeping her hands away from the mallet and bowl; her robe follows the slow turn while the morning clearing becomes part of her invitation rather than a disrupted background.",
+         "compositionLightAndMaterials": "Sun shafts separate Aida from the mossy background; lingering mist thins; crystals provide pink edge glints; the bowl remains inactive and unstruck on its cushion.",
+         "landingImage": "Aida faces outward from the bowl, and the edge of the clearing now belongs to the mission.",
+         "dialogueLineIndexes": [
+          3
+         ],
+         "dialogueDirections": [
+          "Aida’s longer @Audio1 invitation carries warmth, a knowing tease, a locating call, and a calm final invitation; allow readable air after the locating call before the response."
+         ],
+         "holdAfterDialogue": true,
+         "gagBeatIds": []
+        },
+        {
+         "shotNumber": 3,
+         "purpose": "Reveal Keen as the messy approaching companion while Aida’s final warmth lands the new mission state.",
+         "framingLensAndCamera": "Cut to. Shot 3: wider two-character composition, useful 32mm lens, low seated height; Aida holds the calm center beside the bowl while the frame opens diagonally to Keen approaching from the active clearing edge in depth.",
+         "causalAction": "Keen’s off-camera and final sneeze change him from distant disruption into approaching companion as Aida’s final blessing settles the widened calm.",
+         "observablePerformance": "Keen jogs in along Aida’s eyeline with pollen on his nose, one paw lifting toward it as eagerness turns into another full-body sneeze; Aida stays seated, turned toward him, mouth closed during his line and sneeze, then answers with a small protective smile.",
+         "compositionLightAndMaterials": "Ordinary warm morning light replaces the rose residue; dew sparkles around Keen’s steps; path stones and moss create a readable outward route; Aida’s bowl and cushion stay calm in the near center.",
+         "landingImage": "Aida remains grounded beside the bowl, turned toward the noisy edge of the clearing, with the path outward visually opened.",
+         "dialogueLineIndexes": [
+          4,
+          5
+         ],
+         "dialogueDirections": [
+          "Keen’s @Audio1 response is eager and reassuring before the final sneeze overtakes his confidence.",
+          "Aida’s final @Audio1 blessing lands warmly on Keen’s dignity, with a small smile and no scolding."
+         ],
+         "holdAfterDialogue": true,
+         "gagBeatIds": [
+          "2.B2"
+         ]
+        }
+       ],
+       "timingBeats": [
+        {
+         "type": "impact",
+         "count": 3,
+         "source": "Keen’s sneeze impacts: two off-camera interruptions and one final approach sneeze."
+        },
+        {
+         "type": "reaction",
+         "count": 2,
+         "source": "Aida’s first eye-and-breath response, then her final warm blessing."
+        },
+        {
+         "type": "turn",
+         "count": 1,
+         "source": "Aida turns the ritual circle outward toward Keen’s direction."
+        },
+        {
+         "type": "travel",
+         "count": 1,
+         "source": "Keen approaches from the clearing edge toward Aida."
+        }
+       ],
+       "witnessStagingSides": [
+        "Aida remains beside the inactive bowl in the calm center of the opened composition.",
+        "Keen begins off-screen beyond the clearing edge on Aida’s eyeline, then approaches in depth along the visually open path."
+       ],
+       "stagePlan": [
+        {
+         "stageNumber": 1,
+         "beatIds": [
+          "2.B2"
+         ],
+         "purpose": "Protected stillness is interrupted by unseen sneeze force.",
+         "startSec": 0.0,
+         "endSec": 5.2,
+         "initialOrCarriedState": "Aida sits beside the quiet bowl in ordinary morning warmth, her attention just lifted from the vision before the clearing has fully relaxed.",
+         "cause": "The bowl is quiet, the ritual air still holds a little rose residue, and Keen has not entered the frame yet.",
+         "primaryEvent": "Aida’s settled recognition changes into spoken purpose, and Keen’s off-camera double sneeze physically interrupts the quiet before the frame identifies him.",
+         "observableEndState": "The bowl space has visibly loosened—dew and light tremble, Aida’s attention has shifted toward the sound, and Keen remains an unseen comic force.",
+         "emotionOrCameraAnalysis": "Keeping Keen unseen lets the sneeze behave like an invading comic force, while Aida’s restrained reaction proves her grounded warmth under pressure."
+        },
+        {
+         "stageNumber": 2,
+         "beatIds": [
+          "2.B2"
+         ],
+         "purpose": "Aida opens the ritual circle toward the interruption.",
+         "startSec": 5.2,
+         "endSec": 11.2,
+         "initialOrCarriedState": "The disturbed bowl space has loosened, and Aida’s attention is already angled toward Keen’s unseen direction.",
+         "cause": "Keen’s off-camera sneeze has entered the clearing without damaging it, giving Aida a living reason to redirect the ritual’s purpose.",
+         "primaryEvent": "Aida changes the circle’s orientation from closed around the bowl to open toward Keen’s direction while lightly blessing him, naming the honeycomb mischief, and calling him to come with her.",
+         "observableEndState": "Aida faces outward from the bowl, and the edge of the clearing now belongs to the mission.",
+         "emotionOrCameraAnalysis": "The widening camera turn makes Aida’s emotional choice visible: she does not reclaim control, she makes room."
+        },
+        {
+         "stageNumber": 3,
+         "beatIds": [
+          "2.B2"
+         ],
+         "purpose": "Keen becomes the approaching companion and the widened calm lands.",
+         "startSec": 11.2,
+         "endSec": 18.0,
+         "initialOrCarriedState": "Aida faces outward beside the inactive bowl, and the path edge has been invited into the composition.",
+         "cause": "Aida’s invitation gives Keen permission to move from noisy unseen interruption into the shared mission space.",
+         "primaryEvent": "Keen’s off-camera and final sneeze change him from distant disruption into approaching companion as Aida’s final blessing settles the widened calm.",
+         "observableEndState": "Aida remains grounded beside the bowl, turned toward the noisy edge of the clearing, with the path outward visually opened.",
+         "emotionOrCameraAnalysis": "The cut to the wider approach view pays off the delayed reveal while preserving Aida as the emotional anchor."
+        }
+       ],
+       "geography": [
+        "Aida sits near lower center-left beside the inactive crystal bowl and purple ritual mat.",
+        "The bowl and mallet sit just in front of Aida, closer to camera than the cottage path.",
+        "The cottage and large pink crystals sit in mid-background behind Aida, slightly left of center.",
+        "The open path runs diagonally from Aida’s bowl space toward the frame-right clearing edge.",
+        "Keen starts deeper at the frame-right clearing edge on Aida’s eventual eyeline, outside the ritual circle.",
+        "Hold a clear performance corridor between Aida and Keen along the sunlit path.",
+        "Morning light enters from upper frame-right and rakes across dew, mist, crystals, and grass."
+       ],
+       "attributeOwnership": [
+        "Aida owns the grounded seated posture, calm outward turn, warm smile, and non-scolding restraint.",
+        "Keen owns the off-camera sneeze force, sneeze recovery, eager approach, paw-near-nose business, and pollen on nose.",
+        "The inactive bowl owns the residual ritual stillness and tiny surface tremble; it must not restart or glow as a new ritual action.",
+        "Pollen on nose belongs to Keen only."
+       ],
+       "environmentContract": [
+        "Opening: faint rose residue and still ritual air remain around the quiet bowl.",
+        "Sneeze impact: dew, mist, light texture, and the bowl’s settled surface tremble lightly without chaos or damage.",
+        "Middle: rose residue drains away as the composition opens toward the clearing edge.",
+        "Ending: ordinary warm morning light is restored, the bowl remains inactive, and the path outward is visually clear."
+       ],
+       "motionVocabulary": [
+        {
+         "character": "Fuzzby",
+         "belongs": [
+          "careens",
+          "overcommits",
+          "barrels",
+          "bounces",
+          "improvises",
+          "presents",
+          "rockets"
+         ],
+         "banned": [
+          "slinks",
+          "hesitates",
+          "glides",
+          "sulks",
+          "waits",
+          "creeps"
+         ]
+        },
+        {
+         "character": "Zenny",
+         "belongs": [
+          "glides",
+          "observes",
+          "settles",
+          "arches",
+          "softens",
+          "levels"
+         ],
+         "banned": [
+          "scrambles",
+          "flails",
+          "rushes",
+          "panics",
+          "showboats"
+         ]
+        }
+       ],
+       "referenceContract": [
+        {
+         "assetTag": "@图1",
+         "role": "opening_frame",
+         "controls": "the exact first-frame composition and carried visible state from the approved opening keyframe",
+         "scope": "continuity"
+        },
+        {
+         "assetTag": "@图2",
+         "role": "character_identity",
+         "controls": "Aida identity, proportions, scale and approved wearable state",
+         "scope": "canon"
+        },
+        {
+         "assetTag": "@图3",
+         "role": "character_identity",
+         "controls": "Keen identity, proportions, scale and approved wearable state",
+         "scope": "canon"
+        },
+        {
+         "assetTag": "@图4",
+         "role": "location",
+         "controls": "the approved scene geography, world, light, materials and atmosphere",
+         "scope": "episode"
+        },
+        {
+         "assetTag": "@Audio1",
+         "role": "audio",
+         "controls": "approved dialogue, voice identity, cadence, delivery and mouth timing",
+         "scope": "continuity"
+        }
+       ],
+       "openingCarriedState": "Aida sits beside the quiet bowl in ordinary morning warmth, her attention just lifted from the vision before the clearing has fully relaxed.",
+       "openingMotionBridge": "Aida lets the hand near her heart settle into still purpose before her attention shifts toward the first off-camera sneeze.",
+       "actionOwnership": [
+        "Keen causes every sneeze and every sneeze-driven environmental tremble, even while he remains off-camera.",
+        "Aida causes the ritual circle to open outward through her body turn and eyeline, not through renewed bowl action.",
+        "The environment reacts to sneeze force only; no separate wind, magic burst, or unseen creature causes the tremble."
+       ],
+       "consistencyContract": [
+        "Begin from @图1 opening state and maintain the inherited seated bowl-height side until the sneeze has landed.",
+        "Keen’s first double sneeze remains off-camera long enough for Aida and the bowl space to absorb it.",
+        "Aida never scolds, restarts the bowl, reaches to strike it, or loses her grounded center.",
+        "End with Aida grounded beside the inactive bowl, turned toward Keen’s noisy clearing edge, with the outward path readable."
+       ],
+       "audioContract": "@Audio1 is the only source for dialogue, sneezes, voice identity, cadence, delivery, mouth timing, and pauses. No narration, ad-libs, humming, exertion, added voices, musical underscore, or extra spoken words. Listeners keep mouths closed when another character speaks or sneezes.",
+       "continuityFinish": "The ritual circle has opened into a mission: Aida stays grounded beside the inactive bowl, turned toward Keen’s noisy clearing edge, while Keen is established as the sneezy approaching companion.",
+       "surgicalSafeguards": [
+        "Do not show Keen before the off-camera double sneeze has visibly disturbed Aida’s bowl space.",
+        "Do not make Aida frantic, scolding, or broadly startled.",
+        "Do not restart the bowl, add a new glow pulse, or turn the sneeze into destructive chaos."
+       ],
+       "editScope": "One reference-to-video generation unit with three motivated internal views and one deliberate cut before the final approach reveal.",
+       "contentToPreserve": [
+        "Approved opening state from @图1.",
+        "Aida’s grounded restraint and outward reorientation.",
+        "Keen’s off-camera double sneeze before visual explanation.",
+        "Inactive bowl and opened path landing."
+       ],
+       "extensionDirection": "forward",
+       "transitionTrigger": "",
+       "transitionTransformation": "",
+       "transitionArrivalState": "",
+       "audioTransition": "@Audio1 remains continuous and authoritative throughout the unit.",
+       "firstFrameTag": "@图1",
+       "lastFrameTag": "Aida grounded beside the inactive bowl, turned toward Keen at the clearing edge with the path outward open.",
+       "storyboardTag": "",
+       "storyboardReadingOrder": "",
+       "blockoutKind": "coarse",
+       "blockoutMappings": [],
+       "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Aida; @图3=Keen; @图4=location; @Audio1=audio; never swap.\nAngles: @图2=one Aida; @图3=one Keen; views are not extra characters.\n@图1 is the first frame and the previous shot's approved final frame. Use it only for carried character state: it controls the exact opening pose, emotion, light and carried prop state only: Aida sits beside the quiet bowl in ordinary morning warmth, her attention just lifted from the vision before the clearing has fully relaxed. Do not use it as the scene geography, camera framing or environment layout authority; @图4 and Geography control the wider scene. If an Opening Motion Bridge is present, it alone controls how this inherited pose resolves into the new action.\n@图2 defines exactly one Aida identity, proportions, scale and approved wearable state: Aida identity, proportions, scale and approved wearable state; Aida approved wearable state: jewelled brow headdress. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图4 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nAida lets the hand near her heart settle into still purpose before her attention shifts toward the first off-camera sneeze.\n\n[ACTION OWNERSHIP]\nKeen causes every sneeze and every sneeze-driven environmental tremble, even while he remains off-camera.\nAida causes the ritual circle to open outward through her body turn and eyeline, not through renewed bowl action.\nThe environment reacts to sneeze force only; no separate wind, magic burst, or unseen creature causes the tremble.\n\n[ATTRIBUTE OWNERSHIP]\nAida owns the grounded seated posture, calm outward turn, warm smile, and non-scolding restraint.\nKeen owns the off-camera sneeze force, sneeze recovery, eager approach, paw-near-nose business, and pollen on nose.\nThe inactive bowl owns the residual ritual stillness and tiny surface tremble; it must not restart or glow as a new ritual action.\nPollen on nose belongs to Keen only.\nAida approved wearable state: jewelled brow headdress\nKeen approved wearable state: gold wrist cuffs with aquamarine gems\n\n[ENVIRONMENT CONTRACT]\nOpening: faint rose residue and still ritual air remain around the quiet bowl.\nSneeze impact: dew, mist, light texture, and the bowl’s settled surface tremble lightly without chaos or damage.\nMiddle: rose residue drains away as the composition opens toward the clearing edge.\nEnding: ordinary warm morning light is restored, the bowl remains inactive, and the path outward is visually clear.\n\n[One-Sentence Summary]\nAida’s private ritual calm is opened by Keen’s sneezy off-camera interruption, turning the sacred recognition into a warm invitation toward shared movement.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Aida sits near lower center-left beside the inactive crystal bowl and purple ritual mat. The bowl and mallet sit just in front of Aida, closer to camera than the cottage path. The cottage and large pink crystals sit in mid-background behind Aida, slightly left of center. The open path runs diagonally from Aida’s bowl space toward the frame-right clearing edge. Keen starts deeper at the frame-right clearing edge on Aida’s eventual eyeline, outside the ritual circle. Hold a clear performance corridor between Aida and Keen along the sunlit path. Morning light enters from upper frame-right and rakes across dew, mist, crystals, and grass.\n\n[Living Performance]\nLiving performance lock: Aida, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Shot Sequence]\nShot 1: Camera: medium close bowl-height view, useful 40mm lens, inherited from @图1 with Aida near center and the bowl low foreground; the camera holds steady, then gives a small breathing drift toward the sneeze direction without revealing Keen. Action: Aida’s settled recognition changes into spoken purpose, and Keen’s off-camera double sneeze physically interrupts the quiet before the frame identifies him. Performance: Aida sits grounded beside the inactive bowl, one paw still near her heart at first; when the unseen sneezes hit, dew trembles, faint light texture shivers, the bowl surface gives a tiny ripple, and Aida shifts eyes and breath toward the sound without flinching broadly. End state: The bowl space has visibly loosened—dew and light tremble, Aida’s attention has shifted toward the sound, and Keen remains an unseen comic force. Spoken action: Aida, Aida’s first @Audio1 line begins after the ritual hush has a short readable beat; her mouth performance stays quiet and purposeful: {Someone needs a little help today.} Non-verbal SFX: 2.8-4.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. Hold: 2.4s — Hold on Aida’s small absorption of the first sneeze before opening toward Keen’s direction; let the audience register that she is choosing the interruption, not merely reacting to noise.\nShot 2: Camera: medium three-quarter seated view, useful 35mm lens; camera gently widens and pans along Aida’s eyeline so the bowl stays low beside her while the clearing edge and path begin to enter frame. Action: Aida changes the circle’s orientation from closed around the bowl to open toward Keen’s direction while lightly blessing him, naming the honeycomb mischief, and calling him to come with her. Performance: Aida turns from the bowl with a soft smile and contained breath, keeping her hands away from the mallet and bowl; her robe follows the slow turn while the morning clearing becomes part of her invitation rather than a disrupted background. End state: Aida faces outward from the bowl, and the edge of the clearing now belongs to the mission. Spoken action: Aida, Aida’s longer @Audio1 invitation carries warmth, a knowing tease, a locating call, and a calm final invitation; allow readable air after the locating call before the response: {Bless you. Sounds like someone has been sniffing around Fuzzby’s honeycomb. Keen? Come with me} The pose holds a full beat after the line ends.\nShot 3: Camera: wider two-character composition, useful 32mm lens, low seated height; Aida holds the calm center beside the bowl while the frame opens diagonally to Keen approaching from the active clearing edge in depth. Action: Keen’s off-camera and final sneeze change him from distant disruption into approaching companion as Aida’s final blessing settles the widened calm. Performance: Keen jogs in along Aida’s eyeline with pollen on his nose, one paw lifting toward it as eagerness turns into another full-body sneeze; Aida stays seated, turned toward him, mouth closed during his line and sneeze, then answers with a small protective smile. End state: Aida remains grounded beside the bowl, turned toward the noisy edge of the clearing, with the path outward visually opened. Non-verbal SFX: 11.3-13.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. Spoken action: Keen, Keen’s @Audio1 response is eager and reassuring before the final sneeze overtakes his confidence: {Coming, Aida!} The pose holds a full beat after the line ends. Spoken action: Aida, Aida’s final @Audio1 blessing lands warmly on Keen’s dignity, with a small smile and no scolding: {Bless you Keen.} The pose holds a full beat after the line ends. Hold: 2.4s — Hold on Aida’s small absorption of the first sneeze before opening toward Keen’s direction; let the audience register that she is choosing the interruption, not merely reacting to noise.\nWitness staging: Aida remains beside the inactive bowl in the calm center of the opened composition. Keen begins off-screen beyond the clearing edge on Aida’s eyeline, then approaches in depth along the visually open path. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. Authored non-verbal SFX cues: 2.8-4.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. 11.3-13.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Aida and one Keen throughout; no duplicates of either character. Maintain Begin from @图1 opening state and maintain the inherited seated bowl-height side until the sneeze has landed. Safeguard: Do not show Keen before the off-camera double sneeze has visibly disturbed Aida’s bowl space. Safeguard: Do not make Aida frantic, scolding, or broadly startled. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Repeated-contact escalation: separate the first and second contacts with a readable recovery between them. The first contact is small and contained. The second contact is larger than the first, with a stronger visible cause, reaction and recovery. The third contact is larger than the second and completes the escalation. Living performance lock: Aida, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: The ritual circle has opened into a mission: Aida stays grounded beside the inactive bowl, turned toward Keen’s noisy clearing edge, while Keen is established as the sneezy approaching companion."
+      },
+      "preflight": {
+       "verdict": "PASS",
+       "score": 10.0,
+       "maximum": 10,
+       "checkerVerdict": "PASS",
+       "findings": [],
+       "seedanceAuthoring": {
+        "status": "ready",
+        "score": 12,
+        "maximum": 12,
+        "normalizedScore": 10.0,
+        "firingFloor": 9.5,
+        "summary": "Prompt matches every required authoring check."
+       },
+       "contractCompleteness": {
+        "score": 20,
+        "maximum": 20,
+        "threshold": 17,
+        "needsRevision": false,
+        "criticalFailures": []
+       },
+       "qualityGate": {
+        "score": 20,
+        "maximum": 20,
+        "threshold": 17,
+        "needsRevision": false,
+        "criticalFailures": []
+       }
+      },
+      "performanceBudget": {
+       "applicable": true,
+       "ready": true,
+       "durationSec": 18.0,
+       "dialogueOccupiedSec": 11.3,
+       "dialogueOccupancyRatio": 0.628,
+       "availableUnvoicedSec": 6.7,
+       "requiredSilentActingAndLandingSec": 4.0,
+       "emotionalTurnCount": 2,
+       "propStateChangeCount": 2,
+       "reasons": [],
+       "recommendedAction": "proceed-to-animatic"
+      },
+      "packageRevision": 3,
+      "inputSignature": {
+       "stage": "animation",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
+       },
+       "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+       "shotContractHash": "ab1b0867c3c8b46019773058fe5219e19c3695600a00939c5ab800bcc3884b8f",
+       "shotHash": "5a9218fff84c6f0fc87e8784880c937aae7572240cd69823bb4f0146ba2ffd5e",
+       "openingFrameHash": "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62",
+       "openingStageContractHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+       "sceneLookHash": "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921",
+       "referenceOrder": [
+        "@图1",
+        "@图2",
+        "@图3",
+        "@图4"
+       ],
+       "referenceBindings": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "opening keyframe",
+         "view": null,
+         "sameCharacterGroup": null
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图3",
+         "role": "Aida",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1"
+        },
+        {
+         "slot": "@图3",
+         "sourceSlot": "@图2",
+         "role": "Keen",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0"
+        },
+        {
+         "slot": "@图4",
+         "sourceSlot": "@图4",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null
+        }
+       ],
+       "referenceHashes": [
+        "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62",
+        "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+        "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+        "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921"
+       ],
+       "voiceHash": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+       "voiceApprovalSignature": {
+        "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+        "dialogueHash": "cda7354e60b8005eadb0a7b88b947e1764ce47104598bf0583016a075434b978",
+        "performanceHash": "61724816a832eeee397e17d38883c973d606a8d04c8bcb1bbd31b000a47affd2",
+        "voiceCardsHash": "490318f1d5890e5156c05acf0ec5ea507e2399054d22cab997aa03fabbf21d98",
+        "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+        "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+        "voiceCompilerVersion": "voice-director-v1",
+        "voiceIds": [
+         "SHuZ9GyczU4QEDzU4QU4",
+         "TCRj5m2u9xhZHJ8h9pMv",
+         "SHuZ9GyczU4QEDzU4QU4",
+         "TCRj5m2u9xhZHJ8h9pMv",
+         "SHuZ9GyczU4QEDzU4QU4"
+        ]
+       },
+       "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
+      }
+     },
+     "history": []
     }
    },
    "durationRetimes": [
@@ -1791,7 +2367,1053 @@
     "rawContentHash": "39b134388831d2eebbb6d9ee835a78873aa4ebe82e004a9a29788083ee66534c",
     "timingContentHash": "d99805ce029410dff3e91c65bb1292d196cff591f44b864551aa52d0d287ceb6",
     "placementContentHash": "2568a57019073ffacd7f1c2a8ab01ca2929d1ff75bc812729bbccd3277ced921"
-   }
+   },
+   "durationProvenance": {
+    "authoritative": true,
+    "rulesVersion": "engine-rules-v4",
+    "costVersion": "beat-costs-v3",
+    "costSignature": "84d2cb4701d742217288c74cc46229beb90e0f5338fca28e6e536e7b37c0d2de",
+    "costedAt": "2026-08-31T13:29:47.654870+00:00",
+    "unitDurationSec": 18.0,
+    "recommendedDurationSec": 13,
+    "ready": true
+   },
+   "pendingSpendAuth": null,
+   "lastPromptVersion": "e0a86663",
+   "batch": {
+    "token": "9e48ca4fb3d3469a8365c09e8b787c51",
+    "bindingHash": "625104e5da0f11b8a151f265cae2475e",
+    "envelope": {
+     "shotId": "S2.SH2",
+     "prompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Aida; @图3=Keen; @图4=location; @Audio1=audio; never swap.\nAngles: @图2=one Aida; @图3=one Keen; views are not extra characters.\n@图1 is the first frame and the previous shot's approved final frame. Use it only for carried character state: it controls the exact opening pose, emotion, light and carried prop state only: Aida sits beside the quiet bowl in ordinary morning warmth, her attention just lifted from the vision before the clearing has fully relaxed. Do not use it as the scene geography, camera framing or environment layout authority; @图4 and Geography control the wider scene. If an Opening Motion Bridge is present, it alone controls how this inherited pose resolves into the new action.\n@图2 defines exactly one Aida identity, proportions, scale and approved wearable state: Aida identity, proportions, scale and approved wearable state; Aida approved wearable state: jewelled brow headdress. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图4 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nAida lets the hand near her heart settle into still purpose before her attention shifts toward the first off-camera sneeze.\n\n[ACTION OWNERSHIP]\nKeen causes every sneeze and every sneeze-driven environmental tremble, even while he remains off-camera.\nAida causes the ritual circle to open outward through her body turn and eyeline, not through renewed bowl action.\nThe environment reacts to sneeze force only; no separate wind, magic burst, or unseen creature causes the tremble.\n\n[ATTRIBUTE OWNERSHIP]\nAida owns the grounded seated posture, calm outward turn, warm smile, and non-scolding restraint.\nKeen owns the off-camera sneeze force, sneeze recovery, eager approach, paw-near-nose business, and pollen on nose.\nThe inactive bowl owns the residual ritual stillness and tiny surface tremble; it must not restart or glow as a new ritual action.\nPollen on nose belongs to Keen only.\nAida approved wearable state: jewelled brow headdress\nKeen approved wearable state: gold wrist cuffs with aquamarine gems\n\n[ENVIRONMENT CONTRACT]\nOpening: faint rose residue and still ritual air remain around the quiet bowl.\nSneeze impact: dew, mist, light texture, and the bowl’s settled surface tremble lightly without chaos or damage.\nMiddle: rose residue drains away as the composition opens toward the clearing edge.\nEnding: ordinary warm morning light is restored, the bowl remains inactive, and the path outward is visually clear.\n\n[One-Sentence Summary]\nAida’s private ritual calm is opened by Keen’s sneezy off-camera interruption, turning the sacred recognition into a warm invitation toward shared movement.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Aida sits near lower center-left beside the inactive crystal bowl and purple ritual mat. The bowl and mallet sit just in front of Aida, closer to camera than the cottage path. The cottage and large pink crystals sit in mid-background behind Aida, slightly left of center. The open path runs diagonally from Aida’s bowl space toward the frame-right clearing edge. Keen starts deeper at the frame-right clearing edge on Aida’s eventual eyeline, outside the ritual circle. Hold a clear performance corridor between Aida and Keen along the sunlit path. Morning light enters from upper frame-right and rakes across dew, mist, crystals, and grass.\n\n[Living Performance]\nLiving performance lock: Aida, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Shot Sequence]\nShot 1: Camera: medium close bowl-height view, useful 40mm lens, inherited from @图1 with Aida near center and the bowl low foreground; the camera holds steady, then gives a small breathing drift toward the sneeze direction without revealing Keen. Action: Aida’s settled recognition changes into spoken purpose, and Keen’s off-camera double sneeze physically interrupts the quiet before the frame identifies him. Performance: Aida sits grounded beside the inactive bowl, one paw still near her heart at first; when the unseen sneezes hit, dew trembles, faint light texture shivers, the bowl surface gives a tiny ripple, and Aida shifts eyes and breath toward the sound without flinching broadly. End state: The bowl space has visibly loosened—dew and light tremble, Aida’s attention has shifted toward the sound, and Keen remains an unseen comic force. Spoken action: Aida, Aida’s first @Audio1 line begins after the ritual hush has a short readable beat; her mouth performance stays quiet and purposeful: {Someone needs a little help today.} Non-verbal SFX: 2.8-4.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. Hold: 2.4s — Hold on Aida’s small absorption of the first sneeze before opening toward Keen’s direction; let the audience register that she is choosing the interruption, not merely reacting to noise.\nShot 2: Camera: medium three-quarter seated view, useful 35mm lens; camera gently widens and pans along Aida’s eyeline so the bowl stays low beside her while the clearing edge and path begin to enter frame. Action: Aida changes the circle’s orientation from closed around the bowl to open toward Keen’s direction while lightly blessing him, naming the honeycomb mischief, and calling him to come with her. Performance: Aida turns from the bowl with a soft smile and contained breath, keeping her hands away from the mallet and bowl; her robe follows the slow turn while the morning clearing becomes part of her invitation rather than a disrupted background. End state: Aida faces outward from the bowl, and the edge of the clearing now belongs to the mission. Spoken action: Aida, Aida’s longer @Audio1 invitation carries warmth, a knowing tease, a locating call, and a calm final invitation; allow readable air after the locating call before the response: {Bless you. Sounds like someone has been sniffing around Fuzzby’s honeycomb. Keen? Come with me} The pose holds a full beat after the line ends.\nShot 3: Camera: wider two-character composition, useful 32mm lens, low seated height; Aida holds the calm center beside the bowl while the frame opens diagonally to Keen approaching from the active clearing edge in depth. Action: Keen’s off-camera and final sneeze change him from distant disruption into approaching companion as Aida’s final blessing settles the widened calm. Performance: Keen jogs in along Aida’s eyeline with pollen on his nose, one paw lifting toward it as eagerness turns into another full-body sneeze; Aida stays seated, turned toward him, mouth closed during his line and sneeze, then answers with a small protective smile. End state: Aida remains grounded beside the bowl, turned toward the noisy edge of the clearing, with the path outward visually opened. Non-verbal SFX: 11.3-13.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. Spoken action: Keen, Keen’s @Audio1 response is eager and reassuring before the final sneeze overtakes his confidence: {Coming, Aida!} The pose holds a full beat after the line ends. Spoken action: Aida, Aida’s final @Audio1 blessing lands warmly on Keen’s dignity, with a small smile and no scolding: {Bless you Keen.} The pose holds a full beat after the line ends. Hold: 2.4s — Hold on Aida’s small absorption of the first sneeze before opening toward Keen’s direction; let the audience register that she is choosing the interruption, not merely reacting to noise.\nWitness staging: Aida remains beside the inactive bowl in the calm center of the opened composition. Keen begins off-screen beyond the clearing edge on Aida’s eyeline, then approaches in depth along the visually open path. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. Authored non-verbal SFX cues: 2.8-4.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. 11.3-13.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Aida and one Keen throughout; no duplicates of either character. Maintain Begin from @图1 opening state and maintain the inherited seated bowl-height side until the sneeze has landed. Safeguard: Do not show Keen before the off-camera double sneeze has visibly disturbed Aida’s bowl space. Safeguard: Do not make Aida frantic, scolding, or broadly startled. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Repeated-contact escalation: separate the first and second contacts with a readable recovery between them. The first contact is small and contained. The second contact is larger than the first, with a stronger visible cause, reaction and recovery. The third contact is larger than the second and completes the escalation. Living performance lock: Aida, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: The ritual circle has opened into a mission: Aida stays grounded beside the inactive bowl, turned toward Keen’s noisy clearing edge, while Keen is established as the sneezy approaching companion.",
+     "promptSource": "animation-director-current",
+     "durationSec": 18.0,
+     "provider": "byteplus",
+     "providerModelId": "dreamina-seedance-2-5-260628",
+     "modelVersion": "2.5-260628",
+     "transport": "byteplus-async",
+     "endpoint": "/api/v3/contents/generations/tasks",
+     "costRateKey": "seedance_25_byteplus_480p_per_sec",
+     "capabilityVerifiedAt": "2026-08-16",
+     "resolution": "480p",
+     "tier": "standard",
+     "candidateCount": 1,
+     "costPerCandidateUsd": 1.8738,
+     "maxBatchCostUsd": 1.8738,
+     "promptVersion": "e0a86663",
+     "references": [
+      {
+       "slot": "@图1",
+       "sourceSlot": "@图1",
+       "role": "opening keyframe",
+       "view": null,
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH1_final_frame.png",
+       "intactTurnaround": false,
+       "sameCharacterGroup": null,
+       "md5": "f3f4e3a1f704725db261ba1612ef679a"
+      },
+      {
+       "slot": "@图2",
+       "sourceSlot": "@图3",
+       "role": "Aida",
+       "view": "complete-turnaround",
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+       "intactTurnaround": true,
+       "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
+       "md5": "6c60813ac1c5a47ce7bfb1f6f0552440"
+      },
+      {
+       "slot": "@图3",
+       "sourceSlot": "@图2",
+       "role": "Keen",
+       "view": "complete-turnaround",
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+       "intactTurnaround": true,
+       "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+       "md5": "b02f4c314f09a8ae5cc505aff970d24a"
+      },
+      {
+       "slot": "@图4",
+       "sourceSlot": "@图4",
+       "role": "scene plate",
+       "view": null,
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S2_plate_candidate_e7be89c0.png",
+       "intactTurnaround": false,
+       "sameCharacterGroup": null,
+       "md5": "693026c786ae1df02351bf0fca30abfd"
+      }
+     ],
+     "audio": {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+      "md5": "188d1334500826ca8fa1204e3777a49a"
+     },
+     "executionPlan": {
+      "schemaVersion": 1,
+      "mode": "single-qualified-provider-call",
+      "continuityMode": "keyframe-handoff",
+      "studioShotId": "S2.SH2",
+      "studioDurationSec": 18.0,
+      "providerModelId": "dreamina-seedance-2-5-260628",
+      "comparisonRunId": null,
+      "parentPromptHash": "d1ea00909074c420caa8bf58de2c0d38570b2f908b6bcf93b349ce18e6523720",
+      "costPerStudioCandidateUsd": 1.8738,
+      "segments": [
+       {
+        "segmentIndex": 1,
+        "segmentCount": 1,
+        "globalStartSec": 0.0,
+        "globalEndSec": 18.0,
+        "durationSec": 18.0,
+        "stageNumbers": [],
+        "prompt": "[Locked Character Turnarounds]\n@图2 defines Aida's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n@图3 defines Keen's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n\nAUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Aida; @图3=Keen; @图4=location; @Audio1=audio; never swap.\nAngles: @图2=one Aida; @图3=one Keen; views are not extra characters.\n@图1 is the first frame and the previous shot's approved final frame. Use it only for carried character state: it controls the exact opening pose, emotion, light and carried prop state only: Aida sits beside the quiet bowl in ordinary morning warmth, her attention just lifted from the vision before the clearing has fully relaxed. Do not use it as the scene geography, camera framing or environment layout authority; @图4 and Geography control the wider scene. If an Opening Motion Bridge is present, it alone controls how this inherited pose resolves into the new action.\n@图2 defines exactly one Aida identity, proportions, scale and approved wearable state: Aida identity, proportions, scale and approved wearable state; Aida approved wearable state: jewelled brow headdress. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图4 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nAida lets the hand near her heart settle into still purpose before her attention shifts toward the first off-camera sneeze.\n\n[ACTION OWNERSHIP]\nKeen causes every sneeze and every sneeze-driven environmental tremble, even while he remains off-camera.\nAida causes the ritual circle to open outward through her body turn and eyeline, not through renewed bowl action.\nThe environment reacts to sneeze force only; no separate wind, magic burst, or unseen creature causes the tremble.\n\n[ATTRIBUTE OWNERSHIP]\nAida owns the grounded seated posture, calm outward turn, warm smile, and non-scolding restraint.\nKeen owns the off-camera sneeze force, sneeze recovery, eager approach, paw-near-nose business, and pollen on nose.\nThe inactive bowl owns the residual ritual stillness and tiny surface tremble; it must not restart or glow as a new ritual action.\nPollen on nose belongs to Keen only.\nAida approved wearable state: jewelled brow headdress\nKeen approved wearable state: gold wrist cuffs with aquamarine gems\n\n[ENVIRONMENT CONTRACT]\nOpening: faint rose residue and still ritual air remain around the quiet bowl.\nSneeze impact: dew, mist, light texture, and the bowl’s settled surface tremble lightly without chaos or damage.\nMiddle: rose residue drains away as the composition opens toward the clearing edge.\nEnding: ordinary warm morning light is restored, the bowl remains inactive, and the path outward is visually clear.\n\n[One-Sentence Summary]\nAida’s private ritual calm is opened by Keen’s sneezy off-camera interruption, turning the sacred recognition into a warm invitation toward shared movement.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Aida sits near lower center-left beside the inactive crystal bowl and purple ritual mat. The bowl and mallet sit just in front of Aida, closer to camera than the cottage path. The cottage and large pink crystals sit in mid-background behind Aida, slightly left of center. The open path runs diagonally from Aida’s bowl space toward the frame-right clearing edge. Keen starts deeper at the frame-right clearing edge on Aida’s eventual eyeline, outside the ritual circle. Hold a clear performance corridor between Aida and Keen along the sunlit path. Morning light enters from upper frame-right and rakes across dew, mist, crystals, and grass.\n\n[Living Performance]\nLiving performance lock: Aida, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Shot Sequence]\nShot 1: Camera: medium close bowl-height view, useful 40mm lens, inherited from @图1 with Aida near center and the bowl low foreground; the camera holds steady, then gives a small breathing drift toward the sneeze direction without revealing Keen. Action: Aida’s settled recognition changes into spoken purpose, and Keen’s off-camera double sneeze physically interrupts the quiet before the frame identifies him. Performance: Aida sits grounded beside the inactive bowl, one paw still near her heart at first; when the unseen sneezes hit, dew trembles, faint light texture shivers, the bowl surface gives a tiny ripple, and Aida shifts eyes and breath toward the sound without flinching broadly. End state: The bowl space has visibly loosened—dew and light tremble, Aida’s attention has shifted toward the sound, and Keen remains an unseen comic force. Spoken action: Aida, Aida’s first @Audio1 line begins after the ritual hush has a short readable beat; her mouth performance stays quiet and purposeful: {Someone needs a little help today.} Non-verbal SFX: 2.8-4.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. Hold: 2.4s — Hold on Aida’s small absorption of the first sneeze before opening toward Keen’s direction; let the audience register that she is choosing the interruption, not merely reacting to noise.\nShot 2: Camera: medium three-quarter seated view, useful 35mm lens; camera gently widens and pans along Aida’s eyeline so the bowl stays low beside her while the clearing edge and path begin to enter frame. Action: Aida changes the circle’s orientation from closed around the bowl to open toward Keen’s direction while lightly blessing him, naming the honeycomb mischief, and calling him to come with her. Performance: Aida turns from the bowl with a soft smile and contained breath, keeping her hands away from the mallet and bowl; her robe follows the slow turn while the morning clearing becomes part of her invitation rather than a disrupted background. End state: Aida faces outward from the bowl, and the edge of the clearing now belongs to the mission. Spoken action: Aida, Aida’s longer @Audio1 invitation carries warmth, a knowing tease, a locating call, and a calm final invitation; allow readable air after the locating call before the response: {Bless you. Sounds like someone has been sniffing around Fuzzby’s honeycomb. Keen? Come with me} The pose holds a full beat after the line ends.\nShot 3: Camera: wider two-character composition, useful 32mm lens, low seated height; Aida holds the calm center beside the bowl while the frame opens diagonally to Keen approaching from the active clearing edge in depth. Action: Keen’s off-camera and final sneeze change him from distant disruption into approaching companion as Aida’s final blessing settles the widened calm. Performance: Keen jogs in along Aida’s eyeline with pollen on his nose, one paw lifting toward it as eagerness turns into another full-body sneeze; Aida stays seated, turned toward him, mouth closed during his line and sneeze, then answers with a small protective smile. End state: Aida remains grounded beside the bowl, turned toward the noisy edge of the clearing, with the path outward visually opened. Non-verbal SFX: 11.3-13.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. Spoken action: Keen, Keen’s @Audio1 response is eager and reassuring before the final sneeze overtakes his confidence: {Coming, Aida!} The pose holds a full beat after the line ends. Spoken action: Aida, Aida’s final @Audio1 blessing lands warmly on Keen’s dignity, with a small smile and no scolding: {Bless you Keen.} The pose holds a full beat after the line ends. Hold: 2.4s — Hold on Aida’s small absorption of the first sneeze before opening toward Keen’s direction; let the audience register that she is choosing the interruption, not merely reacting to noise.\nWitness staging: Aida remains beside the inactive bowl in the calm center of the opened composition. Keen begins off-screen beyond the clearing edge on Aida’s eyeline, then approaches in depth along the visually open path. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. Authored non-verbal SFX cues: 2.8-4.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. 11.3-13.7s: Seedance 2.5 creates the character's natural sneeze as synchronized non-verbal SFX and physical performance. Do not synthesize words or place this sound in @Audio1. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Aida and one Keen throughout; no duplicates of either character. Maintain Begin from @图1 opening state and maintain the inherited seated bowl-height side until the sneeze has landed. Safeguard: Do not show Keen before the off-camera double sneeze has visibly disturbed Aida’s bowl space. Safeguard: Do not make Aida frantic, scolding, or broadly startled. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Repeated-contact escalation: separate the first and second contacts with a readable recovery between them. The first contact is small and contained. The second contact is larger than the first, with a stronger visible cause, reaction and recovery. The third contact is larger than the second and completes the escalation. Living performance lock: Aida, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: The ritual circle has opened into a mission: Aida stays grounded beside the inactive bowl, turned toward Keen’s noisy clearing edge, while Keen is established as the sneezy approaching companion.",
+        "promptHash": "d1ea00909074c420caa8bf58de2c0d38570b2f908b6bcf93b349ce18e6523720",
+        "signedPromptHash": "d1ea00909074c420caa8bf58de2c0d38570b2f908b6bcf93b349ce18e6523720",
+        "promptAudit": {
+         "profile": "bytedance-seedance-2.5-2026-08-07",
+         "source": {
+          "title": "Dreamina Seedance 2.5 User Guide",
+          "url": "https://docs.byteplus.com/en/docs/ModelArk/2607689",
+          "larkUrl": "https://bytedance.larkoffice.com/docx/A88jd0B47oAd8zxWp5ycZFMfnxh",
+          "productUrl": "https://dreamina.capcut.com/seedance/seedance-2-5",
+          "apiQualificationUrl": "https://docs.byteplus.com/en/docs/modelark/1159178",
+          "skill": ".agents/skills/sd25-pe",
+          "lastUpdated": "2026-08-07",
+          "scope": "Official Dreamina/BytePlus prompt guidance; executable API schema, pricing and account access are separate"
+         },
+         "guideLimits": {
+          "standardDurationSec": {
+           "minimum": 4,
+           "maximum": 30
+          },
+          "betaLongVideoDurationSec": {
+           "minimum": 5,
+           "maximum": 180
+          },
+          "extensionDurationSec": {
+           "minimum": 4,
+           "maximum": 30
+          },
+          "outputResolutions": [
+           "480p",
+           "720p"
+          ],
+          "maxCombinedInputs": 50,
+          "maxImages": 30,
+          "maxVideos": 10,
+          "maxVideoDurationSec": 30,
+          "maxAudioClips": 10,
+          "maxAudioDurationSec": 30
+         },
+         "guideSemantics": {
+          "timestampControl": "Time ranges allocate pacing and exact time points improve alignment; they are not a frame-accurate edit guarantee.",
+          "extensionPreservation": "Preserve the source and match its boundary state, but review the join; generated continuation and boundary frames are not guaranteed pixel-identical.",
+          "negativeInstructions": "Explicit forbidden items improve reliability but remain probabilistic and require review.",
+          "identityStability": "Multi-character consistency is improved, not self-approving; identity and count still require visual review.",
+          "longVideoRoute": "The 5-180 second mode is a Dreamina beta product capability, not a qualified Studio API route.",
+          "audioOnly": "Dreamina product guidance describes audio-only creation; the current BytePlus Seedance 2.0 API still requires at least one image or video reference.",
+          "cleanOutput": "Dreamina advertises cleaner 4K output; the executable provider contract remains the authority for resolution and every render still requires QC.",
+          "watermarkPolicy": "The Studio never uses generative watermark removal as a production shortcut; source footage must be owned or licensed and delivered clean."
+         },
+         "taskMode": "reference-to-video",
+         "status": "ready",
+         "score": 11,
+         "maximum": 11,
+         "authorityScores": {
+          "official-guide": {
+           "label": "Official guide",
+           "score": 8,
+           "maximum": 8
+          },
+          "studio-policy": {
+           "label": "Studio production policy",
+           "score": 3,
+           "maximum": 3
+          }
+         },
+         "summary": "Prompt matches every required authoring check.",
+         "referenceCount": 5,
+         "referenceCounts": {
+          "image": 4,
+          "video": 0,
+          "audio": 1
+         },
+         "stageCount": 3,
+         "checks": [
+          {
+           "code": "goal",
+           "label": "One-sentence story summary",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "[One-Sentence Summary] states the central event.",
+           "nextAction": ""
+          },
+          {
+           "code": "reference-roles",
+           "label": "Reference roles",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "All 5 expected references are individually bound and scoped.",
+           "nextAction": ""
+          },
+          {
+           "code": "reference-limits",
+           "label": "Official reference-count limits",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "Mapped 4 image(s), 0 video(s) and 1 audio clip(s).",
+           "nextAction": ""
+          },
+          {
+           "code": "opening-frame",
+           "label": "Opening-frame authority",
+           "status": "pass",
+           "required": false,
+           "authority": "studio-policy",
+           "detail": "The opening reference explicitly controls the first visible state.",
+           "nextAction": ""
+          },
+          {
+           "code": "global-settings",
+           "label": "Global world and anti-collapse settings",
+           "status": "pass",
+           "required": false,
+           "authority": "official-guide",
+           "detail": "[Global Settings] establishes the world, look and camera language.",
+           "nextAction": ""
+          },
+          {
+           "code": "stages",
+           "label": "Consecutive directed shots",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "3 consecutive shot(s) carry the event progression.",
+           "nextAction": ""
+          },
+          {
+           "code": "approved-stage-plan",
+           "label": "Approved story plan",
+           "status": "pass",
+           "required": false,
+           "authority": "studio-policy",
+           "detail": "The typed approved stage plan remains the compiler source behind the shot sequence.",
+           "nextAction": ""
+          },
+          {
+           "code": "stage-direction",
+           "label": "Action and performance direction",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "Every internal shot has one camera job, action and visible end state.",
+           "nextAction": ""
+          },
+          {
+           "code": "stage-end-states",
+           "label": "Visible shot handoffs",
+           "status": "pass",
+           "required": true,
+           "authority": "studio-policy",
+           "detail": "Every internal shot ends on a visible handoff.",
+           "nextAction": ""
+          },
+          {
+           "code": "consistency",
+           "label": "Global continuity supplement",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "[Global Supplement] protects identity, ownership and screen geography.",
+           "nextAction": ""
+          },
+          {
+           "code": "audio",
+           "label": "Dialogue and audio authority",
+           "status": "pass",
+           "required": true,
+           "authority": "studio-policy",
+           "detail": "The prompt records silence, ambience or sound ownership.",
+           "nextAction": ""
+          },
+          {
+           "code": "pacing",
+           "label": "Pacing control",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "Storyline stages control pacing; timestamps are optional unless a critical handoff, entrance, exit, transition or dialogue cue needs timing.",
+           "nextAction": ""
+          },
+          {
+           "code": "request-parameters",
+           "label": "Request parameters stay outside the prompt",
+           "status": "pass",
+           "required": true,
+           "authority": "studio-policy",
+           "detail": "Duration, aspect ratio, resolution and model selection remain in the API contract.",
+           "nextAction": ""
+          },
+          {
+           "code": "guide-duration",
+           "label": "Guide duration",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "18s is within the official 4-30 second standard window.",
+           "nextAction": ""
+          }
+         ],
+         "repairActions": [],
+         "advisoryOnly": true,
+         "providerAvailabilityChecked": false,
+         "providerCalled": false,
+         "authoringScore10": 10.0,
+         "authoringMaximum": 10,
+         "firingFloor10": 9.5,
+         "creativeGate": {
+          "score": 18,
+          "maximum": 20,
+          "threshold": 17,
+          "ready": true,
+          "criticalFailures": []
+         },
+         "contractCompleteness": {
+          "score": 18,
+          "maximum": 20,
+          "threshold": 17,
+          "ready": true,
+          "criticalFailures": []
+         }
+        },
+        "dynamicOpeningRelay": false,
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "opening keyframe",
+          "view": null,
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH1_final_frame.png",
+          "intactTurnaround": false,
+          "sameCharacterGroup": null,
+          "md5": "f3f4e3a1f704725db261ba1612ef679a"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图3",
+          "role": "Aida",
+          "view": "complete-turnaround",
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+          "intactTurnaround": true,
+          "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
+          "md5": "6c60813ac1c5a47ce7bfb1f6f0552440"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图2",
+          "role": "Keen",
+          "view": "complete-turnaround",
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+          "intactTurnaround": true,
+          "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+          "md5": "b02f4c314f09a8ae5cc505aff970d24a"
+         },
+         {
+          "slot": "@图4",
+          "sourceSlot": "@图4",
+          "role": "scene plate",
+          "view": null,
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S2_plate_candidate_e7be89c0.png",
+          "intactTurnaround": false,
+          "sameCharacterGroup": null,
+          "md5": "693026c786ae1df02351bf0fca30abfd"
+         }
+        ],
+        "videoReferences": [],
+        "audio": {
+         "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+         "md5": "188d1334500826ca8fa1204e3777a49a",
+         "sourcePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+         "sourceMd5": "188d1334500826ca8fa1204e3777a49a"
+        },
+        "generateAudio": true,
+        "contract": {
+         "providerModelId": "dreamina-seedance-2-5-260628",
+         "provider": "byteplus",
+         "modelVersion": "2.5-260628",
+         "transport": "byteplus-async",
+         "mode": "reference-to-video",
+         "endpoint": "/api/v3/contents/generations/tasks",
+         "resolution": "480p",
+         "duration": 18,
+         "costRateKey": "seedance_25_byteplus_480p_per_sec",
+         "capabilityVerifiedAt": "2026-08-16",
+         "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757"
+        },
+        "costUsd": 1.8738
+       }
+      ]
+     },
+     "comparisonRunId": null
+    },
+    "envelopeHash": "9bb31db89bf2d06705be55fbeca439c52ae1a198b560e24292f208b9ac63036f",
+    "batchId": "S2.SH2-b1-20260831T142948-4984a0ef",
+    "expected": 1,
+    "done": [
+     1
+    ],
+    "failed": [],
+    "disclosure": {
+     "shotId": "S2.SH2",
+     "candidateCount": 1,
+     "costPerCandidateUsd": 1.8738,
+     "maxBatchCostUsd": 1.8738,
+     "promptVersion": "e0a86663",
+     "bindingHash": "625104e5da0f11b8a151f265cae2475e",
+     "envelopeHash": "9bb31db89bf2d06705be55fbeca439c52ae1a198b560e24292f208b9ac63036f",
+     "packageHash": "6eb802a60cd89935",
+     "rerollOfUnchangedPackage": false,
+     "packageRevision": 3,
+     "referenceSlots": {
+      "@图1": "opening keyframe",
+      "@图2": "Aida · complete-turnaround turnaround view",
+      "@图3": "Keen · complete-turnaround turnaround view",
+      "@图4": "scene plate"
+     },
+     "logicalReferenceSlots": {
+      "@图1": "opening keyframe",
+      "@图2": "Keen",
+      "@图3": "Aida",
+      "@图4": "scene plate",
+      "@Audio1": "voice track"
+     },
+     "openingAnchor": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH1_final_frame.png",
+     "audioAsset": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+     "shotDurationSec": 18.0,
+     "provider": "byteplus",
+     "providerModelId": "dreamina-seedance-2-5-260628",
+     "modelVersion": "2.5-260628",
+     "resolution": "480p",
+     "promptScores": {
+      "contractCompleteness": {
+       "score": 18,
+       "maximum": 20,
+       "threshold": 17,
+       "ready": true,
+       "criticalFailures": []
+      },
+      "creative": {
+       "score": 18,
+       "maximum": 20,
+       "threshold": 17,
+       "ready": true,
+       "criticalFailures": []
+      },
+      "authoringScore10": 10.0,
+      "authoringMaximum": 10,
+      "firingFloor10": 9.5
+     },
+     "comparisonRunId": null,
+     "internalProviderCalls": [
+      {
+       "segmentIndex": 1,
+       "durationSec": 18.0,
+       "stageNumbers": []
+      }
+     ],
+     "tier": "standard"
+    },
+    "status": "complete",
+    "audioProvenance": {
+     "policyVersion": "dialogue-post-lane-v1",
+     "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+     "approvedMasterSha256": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+     "providerUse": "performance-conditioning",
+     "passthroughGuaranteed": false,
+     "providerOutputRole": "guide-track-only",
+     "finalFilmDialogue": "approved-master-restored-in-post",
+     "guideCandidates": [
+      {
+       "candidate": 1,
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+       "sha256": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+       "exactApprovedWaveformPassthrough": false
+      }
+     ],
+     "reviewCandidates": [
+      {
+       "candidate": 1,
+       "providerGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+       "providerGuideSha256": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+       "reviewPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+       "reviewSha256": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+       "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+       "approvedMasterSha256": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+       "providerGuideRemoved": false,
+       "approvedHearRestored": false,
+       "providerFinalMixPreserved": true
+      }
+     ]
+    },
+    "transportCandidates": {
+     "1": {
+      "segments": [
+       {
+        "segmentIndex": 1,
+        "durationSec": 18.0,
+        "stageNumbers": [],
+        "promptHash": "d1ea00909074c420caa8bf58de2c0d38570b2f908b6bcf93b349ce18e6523720",
+        "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+        "outputHash": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+        "audioHash": "188d1334500826ca8fa1204e3777a49a",
+        "openingRelayPath": null,
+        "openingRelayHash": null
+       }
+      ],
+      "status": "joined",
+      "activeSegment": 1,
+      "lastProviderEvent": {
+       "event": "downloaded",
+       "at": "2026-08-31T14:34:56",
+       "segmentIndex": 1,
+       "taskId": "cgt-20260831212952-6r2gx",
+       "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+       "outputBytes": 6836377
+      },
+      "providerEvents": [
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:31:48",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:31:59",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:32:10",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:32:21",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:32:31",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:32:42",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:32:53",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:33:04",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:33:15",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:33:25",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:33:36",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:33:47",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:33:58",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:34:09",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:34:19",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:34:30",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:34:41",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-08-31T14:34:52",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "status": "succeeded"
+       },
+       {
+        "event": "downloading",
+        "at": "2026-08-31T14:34:52",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx"
+       },
+       {
+        "event": "downloaded",
+        "at": "2026-08-31T14:34:56",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260831212952-6r2gx",
+        "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+        "outputBytes": 6836377
+       }
+      ],
+      "providerTaskId": "cgt-20260831212952-6r2gx",
+      "providerGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+      "providerGuideHash": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+      "approvedHearReviewPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+      "approvedHearReviewHash": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+      "candidatePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+      "candidateHash": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057"
+     }
+    },
+    "inputSignature": {
+     "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+     "shotContractHash": "ab1b0867c3c8b46019773058fe5219e19c3695600a00939c5ab800bcc3884b8f",
+     "animationDirectionSignature": {
+      "stage": "animation",
+      "model": "gpt-5.5",
+      "skillHashes": {
+       "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
+      },
+      "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+      "shotContractHash": "ab1b0867c3c8b46019773058fe5219e19c3695600a00939c5ab800bcc3884b8f",
+      "shotHash": "5a9218fff84c6f0fc87e8784880c937aae7572240cd69823bb4f0146ba2ffd5e",
+      "openingFrameHash": "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62",
+      "openingStageContractHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "sceneLookHash": "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921",
+      "referenceOrder": [
+       "@图1",
+       "@图2",
+       "@图3",
+       "@图4"
+      ],
+      "referenceBindings": [
+       {
+        "slot": "@图1",
+        "sourceSlot": "@图1",
+        "role": "opening keyframe",
+        "view": null,
+        "sameCharacterGroup": null
+       },
+       {
+        "slot": "@图2",
+        "sourceSlot": "@图3",
+        "role": "Aida",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1"
+       },
+       {
+        "slot": "@图3",
+        "sourceSlot": "@图2",
+        "role": "Keen",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0"
+       },
+       {
+        "slot": "@图4",
+        "sourceSlot": "@图4",
+        "role": "scene plate",
+        "view": null,
+        "sameCharacterGroup": null
+       }
+      ],
+      "referenceHashes": [
+       "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62",
+       "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+       "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+       "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921"
+      ],
+      "voiceHash": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+      "voiceApprovalSignature": {
+       "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+       "dialogueHash": "cda7354e60b8005eadb0a7b88b947e1764ce47104598bf0583016a075434b978",
+       "performanceHash": "61724816a832eeee397e17d38883c973d606a8d04c8bcb1bbd31b000a47affd2",
+       "voiceCardsHash": "490318f1d5890e5156c05acf0ec5ea507e2399054d22cab997aa03fabbf21d98",
+       "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+       "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+       "voiceCompilerVersion": "voice-director-v1",
+       "voiceIds": [
+        "SHuZ9GyczU4QEDzU4QU4",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "SHuZ9GyczU4QEDzU4QU4"
+       ]
+      },
+      "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
+     },
+     "promptHash": "b1612e56dece50795eb9d52990845d12452043a943bade39f5f7db9d855fac47",
+     "audioReferencePolicy": "guide",
+     "openingFrameHash": "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62",
+     "references": [
+      {
+       "slot": "@图1",
+       "sourceSlot": "@图1",
+       "role": "opening keyframe",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62"
+      },
+      {
+       "slot": "@图2",
+       "sourceSlot": "@图3",
+       "role": "Aida",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
+       "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+      },
+      {
+       "slot": "@图3",
+       "sourceSlot": "@图2",
+       "role": "Keen",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+       "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+      },
+      {
+       "slot": "@图4",
+       "sourceSlot": "@图4",
+       "role": "scene plate",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921"
+      }
+     ],
+     "audioHash": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+     "durationSec": 18.0,
+     "comparisonModelId": null,
+     "comparisonRunId": null,
+     "executionPlanHash": "6b40b9f1e011265cb1f5021dc7c1c39ebbaf3cfdadef1cd432e98afe8b412ce6",
+     "provider": "byteplus",
+     "providerModelId": "dreamina-seedance-2-5-260628",
+     "modelVersion": "2.5-260628",
+     "transport": "byteplus-async",
+     "endpoint": "/api/v3/contents/generations/tasks",
+     "resolution": "480p",
+     "capabilityVerifiedAt": "2026-08-16",
+     "tier": "standard"
+    },
+    "candidateHashes": [
+     {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+      "sha256": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057"
+     }
+    ]
+   },
+   "candidatePaths": [
+    "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4"
+   ],
+   "batchId": "S2.SH2-b1-20260831T142948-4984a0ef",
+   "candidatesGenerated": 1,
+   "disclosure": {
+    "shotId": "S2.SH2",
+    "candidateCount": 1,
+    "costPerCandidateUsd": 1.8738,
+    "maxBatchCostUsd": 1.8738,
+    "promptVersion": "e0a86663",
+    "bindingHash": "625104e5da0f11b8a151f265cae2475e",
+    "envelopeHash": "9bb31db89bf2d06705be55fbeca439c52ae1a198b560e24292f208b9ac63036f",
+    "packageHash": "6eb802a60cd89935",
+    "rerollOfUnchangedPackage": false,
+    "packageRevision": 3,
+    "referenceSlots": {
+     "@图1": "opening keyframe",
+     "@图2": "Aida · complete-turnaround turnaround view",
+     "@图3": "Keen · complete-turnaround turnaround view",
+     "@图4": "scene plate"
+    },
+    "logicalReferenceSlots": {
+     "@图1": "opening keyframe",
+     "@图2": "Keen",
+     "@图3": "Aida",
+     "@图4": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "openingAnchor": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH1_final_frame.png",
+    "audioAsset": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+    "shotDurationSec": 18.0,
+    "provider": "byteplus",
+    "providerModelId": "dreamina-seedance-2-5-260628",
+    "modelVersion": "2.5-260628",
+    "resolution": "480p",
+    "promptScores": {
+     "contractCompleteness": {
+      "score": 18,
+      "maximum": 20,
+      "threshold": 17,
+      "ready": true,
+      "criticalFailures": []
+     },
+     "creative": {
+      "score": 18,
+      "maximum": 20,
+      "threshold": 17,
+      "ready": true,
+      "criticalFailures": []
+     },
+     "authoringScore10": 10.0,
+     "authoringMaximum": 10,
+     "firingFloor10": 9.5
+    },
+    "comparisonRunId": null,
+    "internalProviderCalls": [
+     {
+      "segmentIndex": 1,
+      "durationSec": 18.0,
+      "stageNumbers": []
+     }
+    ],
+    "tier": "standard"
+   },
+   "lastBatchBinding": "625104e5da0f11b8a151f265cae2475e",
+   "firedAt": "2026-08-31T14:34:56",
+   "renderHistory": [],
+   "approvedCandidate": 1,
+   "approval": {
+    "approved": true,
+    "candidate": 1,
+    "reviewed_by": "Julian",
+    "at": "2026-08-31T14:44:41",
+    "packageRevision": 3,
+    "inputSignature": {
+     "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+     "shotContractHash": "ab1b0867c3c8b46019773058fe5219e19c3695600a00939c5ab800bcc3884b8f",
+     "animationDirectionSignature": {
+      "stage": "animation",
+      "model": "gpt-5.5",
+      "skillHashes": {
+       "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
+      },
+      "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+      "shotContractHash": "ab1b0867c3c8b46019773058fe5219e19c3695600a00939c5ab800bcc3884b8f",
+      "shotHash": "5a9218fff84c6f0fc87e8784880c937aae7572240cd69823bb4f0146ba2ffd5e",
+      "openingFrameHash": "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62",
+      "openingStageContractHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "sceneLookHash": "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921",
+      "referenceOrder": [
+       "@图1",
+       "@图2",
+       "@图3",
+       "@图4"
+      ],
+      "referenceBindings": [
+       {
+        "slot": "@图1",
+        "sourceSlot": "@图1",
+        "role": "opening keyframe",
+        "view": null,
+        "sameCharacterGroup": null
+       },
+       {
+        "slot": "@图2",
+        "sourceSlot": "@图3",
+        "role": "Aida",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1"
+       },
+       {
+        "slot": "@图3",
+        "sourceSlot": "@图2",
+        "role": "Keen",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0"
+       },
+       {
+        "slot": "@图4",
+        "sourceSlot": "@图4",
+        "role": "scene plate",
+        "view": null,
+        "sameCharacterGroup": null
+       }
+      ],
+      "referenceHashes": [
+       "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62",
+       "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+       "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+       "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921"
+      ],
+      "voiceHash": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+      "voiceApprovalSignature": {
+       "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+       "dialogueHash": "cda7354e60b8005eadb0a7b88b947e1764ce47104598bf0583016a075434b978",
+       "performanceHash": "61724816a832eeee397e17d38883c973d606a8d04c8bcb1bbd31b000a47affd2",
+       "voiceCardsHash": "490318f1d5890e5156c05acf0ec5ea507e2399054d22cab997aa03fabbf21d98",
+       "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+       "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+       "voiceCompilerVersion": "voice-director-v1",
+       "voiceIds": [
+        "SHuZ9GyczU4QEDzU4QU4",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "SHuZ9GyczU4QEDzU4QU4"
+       ]
+      },
+      "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
+     },
+     "promptHash": "b1612e56dece50795eb9d52990845d12452043a943bade39f5f7db9d855fac47",
+     "audioReferencePolicy": "guide",
+     "openingFrameHash": "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62",
+     "references": [
+      {
+       "slot": "@图1",
+       "sourceSlot": "@图1",
+       "role": "opening keyframe",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "d7c68223d3e1f61658996e1459954fc5993cd8b9cce5229a24506a0c61503d62"
+      },
+      {
+       "slot": "@图2",
+       "sourceSlot": "@图3",
+       "role": "Aida",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
+       "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+      },
+      {
+       "slot": "@图3",
+       "sourceSlot": "@图2",
+       "role": "Keen",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+       "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+      },
+      {
+       "slot": "@图4",
+       "sourceSlot": "@图4",
+       "role": "scene plate",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921"
+      }
+     ],
+     "audioHash": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+     "durationSec": 18.0,
+     "comparisonModelId": null,
+     "comparisonRunId": null,
+     "executionPlanHash": "6b40b9f1e011265cb1f5021dc7c1c39ebbaf3cfdadef1cd432e98afe8b412ce6",
+     "provider": "byteplus",
+     "providerModelId": "dreamina-seedance-2-5-260628",
+     "modelVersion": "2.5-260628",
+     "transport": "byteplus-async",
+     "endpoint": "/api/v3/contents/generations/tasks",
+     "resolution": "480p",
+     "capabilityVerifiedAt": "2026-08-16",
+     "tier": "standard"
+    },
+    "contentHash": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+    "harvestHash": "ba45c97fb6f395242893e5b8145621ad292abdbead7aca737d774e6c483a6026",
+    "batchId": "S2.SH2-b1-20260831T142948-4984a0ef"
+   },
+   "audioProvenance": {
+    "policyVersion": "dialogue-post-lane-v1",
+    "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+    "approvedMasterSha256": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+    "providerUse": "performance-conditioning",
+    "passthroughGuaranteed": false,
+    "providerOutputRole": "guide-track-only",
+    "finalFilmDialogue": "approved-master-restored-in-post",
+    "guideCandidates": [
+     {
+      "candidate": 1,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+      "sha256": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+      "exactApprovedWaveformPassthrough": false
+     }
+    ],
+    "reviewCandidates": [
+     {
+      "candidate": 1,
+      "providerGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+      "providerGuideSha256": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+      "reviewPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+      "reviewSha256": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+      "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_vo_candidate_c2c92bc3.wav",
+      "approvedMasterSha256": "77cfec8e59f18415e860e9aad6e5299861f3bb0d58211552296e989b2f396e62",
+      "providerGuideRemoved": false,
+      "approvedHearRestored": false,
+      "providerFinalMixPreserved": true
+     }
+    ],
+    "selectedGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S2.SH2_c1.mp4",
+    "selectedGuideSha256": "8c85b7004e734c6965f0b46ce2421bbb75226d14e9f04ab70c8238e899c2e057",
+    "postLaneStatus": "required"
+   },
+   "promptBankRecords": [
+    {
+     "recordId": "c50614525f9e1d71a7d003f8",
+     "outcome": "approved",
+     "bankedAt": "2026-08-31T13:44:41Z"
+    }
+   ]
   }
  ],
  "validation": {

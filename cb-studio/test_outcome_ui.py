@@ -167,6 +167,13 @@ def test_empty_and_moved_views_route_somewhere_useful():
     assert "approved &amp; stored (reusable)" not in APP
 
 
+def test_episode_continue_prefers_newest_script_when_upstream_changes_stale_packages():
+    assert "const byNewestEpisode=" in APP
+    assert 'byNewestEpisode(EPISODES).find(e=>e.packageCurrent)' in APP
+    assert 'byNewestEpisode(EPISODES).find(e=>e.script)' in APP
+    assert 'EPISODES.find(e=>e.script)||EPISODES[0]' not in APP
+
+
 def test_explicit_hash_navigation_reloads_the_requested_scene():
     assert 'window.addEventListener("hashchange",async()=>{' in APP
     assert 'const restored=await _restoreFromHash(raw);' in APP

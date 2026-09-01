@@ -467,3 +467,80 @@ def test_byteplus_25_adapter_builds_and_polls_the_official_async_contract(
     assert [event["event"] for event in progress_events] == [
         "submitting", "submitted", "poll", "poll", "downloading", "downloaded"]
     assert progress_events[1]["taskId"] == "cgt-test-25"
+
+
+def test_byteplus_25_video_editing_uses_provider_duration_sentinel(
+        monkeypatch, tmp_path):
+    video = tmp_path / "approved.mp4"
+    output = tmp_path / "edit.mp4"
+    video.write_bytes(b"MP4-reference")
+    pathlib.Path(str(video) + ".gen.json").write_text(json.dumps({
+        "endpoint": "/api/v3/contents/generations/tasks",
+        "providerTaskId": "cgt-prev-25",
+    }))
+    monkeypatch.setattr(cb_gen, "BYTEPLUS_ARK_KEY", "test-key")
+
+    def contract(**kwargs):
+        return {
+            "providerModelId": "dreamina-seedance-2-5-260628",
+            "provider": "byteplus",
+            "modelVersion": "2.5-260628",
+            "transport": "byteplus-async",
+            "mode": "video-editing",
+            "endpoint": "/api/v3/contents/generations/tasks",
+            "resolution": "480p",
+            "duration": 30,
+            "costRateKey": "seedance_25_byteplus_480p_per_sec",
+            "capabilityVerifiedAt": "2026-08-16",
+            "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757",
+        }
+
+    class Response:
+        def __init__(self, payload=None, content=b""):
+            self.payload = payload or {}
+            self.content = content
+
+        def json(self):
+            return self.payload
+
+    posted = {}
+
+    def post(url, **kwargs):
+        posted.update({"url": url, **kwargs})
+        return Response({"id": "cgt-edit-25"})
+
+    polls = iter([
+        {"id": "cgt-edit-25", "status": "running"},
+        {"id": "cgt-edit-25", "status": "succeeded",
+         "content": {"video_url": "https://media.example/edit.mp4"},
+         "duration": 30, "usage": {"completion_tokens": 456}},
+    ])
+
+    def get(url, **kwargs):
+        if url.endswith("/cgt-prev-25"):
+            return Response({"id": "cgt-prev-25", "status": "succeeded",
+                             "content": {"video_url": "https://media.example/source.mp4"}})
+        if url == "https://media.example/edit.mp4":
+            return Response(content=b"MP4-edit")
+        return Response(next(polls))
+
+    monkeypatch.setattr(cb_providers, "request_contract", contract)
+    monkeypatch.setattr(cb_gen, "_rpost", post)
+    monkeypatch.setattr(cb_gen, "_rget", get)
+    monkeypatch.setattr(cb_gen.time, "sleep", lambda seconds: None)
+    monkeypatch.setattr(cb_gen.cb_costs, "estimate_video_cost", lambda key, seconds: 1.23)
+    monkeypatch.setattr(cb_gen.cb_costs, "log_spend", lambda *args, **kwargs: None)
+    monkeypatch.setattr(cb_gen.cb_costs, "write_gen_sidecar", lambda *args, **kwargs: None)
+
+    result = cb_gen.generate_video_seedance_ref(
+        "Strictly edit @Video1 only.", [], video_urls=[str(video)],
+        duration=30, resolution="480p", out=str(output), raw_prompt=True,
+        production_route="cb_render", model_id="dreamina-seedance-2-5-260628",
+        operation_mode="video-editing")
+
+    assert result == str(output)
+    body = posted["json"]
+    assert body["duration"] == -1
+    assert "ratio" not in body
+    assert body["content"][1]["role"] == "reference_video"
+    assert body["content"][1]["video_url"]["url"] == "https://media.example/source.mp4"

@@ -286,10 +286,13 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
         "content": content,
         "generate_audio": bool(generate_audio),
         "resolution": resolution,
-        "duration": seconds,
         "watermark": False,
         "return_last_frame": True,
     }
+    if contract.get("mode") == "video-editing":
+        body["duration"] = -1
+    else:
+        body["duration"] = seconds
     if not video_refs:
         body["ratio"] = "16:9"
     body_bytes = len(json.dumps(body, ensure_ascii=False).encode("utf-8"))

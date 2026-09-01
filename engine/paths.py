@@ -32,7 +32,7 @@ declared in the profile does not exist as far as the engine is concerned.
     LOCKED / NOTES    legacy engine-level state file names (no live module reads them)
 
 The old paths (shows/, cb-output/, engine/config, cb-studio/data/scripts, the root show documents, the
-skills/ chair paths, projects/crystal-bears/assets → cb-seed/assets) exist only as compatibility SYMLINKS
+skills/ chair paths, the first project's assets → cb-seed/assets) exist only as compatibility SYMLINKS
 for data files and hashes that still name them — real links, not copies; tools/check_links.py verifies
 them and serve.py refuses to start on a broken one. T61 deletes them.
 """

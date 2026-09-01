@@ -1,0 +1,1 @@
+REFUSED: Refused: REFUSED — opening frame for S1.SH3 is not a playable stage: Zenny faces camera instead of travelling across or away; opening pose contradicts the ruled follow-camera relationship

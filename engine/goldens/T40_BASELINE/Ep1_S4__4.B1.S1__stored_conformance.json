@@ -1,0 +1,7 @@
+{
+ "clean": true,
+ "findings": [],
+ "firingFloor": 9.5,
+ "score": 10.0,
+ "verdict": "PASS"
+}

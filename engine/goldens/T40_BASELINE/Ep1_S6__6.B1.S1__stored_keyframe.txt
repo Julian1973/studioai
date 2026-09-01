@@ -1,0 +1,76 @@
+[Opening Stage]
+Create a playable 16:9 opening for 6.B1.S1; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+A storm-pressured wide opening: the six bears are already alive and watchful on the wet shore, while a clean empty beach lane promises an urgent tiny arrival without staging the crash yet.
+
+[References]
+- Project-stable slots: @图1=Aida; @图2=Sunny; @图3=Luna; @图4=Misty; @图5=Amie; @图6=Howey; @图7=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Aida; @图2=one Sunny; @图3=one Luna; @图4=one Misty; @图5=one Amie; @图6=one Howey; views are angles, not extra characters.
+- @图1: Aida's complete, uncropped 360 turnaround is the 100% identity authority. Match Aida exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2: Sunny's complete, uncropped 360 turnaround is the 100% identity authority. Match Sunny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图3: Luna's complete, uncropped 360 turnaround is the 100% identity authority. Match Luna exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图4: Misty's complete, uncropped 360 turnaround is the 100% identity authority. Match Misty exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图5: Amie's complete, uncropped 360 turnaround is the 100% identity authority. Match Amie exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图6: Howey's complete, uncropped 360 turnaround is the 100% identity authority. Match Howey exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图7 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+- Keep Aida and Sunny and Luna and Misty and Amie and Howey distinct; never blend or swap traits.
+
+[Characters In Frame]
+- Aida
+- Amie
+- Howey
+- Luna
+- Misty
+- Sunny
+
+[Frame]
+- Aida @ lower-right area; playable frame-one storm-watch anticipation, grounded and alive without a fixed reaction; facing three-quarter toward screen-left/center, attentive to the storm and open approach lane.
+- Amie @ lower-centre area; smallest bear in the cluster, alert storm-watch anticipation with room to react; facing three-quarter toward center sea and the clear screen-left sand.
+- Howey @ lower-right area; tall protective presence, watchful and ready without pre-acting the warning; facing three-quarter toward center-left and offshore storm.
+- Luna @ lower-centre area; calm attentive storm-watch anticipation, clear silhouette; facing three-quarter toward center sea with peripheral awareness of the left approach lane.
+- Misty @ lower-right area; steady, concerned readiness in the storm, full-body readable; facing three-quarter toward screen-left/center and the surf.
+- Sunny @ lower-right area; bright but tense storm-watch anticipation, not a posed lineup; facing three-quarter toward center sea and screen-left approach space.
+- Same depth: Aida 60 inches; Amie 46 inches; Howey 70 inches; Luna 54 inches; Misty 65 inches; Sunny 50 inches; preserve relative-size truth only.
+
+[Geography]
+Camera looks from the wet beach toward the open sea; the ocean and storm horizon run through center frame, with crystal cliffs framing left and right.
+Aida, Amie, Howey, Luna, Misty and Sunny begin on the screen-right half of the beach, all full-body readable on the same shoreline depth plane.
+The screen-left wet sand is the approach side; an empty travel lane runs from offscreen lower-left toward center-left and stops well short of the bear cluster.
+The future Fuzzby landing zone is center-left wet sand, several bear-lengths away from the nearest bear.
+The future Zenny entrance path follows behind the same lower-left to center-left corridor and remains clear in frame one.
+The offshore danger direction is center to upper-center beyond the surf line, so the bears’ storm-watch eyelines can turn there without a geography reset.
+
+[Negative Space]
+Lead room stays open frame-left for the approved direction of travel.
+Hold lower-left wet sand empty for Fuzzby entering later from several bear-lengths away.
+Hold center-left wet sand empty as Fuzzby’s short-of-the-group crash-landing zone.
+Keep a clear lower-left-to-center-left corridor behind Fuzzby’s path for Zenny’s later entrance.
+Keep the center ocean horizon readable for the later shared turn toward offshore danger.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Low-to-medium beach-level wide relationship, about a 28–32mm animated-feature lens equivalent with gentle perspective and no caricature distortion. Camera height sits around the smaller bears’ upper torso level, looking slightly seaward so the wet sand, surf arc, storm horizon and crystal cliffs all remain legible. Preserve full-body readability and canon relative scale by keeping all opening bears on one depth plane.
+
+[Light]
+Use the locked storm-cove Scene Look: cool blue storm ambience, luminous crystal accents, wet-sand reflections, active surf glow, diagonal rain and gust-softened fur/clothing edges. Let brighter storm break-light sit over the center horizon and rim the bears from the sea side, with darker cloud mass overhead maintaining pressure. Depth is readable through foreground wet sand, midground bear cluster, surf, and distant horizon; no fog or rain density should obscure the characters.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one Aida, one Amie, one Howey, one Luna, one Misty and one Sunny appear in this image.
+Keep Aida, Amie, Howey, Luna, Misty, Sunny at the same distance from the camera; preserve their canonical relative heights.
+Opening keyframe includes only Aida, Amie, Howey, Luna, Misty and Sunny; do not include Fuzzby or Zenny yet.
+Do not create a posed lineup or mannequin stillness; the staging is a playable storm-watch beginning with breath, weight and eyeline potential left to animation.
+Leave the approach lane, landing zone and Zenny path visibly empty and unobstructed, not filled for compositional balance.
+Natural staging lock: restage Aida, Amie, Howey, Luna, Misty, Sunny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Aida, Amie, Howey, Luna, Misty, Sunny each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

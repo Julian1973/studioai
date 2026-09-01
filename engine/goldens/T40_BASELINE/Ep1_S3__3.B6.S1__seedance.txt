@@ -1,0 +1,1 @@
+REFUSED: Refused: REFUSED — Animation direction is stale (STALE direct inputs). Prepare current Animation specialist direction for 3.B6.S1 first. (REFUSED — the previous shot final frame reference file is missing)

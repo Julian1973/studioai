@@ -1,0 +1,93 @@
+[
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Zenny",
+   "characterState": "default",
+   "contractHash": "0108dda12e34d57a7d60a7161b50515042a773ff1b91bd70b86af1fae58b2665",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "round glasses",
+    "small dark nose",
+    "long eyelashes",
+    "rosy blush cheeks",
+    "smaller 12-inch bee proportions"
+   ],
+   "fileName": "CB_Zenny.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "Fuzzby's bulbous tan nose",
+    "Fuzzby's larger body proportions",
+    "any pendant, necklace, medallion or crystal"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+   "sourceSha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "0108dda12e34d57a7d60a7161b50515042a773ff1b91bd70b86af1fae58b2665",
+   "turnaroundViewCount": 4,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 1,
+  "role": "Zenny",
+  "slot": "@图1",
+  "sourceSlot": "@图1",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Fuzzby",
+   "characterState": "default",
+   "contractHash": "5c8b273962bc2ba45ead95ac29ac7bb307b44e9d8e89cebd95d7c7a0eeb229af",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "bulbous tan nose",
+    "round wire-frame spectacles",
+    "larger 14-inch bee proportions"
+   ],
+   "fileName": "CB_Fuzzby.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "Zenny's long eyelashes",
+    "Zenny's rosy blush cheeks",
+    "any pendant, necklace, medallion or crystal"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+   "sourceSha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "5c8b273962bc2ba45ead95ac29ac7bb307b44e9d8e89cebd95d7c7a0eeb229af",
+   "turnaroundViewCount": 4,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 2,
+  "role": "Fuzzby",
+  "slot": "@图2",
+  "sourceSlot": "@图2",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 3,
+  "role": "scene plate",
+  "slot": "@图3",
+  "sourceSlot": "@图3",
+  "usage": "keyframe",
+  "view": null
+ }
+]

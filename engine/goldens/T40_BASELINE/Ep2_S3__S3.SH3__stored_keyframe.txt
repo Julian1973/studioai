@@ -1,0 +1,62 @@
+[Opening Stage]
+Create a playable 16:9 opening for S3.SH3; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+Inside Bo’s protected hollow, the doorway has become occupied by a gentle witness: Bo is still sealed around the conker, while Keen is only a soft, careful presence at the threshold.
+
+[References]
+- Project-stable slots: @图1=Keen; @图2=Bo; @图3=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.
+- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+- Keep Keen and Bo distinct; never blend or swap traits.
+
+[Characters In Frame]
+- Bo
+- Keen
+
+[Frame]
+- Bo @ lower-left area; tight interior crouch holding the conker close, tail gathered near him, not yet startled; facing toward his clutched conker with attention vulnerable to the doorway.
+- Keen @ middle-right area; paused at the threshold as a soft partial doorway presence, gently peeking in without stepping into the room; facing into the hollow toward Bo.
+- Preserve canonical relative size, modified only by the authored depth relationship.
+
+[Geography]
+Camera is inside the hollow at child height, looking outward toward the open doorway.
+Bo starts inside the room foreground-left, deeper than the threshold, near the satchel area and holding the conker.
+Keen starts background-right at the doorway edge, outside the room and facing inward.
+The threshold line runs across the back-right of frame; Keen does not cross it.
+Keep a clear diagonal performance corridor from Bo’s paws upward through center frame toward the doorway.
+Warm interior space surrounds Bo; cooler doorway light outlines Keen from outside.
+
+[Negative Space]
+Hold open center-frame vertical space above Bo for the conker’s coming upward pop and fumble path.
+Hold the floor space between Bo and the doorway visibly empty to prove Keen has not entered.
+Keep a sliver of empty doorway edge around Keen so his presence reads as a gentle discovery, not a full invasion.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Interior child-height camera near Bo’s scale, looking slightly upward through the hollow toward the doorway. Use a gentle wide-normal animated feature lens relationship, wide enough to hold Bo, the open threshold, and the performance corridor without distortion; Keen should feel present but not enlarged by perspective.
+
+[Light]
+Warm amber hollow light protects Bo’s side of the room, with textured oak, moss, stone and pottery falling into soft depth. The doorway carries cooler exterior daylight as a rim and shadow shape around Keen, but it does not flare or brighten aggressively. Depth separation should make Keen a calm threshold presence in the background while Bo remains emotionally primary in the interior warmth.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one Bo and one Keen appear in this image.
+Opening frame is anticipation only: Bo has not jumped and the conker has not launched yet.
+Keen remains outside the room at the threshold; do not place him inside the hollow’s center.
+Bo must be readable as smaller than Keen by canon, with any apparent size difference motivated by Bo being closer to camera.
+The conker is already in Bo’s possession at frame one and must be visible enough to motivate the coming startle-fumble comedy.
+Natural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

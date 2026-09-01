@@ -1,0 +1,37 @@
+AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions. Dialogue language: English.
+
+[Multimodal Reference Layer]
+Fixed slots: @图1=opening_frame; @图2=Keen; @图3=Keen’s Mum; @图4=location; @Audio1=audio. Never swap roles.
+Angles: @图2=one Keen; @图3=one Keen’s Mum; never extra characters.
+@图1 is the previous shot's approved final frame. Use it only for carried character state, emotion, pose relationship, lighting continuity and the handoff fact: The unit begins from @图1 with Keen and Keen’s Mum close together at the island shore near the boat, Keen screen-right of Mum, the boat edge low foreground, and a warm protective mood carrying over. Do not use it as the scene geography, camera framing, shot size, pier layout, boat-position or composition authority when it is a close-up or incomplete view. Do not repeat the previous shot's action. The scene plate, geography, and Scene Continuity State control the wider environment and prop positions.
+@图2 defines Keen identity/scale only. Do not use its background, pose, composition, props or scene.
+@图3 defines Keen’s Mum identity/scale only. Do not use its background, pose, composition, props or scene.
+@图4 defines scene/layout/light only. Do not use characters or action from it.
+
+[ATTRIBUTE OWNERSHIP]
+Keen’s identity and scale come from @图2, but the wristband details in that turnaround do not transfer into this scene.
+Keen’s Mum’s identity and scale come from @图3; her design details do not transfer to Keen.
+Keen’s bare wrists belong to the Scene 3 continuity state; no wrist accessories belong to either of his wrists in this shot.
+
+[ENVIRONMENT CONTRACT]
+Begin from the previous shot final-frame shoreline/boat state in @图1.
+Keep the island shore on screen-left and the open water on screen-right as the camera reframes.
+Keep the boat contents continuous: open satchel, rolled blanket, folded map, and small food pouch remain in the boat unless already hidden by framing.
+No new cargo, characters, or objects enter the clear corridor between Keen and the water.
+
+[One-Sentence Summary]
+Keen carries the previous warm shoreline moment into his first visible fear of the open water, swallows it down, and speaks with borrowed grown-up courage while Mum stays close.
+
+[Global Settings]
+Style (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+Geography: The approved Scene 3 geography master controls the location: wooden pier from shore, small sailboat moored on screen-right with mast, tan sail and rigging, tropical shore behind, open water beyond. Mum remains on the pier at screen-left, close enough to support Keen but not blocking the boat. Keen remains beside or just inside the moored boat at screen-right, oriented between Mum and the open water. The boat cargo remains continuous: open satchel, rolled blanket, folded map and small food pouch stay visible unless a later approved shot visibly moves them. The camera may tighten slightly for emotion but must not lose the pier, boat position, sail/rigging, shoreline direction or open-water context. No generic beach reset, no new vessel, no missing pier, no missing sailboat, no missing packed supplies.
+
+[Camera and Shot Plan]
+Shot 1: Camera: Medium close two-shot beginning from the approved opening composition, useful 40mm feel at child eye height; a slow, motivated drift/reframe right opens the water behind Keen while keeping Mum screen-left as a soft witness. Action: Keen’s attention leaves the boat foreground and moves to the water; the scale of the sea makes him swallow before he speaks through @Audio1. Performance: Keen looks out, steadies himself, swallows, delivers the locked audio with careful bravery. End state: Keen screen-right of Mum on the island shore, both on the same foreground plane; Keen faces the open water to screen-right with a small braced expression, Mum beside him screen-left looking at him, boat edge low foreground, camera at Keen eye height, sunlight from upper right. Dialogue placement: Keen, Keen speaks via @Audio1 only, with a careful childlike attempt at bravery after a visible swallow; Mum listens silently with mouth closed: {Like you said… it’s part of growing up.} The pose holds a full beat after the line ends.
+Witness staging: Keen's Mum remains screen-left. Keen remains screen-right of Keen's Mum. Both share the same foreground depth plane and look toward the open water at screen-right. Hold on the non-acting witness; their stillness and the hold length carry the joke.
+
+[Global Supplement]
+Exactly one Keen and one Keen's Mum throughout; no duplicates of either character. Maintain Keen starts this scene with bare wrists. No wristbands, bands, bracelets, cuffs, crystals or straps appear on either wrist. Safeguard: Keen’s wrists bare despite @图2 showing wristbands. Safeguard: Do not generate extra mouth movement for Keen’s Mum during @Audio1.
+
+[Audio]
+Use @Audio1 as the timing and mouth-shape guide for dialogue performance. Final approved dialogue will be restored in post. No extra voices. No music. No watermark.

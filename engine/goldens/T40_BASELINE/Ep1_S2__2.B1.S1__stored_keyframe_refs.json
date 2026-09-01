@@ -1,0 +1,49 @@
+[
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Aida",
+   "characterState": "default",
+   "contractHash": "398fecbe185675e9309d772f4b95c9618cb22299499ab661cb22d2b5aac6ae4e",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "long flowing lilac-purple hair",
+    "jewelled brow headdress",
+    "layered purple robes"
+   ],
+   "fileName": "CB_Aida.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+   "sourceSha256": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "398fecbe185675e9309d772f4b95c9618cb22299499ab661cb22d2b5aac6ae4e",
+   "turnaroundViewCount": 4,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 1,
+  "role": "Aida",
+  "slot": "@图1",
+  "sourceSlot": "@图1",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 2,
+  "role": "scene plate",
+  "slot": "@图2",
+  "sourceSlot": "@图2",
+  "usage": "keyframe",
+  "view": null
+ }
+]

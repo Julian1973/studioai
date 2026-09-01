@@ -1,0 +1,101 @@
+[
+ {
+  "identity": null,
+  "position": 1,
+  "role": "opening keyframe",
+  "slot": "@图1",
+  "sourceSlot": "@图1",
+  "usage": "animation",
+  "view": null
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Aida",
+   "characterState": "default",
+   "contractHash": "bf9029c1919a32130b703d1474fd00d4e8e443a8993548ae6ff990006838be96",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "long flowing lilac-purple hair",
+    "jewelled brow headdress",
+    "layered purple robes"
+   ],
+   "fileName": "CB_Aida.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+   "sourceSha256": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "bf9029c1919a32130b703d1474fd00d4e8e443a8993548ae6ff990006838be96",
+   "turnaroundViewCount": 4,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 2,
+  "role": "Aida",
+  "slot": "@图2",
+  "sourceSlot": "@图3",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Bo",
+   "characterState": "default",
+   "contractHash": "82d50105497f4d4aa0584ae8345fe8fb0d3a2727d3b82570774f7c8f47a5b515",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "russet-orange squirrel fur",
+    "cream muzzle, chest and belly",
+    "tall pointed ears with tufts",
+    "very large fluffy curled tail",
+    "large expressive brown eyes"
+   ],
+   "fileName": "CB_Bo.png",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "bear ears or bear cub proportions",
+    "another character's crystal or jewellery",
+    "generic backpack or satchel",
+    "small, thin or missing tail"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Bo.png",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Bo.png",
+   "sourceSha256": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "82d50105497f4d4aa0584ae8345fe8fb0d3a2727d3b82570774f7c8f47a5b515",
+   "turnaroundViewCount": 5,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 3,
+  "role": "Bo",
+  "slot": "@图3",
+  "sourceSlot": "@图2",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 4,
+  "role": "scene plate",
+  "slot": "@图4",
+  "sourceSlot": "@图4",
+  "usage": "animation",
+  "view": null
+ }
+]

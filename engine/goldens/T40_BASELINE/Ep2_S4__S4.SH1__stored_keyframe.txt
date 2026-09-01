@@ -1,0 +1,64 @@
+[Opening Stage]
+Create a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+We are already inside Bo's moving coping game at his eye level, sharing a playful side-by-side rhythm that still leaves the path ahead present as pressure.
+
+[References]
+- Project-stable slots: @图1=Keen; @图2=Bo; @图3=prop:satchel; @图4=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.
+- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图3 is the exact satchel prop authority; inherit design, material, construction and scale only; ignore its background and labels.
+- @图4 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+- Keep Keen and Bo distinct; never blend or swap traits.
+
+[Characters In Frame]
+- Bo
+- Keen
+
+[Frame]
+- Bo @ lower-right area; walking anticipation with body braced for the next counted tail-poof, satchel carried and readable; facing screen-right along the path with slight inward awareness toward Keen.
+- Keen @ middle-left area; walking alongside in upbeat supportive anticipation, keeping pace beside Bo; facing screen-right toward shared travel and Bo.
+- Preserve canonical relative size, modified only by the authored depth relationship.
+
+[Geography]
+Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.
+Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.
+The open path continues past them and stays readable behind Bo through center-right background depth.
+A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.
+Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.
+Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.
+
+[Negative Space]
+Lead room stays open frame-right for the approved direction of travel.
+Hold open travel space frame-right and center-right for the path pressure and Bo's later stop at the fallen log.
+Keep frame-left upper-left branch veil readable and lightly open for Aida's later descent entrance.
+Reserve a clear seated pocket around Bo's future stop point so the later trio can settle without a camera reset.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Moderately wide animated lens feel, roughly 32mm full-frame equivalent, camera at Bo's height on a gentle lateral travel matching their walk; close enough for body-read and satchel presence, wide enough to retain the path pocket, fallen log territory, and branch entry zone for Aida. Mild perspective separation is welcome but avoid distortion or heroic emphasis.
+
+[Light]
+Warm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one Bo and one Keen appear in this image.
+Open on Bo and Keen already in motion at Bo's height; do not stage a fresh start or frontal presentation.
+Keep the path legible behind and beyond Bo from frame one so belonging-pressure is built into the composition.
+Preserve branch-veiled left-side entry geography for Aida; her later arrival must feel like joining the same pocket, not entering a new setup.
+Maintain enough foreground-to-midground clearance that the camera's travel can visibly die with Bo's abrupt stop without reframing the scene's logic.
+Natural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No unapproved extra cast, props or body-mounted loads; include only the required referenced satchel with its approved owner. Preserve the locked Scene Look.

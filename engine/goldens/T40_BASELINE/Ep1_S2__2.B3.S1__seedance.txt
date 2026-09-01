@@ -1,0 +1,1 @@
+REFUSED: Refused: REFUSED — Animation direction is stale (STALE direct inputs). Prepare current Animation specialist direction for 2.B3.S1 first. (REFUSED — 2.B3.S1 has no APPROVED keyframe (a generated-but-unapproved candidate is never a valid anchor) — cb_render.py keyframe 2 2.B3.S1, then approve-keyframe once it's reviewed)

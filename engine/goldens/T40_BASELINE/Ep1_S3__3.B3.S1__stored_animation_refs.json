@@ -1,0 +1,105 @@
+[
+ {
+  "identity": null,
+  "position": 1,
+  "role": "previous shot final frame",
+  "slot": "@图1",
+  "sourceSlot": "@图1",
+  "usage": "animation",
+  "view": null
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Keen",
+   "characterState": "no-cuffs",
+   "contractHash": "d833f4e8fd9f98afaee92e28347547c1ac74b45d0c0e25ed3a461e974aa7e32a",
+   "coverage": "front-and-rear",
+   "derived": false,
+   "distinguishingFeatures": [
+    "aquamarine-blue fur",
+    "upright pale-white crown tuft",
+    "both wrists and forearms completely bare"
+   ],
+   "fileName": "CB_Keen_nocuffs_front-back.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
+   "sourceSha256": "0514d405b5b72e2c6401204ac7f633785b2e6ace5794ac760d5ac1b0d29e38ed",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "d833f4e8fd9f98afaee92e28347547c1ac74b45d0c0e25ed3a461e974aa7e32a",
+   "turnaroundViewCount": 2,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 2,
+  "role": "Keen",
+  "slot": "@图2",
+  "sourceSlot": "@图2",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Keen's Mum",
+   "characterState": "default",
+   "contractHash": "5f960870ac3b5b38f9c0298c79e51ac48232c7d462950a5f552e029fb1b14884",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "pale-blue adult-bear fur",
+    "pale-blue hair bun with matching bow",
+    "ornate gold collar"
+   ],
+   "fileName": "CB_KeensMum.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
+   "sourceSha256": "fa3d70111949ef90b675419ed42c91946261f4e45d62e623bb156aac72ccc43a",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "5f960870ac3b5b38f9c0298c79e51ac48232c7d462950a5f552e029fb1b14884",
+   "turnaroundViewCount": 5,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 3,
+  "role": "Keen's Mum",
+  "slot": "@图3",
+  "sourceSlot": "@图3",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 4,
+  "role": "prop:keen_fathers_wristbands",
+  "slot": "@图4",
+  "sourceSlot": "@图5",
+  "usage": "animation",
+  "view": null
+ },
+ {
+  "identity": null,
+  "position": 5,
+  "role": "scene plate",
+  "slot": "@图5",
+  "sourceSlot": "@图4",
+  "usage": "animation",
+  "view": null
+ }
+]

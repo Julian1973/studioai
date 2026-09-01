@@ -1,0 +1,59 @@
+[Opening Stage]
+Create a playable 16:9 opening for S3.SH2; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+Bo is trying to make the outside step feel safe by reducing it to one tiny, serious object action; the open doorway stays present as the real pressure while the conker and satchel become his private decision machine.
+
+[References]
+- Project-stable slots: @图1=Bo; @图2=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Bo; views are angles, not extra characters.
+- @图1: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+
+[Characters In Frame]
+- Bo
+
+[Frame]
+- Bo @ middle-left area; compact frame-one anticipation near the open satchel, carefully setting the conker into it without yet committing to the doorway; facing three-quarter toward the frame-right doorway while pulled back toward the satchel and conker.
+- Preserve canonical relative size, modified only by the authored depth relationship.
+
+[Geography]
+Interior camera is low on the hollow floor, looking diagonally from the satchel area toward the open doorway.
+Bo starts inside the hollow between the satchel area and the doorway path, closer to the satchel than the threshold.
+The open satchel sits foreground lower-left to lower-centre, mouth readable toward Bo and camera.
+The conker begins at the satchel opening in direct relation to Bo’s paws.
+The open doorway remains visible in frame-right background as the uncrossed exit.
+Keep a clear travel axis from satchel foreground through Bo’s position to the doorway.
+Bo’s tail stays contained inside the hollow curve and must not obscure the satchel, conker, or doorway.
+
+[Negative Space]
+Lead room stays open frame-right for the approved direction of travel.
+Reserve the frame-right background doorway and threshold shape as visible empty pressure space; do not fill it with extra props or characters.
+Keep the floor corridor from Bo to the doorway unobstructed for the later approach and retreat.
+Keep a small clean pocket around the satchel mouth and Bo’s paw area so each conker state can remain readable.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Low camera at Bo paw-and-satchel height, slightly inside the hollow looking diagonally toward the doorway. Use a gentle wide-normal animated feature lens relationship: close enough for tactile paw/conker readability, but not so compressed that the doorway loses spatial pressure. The conker should feel important because of placement and focus, not because it is magical or oversized.
+
+[Light]
+Maintain the warm hollow-oak interior from the Scene Look: amber wood, mossy greens, soft hearth-like warmth, tactile bark and stone. The doorway light remains constant, brighter and cooler by comparison, cutting a readable exit shape in the background. Depth should act like a treadmill: every foreground object choice visually relates back to the same unresolved doorway.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Bo is the only visible character in the opening frame.
+The conker, Bo’s paws, the open satchel, and the open doorway must all be readable in one spatial relationship.
+The conker is an ordinary tactile object, not glowing, sentient, floating, or magically animated.
+The doorway light stays constant; the emotional change must come from Bo’s distance and relationship to it, not from a lighting cue change.
+Natural staging lock: restage Bo from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Bo has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

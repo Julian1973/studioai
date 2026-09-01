@@ -1,0 +1,65 @@
+[Opening Stage]
+Create a playable 16:9 opening for 3.B1.S1; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+Keen actively packs and rechecks the sailboat while trying to look ready; Mum watches nearby with proud, restrained worry.
+
+[References]
+- Project-stable slots: @图1=Keen; @图2=Keen's Mum; @图3=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Keen; @图2=one Keen's Mum; views are angles, not extra characters.
+- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2: Keen's Mum's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen's Mum exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+- Keep Keen and Keen's Mum distinct; never blend or swap traits.
+
+[Characters In Frame]
+- Keen
+- Keen's Mum
+
+[Frame]
+- Keen @ lower-centre area; beside the moored boat in a ready-to-pack anticipation state, attention oriented to the supplies without completing a specific action; facing three-quarter screen-right toward the boat cargo and water.
+- Keen's Mum @ middle-left area; standing on the pier in a calm, supportive anticipation state, hands relaxed, giving Keen room; facing three-quarter screen-right toward Keen and the boat.
+- Same depth: Keen 57 inches; Keen's Mum 60 inches; preserve relative-size truth only.
+
+[Geography]
+Pier runs from lower-left shore toward the sailboat on screen-right.
+Sailboat remains moored along screen-right with cockpit and cargo visible.
+Tan sail, mast and rigging rise on screen-right without covering faces or cargo.
+Shore and palms stay screen-left/background-left; open water and horizon stay screen-right/back.
+Keen stands at the boat edge near the open satchel, rolled blanket, folded map and food pouch.
+Keen's Mum stands screen-left of Keen, close enough to reassure but not between Keen and the cargo.
+Playable space remains between Mum, Keen, boat and water.
+
+[Negative Space]
+Lead room stays open frame-right for the approved direction of travel.
+Keep clear pier space between Mum and Keen for packing checks and emotional beats.
+Keep open screen-right water for Keen’s later look outward.
+Keep the boat cargo pocket unobstructed and readable.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Low child-height 30-35mm view from the pier toward boat and water; wide enough to preserve characters, cargo and geography.
+
+[Light]
+Bright island day from the scene plate: warm sun, ocean bounce, tactile wood, tan sailcloth, turquoise water, palm greens, soft blue fur; characters, boat and cargo sharp.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one Keen and one Keen's Mum appear in this image.
+Keep Keen and Keen's Mum at the same distance from the camera; Keen's Mum appears about 5% taller than Keen.
+Keen has bare wrists: no wristbands, bands, bracelets, cuffs, crystals or straps.
+Boat cargo is exactly open satchel, rolled blanket, folded map and small food pouch.
+Sailboat stays moored screen-right beside the pier; do not reset to a generic beach.
+Mum is slightly taller than Keen; keep both at the same camera distance.
+Natural staging lock: restage Keen, Keen's Mum from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Keen, Keen's Mum each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

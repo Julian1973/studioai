@@ -1,0 +1,12 @@
+{
+ "CANON": "<ROOT>/shows/crystal-bears/canon/LOCKED_CANON.md",
+ "CHARS": "<ROOT>/shows/crystal-bears/canon/characters.json",
+ "CONFIG": "<ROOT>/shows/crystal-bears/canon",
+ "ENGINE_ADAPTER": "crystal-bears-v1",
+ "IDENTITY_PACKS": "<ROOT>/shows/crystal-bears/canon/identity_packs.json",
+ "LOCATIONS": "<ROOT>/shows/crystal-bears/canon/locations.json",
+ "OUTPUT": "<ROOT>/shows/crystal-bears/episodes/output",
+ "SCRIPTS": "<ROOT>/shows/crystal-bears/episodes/scripts",
+ "SHOW": "<ROOT>/shows/crystal-bears",
+ "SHOW_ID": "crystal-bears"
+}

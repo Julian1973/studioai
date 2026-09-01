@@ -1,0 +1,65 @@
+[Opening Stage]
+Create a playable 16:9 opening for S1.SH2; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+The audience should instantly understand the trap: Keen is inches from success, Fuzzby is asleep on the honeycomb, and one tiny pollen puff is about to betray Keen from inside his own body.
+
+[References]
+- Project-stable slots: @图1=Fuzzby; @图2=Keen; @图3=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Fuzzby; @图2=one Keen; views are angles, not extra characters.
+- @图1: Fuzzby's complete, uncropped 360 turnaround is the 100% identity authority. Match Fuzzby exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+- Keep Fuzzby and Keen distinct; never blend or swap traits.
+
+[Characters In Frame]
+- Keen
+- Fuzzby
+
+[Frame]
+- Keen @ middle-left area; frozen in a tight stopped-short sneaking reach, close to the prize, with his nose exposed to the drifting pollen; facing screen-right toward Fuzzby and the honeycomb.
+- Fuzzby @ upper-right area; weighted asleep on top of the honeycomb, visibly claiming the prize by position only; facing screen-left toward Keen’s side of the stump.
+- Same depth: Keen 57 inches; Fuzzby 14 inches; preserve relative-size truth only.
+
+[Geography]
+Keen starts low and close on frame-left, facing screen-right toward the honeycomb and sleeping Fuzzby.
+The honeycomb rests on the stump at frame-right, slightly elevated above Keen’s nose line and just beyond his reach.
+Fuzzby is asleep on top of the honeycomb, facing toward Keen’s side of the stump.
+A tiny yellow pollen puff travels from the glowing flowers at lower-left/center-left toward Keen’s nose along a left-to-right air path.
+The action corridor runs from Keen’s nose across the small gap to the honeycomb and Fuzzby.
+Camera stays on the low nook side of the stump, looking diagonally across Keen toward the prize.
+
+[Negative Space]
+Lead room stays open frame-right for the approved direction of travel.
+Lead room stays open frame-left for the approved direction of travel.
+Hold a clean empty air pocket between Keen’s nose and the honeycomb for the pollen path and sneeze anticipation.
+Hold uncluttered space above Fuzzby on the honeycomb for his brief sleepy lift later.
+Keep a narrow open gap between Keen’s reaching side and the honeycomb so the failed almost-touch remains readable.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Use a low child-height camera near Keen’s nose line, slightly below the honeycomb top, with a gentle 35mm animated-feature lens relationship: intimate enough to read Keen’s face, nose, paw, Fuzzby and the pollen, but not a macro gag. Camera is on the same nook side as prior continuity, looking diagonally across Keen toward the stump and honeycomb, with mild depth compression so the ‘almost there’ distance feels cruelly small while preserving canon scale.
+
+[Light]
+Warm golden morning from upper left/back-left, with pollen and dew sparkling in the beam. Keep a soft rim on Keen’s blue fur and a honey glow on Fuzzby and the honeycomb; the stump face and moss provide darker contrast behind the yellow pollen puff. Depth is shallow enough to guide the eye to pollen, Keen’s nose, then Fuzzby-on-honeycomb, but the geography must remain readable for the long performance hold.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one Keen and one Fuzzby appear in this image.
+Keep Keen and Fuzzby at the same distance from the camera; Keen appears about 307% taller than Fuzzby.
+Preserve the continuity-in relationship: Keen is already close to the honeycomb with reaching energy trapped short of it, and Fuzzby is asleep on the prize.
+The pollen must be visibly present before it reaches Keen’s nose; the sneeze cannot feel random.
+Keep Fuzzby drowsy/asleep in the opening frame, not alert or confrontational.
+Preserve canon scale: Keen is much taller than Fuzzby, while Fuzzby’s elevated perch on the honeycomb gives him authority without making him physically large or changing apparent scale.
+Natural staging lock: restage Keen, Fuzzby from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Keen, Fuzzby each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

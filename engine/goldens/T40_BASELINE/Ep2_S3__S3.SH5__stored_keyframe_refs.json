@@ -1,0 +1,92 @@
+[
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Keen",
+   "characterState": "default",
+   "contractHash": "c93dc8355f33fde348e6b4396fa02bdbc1cb670c4bbfc8eb353b37d6baa528cf",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "aquamarine-blue fur",
+    "upright pale-white crown tuft",
+    "gold wrist cuffs with aquamarine gems"
+   ],
+   "fileName": "CB_Keen.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+   "sourceSha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "c93dc8355f33fde348e6b4396fa02bdbc1cb670c4bbfc8eb353b37d6baa528cf",
+   "turnaroundViewCount": 4,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 1,
+  "role": "Keen",
+  "slot": "@图1",
+  "sourceSlot": "@图2",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Bo",
+   "characterState": "default",
+   "contractHash": "55feee7bee28bb900bc5ff937183fa2410891e92cbfcd41a35c68cef97461980",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "russet-orange squirrel fur",
+    "cream muzzle, chest and belly",
+    "tall pointed ears with tufts",
+    "very large fluffy curled tail",
+    "large expressive brown eyes"
+   ],
+   "fileName": "CB_Bo.png",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "bear ears or bear cub proportions",
+    "another character's crystal or jewellery",
+    "generic backpack or satchel",
+    "small, thin or missing tail"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Bo.png",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Bo.png",
+   "sourceSha256": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "55feee7bee28bb900bc5ff937183fa2410891e92cbfcd41a35c68cef97461980",
+   "turnaroundViewCount": 5,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 2,
+  "role": "Bo",
+  "slot": "@图2",
+  "sourceSlot": "@图1",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 3,
+  "role": "scene plate",
+  "slot": "@图3",
+  "sourceSlot": "@图3",
+  "usage": "keyframe",
+  "view": null
+ }
+]

@@ -1,0 +1,22 @@
+{
+ "clean": false,
+ "findings": [
+  {
+   "deduction": 2.0,
+   "fix": "End every shot with a describable frame.",
+   "message": "No ending state appears in the unit.",
+   "rule": "ending-state",
+   "severity": "FATAL"
+  },
+  {
+   "deduction": 0.75,
+   "fix": "State either No music or the approved Seedance non-verbal music/SFX policy.",
+   "message": "Music/SFX policy is absent.",
+   "rule": "audio-policy",
+   "severity": "FIX"
+  }
+ ],
+ "firingFloor": 9.5,
+ "score": 7.25,
+ "verdict": "BLOCK"
+}

@@ -1,0 +1,63 @@
+AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.
+
+[Multimodal Reference Layer]
+Slots: @图1=opening_frame; @图2=Keen; @图3=Bo; @图4/@图5/@图6=location; @Audio1=audio; never swap.
+Angles: @图2=one Keen; @图3=one Bo; views are not extra characters.
+@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.
+@图2 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.
+@图3 defines exactly one Bo identity, proportions, scale and approved wearable state: Bo identity, proportions, scale and approved wearable state. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.
+@图4 defines scene/layout/light only; exclude characters/action.
+@图5 defines scene/layout/light only; exclude characters/action.
+@图6 defines scene/layout/light only; exclude characters/action.
+
+[Opening Motion Bridge]
+Keen completes the inherited tail demonstration, then visibly turns his head, shoulders and torso back toward Bo before Bo touches the conker or satchel.
+
+[ACTION OWNERSHIP]
+Keen alone demonstrates and speaks lines 1, 2 and 3.
+Bo stays closed-mouth during Keen cues; Bo alone speaks line 4.
+Bo alone packs and shoulders the satchel while Keen watches.
+Bo’s tail alone performs one puff-catch-recovery cycle; it never handles the satchel.
+After the tail clears, both walk fully through the doorway.
+
+[ATTRIBUTE OWNERSHIP]
+Bo owns the squirrel tail: normally behind him in the @图3 position, it puffs once at the doorway, then returns fully to normal.
+Keen owns the small short blue bear tail in @图2; it stays unchanged.
+The conker belongs to Bo and ends inside his satchel.
+The satchel belongs to Bo and ends closed, clasped and worn over his shoulder.
+Keen approved wearable state: gold wrist cuffs with aquamarine gems
+
+[ENVIRONMENT CONTRACT]
+Hollow, solid table, stool, floor route and screen-right doorway stay fixed across cuts.
+The doorway stops only Bo’s temporarily puffed tail; no clipping, teleporting or walking through furniture.
+Conker moves from Bo’s paw into the satchel; satchel moves from open on floor to closed on Bo’s shoulder.
+After the tail clears, both end fully outside.
+
+[One-Sentence Summary]
+Keen makes himself the joke, turns back to watch Bo pack, then Bo’s correctly positioned tail puffs and briefly jams the doorway before settling so both friends walk out laughing.
+
+[Global Settings]
+Style (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+Geography: Camera is inside the hollow looking toward the back-center doorway. Bo starts inside the room on frame-left/mid, near the satchel and conker area. Keen starts at the threshold on frame-right/back, turned partly toward Bo. The shared travel axis runs from Bo’s interior position diagonally toward Keen and the doorway. Keep the floor corridor between Bo, Keen, and the doorway unobstructed. The warm interior remains visible around both characters so the conker/satchel payoff can stay inside the room.
+
+[Living Performance]
+Living performance lock: Bo, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.
+
+[Shot Sequence]
+Shot 1: Camera: begin exactly from @图1 in the approved shared two-shot, useful 35mm lens; gently reframe to Keen’s small tail rather than hold the repeated room-wide angle. Action: Keen completes his body wiggle; his small tail stays unchanged. Bo watches silently. Immediately after “See? Nothing,” Keen turns head, shoulders and torso back toward Bo before Bo packs. Performance: Keen is playful and kind. Bo softens and his squirrel tail settles into the correct relaxed position behind his body. End state: Keen is turned back watching Bo; Bo’s tail rests naturally behind him and Bo is ready to pack. Spoken action: Keen, 1.0-3.52s: Keen alone speaks; Bo is silent and closed-mouth: {Mine does nothing. Watch.} The pose holds a full beat after the line ends. Spoken action: Keen, 6.1-7.82s: Keen alone speaks; Bo is silent and closed-mouth; Keen turns back immediately afterward: {See? Nothing.} The pose holds a full beat after the line ends. Hold: 1.4s — Let Bo register that Keen is offering silliness, not judgement, before the invitation to walk redirects the scene toward the doorway.
+Shot 2: Camera: reverse over Keen’s shoulder into a low front three-quarter medium on Bo, useful 50mm lens; Keen’s watching profile frames one edge while Bo’s face, paws, conker, flap and clasp stay visible. Action: Bo alone puts the conker fully inside, withdraws his paw, folds the flap and closes the clasp. Keen is turned toward Bo and watches without touching the bag. Performance: At 10.2-14.52s Keen alone speaks while looking at Bo. Bo listens closed-mouth and completes packing. Bo’s tail remains relaxed behind him. End state: Conker is inside the closed clasped satchel; Keen remains turned toward Bo and watching. Spoken action: Keen, 10.2-14.52s: Keen alone speaks while watching Bo pack; Bo stays silent and closed-mouth: {Let’s go for a walk and get some fresh air. Fresh air always helps.} The pose holds a full beat after the line ends.
+Shot 3: Camera: distinct low side-tracking 28mm doorway profile; track Bo shouldering the bag, use table and stool foreground parallax, then hold doorway edges and both faces for puff-jam-laugh-release. Action: Bo shoulders the closed satchel. Both approach. As they start through the doorway, Bo’s tail puffs once and gently catches on the doorway edges, stopping both. They share a surprised non-verbal laugh. Tail deflates fully, clears doorway, and both walk completely outside. Performance: At 16.3-18.94s Bo alone speaks; Keen watches closed-mouth. Catch is harmless. Keen laughs with Bo; Bo relaxes rather than feeling mocked. End state: Bo and Keen are fully outside smiling and laughing; Bo wears the closed satchel and his tail is normal behind him. Spoken action: Bo, 16.3-18.94s: Bo alone speaks; Keen remains silent, closed-mouth and watching Bo: {That does sound nice.}
+Witness staging: Keen turns back before packing and remains silent watching witness in Shot 2. Reverse angle proves speaker ownership and keeps Bo’s paws, conker and clasp visible. Final angle keeps faces and doorway edges visible through puff, catch, laugh, deflation and exit. Hold on the non-acting witness; their stillness and the hold length carry the joke.
+
+[Human Review Correction]
+This bounded correction is approved Director intent. Integrate it into the staged action and camera while preserving canon, the opening frame, exact @Audio1 dialogue and the signed landing state:
+Preserve Keen's exact small blue bear tail from his approved turnaround in both shape and fur density. Bo must use his paws to put the conker fully inside the satchel, fold the flap, close the clasp, lift the strap over his shoulder, settle the closed bag against his body, and only then leave with Keen. Bo's tail deflates but never carries the satchel.
+
+[Audio]
+@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.
+
+[AUDIO AND EXCLUSIONS]
+No narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.
+
+[Global Supplement]
+Exactly one Bo and one Keen throughout; no duplicates of either character. Maintain @图1 before the first motivated cut. Safeguard: No speaker swap: Bo never mouths Keen’s lines and Keen never mouths Bo’s line. Safeguard: Bo’s tail stays behind him, performs one puff-catch-deflate cycle, and never carries the satchel. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Living performance lock: Bo, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Bo’s tail is fully normal; conker is inside closed satchel on Bo’s shoulder; Bo and Keen are fully outside laughing together.

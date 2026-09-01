@@ -1,0 +1,62 @@
+[Opening Stage]
+Create a playable 16:9 opening for S3.SH5; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+Relief and gentle amusement: Keen is about to make himself the safe silly object, giving Bo enough room to release the conker decision loop without suddenly becoming fearless.
+
+[References]
+- Project-stable slots: @图1=Keen; @图2=Bo; @图3=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.
+- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+- Keep Keen and Bo distinct; never blend or swap traits.
+
+[Characters In Frame]
+- Bo
+- Keen
+
+[Frame]
+- Bo @ middle-left area; softened guarded anticipation beside the satchel/conker area, enlarged tail still readable without starting the release yet; facing toward Keen with cautious curiosity.
+- Keen @ middle-right area; open threshold stance preparing to make his own tail the gentle demonstration; facing toward Bo while angled enough for his small tail side to read.
+- Preserve canonical relative size, modified only by the authored depth relationship.
+
+[Geography]
+Camera is inside the hollow looking toward the back-center doorway.
+Bo starts inside the room on frame-left/mid, near the satchel and conker area.
+Keen starts at the threshold on frame-right/back, turned partly toward Bo.
+The shared travel axis runs from Bo’s interior position diagonally toward Keen and the doorway.
+Keep the floor corridor between Bo, Keen, and the doorway unobstructed.
+The warm interior remains visible around both characters so the conker/satchel payoff can stay inside the room.
+
+[Negative Space]
+Reserve the center floor corridor from Bo to the doorway for the later shared exit.
+Keep a readable warm interior pocket near Bo’s satchel/conker area for the conker’s later packed decision-object payoff.
+Leave soft doorway space behind Keen for the eventual move outside without crowding the frame.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Low interior camera, near small-character chest height, looking gently toward the doorway on a modest wide-normal lens around 32–35mm equivalent. The lens keeps both characters readable without comic distortion, lets Keen feel slightly farther away at the threshold, and preserves enough foreground/interior space for the conker and satchel payoff later in the shot.
+
+[Light]
+Warm hollow interior fire/window ambience continues from the Scene Look, with the doorway light steady and inviting but not magically brighter. Bo sits in soft amber interior fill; Keen catches a warmer edge from the doorway. Depth is organized as foreground decision-object space, mid-ground Bo, threshold Keen, and the exterior glow beyond, so the doorway’s meaning can change through Bo’s movement rather than through a lighting change.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one Bo and one Keen appear in this image.
+Opening frame is before Keen’s wiggle, Bo’s conker release, satchel closure, and exit; stage anticipation only.
+Keen’s tail must retain the exact small, short blue bear-tail silhouette, proportions and fur density shown in his turnaround; it must not enlarge, fluff up or become squirrel-like.
+Bo begins with the conker still in the decision loop near the satchel area; do not show the conker already abandoned or the satchel already closed in the opening frame.
+Bo’s tail is enlarged and softened from prior continuity, but it must not carry the satchel or behave triumphantly in the opening frame or payoff path implied by the staging.
+Natural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

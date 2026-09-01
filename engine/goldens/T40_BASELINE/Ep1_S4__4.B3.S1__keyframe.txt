@@ -1,0 +1,1 @@
+REFUSED: Refused: REFUSED — Cinematography direction is stale (STALE direct inputs). Prepare current Cinematography specialist direction for 4.B3.S1 first. (direct-input-signature-mismatch)

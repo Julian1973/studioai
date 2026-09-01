@@ -1,0 +1,49 @@
+AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions. Dialogue language: English.
+
+[Multimodal Reference Layer]
+Slots: @图1=opening_frame; @图2=Keen; @图3=Squeaky; @图4/@图5=prop; @图6=location; @Audio1=audio; never swap.
+Angles: @图2=one Keen; @图3=one Squeaky; views are not extra characters.
+@图1 is the first frame and the previous shot's approved final frame. Use it only for carried character state: it controls the exact opening pose, emotion, light and carried prop state only: Keen stands center-left with both hands on the upside-down map at chest height, knees flexed; the sail is just beginning to pull hard from an incoming gust at screen-right, and Squeaky is still visible near the waterline. Do not use it as the scene geography, camera framing, pier layout or boat-position authority; @图6 and Geography control the wider scene. If an Opening Motion Bridge is present, it alone controls how this inherited pose resolves into the new action.
+@图2 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: matching aged-gold vacant open cuffs worn on both wrists; blank cuff settings with no crystals and no glow. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.
+@图3 defines exactly one Squeaky identity, proportions, scale and approved wearable state: Squeaky identity, proportions, scale and approved wearable state. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.
+@图4 defines the exact keen sailboat design, materials, construction, scale and approved carried state. Exclude its background, people and composition.
+@图5 defines the exact keen sailboat departure state design, materials, construction, scale and approved carried state. Exclude its background, people and composition.
+@图6 defines scene/layout/light only; exclude characters/action.
+
+[Opening Motion Bridge]
+The dimming horizon becomes a hard screen-right gust that fills the sail before Keen can recover from the upside-down-map landing.
+
+[ACTION OWNERSHIP]
+The screen-right gust loads the sail and steals the map; Keen does not throw or release it voluntarily.
+Keen owns the mast grab, steering attempt, reach, empty-hand check and final frightened hold.
+Squeaky owns only the underwater dive in Stage 1 and has no speech, no reappearance and no later reaction shot.
+
+[ATTRIBUTE OWNERSHIP]
+The map belongs only to Keen at frame one and to the storm after it is torn free; Keen does not hold or catch it at the end.
+Keen approved wearable state: matching aged-gold vacant open cuffs worn on both wrists; blank cuff settings with no crystals and no glow
+
+[ENVIRONMENT CONTRACT]
+Opening light begins as bright daylight dimming at the horizon from @图1 continuity.
+Cloud shadow rolls in from screen-right and darkens the sail, deck and water.
+Rain builds from visible drops to dense sheets across the unit.
+Water roughens from chop to sloshing deck water around Keen’s feet.
+By the landing, the storm remains active and the horizon is fully obscured.
+
+[One-Sentence Summary]
+Continue from the upside-down-map landing as the storm physically strips Keen of control, steals the map, hides Squeaky and the horizon, and leaves Keen alone admitting he is lost.
+
+[Global Settings]
+Style (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+Geography: Camera is on the established starboard side of the boat, looking inward across the deck. The boat’s travel axis reads left-to-right across the frame. Keen starts center-left on the boat, between the starboard rail and mast. The upside-down map is held in Keen’s hands at chest height and remains inside the boat at frame one. The mast and sail occupy the middle-to-right portion of frame, with the sail beginning to load from a gust coming from screen-right. Squeaky starts screen-right at the waterline just outside the bow line, facing the boat’s direction of travel. Open sea and the still-visible but dimming horizon sit behind the boat. Screen-right air and water remain the clear later exit direction for the storm, Squeaky’s dive, and the stolen map.
+
+[Shot Sequence]
+Shot 1: Camera: medium starboard-side view, useful 35mm lens, handheld-style jolt with the boat’s first heel, then a controlled widen to include sail, rough water and Squeaky’s exit line. Action: The incoming screen-right gust fills the sail; the boat heels and rocks; Keen slides from center-left, grabs the mast and loses his calm while rain begins building. Performance: Keen’s body reacts before his pride can; he clutches for stability while keeping partial contact with the map. Squeaky dives below the rough water and is gone from view. End state: Keen braced at the mast with the map still not secure, sail pulled hard to screen-right, Squeaky no longer visible, water rougher and light visibly darker. Dialogue placement: Keen, Keen lip-syncs the first @Audio1 cue as a short startled yelp thrown out by the lurch, ending because his hand hits or grabs the mast: {Oh!}
+Shot 2: Camera: Wider starboard three-quarter boat view, useful 28mm lens, low enough to feel the rocking deck while keeping sail, tiller area, Keen’s hands and screen-right exit air readable. Action: Keen tries to steer with one hand and clamp the map with the other as rain turns to sheets; a stronger gust visibly catches the paper and starts tearing it free toward screen-right. Performance: Keen’s shoulders twist between steering and saving the map; his denial escalates as his fingers lose purchase and his reach becomes helpless pursuit. End state: The map breaks free from Keen’s fingers and whips screen-right while Keen reaches after it, one foot sliding in water sloshing across the deck. Dialogue placement: Keen, Keen lip-syncs the second @Audio1 cue fast and panicked, cut off by the map whipping away beyond control: {No no no no—!}
+Shot 3: Camera: Match Keen’s outstretched reach, useful 50mm lens, then let the camera tighten slowly on Keen alone after the map vanishes and the horizon disappears behind rain. Action: The boat drops beneath Keen’s reach; his hand closes on empty rain; the map vanishes into grey; he regains his feet and checks the horizon, but only dense rain remains. Performance: Keen lowers his empty arms, plants his feet wide in sloshing water, stops performing confidence, and lets the final realization land into the storm. End state: Keen centered in the boat, facing forward into rain toward screen-right, feet apart, arms lowered, empty hands visible, frightened gaze lifted into horizonless grey, camera at deck-to-chest height from starboard side, storm light falling from upper screen-right. Dialogue placement: Keen, Keen lip-syncs the final @Audio1 cue starting small with stunned recognition, then breaking into frightened admission after he verifies the empty horizon: {Oh no… I’m lost!!!} The pose holds a full beat after the line ends.
+Witness staging: Keen starts center-left on the boat, between the starboard rail and mast. Squeaky starts screen-right at the waterline just outside the bow line, facing the boat’s direction of travel. Hold on the non-acting witness; their stillness and the hold length carry the emotional truth.
+
+[Global Supplement]
+Exactly one Keen and one Squeaky throughout; no duplicates of either character. Maintain the established starboard camera side and left-to-right travel axis throughout the unit. Safeguard: Do not keep or return the map in Keen’s hands after the gust tears it free. Safeguard: Do not show Squeaky after the underwater dive in Stage 1. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Living performance lock: Keen, Squeaky has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Keen stands centered in the rocking boat, facing forward into the rain toward screen-right, feet apart, arms lowered, empty hands visible, frightened, rain-wet, with water sloshing at his feet; Squeaky is absent, the map is gone, the storm continues, and the horizon is fully obscured.
+
+[Audio]
+@Audio1 guides dialogue timing and mouth shapes; final approved dialogue is restored in post. No extra voices. No music. No watermark.

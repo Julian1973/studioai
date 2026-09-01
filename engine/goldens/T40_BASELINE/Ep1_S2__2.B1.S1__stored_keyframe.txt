@@ -1,0 +1,59 @@
+[Opening Stage]
+Create a playable 16:9 opening for 2.B1.S1; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+A calm reset: the audience first reads Aida alone at the cove, poised at the start of a private listening ritual, with the shore and bowl giving her stillness room to breathe.
+
+[References]
+- Project-stable slots: @图1=Aida; @图2=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Aida; views are angles, not extra characters.
+- @图1: Aida's complete, uncropped 360 turnaround is the 100% identity authority. Match Aida exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+
+[Characters In Frame]
+- Aida
+
+[Frame]
+- Aida @ middle-centre area; seated beside the crystal bowl in a quiet anticipation state, wand hovering near the rim, eyes open; facing three-quarter toward screen-left ocean.
+- Preserve canonical relative size, modified only by the authored depth relationship.
+
+[Geography]
+Ocean and open cove remain screen-left to center background.
+Forest growth and crystal rock wall remain screen-right.
+Aida starts frame-center on the sandy shore, seated beside the crystal bowl.
+The crystal singing bowl sits just screen-left of Aida within easy ritual reach.
+Aida faces three-quarter toward the screen-left ocean, leaving lead room toward the bowl and water.
+The camera looks from shore foreground toward the cove mouth and horizon.
+Keep the sand-and-rug area around Aida and the bowl unobstructed as the shot’s performance corridor.
+
+[Negative Space]
+Lead room stays open frame-left for the approved direction of travel.
+Reserve open water and horizon space screen-left of Aida for the audience’s quiet read toward the ocean.
+Keep a clean low foreground corridor around the bowl and wand path, with no plants, rocks or props crossing it.
+Leave breathable headroom and soft sky behind Aida so the later push-in can settle on her face without visual clutter.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Camera is low and respectful at Aida’s seated eye-line to slightly above bowl height, looking gently toward the ocean opening. Use a moderately wide cinematic lens relationship for the opening frame, around a 32–35mm full-frame feel, with minimal distortion and enough environment to establish the quiet cove before the push-in. Aida is the scale reference; no perspective size alteration is authored.
+
+[Light]
+Use the approved scene plate’s warm shore daylight, cool blue ocean fill and soft crystal-rim ambience. Keep the opening pendant glow only subtle and contained at Aida’s chest, not yet a strong face-light payoff. Depth is layered from foreground sand/rug and bowl, to Aida on the same playable plane, to lapping water and distant sunset softened with gentle atmospheric depth and shallow bokeh appropriate to feature-quality stylized CGI.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one character appears: Aida only.
+No extra dialogue, captions, subtitles, watermarks, crowd or added speech.
+Opening frame keeps Aida’s eyes open and the wand only hovering near the rim; do not show the later closed-eyed stillness or strong pink face-light payoff yet.
+Rose quartz pendant glow belongs only to Aida and remains subtle at frame one, with no sudden magical burst.
+Natural staging lock: restage Aida from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Aida has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

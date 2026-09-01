@@ -1,0 +1,59 @@
+[Opening Stage]
+Create a playable 16:9 opening for S3.SH1; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+The audience feels tucked safely inside Bo’s warm hollow, but the bright open doorway behind him turns the room into a quiet question: why is leaving so hard?
+
+[References]
+- Project-stable slots: @图1=Bo; @图2=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Bo; views are angles, not extra characters.
+- @图1: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+
+[Characters In Frame]
+- Bo
+
+[Frame]
+- Bo @ middle-centre area; compact seated crouch in frame-one anticipation, body low and tidy, tail contained within the hollow curve; facing angled inward toward the foreground conker and satchel, with the doorway present behind him in peripheral depth.
+- Preserve canonical relative size, modified only by the authored depth relationship.
+
+[Geography]
+Camera is low on the hollow floor, looking upstage across the conker and lunch satchel toward Bo.
+The conker and satchel sit in the near foreground lower-left to lower-center, inside Bo’s reachable decision space.
+Bo starts in the middle interior, downstage of the open doorway and clearly not on the threshold.
+The open doorway stays visible in bright background depth behind Bo, slightly screen-right of his body line.
+The travel axis from Bo to the doorway runs from middle interior toward upstage screen-right and remains uncrossed.
+Curved warm oak walls, root ribs and hollow furnishings wrap the frame edges and ceiling, holding Bo inside.
+Bo’s Mum is not visible; her presence belongs beyond the doorway/offscreen exterior space.
+
+[Negative Space]
+Reserve the bright open doorway area in the upstage background; keep the threshold empty and readable.
+Hold the floor corridor between Bo and the doorway visibly empty so the uncrossed path registers.
+Keep clean breathing space around Bo’s paws and the conker-and-satchel foreground area for small hesitation performance.
+Do not fill the warm upper oak curve with distracting objects; leave it as enclosing negative space around Bo.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Child-height floor-side camera, close enough that the conker and satchel feel consequential without becoming oversized comic props. Use a gentle wide-normal 3D animation lens relationship with mild foreground presence, no distortion of Bo’s identity, and enough depth to hold the doorway as pressure rather than a separate master shot.
+
+[Light]
+Honeyed interior warmth wraps the oak grain, roots and small household objects around Bo. The open doorway carries brighter, slightly cooler exterior daylight in the background; inviting but pressuring, never threatening. Depth reads as decision geography: controllable objects nearest camera, Bo in the middle, outside day waiting behind.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Bo must be visibly inside the hollow, beside the conker and lunch satchel, not rising to stride out.
+The open doorway must remain readable in depth as the unanswered pressure behind him.
+Bo’s Mum remains offscreen only; do not place any other character in the frame.
+Keep Bo’s small-object focus legible through composition: paws, satchel and conker must not be obscured by foreground blur or set dressing changes.
+Natural staging lock: restage Bo from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Bo has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

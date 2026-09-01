@@ -1,0 +1,106 @@
+[
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Keen",
+   "characterState": "vacant-wristbands",
+   "contractHash": "930034df87fe6fd3a3dce3dbd6bdfaf7fc790fb8ece0b74666f31b235e18160b",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "aquamarine-blue fur",
+    "upright pale-white crown tuft",
+    "matching aged-gold vacant open cuffs worn on both wrists",
+    "blank cuff settings with no crystals and no glow"
+   ],
+   "fileName": "CB_Keen_turnaround_vacant_cuffs.png",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/ep1/CB_Keen_turnaround_vacant_cuffs.png",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/ep1/CB_Keen_turnaround_vacant_cuffs.png",
+   "sourceSha256": "a20f85dfa96702cc9e395002e7e3d0207d8655f61acbeed00b2dfc2b69528a0e",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "930034df87fe6fd3a3dce3dbd6bdfaf7fc790fb8ece0b74666f31b235e18160b",
+   "turnaroundViewCount": 4,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 1,
+  "role": "Keen",
+  "slot": "@图1",
+  "sourceSlot": "@图1",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Squeaky",
+   "characterState": "default",
+   "contractHash": "f1b7010753afeac87564c5967aa0b44644a655d5b5209b7730ffc16464b2e158",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "young bottlenose dolphin silhouette",
+    "soft grey-blue body with pale belly",
+    "rounded smiling face and warm expressive eyes"
+   ],
+   "fileName": "CB_Squeaky.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "bear ears, bear limbs, clothing or another character's crystal"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
+   "sourceSha256": "1d603e20e2b8acdb2c96850152c83f0ada89d685333882c910897f0d3ea43404",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "f1b7010753afeac87564c5967aa0b44644a655d5b5209b7730ffc16464b2e158",
+   "turnaroundViewCount": 5,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 2,
+  "role": "Squeaky",
+  "slot": "@图2",
+  "sourceSlot": "@图2",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 3,
+  "role": "prop:keen_sailboat",
+  "slot": "@图3",
+  "sourceSlot": "@图3",
+  "usage": "keyframe",
+  "view": null
+ },
+ {
+  "identity": null,
+  "position": 4,
+  "role": "prop:keen_sailboat_departure_state",
+  "slot": "@图4",
+  "sourceSlot": "@图4",
+  "usage": "keyframe",
+  "view": null
+ },
+ {
+  "identity": null,
+  "position": 5,
+  "role": "scene plate",
+  "slot": "@图5",
+  "sourceSlot": "@图5",
+  "usage": "keyframe",
+  "view": null
+ }
+]

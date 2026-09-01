@@ -1,0 +1,52 @@
+AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions. Dialogue language: English.
+
+[Multimodal Reference Layer]
+Slots: @图1=opening_frame; @图2=Keen; @图3=Keen's Mum; @图4=Squeaky; @图5=location; @Audio1=audio; never swap.
+Angles: @图2=one Keen; @图3=one Keen's Mum; @图4=one Squeaky; views are not extra characters.
+@图1 is the first frame and the previous shot's approved final frame. Use it only for carried character state: it controls the exact opening pose, emotion, light and carried prop state only: The approved opening frame shows the same sailboat already moving away from the pier with Keen aboard, Mum behind on the pier, tan sail filled, cargo secured, both cuffs vacant on Keen’s wrists, and no Squeaky visible yet. Do not use it as the scene geography, camera framing, pier layout or boat-position authority; @图5 and Geography control the wider scene. If an Opening Motion Bridge is present, it alone controls how this inherited pose resolves into the new action.
+@图2 defines exactly one Keen identity, proportions, scale and approved wearable state: Controls Keen identity, scale and cuff placement only; do not use it to alter the opening frame staging; Keen owns the aged-gold open cuffs: one cuff on each wrist with blank settings only; no crystals, aquamarine stones or glow. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.
+@图3 defines exactly one Keen's Mum identity/scale only; exclude background, pose, props and scene.
+@图4 defines exactly one Squeaky identity/scale only; exclude background, pose, props and scene.
+@图5 defines scene/layout/light only; exclude characters/action.
+
+[Opening Motion Bridge]
+Resolve the inherited proud-still farewell pose into the boat’s ongoing forward motion: the hull continues frame-right, water slips past, and Keen’s attention is interrupted by the splash beside him.
+
+[ACTION OWNERSHIP]
+Only Squeaky creates the splash, aerial breach, half-roll, re-entry and pacing swim.
+Only Keen speaks the three @Audio1 dialogue moments; Mum and Squeaky do not speak human words.
+Only the wind and sail drive the boat’s movement; the hull does not slide sideways, hover or drift backward.
+
+[ATTRIBUTE OWNERSHIP]
+Keen owns the aged-gold open cuffs: one cuff on each wrist with blank settings only; no crystals, aquamarine stones or glow.
+Mum owns the pier farewell position and remains behind Keen as distance increases.
+Squeaky owns the splash, breach, half-roll, re-entry and pacing swim beside the hull; exactly one Squeaky appears.
+The boat owns the tan filled sail, rigging, wooden hull, secured cargo and coherent V-shaped wake.
+
+[ENVIRONMENT CONTRACT]
+Start from the approved opening frame with clear water beside the hull and no visible Squeaky.
+Maintain real sailing physics: following wind fills the tan sail, the hull heels gently, the bow cuts small swells, and the wake remains coherent.
+Increase distance from the pier continuously; do not teleport or reset the island, pier, boat or Mum.
+End with open water ahead and the island geography receding behind the moving boat.
+
+[Scene Continuity State]
+Keen boat contents and departure props: The small sailboat contains Keen’s practical departure items: open satchel, rolled blanket, folded map, and small food pouch. Keep them continuous across Scene 3 unless a later approved shot visibly moves them. Forbidden: No crystal baskets, ceremonial loads, aquamarine stones, glowing crystals, or random cargo in the boat.
+
+[One-Sentence Summary]
+From the approved moving-boat opening frame, Squeaky surprises Keen beside the sailing boat, performs one sunlit companion dive, then keeps pace as Keen carries Mum’s farewell into open water.
+
+[Global Settings]
+Style (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+Geography: The small sailboat is already off the wooden pier and traveling bow-first toward frame-right into open water. Keen is aboard the moving sailboat, readable near the cockpit/side, with the tan sail, rigging, and secured cargo continuous from the approved pier master. Keen's Mum remains behind on the pier at frame-left/background, facing the departing boat and growing smaller along the receding axis. The tan sail is filled and taut in a steady following wind, the hull heels gently, and the bow cuts small swells without sliding sideways. A coherent V-shaped wake trails back from the hull toward the pier and island shore. Open blue water dominates frame-right ahead of the bow, while the original tropical island shore and pier recede frame-left/background. The water beside the moving hull is clear and empty in the opening frame; Squeaky is not visible yet.
+
+[Shot Sequence]
+Shot 1: Camera: medium-wide three-quarter boat view, useful 32mm lens, camera traveling with the hull at low boat height while the pier and Mum drift smaller behind. Action: The sailboat continues bow-first frame-right under a filled tan sail; water splits around the bow until a sudden splash erupts beside the hull and exactly one Squeaky rises into view. Performance: Keen flinches safely back from the rail, registers the single friendly shape, then brightens without stopping the boat; Mum remains behind on the pier, laughing through a tear. End state: Keen’s startled attention is locked on Squeaky beside the moving hull; the sail stays taut, wake coherent, Mum small but readable behind. Dialogue placement: Keen, Keen’s first @Audio1 line begins as an involuntary gasp from the splash and turns into wonder by the end: {Whoa!}
+Shot 2: Camera: side-tracking waterline view, useful 40mm lens, camera pans and rises just enough to follow Squeaky’s complete breach without losing the moving hull. Camera tracks the full arc. Action: Squeaky launches from the water beside the hull, breaches high through the golden sun path, half-rolls once at the apex, then curves into a clean nose-first re-entry beside the boat. Performance: Keen leans safely over the side during the arc, delighted and welcoming; Squeaky’s nonverbal chirps, clicks and one small squeak answer immediately after Keen’s greeting. End state: Squeaky re-enters cleanly beside the still-moving hull, with Keen safely braced and smiling toward the water. Dialogue placement: Keen, Keen’s second @Audio1 line is light, close, excited and welcoming during Squeaky’s aerial arc: {Hey there!}
+Shot 3: Camera: widening shared departure axis, useful 28mm lens, camera eases back and slightly higher so Keen, Squeaky, the sailboat wake, distant Mum and open water all read in one geography. Action: Squeaky resurfaces and swims in pace beside the hull; Keen acknowledges him, looks back once to Mum across the widening gap, meets her gaze, then turns forward toward open water. Performance: Keen’s delight softens into a truthful mix of nerves and excitement; Mum stays visible but small on the pier; Squeaky remains alongside as a steady companion rather than a spectacle. End state: Final held handoff: boat bow aimed frame-right, Keen aboard facing forward after his look back, Squeaky pacing beside the hull, Mum small on the distant pier, vacant cuffs unchanged, cargo secured, sail filled, wake coherent. Dialogue placement: Keen, Keen’s third @Audio1 line is a warm little reply to Squeaky, less alone but still carrying the goodbye: {Nice to meet you too.} The pose holds a full beat after the line ends.
+Witness staging: Keen remains aboard the moving sailboat on the departure axis; Mum remains behind on the approved pier until distance makes her small. Squeaky appears and stays on the water side beside the moving hull, never replacing Mum’s pier position or crossing into the boat. Hold on the non-acting witness; their stillness and the hold length carry the emotional truth.
+
+[Global Supplement]
+Exactly one Keen, one Keen's Mum and one Squeaky throughout; no duplicates of any character. Maintain the approved screen direction: bow frame-right into open water for the entire unit. Safeguard: Do not show Squeaky in the opening state; his first visibility is the single splash beside the moving hull. Safeguard: Do not reverse the boat, pause it, make it slide sideways, or lose the taut wind-filled sail and V-shaped wake. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Living performance lock: Keen, Keen's Mum, Squeaky has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Final held handoff: Keen and Squeaky move toward open water, Mum is still readable but small on the distant pier, both cuffs are vacant and unchanged, the wind-filled sail drives the bow frame-right, the V-shaped wake trails behind, and the original island geography recedes.
+
+[Audio]
+@Audio1 guides dialogue timing and mouth shapes; final approved dialogue is restored in post. No extra voices. No music. No watermark.

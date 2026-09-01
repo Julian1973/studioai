@@ -1,0 +1,219 @@
+[
+ {
+  "identity": null,
+  "position": 1,
+  "role": "opening keyframe",
+  "slot": "@图1",
+  "sourceSlot": "@图1",
+  "usage": "animation",
+  "view": null
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Sunny",
+   "characterState": "default",
+   "contractHash": "1c86ff5be7062ff4f8a8928c3994e0d99ec7123a51945dcbcca70ce73b193bce",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "golden-orange fur",
+    "upright orange crown tuft",
+    "small jewelled gold tiara",
+    "multicoloured flower-bead collar"
+   ],
+   "fileName": "CB_Sunny.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Sunny.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Sunny.jpeg",
+   "sourceSha256": "a77fbe8a031ed4e3f818d176b1f273a81d0fb17665d8e3f28147cdf4bec9d1ef",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "1c86ff5be7062ff4f8a8928c3994e0d99ec7123a51945dcbcca70ce73b193bce",
+   "turnaroundViewCount": 4,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 2,
+  "role": "Sunny",
+  "slot": "@图2",
+  "sourceSlot": "@图4",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Luna",
+   "characterState": "default",
+   "contractHash": "0c3517f20a7b6f251d717799c275a135d7370d3d5301306ac3287fdbe122bf67",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "lilac-lavender fur",
+    "long pale-blonde hair",
+    "lilac gown with silver embroidery",
+    "small pale chest gem"
+   ],
+   "fileName": "CB_Luna.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
+   "sourceSha256": "c606b18e95fb5a02d85dbac065001b37ad37521ef9dc663d4cd0200a3cefb0a4",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "0c3517f20a7b6f251d717799c275a135d7370d3d5301306ac3287fdbe122bf67",
+   "turnaroundViewCount": 4,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 3,
+  "role": "Luna",
+  "slot": "@图3",
+  "sourceSlot": "@图5",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Misty",
+   "characterState": "default",
+   "contractHash": "e99c5c91b80da0cca6bd8547ad01bafae36bb2b1face073d5e5e9a56b414aabb",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "white polar-bear fur",
+    "long wavy white hair",
+    "delicate silver tiara",
+    "blue teardrop pendant"
+   ],
+   "fileName": "CB_Misty.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
+   "sourceSha256": "e16d95d0182d3cc86b54d09e8f478fd8c8f912f55cc4afcc1dc641305df465b6",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "e99c5c91b80da0cca6bd8547ad01bafae36bb2b1face073d5e5e9a56b414aabb",
+   "turnaroundViewCount": 4,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 4,
+  "role": "Misty",
+  "slot": "@图4",
+  "sourceSlot": "@图6",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Amie",
+   "characterState": "default",
+   "contractHash": "bab8a4354f3ff7b0d6432b81e3d90a4ed0a0d0df290dbe76be46d4b62b99e110",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "raspberry-pink fur",
+    "pink belly and muzzle",
+    "swept magenta tuft with purple diamond gem",
+    "purple teardrop pendant"
+   ],
+   "fileName": "CB_Amie.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
+   "sourceSha256": "8e521c72177e835505f82edbb32f136d0240ab54492827fd94c5742a5b2171d4",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "bab8a4354f3ff7b0d6432b81e3d90a4ed0a0d0df290dbe76be46d4b62b99e110",
+   "turnaroundViewCount": 4,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 5,
+  "role": "Amie",
+  "slot": "@图5",
+  "sourceSlot": "@图3",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Bo",
+   "characterState": "default",
+   "contractHash": "82d50105497f4d4aa0584ae8345fe8fb0d3a2727d3b82570774f7c8f47a5b515",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "russet-orange squirrel fur",
+    "cream muzzle, chest and belly",
+    "tall pointed ears with tufts",
+    "very large fluffy curled tail",
+    "large expressive brown eyes"
+   ],
+   "fileName": "CB_Bo.png",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "bear ears or bear cub proportions",
+    "another character's crystal or jewellery",
+    "generic backpack or satchel",
+    "small, thin or missing tail"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Bo.png",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Bo.png",
+   "sourceSha256": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "82d50105497f4d4aa0584ae8345fe8fb0d3a2727d3b82570774f7c8f47a5b515",
+   "turnaroundViewCount": 5,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 6,
+  "role": "Bo",
+  "slot": "@图6",
+  "sourceSlot": "@图2",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 7,
+  "role": "scene plate",
+  "slot": "@图7",
+  "sourceSlot": "@图7",
+  "usage": "animation",
+  "view": null
+ }
+]

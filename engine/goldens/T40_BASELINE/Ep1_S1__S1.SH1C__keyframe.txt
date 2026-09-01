@@ -1,0 +1,1 @@
+REFUSED: Refused: REFUSED — Cinematography direction is stale (STALE direct inputs). Prepare current Cinematography specialist direction for S1.SH1C first. (REFUSED — no current signed scene plate found for Ep1 scene 1 — generate the internal world anchor before the first keyframe)

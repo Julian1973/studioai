@@ -1,0 +1,61 @@
+AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.
+
+[Multimodal Reference Layer]
+Slots: @图1=opening_frame; @图2=Keen; @图3=Bo; @图4/@图5/@图6=location; @Audio1=audio; never swap.
+Angles: @图2=one Keen; @图3=one Bo; views are not extra characters.
+@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.
+@图2 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.
+@图3 defines exactly one Bo identity, proportions, scale and approved wearable state: Bo identity, proportions, scale and approved wearable state. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.
+@图4 defines scene/layout/light only; exclude characters/action.
+@图5 defines scene/layout/light only; exclude characters/action.
+@图6 defines scene/layout/light only; exclude characters/action.
+
+[Opening Motion Bridge]
+Bo’s hunched clutch resolves into a forward lean and nervous paw-tightening as he begins to confess the real fear to Keen.
+
+[ACTION OWNERSHIP]
+Bo’s body and tail perform all grabbing, squeezing, poofing, off-balance struggle, and softening.
+Keen’s only active influence is witnessing with sincere awe and speaking through @Audio1; he does not physically intervene.
+The conker does not cause the tail poofs and must not become the object of the reveal.
+
+[ATTRIBUTE OWNERSHIP]
+Bo owns the large fluffy tail; no other character has or controls it.
+The two poofs are Bo’s tail behavior and must not be transferred to Keen, the conker, the bag, or the room.
+Keen owns the sincere impressed gaze and still threshold posture; he does not laugh, touch the tail, or fix Bo.
+The conker remains Bo’s guarded prop, but it stops being the dominant visual motif once the tail expands.
+Keen approved wearable state: gold wrist cuffs with aquamarine gems
+
+[ENVIRONMENT CONTRACT]
+Warm hollow interior and doorway light continue unchanged from the opening frame.
+The tail expansion disturbs space and composition, not geography; furniture, doorway, hearth, stairs, shelves, and stone floor remain stable.
+Doorway light shifts in meaning from exposure-threat to witness-light while maintaining the same direction and warmth.
+End with the enlarged tail still present and softened after the second poof, not vanished or hidden.
+
+[One-Sentence Summary]
+Bo’s feared tail poofs in front of Keen, and Keen’s sincere wonder lets Bo stop wrestling it just enough to ask whether being seen might be safe.
+
+[Global Settings]
+Style (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+Geography: Camera is inside the hollow at Bo height, looking diagonally toward the doorway threshold. Bo starts inside the hollow in the left foreground-to-middle depth, angled toward Keen. Keen starts at the doorway threshold in the right/back depth, facing into the room toward Bo. The open floor between Bo and Keen is the shared middle-depth space where Bo’s tail can later expand. The doorway remains behind Keen as the visible social-exposure edge of the room. Bo’s tail begins contained close to Bo, not yet filling the room. The conker is held close to Bo and remains secondary to the tail corridor. Keep the round table and interior set dressing peripheral so they do not block Bo, Keen, or the tail space.
+
+[Living Performance]
+Living performance lock: Bo, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.
+
+[Shot Sequence]
+Shot 1: Camera: intimate medium close at Bo height, useful 35mm lens, slow nervous hold with a slight backward allowance as his posture leans toward Keen. Action: Bo clutches the conker close and blurts his Learning Circle fear toward Keen at the doorway, his words making the private tail worry public. Performance: Bo’s paws stay tight, shoulders lifted, eyes flicking between the conker and Keen; Keen remains at the threshold with mouth closed, listening softly and not stepping in. End state: Bo exposed in front of Keen, conker still close but no longer able to hide the real fear. Spoken action: Bo, Bo’s nervous spill follows @Audio1 exactly; Keen listens silently with closed mouth: {Hi Keen, my name is Bo and I am really worried. What if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?}
+Shot 2: Camera: wider Bo-height shared interior frame, useful 28mm lens, camera gives ground as the tail expands and then steadies on the failed containment. Action: Bo’s tail poofs suddenly; he grabs it with both paws and pleads with it, but the second poof expands larger and pulls his balance wider than his grip can manage. Performance: Bo squeezes and tugs against the fur like it has betrayed him, feet and hips pulled off balance. Keen stays still at the threshold, watching without laughing or reaching. End state: The enlarged tail is undeniable in the room, with Bo struggling against it. Spoken action: Bo, Bo’s plea follows @Audio1 exactly; the second tail poof interrupts his attempt to regain control: {Stop it! Please just be a normal tail!}
+Shot 3: Camera: shared medium two-shot at Bo height, useful 35mm lens, steady and patient so Keen’s still awe and Bo’s release can be read together. Action: Keen looks directly at the enlarged tail with widened eyes and lifted face, then toward Bo with care; Bo stops fighting as hard, loosens his grip, lowers his shoulders, and checks Keen’s face. Performance: Keen’s delight is sincere and quiet, not teasing. Bo receives it late, as if verifying the room before allowing his paws to soften and his expression to become uncertain curiosity. End state: Bo beside his enlarged tail with softened grip and questioning gaze toward Keen; Keen remains still, open, and impressed at the threshold. Spoken action: Keen, Keen’s compliment follows @Audio1 exactly after the silent impressed look; Bo listens with closed mouth: {Whoa. Your tail is AMAZING.} The pose holds a full beat after the line ends. Spoken action: Bo, Bo’s small question follows @Audio1 exactly after Keen’s awe visibly reaches him: {…you think so?} The pose holds a full beat after the line ends. Hold: 2.0s — Hold briefly after Keen’s awe so Bo’s shame has time to become curiosity; do not rush into the next gag.
+Witness staging: Bo remains inside the hollow in foreground-to-middle depth, physically vulnerable beside the tail. Keen remains at the doorway threshold, facing Bo and the tail without stepping in, touching, laughing, or fixing. Hold on the non-acting witness; their stillness and the hold length carry the joke.
+
+[Human Review Correction]
+This bounded correction is approved Director intent. Integrate it into the staged action and camera while preserving canon, the opening frame, exact @Audio1 dialogue and the signed landing state:
+Make the tail reveal faster, happier and more playful while protecting Bo's sincere anxiety. Use crisp reaction timing and buoyant visual escalation: worry spills out, the tail poofs, Bo wrestles it, Keen's delighted reaction turns embarrassment into shared fun. Seedance supplies an upbeat instrumental comedy cue with light plucked strings, bright woodwind color and restrained soft percussion, synchronized with the tail poofs and physical SFX. The music should bloom warmly on Keen's compliment and soften into a hopeful button on Bo's question, never aggressive, frantic or mocking. @Audio1 remains the sole dialogue and mouth-timing authority; no extra voices, lyrics or vocal music.
+
+[Audio]
+@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.
+
+[AUDIO AND EXCLUSIONS]
+No narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.
+
+[Global Supplement]
+Exactly one Bo and one Keen throughout; no duplicates of either character. Maintain Start exactly from @图1 opening state with Bo inside the hollow and Keen at the doorway. Safeguard: Do not let Keen touch the tail or step in to fix Bo; his still awe is the meaning-changing action. Safeguard: Do not reduce the second tail poof to a small wiggle; it must visibly overpower Bo’s grip and widen the frame. Repeated-contact escalation: separate the first and second contacts with a readable recovery between them. The first contact is small and contained. The second contact is larger than the first, with a stronger visible cause, reaction and recovery. Living performance lock: Bo, Keen has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Bo is still with the tail, but his grip and face have softened into uncertain curiosity.

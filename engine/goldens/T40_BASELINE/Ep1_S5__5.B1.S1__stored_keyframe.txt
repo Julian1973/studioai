@@ -1,0 +1,66 @@
+[Opening Stage]
+Create a playable 16:9 opening for 5.B1.S1; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+A storm-side forest flight path with Fuzzby slightly ahead and Zenny closing behind: the audience should immediately feel forward momentum into danger, with clear room ahead for the coming discovery and branch gag without the opening frame already playing the stop or impact.
+
+[References]
+- Project-stable slots: @图1=Zenny; @图2=Fuzzby; @图3=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Zenny; @图2=one Fuzzby; views are angles, not extra characters.
+- @图1: Zenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Zenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2: Fuzzby's complete, uncropped 360 turnaround is the 100% identity authority. Match Fuzzby exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+- Keep Zenny and Fuzzby distinct; never blend or swap traits.
+
+[Characters In Frame]
+- Fuzzby
+- Zenny
+
+[Frame]
+- Fuzzby @ middle-centre area; airborne forward-flight anticipation into wind, slightly ahead, ready to continue speaking; facing screen-right.
+- Zenny @ middle-left area; airborne trailing flight anticipation, closing distance behind Fuzzby; facing screen-right.
+- Same depth: Fuzzby 14 inches; Zenny 12 inches; preserve relative-size truth only.
+
+[Geography]
+The flight path runs screen-left to screen-right through the rainforest toward the beach and ocean.
+Fuzzby starts airborne at screen-center-right, slightly ahead of Zenny on the same path.
+Zenny starts airborne at screen-left, trailing Fuzzby and closing the distance.
+Both characters face and anticipate travel screen-right in the opening frame.
+Bending tree branches sit ahead in frame-right, crossing the future path but leaving clear empty air before any contact.
+The camera remains on the same side of the flight path, tracking laterally with the characters.
+Rain and foliage layer in foreground and background, but the bees and performance corridor stay unobstructed.
+The beach and ocean direction is through the trees toward screen-right beyond the branch corridor.
+
+[Negative Space]
+Lead room stays open frame-right for the approved direction of travel.
+Hold clear empty air from Fuzzby to frame-right for the later stop, launch and branch approach.
+Keep a visible gap before the bending branches so no contact is implied in frame one.
+Reserve the right-side corridor through foliage as the travel path toward the beach.
+Do not fill the mid-right eyeline corridor with foreground leaves, rain streaks or extra objects that would block the later reveal path.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Side-tracking relationship with a gentle feature-animation medium lens feel, close enough for face and body readability but wide enough to show the approaching branch space. Camera is level with the airborne characters, not looking down on them, preserving a lateral screen-left-to-screen-right travel axis toward the beach.
+
+[Light]
+Storm-dim rainforest light from the supplied Scene Look: cool blue-green ambient rain light, wet leaf speculars, soft ocean spill beyond the trees, and subtle rim separation on the characters. Keep foreground foliage and rain layered for depth, with the bees on the same readable depth plane and no perspective scaling that changes their canon relative size.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one Fuzzby and one Zenny appear in this image.
+Keep Fuzzby and Zenny at the same distance from the camera; Fuzzby appears about 17% taller than Zenny.
+Include exactly Fuzzby and Zenny; no extra characters.
+No crystals on the bees, no redesign, no appearance drift from the supplied turnarounds.
+Opening frame must not show Fuzzby already frozen, pointing, colliding, rebounding or shouting; it is only the playable anticipation before those actions begin Animation-side later in the shot.
+Natural staging lock: restage Fuzzby, Zenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Fuzzby, Zenny each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

@@ -1,0 +1,64 @@
+[Opening Stage]
+Create a playable 16:9 opening for S1.SH1A; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+The first frame should feel like the audience has been dropped to bee height into a warm flower corridor just as Fuzzby is already becoming a containment problem. Fuzzby’s jagged confidence leads the eye into the open lane, while Zenny’s smaller, calmer hover beside him makes the comedy legible before any impact occurs.
+
+[References]
+- Project-stable slots: @图1=Zenny; @图2=Fuzzby; @图3=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Zenny; @图2=one Fuzzby; views are angles, not extra characters.
+- @图1: Zenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Zenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2: Fuzzby's complete, uncropped 360 turnaround is the 100% identity authority. Match Fuzzby exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+- Keep Zenny and Fuzzby distinct; never blend or swap traits.
+
+[Characters In Frame]
+- Fuzzby
+- Zenny
+
+[Frame]
+- Fuzzby @ middle-centre area; chest-leading overcommitted hover at the start of a zig-zag, readable but not yet contacting any plant; facing down the corridor toward frame-right, slightly away from camera.
+- Zenny @ middle-left area; compact steady hover on a clean nearby path, calm anticipation only; facing down the corridor parallel to Fuzzby, with slight attention toward him.
+- Same depth: Fuzzby 14 inches; Zenny 12 inches; preserve relative-size truth only.
+
+[Geography]
+Bee-height camera sits inside the flower corridor, looking along a travel axis from screen-left foreground toward screen-right mid-depth.
+Fuzzby and Zenny begin at the same depth; Fuzzby is slightly screen-right of Zenny and closer to the central flower lane.
+Fuzzby’s open route runs through the central gap toward a visible flower mouth ahead on frame-right.
+Zenny’s clean working line runs parallel on screen-left, outside Fuzzby’s jagged route but close enough to witness him.
+A springy leaf waits lower frame-right beyond the flower mouth, readable as the next plant contact in the same corridor.
+Foreground stems and petals may frame the edges as chase wipes, but they must not block either bee or the flower-to-leaf path.
+
+[Negative Space]
+Lead room stays open frame-right for the approved direction of travel.
+Hold the central-to-frame-right corridor open for Fuzzby’s coming zig-zag travel.
+Reserve the area around the visible flower mouth ahead of Fuzzby; do not fill it with extra petals or characters.
+Keep lower frame-right clear enough for the springy leaf to read as a future contact point.
+Keep a narrow clean lane screen-left of Fuzzby for Zenny’s steady parallel path.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Low bee-height chase relationship, as if a small drone is following slightly late inside the flowers. Use a moderately wide animated feature lens feel: close enough to read Fuzzby and Zenny’s silhouettes, spectacles and wing shapes, but wide enough to see the flower mouth and springy leaf staged ahead in one readable cause-and-effect corridor. Camera height stays within the flower stems, never overhead.
+
+[Light]
+Warm sunny field light from the upper frame-right/back direction, matching the golden meadow look, with soft plush plant materials, glowing petal edges and suspended pollen motes revealing the travel path. Depth is built as a tunnel: foreground stems at the edges, both bees in the same mid-depth plane, then the flower mouth and spring leaf further down the open lane.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one Fuzzby and one Zenny appear in this image.
+Keep Fuzzby and Zenny at the same distance from the camera; Fuzzby appears about 17% taller than Zenny.
+Include only Fuzzby and Zenny from the approved cast, each readable once in frame.
+Do not stage the opener as an overhead master or neat side-on tracking tableau; it must feel bee-height and slightly late behind the chase.
+Do not show the leaf recoil, flower impact or final Nailed it pose in the opening keyframe; only make their path and contact geography visible ahead for Animation to play through the shot.
+Natural staging lock: restage Fuzzby, Zenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Fuzzby, Zenny each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

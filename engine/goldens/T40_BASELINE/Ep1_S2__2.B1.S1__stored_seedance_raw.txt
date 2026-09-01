@@ -1,0 +1,10 @@
+image_1 defines exactly one Aida: an elder bear with long flowing lilac-purple hair, a jewelled headdress across her brow, layered purple robes and a rose quartz pendant at her chest. Refer to it strictly. Do not use its pose or background.
+image_2 defines only the sanctuary environment: a quiet cove shoreline with gentle waves and Aida's crystal singing bowl. Do not use or invent characters from it.
+Exactly one Aida; no other characters appear.
+The rose quartz pendant and its pink glow belong to Aida only.
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+No dialogue in this beat; no narrator, no crowd, no added speech.
+
+Shot 1 — the ritual. Camera: a slow push-in from a wide of the quiet cove toward Aida seated beside the crystal bowl. Gentle waves roll onto the shore. She runs the wand softly around the bowl's rim and a low shimmering tone rises <sustained crystal-bowl tone>; the cove seems to quiet around it — the water calms, the air stills. She closes her eyes. Her rose quartz pendant begins to glow, and soft pink light rises across her face from below, growing steadily stronger. Hold on her still, pink-lit face for two full seconds. End state: Aida perfectly still with eyes closed, her face lit in rose-pink, the bowl's tone sustained — a describable frame.
+
+The singing-bowl tone is diegetic sound, not music. No music. No subtitles, captions or on-screen text. No watermark. No extra characters.

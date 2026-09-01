@@ -1,0 +1,100 @@
+[
+ {
+  "identity": null,
+  "position": 1,
+  "role": "opening keyframe",
+  "slot": "@图1",
+  "sourceSlot": "@图1",
+  "usage": "animation",
+  "view": null
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Zenny",
+   "characterState": "default",
+   "contractHash": "337f68283f100245427d67b886e86ffff2f0b50408422e5121724a384da91347",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "round glasses",
+    "small dark nose",
+    "long eyelashes",
+    "rosy blush cheeks",
+    "smaller 12-inch bee proportions"
+   ],
+   "fileName": "CB_Zenny.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "Fuzzby's bulbous tan nose",
+    "Fuzzby's larger body proportions",
+    "any pendant, necklace, medallion or crystal"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+   "sourceSha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "337f68283f100245427d67b886e86ffff2f0b50408422e5121724a384da91347",
+   "turnaroundViewCount": 4,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 2,
+  "role": "Zenny",
+  "slot": "@图2",
+  "sourceSlot": "@图2",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Keen",
+   "characterState": "default",
+   "contractHash": "b0e3abf03d73c899e9f586e65ed0ad490b16611ca9e11ed7cb7db84e7fc0ef73",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "aquamarine-blue fur",
+    "upright pale-white crown tuft",
+    "gold wrist cuffs with aquamarine gems"
+   ],
+   "fileName": "CB_Keen.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+   "sourceSha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "b0e3abf03d73c899e9f586e65ed0ad490b16611ca9e11ed7cb7db84e7fc0ef73",
+   "turnaroundViewCount": 4,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 3,
+  "role": "Keen",
+  "slot": "@图3",
+  "sourceSlot": "@图3",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 4,
+  "role": "scene plate",
+  "slot": "@图4",
+  "sourceSlot": "@图4",
+  "usage": "animation",
+  "view": null
+ }
+]

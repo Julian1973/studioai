@@ -1,0 +1,1 @@
+REFUSED: Refused: REFUSED — Animation direction is stale (STALE direct inputs). Prepare current Animation specialist direction for S1.SH2 first. (REFUSED — the opening keyframe reference file is missing)

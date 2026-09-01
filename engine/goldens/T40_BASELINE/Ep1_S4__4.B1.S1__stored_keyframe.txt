@@ -1,0 +1,63 @@
+[Opening Stage]
+Create a playable 16:9 opening for 4.B1.S1; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+Keen and the little sailboat feel tiny against a huge open sea; the frame leaves a friendly, expectant pocket at screen-right where Squeaky is about to surface, turning loneliness into first companionship without starting the later acting beat too early.
+
+[References]
+- Project-stable slots: @图1=Keen; @图2=Squeaky; @图3=prop:keen_sailboat; @图4=prop:keen_sailboat_departure_state; @图5=scene plate. Never swap roles.
+- Multi-angle collapse: @图1=one Keen; @图2=one Squeaky; views are angles, not extra characters.
+- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图2: Squeaky's complete, uncropped 360 turnaround is the 100% identity authority. Match Squeaky exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.
+- @图3 is the exact keen sailboat prop authority; inherit design, material, construction and scale only; ignore its background and labels.
+- @图4 is the exact keen sailboat departure state prop authority; inherit design, material, construction and scale only; ignore its background and labels.
+- @图5 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.
+- Keep Keen and Squeaky distinct; never blend or swap traits.
+
+[Characters In Frame]
+- Keen
+
+[Frame]
+- Keen @ lower-left area; standing in the boat with knees softly braced, one hand lightly near the tiller and the other beginning to lift in anticipation; facing toward screen-right water and boat travel.
+- Preserve canonical relative size, modified only by the authored depth relationship.
+
+[Geography]
+Starboard side of the little sailboat is visible; bow points screen-right and the boat travels left-to-right.
+The boat sits low center-left in frame with the open sea extending far ahead to screen-right.
+Keen stands inside the boat center-left, oriented toward the screen-right water and travel direction.
+Squeaky is just below the surface at screen-right beside the moving hull, indicated by rising ripples in the waterline corridor.
+Wake trails coherently from the stern toward screen-left; the filled tan sail drives bow-first travel.
+The mast, rigging, tan sail and established cargo remain aboard and spatially continuous.
+The horizon and sky stay wide and open so the sea reads enormous around the small boat.
+
+[Negative Space]
+Lead room stays open frame-right for the approved direction of travel.
+Reserve the screen-right water beside and ahead of the bow for Squeaky’s imminent surfacing and pacing corridor.
+Keep open sea ahead of the bow so left-to-right travel has visible lead room.
+Leave upper-frame sky and horizon uncluttered to make the empty ocean feel enormous.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Wide establishing lens relationship, camera at low boat-side height from the starboard side, looking slightly across the hull toward the forward screen-right travel direction. Keep mild perspective depth in the sea but avoid warping Keen or the boat. The camera is not centered on Keen as a portrait; it is staged as an ocean-scale opener with lead room ahead of the bow.
+
+[Light]
+Use the approved Scene Look for palette, ocean material, sky, cloud structure and daylight quality: bright open-water illumination with a faint dimming weight on the far horizon. Keep Keen and the sailboat cleanly readable against the water with soft daylight modelling, small specular breaks on the waves and coherent wake foam trailing behind the stern. Depth should sell enormous empty distance without fogging out the foreground action corridor.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Keen wears exactly two aged-gold open cuffs with blank settings, one on each wrist; no crystals, stones or glow.
+Preserve the same little sailboat with tan sail, mast, rigging, open satchel, rolled blanket, folded map and small food pouch aboard.
+Do not show the map in Keen’s hands in the opening frame; the map remains part of the cargo for later action.
+Boat travel is bow-first left-to-right with starboard side visible; no sideways slide, stern-first motion or reversed screen direction implied.
+Natural staging lock: restage Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Keen has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No unapproved extra cast, props or body-mounted loads; include only the required referenced keen_sailboat and keen_sailboat_departure_state with its approved owner. Preserve the locked Scene Look.

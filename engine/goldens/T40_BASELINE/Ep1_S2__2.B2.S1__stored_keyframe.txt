@@ -1,0 +1,58 @@
+[Opening Stage]
+Create a playable 16:9 opening for 2.B2.S1; frame-one anticipation, not portrait or payoff.
+
+[Intended Read]
+Aida’s inner vision opens as a clear, tender departure image: Keen is small but determined beside his Mum, close to the sailboat and the bright water, with the rose-pink vision wash making the moment feel remembered, distant and emotionally charged.
+
+[Characters In Frame]
+- Keen
+- Keen's Mum
+
+[Frame]
+- Keen @ middle-centre area; standing in a playable anticipation state beside Mum, satchel worn across body, hands near the strap area, wrists and forearms unobstructed and completely bare; facing three-quarter toward Keen's Mum and the satchel area.
+- Keen's Mum @ middle-centre area; standing close in a supportive anticipation state, attentive to Keen, pale-blue bow and ornate gold collar readable; facing toward Keen.
+- Same depth: Keen 57 inches; Keen's Mum 60 inches; preserve relative-size truth only.
+
+[Geography]
+Wooden pier and shore hold screen-left.
+Small sailboat and bright blue water hold screen-right.
+Keen stands beside Keen’s Mum on the pier near the sailboat.
+Keen and Keen’s Mum share the same depth plane, with Keen slightly screen-right of Mum.
+Both characters face generally inward toward each other and the satchel area, not out to camera.
+The camera looks along the pier on a gentle forward travel axis toward the pair.
+Keep open water visible beyond the sailboat on frame-right.
+No other characters occupy the pier, boat or waterline.
+
+[Negative Space]
+Reserve open water and sailboat space on frame-right as the visual destination.
+Keep a clear forward drift corridor through the lower-centre pier boards toward Keen and Mum.
+Leave a small breathable gap between Keen and Mum so their silhouettes and scale relationship remain readable.
+Keep the frame edges softly open for the rose-pink vision wash; do not fill them with extra figures or props.
+
+[Canonical Style]
+Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+
+[Camera]
+Vision POV at a gentle child-height-to-waist-height relationship, camera looking slightly across the pier toward the pair and the boat. Use a natural cinematic lens feel, around a 35–45mm equivalent, close enough for emotional readability but wide enough to hold pier, boat and water geography. The frame should feel ready for a slow forward drift, not already pushed into a close-up.
+
+[Light]
+Use the approved Scene Look’s soft rose-pink vision wash at the edges and across the image, with a warm teal-orange base grade beneath it. Bright blue water remains luminous but softened by the vision glow. Shallow depth of field keeps Keen and Mum crisp on the same depth plane, with the boat and distant water slightly softened. Plush fur, glossy eyes and soft subsurface character materials catch warm highlights without losing the dreamlike haze.
+
+[Physical Integration]
+Keep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.
+
+[Performance Freedom]
+Animation owns performance, movement, recovery and camera evolution.
+
+[Protect]
+Exactly one Keen and one Keen's Mum appear in this image.
+Keep Keen and Keen's Mum at the same distance from the camera; Keen's Mum appears about 5% taller than Keen.
+Exactly one Keen and exactly one Keen's Mum appear in frame.
+Aida does not appear inside the vision.
+Keen’s wrists and forearms are completely bare: no wristbands, bands, bracelets, cuffs or straps of any kind on his wrists or forearms.
+Keen’s satchel is worn across his body and remains readable without becoming a wrist strap or cuff-like element.
+Natural staging lock: restage Keen, Keen's Mum from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.
+Living performance lock: Keen, Keen's Mum each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.
+
+[Forbidden]
+No portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.

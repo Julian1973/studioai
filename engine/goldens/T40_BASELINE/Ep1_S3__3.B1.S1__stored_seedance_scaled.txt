@@ -1,0 +1,38 @@
+AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions. Dialogue language: English.
+
+[Multimodal Reference Layer]
+Slots: @图1=opening_frame; @图2=Keen; @图3=Keen's Mum; @图4=location; @Audio1=audio; never swap.
+Angles: @图2=one Keen; @图3=one Keen's Mum; views are not extra characters.
+@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.
+@图2 defines exactly one Keen identity/scale only; exclude background, pose, props and scene.
+@图3 defines exactly one Keen's Mum identity/scale only; exclude background, pose, props and scene.
+@图4 defines scene/layout/light only; exclude characters/action.
+
+[ATTRIBUTE OWNERSHIP]
+@图2 defines Keen identity and scale only. Do not use unrelated background, pose, composition, props or scene.
+@图3 defines Keen's Mum identity and scale only. Do not use unrelated background, pose, composition, props or scene.
+The open satchel, rolled blanket, folded map and small food pouch belong to the boat cargo state; no other cargo appears.
+
+[ENVIRONMENT CONTRACT]
+Start from the approved sunny daytime pier, shore, sailboat, open water and loaded boat state.
+During the unit, only subtle natural motion changes: water shimmer, sail cloth breathing, rope settling, small fur movement and character performance.
+End with the sailboat still moored screen-right, cargo visible and unchanged, Mum on the pier, Keen beside the boat facing the water.
+
+[One-Sentence Summary]
+Create a emotional-continuity unit at the pier where Keen over-organizes the boat supplies, reassures Mum, then finds visible courage by meeting her eyes before facing the open water.
+
+[Global Settings]
+Style (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+Geography: Pier runs from lower-left shore toward the sailboat on screen-right. Sailboat remains moored along screen-right with cockpit and cargo visible. Tan sail, mast and rigging rise on screen-right without covering faces or cargo. Shore and palms stay screen-left/background-left; open water and horizon stay screen-right/back. Keen stands at the boat edge near the open satchel, rolled blanket, folded map and food pouch. Keen's Mum stands screen-left of Keen, close enough to reassure but not between Keen and the cargo. Playable space remains between Mum, Keen, boat and water.
+
+[Shot Sequence]
+Shot 1: Camera: medium-wide at child height, useful 28–35mm lens, beginning from the approved opening composition and gently tracking with Keen’s hands between the boat cargo and Mum. Action: Keen arranges the open satchel, rolled blanket, folded map and small food pouch, then rechecks them; Mum’s practical question is prompted by his repeated checking, and Keen answers while still tempted to touch the supplies again. Performance: Keen performs neat confidence with busy hands and a small official posture. Mum stays beside him on the pier, proud and glassy-eyed, close enough to reassure but not interfering. End state: Keen’s hand settles on or near the satchel after his reply while Mum watches him gently; the loaded boat remains screen-right and moored. Dialogue placement: Keen's Mum, Keen's Mum speaks via @Audio1 with gentle practical concern while watching his last pocket-check: {Keen… are you sure you’ve got everything?} Dialogue placement: Keen, Keen speaks via @Audio1 with compact performed confidence, softening toward Mum while his body still reveals nerves: {I’ve got this, Mum.}
+Shot 2: Camera: Two-shot medium close view from the pier side, useful 40–50mm lens, with Mum readable in left midground and Keen partially turned toward the supplies and water. Action: Keen’s extra check after his confidence gives Mum permission to confess concern; she remains physically still rather than reaching in. Performance: Mum’s smile trembles but holds; her eyes stay wet without breaking. Keen listens with his mouth closed, hands slowing on the cargo as the words land. End state: Mum finishes with a contained face, Keen quieter beside the boat, and the supplies unchanged in view. Dialogue placement: Keen's Mum, Keen's Mum speaks via @Audio1 softly and breath-led, affirming him before the worry shows: {I know… it’s just… this is a big step.}
+Shot 3: Camera: Return to a wider child-height two-shot, useful 28mm lens, revealing pier, Mum, moored sailboat, tan sail, rigging, cargo, shore and open water while keeping both faces readable during their eye contact. Action: Mum’s admission makes Keen stop fiddling, look out over the water and swallow. On ‘Like you said’ he turns toward Mum and meets her eyes directly. Mum holds his gaze in complete stillness; a tiny proud softening tells him she believes him. Keen visibly receives it during the ellipsis, then turns back toward the horizon for ‘it’s part of growing up.’ Performance: Keen’s body is smaller than his words for a moment. His eye contact with Mum is sustained and searching, never a passing glance; his breath and shoulders settle only after he reads her quiet reassurance. Mum stays proud, worried and deliberately hands-off, answering through her eyes and one restrained softening rather than a broad smile or gesture. End state: End wide after the eye-contact exchange: boat moored screen-right, cargo visible and unchanged, Keen beside the boat facing the water with bare wrists visible, Mum on the pier nearby still emotionally connected to him, camera child-height, sun from upper screen-left. Dialogue placement: Keen, Keen speaks via @Audio1 with borrowed grown-up courage after the visible swallow; he delivers ‘Like you said’ directly into Mum’s eyes, receives her silent reassurance through the ellipsis, then turns to the horizon for ‘it’s part of growing up’; hold a full beat after the line ends: {Like you said… it’s part of growing up.} The pose holds a full beat after the line ends.
+Witness staging: Keen works at or beside the small sailboat on the screen-right side of the wooden pier. Keen's Mum remains on the pier nearby, screen-left of Keen in the established opening relationship, close enough to reassure but not taking over. Hold on the non-acting witness; their stillness and the hold length carry the joke.
+
+[Global Supplement]
+Exactly one Keen and one Keen's Mum throughout; no duplicates of either character. Maintain the approved Scene 3 pier-and-boat geography until a later approved shot visibly shows Keen sailing away. Safeguard: Keen’s wrists must remain bare despite @图2 showing turnaround wrist accessories. Safeguard: Do not add, remove or transform boat cargo; keep only the open satchel, rolled blanket, folded map and small food pouch. Final handoff: End wide enough to preserve the pier, sailboat, cargo, Mum and Keen for the next unit: boat still moored screen-right, cargo visible and unchanged, Keen beside the boat facing the water with bare wrists visible, Mum nearby on the pier watching with proud restraint.
+
+[Audio]
+@Audio1 guides dialogue timing and mouth shapes; final approved dialogue is restored in post. No extra voices. No music. No watermark.

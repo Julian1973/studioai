@@ -1,0 +1,54 @@
+[
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Bo",
+   "characterState": "default",
+   "contractHash": "55feee7bee28bb900bc5ff937183fa2410891e92cbfcd41a35c68cef97461980",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "russet-orange squirrel fur",
+    "cream muzzle, chest and belly",
+    "tall pointed ears with tufts",
+    "very large fluffy curled tail",
+    "large expressive brown eyes"
+   ],
+   "fileName": "CB_Bo.png",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "bear ears or bear cub proportions",
+    "another character's crystal or jewellery",
+    "generic backpack or satchel",
+    "small, thin or missing tail"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Bo.png",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Bo.png",
+   "sourceSha256": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "55feee7bee28bb900bc5ff937183fa2410891e92cbfcd41a35c68cef97461980",
+   "turnaroundViewCount": 5,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 1,
+  "role": "Bo",
+  "slot": "@图1",
+  "sourceSlot": "@图1",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 2,
+  "role": "scene plate",
+  "slot": "@图2",
+  "sourceSlot": "@图2",
+  "usage": "keyframe",
+  "view": null
+ }
+]

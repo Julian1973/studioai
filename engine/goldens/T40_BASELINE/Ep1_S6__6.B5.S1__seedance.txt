@@ -1,0 +1,1 @@
+REFUSED: Refused: REFUSED — Animation direction is stale (STALE direct inputs). Prepare current Animation specialist direction for 6.B5.S1 first. (REFUSED — 6.B5.S1 relays off 6.B3.S1, which is not approved+harvested yet (status: candidates-pending) — Julian's eye comes first, always)

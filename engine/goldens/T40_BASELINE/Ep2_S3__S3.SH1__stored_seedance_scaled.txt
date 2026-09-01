@@ -1,0 +1,51 @@
+AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.
+
+[Multimodal Reference Layer]
+Slots: @图1=opening_frame; @图2=Bo; @图3=location; @Audio1=audio; never swap.
+Angles: @图2=one Bo; views are not extra characters.
+@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.
+@图2 defines exactly one Bo identity, proportions, scale and approved wearable state: Bo identity, proportions, scale and approved wearable state. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.
+@图3 defines scene/layout/light only; exclude characters/action.
+
+[Opening Motion Bridge]
+Bo resolves the still opening pose with a small paw-hover toward the satchel, then pulls back before the offscreen call turns the doorway active.
+
+[ACTION OWNERSHIP]
+Bo owns all visible paw, eyeline, body and tail actions in frame.
+Bo’s Mum owns only the offscreen voice in @Audio1 and never appears in frame.
+The doorway owns environmental pressure through light and position only; it does not move or animate.
+The satchel and conker remain passive props touched or considered by Bo.
+
+[ATTRIBUTE OWNERSHIP]
+Bo’s squirrel identity, scale and expressive tail are controlled only by @图2.
+The hollow-oak interior, warm wood, fireplace, shelves, stone floor and doorway world are controlled only by @图3.
+The conker and satchel are practical continuity props in Bo’s object area; they do not move independently or make decisions.
+
+[ENVIRONMENT CONTRACT]
+Warm honeyed hollow interior remains stable and protective around Bo.
+The open doorway stays bright and cooler in depth, inviting but not threatening.
+Mum remains an offscreen exterior presence; no other character enters the hollow.
+The threshold remains uncrossed for the entire unit.
+End with the satchel, conker and doorway all visible enough to carry the next unit’s continuity.
+
+[One-Sentence Summary]
+Establish Bo inside the hollow oak as he delays leaving by choosing the conker and satchel over the bright open doorway after Mum calls from offscreen.
+
+[Global Settings]
+Style (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.
+Geography: Camera is low on the hollow floor, looking upstage across the conker and lunch satchel toward Bo. The conker and satchel sit in the near foreground lower-left to lower-center, inside Bo’s reachable decision space. Bo starts in the middle interior, downstage of the open doorway and clearly not on the threshold. The open doorway stays visible in bright background depth behind Bo, slightly screen-right of his body line. The travel axis from Bo to the doorway runs from middle interior toward upstage screen-right and remains uncrossed. Curved warm oak walls, root ribs and hollow furnishings wrap the frame edges and ceiling, holding Bo inside. Bo’s Mum is not visible; her presence belongs beyond the doorway/offscreen exterior space.
+
+[Living Performance]
+Living performance lock: Bo has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.
+
+[Camera and Shot Plan]
+Phase 1: Camera: intimate object-led medium close from low hollow-floor height, useful 28–35mm equivalent; begin exactly from @图1 across the conker and open satchel toward Bo, with the open doorway held as a bright vertical interruption in depth. The camera stays continuous, making only tiny motivated adjustments with Bo’s attention back to the objects. Action: Mum’s offscreen call activates the doorway. Bo’s paws hover near the satchel, retreat, and settle nearer the conker while his eyeline flicks from the bright doorway back to the objects, keeping his body compact inside the hollow. Performance: Bo plays polite control failing quietly: ears and shoulders stay tidy, paws almost touch then withdraw, eyes ricochet between satchel, conker and doorway, and after answering through @Audio1 he lowers back toward the conker rather than preparing to stand. End state: Bo remains in a compact seated crouch beside the satchel and conker, angled inward; his gaze has returned to the conker, tail contained within the hollow curve, open doorway still bright behind him, camera low at floor height, warm firelight from screen right and cooler doorway light from depth. Spoken action: Bo's Mum, Bo’s Mum is offscreen only, calm and ordinary through @Audio1; her voice makes the doorway active while Bo listens with his mouth closed: {Bo, it’s time for you to go to the Learning Circle? Don’t forget your lunch.} The pose holds a full beat after the line ends. Spoken action: Bo, Bo answers through @Audio1 after a small delay, sounding compliant while his body pulls back toward the objects: {I’ll go in a minute Mum.} The pose holds a full beat after the line ends. Hold: 2.0s — Let the satchel, conker and open doorway share the emotional space long enough for the audience to feel how seriously Bo is outsourcing the decision.
+
+[Audio]
+@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.
+
+[AUDIO AND EXCLUSIONS]
+No narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.
+
+[Global Supplement]
+Maintain Begin exactly from @图1 and preserve the approved low floor-side composition. Safeguard: Do not let Bo stand, stride, or orient his whole body toward leaving at the landing. Safeguard: Do not lose the open doorway in depth; it must remain the visible unanswered pressure. Living performance lock: Bo has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.

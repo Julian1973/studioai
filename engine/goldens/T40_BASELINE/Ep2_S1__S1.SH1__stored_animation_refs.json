@@ -1,0 +1,98 @@
+[
+ {
+  "identity": null,
+  "position": 1,
+  "role": "opening keyframe",
+  "slot": "@图1",
+  "sourceSlot": "@图1",
+  "usage": "animation",
+  "view": null
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Fuzzby",
+   "characterState": "default",
+   "contractHash": "f56473a0f045ebb8b8534b0097730bc43c4ae65e09ab185adaa678f44a09df61",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "bulbous tan nose",
+    "round wire-frame spectacles",
+    "larger 14-inch bee proportions"
+   ],
+   "fileName": "CB_Fuzzby.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "Zenny's long eyelashes",
+    "Zenny's rosy blush cheeks",
+    "any pendant, necklace, medallion or crystal"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+   "sourceSha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "f56473a0f045ebb8b8534b0097730bc43c4ae65e09ab185adaa678f44a09df61",
+   "turnaroundViewCount": 4,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 2,
+  "role": "Fuzzby",
+  "slot": "@图2",
+  "sourceSlot": "@图2",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Keen",
+   "characterState": "default",
+   "contractHash": "b0e3abf03d73c899e9f586e65ed0ad490b16611ca9e11ed7cb7db84e7fc0ef73",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "aquamarine-blue fur",
+    "upright pale-white crown tuft",
+    "gold wrist cuffs with aquamarine gems"
+   ],
+   "fileName": "CB_Keen.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+   "sourceSha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "b0e3abf03d73c899e9f586e65ed0ad490b16611ca9e11ed7cb7db84e7fc0ef73",
+   "turnaroundViewCount": 4,
+   "usage": "animation",
+   "view": "complete-turnaround"
+  },
+  "position": 3,
+  "role": "Keen",
+  "slot": "@图3",
+  "sourceSlot": "@图3",
+  "usage": "animation",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 4,
+  "role": "scene plate",
+  "slot": "@图4",
+  "sourceSlot": "@图4",
+  "usage": "animation",
+  "view": null
+ }
+]

@@ -1,0 +1,15 @@
+{
+ "clean": false,
+ "findings": [
+  {
+   "deduction": 0.25,
+   "fix": "The deterministic emitter must add holds to non-immediate recognition/reaction lines.",
+   "message": "No protected post-line hold is visible in the specialist draft.",
+   "rule": "button-hold",
+   "severity": "POLISH"
+  }
+ ],
+ "firingFloor": 9.5,
+ "score": 9.75,
+ "verdict": "PASS"
+}

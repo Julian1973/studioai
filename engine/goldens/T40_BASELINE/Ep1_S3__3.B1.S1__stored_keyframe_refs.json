@@ -1,0 +1,87 @@
+[
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Keen",
+   "characterState": "no-cuffs",
+   "contractHash": "b4ec6e8ef60de67b80fdf69761a836253af42eb89cf7d2f9180b2b204ca899ba",
+   "coverage": "front-and-rear",
+   "derived": false,
+   "distinguishingFeatures": [
+    "aquamarine-blue fur",
+    "upright pale-white crown tuft",
+    "both wrists and forearms completely bare"
+   ],
+   "fileName": "CB_Keen_nocuffs_front-back.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
+   "sourceSha256": "0514d405b5b72e2c6401204ac7f633785b2e6ace5794ac760d5ac1b0d29e38ed",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "b4ec6e8ef60de67b80fdf69761a836253af42eb89cf7d2f9180b2b204ca899ba",
+   "turnaroundViewCount": 2,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 1,
+  "role": "Keen",
+  "slot": "@图1",
+  "sourceSlot": "@图2",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": {
+   "attachmentMode": "intact-turnaround",
+   "character": "Keen's Mum",
+   "characterState": "default",
+   "contractHash": "d59f68be9e6ff3de5f18bbc79dbcf4b1c38c1bed61b0caed1df415fa267cb0c7",
+   "coverage": "360",
+   "derived": false,
+   "distinguishingFeatures": [
+    "pale-blue adult-bear fur",
+    "pale-blue hair bun with matching bow",
+    "ornate gold collar"
+   ],
+   "fileName": "CB_KeensMum.jpeg",
+   "intactTurnaround": true,
+   "mustNotBorrow": [
+    "another character's fur colour, hair, crystal or clothing"
+   ],
+   "path": "<ROOT>/cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
+   "providerSafe": true,
+   "schemaVersion": 1,
+   "singleCharacterIdentity": true,
+   "singleSubject": false,
+   "source": "<ROOT>/cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
+   "sourceSha256": "fa3d70111949ef90b675419ed42c91946261f4e45d62e623bb156aac72ccc43a",
+   "turnaroundAuthority": true,
+   "turnaroundGroupHash": "d59f68be9e6ff3de5f18bbc79dbcf4b1c38c1bed61b0caed1df415fa267cb0c7",
+   "turnaroundViewCount": 5,
+   "usage": "keyframe",
+   "view": "complete-turnaround"
+  },
+  "position": 2,
+  "role": "Keen's Mum",
+  "slot": "@图2",
+  "sourceSlot": "@图3",
+  "usage": "keyframe",
+  "view": "complete-turnaround"
+ },
+ {
+  "identity": null,
+  "position": 3,
+  "role": "scene plate",
+  "slot": "@图3",
+  "sourceSlot": "@图1",
+  "usage": "keyframe",
+  "view": null
+ }
+]

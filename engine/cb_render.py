@@ -5022,6 +5022,15 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
             placement = json.loads(pathlib.Path(placement_path).read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError, TypeError):
             placement = None
+    timing_recovery = None
+    if placement and placement.get("tempoAdjusted"):
+        timing_recovery = {
+            "tempoAdjusted": True,
+            "tempoFactor": placement.get("tempoFactor"),
+            "performanceTargetStartSec": placement.get("performanceTargetStartSec"),
+            "performanceTargetEndSec": placement.get("performanceTargetEndSec"),
+            "providerCalled": bool(placement.get("providerCalledForTimingRecovery")),
+        }
     return {"approvedLines": approved, "currentLines": current_with_direction, "source": source,
             "isWorking": bool(working) and source != "voice-director-compiled",
             "savedAt": (working or {}).get("savedAt"),
@@ -5032,6 +5041,7 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
             "expectedLineCount": len(cb_audio_authority.spoken_dialogue_lines(shot)),
             "generatedLineCount": len((placement or {}).get("placements") or []),
             "placements": (placement or {}).get("placements") or [],
+            "timingRecovery": timing_recovery,
             "takeKind": "complete-shot-track" if has_take else None,
             "compiler": compiler, "auditions": auditions}
 

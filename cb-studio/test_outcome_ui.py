@@ -100,6 +100,8 @@ def test_hear_exposes_words_and_provider_prompt_as_separate_editable_layers():
     assert "Changing them creates a scoped dialogue revision for this shot" in APP
     assert "Adapt phonetic spelling, pronunciation, cadence, pauses, breath" in APP
     assert "The saved ElevenLabs performance prompt is the provider text used when you fire" in APP
+    assert "Local timing recovery · review this take" in APP
+    assert "No provider was called for this recovery" in APP
     assert "The paid path uses only the approved Voice specialist performance above" not in APP
     assert "Save ElevenLabs prompt" in APP
     assert "voicePanelHTML(tok,SH_VOICE_CACHE[tok])" in APP

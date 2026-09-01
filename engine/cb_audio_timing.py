@@ -2,8 +2,10 @@
 
 The paid voice provider returns one acted conversation plus the source range for each
 dialogue input. Authored start times remain exact performance anchors. The natural take
-may extend beyond an estimated end time when it still fits before the next start anchor;
-the software never clips or time-compresses an actor to satisfy an estimate.
+may extend beyond an estimated end time when it still fits before the next start anchor.
+The software never clips an actor; a continuous take that only narrowly exceeds the hard
+30-second provider limit may receive a bounded, pitch-preserving tempo fit that is recorded
+for human review.
 """
 from __future__ import annotations
 
@@ -30,6 +32,11 @@ EDGE_FADE_SEC = 0.012
 MIN_DIALOGUE_GAP_SEC = 0.0
 MIN_LANDING_ROOM_SEC = 0.35
 TIMING_COVERAGE_TOLERANCE_SEC = 0.20
+# A small provider-duration variance must not strand an already-paid continuous take.
+# Keep pitch unchanged with ffmpeg atempo, preserve the authored first cue, and expose
+# the exact adjustment in the timing contract for human review.
+MAX_CONTINUOUS_TEMPO_FACTOR = 1.10
+CONTINUOUS_END_ROOM_SEC = 0.10
 
 
 def file_sha256(path):
@@ -295,6 +302,13 @@ def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, 
     raw_duration = _probe_duration(raw_audio)
     authored_target_start = target_start
     target_end = target_start + raw_duration
+    tempo_factor = 1.0
+    if raw_duration > duration_sec:
+        available = duration_sec - target_start - CONTINUOUS_END_ROOM_SEC
+        required_tempo = raw_duration / available if available > 0 else float("inf")
+        if required_tempo <= MAX_CONTINUOUS_TEMPO_FACTOR + 0.0001:
+            tempo_factor = required_tempo
+            target_end = target_start + (raw_duration / tempo_factor)
     if target_end > duration_sec and raw_duration <= duration_sec:
         # The returned performance already contains the actors' natural pauses.
         # Use available headroom at the front of the slate instead of clipping the
@@ -307,8 +321,10 @@ def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, 
             f"{duration_sec:.2f}s")
 
     delay_ms = int(round(target_start * 1000))
+    tempo_filter = f"atempo={tempo_factor:.8f}," if tempo_factor > 1.0001 else ""
     filters = (
         f"[0:a]aformat=sample_rates={SAMPLE_RATE}:channel_layouts=stereo,"
+        f"{tempo_filter}"
         f"adelay={delay_ms}|{delay_ms}[performance];"
         f"[1:a]atrim=duration={duration_sec:.6f},asetpts=PTS-STARTPTS[silence];"
         "[silence][performance]amix=inputs=2:duration=first:"
@@ -334,9 +350,10 @@ def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, 
             "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
             "sourceStartSec": source_range[0],
             "sourceEndSec": source_range[1],
-            "targetStartSec": target_start + source_range[0],
-            "targetEndSec": target_start + source_range[1],
+            "targetStartSec": target_start + source_range[0] / tempo_factor,
+            "targetEndSec": target_start + source_range[1] / tempo_factor,
             "continuousPerformance": True,
+            "tempoFactor": tempo_factor,
         })
     contract = {
         "schemaVersion": 1,
@@ -350,6 +367,9 @@ def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, 
         "performanceTargetStartSec": target_start,
         "performanceTargetEndSec": target_end,
         "performanceStartShiftSec": target_start - authored_target_start,
+        "tempoAdjusted": tempo_factor > 1.0001,
+        "tempoFactor": tempo_factor,
+        "providerCalledForTimingRecovery": False,
         "placements": placements,
         "outputPath": str(out),
         "outputSha256": file_sha256(out),

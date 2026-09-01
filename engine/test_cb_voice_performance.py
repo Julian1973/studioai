@@ -1,3 +1,5 @@
+import json
+
 import cb_render
 
 
@@ -98,6 +100,41 @@ def test_voice_status_uses_compiled_track_instead_of_stale_working_prompt(monkey
     assert status["generatedLineCount"] == 1
     assert status["expectedLineCount"] == 1
     assert status["shotDurationSec"] == 9
+
+
+def test_voice_status_exposes_local_tempo_recovery(monkeypatch, tmp_path):
+    take = tmp_path / "take.wav"
+    take.write_bytes(b"audio")
+    placement = tmp_path / "take.wav.timing.json"
+    placement.write_text(json.dumps({
+        "tempoAdjusted": True,
+        "tempoFactor": 1.093,
+        "performanceTargetStartSec": 1.2,
+        "performanceTargetEndSec": 29.9,
+        "providerCalledForTimingRecovery": False,
+        "placements": [],
+    }))
+    package = {
+        "shots": [{"shotId": "S4.SH1", "durationSec": 30, "dialogueLines": []}],
+        "continuityLedger": [{
+            "shotId": "S4.SH1", "voPath": str(take),
+            "voPlacementPath": str(placement),
+        }],
+    }
+    monkeypatch.setattr(
+        cb_render, "load_pkg", lambda scene, episode="Ep1": (package, tmp_path / "pkg.json"))
+    monkeypatch.setattr(cb_render, "_approved_department_output", lambda *args: {"lines": []})
+    monkeypatch.setattr(cb_render, "_approved_voice_lines", lambda *args: [])
+
+    status = cb_render.voice_performance_status("4", "S4.SH1", "Ep2")
+
+    assert status["timingRecovery"] == {
+        "tempoAdjusted": True,
+        "tempoFactor": 1.093,
+        "performanceTargetStartSec": 1.2,
+        "performanceTargetEndSec": 29.9,
+        "providerCalled": False,
+    }
 
 
 def test_take_remains_current_when_only_compiler_audit_hash_changes(

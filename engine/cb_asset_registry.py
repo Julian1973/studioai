@@ -338,8 +338,11 @@ def migrate_existing(episode: str = "Ep1") -> dict[str, Any]:
         scene = str(pkg.get("sceneNumber") or path.stem.split("_scene")[-1].split("_")[0])
         for led in pkg.get("continuityLedger") or []:
             sid = led.get("shotId")
+            voice_status = (
+                "approved" if (led.get("voiceApproval") or {}).get("approved")
+                else "candidate")
             mappings = [
-                ("voice", "voice_track", led.get("voPath"), "approved"),
+                ("voice", "voice_track", led.get("voPath"), voice_status),
                 ("approved_take", "approved_take", led.get("approvedTake"), "approved"),
                 ("final_frame", "final_frame", led.get("harvestFrame"), "approved"),
                 ("keyframe_candidate", "keyframe_candidate", (led.get("keyframeCandidate") or {}).get("path"), "candidate"),

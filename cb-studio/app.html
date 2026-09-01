@@ -4270,6 +4270,11 @@ function voicePanelHTML(tok,vw){
   if(vw.loading)return `<div class="stage-working" style="min-height:150px"><span class="stage-spinner" aria-hidden="true"></span><b>Loading the ElevenLabs v3 prompt</b><span>The exact provider text will appear here.</span></div>`;
   if(vw.error)return `<div class="ccpanel"><div class="dec-caption" style="color:var(--danger)">${_esc(vw.error)}</div></div>`;
   const dirty=SH_VOICE_DIRTY[tok];
+  const recovery=vw.timingRecovery||{};
+  const recoveryNote=recovery.tempoAdjusted?`<div class="ccpanel" style="border-color:var(--warn);margin-bottom:10px">
+    <div style="font-weight:600;color:var(--warn)">Local timing recovery · review this take</div>
+    <div class="dec-caption" style="margin-top:4px">The returned continuous performance was fitted to this shot at ${_esc(Number(recovery.tempoFactor||1).toFixed(3))}× tempo, preserving every line from ${_esc(Number(recovery.performanceTargetStartSec||0).toFixed(1))}s to ${_esc(Number(recovery.performanceTargetEndSec||0).toFixed(1))}s. No provider was called for this recovery.</div>
+  </div>`:"";
   const lines=(vw.currentLines||[]).map((ln,i)=>{
     const approved=(vw.approvedLines||[])[i]||{};
     const val=(dirty&&dirty[i]!=null)?dirty[i]:ln.text;
@@ -4307,6 +4312,7 @@ function voicePanelHTML(tok,vw){
     <button class="btn ghost" style="margin-top:8px" onclick="shRestoreVoiceTake('${_esc(tok)}')">↺ Restore this take instead</button>
   </div>` : "";
   return `<div class="ccpanel">
+    ${recoveryNote}
     ${staleBanner}
     <div class="cchead">ElevenLabs v3 performance prompt <span class="stbadge" style="color:var(--brand);background:var(--surface2)">${_esc(vw.source||"approved source")}</span>${vw.isWorking?` <span class="stbadge" style="color:var(--brand);background:var(--surface2)">working version${vw.savedAt?" · "+_esc(vw.savedAt.slice(0,16)):""}</span>`:""}</div>
     <div class="dec-caption" style="margin-bottom:10px">This is exactly what will be sent to ElevenLabs per line. Adapt phonetic spelling, pronunciation, cadence, pauses, breath and [bracketed] v3 performance tags here. A phonetic spelling changes the sound only; the approved words, captions and script remain unchanged above.</div>

@@ -28,9 +28,12 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 SHOW_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-# T44: the adapter whitelist is on its way out (T55 replaces it with capability flags). Until then a
-# profile may name any adapter; only the one that exists is "installed".
-SUPPORTED_ENGINE_ADAPTERS = {"crystal-bears-v1"}
+# T55 (2026-09-01): the adapter whitelist is gone. The engine is ONE pipeline for every project; a
+# profile's `engineAdapter` is an optional historical label (the first project's reads
+# "crystal-bears-v1") and never gates anything. What gates production is CONTENT: the required project
+# files, each named by path when missing (capability_report → missingRequiredContent), and the
+# project's own `capabilities` flags (what this project chooses to produce).
+DEFAULT_CAPABILITIES = {"keyframes": True, "animation": True, "voice": True, "music": True, "post": True}
 PROJECTS_DIR = "projects"
 
 
@@ -114,8 +117,10 @@ class ShowProfile(BaseModel):
     name: str = Field(min_length=1)
     animationType: str = Field(min_length=1)
     aspectRatio: str = Field(min_length=1)
-    engineAdapter: str = Field(min_length=1)
+    engineAdapter: Optional[str] = None      # historical label only (T55) — never a gate
+    capabilities: Dict[str, bool] = Field(default_factory=dict)   # T55: what this project produces
     default: bool = False
+    showrunner: Optional[str] = None    # the person who signs the gates — named in chair contracts (T52)
     canon: CanonProfile
     laws: LawsProfile = Field(default_factory=LawsProfile)
     episodes: EpisodeProfile
@@ -350,21 +355,34 @@ def capability_report(loaded: LoadedShowProfile) -> dict:
         "scripts": loaded.scripts_path,
     }
     missing = [name for name, path in required.items() if not path.exists()]
-    adapter_ready = loaded.profile.engineAdapter in SUPPORTED_ENGINE_ADAPTERS
+    missing_paths = [f"{name}: {_display_path(loaded, path)}" for name, path in required.items()
+                     if not path.exists()]
+    capabilities = {**DEFAULT_CAPABILITIES, **(loaded.profile.capabilities or {})}
     return {
         "showId": loaded.profile.showId,
         "projectId": loaded.profile.showId,
         "name": loaded.profile.name,
         "engineAdapter": loaded.profile.engineAdapter,
-        "adapterReady": adapter_ready,
+        # T55: there is no adapter to install — the one engine serves every project. Kept as a key
+        # for older readers; it is simply "the project declares what it needs".
+        "adapterReady": True,
+        "capabilities": capabilities,
         "profileDigest": loaded.profile_digest,
         "profilePath": str(loaded.profile_path),
         "tenantRoot": str(loaded.show_root),
         "projectRoot": str(loaded.show_root),
         "missingRequiredContent": missing,
-        "productionReady": adapter_ready and not missing,
+        "missingRequiredPaths": missing_paths,
+        "productionReady": not missing,
         "zeroSpend": True,
     }
+
+
+def _display_path(loaded: LoadedShowProfile, path: pathlib.Path) -> str:
+    try:
+        return path.relative_to(loaded.repo_root).as_posix()
+    except (ValueError, AttributeError):
+        return str(path)
 
 
 def __getattr__(name):

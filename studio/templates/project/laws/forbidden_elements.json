@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "_note": "Elements that must never appear in a keyframe (always / winged) and the animation negatives per physiology group.",
+  "always": [],
+  "winged": [],
+  "animationNegatives": {}
+}

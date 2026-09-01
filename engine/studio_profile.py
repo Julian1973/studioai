@@ -6,7 +6,7 @@ imports project_profile directly. Deleted by T61 together with the other compati
 """
 from project_profile import *  # noqa: F401,F403
 from project_profile import (  # noqa: F401 — explicit, so tools that scan for names still find them
-    SHOW_ID_RE, SUPPORTED_ENGINE_ADAPTERS, ShowProfileError, CanonProfile, EpisodeProfile,
+    SHOW_ID_RE, DEFAULT_CAPABILITIES, ShowProfileError, CanonProfile, EpisodeProfile,
     ShowProfile, LoadedShowProfile, validate_show_id, load_show_profile, capability_report,
     default_project_id, list_project_ids,
 )

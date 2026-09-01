@@ -11,7 +11,7 @@ against the archived, human-approved Episode 1 beat package
 
 MECHANICAL, never the LLM: scene order, scene boundaries, every spoken line (speaker +
 exact text, in source order) and the per-scene cast (regex-matched against the canon
-character roster). The Director (crystal-bears-director skill, loaded live via
+character roster). The Director (the studio's director chair, loaded live via
 cb_departments.load_runtime_skill) decides only WHERE a scene's own beats begin and
 authors the creative content — storyBeat/want/need/kidRead/adultRead/emotionalIntent,
 plus the whole-episode vision, title, logline and lead bear. Its own reproduction of
@@ -743,7 +743,7 @@ def _prepare_intake(episode="Ep1", log=print):
             "profileDigest": canon_lock["profileDigests"]["story"],
             "sourceHashes": canon_context["sourceHashes"],
         },
-        "director": {"skill": "crystal-bears-director",
+        "director": {"skill": cb_departments.chair_ref("director"),
                     "loaded": bool(cb_departments.load_runtime_skill("director"))},
         "title": direction.title, "logline": direction.logline,
         "leadBear": direction.leadBear,

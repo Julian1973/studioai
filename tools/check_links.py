@@ -36,6 +36,18 @@ COMPATIBILITY_LINKS = [
     # every approved direction stale on a working machine. The project owns the path; the link
     # points at the bytes. T61 decides the migration (content digests, or a one-time relock).
     ("projects/crystal-bears/assets", "../../cb-seed/assets"),
+    # T52: the chairs are generic (studio/chairs/<role>) and the show's own chair documents live in
+    # projects/crystal-bears/chairs/. The project's lock_policy.json still hashes the runtime sources
+    # at the old skills/ paths; these links keep those hashes (and every approved package's canon
+    # profile digest) current until Julian re-locks canon at T61.
+    ("skills/crystal-bears-writer/SKILL.md", "../../projects/crystal-bears/chairs/writer.md"),
+    ("skills/crystal-bears-director/SKILL.md", "../../projects/crystal-bears/chairs/director.md"),
+    ("skills/crystal-bears-cinematographer/SKILL.md", "../../projects/crystal-bears/chairs/cinematographer.md"),
+    ("skills/crystal-bears-voice-director/SKILL.md", "../../projects/crystal-bears/chairs/voice-director.md"),
+    ("skills/crystal-bears-composer/SKILL.md", "../../projects/crystal-bears/chairs/composer.md"),
+    ("skills/crystal-bears-continuity/SKILL.md", "../../projects/crystal-bears/chairs/continuity.md"),
+    ("skills/crystal-bears-post/SKILL.md", "../../projects/crystal-bears/chairs/post.md"),
+    ("skills/seedance-production-director/SKILL.md", "../../studio/chairs/animation/SKILL.md"),
 ]
 
 # Real directories that a checkout made BEFORE the restructure may still carry at the old path —

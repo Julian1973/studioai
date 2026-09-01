@@ -420,16 +420,16 @@ def production_preflight(scene, episode="Ep1", state=None):
             "productionReady": False, "adapterReady": False,
             "error": str(exc), "zeroSpend": True,
         }
-    if not show_profile.get("adapterReady"):
-        block("SHOW_ADAPTER_NOT_SUPPORTED", "configuration",
-              show_profile.get("error") or
-              f"Engine adapter {show_profile.get('engineAdapter')} is not installed.",
-              "Install and test this show's creative adapter before production.")
+    if show_profile.get("error"):
+        block("SHOW_PROFILE_INVALID", "configuration", show_profile["error"],
+              "Fix the project's profile.json before production.")
     if show_profile.get("missingRequiredContent"):
+        # T55: never an adapter — production is blocked only by missing required content, each
+        # file named by path.
         block("SHOW_PROFILE_CONTENT_MISSING", "configuration",
-              "Show profile content is missing: " +
-              ", ".join(show_profile["missingRequiredContent"]),
-              "Restore the named tenant files before production.")
+              "Project content is missing: " +
+              ", ".join(show_profile.get("missingRequiredPaths") or show_profile["missingRequiredContent"]),
+              "Create the named project files before production.")
 
     for provider in ("fal", "elevenlabs"):
         if (provider == "elevenlabs" and package and

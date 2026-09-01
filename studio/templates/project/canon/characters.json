@@ -1,0 +1,10 @@
+{
+  "_note": "SSOT character register for {{PROJECT_NAME}}. One key per character: {\"anchor\": <reference-image path, used reference-only, never described>, \"refs\": [...], \"key_features\": ..., \"species\": ..., \"gender\": ..., \"sizeRank\": <1=smallest>, \"voiceId\": <provider voice>, \"cadence\": <one line of movement-and-comedy acting DNA>, \"bible\": {...}}. Guest characters are sized by class via sizeClasses.",
+  "_sizeRule": "ADDITIONAL/GUEST characters are sized by class: name the reference character for each class in sizeClasses once the principal cast exists.",
+  "sizeClasses": {
+    "adult_female": null,
+    "adult_male": null,
+    "child_female": null,
+    "child_male": null
+  }
+}

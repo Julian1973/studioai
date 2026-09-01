@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "1.0.0",
+  "project": "{{PROJECT_ID}}",
+  "characterOrder": [],
+  "keyframeRoleOrder": [
+    "character_identity",
+    "scene plate"
+  ],
+  "animationRoleOrder": [
+    "opening keyframe",
+    "previous shot final frame",
+    "character_identity",
+    "scene plate"
+  ],
+  "advisory": true,
+  "identityOverrides": [],
+  "note": "Reference slot order for provider prompts. characterOrder lists the cast in binding order once it exists."
+}

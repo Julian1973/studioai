@@ -1,1 +1,0 @@
-../../../projects/crystal-bears/canon/LOCKED_CANON.md

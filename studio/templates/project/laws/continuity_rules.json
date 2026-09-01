@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "_note": "Carry rules evaluated against a beat's locked text (whenTextContains → cases → state) and the state markers a shot's continuity text can name.",
+  "rules": [],
+  "stateMarkers": []
+}

@@ -23,12 +23,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 # Files (repo-relative) that may still name the first project by id — each is owned by a ticket.
 ALLOW_PROJECT_ID = {
     "tools/check_links.py",                        # T61 deletes the links and this list
-    "engine/project_profile.py",                   # SUPPORTED_ENGINE_ADAPTERS — T55 (capabilities)
-    "engine/cb_render.py",                         # adapter check + skills/crystal-bears-* — T53/T55
-    "engine/cb_departments.py",                    # skills/crystal-bears-* — T53
-    "engine/cb_intake.py",                         # "skill": "crystal-bears-director" — T53
-    "tools/sync_canon.py",                         # skills/crystal-bears-* glob — T54
-    "cb-studio/data/projects.json",                # the registry itself
+    "cb-studio/data/projects.json",                # presentation fields for the registry
 }
 CODE_GLOBS = ("engine/*.py", "engine/tools/*.py", "cb-studio/*.py", "cb-studio/*.js",
               "cb-studio/*.html", "tools/*.py", "dailies/*.py", "dailies/*.json")

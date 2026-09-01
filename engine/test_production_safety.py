@@ -15,15 +15,27 @@ def test_safety_layer_is_installed():
     assert cb_render.fire_shot.__module__ == "cb_safety"
 
 
-def test_show_specific_runtime_refuses_an_uninstalled_adapter(monkeypatch):
+def test_runtime_refuses_only_on_missing_project_content(monkeypatch, tmp_path):
+    """T55: no adapter gate. Another project's adapter label is accepted; missing required content
+    is refused with every missing file named by path and no provider contacted."""
     monkeypatch.setattr(cb_render.P, "ENGINE_ADAPTER", "another-show-v1")
+    cb_render._require_show_adapter()          # the label gates nothing
+
+    import project_profile
+    real = project_profile.capability_report
+    def hollow(loaded):
+        report = dict(real(loaded))
+        report["missingRequiredContent"] = ["lockedCanon"]
+        report["missingRequiredPaths"] = ["lockedCanon: projects/x/canon/LOCKED_CANON.md"]
+        return report
+    monkeypatch.setattr(project_profile, "capability_report", hollow)
     try:
         cb_render._require_show_adapter()
     except cb_render.Refused as exc:
-        assert "not supported" in str(exc)
+        assert "projects/x/canon/LOCKED_CANON.md" in str(exc)
         assert "no provider was contacted" in str(exc)
     else:
-        raise AssertionError("Crystal Bears runtime accepted another show's adapter")
+        raise AssertionError("the runtime accepted a project with missing required content")
 
 
 def test_preflight_keeps_unchanged_scene_usable_during_episode_story_direction_update(monkeypatch):

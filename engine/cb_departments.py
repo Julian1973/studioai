@@ -21,6 +21,7 @@ import cb_emission_conformance as emission
 import cb_engine_rules
 import cb_voice_director
 import cb_audio_authority
+import paths as P  # the project profile is the only path authority (T44)
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -73,18 +74,33 @@ def prompt_sections(prompt):
     return sections
 
 
-SKILLS = {
-    # One owner per production responsibility.  Compatibility names resolve here so
-    # versioned skill families cannot silently become alternate runtime authorities.
-    "story-architect": ROOT / "skills/crystal-bears-director/SKILL.md",
-    "director": ROOT / "skills/crystal-bears-director/SKILL.md",
-    "cinematography": ROOT / "skills/crystal-bears-cinematographer/SKILL.md",
-    "dp": ROOT / "skills/crystal-bears-cinematographer/SKILL.md",
-    "voice": ROOT / "skills/crystal-bears-voice-director/SKILL.md",
-    "animation": ROOT / "skills/seedance-production-director/SKILL.md",
-    "review": ROOT / "skills/crystal-bears-continuity/SKILL.md",
-    "post": ROOT / "skills/crystal-bears-post/SKILL.md",
+# T52/T53 (RESTRUCTURE_SPEC_PROJECTS.md, 2026-09-01): a chair is resolved BY ROLE — the studio's
+# generic craft document `studio/chairs/<role>/SKILL.md` carries the executable runtime contract
+# (templated with {project} / {showrunner}); the active project's optional taste overlay
+# `projects/<id>/chairs/<role>.md` may add a RUNTIME_TASTE block. No path is ever built from a
+# project id. Compatibility names resolve here so versioned skill families cannot silently become
+# alternate runtime authorities.
+CHAIRS_ROOT = ROOT / "studio" / "chairs"
+SKILL_ROLES = {
+    "story-architect": "director",
+    "director": "director",
+    "writer": "writer",
+    "cinematography": "cinematographer",
+    "cinematographer": "cinematographer",
+    "dp": "cinematographer",
+    "camera": "cinematographer",
+    "voice": "voice-director",
+    "voice-director": "voice-director",
+    "composer": "composer",
+    "animation": "animation",
+    "review": "continuity",
+    "continuity": "continuity",
+    "post": "post",
 }
+SKILLS = {key: CHAIRS_ROOT / role / "SKILL.md" for key, role in SKILL_ROLES.items()}
+
+RUNTIME_TASTE_START = "<!-- RUNTIME_TASTE_START -->"
+RUNTIME_TASTE_END = "<!-- RUNTIME_TASTE_END -->"
 
 SKILL_ALIASES = {
     "heart-director": "director",
@@ -95,26 +111,26 @@ SKILL_ALIASES = {
 DEPARTMENTS = [
     {"id": "story", "stage": "storyboard", "department": "Story & Direction",
      "worker": "Director", "influences": "Pete Docter · Andrew Stanton",
-     "skill": "crystal-bears-director", "output": "approved storyboard and shot purpose"},
+     "skill": "director", "output": "approved storyboard and shot purpose"},
     {"id": "look", "stage": "scenelook", "department": "Look Development",
      "worker": "Cinematographer / DP", "influences": "Patrick Lin · Jean-Claude Kalache",
-     "skill": "crystal-bears-cinematographer", "output": "exact Scene Look plate brief"},
+     "skill": "cinematographer", "output": "exact Scene Look plate brief"},
     {"id": "cinematography", "stage": "keyframe", "department": "Cinematography",
      "worker": "Cinematographer / DP", "influences": "Patrick Lin · Jean-Claude Kalache",
-     "skill": "crystal-bears-cinematographer", "output": "exact opening-frame prompt"},
+     "skill": "cinematographer", "output": "exact opening-frame prompt"},
     {"id": "voice", "stage": "voice", "department": "Voice",
      "worker": "Voice Director", "influences": "character-specific ElevenLabs v3 acting craft",
-     "skill": "crystal-bears-voice-director", "output": "exact performed text sent to ElevenLabs"},
+     "skill": "voice-director", "output": "exact performed text sent to ElevenLabs"},
     {"id": "animation", "stage": "animation", "department": "Animation",
      "worker": "Seedance Production Director",
      "influences": "feature-animation direction · cinematography · editorial rhythm",
-     "skill": "seedance-production-director", "output": "exact cinematic Seedance shooting script"},
+     "skill": "animation", "output": "exact cinematic Seedance shooting script"},
     {"id": "review", "stage": "continuity", "department": "Director Review & Continuity",
      "worker": "Director Review / Continuity Supervisor", "influences": "evidence-led dailies review",
-     "skill": "crystal-bears-continuity", "output": "review of the actual rendered media"},
+     "skill": "continuity", "output": "review of the actual rendered media"},
     {"id": "post", "stage": "final", "department": "Final & Post",
      "worker": "Post Supervisor", "influences": "picture editing · sound design · re-recording mix",
-     "skill": "crystal-bears-post", "output": "review of the actual assembled scene"},
+     "skill": "post", "output": "review of the actual assembled scene"},
 ]
 
 
@@ -144,7 +160,47 @@ def load_runtime_skill(worker, standard_version=0):
     text = path.read_text(encoding="utf-8")
     if RUNTIME_START not in text or RUNTIME_END not in text:
         raise RuntimeError(f"{path} has no executable runtime worker contract")
-    return text.split(RUNTIME_START, 1)[1].split(RUNTIME_END, 1)[0].strip()
+    contract = text.split(RUNTIME_START, 1)[1].split(RUNTIME_END, 1)[0].strip()
+    contract = (contract.replace("{project}", P.PROJECT_NAME)
+                        .replace("{showrunner}", P.SHOWRUNNER))
+    taste = project_chair_taste(SKILL_ROLES[worker])
+    return contract + ("\n\n" + taste if taste else "")
+
+
+def chair_paths(worker):
+    """(studio craft SKILL.md, project taste overlay or None) for a worker key — resolved by role."""
+    worker = SKILL_ALIASES.get(worker, worker)
+    role = SKILL_ROLES[worker]
+    overlay = (ROOT / P.rel(P.CHAIRS) / f"{role}.md") if P.CHAIRS else None
+    return SKILLS[worker], (overlay if overlay and overlay.exists() else None)
+
+
+def chair_ref(worker):
+    """Repo-relative provenance string recorded with department work: the craft chair, plus the
+    project's taste overlay when it exists."""
+    craft, overlay = chair_paths(worker)
+    ref = craft.relative_to(ROOT).as_posix()
+    return ref if overlay is None else f"{ref} + {overlay.relative_to(ROOT).as_posix()}"
+
+
+def chair_label(worker):
+    """The chair's role name as shown in the Studio (the studio/chairs/<role> directory name)."""
+    return SKILL_ROLES[SKILL_ALIASES.get(worker, worker)]
+
+
+def project_chair_taste(role):
+    """The active project's RUNTIME_TASTE block for a chair role, or "" (a missing overlay is not a
+    refusal — the craft contract stands on its own)."""
+    if not P.CHAIRS:
+        return ""
+    path = ROOT / P.rel(P.CHAIRS) / f"{role}.md"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    if RUNTIME_TASTE_START not in text or RUNTIME_TASTE_END not in text:
+        return ""
+    return text.split(RUNTIME_TASTE_START, 1)[1].split(RUNTIME_TASTE_END, 1)[0].strip()
 
 
 class LookDirection(BaseModel):

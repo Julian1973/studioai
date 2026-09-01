@@ -3954,68 +3954,80 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(400, {"error": str(e)})
             return
         if self.path == "/api/project":
+            # T56: a new production is created FROM THE TEMPLATE (studio/templates/project/) by
+            # engine/project_scaffold.py — a complete, engine-valid project with its own profile,
+            # canon, laws, chairs, creative and episodes folders. The wizard's cast and key art land
+            # inside the project; cb-studio/data/projects.json only gains PRESENTATION fields.
             try:
                 import datetime
+                import project_scaffold
                 d = self._body()
                 name = str(d.get("name", "")).strip()
                 if not name:
                     raise ValueError("project name required")
-                pid = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "project"
-                base_pid = pid; i = 2
-                while (ROOT / "projects" / pid).exists():
-                    pid = base_pid + "-" + str(i); i += 1
+                pid = project_scaffold.project_id_for(name, ROOT)
                 pdir = ROOT / "projects" / pid
-                (pdir / "assets").mkdir(parents=True, exist_ok=True)
-                chars = {}
+                assets_dir = pdir / "assets"
+                staged = []
+                chars = []
                 for ch in (d.get("characters") or []):
                     cn = str(ch.get("name", "")).strip()
                     if not cn:
                         continue
-                    entry = {"key_features": str(ch.get("keyFeatures", "")).strip()}
+                    entry = {"name": cn, "keyFeatures": str(ch.get("keyFeatures", "")).strip()}
                     raw = ch.get("imageData") or ""
                     if raw:
                         blob, ext = decode_image_upload(raw)
-                        safe = slug(cn).lower()
-                        fn = safe + "_anchor" + ext
-                        (pdir / "assets" / fn).write_bytes(blob)
-                        rel = "projects/" + pid + "/assets/" + fn
-                        entry["anchor"] = rel; entry["refs"] = [rel]
-                    chars[cn] = entry
+                        fn = slug(cn).lower() + "_anchor" + ext
+                        staged.append((assets_dir / fn, blob))
+                        entry["anchor"] = "projects/" + pid + "/assets/" + fn
+                    chars.append(entry)
                 cover_image = ""
                 raw_cover = d.get("coverImageData") or ""
                 if raw_cover:
                     blob, ext = decode_image_upload(raw_cover)
                     fn = "project_key_art" + ext
-                    (pdir / "assets" / fn).write_bytes(blob)
+                    staged.append((assets_dir / fn, blob))
                     cover_image = "/projects/" + pid + "/assets/" + fn
-                (pdir / "characters.json").write_text(json.dumps(chars, indent=2, ensure_ascii=False))
-                (pdir / "show_bible.md").write_text(str(d.get("showBible", "")))
-                (pdir / "episodes.json").write_text("[]")
+                facts = {"premise": d.get("premise", ""), "audience": d.get("audience", ""),
+                         "animationType": d.get("animationType") or d.get("style") or "",
+                         "aspectRatio": d.get("aspectRatio", ""), "episodeLength": d.get("episodeLength", ""),
+                         "showrunner": d.get("showrunner", "")}
+                created = project_scaffold.scaffold_project(
+                    name, root=ROOT, project_id=pid, facts=facts, characters=chars)
+                for path, blob in staged:
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(blob)
                 accent = str(d.get("accentColor", "")).strip().lower()
                 if not re.fullmatch(r"#[0-9a-f]{6}", accent):
                     accent = "#0b8f87"
                 meta = {
                     "id": pid, "name": name, "primary": False,
-                    "animationType": d.get("animationType", ""), "style": d.get("style", ""),
+                    "animationType": facts["animationType"], "style": d.get("style", ""),
                     "premise": d.get("premise", ""), "audience": d.get("audience", ""),
                     "episodeLength": d.get("episodeLength", ""), "aspectRatio": d.get("aspectRatio", ""),
                     "voiceProvider": d.get("voiceProvider", ""), "musicStyle": d.get("musicStyle", ""),
                     "theme": {"accent": accent},
-                    "configBase": "projects/" + pid, "showBibleFile": "projects/" + pid + "/show_bible.md",
-                    "episodesFile": "projects/" + pid + "/episodes.json", "mediaBase": "projects/" + pid + "/media",
                     "createdAt": str(datetime.date.today()),
-}
+                }
                 if cover_image:
                     meta["coverImage"] = cover_image
                     meta["episodeCoverImage"] = cover_image
-                (pdir / "meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))
+                show_bible = str(d.get("showBible", "")).strip()
+                if show_bible:
+                    bible = pdir / "SHOW_BIBLE.md"
+                    bible.write_text(bible.read_text(encoding="utf-8").rstrip()
+                                     + "\n\n## Notes from the wizard\n\n" + show_bible + "\n",
+                                     encoding="utf-8")
                 pf = ROOT / "cb-studio" / "data" / "projects.json"
                 pdata = json.loads(pf.read_text()) if pf.exists() else {"projects": []}
                 if not isinstance(pdata, dict):
                     pdata = {"projects": []}
                 pdata.setdefault("projects", []).append(meta)
                 pf.write_text(json.dumps(pdata, indent=2, ensure_ascii=False))
-                self._json(200, {"ok": True, "id": pid, "project": meta})
+                entry = next((item for item in _project_registry() if item.get("id") == pid), meta)
+                self._json(200, {"ok": True, "id": pid, "project": entry,
+                                 "written": created["written"]})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

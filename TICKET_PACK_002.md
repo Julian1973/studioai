@@ -61,23 +61,23 @@ DoD: the spec's Phase-3 grep returns ZERO lines across engine/ studio/ studio-ui
 
 ## GENERIC CHAIRS (P1) — Phase 4
 
-**T52 · Split the seven chairs into craft + taste** ⏳ OPEN — blocked by T51
+**T52 · Split the seven chairs into craft + taste** ✅ DONE (2026-09-01 — `studio/chairs/<role>/SKILL.md` ×8 generic craft (role · responsibility · workflow · influence + templated runtime contract); the show's documents moved verbatim to `projects/crystal-bears/chairs/<role>.md` (+ `animation.md`, `README.md`); `references/` copies deleted; `skills/…/SKILL.md` are symlinks to the moved files so `lock_policy.json`'s runtime hashes and every package's canon digest stay current until Julian's T61 re-lock. `grep -rin crystal studio/chairs` → zero (the lock-hashed animation SKILL.md keeps two 'Julian' mentions until re-lock))
 skills/crystal-bears-{writer,director,cinematographer,voice-director,composer,continuity,post}/SKILL.md → studio/chairs/<role>/SKILL.md (craft) + projects/crystal-bears/chairs/<role>.md (taste, canon citations, the show's worked examples). (Older v3/v4 chair variants exist only on the `integration/reconciled-studioai` branch, not on the working branch — nothing to archive here.) `references/` copies deleted.
 DoD: `grep -rn crystal studio/chairs` zero; every chair still loads (cb_departments smoke test); safety rule green. Verified.
 
-**T53 · Chair resolution by role, not by project id** ⏳ OPEN — blocked by T52
+**T53 · Chair resolution by role, not by project id** ✅ DONE (2026-09-01 — `cb_departments.SKILL_ROLES`/`chair_paths`/`chair_ref`/`project_chair_taste`; contracts fill `{project}`/`{showrunner}` from the profile (new optional `showrunner` field) and append the project's `RUNTIME_TASTE` block; proven byte-identical for all six chairs; a missing overlay is silent, never a refusal)
 engine/cb_departments.py:68-106, engine/cb_render.py:2989/3021, engine/cb_intake.py:14/745. Resolve `studio/chairs/<role>/SKILL.md` + optional `projects/<id>/chairs/<role>.md`.
 DoD: no f-string builds a skill path from a project id; a missing taste overlay is a WARN, not a refusal. Verified.
 
-**T54 · sync_canon per project** ⏳ OPEN — blocked by T52
+**T54 · sync_canon per project** ✅ DONE (2026-09-01 — `--project <id>` (sets STUDIO_PROJECT before paths loads); SRC/POLICY from the profile; stamped chair copies retired; a project with no locked canon yet reports 'nothing to sync' green. CLAUDE.md rule 6 rewrite lands with T60)
 tools/sync_canon.py, projects/crystal-bears/canon/lock_policy.json. `--project <id>`; SRC/POLICY/glob from the profile; compatibilityCopies project-relative. CLAUDE.md rule 6 rewritten in the same commit.
 DoD: `sync_canon.py --project crystal-bears --check` green; `--project box-monsters --check` green on an empty project. Verified.
 
-**T55 · Adapters become capabilities** ⏳ OPEN — blocked by T47, T49
+**T55 · Adapters become capabilities** ✅ DONE (2026-09-01 — `SUPPORTED_ENGINE_ADAPTERS` deleted; `engineAdapter` optional label; `capabilities{}` + `DEFAULT_CAPABILITIES`; `capability_report.missingRequiredPaths`; `cb_render._require_show_adapter` refuses only on missing content, naming each file; preflight block `SHOW_PROFILE_CONTENT_MISSING` names paths)
 engine/project_profile.py (`SUPPORTED_ENGINE_ADAPTERS` deleted; `capabilities{}` added), engine/cb_render.py:150-153, engine/cb_production_preflight.py:426, projects/crystal-bears/profile.json. Production is blocked only by missing required content, with the missing file named.
 DoD: a profile with `engineAdapter` removed loads; preflight on an empty project reports every missing file by path and never a project name. Verified.
 
-**T56 · The project template + wizard** ⏳ OPEN — blocked by T55
+**T56 · The project template + wizard** ✅ DONE (2026-09-01 — `studio/templates/project/` (30 files, no show named); `engine/project_scaffold.py` (`scaffold_project`, CLI); `POST /api/project` scaffolds from it (cast → canon/characters.json + cast_vocabulary names + design roster + slot policy; key art into the project's assets); wizard gains the showrunner field; `test_project_scaffold.py`)
 studio/templates/project/ (new), cb-studio/serve.py:3826-3888 `POST /api/project`, app.html openProjectWizard.
 DoD: the wizard creates `projects/<id>/` from the template with a valid profile; `test_project_profile.py` passes for the fresh project. Verified.
 

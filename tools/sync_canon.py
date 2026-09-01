@@ -1,16 +1,34 @@
 #!/usr/bin/env python3
-"""ONE CANON (Restructure Phase 1 / T28, Phase 3 repointed). The single source of truth is
-the project's canon/LOCKED_CANON.md — paths.CANON (root CRYSTAL_BEARS_LOCKED_CANON.md is now a compat
-symlink to it). Every skills/*/references/ copy is GENERATED from it by this script, stamped,
-and hash-verified. Editing a copy is drift; this script shouts and fixes.
+"""ONE CANON per project (Restructure Phase 1 / T28, Phase 3 repointed, T54 per project). The single
+source of truth is the project's canon/LOCKED_CANON.md — paths.CANON (root CRYSTAL_BEARS_LOCKED_CANON.md
+is a compat symlink to it for the first project). The project's lock_policy.json declares the
+compatibility copies that are GENERATED from the sources by this script and hash-verified; the old
+stamped skills/*/references/ copies were retired in T52 (the chairs are generic now — a project's canon
+is read from its own canon/, never copied beside a chair). Editing a copy is drift; this script shouts
+and fixes.
 
-    python3 tools/sync_canon.py            # regenerate all copies from the source
-    python3 tools/sync_canon.py --check    # verify only — exit 1 on any drift (CI / Continuity)
+    python3 tools/sync_canon.py                          # regenerate copies for the active project
+    python3 tools/sync_canon.py --check                  # verify only — exit 1 on any drift
+    python3 tools/sync_canon.py --project box-monsters   # another project (its profile picks the paths)
 """
 import sys, os, glob, hashlib, json, shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "engine"))
+
+
+def _project_arg(argv):
+    for i, a in enumerate(argv):
+        if a == "--project" and i + 1 < len(argv):
+            return argv[i + 1]
+        if a.startswith("--project="):
+            return a.split("=", 1)[1]
+    return None
+
+
+_pid = _project_arg(sys.argv)
+if _pid:
+    os.environ["STUDIO_PROJECT"] = _pid
 import paths as P  # noqa: E402 — the project profile is the only path authority (T44)
 SRC = P.CANON
 POLICY = P.LOCK_POLICY
@@ -23,12 +41,16 @@ def body(path):
 
 def main():
     check = "--check" in sys.argv
+    if not SRC or not os.path.exists(SRC):
+        print(f"canon: {P.PROJECT_ID} has no locked canon yet ({P.rel(SRC) if SRC else 'undeclared'}) — nothing to sync")
+        return
     src = open(SRC, encoding="utf-8").read()
     h = hashlib.sha256(src.encode()).hexdigest()[:12]
-    policy = json.load(open(POLICY, encoding="utf-8"))
-    # every crystal-bears-* skill gets a copy, whether or not references/ + the file exist yet
-    skill_dirs = sorted(d for d in glob.glob(os.path.join(ROOT, "skills", "crystal-bears-*")) if os.path.isdir(d))
-    copies = [os.path.join(d, "references", "CRYSTAL_BEARS_LOCKED_CANON.md") for d in skill_dirs]
+    policy = json.load(open(POLICY, encoding="utf-8")) if POLICY and os.path.exists(POLICY) else {}
+    # Stamped chair-side copies (policy.skillCanonCopiesGlob) are only maintained where a references/
+    # directory still exists — T52 retired them; a glob that matches nothing is simply empty.
+    pattern = policy.get("skillCanonCopiesGlob") or ""
+    copies = sorted(c for c in glob.glob(os.path.join(ROOT, pattern)) if os.path.isdir(os.path.dirname(c))) if pattern else []
     drift = []
     for c in copies:
         if not os.path.exists(c) or hashlib.sha256(body(c).encode()).hexdigest()[:12] != h:

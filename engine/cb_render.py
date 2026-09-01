@@ -147,10 +147,18 @@ def _review_video_resolution():
 
 
 def _require_show_adapter():
-    if P.ENGINE_ADAPTER != "crystal-bears-v1":
+    """T55: there is no adapter to support — one engine serves every project. Production is refused
+    only when the project's REQUIRED CONTENT is missing, and the refusal names each missing file."""
+    import project_profile
+    report = project_profile.capability_report(P.PROFILE)   # the active project (T44), never re-resolved from ROOT
+    missing = report.get("missingRequiredPaths") or report.get("missingRequiredContent") or []
+    if missing:
         raise Refused(
-            f"REFUSED — show adapter {P.ENGINE_ADAPTER!r} is not supported by the "
-            "Crystal Bears production runtime; no provider was contacted")
+            f"REFUSED — project {report.get('projectId')!r} is missing required content: "
+            + "; ".join(missing) + " — no provider was contacted")
+
+
+_require_project_content = _require_show_adapter
 
 
 def _now():
@@ -3013,12 +3021,11 @@ _DEPARTMENT_WORKERS = {
 
 
 def _department_skill_ref(stage, skill, standard_version=0):
+    """Provenance for department work: the studio chair resolved BY ROLE plus the active project's
+    taste overlay (T53) — never a path built from a project id."""
     del standard_version  # runtime skill families were consolidated in Pass 2
-    if stage == "animation":
-        return "skills/seedance-production-director/SKILL.md"
-    if skill == "dp":
-        skill = "cinematographer"
-    return f"skills/crystal-bears-{skill}/SKILL.md"
+    worker = "animation" if stage == "animation" else skill
+    return cb_departments.chair_ref(worker)
 
 
 def _department_container(pkg, scene, shot_id, stage, episode="Ep1"):
@@ -3049,8 +3056,8 @@ def department_status(scene, shot_id=None, episode="Ep1", stage=None):
         work, _ = _department_container(pkg, scene, shot_id, stage, episode)
         dep, worker, skill = _DEPARTMENT_WORKERS[stage]
         return {"stage": stage, "department": dep, "worker": worker,
-                "skill": ("seedance-production-director" if stage == "animation"
-                          else f"crystal-bears-{skill}"), **work}
+                "skill": cb_departments.chair_label("animation" if stage == "animation" else skill),
+                **work}
     out = []
     for rec in cb_departments.roster():
         item = dict(rec)

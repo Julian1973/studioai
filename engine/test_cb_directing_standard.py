@@ -204,14 +204,13 @@ def test_runtime_roles_have_one_current_owner_and_compatibility_aliases():
     assert D.load_runtime_skill("director", 4) == current
     assert D.load_runtime_skill("heart-director", 4) == current
     assert D.load_runtime_skill("story-director") == current
-    assert R._department_skill_ref("animation", "seedance-production-director", 0) == (
-        "skills/seedance-production-director/SKILL.md")
-    assert R._department_skill_ref("animation", "seedance-production-director", 3) == (
-        "skills/seedance-production-director/SKILL.md")
-    assert R._department_skill_ref("animation", "seedance-production-director", 4) == (
-        "skills/seedance-production-director/SKILL.md")
-    assert R._department_skill_ref("cinematography", "dp", 4) == (
-        "skills/crystal-bears-cinematographer/SKILL.md")
+    # T53: chairs resolve by role — the studio craft plus the active project's taste overlay.
+    for version in (0, 3, 4):
+        assert R._department_skill_ref("animation", "seedance-production-director", version).startswith(
+            "studio/chairs/animation/SKILL.md")
+    assert R._department_skill_ref("cinematography", "dp", 4).startswith(
+        "studio/chairs/cinematographer/SKILL.md")
+    assert "crystal-bears-" not in R._department_skill_ref("cinematography", "dp", 4)
 
 
 def test_v3_source_contract_remains_valid_without_v4_heart_fields(tmp_path, monkeypatch):

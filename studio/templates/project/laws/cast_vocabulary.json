@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "_note": "The show's own cast words the engine reads (project_laws): names, species map, physiology (e.g. wings), appearance terms that must never appear in prompt text, pronunciation overrides for spoken text, proximity bans, retake terms, review questions, offscreen-only characters, complexity signals, non-verbal sound palette, asset-group tokens. Empty lists mean 'this show declares none'.",
+  "names": [],
+  "species": {},
+  "physiology": {},
+  "speciesFallbackTerms": [],
+  "appearanceTerms": [],
+  "pronunciation": {},
+  "proximityBans": [],
+  "retakeTerms": {},
+  "reviewQuestions": {},
+  "vocalCues": {},
+  "comedyDefaults": {},
+  "offscreenOnly": [],
+  "complexitySignals": [],
+  "nonverbalSoundPalette": [],
+  "assetGroupTokens": {
+    "scenes": [],
+    "props": []
+  }
+}

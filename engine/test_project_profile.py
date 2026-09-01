@@ -44,8 +44,24 @@ def test_profile_resolves_only_inside_selected_tenant(tmp_path):
     assert loaded.canon_paths["characters"] == show / "canon" / "characters.json"
     assert loaded.canon_paths["identityPacks"] == show / "canon" / "identity_packs.json"
     report = studio_profile.capability_report(loaded)
-    assert report["adapterReady"] is False
+    # T55: no adapter gate — production is blocked only by missing content, each file named by path
+    assert report["adapterReady"] is True
     assert report["productionReady"] is False
+    assert any(item.startswith("lockedCanon: projects/moon-lanterns/canon/LOCKED_CANON.md")
+               for item in report["missingRequiredPaths"])
+    assert report["capabilities"]["animation"] is True
+
+
+def test_profile_loads_without_an_engine_adapter(tmp_path):
+    show = _profile(tmp_path)
+    payload = json.loads((show / "profile.json").read_text())
+    del payload["engineAdapter"]
+    payload["capabilities"] = {"music": False}
+    (show / "profile.json").write_text(json.dumps(payload))
+    loaded = studio_profile.load_show_profile(tmp_path, "moon-lanterns")
+    report = studio_profile.capability_report(loaded)
+    assert loaded.profile.engineAdapter is None
+    assert report["capabilities"]["music"] is False and report["capabilities"]["voice"] is True
 
 
 def test_selected_show_never_falls_back_to_crystal_bears(tmp_path):

@@ -2,7 +2,12 @@
 > governs ONLY the legacy beat pipeline until the shot pipeline's first real approved
 > shot lands. THE_DEFINITIVE_PIPELINE.md is the one authoritative specification.
 
-# THE PRODUCTION DOCTRINE — CRYSTAL BEARS, THE DEFINITIVE BUILD
+# THE PRODUCTION DOCTRINE — THE DEFINITIVE BUILD
+
+> **Projects (T60, 2026-09-01):** this doctrine is the STUDIO's and applies to every production. Where it
+> names Crystal Bears, a bee, a bear or a Crystal Bears file, read "the active project" and its own
+> `projects/<id>/canon` + `laws` — the stage map is identical for any show; only the project's data
+> changes. See STUDIO_BIBLE.md Part 4 for where a project's things live.
 
 **Locked 2026-07-06, Julian's consolidation ruling: "consolidate, purge, prove."** This document supersedes
 `REPLICATOR.md` and the prior (2026-07-05) draft of this file, both retired the same day this was written —

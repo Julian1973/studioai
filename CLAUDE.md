@@ -1,16 +1,36 @@
-# Crystal Bears Studio — operating instructions for Claude Code
+# StudioAI — operating instructions for Claude Code
 
-Source of truth order: CRYSTAL_BEARS_LOCKED_CANON.md (what the show is) > CRYSTAL_BEARS_STUDIO_BIBLE.md (how it is made) > this file. Where they touch, canon wins.
+**StudioAI is ONE studio for ANY show (Julian's stipulation, 2026-09-01: "this has to be a software for any
+project… we create projects, assets within the project, and episodes").** The engine (`engine/`), the
+studio UI (`cb-studio/`), the chairs (`studio/chairs/`) and the tools contain no show. Every show is a
+PROJECT — `projects/<id>/` — that owns its show bible, canon, laws, chairs' taste, creative memory,
+assets, scripts, episodes and every emitted package and take. `projects/crystal-bears/` is the first
+project; `projects/the-box-monsters/` the second. The active project is chosen by `STUDIO_PROJECT`,
+then the studio's last switch (`cb-studio/data/active-project.json`), then the one profile marked
+`"default": true`. Read STUDIO_BIBLE.md (how the studio works) and RESTRUCTURE_SPEC_PROJECTS.md (why it
+is shaped this way) before touching structure.
 
-Every session: read this file, TICKET_PACK_001.md and the current phase of WORLD_CLASS_ROADMAP.md before writing any code. Work tickets in the pack's order of play, one commit per ticket, the commit message naming the ticket. A ticket is done only when its Definition of Done is true AND the Bible agrees — never merely when the code compiles.
+Source of truth order, for a project: `projects/<id>/canon/LOCKED_CANON.md` (what the show is) >
+`projects/<id>/SHOW_BIBLE.md` (how that show is made) > STUDIO_BIBLE.md (how the studio works) > this
+file. Where they touch, canon wins. For the first project the root `CRYSTAL_BEARS_LOCKED_CANON.md` and
+`CRYSTAL_BEARS_STUDIO_BIBLE.md` are compatibility links to those files, until T61.
+
+Every session: read this file, the current ticket pack (TICKET_PACK_002.md) and the current phase of
+WORLD_CLASS_ROADMAP.md before writing any code. Work tickets in the pack's order of play, one commit per
+ticket, the commit message naming the ticket. A ticket is done only when its Definition of Done is true
+AND the Bible agrees — never merely when the code compiles.
+
+The rules below were written while the studio was built around its first show; where one names Crystal
+Bears, a bee, a bear or a Crystal Bears file, read it as "the active project" and its own canon/laws —
+the dated history is kept as written, per this file's own practice for superseded entries (rule 87).
 
 Hard rules (never work around these):
 1. Gates are hard locks. Never advance past an unsigned gate; never sign past an open BLOCK.
-2. Taste lives in prose (the chair skills); law lives in code; canon lives in data. Anything found in the wrong layer moves the day it is found.
+2. Taste lives in prose, law lives in code, canon lives in data — and each in ITS OWN HOME (T40–T60, 2026-09-01): a chair's CRAFT (role, responsibility, workflow, influence, the runtime contract) is the studio's, at `studio/chairs/<role>/SKILL.md`, and names no show; a show's TASTE for that chair is the project's, at `projects/<id>/chairs/<role>.md` (only its `RUNTIME_TASTE` block reaches a worker call); law lives in the engine; canon lives in the project's `canon/` (facts) and `laws/` (the show's own rules the engine enforces — cast vocabulary, forbidden elements, continuity rules, emission checks — read only through `engine/project_laws.py`). A cast name, a species, a gag word or a show's file path found in engine/studio/tools code is in the wrong layer and moves the day it is found (`test_t44_profile_authority.py`, `test_t46_cast_vocabulary.py`, `test_second_project_isolation.py` fail on it).
 3. No output is ever hand patched. A fault routes through a retake with a layer diagnosis (keyframe / brief / reference / take).
 4. Law 5: the voice lives in the render. One combined @Audio1, supplied by the Voice Director and lip-synced by Seedance; no native-voice fallback (a beat with dialogue whose V3 track fails REFUSES to render); no post voice swap. cb_post has no swap function by design — do not add one.
 5. Never describe a character's appearance in prompt text. Identity comes only from the reference images. Binding a name to its reference slot in the prompt text ("Fuzzby is the bee from @图2") is allowed and is now the standard (Julian, 2026-07-05, the blessed v4 template — reversing this rule's earlier "names live only in the audio" wording); what stays absolutely forbidden is DESCRIBING the character — no physical/appearance text anywhere, ever. The distinction: a name is a label, not a description.
-6. Canon is edited ONLY at root CRYSTAL_BEARS_LOCKED_CANON.md, then `python3 tools/sync_canon.py`. The skill copies are generated; editing one is drift. `--check` must pass before any sign off.
+6. Canon is edited ONLY at the project's own `projects/<id>/canon/LOCKED_CANON.md`, then `python3 tools/sync_canon.py --project <id>` (T54) regenerates the compatibility copies the project's `canon/lock_policy.json` declares. A copy is generated; editing one is drift. `--check` must pass before any sign off. The chairs no longer carry canon copies (T52); a chair reads the active project's canon from the project. Editing a lock-hashed source (the locked canon, characters.json, the style/wing laws, a chair file the lock policy names) marks the project's canon DRIFTED until it is re-locked — the showrunner's explicit action in the studio; a new show LAW goes in `laws/*.json`, which the lock does not hash.
 7. When code becomes sharper than the documents, the documents update in the same commit.
 8. Restructure work follows RESTRUCTURE_SPEC_T30.md: one phase per commit, baseline byte-identical prompts proven after each phase.
 9. A temporary state (e.g. a pollen moustache) resolves WITHIN the take it started in — it never carries across a take boundary (T2 ruling, 2026-07-02, Julian). There is no continuity-tail/previous-clip-tail chaining mechanism; do not re-add one without a fresh ruling.
@@ -1419,3 +1439,14 @@ Baseline proof (run before and after any change that touches prompt code):
     work (`67e871828cdeda43f5a094cf685e68be`) — every fix here lives in checker/compiler code, plus two
     narrowly-scoped, factual data completions (`continuity.json`'s three `"on": "Keen"` fields, `characters.json`
     untouched) — no beat's own authored creative content was edited.
+
+87. THE PROJECTS RESTRUCTURE — ONE STUDIO, ANY SHOW (Julian, 2026-09-01, T40 → T60, branch `t40/projects`; RESTRUCTURE_SPEC_PROJECTS.md is the spec, TICKET_PACK_002.md the ledger): "the software is the pipeline and the Crystal Bears — or the Box Monsters — sit as projects with episodes, so each project has its own assets and show bible"; "I only want the bears as a project, I will be doing different shows on this computer". Done under one safety rule: `tools/t40_baseline.py --check` must print IDENTICAL (286 stored emissions and production packages) after every phase, and pytest keeps its pre-existing failures and no more. What is true NOW:
+    - **A project is a folder** `projects/<id>/` with `profile.json` as the only path authority (`engine/paths.py` reads it once; nothing builds a project path by hand — T44). `canon/` facts, `laws/` rules, `chairs/` taste, `creative/` memory and the Design-tab roster, `assets/`, `episodes/{scripts,output,media,episodes.json}`, `SHOW_BIBLE.md`, `docs/`. The template is `studio/templates/project/`; `engine/project_scaffold.py` and the studio wizard (`POST /api/project`) create a project from it — never by hand (T56).
+    - **The registry is `projects/*/profile.json`** (T45): the Productions screen lists every valid profile; `cb-studio/data/projects.json` contributes presentation only. Entering another production switches the studio (`/api/project/activate` → `cb-studio/data/active-project.json` → re-exec, T59).
+    - **Canon out of code** (T46–T51): cast names, species and physiology (`isBee` is a legacy alias of `physiology.wings`), appearance terms, pronunciation overrides, proximity bans, forbidden elements, continuity carry rules, emission checks, archetype signals, room voice, the studio Design roster and every last worked string live in the project and are read through `engine/project_laws.py`. A project that declares none gets empty vocabularies — never another project's.
+    - **Chairs are generic** (T52/T53): `studio/chairs/<role>/SKILL.md` ×8 (writer, director, cinematographer, voice-director, composer, animation, continuity, post) with `{project}`/`{showrunner}` filled from the profile (new optional `showrunner` field); a chair is resolved BY ROLE (`cb_departments.SKILL_ROLES`), never by project id. The first project's own chair documents moved verbatim to `projects/crystal-bears/chairs/`; `skills/*/SKILL.md` are symlinks to them so `lock_policy.json`'s runtime hashes stay current until the T61 re-lock.
+    - **No adapters** (T55): `engineAdapter` is an optional label; `capabilities{}` declares what a project produces; production is refused only for MISSING REQUIRED CONTENT, each file named by path.
+    - **Compatibility links for one release** (T43, T61 deletes them): `shows/`→`projects/`, `cb-output/`, `engine/config`, `cb-studio/data/scripts`, the root show documents, `projects/crystal-bears/assets`→`cb-seed/assets` (identity digests hash absolute asset paths), and the eight `skills/…/SKILL.md` links. `tools/check_links.py` verifies them; `serve.py` refuses to start on a broken one (a Windows checkout without symlink support).
+    - **The first project keeps its shared media home** (`engine/media`) for one release; every project made from the template declares `episodes.media` and owns its own (T58, `paths.MEDIA`/`MEDIA_URL`).
+    - **Proof of the second project**: `engine/test_second_project_isolation.py` runs the engine as `the-box-monsters` in a subprocess and asserts no Crystal Bears path, name or word is reachable (T58).
+    - **Later**: T61 (delete the links, re-lock canon with the runtime sources at their real paths), T62 (`cb-studio`/`cb_` naming — Julian's call), T63 (the PC's `update-studio.cmd`), T64 (the test suite writes into real project data — `prompt_bank.jsonl`, `asset-registry/assets.json`; revert after a run until fixed).

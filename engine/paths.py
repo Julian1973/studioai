@@ -8,7 +8,10 @@ declared in the profile does not exist as far as the engine is concerned.
 
     ENGINE            this directory
     ROOT              the repo root (ENGINE's parent)
-    PROJECT_ID        the active project's id (env STUDIO_PROJECT, else the profile marked "default")
+    PROJECT_ID        the active project's id (env STUDIO_PROJECT → the studio's last switch,
+                      cb-studio/data/active-project.json → the profile marked "default" → the only project)
+    PROJECT_NAME / SHOWRUNNER / CAPABILITIES
+                      the profile's name, who signs the gates, what the project produces (T52/T55)
     PROJECT           projects/<id>/  (SHOW and SHOW_ID remain as aliases for one release)
     CANON             the locked-canon markdown
     CONFIG            the canon/ data directory
@@ -23,11 +26,15 @@ declared in the profile does not exist as far as the engine is concerned.
     SCRIPTS           the project's locked screenplays
     OUTPUT            the project's packages / evidence / prompt bank / asset registry
     EPISODES_INDEX    the derived episode index the studio maintains for this project
-    MEDIA             generated review media — engine scratch, not project data
-    LOCKED / NOTES    the engine's gate-lock and notes state files
+    MEDIA / MEDIA_URL generated media (plates, keyframes, takes, post) — the project's own
+                      episodes.media when declared, else the engine's legacy shared engine/media
+                      (the first project, for one release); MEDIA_URL is the studio's URL root for it
+    LOCKED / NOTES    legacy engine-level state file names (no live module reads them)
 
-The old paths (shows/, cb-output/, engine/config, cb-studio/data/scripts, cb-seed/) exist only as
-compatibility links for data files that still name them; tools/check_links.py verifies them.
+The old paths (shows/, cb-output/, engine/config, cb-studio/data/scripts, the root show documents, the
+skills/ chair paths, projects/crystal-bears/assets → cb-seed/assets) exist only as compatibility SYMLINKS
+for data files and hashes that still name them — real links, not copies; tools/check_links.py verifies
+them and serve.py refuses to start on a broken one. T61 deletes them.
 """
 import os
 import re

@@ -97,7 +97,7 @@ DoD: green with Box Monsters active; RED if any T46–T51 change is reverted (pr
 cb-studio/app.html, serve.py. Selecting a production switches scripts, episodes, canon, assets and chairs without restart; the `p=` deep link survives reload.
 DoD: `test_director_ui.py` gains a two-project switch case; passes. Verified.
 
-**T60 · Docs tell one story** ⏳ OPEN — blocked by T59
+**T60 · Docs tell one story** ✅ DONE pending Julian's sign (2026-09-01 — CLAUDE.md header + rules 2/6 rewritten, rule 87 (the restructure, dated); STUDIO_BIBLE.md (new, the studio's laws/pipeline/chairs/gate contracts/where things live); README repository map; EPISODE_2_START_HERE.md → any production; PRODUCTION_DOCTRINE.md projects note; engine/paths.py docstring corrected (real symlinks, MEDIA/MEDIA_URL, the active-project order))
 CLAUDE.md (rules 2, 6 rewritten; new dated rule for T40), STUDIO_BIBLE.md (from the engine parts of the old CRYSTAL_BEARS_STUDIO_BIBLE.md), README.md repository map, EPISODE_2_START_HERE.md, PRODUCTION_DOCTRINE.md stage map, engine/paths.py docstring (which today falsely says engine/config is symlinks).
 DoD: a fresh Claude Code / Codex session reading only CLAUDE.md + README would build the project structure, not the Crystal Bears one. Done when Julian signs.
 
@@ -117,6 +117,6 @@ DoD: Julian's ruling recorded either way.
 projects/crystal-bears/episodes/output/{prompt-bank/prompt_bank.jsonl, asset-registry/assets.json}. A full pytest run appends test prompts to the real prompt bank and re-registers real assets with test-machine paths — the committed prompt_bank.jsonl already carries pytest tmp paths from the Mac. Every writer in the suite must be pointed at a scratch project (the template from T56 is the natural fixture).
 DoD: `python3 -m pytest -q` leaves `git status` clean. Verified.
 
-**T63 · Windows PC copy brought to the working branch** ⏳ OPEN
+**T63 · Windows PC copy brought to the working branch** ✅ BUILT, unverified on the PC (2026-09-01 — `update-studio.cmd` + `update-studio.ps1` beside `start-studio.cmd`: stashes ALL uncommitted work (tracked + untracked) under a dated name first, `git config core.symlinks true`, fetch + checkout + `--ff-only`, rebuilds .venv only when requirements.txt changed, runs check_links, prints the commit. Default branch `t40/projects`; pass another name once merged. The PC's own the-box-monsters folder and Jenny assets stay put (assets are gitignored; the rest goes to the stash))
 C:\Users\julia\OneDrive\Desktop\Ai Studio. Add `update-studio.cmd` beside `start-studio.cmd` (fetch + fast-forward `codex/studioai-reduction-pass-3`, then re-create `.venv` if requirements changed). The PC copy was 19 commits behind on 2026-09-01 AND carries uncommitted local work (characters.json edited 16:01 BST, CB_Jenny_* assets added 16:06) — the update must stash or commit that first, never discard it.
 DoD: double-click updates the PC to the branch tip and prints the commit it landed on. Verified on the PC.

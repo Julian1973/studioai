@@ -1,7 +1,11 @@
-# 8th Hour Animation Studio
+# StudioAI — 8th Hour Animation Studio
 
-The canonical Crystal Bears production build: a human-directed, approval-gated AI
-animation pipeline from script to finished scene.
+A human-directed, approval-gated AI animation pipeline from script to finished scene — ONE studio
+for ANY show. Every show is a project under `projects/<id>/` that owns its bible, canon, laws, chairs'
+taste, assets, scripts and episodes; the engine and the studio contain no show. `projects/crystal-bears/`
+is the first production, `projects/the-box-monsters/` the second. Read [STUDIO_BIBLE.md](STUDIO_BIBLE.md)
+for how the studio works and [RESTRUCTURE_SPEC_PROJECTS.md](RESTRUCTURE_SPEC_PROJECTS.md) for why it is
+shaped this way.
 
 It is designed around one principle: the models execute a resolved production plan. They
 do not silently decide story, performance, camera, canon, continuity or spend.
@@ -15,7 +19,9 @@ pip install -r requirements.txt
 python3 cb-studio/serve.py
 ```
 
-Open `http://localhost:8765/cb-studio/app.html`.
+Open `http://localhost:8765/cb-studio/app.html`. The Productions screen lists every project;
+entering one switches the studio to it (`STUDIO_PROJECT=<id>` also selects the project at start).
+Create a new show with **New production** (the wizard builds it from `studio/templates/project/`).
 
 Run the zero-spend verification suite:
 
@@ -23,8 +29,10 @@ Run the zero-spend verification suite:
 python3 -m pytest -q
 ```
 
-Expected canonical result: **153 passed, 4 skipped**. The skips name unavailable historical
-revision-6 media fixtures; the current production route is covered and passes.
+Expected result: everything passes except the pre-existing, documented failures (key-art media fixtures,
+two audio-timing cases); the skips name unavailable historical media fixtures. After a run, revert the
+two project data files the suite still writes into (`git checkout -- projects/crystal-bears/episodes/output/prompt-bank/prompt_bank.jsonl projects/crystal-bears/episodes/output/asset-registry/assets.json`, T64).
+After any structural change: `python3 tools/t40_baseline.py --check` must print IDENTICAL.
 
 ## The production path
 
@@ -66,15 +74,22 @@ The researched Seedance 2.5 scene-generation, provider-migration and delivery pl
 
 ## Repository map
 
-- `cb-studio/` — production command centre and local API.
-- `engine/` — planning, validation, generation, safety, approvals, cost controls and post.
-- `projects/<project>/` — ONE FOLDER PER SHOW: its show bible, canon, laws, scripts, episodes and
-  production output. `projects/crystal-bears/` is the first project. (`shows/` is a compatibility
-  link to `projects/` for one release — see RESTRUCTURE_SPEC_PROJECTS.md.)
-- `skills/` — runtime production-department contracts, including the Seedance Production
-  Director.
-- `cb-output/` — compatibility link to `projects/crystal-bears/episodes/output/` (packages and evidence).
-- `tools/` — canon, media and field-audit utilities.
+- `engine/` — the pipeline: planning, validation, generation, safety, approvals, cost controls, post. No show in it;
+  `engine/paths.py` reads the active project's `profile.json` (the only path authority) and `engine/project_laws.py`
+  reads the project's own laws.
+- `cb-studio/` — the studio UI and local API (`serve.py`). No show in it.
+- `studio/chairs/<role>/` — the eight generic chairs (writer, director, cinematographer, voice-director, composer,
+  animation, continuity, post): craft + runtime contract, `{project}`/`{showrunner}` filled from the profile.
+- `studio/templates/project/` — the project template; `engine/project_scaffold.py` / the wizard create a project from it.
+- `projects/<id>/` — ONE FOLDER PER SHOW: `profile.json`, `SHOW_BIBLE.md`, `canon/` (facts + the canon lock), `laws/`
+  (the show's rules the engine enforces), `chairs/` (the show's taste), `creative/`, `assets/`, `episodes/`
+  (scripts, output, media, episodes.json). `docs/` for the show's own documents.
+- `tools/` — `t40_baseline.py` (byte-identity proof), `sync_canon.py --project <id>`, `check_links.py`, media backup.
+- `dailies/` — evidence review helpers.
+- Compatibility links, for one release (T61 removes them): `shows/`→`projects/`, `cb-output/`→the first project's
+  output, `engine/config`→its canon, `cb-studio/data/scripts`→its scripts, `skills/*/SKILL.md`→the moved chair
+  documents, the root `CRYSTAL_BEARS_*.md`. `tools/check_links.py` verifies them; the studio refuses to start on a
+  broken one (a Windows clone without symlink support — enable Developer Mode, `git config core.symlinks true`).
 
 The root Node/Replit files are an older, unrelated interactive project retained from the
 original 8th Hour folder. They are not part of this animation production path.

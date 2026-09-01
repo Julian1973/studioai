@@ -22,7 +22,7 @@ corrected above to match what the code actually does.
 Keys come from cb-gen/.env (gitignored): GEMINI_API_KEY, ELEVENLABS_API_KEY.
 Endpoints verified against ai.google.dev + elevenlabs.io docs (June 2026).
 """
-import os, sys, json, time, base64, hashlib, mimetypes, argparse, pathlib, subprocess, tempfile
+import os, sys, json, time, base64, hashlib, mimetypes, argparse, pathlib, re, subprocess, tempfile
 import urllib.parse
 import requests
 import cb_costs
@@ -63,6 +63,22 @@ FAL_KEY = os.environ.get("FAL_KEY", "")
 FAL = "https://queue.fal.run"
 BYTEPLUS_ARK_KEY = os.environ.get("BYTEPLUS_ARK_API_KEY", "")
 BYTEPLUS_ARK = "https://ark.ap-southeast.bytepluses.com"
+
+# Canon keeps the character name "Aida". ElevenLabs pronounces that spelling
+# incorrectly, so only the provider-facing voice text uses the phonetic "Ada".
+ELEVEN_PRONUNCIATION_OVERRIDES = {"Aida": "Ada"}
+
+
+def _eleven_voice_text(text):
+    spoken = str(text or "")
+    for canonical, phonetic in ELEVEN_PRONUNCIATION_OVERRIDES.items():
+        spoken = re.sub(rf"\b{re.escape(canonical)}\b", phonetic, spoken)
+    return spoken
+
+
+def _eleven_dialogue_inputs(inputs):
+    return [{**item, "text": _eleven_voice_text(item.get("text"))}
+            for item in (inputs or [])]
 BYTEPLUS_MAX_REQUEST_BYTES = 64 * 1024 * 1024
 
 def _b64(path):
@@ -759,27 +775,28 @@ def eleven_tts(text, voice_id, model_id="eleven_v3", out="vo.mp3",
     The tag sets the colour; the TEXT does the acting; 1-2 tags per segment. Never use_speaker_boost in v3."""
     _need_eleven_key()
     url = f"{XI}/v1/text-to-speech/{voice_id}"
-    request_body = {"text": text, "model_id": model_id,
+    provider_text = _eleven_voice_text(text)
+    request_body = {"text": provider_text, "model_id": model_id,
                     "voice_settings": {"stability": stability,
                                        "similarity_boost": similarity_boost,
                                        "style": style}}
     # ElevenLabs currently rejects previous_text with eleven_v3. Keep the argument at this
     # transport boundary for models that support it, but never send an unsupported V3 field.
     if model_id != "eleven_v3" and str(previous_text or "").strip():
-        request_body["previous_text"] = str(previous_text).strip()
+        request_body["previous_text"] = _eleven_voice_text(previous_text).strip()
     r = _rpost(url, headers={"xi-api-key": ELEVEN_KEY, "accept": "audio/mpeg",
                             "Content-Type": "application/json"},
                json=request_body, timeout=120)
     r.raise_for_status()
     outp = MEDIA / out; outp.write_bytes(r.content)
-    cb_costs.log_spend("elevenlabs_tts", cb_costs.estimate_tts_cost(text), out=out, meta={"model": model_id})
+    cb_costs.log_spend("elevenlabs_tts", cb_costs.estimate_tts_cost(provider_text), out=out, meta={"model": model_id})
     cb_costs.write_gen_sidecar(
         outp, op="elevenlabs_tts", model=model_id, voice_id=voice_id,
         stability=stability, similarity_boost=similarity_boost, style=style,
         previousTextProvided=(model_id != "eleven_v3" and
                               bool(str(previous_text or "").strip())),
         directionContextRunwayProvided=bool(str(previous_text or "").strip()),
-        chars=len(text or ""))
+        chars=len(provider_text), pronunciationOverrides=ELEVEN_PRONUNCIATION_OVERRIDES)
     return str(outp)
 
 def _ffprobe_duration(path):
@@ -1015,14 +1032,16 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
     v3 guide wants context, not one-liners). `inputs` = ordered [{"text","voice_id"}] (<=2000 chars total, <=10
     voices). Lower stability = broader emotional range (0.30 = the expressive 'Creative' zone; never use_speaker_boost)."""
     _need_eleven_key()
+    provider_inputs = _eleven_dialogue_inputs(inputs)
     try:
         r = _rpost(f"{XI}/v1/text-to-dialogue/with-timestamps",
                    headers={"xi-api-key": ELEVEN_KEY, "Content-Type": "application/json"},
-                   json={"inputs": inputs, "model_id": model_id, "settings": {"stability": stability},
+                   json={"inputs": provider_inputs, "model_id": model_id, "settings": {"stability": stability},
                          "apply_text_normalization": "auto"}, timeout=180)
     except requests.HTTPError as exc:
         if os.environ.get("CB_ELEVEN_DIALOGUE_TTS_FALLBACK", "1") != "0":
-            return _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, exc)
+            return _eleven_dialogue_tts_fallback(
+                provider_inputs, out, model_id, generation_kind, exc)
         raise
     r.raise_for_status()
     try:
@@ -1033,7 +1052,7 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
         raise RuntimeError(
             "ElevenLabs dialogue response omitted the timestamped audio contract"
         ) from exc
-    expected_indexes = set(range(len(inputs or [])))
+    expected_indexes = set(range(len(provider_inputs)))
     try:
         returned_indexes = {
             int(item["dialogue_input_index"]) for item in voice_segments
@@ -1055,7 +1074,8 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
         "model": model_id,
         "audioPath": str(outp.resolve()),
         "audioSha256": __import__("hashlib").sha256(audio).hexdigest(),
-        "inputCount": len(inputs or []),
+        "inputCount": len(provider_inputs),
+        "pronunciationOverrides": ELEVEN_PRONUNCIATION_OVERRIDES,
         "voiceSegments": [
             {
                 "voiceId": item.get("voice_id"),
@@ -1077,15 +1097,15 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
         json.dumps(timing_payload, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
-    _chars = sum(len(str(i.get("text") or "")) for i in (inputs or []))
-    _billing = cb_costs.dialogue_billing(inputs, model_id=model_id,
+    _chars = sum(len(str(i.get("text") or "")) for i in provider_inputs)
+    _billing = cb_costs.dialogue_billing(provider_inputs, model_id=model_id,
                                           generation_kind=generation_kind)
-    _billing["voices"] = len(inputs or [])
+    _billing["voices"] = len(provider_inputs)
     cb_costs.log_spend("elevenlabs_dialogue", _billing["estimatedCostUsdExTax"], out=out,
                         meta=_billing)
     cb_costs.write_gen_sidecar(
         outp, op="elevenlabs_dialogue", model=model_id, stability=stability,
-        chars=_chars, voices=len(inputs or []), billing=_billing,
+        chars=_chars, voices=len(provider_inputs), billing=_billing,
         timestampEndpoint=True, dialogueTimingPath=str(timing_path),
     )
     return str(outp)

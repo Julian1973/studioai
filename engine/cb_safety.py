@@ -661,8 +661,8 @@ def install(m):
             # provenance, but may not silently restore tags or punctuation that the human
             # removed to correct a glitch or cadence fault.
             working_line = working_by_occurrence.get(source.get("dialogueOccurrenceId"))
-            provider_text = ((working_line or {}).get("text") or
-                             recipe["performedText"])
+            provider_text = m.cb_gen._eleven_voice_text(
+                (working_line or {}).get("text") or recipe["performedText"])
             result.append({
                 "dialogueOccurrenceId": source.get("dialogueOccurrenceId"),
                 "sourceEventId": source.get("sourceEventId"),
@@ -671,7 +671,7 @@ def install(m):
                 "voiceId": item["voiceId"],
                 "modelId": item["modelId"],
                 "voiceSettings": item["voiceSettings"],
-                "previousText": item["previousText"],
+                "previousText": m.cb_gen._eleven_voice_text(item["previousText"]),
                 "compiledHash": item["compiledHash"],
                 "recipeId": recipe["recipeId"],
                 "voiceTreatment": item.get("voiceTreatment", "single_voice"),
@@ -705,6 +705,7 @@ def install(m):
                 "voiceRegistersHash": file_sha256(m.cb_voice_director.REGISTERS_PATH),
                 "voiceRulebookHash": file_sha256(m.cb_voice_director.RULEBOOK_PATH),
                 "voiceCompilerVersion": m.cb_voice_director.COMPILER_VERSION,
+                "pronunciationOverrides": m.cb_gen.ELEVEN_PRONUNCIATION_OVERRIDES,
                 "voiceIds": ids}
 
     def voice_provider_projection(lines):

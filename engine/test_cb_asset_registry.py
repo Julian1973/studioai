@@ -64,6 +64,26 @@ def test_scene_library_returns_opening_plate_without_package(monkeypatch, tmp_pa
     assert stored["assets"][0]["bindingKey"] == "Ep1|3||opening_plate|scene_opening_plate"
 
 
+def test_reregistering_existing_binding_preserves_registry_order(monkeypatch, tmp_path):
+    media, _ = _tmp_registry(monkeypatch, tmp_path)
+    first = media / "first.png"
+    second = media / "second.png"
+    first.write_bytes(b"first")
+    second.write_bytes(b"second")
+    A.register_asset(
+        episode="Ep1", scene="1", kind="scene_plate", role="first", path=first)
+    A.register_asset(
+        episode="Ep1", scene="2", kind="scene_plate", role="second", path=second)
+
+    A.register_asset(
+        episode="Ep1", scene="1", kind="scene_plate", role="first", path=first,
+        label="First refreshed")
+
+    stored = json.loads((tmp_path / "registry" / "assets.json").read_text())
+    assert [item["role"] for item in stored["assets"]] == ["first", "second"]
+    assert stored["assets"][0]["label"] == "First refreshed"
+
+
 def test_remove_asset_unbinds_registry_record_without_deleting_file(monkeypatch, tmp_path):
     media, _ = _tmp_registry(monkeypatch, tmp_path)
     plate = media / "uploaded_prop.png"

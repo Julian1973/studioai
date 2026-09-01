@@ -971,6 +971,7 @@ body{background:var(--bg);color:var(--ink)}
 .visual-anchor-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 14px}.visual-anchor{display:grid;grid-template-columns:96px minmax(0,1fr);min-height:82px;border:1px solid var(--line);background:var(--surface2);border-radius:7px;overflow:hidden;text-align:left;color:inherit}.visual-anchor>button{all:unset;display:contents;cursor:pointer}.visual-anchor-media{width:96px;height:100%;min-height:82px;object-fit:cover;background:#090a0e}.visual-anchor-empty{display:grid;place-items:center;width:96px;min-height:82px;box-sizing:border-box;background:#090a0e;color:var(--muted);font-size:10px;text-align:center;padding:8px}.visual-anchor-copy{display:flex;flex-direction:column;justify-content:center;gap:4px;padding:10px;min-width:0}.visual-anchor-label{color:var(--hint);font-size:10px;font-weight:800;text-transform:uppercase}.visual-anchor-title{font-size:13px;font-weight:800}.visual-anchor-status{color:var(--muted);font-size:11px;line-height:1.35}
 .see-focus-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:2px 0 12px}.see-focus-title{font-size:19px;font-weight:850;line-height:1.2}.see-focus-brief{max-width:620px;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.45}.see-workspace .visual-anchor-pair{gap:12px}.see-workspace .visual-anchor{display:flex;flex-direction:column;min-height:0}.see-workspace .visual-anchor>button{display:flex;flex-direction:column;height:100%}.see-workspace .visual-anchor-media,.see-workspace .visual-anchor-empty{width:100%;height:auto;min-height:0;aspect-ratio:16/9;object-fit:cover}.see-workspace .visual-anchor-copy{min-height:78px;padding:11px 12px}.see-workspace .see-supporting.has-anchor-keyframe>.kf-current{display:none}.see-workspace .see-supporting:empty{display:none}.see-context{margin-top:14px}.see-context .shot-context{margin:0;border:0;background:transparent;padding:0}
 .scene-plate-preview{all:unset!important;display:block!important;height:auto!important;cursor:pointer!important}.scene-plate-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-top:auto;border-top:1px solid var(--line);background:var(--line)}.scene-plate-actions .btn,.scene-plate-actions .btn.ghost{width:100%;min-width:0;min-height:42px;margin:0;padding:7px 6px;border:0;border-radius:0;background:var(--surface);color:var(--muted);font-size:10px;line-height:1.25}.scene-plate-actions .btn:hover,.scene-plate-actions .btn:focus-visible{background:var(--brandbg);color:var(--brandink);outline:none}.scene-plate-protection{padding:7px 10px;border-top:1px solid var(--line);color:var(--hint);font-size:9px;line-height:1.35;text-align:center;background:var(--surface2)}
+.scene-plate-progress{display:flex;align-items:center;gap:10px;padding:11px 12px;border-top:1px solid var(--brand);background:var(--brandbg);color:var(--ink);font-size:11px;line-height:1.4}.scene-plate-progress .stage-spinner{width:18px;height:18px;border-width:2px;flex:none}.scene-plate-progress span:last-child{display:grid;gap:2px}.scene-plate-progress small{color:var(--muted)}.scene-plate-anchor.is-generating .scene-plate-actions button{pointer-events:none;opacity:.5}
 @keyframes directorFade{from{opacity:0}to{opacity:1}}@keyframes directorSlide{from{transform:translateX(22px);opacity:.75}to{transform:translateX(0);opacity:1}}
 @media(max-width:900px){.focus-workspace.result-first{display:flex;max-width:780px}.focus-workspace.result-first .wcol-artefact{order:1}.focus-workspace.result-first .wcol-decision{order:2;position:static}.focus-workspace.result-first .focus-context{order:3}.watch-stage{grid-template-columns:minmax(0,1fr)}.watch-candidate-grid{grid-template-columns:minmax(0,1fr);padding:10px}.watch-change-below{margin:0 10px 10px}.director-chat{top:auto;left:0;width:100%;height:min(78dvh,720px);padding:16px max(14px,env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));border-left:0;border-top:1px solid var(--line);animation:directorRise .2s ease-out}.kf-revision-flow{grid-template-columns:96px minmax(0,1fr)}.kf-previous img{width:96px}.shot-glance{grid-template-columns:82px minmax(0,1fr)}.shot-dialogue-window{grid-column:1/-1}.shot-state-flow{grid-template-columns:1fr}.shot-state-text{-webkit-line-clamp:2}.stage-audio-placeholder{grid-template-columns:42px minmax(0,1fr);padding:14px}.stage-audio-play{width:42px;height:42px}.stage-audio-placeholder .btn{grid-column:1/-1;width:100%}@keyframes directorRise{from{transform:translateY(22px);opacity:.75}to{transform:translateY(0);opacity:1}}}
 @media(max-width:620px){.visual-anchor-pair{grid-template-columns:1fr}.visual-anchor{grid-template-columns:84px minmax(0,1fr)}.visual-anchor-media,.visual-anchor-empty{width:84px}.see-workspace .visual-anchor{display:flex}.see-workspace .visual-anchor-media,.see-workspace .visual-anchor-empty{width:100%}.see-focus-head{display:block}.see-focus-brief{margin-top:6px}.scene-plate-actions .btn,.scene-plate-actions .btn.ghost{min-height:48px;font-size:11px}}
@@ -4911,31 +4912,45 @@ function shotContextCardHTML(mode,shot,led,media){
   ];
   return `<section class="shot-context" aria-label="Current shot context"><div class="shot-context-head"><div class="shot-context-id">SHOT · ${_esc(shot.shotId)} · ${stage} REVISION ${revision}</div><div class="shot-context-state">${working?`<span class="stage-spinner" style="width:11px;height:11px;border-width:2px"></span><b>WORKING</b>`:`<b>CURRENT</b>`}</div></div><div class="shot-glance"><div class="shot-duration"><b>${_esc(duration?duration.toFixed(duration%1?1:0):"—")}s</b><span>Total shot</span></div><div class="shot-job"><span>What this shot must do</span><b>${_esc(shot.purpose||"Deliver the approved story beat and continuity handoff.")}</b></div><div class="shot-dialogue-window"><span>Voice in context</span><b>${_esc(dialogue.label)}</b></div></div><div class="shot-state-flow">${states.map((item,i)=>`<div class="shot-state ${i===active?"current":""}"><span class="shot-state-label">${i+1} · ${item[0]}</span><span class="shot-state-text">${_esc(item[1])}</span></div>`).join("")}</div><div class="shot-context-locks"><span>${refCount} ${dialogue.count?"assigned":"visual"} reference${refCount===1?"":"s"}</span><span class="locked">Canon locked</span><span class="locked">Seedance 2.5</span>${dialogue.count?`<span class="locked">ElevenLabs v3 · @Audio1</span>`:dialogue.sfx.length?`<span class="locked">Seedance SFX only · no @Audio1 required</span>`:`<span>No dialogue or audio bed required</span>`}${media&&media.finalFrame?`<span class="locked">Landing frame captured</span>`:""}</div></section>`;
 }
+function scenePlateProgressHTML(job){
+  if(!job)return "";
+  const step=String(job.step||"Generating the new scene world");
+  const generating=String(job.gate||"")==="shot:scenelook";
+  return `<div id="scenePlateProgress" class="scene-plate-progress" role="status" aria-live="polite"><span class="stage-spinner" aria-hidden="true"></span><span><b>${_esc(step)}</b><small>${generating?"Generating":"Updating"} inside this Scene Plate window. The current approved plate remains protected until you approve the replacement.</small></span></div>`;
+}
+function isScenePlateJob(job){return /^shot:(?:scenelook|reject-scenelook|select-scenelook-(?:library|upload))$/.test(String((job&&job.gate)||""));}
+function updateScenePlateLiveStatus(job){
+  SH_SCENE_PLATE_PROGRESS=job||SH_SCENE_PLATE_PROGRESS;
+  const row=document.getElementById("scenePlateProgress");
+  if(row&&SH_SCENE_PLATE_PROGRESS)row.outerHTML=scenePlateProgressHTML(SH_SCENE_PLATE_PROGRESS);
+}
 function visualAnchorPairHTML(media){
   const plate=(SH_SCENELOOK&&SH_SCENELOOK.plateUrl)||null;
   const keyframe=(media&&media.keyframe)||null;
+  const plateJob=SH_SCENE_PLATE_PROGRESS;
   const plateStatus=SH_SCENELOOK&&SH_SCENELOOK.activeSource==="working"
     ?"Current working Scene Look · attached to every shot"
     :"Current approved Scene Look · attached to every shot";
   const shot=(pShots()[PSHOT_I]||{}).shotId||"Shot 1";
   return `<section class="visual-anchor-pair" aria-label="Scene plate and opening keyframe">
-    <article class="visual-anchor scene-plate-anchor"><button type="button" class="scene-plate-preview" onclick="openStageOutcome('scenelook')" aria-label="Open Scene Look plate">
+    <article class="visual-anchor scene-plate-anchor ${plateJob?"is-generating":""}"><button type="button" class="scene-plate-preview" onclick="openStageOutcome('scenelook')" aria-label="Open Scene Look plate">
       ${plate?`<img class="visual-anchor-media" src="${BASE}${_esc(plate)}?v=${MEDIA_V}" alt="Scene ${_esc(SH_SC)} environment plate">`:`<span class="visual-anchor-empty">No plate</span>`}
-    </button><span class="visual-anchor-copy"><span class="visual-anchor-label">1 · Scene plate</span><span class="visual-anchor-title">The world and lighting</span><span class="visual-anchor-status">${plate?_esc(plateStatus):"Scene Look must be supplied first"}</span></span>${scenePlateSourceActionsHTML(!!plate)}</article>
+    </button><span class="visual-anchor-copy"><span class="visual-anchor-label">1 · Scene plate</span><span class="visual-anchor-title">The world and lighting</span><span class="visual-anchor-status">${plateJob?"Replacement is generating here":plate?_esc(plateStatus):"Scene Look must be supplied first"}</span></span>${scenePlateProgressHTML(plateJob)}${scenePlateSourceActionsHTML(!!plate,!!plateJob)}</article>
     <article class="visual-anchor">
       ${keyframe?`<img class="visual-anchor-media zoom" data-cap="${_esc(shot)} · opening keyframe" src="${BASE}${_esc(keyframe)}?v=${MEDIA_V}" alt="Opening keyframe">`:`<span class="visual-anchor-empty">Awaiting frame</span>`}
       <span class="visual-anchor-copy"><span class="visual-anchor-label">2 · Opening keyframe</span><span class="visual-anchor-title">Characters and first composition</span><span class="visual-anchor-status">${keyframe?"Current candidate ready for your decision":"Use the decision controls to choose, upload or build the Shot 1 frame"}</span></span>
     </article>
   </section>`;
 }
-function scenePlateSourceActionsHTML(hasPlate){
+function scenePlateSourceActionsHTML(hasPlate,isGenerating){
   const rate=(RATES||{})["seedream5pro_image"];
   const cost=rate?` · $${rate.usd}`:"";
+  const disabled=isGenerating?" disabled":"";
   return `<div class="scene-plate-actions" aria-label="Change Scene Plate source">
-    <button type="button" class="btn ghost" onclick="startScenePlateGeneration(${!!hasPlate})">Generate${_esc(cost)}</button>
-    <button type="button" class="btn ghost" onclick="document.getElementById('seePlateUpload').click()">Upload</button>
+    <button type="button" class="btn ghost"${disabled} onclick="startScenePlateGeneration(${!!hasPlate})">Generate${_esc(cost)}</button>
+    <button type="button" class="btn ghost"${disabled} onclick="document.getElementById('seePlateUpload').click()">Upload</button>
     <input type="file" id="seePlateUpload" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="slUpload(this)">
-    <button type="button" class="btn ghost" onclick="slLibrary()">Use library</button>
+    <button type="button" class="btn ghost"${disabled} onclick="slLibrary()">Use library</button>
   </div><div class="scene-plate-protection">${hasPlate?"The current plate stays protected until you approve its replacement.":"Upload and library choices create a candidate without generation cost."}</div>`;
 }
 function renderShotStage(mode){
@@ -5497,7 +5512,7 @@ async function openDisclosureModal(kind,ctx){
           ["Outputs","1 image"],
           ["Next decision","Fire the first keyframe and judge the complete composition"]];
     confirmLabel="Build scene world";
-    confirm=()=>{closeM();shRun('scenelook',null,{sourcePath:ctx.sourcePath});};
+    confirm=()=>{closeM();shRun('scenelook',null,{sourcePath:ctx.sourcePath,preserveView:true,progressTarget:"scene-plate",progressLabel:"Generating the new Scene Plate"});};
   } else return;
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
     <h3>${_esc(title)}</h3>
@@ -5817,7 +5832,7 @@ let SH_AGENT_KEY=null,SH_AGENT_SEQ=0,SH_AGENT_CACHE={};
 // outcome so renderJobBanner() can show it (color-coded, with its log) until the user either
 // dismisses it or fires the next job — matching shJobHTML's existing color/informative-note
 // logic, which was written once but never actually wired into any visible screen.
-let SH_LAST_JOB=null,SH_POLL_MISSES=0,SH_AFTER_JOB=null,SH_PRESERVE_VIEW=null;
+let SH_LAST_JOB=null,SH_POLL_MISSES=0,SH_AFTER_JOB=null,SH_PRESERVE_VIEW=null,SH_SCENE_PLATE_PROGRESS=null;
 // THE CONTAINED CREATIVE CONTROLS (2026-07-19, Voice + Animation working versions + the free
 // structure check): per-shot, fetched on demand (never prefetched for the whole scene — these
 // stay genuinely optional/contained, not a new eager network cost on every scene load).
@@ -6100,7 +6115,11 @@ async function shRun(cmd,shotId,opts){
   const preserveView=opts.preserveView!=null?!!opts.preserveView:cmd==="fire";
   if(preserveView){
     SH_PRESERVE_VIEW={scrollY:window.scrollY,page,scene:String(SH_SC||""),stage:PSTAGE,shotId:shotId||null};
-    showInlineSourceProgress(opts.progressLabel||stageWorkingLabel(cmd));
+    if(opts.progressTarget)SH_PRESERVE_VIEW.progressTarget=opts.progressTarget;
+    if(opts.progressTarget==="scene-plate"){
+      SH_SCENE_PLATE_PROGRESS={status:"running",gate:"shot:"+cmd,step:opts.progressLabel||stageWorkingLabel(cmd)};
+      renderWorkspaceBody();
+    }else showInlineSourceProgress(opts.progressLabel||stageWorkingLabel(cmd));
   }else{
     showStageWorking(stageWorkingLabel(cmd),"The current media space will refresh automatically when this step completes.");
   }
@@ -6116,6 +6135,7 @@ async function shRun(cmd,shotId,opts){
       step:cmd==="fire"?(opts.spendToken?"Submitting the sealed Seedance 2.5 request":"Preparing cost disclosure and sealed spend authorization"):
         cmd==="edit"?(opts.spendToken?"Submitting the sealed Seedance 2.5 video edit":"Preparing the bounded edit and cost disclosure"):(stageWorkingLabel(cmd)||"Starting…"),
       started:Date.now()/1000,ended:null};
+    if(opts.progressTarget==="scene-plate")updateScenePlateLiveStatus(PJOBS[j.jobId]);
     SH_AFTER_JOB=typeof opts.afterJob==="function"?opts.afterJob:null;
     if(typeof showToast=="function")showToast("▶ "+cmd+(shotId?" · "+shotId:"")+" — started",true);
     shPollStart();if(page=="pipeline"&&!preserveView)renderControl();
@@ -6174,6 +6194,7 @@ function showInlineSourceProgress(label){
 function clearInlineSourceProgress(){
   const row=document.getElementById("inlineSourceProgress");if(row)row.remove();
   const dec=document.getElementById("wdecision");if(dec)dec.classList.remove("source-updating");
+  SH_SCENE_PLATE_PROGRESS=null;
   SH_PRESERVE_VIEW=null;
 }
 function shSelectReplacementKeyframe(cmd,tok,sourcePath){
@@ -6286,7 +6307,7 @@ async function slUpload(input){
         body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,filename:file.name,dataB64:reader.result})});
       const j=await r.json();
       if(!j.ok){alert("Upload failed: "+(j.error||"unknown error"));return;}
-      await shRun('select-scenelook-upload',null,{sourcePath:j.sourcePath});
+      await slSelectReplacement('select-scenelook-upload',j.sourcePath,"Installing the uploaded Scene Plate");
     }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
     input.value="";
   };
@@ -6334,7 +6355,20 @@ async function slLibrary(){
 }
 async function slLibraryPick(file){
   closeM();
-  await shRun('select-scenelook-library',null,{sourcePath:file});
+  await slSelectReplacement('select-scenelook-library',file,"Installing the selected library Scene Plate");
+}
+async function slSelectReplacement(cmd,sourcePath,progressLabel){
+  const pending=!!(SH_SCENELOOK&&(SH_SCENELOOK.candidate||SH_SCENELOOK.activeSource==="working"||SH_SCENELOOK.status==="working"));
+  const install=()=>shRun(cmd,null,{sourcePath,preserveView:true,progressTarget:"scene-plate",progressLabel});
+  if(!pending){await install();return;}
+  if(!confirm("Replace the current Scene Plate candidate? It will move to History, then the selected image will become the new candidate. Any separately approved plate remains protected."))return;
+  await shRun("reject-scenelook",null,{
+    correction:"Replaced by a different Scene Plate source selected by Julian.",
+    preserveView:true,
+    progressTarget:"scene-plate",
+    progressLabel:"Moving the current Scene Plate candidate to History",
+    afterJob:job=>{if(job&&job.status==="done")install();}
+  });
 }
 function shNextLedger(){   // the shot `next` will fire — the FIRST unapproved shot's ledger carries the spend auth
   return ((SH_PKG&&SH_PKG.continuityLedger)||[]).find(e=>e.status!="approved")||null;
@@ -6494,6 +6528,7 @@ async function _shPollTick(){
     SH_VOICE_CACHE={};SH_SEEDANCE_CACHE={};SH_STRUCTURE_CACHE={};SH_READBACK_CACHE={};SH_REFERENCE_CACHE={};SH_PROMPTLAB_CACHE={};SH_PROMPTLAB_DRAFTS={};
     const afterJob=SH_AFTER_JOB;SH_AFTER_JOB=null;
     const preservedView=SH_PRESERVE_VIEW;SH_PRESERVE_VIEW=null;
+    if(isScenePlateJob(j))SH_SCENE_PLATE_PROGRESS=null;
     // Complete the authoritative refresh before resuming any deferred outcome. Starting
     // renderControl() without awaiting it lets its nested shFetchPkg() clear SH_PREFLIGHT
     // just before prepareDirectionThen() checks the newly-signed specialist direction,
@@ -6509,6 +6544,7 @@ async function _shPollTick(){
   // STILL RUNNING — refresh the visible banner every tick so the pulsing indicator and
   // the job's own real step text (cb-studio/serve.py's _humanise(line), updated live as
   // the subprocess prints progress) actually change on screen instead of sitting frozen.
+  if(isScenePlateJob(j))updateScenePlateLiveStatus(j);
   if(page=="pipeline")renderJobBanner();
 }
 function updateWatchLiveStatus(job){

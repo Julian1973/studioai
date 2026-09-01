@@ -8,7 +8,7 @@ from project_profile import *  # noqa: F401,F403
 from project_profile import (  # noqa: F401 — explicit, so tools that scan for names still find them
     SHOW_ID_RE, DEFAULT_CAPABILITIES, ShowProfileError, CanonProfile, EpisodeProfile,
     ShowProfile, LoadedShowProfile, validate_show_id, load_show_profile, capability_report,
-    default_project_id, list_project_ids,
+    default_project_id, list_project_ids, active_project_setting, set_active_project,
 )
 
 

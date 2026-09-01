@@ -85,12 +85,21 @@ CAST_VOCABULARY = _s(_LAWS.get("castVocabulary"))
 CONTINUITY_RULES = _s(_LAWS.get("continuityRules"))
 
 CREATIVE = _s(PROFILE.creative_root)
-LEARNING = _s(PROFILE.creative_path("learning"))
-EXEMPLARS = _s(PROFILE.creative_path("exemplars"))
-DAILIES_LIBRARY = _s(PROFILE.creative_path("dailiesLibrary"))
-VOICE_REGISTERS = _s(PROFILE.creative_path("voiceRegisters"))
-VOICE_RULEBOOK = _s(PROFILE.creative_path("voiceRulebook"))
-VOICE_PLAYBOOK = _s(PROFILE.creative_path("voicePlaybook"))
+
+
+def _creative(key, default_rel):
+    """A creative file the profile declares, else its conventional home under creative/ (T58: a
+    project that has not written one yet still has a definite path; the module handles absence)."""
+    declared = PROFILE.creative_path(key)
+    return _s(declared) if declared else os.path.join(CREATIVE, default_rel)
+
+
+LEARNING = _creative("learning", "learning")
+EXEMPLARS = _creative("exemplars", "EXEMPLAR_LIBRARY.json")
+DAILIES_LIBRARY = _creative("dailiesLibrary", os.path.join("learning", "DAILIES_LIBRARY.jsonl"))
+VOICE_REGISTERS = _creative("voiceRegisters", "VOICE_ARCHETYPE_REGISTERS.json")
+VOICE_RULEBOOK = _creative("voiceRulebook", "VOICE_DIRECTOR_RULEBOOK.json")
+VOICE_PLAYBOOK = _creative("voicePlaybook", os.path.join("learning", "VOICE_PLAYBOOK.json"))
 
 ASSETS = _s(PROFILE.assets_root)
 SHOW_BIBLE = _s(PROFILE.show_bible_path)
@@ -107,7 +116,10 @@ SCRIPTS_REL = os.path.relpath(SCRIPTS, ROOT)
 EPISODES_INDEX_REL = os.path.relpath(EPISODES_INDEX, ROOT)
 CONFIG_REL = os.path.relpath(CONFIG, ROOT)
 
-MEDIA = os.path.join(ENGINE, "media")
+# T58: the project's own media home when its profile declares episodes.media; otherwise the legacy
+# shared engine/media (the first project, for one release). Every module builds media paths from here.
+MEDIA = _s(PROFILE.media_path) or os.path.join(ENGINE, "media")
+MEDIA_URL = "/" + os.path.relpath(MEDIA, ROOT).replace(os.sep, "/") + "/"   # the studio's URL root for it
 LOCKED = os.path.join(ENGINE, "locked.json")
 NOTES = os.path.join(ENGINE, "notes.json")
 

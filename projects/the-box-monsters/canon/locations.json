@@ -1,0 +1,10 @@
+{
+  "_note": "Project-owned location canon. Visual masters are added and approved through this production only.",
+  "Ep1": {
+    "1": {"locationId": "classroom", "name": "Classroom", "location": "Jenny's classroom", "master": null, "shots": []},
+    "2": {"locationId": "jennys_bedroom", "name": "Jenny's Bedroom", "location": "Jenny's bedroom", "master": null, "shots": []},
+    "3": {"locationId": "the_fold", "name": "The Fold", "location": "The hidden cardboard city inside the boxes", "master": null, "shots": []},
+    "4": {"locationId": "shoebox_shame_world", "name": "Shoebox Shame World", "location": "The emotional world inside Jenny's shoebox", "master": null, "shots": []},
+    "5": {"locationId": "morning_payoff", "name": "Morning and Payoff", "location": "Jenny's world the following morning", "master": null, "shots": []}
+  }
+}

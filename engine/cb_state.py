@@ -298,7 +298,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             # approval ledger is being rehydrated. A recorded predecessor final frame is
             # sufficient to show the handoff in SEE; it does not authorise WATCH spend.
             if not (source_state and source_state["current"]):
-                final_frame = (cb_render.ROOT / "engine" / "media" / "shots" /
+                final_frame = (cb_render._media_root() / "shots" /
                                f"{episode}_{source_shot_id}_final_frame.png")
                 if final_frame.is_file():
                     source_state = {"current": True, "reason": "verified predecessor final frame",

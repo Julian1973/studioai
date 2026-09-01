@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "modelId": "eleven_v3",
+  "characters": {
+    "Jenny": {
+      "voiceId": "BUhaNjY74aXLexxM9qfh",
+      "modelId": "eleven_v3",
+      "settings": {
+        "stability": 0.45,
+        "similarity_boost": 0.9,
+        "style": 0.15
+      },
+      "cadenceSignature": "Thoughtful, sensitive, quietly funny; goes small and careful when embarrassed, warms when she dares.",
+      "defaultTags": [
+        "softly",
+        "quietly"
+      ],
+      "bannedTags": [
+        "shouting"
+      ]
+    }
+  },
+  "_note": "Patch, Rumble, Tilly and Nib have no ElevenLabs voice yet — Julian casts them in the studio before any dialogue beat can fire (Law 5: a beat with dialogue and no V3 track refuses to render)."
+}

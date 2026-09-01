@@ -1,0 +1,127 @@
+{
+  "_note": "The studio's Design tab for The Box Monsters: characters / locations / props presented in the Character Portraits, Locations and Props views; workbench[episode][scene] beat contracts; editorClips.",
+  "episodeTitles": {
+    "Ep1": "The Box That Felt Small"
+  },
+  "characters": [
+    {
+      "name": "Patch",
+      "scenes": "3-4",
+      "status": "ready",
+      "role": "The brave first responder — leads the team into the box",
+      "identity": "The brave first responder. Patch is quick, warm, impulsive and loyal. He jumps in before he has a full plan, then learns by staying with the feeling instead of rushing past it.",
+      "reference": "Generate Reference Sheet",
+      "wardrobes": [],
+      "imageUrl": "/projects/the-box-monsters/assets/patch_anchor.png"
+    },
+    {
+      "name": "Rumble",
+      "scenes": "3-4",
+      "status": "ready",
+      "role": "The biggest monster with the softest heart — protects the child's emotional space",
+      "identity": "The biggest monster with the softest heart. Rumble is gentle, careful and protective. He is strong, but his real gift is making space feel safe.",
+      "reference": "Generate Reference Sheet",
+      "wardrobes": [],
+      "imageUrl": "/projects/the-box-monsters/assets/rumble_anchor.png"
+    },
+    {
+      "name": "Tilly",
+      "scenes": "3-4",
+      "status": "ready",
+      "role": "The organiser and inventor — diagnoses the box world and builds practical solutions",
+      "identity": "The organiser and inventor. Tilly loves systems, tools, labels and machines. She often tries to solve feelings like puzzles, then learns that some feelings need listening before fixing.",
+      "reference": "Generate Reference Sheet",
+      "wardrobes": [],
+      "imageUrl": "/projects/the-box-monsters/assets/tilly_anchor.png"
+    },
+    {
+      "name": "Nib",
+      "scenes": "3-5",
+      "status": "ready",
+      "role": "The smallest, fastest and strangest — breaks tension and finds the sideways truth",
+      "identity": "The smallest, fastest and strangest. Nib is curious, funny and easily distracted, but often says the emotional truth by accident.",
+      "reference": "Generate Reference Sheet",
+      "wardrobes": [],
+      "imageUrl": "/projects/the-box-monsters/assets/nib_anchor.png"
+    },
+    {
+      "name": "Jenny",
+      "scenes": "1-2, 4-5",
+      "status": "ready",
+      "role": "Pilot child lead — appears inside the box world only as an emotional echo",
+      "identity": "A thoughtful, sensitive schoolgirl with a quiet sense of humor. In the pilot, one small mistake in class makes her feel tiny in front of everyone.",
+      "reference": "Generate Reference Sheet",
+      "wardrobes": [],
+      "imageUrl": "/projects/the-box-monsters/assets/jenny_anchor.png"
+    }
+  ],
+  "locations": [
+    {
+      "name": "Classroom",
+      "mood": "Quiet, exposed, a little too bright",
+      "scenes": "1",
+      "prompt": "Jenny's classroom",
+      "imageUrl": ""
+    },
+    {
+      "name": "Jenny's Bedroom",
+      "mood": "Safe, small, night-warm",
+      "scenes": "2",
+      "prompt": "Jenny's bedroom",
+      "imageUrl": ""
+    },
+    {
+      "name": "The Fold",
+      "mood": "Handmade, busy, lamp-lit, alive",
+      "scenes": "3",
+      "prompt": "The hidden cardboard city inside the boxes",
+      "imageUrl": ""
+    },
+    {
+      "name": "Shoebox Shame World",
+      "mood": "Cardboard classroom where one wrong word grew enormous",
+      "scenes": "4",
+      "prompt": "The emotional world inside Jenny's shoebox",
+      "imageUrl": ""
+    },
+    {
+      "name": "Morning and Payoff",
+      "mood": "Morning light, gentle relief",
+      "scenes": "5",
+      "prompt": "Jenny's world the following morning",
+      "imageUrl": ""
+    }
+  ],
+  "props": [
+    {
+      "name": "Jenny's Shoebox",
+      "scenes": "2, 4, 5",
+      "status": "Draft",
+      "prompt": "A decorated shoebox with stars, hearts and one wonky rainbow on the lid; small treasures inside.",
+      "imageUrl": ""
+    },
+    {
+      "name": "The Worksheet",
+      "scenes": "1-5",
+      "status": "Draft",
+      "prompt": "A folded school worksheet with the word BRIDGE; later repaired with a strip of golden tape.",
+      "imageUrl": ""
+    },
+    {
+      "name": "Correct Answer / Try Again Machine",
+      "scenes": "4",
+      "status": "Draft",
+      "prompt": "Tilly's unfolding cardboard machine with a handle and a paper sign; spits cards.",
+      "imageUrl": ""
+    },
+    {
+      "name": "The Golden Card",
+      "scenes": "4, 5",
+      "status": "Draft",
+      "prompt": "A small golden card: WRONG IS NOT THE SAME AS SMALL.",
+      "imageUrl": ""
+    }
+  ],
+  "workbench": {},
+  "editorClips": []
+}

@@ -446,9 +446,13 @@ def _compatibility_integrity(policy: dict, root: pathlib.Path) -> list:
 
 
 def _performance_gap_counts(policy: dict, root: pathlib.Path) -> dict[str, int]:
+    # A project need not declare a characterPerformance source at all (T57: it is one show's
+    # optional creative canon, not a requirement of the lock) — no source, no gaps to count.
+    if "characterPerformance" not in (policy.get("sources") or {}):
+        return {}
     try:
         values = _read_json_source(policy, "characterPerformance", root).get("characters") or {}
-    except (OSError, ValueError, AttributeError):
+    except (OSError, ValueError, AttributeError, KeyError, CanonLockError):
         return {}
     counts = {}
     for name, record in values.items():

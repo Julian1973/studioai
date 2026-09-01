@@ -85,15 +85,15 @@ DoD: the wizard creates `projects/<id>/` from the template with a valid profile;
 
 ## THE SECOND PROJECT (P1) — Phase 5
 
-**T57 · Box Monsters scaffolded** ⛔ BLOCKED (Julian supplies the profile facts) — blocked by T56
+**T57 · The Box Monsters scaffolded** ✅ DONE (2026-09-01 — `projects/the-box-monsters/` created from the template (`project_scaffold`) and filled with Julian's own files from the PC (his Codex-built project of the same day: show bible → LOCKED_CANON, characters (Patch/Rumble/Tilly/Nib/Jenny + stubs), locations for the 5 scenes, continuity, style law, lock policy re-based to the projects/ layout, Jenny's voice card, the Ep1 script activated in the store with the identical sha256, design roster from his cast, key art). Canon locked (`lockedBy: Julian — 2026-09-01T16:29 lock, re-based …`); `cb_canon.status` current + episodeReady; preflight's next action for Ep1 is 'Approve and promote Story & Direction' — the first fire is Julian's)
 projects/box-monsters/. Created through the wizard, not by hand. Name, premise, audience, animation type, aspect ratio, episode length from Julian; canon/laws/chairs/assets empty.
 DoD: the project appears on the Productions screen; every gate reports "blocked: missing <file>" for a Box Monsters path. Verified.
 
-**T58 · Isolation test** ⏳ OPEN — blocked by T57
+**T58 · Isolation test** ✅ DONE (2026-09-01 — `engine/test_second_project_isolation.py` runs the engine in a subprocess with STUDIO_PROJECT=the-box-monsters: every paths.* inside the project, every engine module imports, loaders/chairs/canon/intake/registry serve Box Monsters only, no first-project word reachable. It found and closed: cb_canon's assumed characterPerformance source; None creative paths (now conventional defaults under creative/); cb_gen's import order; per-project MEDIA (profile `episodes.media`, `paths.MEDIA`/`MEDIA_URL`, cb_render/cb_gen/cb_post_workspace/cb_costs/serve.py re-pointed; the first project keeps engine/media for one release); the asset registry's `cb-seed/assets` label and URL prefix)
 engine/test_second_project_isolation.py (new). With `STUDIO_PROJECT=box-monsters`: walk every `paths.*` value, run the dry-run emitter on a stub beat, assert no Crystal Bears path, name or Phase-3 term is reachable.
 DoD: green with Box Monsters active; RED if any T46–T51 change is reverted (proved by reverting one locally). Verified.
 
-**T59 · Switching projects in the UI** ⏳ OPEN — blocked by T45, T57
+**T59 · Switching projects in the UI** ✅ DONE (2026-09-01 — entering another engine-ready production POSTs `/api/project/activate`: the choice is recorded in `cb-studio/data/active-project.json` (honoured by `project_profile.default_project_id` after STUDIO_PROJECT, before the profile default), the studio re-execs itself and the page reloads on `?p=<id>`; refused while a job runs. `test_director_ui.py` gains the two-project switch case)
 cb-studio/app.html, serve.py. Selecting a production switches scripts, episodes, canon, assets and chairs without restart; the `p=` deep link survives reload.
 DoD: `test_director_ui.py` gains a two-project switch case; passes. Verified.
 

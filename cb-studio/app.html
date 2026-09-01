@@ -1127,6 +1127,10 @@ function normBeat(b){
 }
 
 var CURRENT_PROJECT=null, PROJECTS=[], WIZ=null;
+// T58: generated media is served from the ACTIVE project's own media home (the registry's mediaBase —
+// "engine/media" for the first project, projects/<id>/episodes/media for every project made from the template).
+var MEDIA_URL_ROOT="/engine/media/";
+function applyMediaRoot(p){ MEDIA_URL_ROOT="/"+String((p&&p.mediaBase)||"engine/media").replace(/^\/+|\/+$/g,"")+"/"; }
 
 // ── NAVIGATION CONTEXT, IN THE URL/HASH — NEVER A SECOND PRODUCTION-STATE STORE (2026-07-17
 // state-integrity checkpoint): the hash records WHERE the user is (project/episode/scene/
@@ -1176,7 +1180,7 @@ async function _restoreFromHash(raw){
   try{PROJECTS=(((await fetch(BASE+"/api/projects",{cache:"no-store"}).then(r=>r.json()))||{}).projects)||[];}catch(e){PROJECTS=[];}
   const proj=PROJECTS.find(x=>x.id===pid);
   if(!proj) return false;
-  CURRENT_PROJECT=proj; CUR=null; SHOTS=[]; page="episodes";
+  CURRENT_PROJECT=proj; applyMediaRoot(proj); CUR=null; SHOTS=[]; page="episodes";
   if(!(await boot())) return false;
   const pg=params.get('pg')||'episodes', epNum=params.get('ep');
   if(pg=='characters'){showCharacters();return true;}
@@ -1353,7 +1357,27 @@ function renderProjects(){
 }
 async function enterProject(id){
   const p=PROJECTS.find(x=>x.id===id); if(!p){alert("Project not found");return;}
-  CURRENT_PROJECT=p; CUR=null; SHOTS=[]; page="episodes"; return await boot();
+  // T59: the engine serves ONE active production at a time (canon, scripts, assets, chairs all resolve
+  // from its profile). Entering another engine-ready production switches the studio to it — the server
+  // records the choice and reloads itself; this page reloads on ?p=<id> once it answers again.
+  if(p.engineReady && !p.active){
+    try{
+      const r=await fetch(BASE+"/api/project/activate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:p.id})});
+      const j=await r.json();
+      if(!r.ok){alert(j.error||"Could not switch production");return;}
+      if(j.restarting){ await waitForStudioThenReload(p.id); return; }
+    }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");return;}
+  }
+  CURRENT_PROJECT=p; applyMediaRoot(p); CUR=null; SHOTS=[]; page="episodes"; return await boot();
+}
+async function waitForStudioThenReload(pid){
+  document.body.style.cursor="wait";
+  const url=new URL(window.location.href); url.searchParams.set("p",pid); url.searchParams.delete("ep"); url.searchParams.delete("pg");
+  for(let i=0;i<60;i++){
+    await new Promise(r=>setTimeout(r,750));
+    try{ const j=await fetch(BASE+"/api/show-profile",{cache:"no-store"}).then(r=>r.json()); if(j&&(j.projectId===pid||j.showId===pid)){ window.location.replace(url.toString()); return; } }catch(_){ }
+  }
+  alert("The studio is taking a while to switch — reload the page in a moment."); document.body.style.cursor="";
 }
 async function continueProject(id){
   const p=PROJECTS.find(x=>x.id===id); if(!p){alert("Project not found");return;}
@@ -1705,7 +1729,7 @@ async function renderScenes(){
   let L={manifest:{},reuse:{},scenes:[]};
   try{L=await fetch(BASE+"/api/loclib",{cache:"no-store"}).then(r=>r.json());}catch(e){}
   const RE=L.reuse||{}, SC=L.scenes||[], M=L.manifest||{};
-  const img=p=>BASE+"/engine/media/"+p+"?v="+Date.now();
+  const img=p=>BASE+MEDIA_URL_ROOT+p+"?v="+Date.now();
   const card=(s)=>{
     const reused=(RE[s.locationId]||[]).length>1?`<span style="font-size:11px;color:var(--brandink);background:var(--brandbg);border-radius:6px;padding:2px 8px">↻ reused in scenes ${RE[s.locationId].join(", ")}</span>`:'';
     const preview=s.plate?img(s.plate):(s.master?refUrl(s.master):null);
@@ -2231,7 +2255,7 @@ async function projectStats(p){
       // which Object.values(stages) would otherwise miscount as an extra, always-incomplete
       // "stage" and skew this percentage low.
       PSTAGES.map(p=>p.id).forEach(id=>{const x=stages[id];if(!x)return;totalStages++;if(x.state=="approved")doneStages++;});
-      if(!artwork&&r.plate)artwork="/engine/media/"+r.plate;
+      if(!artwork&&r.plate)artwork=MEDIA_URL_ROOT+r.plate;
     });
     const jobs=Object.values(PJOBS).filter(j=>(j.ended||j.started)&&(!Array.isArray(j.args)||j.args.includes(episode))).sort((a,b)=>(b.ended||b.started)-(a.ended||a.started));
     const latest=jobs[0];
@@ -2650,7 +2674,7 @@ async function loadBoard(){
       const shots=(bundle.pkg&&bundle.pkg.shots)||[];
       let latestFrame=null;
       for(const s of shots){ const m=media[s.shotId]; if(m&&(m.finalFrame||m.keyframe)) latestFrame=m.finalFrame||m.keyframe; }
-      if(!latestFrame&&r.plate) latestFrame="/engine/media/"+r.plate;
+      if(!latestFrame&&r.plate) latestFrame=MEDIA_URL_ROOT+r.plate;
       return Object.assign({},r,{bundle,stages,latestFrame,status:sceneCardStatus(stages),carried:!!r.carried});
     });
   }finally{ BOARD_LOADING=false; }

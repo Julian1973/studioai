@@ -28,8 +28,10 @@ import requests
 import cb_costs
 import cb_providers
 
+import paths as P  # the project profile is the only path authority (T44)
+
 HERE = pathlib.Path(__file__).resolve().parent
-MEDIA = HERE / "media"
+MEDIA = pathlib.Path(P.MEDIA)   # T58: the active project's media home
 MEDIA.mkdir(exist_ok=True)
 
 def _load_env():

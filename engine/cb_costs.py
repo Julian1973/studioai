@@ -295,7 +295,8 @@ def report(episode=None):
 
     # cost per signed minute — WORLD_CLASS_ROADMAP.md's own named metric
     signed_seconds = 0.0
-    media_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media")
+    import paths as P
+    media_dir = P.MEDIA
     if os.path.isdir(media_dir):
         seen_codes = set()
         for (ep, code) in by_beat:

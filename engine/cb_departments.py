@@ -162,7 +162,8 @@ def load_runtime_skill(worker, standard_version=0):
         raise RuntimeError(f"{path} has no executable runtime worker contract")
     contract = text.split(RUNTIME_START, 1)[1].split(RUNTIME_END, 1)[0].strip()
     contract = (contract.replace("{project}", P.PROJECT_NAME)
-                        .replace("{showrunner}", P.SHOWRUNNER))
+                        .replace("{showrunner}", P.SHOWRUNNER)
+                        .replace("the The ", "the "))      # "the The Box Monsters Director" → "the Box Monsters Director"
     taste = project_chair_taste(SKILL_ROLES[worker])
     return contract + ("\n\n" + taste if taste else "")
 

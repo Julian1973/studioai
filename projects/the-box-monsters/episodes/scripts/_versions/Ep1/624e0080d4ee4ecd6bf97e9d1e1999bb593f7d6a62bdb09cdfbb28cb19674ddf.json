@@ -1,0 +1,11 @@
+{
+ "schemaVersion": 1,
+ "episodeId": "Ep1",
+ "scriptVersionId": "sha256:624e0080d4ee4ecd6bf97e9d1e1999bb593f7d6a62bdb09cdfbb28cb19674ddf",
+ "algorithm": "sha256",
+ "sha256": "624e0080d4ee4ecd6bf97e9d1e1999bb593f7d6a62bdb09cdfbb28cb19674ddf",
+ "byteLength": 9863,
+ "contentPath": "projects/the-box-monsters/episodes/scripts/_versions/Ep1/624e0080d4ee4ecd6bf97e9d1e1999bb593f7d6a62bdb09cdfbb28cb19674ddf.txt",
+ "createdAt": "2026-09-01T16:23:18+00:00",
+ "sourceName": "Ep1_Episode_1_The_Box_That_Felt_Small.txt"
+}

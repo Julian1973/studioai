@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "_note": "The show's own cast words the engine reads (project_laws): names, species map, physiology (e.g. wings), appearance terms that must never appear in prompt text, pronunciation overrides for spoken text, proximity bans, retake terms, review questions, offscreen-only characters, complexity signals, non-verbal sound palette, asset-group tokens. Empty lists mean 'this show declares none'.",
+  "names": [
+    "Patch",
+    "Rumble",
+    "Tilly",
+    "Nib",
+    "Jenny",
+    "Teacher",
+    "Classmate"
+  ],
+  "species": {
+    "Patch": "box monster",
+    "Rumble": "box monster",
+    "Tilly": "box monster",
+    "Nib": "box monster",
+    "Jenny": "human",
+    "Teacher": "human",
+    "Classmate": "human"
+  },
+  "physiology": {
+    "Patch": {
+      "wings": false
+    },
+    "Rumble": {
+      "wings": false
+    },
+    "Tilly": {
+      "wings": false
+    },
+    "Nib": {
+      "wings": false
+    },
+    "Jenny": {
+      "wings": false
+    }
+  },
+  "speciesFallbackTerms": [
+    "box monster",
+    "monster",
+    "girl",
+    "schoolgirl",
+    "teacher",
+    "child"
+  ],
+  "appearanceTerms": [],
+  "pronunciation": {},
+  "proximityBans": [],
+  "retakeTerms": {},
+  "reviewQuestions": {},
+  "vocalCues": {},
+  "comedyDefaults": {},
+  "offscreenOnly": [],
+  "complexitySignals": [],
+  "nonverbalSoundPalette": [
+    "cardboard creaks",
+    "paper rustle",
+    "tape squeaks",
+    "warm lamp hum"
+  ],
+  "assetGroupTokens": {
+    "scenes": [
+      "classroom",
+      "bedroom",
+      "fold",
+      "shoebox",
+      "platform",
+      "tunnel"
+    ],
+    "props": [
+      "worksheet",
+      "shoebox",
+      "machine",
+      "card",
+      "tool roll",
+      "lamp",
+      "sign"
+    ]
+  },
+  "environmentalVoices": [
+    "BRIGGLE ECHO",
+    "MACHINE"
+  ]
+}

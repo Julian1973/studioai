@@ -33,9 +33,13 @@ REGISTRY_DIR = OUTPUT / "asset-registry"
 REGISTRY_PATH = REGISTRY_DIR / "assets.json"
 MANAGED_DIR = MEDIA / "asset-registry"
 
+PROJECT_ASSET_SOURCE = "project-assets"    # T58: was the first project's literal "cb-seed/assets"
+
 DISPLAY_ROOTS = (
-    (MEDIA, "/engine/media/"),
-    (ASSET_ROOT, "/cb-seed/assets/"),
+    (MEDIA, paths.MEDIA_URL),
+    # T58: the project's assets are served at their own path (the first project's assets root
+    # resolves to cb-seed/assets for one release, so its URLs are unchanged).
+    (ASSET_ROOT, "/" + ASSET_ROOT.relative_to(ROOT.resolve()).as_posix() + "/"),
     (PROJECTS_ROOT, "/projects/"),
 )
 
@@ -420,7 +424,7 @@ def migrate_existing(episode: str = "Ep1") -> dict[str, Any]:
     data["assets"] = [
         item for item in data["assets"]
         if not (
-            item.get("source") == "cb-seed/assets"
+            item.get("source") in ("cb-seed/assets", PROJECT_ASSET_SOURCE)
             and item.get("kind") == "reference_image"
             and "." not in str(item.get("role") or "")
         )
@@ -435,7 +439,7 @@ def migrate_existing(episode: str = "Ep1") -> dict[str, Any]:
                     out = _register_if_exists(
                         episode=episode, scene="*", kind="reference_image", role=role,
                         path=p, status="approved", label=p.stem.replace("_", " "),
-                        source="cb-seed/assets")
+                        source=PROJECT_ASSET_SOURCE)
                     if out:
                         created.append(out["assetId"])
 

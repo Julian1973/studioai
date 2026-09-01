@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "_note": "Project-specific emission checks: preflight triggers, archetype checks and archetype signals. The engine's structural checks always run; these are the show's own.",
+  "preflight": [],
+  "archetypes": {},
+  "archetypeSignals": []
+}

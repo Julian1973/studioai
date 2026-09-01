@@ -112,7 +112,17 @@ import cb_asset_registry
 import cb_prompt_bank
 import paths as P
 
-MEDIA = HERE / "media" / "shots"
+_PROJECT_MEDIA = pathlib.Path(P.MEDIA) if P.PROFILE.media_path else None   # T58: declared media home
+
+
+def _media_root():
+    """The active project's media home. A project that declares episodes.media owns its own; the
+    first project (undeclared, for one release) keeps the engine's media/ — resolved from HERE at
+    call time so a caller that relocates HERE (the scratch-root tests) relocates media with it."""
+    return _PROJECT_MEDIA if _PROJECT_MEDIA is not None else HERE / "media"
+
+
+MEDIA = _media_root() / "shots"
 ROOT = HERE.parent
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 
@@ -1024,8 +1034,8 @@ def generate_scenelook_plate(scene, episode="Ep1", reference_path=None, log=prin
     if not prompt:
         raise Refused("REFUSED — Prepare current Look Development direction first.")
     _require_confirmed_billing("fal")
-    (HERE / "media").mkdir(parents=True, exist_ok=True)
-    out = HERE / "media" / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}.png"
+    (_media_root()).mkdir(parents=True, exist_ok=True)
+    out = _media_root() / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}.png"
     refs = [str(reference_path)] if reference_path else []
     cb_gen.generate_image(prompt, refs=refs, out=str(out), production_route="cb_render")
     # ONLY reached on a successful generation — the approved record above was never read for
@@ -1054,7 +1064,7 @@ def approve_scenelook(scene, episode="Ep1", reviewed_by="Julian", log=print):
     old = rec.get("approved")
     if old and old.get("path") and os.path.exists(old["path"]):
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "scenelook_superseded" / ts
+        arch = _media_root() / "archive" / "scenelook_superseded" / ts
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(old["path"])
         shutil.move(old["path"], dest)
@@ -1080,7 +1090,7 @@ def reject_scenelook(scene, note, episode="Ep1", reviewed_by="Julian", log=print
     archived_rel = None
     if cand.get("path") and os.path.exists(cand["path"]):
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "scenelook_rejected" / ts
+        arch = _media_root() / "archive" / "scenelook_rejected" / ts
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(cand["path"])
         shutil.move(cand["path"], dest)
@@ -1117,7 +1127,7 @@ def select_scenelook_source(scene, mode, episode="Ep1", upload_path=None, librar
             raise Refused("REFUSED — no uploaded file found to select")
         # PRESERVE THE ORIGINAL ASSET — a permanent copy, distinct from and never touched by
         # the scene's own immutable candidate copy made below.
-        preserved_dir = HERE / "media" / "uploads"
+        preserved_dir = _media_root() / "uploads"
         preserved_dir.mkdir(parents=True, exist_ok=True)
         ext = pathlib.Path(upload_path).suffix or ".png"
         preserved = preserved_dir / f"{episode}_S{scene}_scenelook_upload_{uuid.uuid4().hex[:8]}{ext}"
@@ -1129,9 +1139,9 @@ def select_scenelook_source(scene, mode, episode="Ep1", upload_path=None, librar
             raise Refused("REFUSED — the selected library item no longer exists on disk")
         src_for_copy = library_path
         source_note = {"source": "library", "libraryOriginal": library_path}
-    (HERE / "media").mkdir(parents=True, exist_ok=True)
+    (_media_root()).mkdir(parents=True, exist_ok=True)
     ext = pathlib.Path(src_for_copy).suffix or ".png"
-    out = HERE / "media" / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}{ext}"
+    out = _media_root() / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}{ext}"
     shutil.copy2(src_for_copy, out)
     rec = _load_scenelook_rec(scene, episode)
     rec["candidate"] = {"path": str(out), "hash": _sha256_file(out),
@@ -1197,7 +1207,7 @@ def _reference_path_is_approved(path):
     if not candidate:
         return False
     roots = {
-        (HERE / "media").resolve(),
+        _media_root().resolve(),
         MEDIA.resolve(),
         MEDIA.parent.resolve(),
         pathlib.Path(P.ASSETS).resolve(),
@@ -1991,7 +2001,7 @@ def reject_pose_reference(scene, shot_id, character, correction, episode="Ep1",
     if not candidate_path or not candidate_path.exists():
         raise Refused(f"REFUSED — {name} has no pose candidate to reject")
     ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-    archive = (HERE / "media" / "archive" / "pose_references_rejected" /
+    archive = (_media_root() / "archive" / "pose_references_rejected" /
                f"{episode}_{shot_id}_{re.sub(r'[^A-Za-z0-9._-]+', '_', name)}_{ts}")
     archive.mkdir(parents=True, exist_ok=True)
     destination = archive / candidate_path.name
@@ -5260,7 +5270,7 @@ def voice_shot(pkg, path, shot_id, episode="Ep1", log=print):
     # can bring the old one back if it wins the comparison.
     if kind == "regeneration" and os.path.exists(out):
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "shots_superseded" / f"{episode}_{shot_id}_voice_{ts}"
+        arch = _media_root() / "archive" / "shots_superseded" / f"{episode}_{shot_id}_voice_{ts}"
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / out.name
         shutil.move(str(out), str(dest))
@@ -5366,7 +5376,7 @@ def reject_voice(scene, shot_id, correction, episode="Ep1", reviewed_by="Julian"
     archived_rel = None
     if os.path.exists(vo):
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "shots_rejected" / f"{episode}_{shot_id}_voice_{ts}"
+        arch = _media_root() / "archive" / "shots_rejected" / f"{episode}_{shot_id}_voice_{ts}"
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(vo)
         shutil.move(vo, dest)
@@ -5413,7 +5423,7 @@ def restore_previous_voice_take(scene, shot_id, episode="Ep1", log=print):
     archived_rel = None
     if cur_path and os.path.exists(cur_path):
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "shots_superseded" / f"{episode}_{shot_id}_voice_{ts}"
+        arch = _media_root() / "archive" / "shots_superseded" / f"{episode}_{shot_id}_voice_{ts}"
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(cur_path)
         shutil.move(cur_path, str(dest))
@@ -5467,7 +5477,7 @@ def _timing_slate_input_signature(pkg):
 
 def timing_slate_status(scene, episode="Ep1"):
     """Read-only timing-slate freshness report; never calls a provider."""
-    out = HERE / "media" / f"{episode}_Scene{scene}_timing_slate.mp4"
+    out = _media_root() / f"{episode}_Scene{scene}_timing_slate.mp4"
     sidecar = pathlib.Path(str(out) + ".contract.json")
     if not out.exists() or not sidecar.exists():
         return {"exists": out.exists(), "current": False, "path": str(out),
@@ -5511,7 +5521,7 @@ def animatic_scene(scene, episode="Ep1", log=print):
         clip = MEDIA / f"{episode}_{s['shotId']}_timing_slate.mp4"
         _hold(img, dur, vo, str(clip))
         clips.append(str(clip))
-    out = HERE / "media" / f"{episode}_Scene{scene}_timing_slate.mp4"
+    out = _media_root() / f"{episode}_Scene{scene}_timing_slate.mp4"
     result = cb_post.assemble_picture(clips, str(out))
     if not result:
         raise Refused("timing-slate assembly failed — see ffmpeg output above")
@@ -6223,7 +6233,7 @@ def select_keyframe_source(scene, shot_id, mode, episode="Ep1", upload_path=None
             raise Refused("REFUSED — no uploaded file found to select")
         # PRESERVE THE ORIGINAL ASSET — a permanent copy, distinct from and never touched by
         # the shot's own immutable production candidate copy made below.
-        preserved_dir = HERE / "media" / "uploads"
+        preserved_dir = _media_root() / "uploads"
         preserved_dir.mkdir(parents=True, exist_ok=True)
         ext = pathlib.Path(upload_path).suffix or ".png"
         preserved = preserved_dir / f"{episode}_{shot_id}_upload_{uuid.uuid4().hex[:8]}{ext}"
@@ -6242,7 +6252,7 @@ def select_keyframe_source(scene, shot_id, mode, episode="Ep1", upload_path=None
                           "previous final frame to carry forward")
         src = _ledger(pkg, source_shot_id)
         harvest = src.get("harvestFrame")
-        fallback = HERE / "media" / "shots" / f"{episode}_{source_shot_id}_final_frame.png"
+        fallback = _media_root() / "shots" / f"{episode}_{source_shot_id}_final_frame.png"
         if not harvest and fallback.is_file():
             harvest = str(fallback)
         if (src.get("status") != "approved" or not harvest) and not fallback.is_file():
@@ -6303,7 +6313,7 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
     old = led.get("keyframeApproval")
     if old and old.get("path") and os.path.exists(old["path"]):
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "shots_superseded" / f"{episode}_{shot_id}_{ts}"
+        arch = _media_root() / "archive" / "shots_superseded" / f"{episode}_{shot_id}_{ts}"
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(old["path"])
         shutil.move(old["path"], dest)
@@ -6313,7 +6323,7 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
     ab_audit = []
     if ab_candidates:
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "shots_superseded" / (
+        arch = _media_root() / "archive" / "shots_superseded" / (
             f"{episode}_{shot_id}_see_ab_{ts}")
         for item in ab_candidates:
             audit_item = {key: item.get(key) for key in (
@@ -6373,7 +6383,7 @@ def reject_keyframe(scene, shot_id, correction, episode="Ep1", reviewed_by="Juli
         return None
     pending = list(led.get("keyframeCandidates") or [cand])
     ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-    arch = HERE / "media" / "archive" / "shots_rejected" / f"{episode}_{shot_id}_keyframe_{ts}"
+    arch = _media_root() / "archive" / "shots_rejected" / f"{episode}_{shot_id}_keyframe_{ts}"
     arch.mkdir(parents=True, exist_ok=True)
     archived_rel = None
     archived_candidates = []
@@ -8578,9 +8588,9 @@ def _prompt_lab_media_url(path):
     """Return a preview URL only for media inside this canonical engine tree."""
     try:
         resolved = pathlib.Path(path).resolve()
-        media_root = (HERE / "media").resolve()
+        media_root = _media_root().resolve()
         if resolved.is_file() and resolved.is_relative_to(media_root):
-            return "/engine/media/" + resolved.relative_to(media_root).as_posix()
+            return P.MEDIA_URL + resolved.relative_to(media_root).as_posix()
     except (OSError, ValueError):
         pass
     return None
@@ -9933,7 +9943,7 @@ def approve_shot(scene, shot_id, candidate=1, episode="Ep1", reviewed_by="Julian
     selected = cands[candidate - 1]
 
     # archive the unselected candidates + their review sheets (never deleted)
-    arch = HERE / "media" / "archive" / "shots_candidates" / led["batchId"]
+    arch = _media_root() / "archive" / "shots_candidates" / led["batchId"]
     history = _archive_animation_candidates(
         led, arch, {i for i in range(1, len(cands) + 1) if i != candidate},
         "not-selected")
@@ -10094,7 +10104,7 @@ def reject_shot(scene, shot_id, correction, category="other", episode="Ep1",
     if category not in FAILURE_CATEGORIES:
         raise Refused(f"REFUSED — category must be one of {FAILURE_CATEGORIES}")
     ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-    arch = HERE / "media" / "archive" / "shots_rejected" / f"{episode}_{shot_id}_{ts}"
+    arch = _media_root() / "archive" / "shots_rejected" / f"{episode}_{shot_id}_{ts}"
     history = _archive_animation_candidates(
         led, arch, set(range(1, len(led["candidatePaths"]) + 1)), "rejected")
     # Historical evidence comes from the sealed batch that produced the rejected pixels,
@@ -10201,7 +10211,7 @@ def reopen_approved_shot(scene, shot_id, correction, category="other", episode="
             raise Refused(f"REFUSED — {shot_id} has no accepted animation take to reopen")
 
         stamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = (HERE / "media" / "archive" / "shots_reopened" /
+        arch = (_media_root() / "archive" / "shots_reopened" /
                 f"{episode}_{shot_id}_{stamp}_{uuid.uuid4().hex[:6]}")
         arch.mkdir(parents=True, exist_ok=False)
 
@@ -10636,9 +10646,9 @@ def stitch_scene(scene, episode="Ep1", log=print):
     signature = _post_input_signature(pkg, scene, episode)
     try:
         manifest = cb_post.build_scene_post(
-            sources, HERE / "media" / "post", episode, str(scene), signature,
-            music=str(HERE / "media" / f"{episode}_S{scene}_music.mp3"),
-            ambience=str(HERE / "media" / f"{episode}_S{scene}_ambience.mp3"))
+            sources, _media_root() / "post", episode, str(scene), signature,
+            music=str(_media_root() / f"{episode}_S{scene}_music.mp3"),
+            ambience=str(_media_root() / f"{episode}_S{scene}_ambience.mp3"))
     except Exception as exc:
         raise Refused(f"REFUSED — post build failed: {exc}") from exc
     post["candidate"] = {"manifest": manifest, "preparedAt": _now(),
@@ -10728,9 +10738,9 @@ def evidence_pack(scene, episode="Ep1", log=print):
     post_manifest = selected_post.get("manifest") if selected_post else None
     conformed = ((post_manifest or {}).get("outputs") or {}).get("conformedPicture") or {}
     final_master = ((post_manifest or {}).get("outputs") or {}).get("master16x9") or {}
-    animatic = HERE / "media" / f"{episode}_Scene{scene}_timing_slate.mp4"
+    animatic = _media_root() / f"{episode}_Scene{scene}_timing_slate.mp4"
     if not animatic.exists():   # the pre-reclassification name (the frozen 2026-07-16 slate)
-        animatic = HERE / "media" / f"{episode}_Scene{scene}_animatic.mp4"
+        animatic = _media_root() / f"{episode}_Scene{scene}_animatic.mp4"
     pack = {"episode": episode, "scene": str(scene), "generatedAt": _now(),
             "validation": pkg.get("validation"),
             "shots": cases,

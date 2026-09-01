@@ -1128,3 +1128,30 @@ def test_story_direction_exposes_episode_architecture_and_audience_information()
         "Audience information:",
     ):
         assert phrase in JS
+
+
+def test_switching_productions_reloads_the_engine_onto_the_chosen_project():
+    """T59: entering another engine-ready production records the choice (cb-studio/data/active-project.json,
+    honoured by project_profile.default_project_id) and reloads the server; the page comes back on ?p=<id>."""
+    APP_HTML = (HERE / "app.html").read_text(encoding="utf-8")
+    assert '"/api/project/activate"' in APP_HTML and "waitForStudioThenReload(p.id)" in APP_HTML
+    assert 'url.searchParams.set("p",pid)' in APP_HTML
+    assert 'if self.path == "/api/project/activate":' in SERVER
+    assert "studio_profile.set_active_project(pid, ROOT)" in SERVER and "threading.Timer(0.5, _reexec)" in SERVER
+    import importlib, sys, tempfile, json, pathlib as _pl
+    sys.path.insert(0, str(HERE.parent / "engine"))
+    pp = importlib.import_module("project_profile")
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _pl.Path(tmp)
+        for pid in ("aaa", "bbb"):
+            (root / "projects" / pid).mkdir(parents=True)
+            (root / "projects" / pid / "profile.json").write_text(json.dumps({"showId": pid, "default": pid == "aaa"}))
+        assert pp.default_project_id(root) == "aaa"                 # the declared default
+        assert pp.set_active_project("bbb", root) == "bbb"
+        assert pp.default_project_id(root) == "bbb"                 # the switch wins over the default
+        try:
+            pp.set_active_project("nope", root)
+        except pp.ShowProfileError:
+            pass
+        else:
+            raise AssertionError("an unknown project was accepted as active")

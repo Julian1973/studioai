@@ -11,7 +11,7 @@ sys.path.insert(0, str(CBGEN))   # FIXED 2026-07-17 (state-integrity checkpoint)
 # needed this — but /api/rates (and /api/learning, same bug) import an engine module directly
 # in-process, which raised "No module named 'cb_costs'" until now. cb_costs.py is a pure,
 # side-effect-free module at import time (constants + a path string) — safe to add once, here.
-MEDIA = ROOT / "engine" / "media"
+MEDIA = ROOT / "engine" / "media"   # re-pointed to the active project's media home below (T58)
 DATA = ROOT / "cb-studio" / "data"
 DATA.mkdir(parents=True, exist_ok=True)
 import cb_scripts
@@ -70,6 +70,8 @@ ACTIVE_PROJECT_ID = ACTIVE_SHOW.profile.showId        # T44: never a hard-coded 
 OUT = ACTIVE_SHOW.output_path                          # T45: the project's packages/evidence (was ROOT/"cb-output")
 OUTPUT_REL = os.path.relpath(str(OUT), str(ROOT))      # repo-relative, so a test that patches ROOT relocates it too
 EPISODES_INDEX = ACTIVE_SHOW.episodes_index_path       # T45: the project's own episode index (was cb-studio/data/episodes.json)
+MEDIA = ACTIVE_SHOW.media_path or MEDIA                  # T58: the project's own media home when declared
+MEDIA_URL = "/" + MEDIA.relative_to(ROOT).as_posix() + "/"
 ASSETS = ACTIVE_SHOW.assets_root or (ROOT / "cb-seed" / "assets")   # the project's reference media root
 
 
@@ -1611,7 +1613,7 @@ def shot_media_map(pkg, scene, episode="Ep1"):
     keyframeCandidate) via _url_from_abs, never guessed from a filename convention."""
     shots_dir = MEDIA / "shots"
     def _url(p):
-        return ("/engine/media/" + p.relative_to(MEDIA).as_posix()) if p.exists() else None
+        return (MEDIA_URL + p.relative_to(MEDIA).as_posix()) if p.exists() else None
     registry_shots = cb_asset_registry.shot_media_from_registry(pkg, scene, episode)
     shots = {}
     for s in pkg.get("shots") or []:
@@ -2491,7 +2493,7 @@ def _project_registry():
             "showBibleFile": rel(prof.show_bible_path or prof.canon_paths["lockedCanon"]),
             "episodesFile": rel(prof.episodes_index_path),
             "packageBase": rel(prof.output_path),
-            "mediaBase": entry.get("mediaBase") or "engine/media",
+            "mediaBase": (rel(prof.media_path) if prof.media_path else (entry.get("mediaBase") or "engine/media")),
             "active": pid == ACTIVE_PROJECT_ID,
         })
         out.append(entry)
@@ -3953,6 +3955,28 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
+        if self.path == "/api/project/activate":
+            # T59: switch the studio to another production. The engine reads its project ONCE at
+            # import (paths.py), so a real switch means reloading the process with the setting
+            # recorded — the same _reexec the idle auto-reload already uses. Refused while any job
+            # is running; the browser reloads on ?p=<id> once the new process answers.
+            try:
+                d = self._body()
+                pid = str(d.get("id") or d.get("project") or "").strip()
+                if not pid:
+                    raise ValueError("project id required")
+                if PROCS:
+                    self._json(409, {"error": "a job is still running — switch productions when it has finished"})
+                    return
+                studio_profile.set_active_project(pid, ROOT)
+                already = (pid == ACTIVE_PROJECT_ID)
+                self._json(200, {"ok": True, "id": pid, "restarting": not already,
+                                 "next": f"/cb-studio/app.html?p={pid}"})
+                if not already:
+                    threading.Timer(0.5, _reexec).start()
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
         if self.path == "/api/project":
             # T56: a new production is created FROM THE TEMPLATE (studio/templates/project/) by
             # engine/project_scaffold.py — a complete, engine-valid project with its own profile,
@@ -4996,7 +5020,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(200, {
                     "ok": True,
                     "sourcePath": str(out),
-                    "url": "/engine/media/" + out.relative_to(MEDIA).as_posix(),
+                    "url": MEDIA_URL + out.relative_to(MEDIA).as_posix(),
                     "assetId": rec.get("assetId"),
                     "assetUse": asset_use,
                     "kind": group_kind,

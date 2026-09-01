@@ -11,7 +11,7 @@ import paths as P  # the project profile is the only path authority (T44/T45)
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-MEDIA_ROOT = ROOT / "engine" / "media"
+MEDIA_ROOT = pathlib.Path(P.MEDIA)   # T58: the active project's media home
 POST_ROOT = MEDIA_ROOT / "post95"
 STATE_ROOT = ROOT / P.OUTPUT_REL / "state"
 
@@ -36,7 +36,7 @@ def _media_url(value: str | None) -> str | None:
         relative = path.relative_to(MEDIA_ROOT.resolve())
     except ValueError:
         return None
-    return "/engine/media/" + relative.as_posix() if path.is_file() else None
+    return P.MEDIA_URL + relative.as_posix() if path.is_file() else None
 
 
 def _manifest_path(episode: str) -> pathlib.Path | None:

@@ -108,6 +108,10 @@ class EpisodeProfile(BaseModel):
     scripts: str = Field(min_length=1)
     output: str = Field(min_length=1)
     index: Optional[str] = None
+    # T57/T58: rendered media (plates, keyframes, takes, post) for THIS project. Undeclared = the
+    # engine's legacy shared engine/media (the first project keeps it for one release — identity
+    # digests hash absolute media paths); every new project declares its own.
+    media: Optional[str] = None
 
 
 class ShowProfile(BaseModel):
@@ -186,11 +190,43 @@ def list_project_ids(repo_root=None) -> List[str]:
                   if SHOW_ID_RE.fullmatch(p.parent.name))
 
 
+ACTIVE_PROJECT_FILE = pathlib.Path("cb-studio") / "data" / "active-project.json"
+
+
+def active_project_setting(repo_root=None) -> Optional[str]:
+    """T59: the production the studio last switched to (cb-studio/data/active-project.json), or None.
+    Per-machine runtime state — never project data, never committed."""
+    path = _repo_root(repo_root) / ACTIVE_PROJECT_FILE
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    pid = str((raw or {}).get("id") or "").strip()
+    if not pid or not SHOW_ID_RE.fullmatch(pid):
+        return None
+    return pid if (_repo_root(repo_root) / PROJECTS_DIR / pid / "profile.json").exists() else None
+
+
+def set_active_project(project_id: str, repo_root=None) -> str:
+    pid = validate_show_id(project_id)
+    if not (_repo_root(repo_root) / PROJECTS_DIR / pid / "profile.json").exists():
+        raise ShowProfileError(f"no such project: {pid}")
+    path = _repo_root(repo_root) / ACTIVE_PROJECT_FILE
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"id": pid}, indent=2) + "\n", encoding="utf-8")
+    return pid
+
+
 def default_project_id(repo_root=None) -> str:
-    """The project the engine works on when nobody said otherwise — see the module docstring."""
+    """The project the engine works on when nobody said otherwise — see the module docstring.
+    Order: STUDIO_PROJECT env → the studio's active-project setting (T59) → the one profile that
+    declares "default": true → the only project → error."""
     env = os.environ.get("STUDIO_PROJECT") or os.environ.get("STUDIO_SHOW")
     if env:
         return validate_show_id(env)
+    chosen = active_project_setting(repo_root)
+    if chosen:
+        return chosen
     root = _repo_root(repo_root) / PROJECTS_DIR
     ids = list_project_ids(repo_root)
     defaults = []
@@ -251,6 +287,10 @@ class LoadedShowProfile:
     @property
     def output_path(self) -> pathlib.Path:
         return self.resolve(self.profile.episodes.output, "episodes.output")
+
+    @property
+    def media_path(self) -> Optional[pathlib.Path]:
+        return self.resolve_optional(self.profile.episodes.media, "episodes.media")
 
     @property
     def episodes_index_path(self) -> pathlib.Path:

@@ -24,6 +24,25 @@
       "createdAt": "2026-06-24"
     },
     {
+      "id": "the-box-monsters",
+      "name": "The Box Monsters",
+      "primary": false,
+      "animationType": "Premium stylized 3D CGI",
+      "style": "Tactile handmade cardboard world — visible paper fibres, folded edges, stitched repairs, warm practical lamps.",
+      "premise": "Inside Out meets The Borrowers in a hidden cardboard world.\nA funny, heartfelt animated series for 8-12s about four handmade monsters who live inside The Fold, a secret cardboard world that opens whenever a child hides a feeling too big to carry alone.\n\nThe Box Monsters is about the secret cardboard world inside the boxes where children hide the feelings they do not know what to do with. When a child feels shame, fear, jealousy, sadness or worry and pushes it away, the box sends a call through The Fold, a hidden city of cardboard tunnels, lamps and patched-together homes. Patch, Rumble, Tilly and Nib answer the call, travelling unseen into the emotional world inside the box.\n\nEach seven minute story follows one child, one feeling and one simple emotional repair. The monsters do not magically fix the child’s life, and the child never sees them in the real world. Instead, they reshape the feeling from inside, turning something heavy, tangled or scary into something the child can understand and carry. It is funny, warm and a bit wonky, with handmade comedy on the surface and real emotional truth underneath.",
+      "audience": "8-12 (sweet spot 7-10), co-viewing parents and carers",
+      "episodeLength": "7-min episode",
+      "aspectRatio": "16:9",
+      "voiceProvider": "ElevenLabs",
+      "musicStyle": "",
+      "theme": {
+        "accent": "#a875ff"
+      },
+      "coverImage": "/projects/the-box-monsters/assets/project_key_art.png",
+      "episodeCoverImage": "/projects/the-box-monsters/assets/project_key_art.png",
+      "createdAt": "2026-09-01"
+    },
+    {
       "id": "ep1-v2-archive",
       "name": "Episode 1 — v2 Archive",
       "primary": false,

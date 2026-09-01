@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "showId": "the-box-monsters",
+  "showName": "The Box Monsters",
+  "sources": {
+    "showBible": "projects/the-box-monsters/canon/LOCKED_CANON.md",
+    "characters": "projects/the-box-monsters/canon/characters.json",
+    "locations": "projects/the-box-monsters/canon/locations.json",
+    "continuity": "projects/the-box-monsters/canon/continuity.json",
+    "styleLaw": "projects/the-box-monsters/laws/style.txt",
+    "locationAssetManifest": "projects/the-box-monsters/canon/location_assets.json",
+    "runtimeDirector": "studio/chairs/director/SKILL.md",
+    "runtimeCinematographer": "studio/chairs/cinematographer/SKILL.md",
+    "runtimeVoice": "studio/chairs/voice-director/SKILL.md",
+    "runtimeAnimation": "studio/chairs/animation/SKILL.md",
+    "runtimeContinuity": "studio/chairs/continuity/SKILL.md",
+    "runtimePost": "studio/chairs/post/SKILL.md"
+  },
+  "profiles": {
+    "story": [
+      "showBible",
+      "characters",
+      "locations",
+      "continuity",
+      "runtimeDirector"
+    ],
+    "storyboard": [
+      "showBible",
+      "characters",
+      "locations",
+      "continuity",
+      "styleLaw",
+      "runtimeDirector",
+      "runtimeCinematographer",
+      "runtimeVoice"
+    ],
+    "look": [
+      "showBible",
+      "locations",
+      "styleLaw",
+      "runtimeCinematographer"
+    ],
+    "cinematography": [
+      "showBible",
+      "characters",
+      "locations",
+      "continuity",
+      "styleLaw",
+      "runtimeCinematographer"
+    ],
+    "voice": [
+      "showBible",
+      "characters",
+      "runtimeVoice"
+    ],
+    "animation": [
+      "showBible",
+      "characters",
+      "locations",
+      "continuity",
+      "styleLaw",
+      "runtimeAnimation"
+    ],
+    "review": [
+      "showBible",
+      "characters",
+      "locations",
+      "continuity",
+      "styleLaw",
+      "runtimeContinuity"
+    ],
+    "post": [
+      "showBible",
+      "characters",
+      "continuity",
+      "runtimePost"
+    ]
+  },
+  "roster": {
+    "Patch": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "unassigned"
+    },
+    "Rumble": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "unassigned"
+    },
+    "Tilly": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "unassigned"
+    },
+    "Nib": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "unassigned"
+    },
+    "Jenny": {
+      "tier": "guest",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3"
+    },
+    "Teacher": {
+      "tier": "supporting",
+      "status": "stub",
+      "voiceMode": "unassigned"
+    },
+    "Classmate": {
+      "tier": "supporting",
+      "status": "stub",
+      "voiceMode": "unassigned"
+    },
+    "BRIGGLE ECHO": {
+      "tier": "environmental-voice",
+      "status": "stub",
+      "voiceMode": "unassigned"
+    },
+    "MACHINE": {
+      "tier": "environmental-voice",
+      "status": "stub",
+      "voiceMode": "unassigned"
+    }
+  },
+  "characterAliases": {},
+  "scriptChecks": {
+    "forbiddenPatterns": [],
+    "lockedDialogue": [],
+    "pronounContracts": []
+  },
+  "compatibilityCopies": [],
+  "_note": "Julian's 2026-09-01 lock policy for The Box Monsters, re-based to the projects/ layout by T57; runtime chairs are the studio's generic chairs (T52)."
+}

@@ -6,6 +6,7 @@ import pytest
 import cb_intake
 import cb_lineage
 from cb_scripts import ScriptStore
+import paths as P  # T45: scratch worlds use the project layout
 
 SCRIPT_ONE = "INT. CRYSTAL COVE - DAY 1\n\nKEEN\nHello.\n"
 SCRIPT_TWO = "INT. CRYSTAL COVE - DAY 1\n\nKEEN\nHello again.\n"
@@ -25,7 +26,7 @@ def _workspace(tmp_path, monkeypatch, text=SCRIPT_ONE):
     store = ScriptStore(
         tmp_path, script_root=tmp_path / "projects/crystal-bears/episodes/scripts")
     current = store.store("Ep1", text, "Pilot", activated_at="2026-01-01T00:00:00+00:00")
-    episodes = tmp_path / "cb-studio" / "data" / "episodes.json"
+    episodes = tmp_path / P.EPISODES_INDEX_REL
     episodes.parent.mkdir(parents=True, exist_ok=True)
     episodes.write_text(json.dumps([{
         "number": 1,
@@ -33,7 +34,7 @@ def _workspace(tmp_path, monkeypatch, text=SCRIPT_ONE):
         "script": current["displayFile"],
         "scriptVersionId": current["scriptVersionId"],
     }]))
-    out = tmp_path / "cb-output"
+    out = tmp_path / P.OUTPUT_REL
     creative = out / "creative"
     creative.mkdir(parents=True)
     monkeypatch.setattr(cb_intake, "ROOT", tmp_path)
@@ -102,7 +103,7 @@ def test_intake_approval_refuses_candidate_from_previous_script(tmp_path, monkey
     with pytest.raises(cb_intake.Refused, match="run Story & Direction again"):
         cb_intake.decide_intake("Ep1", "approve", log=lambda *_: None)
 
-    assert not list((tmp_path / "cb-output").glob("Ep1_*beat_package.json"))
+    assert not list((tmp_path / P.OUTPUT_REL).glob("Ep1_*beat_package.json"))
 
 
 def test_failed_replacement_keeps_the_previous_candidate(tmp_path, monkeypatch):
@@ -131,7 +132,7 @@ def test_failed_replacement_keeps_the_previous_candidate(tmp_path, monkeypatch):
         cb_intake.prepare_intake("Ep1", log=lambda *_: None)
 
     assert json.loads(candidate_path.read_text()) == previous
-    superseded = tmp_path / "cb-output" / "archive" / "story_intake_superseded"
+    superseded = tmp_path / P.OUTPUT_REL / "archive" / "story_intake_superseded"
     assert not superseded.exists()
 
 
@@ -239,7 +240,7 @@ def test_outcome_compression_plan_groups_beats_by_scene():
 
 def test_new_script_approval_archives_previous_canonical_package(tmp_path, monkeypatch):
     store, first, episodes = _workspace(tmp_path, monkeypatch)
-    old = tmp_path / "cb-output" / "Ep1_Old_beat_package.json"
+    old = tmp_path / P.OUTPUT_REL / "Ep1_Old_beat_package.json"
     old.write_text(json.dumps({"episode": 1, "title": "Old", "beats": [],
                                "sourceScript": cb_intake._script_ref(first)}))
 
@@ -254,7 +255,7 @@ def test_new_script_approval_archives_previous_canonical_package(tmp_path, monke
     cb_intake.decide_intake("Ep1", "approve", log=lambda *_: None)
 
     assert not old.exists()
-    archived = list((tmp_path / "cb-output" / "archive" / "script_versions").glob("*.json"))
+    archived = list((tmp_path / P.OUTPUT_REL / "archive" / "script_versions").glob("*.json"))
     assert len(archived) == 1
     assert json.loads(archived[0].read_text())["sourceScript"]["scriptVersionId"] == first["scriptVersionId"]
 
@@ -282,12 +283,12 @@ def test_canon_rebase_preserves_approved_creative_content(tmp_path, monkeypatch)
     assert after["contentSignature"] == before["contentSignature"]
     assert after["canonLock"]["profileDigest"] == new_digest
     assert cb_intake.intake_status("Ep1")["canonicalCurrent"] is True
-    assert len(list((tmp_path / "cb-output/archive/canon_rebases").glob("*.json"))) == 1
+    assert len(list((tmp_path / P.OUTPUT_REL / "archive/canon_rebases").glob("*.json"))) == 1
 
 
 def test_scene_roster_ignores_a_stale_legacy_package(tmp_path, monkeypatch):
     _, current, _ = _workspace(tmp_path, monkeypatch)
-    legacy = tmp_path / "cb-output" / "Ep1_Legacy_beat_package.json"
+    legacy = tmp_path / P.OUTPUT_REL / "Ep1_Legacy_beat_package.json"
     legacy.write_text(json.dumps({
         "episode": 1,
         "title": "Legacy",

@@ -1,4 +1,5 @@
 from pathlib import Path
+import paths as P  # T45: scratch worlds use the project layout
 
 
 HERE = Path(__file__).resolve().parent
@@ -466,8 +467,8 @@ def test_shot_context_sits_above_see_hear_watch_and_carries_continuity_refs():
     assert "renderContinuityConstraints(session)" in JS
     assert "${renderShotContextPanel(session)}\n      <section class=\"relay-grid\"" in JS
     assert "stage === 1 && current ? `${renderKeyframeSourcePanel(session)}`" in JS
-    assert "Keen wristband state" in Path(HERE.parent / "cb-output" / "Ep1_scene3_production_package.json").read_text(encoding="utf-8")
-    assert "no aquamarine stones and no glow" in Path(HERE.parent / "cb-output" / "Ep1_scene3_production_package.json").read_text(encoding="utf-8").lower()
+    assert "Keen wristband state" in Path(HERE.parent / P.OUTPUT_REL / "Ep1_scene3_production_package.json").read_text(encoding="utf-8")
+    assert "no aquamarine stones and no glow" in Path(HERE.parent / P.OUTPUT_REL / "Ep1_scene3_production_package.json").read_text(encoding="utf-8").lower()
     assert ".shot-context-panel" in CSS
     assert ".shot-context-grid" in CSS
     assert ".shot-continuity-brief" in CSS

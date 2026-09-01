@@ -49,7 +49,7 @@ DRIVE = os.path.dirname(BACKUP_ROOT)
 SOURCES = [
     ("engine/media", "media"),
     (P.rel(P.CONFIG), "canon"),
-    ("cb-output", "production-state"),
+    (P.rel(P.OUTPUT), "production-state"),
     # Added 2026-07-08 (workspace-clutter pass): these three are real, irreplaceable Crystal Bears assets
     # (cb-seed/ holds the locked character turnarounds cb_prompts.py references by filename — hand-curated,
     # not regenerable by the pipeline; archive/ and cb_pages/ are historical record) — but at ~790MB combined,

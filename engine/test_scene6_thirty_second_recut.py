@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import pathlib
+import paths as P  # T45: scratch worlds use the project layout
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -17,7 +18,7 @@ def test_scene6_recut_script_preserves_all_beats_and_dialogue():
 
 
 def test_current_scene6_package_is_three_story_led_units():
-    path = ROOT / "cb-output" / "Ep1_scene6_production_package.json"
+    path = ROOT / P.OUTPUT_REL / "Ep1_scene6_production_package.json"
     if not path.exists():
         return
     package = json.loads(path.read_text(encoding="utf-8"))

@@ -2,11 +2,12 @@ import json
 from pathlib import Path
 
 import cb_lineage
+import paths as P  # T45: scratch worlds use the project layout
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE = ROOT / "cb-output" / "Ep1_scene4_production_package.json"
-STORYBOARD = ROOT / "cb-output" / "creative" / "Ep1_scene4_storyboard.json"
+PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene4_production_package.json"
+STORYBOARD = ROOT / P.OUTPUT_REL / "creative" / "Ep1_scene4_storyboard.json"
 
 
 def _load(path):

@@ -16,10 +16,11 @@ import pathlib
 import re
 import tempfile
 import threading
+import paths as P  # the project profile is the only path authority (T44/T45)
 
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUT = ROOT / "cb-output"
+OUT = ROOT / P.OUTPUT_REL
 _TOKEN = re.compile(r"^[A-Za-z0-9._-]+$")
 _LOCK = threading.Lock()
 

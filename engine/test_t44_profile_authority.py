@@ -72,6 +72,25 @@ def test_no_live_module_names_the_first_project_by_hand():
     assert not offenders, "hand-built project paths/ids in live code:\n" + "\n".join(offenders)
 
 
+ALLOW_OLD_OUTPUT_NAME = {
+    "cb-studio/serve.py",      # the "/cb-output/" URL root — served through the compatibility link, T61
+    "tools/check_links.py",
+}
+
+
+def test_no_live_module_builds_the_output_path_by_hand():
+    """T45: packages/evidence live at paths.OUTPUT — never ROOT/"cb-output" spelled by hand."""
+    needle = re.compile(r'/ "cb-output"|"cb-output/|\'cb-output/|"\.\./cb-output')
+    offenders = []
+    for rel, f in _live_code_files():
+        if rel in ALLOW_OLD_OUTPUT_NAME:
+            continue
+        for n, line in enumerate(f.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+            if needle.search(line) and not line.lstrip().startswith("#"):
+                offenders.append(f"{rel}:{n}: {line.strip()[:100]}")
+    assert not offenders, "hand-built output paths in live code:\n" + "\n".join(offenders)
+
+
 def test_default_project_comes_from_the_registry(tmp_path, monkeypatch):
     monkeypatch.delenv("STUDIO_PROJECT", raising=False)
     monkeypatch.delenv("STUDIO_SHOW", raising=False)

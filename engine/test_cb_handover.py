@@ -21,6 +21,7 @@ import cb_handover as H
 import cb_engine
 import cb_lineage
 from cb_scripts import ScriptStore
+import paths as P  # T45: scratch worlds use the project layout
 
 # distinctive markers that must NEVER cross into production (req 4)
 JUDGEMENT_MARKER = "ZZ-SHOWRUNNER-ANALYSIS-MARKER-ZZ"
@@ -305,8 +306,8 @@ def test_unapproved_storyboard_cannot_alter_production():
 
 
 def test_real_awaiting_storyboard_refused_against_package_copy():
-    live = HERE.parent / "cb-output" / "creative" / "Ep1_scene1_storyboard.json"
-    archived = (HERE.parent / "cb-output" / "creative" / "archive_process_v1"
+    live = HERE.parent / P.OUTPUT_REL / "creative" / "Ep1_scene1_storyboard.json"
+    archived = (HERE.parent / P.OUTPUT_REL / "creative" / "archive_process_v1"
                 / "Ep1_scene1_storyboard.json")
     real_sb = live if live.exists() else archived
     if not real_sb.exists():
@@ -776,7 +777,7 @@ def test_real_s1sh1_maps_cleanly_into_the_canonical_engine_compiler():
     engine compiles cleanly, on real production content, not just a synthetic fixture.
     Skips gracefully if the real storyboard file is absent/unapproved so this suite never
     depends on production state to pass."""
-    real_sb_path = pathlib.Path(__file__).resolve().parent.parent / "cb-output" / "creative" / \
+    real_sb_path = pathlib.Path(__file__).resolve().parent.parent / P.OUTPUT_REL / "creative" / \
         "Ep1_scene1_storyboard.json"
     if not real_sb_path.exists():
         pytest.skip("real storyboard not present in this environment")
@@ -1037,7 +1038,7 @@ def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
     }
     sb_p = tmp_path / "sb.json"
     json.dump(sb, open(sb_p, "w"))
-    pkg_dir = tmp_path / "cb-output"
+    pkg_dir = tmp_path / P.OUTPUT_REL
     pkg_dir.mkdir()
     monkeypatch.setattr(H, "ROOT", tmp_path)
     monkeypatch.setattr(H, "SCRIPT_STORE", store)

@@ -18,7 +18,10 @@ ROOT = HERE.parent
 ENGINE = ROOT / "engine"
 LOGF = HERE / "dailies_log.jsonl"
 PLAYBOOK = HERE / "playbook.json"
-DEFAULT_PKG = "../cb-output/Ep1_Episode_1_beat_package.json"
+sys.path.insert(0, str(ENGINE))
+import paths as _P  # noqa: E402 — the project profile is the only path authority (T45)
+# Relative to engine/ (the engine commands below run with cwd=ENGINE).
+DEFAULT_PKG = os.path.relpath(os.path.join(_P.OUTPUT, "Ep1_Episode_1_beat_package.json"), str(ENGINE))
 
 LAYERS = ("take", "keyframe", "brief", "reference")
 

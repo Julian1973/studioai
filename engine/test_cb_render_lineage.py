@@ -20,6 +20,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_render as R
 import cb_engine as E
+import paths as P  # T45: scratch worlds use the project layout
 
 FAILS = []
 
@@ -34,13 +35,13 @@ def check(name, cond, detail=""):
 
 def _scratch():
     d = pathlib.Path(tempfile.mkdtemp(prefix="cb_render_lineage_"))
-    (d / "cb-output" / "creative").mkdir(parents=True)
+    (d / P.OUTPUT_REL / "creative").mkdir(parents=True)
     (d / "engine" / "media" / "shots").mkdir(parents=True)
     return d
 
 
 def _write_storyboard(root, scene, episode, shot_id="S1.SH1", marker="v1"):
-    p = root / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
+    p = root / P.OUTPUT_REL / "creative" / f"{episode}_scene{scene}_storyboard.json"
     sb = {"marker": marker, "shots": [{"shotId": shot_id, "marker": marker}]}
     p.write_text(json.dumps(sb, sort_keys=True))
     return hashlib.md5(p.read_bytes()).hexdigest()
@@ -63,7 +64,7 @@ def _write_package(root, scene, episode, storyboard_md5, revision=1, extra_ledge
         "continuityLedger": [dict({"shotId": shot_id, "status": "designed"},
                                    **(extra_ledger or {}))],
     }
-    p = root / "cb-output" / f"{episode}_scene{scene}_production_package.json"
+    p = root / P.OUTPUT_REL / f"{episode}_scene{scene}_production_package.json"
     p.write_text(json.dumps(pkg, indent=1))
     return pkg, p
 
@@ -76,7 +77,7 @@ def main():
     try:
         R.HERE = scratch / "engine"
         R.MEDIA = R.HERE / "media" / "shots"
-        E.canonical_package_path = lambda sc, ep="Ep1": scratch / "cb-output" / f"{ep}_scene{sc}_production_package.json"
+        E.canonical_package_path = lambda sc, ep="Ep1": scratch / P.OUTPUT_REL / f"{ep}_scene{sc}_production_package.json"
         # cb_gen.generate_image must NEVER be called by any test below — any accidental
         # invocation proves an unauthorized spend, so make it raise loudly instead of a
         # silent no-op that would hide the bug.

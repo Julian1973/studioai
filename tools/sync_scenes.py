@@ -29,7 +29,7 @@ def _load_cb_prompts():
 
 def _episodes():
     """Every episode that has both a beat package and a canon/locations.json entry to sync."""
-    pattern = os.path.join(ROOT, "cb-output", "*_beat_package.json")
+    pattern = os.path.join(ROOT, P.OUTPUT_REL, "*_beat_package.json")
     for p in sorted(glob.glob(pattern)):
         base = os.path.basename(p)
         ep = base.split("_", 1)[0]

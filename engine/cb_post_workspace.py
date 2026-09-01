@@ -7,12 +7,13 @@ import json
 import pathlib
 from datetime import datetime, timezone
 from typing import Any
+import paths as P  # the project profile is the only path authority (T44/T45)
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MEDIA_ROOT = ROOT / "engine" / "media"
 POST_ROOT = MEDIA_ROOT / "post95"
-STATE_ROOT = ROOT / "cb-output" / "state"
+STATE_ROOT = ROOT / P.OUTPUT_REL / "state"
 
 
 class PostWorkspaceError(ValueError):

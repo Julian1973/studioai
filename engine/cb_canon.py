@@ -524,9 +524,9 @@ def _character_status(policy: dict, manifest: dict, root: pathlib.Path) -> list[
 
 
 def _episode_cast(root: pathlib.Path, episode: str) -> list[str]:
-    candidate = root / "cb-output" / "creative" / f"{episode}_story_intake_CANDIDATE.json"
+    candidate = root / P.OUTPUT_REL / "creative" / f"{episode}_story_intake_CANDIDATE.json"
     paths = [candidate] if candidate.exists() else []
-    paths.extend(sorted((root / "cb-output").glob(f"{episode}_*beat_package.json"),
+    paths.extend(sorted((root / P.OUTPUT_REL).glob(f"{episode}_*beat_package.json"),
                         key=lambda path: path.stat().st_mtime, reverse=True))
     for path in paths:
         try:

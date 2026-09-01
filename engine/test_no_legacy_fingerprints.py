@@ -15,6 +15,7 @@ import pathlib
 import re
 
 import pytest
+import paths as P  # T45: scratch worlds use the project layout
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -63,7 +64,7 @@ def test_no_legacy_fingerprint_in_executable_source():
 
 
 def test_no_legacy_fingerprint_in_active_shot_prompts():
-    pkg = json.load(open(ROOT / "cb-output" / "Ep1_scene1_production_package.json"))
+    pkg = json.load(open(ROOT / P.OUTPUT_REL / "Ep1_scene1_production_package.json"))
     hits = []
     for s in pkg["shots"]:
         for field in ("seedancePrompt", "keyframePrompt"):

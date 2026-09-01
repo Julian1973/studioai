@@ -10,6 +10,7 @@ engine/relay_state.json
 engine/notes.json
 engine/_director_pass/
 cb-studio/data/media-index.json
+projects/*/episodes/episodes.json
 cb-studio/data/episodes.json
 engine/cost_ledger.jsonl
 projects/*/episodes/output/state/

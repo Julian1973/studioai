@@ -4,11 +4,12 @@ from pathlib import Path
 import cb_departments
 import cb_emission_standard
 import cb_render
+import paths as P  # T45: scratch worlds use the project layout
 
 
 ROOT = Path(__file__).resolve().parent.parent
-RECORDS = ROOT / "cb-output" / "creative" / "director-records" / "scene1-v1"
-PACKAGE = ROOT / "cb-output" / "Ep1_scene1_production_package.json"
+RECORDS = ROOT / P.OUTPUT_REL / "creative" / "director-records" / "scene1-v1"
+PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene1_production_package.json"
 CASES = {
     "S1.SH1B": "reveal-and-deadpan-verdict",
     "S1.SH1C": "escalation-into-verdict",

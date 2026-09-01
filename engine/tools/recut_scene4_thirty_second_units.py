@@ -21,8 +21,8 @@ import cb_lineage  # noqa: E402
 import paths as P  # noqa: E402 — the project profile is the only path authority (T44)
 
 
-PACKAGE = ROOT / "cb-output" / "Ep1_scene4_production_package.json"
-STORYBOARD = ROOT / "cb-output" / "creative" / "Ep1_scene4_storyboard.json"
+PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene4_production_package.json"
+STORYBOARD = ROOT / P.OUTPUT_REL / "creative" / "Ep1_scene4_storyboard.json"
 CHARS = pathlib.Path(P.CHARS)                        # T44: from the project profile
 
 
@@ -87,7 +87,7 @@ def main() -> None:
     }
 
     stamp = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
-    archive = ROOT / "cb-output" / "archive" / "scene_recuts"
+    archive = ROOT / P.OUTPUT_REL / "archive" / "scene_recuts"
     archive.mkdir(parents=True, exist_ok=True)
     shutil.copy2(PACKAGE, archive / f"Ep1_scene4_before_three_unit_recut_{stamp}.json")
     shutil.copy2(STORYBOARD, archive / f"Ep1_scene4_storyboard_before_three_unit_recut_{stamp}.json")

@@ -35,6 +35,7 @@ import cb_render as R
 import cb_canon
 import cb_departments
 import cb_voice_director
+import paths as P  # T45: scratch worlds use the project layout
 
 
 TEST_CANON_DIGESTS = {name: (name[0] * 64) for name in (
@@ -350,7 +351,7 @@ def _build_package(tmp, valid=True):
                 "packageRevision": revision,
                 "output": {"providerPrompt": shot["seedancePrompt"]}}},
         }
-    out = tmp / "cb-output" / "EpT_scene9_production_package.json"
+    out = tmp / P.OUTPUT_REL / "EpT_scene9_production_package.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     json.dump(pkg, open(out, "w"), indent=1)
     return out
@@ -539,9 +540,9 @@ def world(monkeypatch, tmp_path):
     # a real beat package in the tmp world so _fresh_validation re-validates for real
     beatpkg = {"beats": [dict(b, sceneNumber="9") for b in BEATS],
                "scenes": [{"sceneNumber": "9", "name": "test"}]}
-    (tmp_path / "cb-output" / "EpT_test_beat_package.json").parent.mkdir(
+    (tmp_path / P.OUTPUT_REL / "EpT_test_beat_package.json").parent.mkdir(
         parents=True, exist_ok=True)
-    json.dump(beatpkg, open(tmp_path / "cb-output" / "EpT_test_beat_package.json", "w"))
+    json.dump(beatpkg, open(tmp_path / P.OUTPUT_REL / "EpT_test_beat_package.json", "w"))
     import cb_engine as E2
     monkeypatch.setattr(E2, "HERE", tmp_path / "engine")
     pkg_path = _build_package(tmp_path)
@@ -631,7 +632,7 @@ def _led(scene="9", ep="EpT"):
 
 
 def _lock_scene_cut(scene="9", ep="EpT"):
-    output = R.HERE.parent / "cb-output"
+    output = R.HERE.parent / P.OUTPUT_REL
     state = R.cb_rough_cut.scene_status(ep, scene, out=output)
     return R.cb_rough_cut.save_scene_cut(
         ep, scene, state["sequence"], confirm=True, out=output)
@@ -1459,13 +1460,13 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
     characters_path = tmp_path / "projects" / "crystal-bears" / "canon" / "characters.json"
     characters_path.parent.mkdir(parents=True, exist_ok=True)
     characters_path.write_text(json.dumps(CFG, indent=1))
-    episodes = tmp_path / "cb-studio" / "data" / "episodes.json"
+    episodes = tmp_path / P.EPISODES_INDEX_REL
     episodes.parent.mkdir(parents=True, exist_ok=True)
     episodes.write_text(json.dumps([{
         "number": 1, "title": "Script To Master", "script": current["displayFile"],
         "scriptVersionId": current["scriptVersionId"],
     }]))
-    output = tmp_path / "cb-output"
+    output = tmp_path / P.OUTPUT_REL
     creative = output / "creative"
     creative.mkdir(parents=True)
     for name, value in {

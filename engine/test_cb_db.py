@@ -5,6 +5,7 @@ import time
 import pytest
 
 import cb_db
+import paths as P  # T45: scratch worlds use the project layout
 
 
 def _auth(token="a" * 32):
@@ -24,7 +25,7 @@ def _auth(token="a" * 32):
 
 
 def test_atomic_json_compare_and_swap_blocks_lost_update(tmp_path):
-    path = tmp_path / "cb-output" / "EpT_scene1_production_package.json"
+    path = tmp_path / P.OUTPUT_REL / "EpT_scene1_production_package.json"
     path.parent.mkdir(parents=True)
     path.write_text(json.dumps({"value": 0}))
 

@@ -11,7 +11,10 @@ import shutil
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PACKAGE = ROOT / "cb-output" / "Ep1_scene3_production_package.json"
+import sys  # noqa: E402
+sys.path.insert(0, str(ROOT / "engine"))
+import paths as P  # noqa: E402 — the project profile is the only path authority (T45)
+PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene3_production_package.json"
 
 
 def _shot(package: dict, shot_id: str) -> dict:
@@ -50,7 +53,7 @@ def _supersede(shot: dict, ledger: dict, replacement: str) -> None:
 def main() -> None:
     package = json.loads(PACKAGE.read_text(encoding="utf-8"))
     stamp = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
-    archive = ROOT / "cb-output" / "archive" / "scene_recuts"
+    archive = ROOT / P.OUTPUT_REL / "archive" / "scene_recuts"
     archive.mkdir(parents=True, exist_ok=True)
     shutil.copy2(PACKAGE, archive / f"Ep1_scene3_before_two-unit_finish_{stamp}.json")
 

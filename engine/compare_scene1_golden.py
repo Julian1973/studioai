@@ -8,14 +8,16 @@ from pathlib import Path
 import cb_emission_standard as standard
 import cb_departments
 import cb_render
+import pathlib
+import paths as P  # the project profile is the only path authority (T44/T45)
 
 
 ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "cb-output" / "Ep1_scene1_production_package.json"
+PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene1_production_package.json"
 FIXTURES = ROOT / "engine" / "grammar" / "golden-fixtures" / "scene1-v1"
-OUTPUT = ROOT / "cb-output" / "audits" / "SCENE1_GOLDEN_EMISSION_COMPARISON.json"
-MARKDOWN_OUTPUT = ROOT / "cb-output" / "audits" / "SCENE1_GOLDEN_EMISSION_COMPARISON.md"
-COMPILED_DIR = ROOT / "cb-output" / "audits" / "scene1-compiled-emissions"
+OUTPUT = ROOT / P.OUTPUT_REL / "audits" / "SCENE1_GOLDEN_EMISSION_COMPARISON.json"
+MARKDOWN_OUTPUT = ROOT / P.OUTPUT_REL / "audits" / "SCENE1_GOLDEN_EMISSION_COMPARISON.md"
+COMPILED_DIR = ROOT / P.OUTPUT_REL / "audits" / "scene1-compiled-emissions"
 
 UNITS = {
     "S1.SH1A": ("beat_1_chase.txt", "false-triumph-chase"),

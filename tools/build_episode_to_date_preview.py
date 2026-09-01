@@ -15,7 +15,9 @@ import sys
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-OUT = ROOT / "cb-output" / "review" / "episode_post_pass"
+sys.path.insert(0, str(ROOT / "engine"))
+import paths as P  # noqa: E402 — the project profile is the only path authority (T45)
+OUT = ROOT / P.OUTPUT_REL / "review" / "episode_post_pass"
 TMP = OUT / "_tmp"
 
 SOURCES = {
@@ -26,7 +28,7 @@ SOURCES = {
     "s2a": (ROOT / "engine/media/shots/Ep1_2.B1.S1_import_20260811T210039_ef0c243bc1.mp4", 14.0),
     "s2b": (ROOT / "engine/media/shots/Ep1_2.B2.S1_import_20260811T210127_73777ed51a.mp4", 14.0),
     "s2c": (ROOT / "engine/media/shots/Ep1_2.B3.S1_import_20260811T210127_9e0026f64f.mp4", 10.0),
-    "s3": (ROOT / "cb-output/review/scene3_pace_pass/Ep1_scene3_sync_safe_cut_v6_no_nice_to_meet_you.mp4", 2.0),
+    "s3": (ROOT / P.OUTPUT_REL / "review/scene3_pace_pass/Ep1_scene3_sync_safe_cut_v6_no_nice_to_meet_you.mp4", 2.0),
 }
 
 TRIMS = {

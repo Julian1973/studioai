@@ -334,7 +334,7 @@ def _require_valid(pkg):
 # is the ONE place that claim is checked against the live file's ACTUAL current bytes —
 # never by filesystem existence of a rendered asset, which proves nothing about lineage.
 def _storyboard_path(scene, episode="Ep1"):
-    return HERE.parent / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
+    return HERE.parent / P.OUTPUT_REL / "creative" / f"{episode}_scene{scene}_storyboard.json"
 
 
 def _current_storyboard_md5(scene, episode="Ep1"):
@@ -844,7 +844,7 @@ def _plate_path(scene, episode="Ep1"):
 # compiler would produce right now. An SH6-only storyboard edit can never touch this, because
 # it was never a real input to begin with.
 def _scenelook_path(scene, episode="Ep1"):
-    return HERE.parent / "cb-output" / f"{episode}_scenelook_scene{scene}.json"
+    return HERE.parent / P.OUTPUT_REL / f"{episode}_scenelook_scene{scene}.json"
 
 
 def _sha256_file(path):
@@ -961,7 +961,7 @@ def _resolve_scenelook_prompt(scene, episode="Ep1"):
     signature can call it without a migration/signature recursion.
     """
     base = _compile_scenelook_prompt(scene, episode)
-    path = HERE.parent / "cb-output" / f"{episode}_scenelook_scene{scene}.json"
+    path = HERE.parent / P.OUTPUT_REL / f"{episode}_scenelook_scene{scene}.json"
     if not path.exists():
         return base
     try:
@@ -3509,7 +3509,7 @@ def apply_scoped_dialogue_correction(scene, shot_id, old_occurrence_id, old_exac
         ledger[key] = None
     ledger["status"] = "designed"
 
-    amendment_dir = ROOT / "cb-output" / "creative" / "amendments"
+    amendment_dir = ROOT / P.OUTPUT_REL / "creative" / "amendments"
     amendment_dir.mkdir(parents=True, exist_ok=True)
     transition_id = hashlib.sha256(json.dumps({
         "at": now,
@@ -3696,7 +3696,7 @@ def apply_scoped_voice_contract_correction(scene, shot_id, corrected_lines,
         ledger[key] = None
     ledger["status"] = "designed"
 
-    amendment_dir = ROOT / "cb-output" / "creative" / "amendments"
+    amendment_dir = ROOT / P.OUTPUT_REL / "creative" / "amendments"
     amendment_dir.mkdir(parents=True, exist_ok=True)
     suffix = script_version_id.split(":")[-1][:12]
     amendment_path = amendment_dir / f"{episode}_{shot_id}_{suffix}_voice.json"
@@ -10406,7 +10406,7 @@ def metrics(scene, episode="Ep1", log=print):
                                  if _ledger(pkg, s["shotId"]).get("status") == "model-limited"),
            "identityFailures": cats.get("identity", 0),
            "continuityFailures": cats.get("geography", 0)}
-    dest = HERE.parent / "cb-output" / f"{episode}_scene{scene}_metrics.json"
+    dest = HERE.parent / P.OUTPUT_REL / f"{episode}_scene{scene}_metrics.json"
     json.dump(out, open(dest, "w"), indent=1)
     log(json.dumps(out, indent=1))
     return out
@@ -10416,7 +10416,7 @@ def metrics(scene, episode="Ep1", log=print):
 def _post_input_signature(pkg, scene, episode="Ep1"):
     """Exact approved source graph for one post build."""
     edit_decision = cb_rough_cut.scene_edit_decision(
-        episode, str(scene), out=HERE.parent / "cb-output")
+        episode, str(scene), out=HERE.parent / P.OUTPUT_REL)
     package_shots = {shot["shotId"]: shot for shot in (pkg.get("shots") or [])}
     shots = []
     for cut in edit_decision["sequence"]:
@@ -10544,7 +10544,7 @@ def _scene_post_sources(pkg, scene=None, episode=None):
         return list(source_by_id.values()), missing
     episode = episode or pkg.get("episode") or "Ep1"
     cut = cb_rough_cut.scene_edit_decision(
-        episode, str(scene), out=HERE.parent / "cb-output")
+        episode, str(scene), out=HERE.parent / P.OUTPUT_REL)
     if not cut.get("confirmedCurrent"):
         raise Refused("REFUSED — lock the current Director's Seat cut before building the master")
     sources = []
@@ -10606,7 +10606,7 @@ def evidence_pack(scene, episode="Ep1", log=print):
     to cb-output/{episode}_scene{scene}_evidence/ as JSON + a readable index.md. Collects
     only what exists; missing pieces are named MISSING, never invented."""
     pkg, _ = load_pkg(scene, episode)
-    out_dir = HERE.parent / "cb-output" / f"{episode}_scene{scene}_evidence"
+    out_dir = HERE.parent / P.OUTPUT_REL / f"{episode}_scene{scene}_evidence"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # cost entries, keyed by output filename (cb_gen logs every paid call with out=)

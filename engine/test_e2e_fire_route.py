@@ -56,6 +56,7 @@ import cb_departments
 import cb_lineage
 import cb_render
 import cb_safety
+import paths as P  # T45: scratch worlds use the project layout
 
 
 def _pose_first_cinematography_output(shot, existing=None):
@@ -149,7 +150,7 @@ def legacy_scratch_pkg(monkeypatch, tmp_path):
     rev6_20260717.json — the stable, permanent archived home for this content (preserved
     byte-identical there by cb_handover.promote_to_canonical's own supersession-archive
     step), never the live path, which now legitimately holds real S1.SH1 content instead."""
-    real = (HERE.parent / "cb-output" / "archive" /
+    real = (HERE.parent / P.OUTPUT_REL / "archive" /
             "Ep1_scene1_production_package_pre_S1.SH1_promotion_rev6_20260717.json")
     if not real.exists():
         pytest.skip("legacy revision-6 production fixture was not included in the source handover")
@@ -248,7 +249,7 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     source is derived from that snapshot solely to provide deterministic lineage bytes; the
     full immutable-script-to-master proof lives in test_golden_path.py.
     """
-    real = HERE.parent / "cb-output" / "Ep1_scene1_production_package.json"
+    real = HERE.parent / P.OUTPUT_REL / "Ep1_scene1_production_package.json"
     live = json.load(open(real))
     golden_shot_id = live["shots"][0]["shotId"]
     assert golden_shot_id.startswith("S1.SH1"), (
@@ -272,13 +273,13 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     }, indent=1, ensure_ascii=False))
     storyboard_md5 = hashlib.md5(scratch_storyboard.read_bytes()).hexdigest()
     storyboard_sha256 = cb_lineage.sha256_file(scratch_storyboard)
-    beat_pkg = json.load(open(HERE.parent / "cb-output" /
+    beat_pkg = json.load(open(HERE.parent / P.OUTPUT_REL /
                               "Ep1_The_Adventure_Begins_beat_package.json"))
     beat_signature = cb_lineage.beat_package_signature(beat_pkg)
     card_hashes = (scratch_pkg.get("sourceStoryboard") or {}).get("creativeCardHashes") or {}
     scratch_pkg["sourceScript"] = source_ref
     scratch_pkg["sourceBeatPackage"] = {
-        "path": "cb-output/Ep1_The_Adventure_Begins_beat_package.json",
+        "path": f"{P.OUTPUT_REL}/Ep1_The_Adventure_Begins_beat_package.json",
         "contentSignature": beat_signature,
     }
     scratch_pkg["sourceStoryboard"].update({
@@ -524,7 +525,7 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
     (golden_path_scratch_pkg); the real live file is never touched by this test."""
     pkg_md5 = json.load(open(golden_path_scratch_pkg))["sourceStoryboard"]["md5"]
     monkeypatch.setattr(cb_render, "_current_storyboard_md5", lambda scene, episode="Ep1": pkg_md5)
-    real_live = HERE.parent / "cb-output" / "Ep1_scene1_production_package.json"
+    real_live = HERE.parent / P.OUTPUT_REL / "Ep1_scene1_production_package.json"
     real_before = real_live.read_bytes()
     calls = []
 

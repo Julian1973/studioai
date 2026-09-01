@@ -10,7 +10,10 @@ import shutil
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PACKAGE = ROOT / "cb-output" / "Ep1_scene3_production_package.json"
+import sys  # noqa: E402
+sys.path.insert(0, str(ROOT / "engine"))
+import paths as P  # noqa: E402 — the project profile is the only path authority (T45)
+PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene3_production_package.json"
 ANCHOR = "Mum lifts one paw; Keen waves back. "
 TRAVERSAL = (
     "As the boat starts travelling, preserve the emotional medium-wide while showing three "
@@ -31,7 +34,7 @@ def main() -> None:
     if ANCHOR not in shot.get("action", ""):
         raise RuntimeError("Scene 3 B5 travel anchor is missing")
 
-    archive = ROOT / "cb-output" / "archive" / "scene_recuts"
+    archive = ROOT / P.OUTPUT_REL / "archive" / "scene_recuts"
     archive.mkdir(parents=True, exist_ok=True)
     stamp = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     shutil.copy2(PACKAGE, archive / f"Ep1_scene3_before_b5_r9_{stamp}.json")

@@ -20,10 +20,12 @@ from pydantic import BaseModel, ConfigDict, Field
 import cb_llm
 import cb_audio_authority
 import cb_render
+import pathlib
+import paths as P  # the project profile is the only path authority (T44/T45)
 
 
 ROOT = Path(__file__).resolve().parent.parent
-CHAT_DIR = ROOT / "cb-output" / "director-chat"
+CHAT_DIR = ROOT / P.OUTPUT_REL / "director-chat"
 CHAT_MODEL = os.environ.get("OPENAI_STUDIO_AGENT_MODEL", cb_llm.VALIDATOR_MODEL)
 VALID_STAGES = {
     "script", "storyboard", "scenelook", "keyframe", "voice", "animation",

@@ -12,7 +12,6 @@ sys.path.insert(0, str(CBGEN))   # FIXED 2026-07-17 (state-integrity checkpoint)
 # in-process, which raised "No module named 'cb_costs'" until now. cb_costs.py is a pure,
 # side-effect-free module at import time (constants + a path string) — safe to add once, here.
 MEDIA = ROOT / "engine" / "media"
-OUT = ROOT / "cb-output"
 DATA = ROOT / "cb-studio" / "data"
 DATA.mkdir(parents=True, exist_ok=True)
 import cb_scripts
@@ -68,6 +67,9 @@ def _canonical_cb_state():
 
 ACTIVE_SHOW = studio_profile.load_show_profile(ROOT)
 ACTIVE_PROJECT_ID = ACTIVE_SHOW.profile.showId        # T44: never a hard-coded show id in this file
+OUT = ACTIVE_SHOW.output_path                          # T45: the project's packages/evidence (was ROOT/"cb-output")
+OUTPUT_REL = os.path.relpath(str(OUT), str(ROOT))      # repo-relative, so a test that patches ROOT relocates it too
+EPISODES_INDEX = ACTIVE_SHOW.episodes_index_path       # T45: the project's own episode index (was cb-studio/data/episodes.json)
 ASSETS = ACTIVE_SHOW.assets_root or (ROOT / "cb-seed" / "assets")   # the project's reference media root
 
 
@@ -444,7 +446,7 @@ def reindex_episodes():
     # the registered episode agree. Publish that pointer-only view first, then annotate the
     # cards from cb_intake's canonical status instead of treating any old beat-package file
     # as production-ready.
-    cb_db.atomic_write_json(ROOT, DATA / "episodes.json", out)
+    cb_db.atomic_write_json(ROOT, EPISODES_INDEX, out)
     try:
         import cb_intake
         for e in out:
@@ -478,7 +480,7 @@ def reindex_episodes():
                 e["status"] = "New"
     except Exception as exc:
         print(f"STORY INTAKE INDEX WARNING — {exc}", flush=True)
-    cb_db.atomic_write_json(ROOT, DATA / "episodes.json", out)
+    cb_db.atomic_write_json(ROOT, EPISODES_INDEX, out)
     return out
 
 
@@ -1198,7 +1200,7 @@ def _queue_episode_storyboards(episode):
         number = str(scene.get("sceneNumber", "")).strip()
         if not number:
             continue
-        storyboard_path = (ROOT / "cb-output" / "creative" /
+        storyboard_path = (ROOT / OUTPUT_REL / "creative" /
                            f"{episode}_scene{number}_storyboard.json")
         if storyboard_path.exists():
             try:
@@ -1217,7 +1219,7 @@ def _queue_episode_storyboards(episode):
             source = storyboard.get("sourceScript") or {}
             source_path = (ROOT / str(source.get("contentPath") or "")).resolve()
             active_path = (ROOT / str((active_script or {}).get("contentPath") or "")).resolve()
-            production_path = (ROOT / "cb-output" /
+            production_path = (ROOT / OUTPUT_REL /
                                f"{episode}_scene{number}_production_package.json")
             if production_path.exists():
                 try:
@@ -1260,7 +1262,7 @@ def _prepare_scene_direction_for_production(episode, scene):
     human creative decision. Human authority begins at SEE, HEAR and WATCH.
     """
     import cb_intake
-    path = ROOT / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
+    path = ROOT / OUTPUT_REL / "creative" / f"{episode}_scene{scene}_storyboard.json"
     with cb_db.scene_lease(ROOT, episode, scene, "serve.automatic-direction-handover"):
         package, digest = cb_db.read_json_document(ROOT, path)
         if package.get("approvalState") == "approved":
@@ -2221,21 +2223,20 @@ def _snapshot_storyboard_handover(storyboard_path, episode, scene):
             "REFUSED — production package is missing; rebuild Story & Direction")
     package, package_digest = cb_db.read_json_document(ROOT, out_path)
     source_storyboard = package.get("sourceStoryboard") or {}
+    # T45: compare PHYSICAL files, not path spellings — a package written before the restructure names
+    # its storyboard as "cb-output/creative/…" (a compatibility link today), a newer one names the
+    # project path; both must bind to the same real file.
     reviewed_path = pathlib.Path(storyboard_path).resolve()
-    expected_rel = pathlib.Path("cb-output") / "creative" / f"{episode}_scene{scene}_storyboard.json"
-    try:
-        reviewed_rel = reviewed_path.relative_to(ROOT.resolve())
-    except ValueError:
-        reviewed_rel = None
+    expected_path = (ROOT / OUTPUT_REL / "creative" / f"{episode}_scene{scene}_storyboard.json").resolve()
     source_path_text = str(source_storyboard.get("path") or "")
     source_path = pathlib.Path(source_path_text)
-    source_rel = pathlib.Path(source_path_text)
-    if source_path.is_absolute():
-        try:
-            source_rel = source_path.resolve().relative_to(ROOT.resolve())
-        except ValueError:
-            source_rel = pathlib.Path(*source_path.parts[-3:])
-    if reviewed_rel != expected_rel or source_rel != expected_rel:
+    if not source_path.is_absolute():
+        source_path = ROOT / source_path
+    try:
+        source_resolved = source_path.resolve()
+    except OSError:
+        source_resolved = None
+    if reviewed_path != expected_path or source_resolved != expected_path:
         raise StoryboardApprovalRefused(
             "REFUSED — production package did not bind to the reviewed storyboard")
     storyboard, _ = cb_db.read_json_document(ROOT, storyboard_path)
@@ -2306,7 +2307,7 @@ def _ensure_storyboard_handover(d):
     if not _SHOT_TOKEN.match(ep) or not _SHOT_TOKEN.match(sc):
         raise ValueError("episode and scene must be plain tokens")
     with cb_db.scene_lease(ROOT, ep, sc, "serve.storyboard-handover"):
-        path = ROOT / "cb-output" / "creative" / f"{ep}_scene{sc}_storyboard.json"
+        path = ROOT / OUTPUT_REL / "creative" / f"{ep}_scene{sc}_storyboard.json"
         if not path.exists():
             raise FileNotFoundError("no storyboard")
         package, _ = cb_db.read_json_document(ROOT, path)
@@ -2342,7 +2343,7 @@ def _storyboard_approval(d):
     }
 
     with cb_db.scene_lease(ROOT, ep, sc, "serve.storyboard-approve"):
-        path = ROOT / "cb-output" / "creative" / f"{ep}_scene{sc}_storyboard.json"
+        path = ROOT / OUTPUT_REL / "creative" / f"{ep}_scene{sc}_storyboard.json"
         if not path.exists():
             raise FileNotFoundError("no storyboard")
         original_bytes = path.read_bytes()
@@ -2402,6 +2403,53 @@ def _storyboard_approval(d):
 # chokepoint; it was never actually reachable and has been removed.
 #
 # Approved EXACT files the UI fetches by name (case-insensitive):
+def _project_registry():
+    """T45: THE REGISTRY IS projects/*/profile.json. Every engine-valid project is listed from its own
+    profile (paths derived, never hand-typed); cb-studio/data/projects.json only contributes
+    PRESENTATION fields (cover art, premise, theme…) matched by id, plus any legacy entries that have
+    no profile (archived references) — those are flagged engineReady:false."""
+    presentation = {}
+    legacy = []
+    try:
+        pf = DATA / "projects.json"
+        if pf.exists():
+            d = json.loads(pf.read_text())
+            for p in (d.get("projects", []) if isinstance(d, dict) else []):
+                if p.get("id"):
+                    presentation[p["id"]] = p
+    except Exception:
+        presentation = {}
+    out = []
+    seen = set()
+    for pid in studio_profile.list_project_ids(ROOT):
+        try:
+            prof = studio_profile.load_show_profile(ROOT, pid)
+        except studio_profile.ShowProfileError:
+            continue
+        rel = lambda path: os.path.relpath(str(path), str(ROOT)).replace(os.sep, "/")
+        entry = dict(presentation.get(pid, {}))
+        entry.update({
+            "id": pid,
+            "name": prof.profile.name,
+            "primary": bool(prof.profile.default),
+            "animationType": prof.profile.animationType,
+            "aspectRatio": prof.profile.aspectRatio,
+            "engineReady": True,
+            "configBase": rel(prof.canon_paths["characters"].parent),
+            "showBibleFile": rel(prof.show_bible_path or prof.canon_paths["lockedCanon"]),
+            "episodesFile": rel(prof.episodes_index_path),
+            "packageBase": rel(prof.output_path),
+            "mediaBase": entry.get("mediaBase") or "engine/media",
+            "active": pid == ACTIVE_PROJECT_ID,
+        })
+        out.append(entry)
+        seen.add(pid)
+    for pid, p in presentation.items():
+        if pid not in seen:
+            legacy.append({**p, "engineReady": False})
+    return out + legacy
+
+
 def _project_approved_files():
     """T44: every registered project's own characters.json / locked canon / show bible, derived from
     each projects/<id>/profile.json — never a hand-typed per-project list."""
@@ -2721,7 +2769,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             q = parse_qs(urlparse(self.path).query)
             ep = (q.get("episode") or ["Ep1"])[0]
             sc = (q.get("scene") or [None])[0]
-            base = ROOT / "cb-output" / "creative"
+            base = ROOT / OUTPUT_REL / "creative"
             if sc:
                 f = base / f"{ep}_scene{sc}_storyboard.json"
                 if not f.exists():
@@ -2863,9 +2911,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/projects":
             projs = []
             try:
-                pf = ROOT / "cb-studio" / "data" / "projects.json"
-                if pf.exists():
-                    d = json.loads(pf.read_text()); projs = d.get("projects", []) if isinstance(d, dict) else []
+                projs = _project_registry()
                 for p in projs:
                     pid = p.get("id", "")
                     cfgbase = p.get("configBase") or ("projects/" + pid)
@@ -3559,7 +3605,10 @@ class H(http.server.SimpleHTTPRequestHandler):
         if static_path == "/cb-studio/data/media-index.json":
             reindex_media()
         elif static_path == "/cb-studio/data/episodes.json":
-            reindex_episodes()
+            # T45: the index lives in the project now; the old URL keeps answering for one release.
+            return self._json(200, reindex_episodes())
+        elif static_path == "/" + os.path.relpath(str(EPISODES_INDEX), str(ROOT)).replace(os.sep, "/"):
+            return self._json(200, reindex_episodes())      # always fresh, like the old URL was
         return self._serve_static()       # range-aware (video streams + seeks), not the no-Range super().do_GET()
 
     def _body(self):
@@ -3777,7 +3826,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     raise ValueError("package and beatCode required")
                 if "/" in pkg or ".." in pkg:
                     raise ValueError("bad package name")
-                pf = ROOT / "cb-output" / pkg
+                pf = ROOT / OUTPUT_REL / pkg
                 if not pf.exists():
                     raise ValueError("package not found: " + pkg)
                 data = json.loads(pf.read_text())
@@ -3800,7 +3849,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if isinstance(d.get("cuts"), list):
                     target["cuts"] = d["cuts"]
                 try:
-                    (ROOT / "cb-output" / (pkg + ".bak")).write_text(pf.read_text())  # one-step undo backup
+                    (ROOT / OUTPUT_REL / (pkg + ".bak")).write_text(pf.read_text())  # one-step undo backup
                 except Exception:
                     pass
                 pf.write_text(json.dumps(data, indent=2, ensure_ascii=False))
@@ -3821,7 +3870,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     raise ValueError("package and sceneNumber required")
                 if "/" in pkg or ".." in pkg:
                     raise ValueError("bad package name")
-                pf = ROOT / "cb-output" / pkg
+                pf = ROOT / OUTPUT_REL / pkg
                 if not pf.exists():
                     raise ValueError("package not found: " + pkg)
                 data = json.loads(pf.read_text())
@@ -3838,7 +3887,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     elif v is not None:
                         target[k] = v
                 try:
-                    (ROOT / "cb-output" / (pkg + ".bak")).write_text(pf.read_text())  # one-step undo backup
+                    (ROOT / OUTPUT_REL / (pkg + ".bak")).write_text(pf.read_text())  # one-step undo backup
                 except Exception:
                     pass
                 pf.write_text(json.dumps(data, indent=2, ensure_ascii=False))

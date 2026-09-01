@@ -17,6 +17,7 @@ import cb_quality
 import cb_render
 import cb_audio_authority
 import cb_rough_cut
+import paths as P  # the project profile is the only path authority (T44/T45)
 
 
 POLICY_VERSION = "canon-locked-current-direction-outcome-approval-v5"
@@ -838,7 +839,7 @@ def production_state(scene, episode="Ep1", intake=None):
     else:
         try:
             cut = cb_rough_cut.scene_status(
-                episode, str(scene), out=cb_render.HERE.parent / "cb-output")
+                episode, str(scene), out=cb_render.HERE.parent / P.OUTPUT_REL)
         except (OSError, ValueError) as exc:
             stages["continuity"] = _stage("blocked", f"Director's Seat could not load: {exc}")
         else:

@@ -17,18 +17,20 @@ from pathlib import Path
 import cb_departments as departments
 import cb_emission_standard as standard
 import cb_render
+import pathlib
+import paths as P  # the project profile is the only path authority (T44/T45)
 
 
 ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "cb-output" / "Ep1_scene1_production_package.json"
+PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene1_production_package.json"
 SOURCE = Path(os.environ.get(
     "CB_DIRECTOR_RECORDS_SOURCE",
     str(ROOT / "engine" / "grammar" / "golden-fixtures" /
         "scene1-v1" / "DIRECTOR_RECORDS_S1.md")))
-OUTPUT_DIR = ROOT / "cb-output" / "creative" / "director-records" / "scene1-v1"
+OUTPUT_DIR = ROOT / P.OUTPUT_REL / "creative" / "director-records" / "scene1-v1"
 SH2_PROMPT_TARGET = OUTPUT_DIR / "S1.SH2_user_prompt_target_20260811.txt"
-REPORT = ROOT / "cb-output" / "audits" / "SCENE1_TYPED_DIRECTOR_COMPARISON.json"
-REPORT_MD = ROOT / "cb-output" / "audits" / "SCENE1_TYPED_DIRECTOR_COMPARISON.md"
+REPORT = ROOT / P.OUTPUT_REL / "audits" / "SCENE1_TYPED_DIRECTOR_COMPARISON.json"
+REPORT_MD = ROOT / P.OUTPUT_REL / "audits" / "SCENE1_TYPED_DIRECTOR_COMPARISON.md"
 FIXTURES = ROOT / "engine" / "grammar" / "golden-fixtures" / "scene1-v1"
 
 ARCHETYPES = {

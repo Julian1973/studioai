@@ -16,6 +16,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_creative as C
 import cb_llm
+import paths as P  # T45: scratch worlds use the project layout
 
 CANON_DIGEST = "c" * 64
 
@@ -383,7 +384,7 @@ def _isolated(monkeypatch, record, review_script=None):
                         lambda *a, **k: CANON_DIGEST)
     root = pathlib.Path(tempfile.mkdtemp())
     monkeypatch.setattr(C, "ROOT", root)
-    monkeypatch.setattr(C, "OUT", root / "cb-output" / "creative")
+    monkeypatch.setattr(C, "OUT", root / P.OUTPUT_REL / "creative")
     source_beats, source_pkg = _source_fixture()
     _set_source(monkeypatch, source_beats, source_pkg)
     monkeypatch.setattr(C, "_locked_dialogue", lambda beats: [])

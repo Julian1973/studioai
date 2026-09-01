@@ -61,11 +61,11 @@ def canonical_package_path(scene, episode="Ep1"):
     render or provider entry point, so it does not violate cb_handover's own
     never-imports-cb_render/cb_gen invariant. No new module, no new convention: this is
     the SAME path both modules already computed independently before this correction."""
-    return HERE.parent / "cb-output" / f"{episode}_scene{scene}_production_package.json"
+    return HERE.parent / P.OUTPUT_REL / f"{episode}_scene{scene}_production_package.json"
 
 
 def _storyboard_path(scene, episode="Ep1"):
-    return HERE.parent / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
+    return HERE.parent / P.OUTPUT_REL / "creative" / f"{episode}_scene{scene}_storyboard.json"
 
 
 def _sha256_file(path):
@@ -319,10 +319,10 @@ def _design_mind():
 
 
 def _load_pkg(episode):
-    cands = sorted((HERE.parent / "cb-output").glob(f"{episode}_*beat_package.json"),
+    cands = sorted((HERE.parent / P.OUTPUT_REL).glob(f"{episode}_*beat_package.json"),
                    key=lambda p: p.stat().st_mtime)
     if not cands:
-        raise FileNotFoundError(f"no beat package for {episode} in cb-output/")
+        raise FileNotFoundError(f"no beat package for {episode} in {P.rel(P.OUTPUT)}/")
     return json.load(open(cands[-1])), cands[-1]
 
 
@@ -1604,7 +1604,7 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
         if s.get("keyframePrompt"):
             md.append(f"**Keyframe prompt:**\n```\n{s['keyframePrompt']}\n```")
         md.append("")
-    out_md = HERE.parent / "cb-output" / f"{episode}_scene{scene_num}_production_package.md"
+    out_md = HERE.parent / P.OUTPUT_REL / f"{episode}_scene{scene_num}_production_package.md"
     out_md.write_text("\n".join(md))
     log(f"ENGINE — wrote {out_json.name} + {out_md.name}: {len(design.shots)} shots, "
         f"~{round(total_sec)}s, validation "

@@ -77,7 +77,7 @@ import cb_scripts
 import cb_unit_packing
 
 CREATIVE = pathlib.Path(P.CREATIVE)                  # T44: from the project profile
-OUT = ROOT / "cb-output" / "creative"
+OUT = ROOT / P.OUTPUT_REL / "creative"
 CANON_VERSION = "1.0"
 ENGINE_VERSION = "creative-room-2.2 (2026-08-01, story-to-screen supervision contracts)"
 SCENE_DIRECTION_VERSION = "scene-direction-v1"
@@ -825,10 +825,10 @@ _CANON_SOURCES = {
 
 
 def _script_package(episode, cast_scope=None, validate_canon=True):
-    cands = sorted((ROOT / "cb-output").glob(f"{episode}_*beat_package.json"),
+    cands = sorted((ROOT / P.OUTPUT_REL).glob(f"{episode}_*beat_package.json"),
                    key=lambda p: p.stat().st_mtime)
     if not cands:
-        raise RuntimeError(f"no approved script/beat package for {episode} in cb-output/")
+        raise RuntimeError(f"no approved script/beat package for {episode} in {P.rel(P.OUTPUT)}/")
     path = cands[-1]
     pkg = json.loads(path.read_text())
     try:
@@ -2547,7 +2547,7 @@ def build_scene_direction_card(vision, scene, beats, shots, voices, details):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def _serial_scene_director(fn):
     def locked(scene_num, episode="Ep1", brief=None, log=print):
-        lock_path = ROOT / "cb-output" / "state" / "episode-scene-director.lock"
+        lock_path = ROOT / P.OUTPUT_REL / "state" / "episode-scene-director.lock"
         lock_path.parent.mkdir(parents=True, exist_ok=True)
         with open(lock_path, "a+") as lock_file:
             log(f"SCENE {scene_num} — queued for the Director text pass")

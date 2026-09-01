@@ -46,7 +46,7 @@ EVIDENCE_P = LEARNING / "EVIDENCE_LIBRARY.json"
 PATTERNS_P = LEARNING / "PATTERN_LIBRARY.json"
 ACTIVE_P = LEARNING / "ACTIVE_CREATIVE_MEMORY.json"
 EXEMPLARS_P = pathlib.Path(P.EXEMPLARS)             # T44: from the project profile
-ARCHIVE_V1 = ROOT / "cb-output" / "creative" / "archive_process_v1"
+ARCHIVE_V1 = ROOT / P.OUTPUT_REL / "creative" / "archive_process_v1"
 
 SOURCES = ("show canon", "character-performance canon", "relationship canon",
            "showrunner canon", "director canon", "cinematography canon",
@@ -347,7 +347,7 @@ def seed_initial(log=print):
         classification="under process v2 with no hints, Scene 2 independently produced 4 "
                         "near-motionless decisive shots and passed adversarial review",
         context="process-v2 Scene 2 storyboard (4 shots, PASS)",
-        assetPointers=["cb-output/creative/Ep1_scene2_storyboard.json"],
+        assetPointers=[f"{P.rel(P.OUTPUT)}/creative/Ep1_scene2_storyboard.json"],
         capturedBy="seed_initial"))
     log(f"SEED — {len(made)} evidence records migrated from the real history "
         f"(exact language preserved; assets pointed to, never summarised away).")

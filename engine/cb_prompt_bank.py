@@ -12,9 +12,10 @@ import re
 from typing import Any
 
 import cb_emission_standard
+import paths as P  # the project profile is the only path authority (T44/T45)
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DEFAULT_BANK_PATH = ROOT / "cb-output" / "prompt-bank" / "prompt_bank.jsonl"
+DEFAULT_BANK_PATH = ROOT / P.OUTPUT_REL / "prompt-bank" / "prompt_bank.jsonl"
 SCHEMA_VERSION = 1
 
 

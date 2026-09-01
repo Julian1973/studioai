@@ -44,7 +44,9 @@ def state_db_path(root):
     override = os.environ.get("CB_STUDIO_STATE_DB")
     if override:
         return pathlib.Path(override).expanduser().resolve()
-    return pathlib.Path(root).resolve() / "cb-output" / "state" / "studio.sqlite3"
+    # T45: the project's output tree, relative to whichever root the caller passed (tests pass a scratch root).
+    import paths as P
+    return pathlib.Path(root).resolve() / P.OUTPUT_REL / "state" / "studio.sqlite3"
 
 
 def _connect(root):

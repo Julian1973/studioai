@@ -17,10 +17,11 @@ ENGINE = ROOT / "engine"
 sys.path.insert(0, str(ENGINE))
 
 import cb_lineage  # noqa: E402
+import paths as P  # noqa: E402 — the project profile is the only path authority (T45)
 
 
-PACKAGE = ROOT / "cb-output" / "Ep1_scene6_production_package.json"
-STORYBOARD = ROOT / "cb-output" / "creative" / "Ep1_scene6_storyboard.json"
+PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene6_production_package.json"
+STORYBOARD = ROOT / P.OUTPUT_REL / "creative" / "Ep1_scene6_storyboard.json"
 
 
 def _shot(records: list[dict], shot_id: str) -> dict:
@@ -101,7 +102,7 @@ def main() -> None:
         return
 
     stamp = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
-    archive = ROOT / "cb-output" / "archive" / "scene_recuts"
+    archive = ROOT / P.OUTPUT_REL / "archive" / "scene_recuts"
     archive.mkdir(parents=True, exist_ok=True)
     shutil.copy2(PACKAGE, archive / f"Ep1_scene6_before_three_unit_recut_{stamp}.json")
     shutil.copy2(STORYBOARD, archive / f"Ep1_scene6_storyboard_before_three_unit_recut_{stamp}.json")

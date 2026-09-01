@@ -20,12 +20,13 @@ from typing import Any
 from urllib.parse import quote
 
 import paths
+import paths as P  # the project profile is the only path authority (T44/T45)
 
 ROOT = pathlib.Path(paths.ROOT).resolve()
 MEDIA = pathlib.Path(paths.MEDIA).resolve()
 OUTPUT = pathlib.Path(paths.OUTPUT).resolve()
 if not (OUTPUT / "Ep1_The_Adventure_Begins_beat_package.json").exists():
-    OUTPUT = (ROOT / "cb-output").resolve()
+    OUTPUT = (ROOT / P.OUTPUT_REL).resolve()
 ASSET_ROOT = pathlib.Path(paths.ASSETS).resolve()   # T44: from the project profile
 PROJECTS_ROOT = (ROOT / "projects").resolve()
 REGISTRY_DIR = OUTPUT / "asset-registry"

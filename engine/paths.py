@@ -97,6 +97,12 @@ SCRIPTS = _s(PROFILE.scripts_path)
 OUTPUT = _s(PROFILE.output_path)
 EPISODES_INDEX = _s(PROFILE.episodes_index_path)
 
+# Repo-relative forms, for callers that work under a caller-supplied root (tests pass a scratch root).
+OUTPUT_REL = os.path.relpath(OUTPUT, ROOT)
+SCRIPTS_REL = os.path.relpath(SCRIPTS, ROOT)
+EPISODES_INDEX_REL = os.path.relpath(EPISODES_INDEX, ROOT)
+CONFIG_REL = os.path.relpath(CONFIG, ROOT)
+
 MEDIA = os.path.join(ENGINE, "media")
 LOCKED = os.path.join(ENGINE, "locked.json")
 NOTES = os.path.join(ENGINE, "notes.json")

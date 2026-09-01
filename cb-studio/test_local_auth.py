@@ -20,6 +20,7 @@ if str(ENGINE) not in sys.path:
 
 import cb_lineage
 import cb_intake
+import paths as P  # T45: scratch worlds use the project layout
 
 
 def _load_server_module(name="cb_studio_serve_auth_test"):
@@ -183,7 +184,7 @@ def test_accept_direction_queues_all_eight_scene_compilers_without_provider_call
 def test_episode_retry_skips_completed_scene_direction_packages(monkeypatch, tmp_path):
     module = _load_server_module("cb_studio_retry_missing_scenes_test")
     monkeypatch.setattr(module, "ROOT", tmp_path)
-    complete = tmp_path / "cb-output/creative/Ep2_scene2_storyboard.json"
+    complete = tmp_path / f"{P.OUTPUT_REL}/creative/Ep2_scene2_storyboard.json"
     complete.parent.mkdir(parents=True)
     complete.write_text("{}")
     monkeypatch.setattr(cb_intake, "scene_roster", lambda episode: {
@@ -201,7 +202,7 @@ def test_episode_retry_rebuilds_and_archives_storyboard_from_stale_script(monkey
                                                                           tmp_path):
     module = _load_server_module("cb_studio_retry_stale_scene_test")
     monkeypatch.setattr(module, "ROOT", tmp_path)
-    stale = tmp_path / "cb-output/creative/Ep2_scene1_storyboard.json"
+    stale = tmp_path / f"{P.OUTPUT_REL}/creative/Ep2_scene1_storyboard.json"
     stale.parent.mkdir(parents=True)
     stale.write_text(json.dumps({
         "sourceScript": {"scriptVersionId": "sha256:old"},
@@ -258,7 +259,7 @@ def test_uncached_director_builds_are_serialized_across_different_shots(monkeypa
 def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatch, tmp_path):
     module = _load_server_module("cb_studio_serve_snapshot_handover_test")
     monkeypatch.setattr(module, "ROOT", tmp_path)
-    monkeypatch.setattr(module, "OUT", tmp_path / "cb-output")
+    monkeypatch.setattr(module, "OUT", tmp_path / P.OUTPUT_REL)
     creative = module.OUT / "creative"
     creative.mkdir(parents=True)
     signature = {
@@ -339,7 +340,7 @@ def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatc
 def test_approved_scene_handover_preserves_exact_unchanged_shots(monkeypatch, tmp_path):
     module = _load_server_module("cb_studio_serve_unchanged_handover_test")
     monkeypatch.setattr(module, "ROOT", tmp_path)
-    monkeypatch.setattr(module, "OUT", tmp_path / "cb-output")
+    monkeypatch.setattr(module, "OUT", tmp_path / P.OUTPUT_REL)
     monkeypatch.setattr(
         module, "scene_lineage",
         lambda package, scene, episode="Ep1": {"current": True})
@@ -407,7 +408,7 @@ def test_approved_scene_handover_preserves_exact_unchanged_shots(monkeypatch, tm
 def test_approved_scene_handover_rebuilds_when_one_shot_changed(monkeypatch, tmp_path):
     module = _load_server_module("cb_studio_serve_changed_handover_test")
     monkeypatch.setattr(module, "ROOT", tmp_path)
-    monkeypatch.setattr(module, "OUT", tmp_path / "cb-output")
+    monkeypatch.setattr(module, "OUT", tmp_path / P.OUTPUT_REL)
     creative = module.OUT / "creative"
     creative.mkdir(parents=True)
     storyboard_path = creative / "Ep1_scene3_storyboard.json"

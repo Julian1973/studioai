@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import cb_engine
+import paths as P  # T45: scratch worlds use the project layout
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -10,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def _scene10_shot():
     # Use the tracked production-package schema as a deterministic wrapper fixture;
     # the wrapper contract is independent of a particular scene-10 generated output.
-    pkg = json.loads((ROOT / "cb-output/Ep1_scene1_production_package.json").read_text())
+    pkg = json.loads((ROOT / f"{P.OUTPUT_REL}/Ep1_scene1_production_package.json").read_text())
     raw = dict(pkg["shots"][0])
     raw["shotId"] = "10.B1.S1"
     return pkg, raw

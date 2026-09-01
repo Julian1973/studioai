@@ -3,10 +3,11 @@ from pathlib import Path
 
 import cb_engine_rules
 import cb_state
+import paths as P  # T45: scratch worlds use the project layout
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE = ROOT / "cb-output" / "Ep1_scene3_production_package.json"
+PACKAGE = ROOT / P.OUTPUT_REL / "Ep1_scene3_production_package.json"
 
 
 def _package():

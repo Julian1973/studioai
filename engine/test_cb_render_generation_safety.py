@@ -32,6 +32,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_render as R
 import cb_engine as E
+import paths as P  # T45: scratch worlds use the project layout
 
 FAILS = []
 GEN_CALLS = []   # every cb_gen.generate_image call this run, for proof #2/#3's isolation check
@@ -47,7 +48,7 @@ def check(name, cond, detail=""):
 
 def _scratch():
     d = pathlib.Path(tempfile.mkdtemp(prefix="cb_render_gensafety_"))
-    (d / "cb-output" / "creative").mkdir(parents=True)
+    (d / P.OUTPUT_REL / "creative").mkdir(parents=True)
     (d / "engine" / "media" / "shots").mkdir(parents=True)
     (d / "projects" / "crystal-bears" / "canon").mkdir(parents=True)
     (d / "projects" / "crystal-bears" / "laws").mkdir(parents=True)
@@ -66,7 +67,7 @@ def _write_style(root, text="Pixar-caliber 3D CGI."):
 
 
 def _write_storyboard(root, scene, episode, sh1_marker="v1", sh6_marker="v1"):
-    p = root / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
+    p = root / P.OUTPUT_REL / "creative" / f"{episode}_scene{scene}_storyboard.json"
     sb = {"marker": "scene", "shots": [
         {"shotId": "S1.SH1", "openingImage": sh1_marker},
         {"shotId": "S1.SH6", "cameraRelationship": sh6_marker},
@@ -89,7 +90,7 @@ def _write_package(root, scene, episode, shot_ids=("S1.SH1", "S1.SH6"), revision
            "sourceStoryboard": {"path": "n/a", "md5": "irrelevant-now",
                                 "creativeCardHashes": card_hashes},
            "shots": shots, "continuityLedger": ledger}
-    p = root / "cb-output" / f"{episode}_scene{scene}_production_package.json"
+    p = root / P.OUTPUT_REL / f"{episode}_scene{scene}_production_package.json"
     p.write_text(json.dumps(pkg, indent=1))
     return pkg, p
 
@@ -103,7 +104,7 @@ def main():
     try:
         R.HERE = scratch / "engine"
         R.MEDIA = R.HERE / "media" / "shots"
-        E.canonical_package_path = lambda sc, ep="Ep1": scratch / "cb-output" / f"{ep}_scene{sc}_production_package.json"
+        E.canonical_package_path = lambda sc, ep="Ep1": scratch / P.OUTPUT_REL / f"{ep}_scene{sc}_production_package.json"
         R._require_confirmed_billing = lambda provider: None
         _write_locations(scratch, scene, episode)
         _write_style(scratch)

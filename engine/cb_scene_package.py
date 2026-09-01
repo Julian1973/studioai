@@ -14,7 +14,7 @@ import cb_scripts
 
 OUTPUT = pathlib.Path(paths.OUTPUT)
 if not (OUTPUT / "Ep1_The_Adventure_Begins_beat_package.json").exists():
-    OUTPUT = pathlib.Path(paths.ROOT) / "cb-output"
+    OUTPUT = pathlib.Path(paths.ROOT) / paths.OUTPUT_REL
 ROOT = pathlib.Path(paths.ROOT)
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 

@@ -3147,6 +3147,24 @@ function defaultDecisionAction(){
   if(active===current)return {label:"Back to all scenes",onclick:"backToBoard()",kind:"secondary"};
   return {label:"Open "+name,onclick:`openStageOutcome('${active}')`};
 }
+function nextSceneActionHTML(kind){
+  const roster=SCENE_ROSTER||[];
+  const current=roster.findIndex(item=>String(item.scene)===String(SH_SC));
+  if(current>=0&&current<roster.length-1){
+    const next=roster[current+1]||{};
+    const label=kind==="scene"
+      ?`Continue to Scene ${_esc(next.scene)} →`
+      :`Finish scene then continue to Scene ${_esc(next.scene)} →`;
+    return `<button class="btn scene-next-primary" onclick="continueToNextScene()">${label}</button>`;
+  }
+  return `<button class="btn scene-next-primary" onclick="backToBoard()">Back to all scenes</button>`;
+}
+function approvedShotNextActionHTML(shots){
+  if(PSHOT_I<shots.length-1){
+    return `<button class="btn" onclick="continueToNextProductionShot()">Continue to ${_esc(shots[PSHOT_I+1].shotId)} →</button>`;
+  }
+  return nextSceneActionHTML("shot");
+}
 function openPreviousShotOutcome(stage){
   if(PSHOT_I>0){PSHOT_I--;PSTAGE=stage;renderWorkspaceBody();_syncHash();return;}
   openStageOutcome(prerequisiteStage(stage));
@@ -5164,7 +5182,7 @@ function renderShotStage(mode){
       body=`${m.clip?`<video controls src="${BASE}${m.clip}?v=${MEDIA_V}"></video>`:`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/>`}`;
       decVersion="Approved take";
       decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
-        PSHOT_I<shots.length-1?`<button class="btn" onclick="continueToNextProductionShot()">Continue to ${_esc(shots[PSHOT_I+1].shotId)} →</button>`:"",
+        approvedShotNextActionHTML(shots),
         `<button class="btn" onclick="openStageOutcome('continuity')">Open Director's Seat</button>`,
         `<button class="btn ghost" onclick="shRefireTake('${tok}')">Refire full take</button>`,
         `<button class="btn ghost" onclick="shEditTake('${tok}',${Number(s.durationSec||0)})">Edit part of take</button>`];
@@ -5702,7 +5720,7 @@ function renderFinalStage(){
     let finalActions=[];
     if(finalState.state=="approved"){
       finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`,
-        `<button class="btn" onclick="backToBoard()">Back to all scenes</button>`];
+        nextSceneActionHTML("scene")];
     } else if(finalState.state=="awaiting"){
       finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`,
         `<button class="btn" onclick="focusDepartmentOutcome()">Approve or reject the final review</button>`];

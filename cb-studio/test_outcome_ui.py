@@ -174,6 +174,15 @@ def test_episode_continue_prefers_newest_script_when_upstream_changes_stale_pack
     assert 'EPISODES.find(e=>e.script)||EPISODES[0]' not in APP
 
 
+def test_completed_shots_and_scenes_have_a_clean_next_step():
+    assert "function nextSceneActionHTML(kind)" in APP
+    assert "function approvedShotNextActionHTML(shots)" in APP
+    assert 'return nextSceneActionHTML("shot");' in APP
+    assert 'nextSceneActionHTML("scene")' in APP
+    assert "Finish scene then continue to Scene" in APP
+    assert "Continue to Scene" in APP
+
+
 def test_explicit_hash_navigation_reloads_the_requested_scene():
     assert 'window.addEventListener("hashchange",async()=>{' in APP
     assert 'const restored=await _restoreFromHash(raw);' in APP

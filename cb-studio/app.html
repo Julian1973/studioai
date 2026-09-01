@@ -6153,6 +6153,11 @@ async function shRun(cmd,shotId,opts){
   if(opts.startSec!=null)body.startSec=opts.startSec;
   if(opts.endSec!=null)body.endSec=opts.endSec;
   if(opts.sourcePath)body.sourcePath=opts.sourcePath;          // select-upload/select-library: the holding/library file's own path
+  if(cmd==="approve-keyframe"&&body.candidate==null){
+    // Approving the image on screen is an explicit choice of that A/B candidate.
+    const visibleCandidate=shLedger(shotId).keyframeCandidate||{};
+    if(visibleCandidate.candidateId)body.candidate=visibleCandidate.candidateId;
+  }
   // Fire is a transition within the current WATCH decision, not navigation. Keep its
   // media, references and shot context mounted while disclosure/submission/rendering run.
   const preserveView=opts.preserveView!=null?!!opts.preserveView:cmd==="fire";

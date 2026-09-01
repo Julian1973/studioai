@@ -3449,516 +3449,9 @@
      ]
     }
    },
-   "keyframeCandidates": [
-    {
-     "candidateId": "A",
-     "label": "A - Seedream 5 Pro",
-     "provider": "byteplus",
-     "model": "dola-seedream-5-0-pro-260628",
-     "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
-     "generatedAt": "2026-09-01T16:22:07",
-     "source": "generated",
-     "inputSignature": {
-      "cardHash": "03851c6a9c87e698788385caa5c9df9eb549bb2121a595121088be27d24a918d",
-      "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
-      "referenceHashes": {
-       "CB_Keen.jpeg": "b02f4c314f09a8ae5cc505aff970d24a",
-       "CB_Bo.png": "68076f0b3779ee745be0ac0473db13d8",
-       "CB_Bo_satchel.png": "977d88cb8e75812f5d89a399a31adb82",
-       "Ep2_S4_plate_candidate_ff9d9499.png": "f97b4176595fce9356cf30f3ddaa9489"
-      },
-      "briefHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
-      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
-      "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045"
-     },
-     "promptContract": {
-      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nWe are already inside Bo's moving coping game at his eye level, sharing a playful side-by-side rhythm that still leaves the path ahead present as pressure.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=prop:satchel; @图4=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the exact satchel prop authority; inherit design, material, construction and scale only; ignore its background and labels.\n- @图4 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ lower-right area; walking anticipation with body braced for the next counted tail-poof, satchel carried and readable; facing screen-right along the path with slight inward awareness toward Keen.\n- Keen @ middle-left area; walking alongside in upbeat supportive anticipation, keeping pace beside Bo; facing screen-right toward shared travel and Bo.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nCamera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.\nBo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.\nThe open path continues past them and stays readable behind Bo through center-right background depth.\nA fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.\nOverhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.\nAida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nHold open travel space frame-right and center-right for the path pressure and Bo's later stop at the fallen log.\nKeep frame-left upper-left branch veil readable and lightly open for Aida's later descent entrance.\nReserve a clear seated pocket around Bo's future stop point so the later trio can settle without a camera reset.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nModerately wide animated lens feel, roughly 32mm full-frame equivalent, camera at Bo's height on a gentle lateral travel matching their walk; close enough for body-read and satchel presence, wide enough to retain the path pocket, fallen log territory, and branch entry zone for Aida. Mild perspective separation is welcome but avoid distortion or heroic emphasis.\n\n[Light]\nWarm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nOpen on Bo and Keen already in motion at Bo's height; do not stage a fresh start or frontal presentation.\nKeep the path legible behind and beyond Bo from frame one so belonging-pressure is built into the composition.\nPreserve branch-veiled left-side entry geography for Aida; her later arrival must feel like joining the same pocket, not entering a new setup.\nMaintain enough foreground-to-midground clearance that the camera's travel can visibly die with Bo's abrupt stop without reframing the scene's logic.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No unapproved extra cast, props or body-mounted loads; include only the required referenced satchel with its approved owner. Preserve the locked Scene Look.",
-      "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
-      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
-      "provider": "seedream",
-      "providerModelId": "dola-seedream-5-0-pro-260628",
-      "modelVersion": "dola-seedream-5-0-pro-260628",
-      "directionContract": {
-       "canonicalStyleVersion": "v1.0.0",
-       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
-       "lightingAndDepth": "Warm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.",
-       "geography": [
-        "Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.",
-        "Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.",
-        "The open path continues past them and stays readable behind Bo through center-right background depth.",
-        "A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.",
-        "Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.",
-        "Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing."
-       ],
-       "charactersInFrame": [
-        "Bo",
-        "Keen"
-       ],
-       "emptySections": []
-      },
-      "contractHash": "73a02907142a90ca728a7dad2c03833517f505a5b8e9950e0e9d83eac52fcdcc"
-     },
-     "geometryScreening": {
-      "status": "fail",
-      "reason": "one or more subjects drifted outside authored position or size tolerances",
-      "candidateSize": [
-       2816,
-       1584
-      ],
-      "positionTolerance": 0.12,
-      "heightScaleTolerance": [
-       0.75,
-       1.25
-      ],
-      "matches": [
-       {
-        "character": "Bo",
-        "passed": false,
-        "positionDelta": 0.0524,
-        "heightScaleAgainstLayout": 1.449,
-        "expectedCenter": [
-         0.61,
-         0.62
-        ],
-        "actualCenter": [
-         0.5922,
-         0.5707
-        ],
-        "expectedHeightFraction": 0.4514,
-        "actualHeightFraction": 0.654,
-        "detectedBoundsPx": [
-         1333,
-         386,
-         2002,
-         1422
-        ]
-       },
-       {
-        "character": "Keen",
-        "passed": false,
-        "positionDelta": 0.047,
-        "heightScaleAgainstLayout": 0.7188,
-        "expectedCenter": [
-         0.36,
-         0.5716
-        ],
-        "actualCenter": [
-         0.3343,
-         0.5322
-        ],
-        "expectedHeightFraction": 0.8168,
-        "actualHeightFraction": 0.5871,
-        "detectedBoundsPx": [
-         578,
-         378,
-         1305,
-         1308
-        ]
-       }
-      ],
-      "detectedComponentCount": 2,
-      "method": "local-u2net-foreground-geometry-v1",
-      "zeroSpend": true,
-      "providerCalled": false
-     },
-     "conformanceScreening": {
-      "status": "fail",
-      "reason": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
-      "checkedAt": "2026-09-01T16:22:07",
-      "screenVersion": 2,
-      "validatorModel": "gpt-5.4-mini",
-      "mediaProviderCalled": false,
-      "referenceHashes": {
-       "CB_Keen.jpeg": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
-       "CB_Bo.png": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
-       "CB_Bo_satchel.png": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
-       "Ep2_S4_plate_candidate_ff9d9499.png": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
-      },
-      "candidateSha256": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
-      "review": {
-       "verdict": "block",
-       "expectedCharacters": [
-        "Bo",
-        "Keen"
-       ],
-       "detectedCharacters": [
-        "Keen",
-        "Bo"
-       ],
-       "expectedSubjectCount": 2,
-       "subjectCount": 2,
-       "summary": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
-       "identityAndDistinguishability": {
-        "score": 2,
-        "visibleEvidence": "Both named characters are visible and distinct: Keen is the blue bear with pale crown tuft and gold cuffs; Bo is the orange squirrel with cream muzzle, tall tufted ears, and a large curled tail.",
-        "correction": "Keep both characters clearly separated and preserve each character’s canonical colors, tufting, cuffs, tail, and facial structure without borrowing features."
-       },
-       "relativeScaleAndGeography": {
-        "score": 1,
-        "visibleEvidence": "The two characters are in the same forest environment, but Bo dominates the foreground more than the specified 0.42 frame placement and Keen sits farther left/back than the authored screen geography; the planned side-by-side staging is only approximate.",
-        "correction": "Reposition Bo to screen-right at the authored mid-foreground size and place Keen to screen-left slightly behind him, maintaining the intended side-by-side travel spacing."
-       },
-       "anatomyAndSilhouette": {
-        "score": 2,
-        "visibleEvidence": "Both figures have readable, complete anatomy and silhouettes: Keen’s bear form is intact, and Bo’s squirrel form shows the large fluffy curled tail, upright ears, and small body proportions.",
-        "correction": "Preserve the full tail volume, ear points, and clean limb shapes; avoid any malformed paws or cropped anatomy."
-       },
-       "actionReadyComposition": {
-        "score": 1,
-        "visibleEvidence": "The image is action-ready in a forest path setting, but Bo’s pose and satchel read more like a generic traveling character than the specified walking anticipation with readable satchel support; Keen’s supportive walk is present but not strongly matched in staging.",
-        "correction": "Adjust both characters into a clearer walking-anticipation pose along the path, with Bo’s satchel reading only if the contract permits, and Keen aligned in upbeat supportive pace beside him."
-       },
-       "forbiddenContent": {
-        "score": 0,
-        "visibleEvidence": "Bo has a visible brown satchel/body-mounted bag crossing the torso, which is explicitly forbidden as a generic backpack or satchel.",
-        "correction": "Remove Bo’s satchel entirely and ensure no body-mounted bags, dangling loads, text, logos, or watermarks appear."
-       },
-       "recommendedCorrection": "Remove Bo’s satchel, then shift Bo to the authored screen-right foreground and Keen to the authored screen-left slightly rear position, keeping both in a clear walking-anticipation side-by-side forest path composition with no extra props."
-      }
-     },
-     "packageRevision": 3,
-     "contentHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec"
-    },
-    {
-     "candidateId": "B",
-     "label": "B - Nano Banana 2",
-     "provider": "google",
-     "model": "gemini-3.1-flash-image",
-     "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_B_286cbd03.png",
-     "generatedAt": "2026-09-01T16:22:40",
-     "source": "generated",
-     "inputSignature": {
-      "cardHash": "03851c6a9c87e698788385caa5c9df9eb549bb2121a595121088be27d24a918d",
-      "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
-      "referenceHashes": {
-       "CB_Keen.jpeg": "b02f4c314f09a8ae5cc505aff970d24a",
-       "CB_Bo.png": "68076f0b3779ee745be0ac0473db13d8",
-       "CB_Bo_satchel.png": "977d88cb8e75812f5d89a399a31adb82",
-       "Ep2_S4_plate_candidate_ff9d9499.png": "f97b4176595fce9356cf30f3ddaa9489"
-      },
-      "briefHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
-      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
-      "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045"
-     },
-     "promptContract": {
-      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nWe are already inside Bo's moving coping game at his eye level, sharing a playful side-by-side rhythm that still leaves the path ahead present as pressure.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=prop:satchel; @图4=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the exact satchel prop authority; inherit design, material, construction and scale only; ignore its background and labels.\n- @图4 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ lower-right area; walking anticipation with body braced for the next counted tail-poof, satchel carried and readable; facing screen-right along the path with slight inward awareness toward Keen.\n- Keen @ middle-left area; walking alongside in upbeat supportive anticipation, keeping pace beside Bo; facing screen-right toward shared travel and Bo.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nCamera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.\nBo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.\nThe open path continues past them and stays readable behind Bo through center-right background depth.\nA fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.\nOverhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.\nAida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nHold open travel space frame-right and center-right for the path pressure and Bo's later stop at the fallen log.\nKeep frame-left upper-left branch veil readable and lightly open for Aida's later descent entrance.\nReserve a clear seated pocket around Bo's future stop point so the later trio can settle without a camera reset.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nModerately wide animated lens feel, roughly 32mm full-frame equivalent, camera at Bo's height on a gentle lateral travel matching their walk; close enough for body-read and satchel presence, wide enough to retain the path pocket, fallen log territory, and branch entry zone for Aida. Mild perspective separation is welcome but avoid distortion or heroic emphasis.\n\n[Light]\nWarm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nOpen on Bo and Keen already in motion at Bo's height; do not stage a fresh start or frontal presentation.\nKeep the path legible behind and beyond Bo from frame one so belonging-pressure is built into the composition.\nPreserve branch-veiled left-side entry geography for Aida; her later arrival must feel like joining the same pocket, not entering a new setup.\nMaintain enough foreground-to-midground clearance that the camera's travel can visibly die with Bo's abrupt stop without reframing the scene's logic.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No unapproved extra cast, props or body-mounted loads; include only the required referenced satchel with its approved owner. Preserve the locked Scene Look.",
-      "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
-      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
-      "provider": "seedream",
-      "providerModelId": "dola-seedream-5-0-pro-260628",
-      "modelVersion": "dola-seedream-5-0-pro-260628",
-      "directionContract": {
-       "canonicalStyleVersion": "v1.0.0",
-       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
-       "lightingAndDepth": "Warm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.",
-       "geography": [
-        "Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.",
-        "Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.",
-        "The open path continues past them and stays readable behind Bo through center-right background depth.",
-        "A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.",
-        "Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.",
-        "Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing."
-       ],
-       "charactersInFrame": [
-        "Bo",
-        "Keen"
-       ],
-       "emptySections": []
-      },
-      "contractHash": "73a02907142a90ca728a7dad2c03833517f505a5b8e9950e0e9d83eac52fcdcc"
-     },
-     "geometryScreening": {
-      "status": "fail",
-      "reason": "one or more subjects drifted outside authored position or size tolerances",
-      "candidateSize": [
-       2752,
-       1536
-      ],
-      "positionTolerance": 0.12,
-      "heightScaleTolerance": [
-       0.75,
-       1.25
-      ],
-      "matches": [
-       {
-        "character": "Bo",
-        "passed": true,
-        "positionDelta": 0.0262,
-        "heightScaleAgainstLayout": 1.0601,
-        "expectedCenter": [
-         0.61,
-         0.62
-        ],
-        "actualCenter": [
-         0.6105,
-         0.6462
-        ],
-        "expectedHeightFraction": 0.4514,
-        "actualHeightFraction": 0.4785,
-        "detectedBoundsPx": [
-         1382,
-         625,
-         1978,
-         1360
-        ]
-       },
-       {
-        "character": "Keen",
-        "passed": false,
-        "positionDelta": 0.0174,
-        "heightScaleAgainstLayout": 0.6918,
-        "expectedCenter": [
-         0.36,
-         0.5716
-        ],
-        "actualCenter": [
-         0.351,
-         0.5566
-        ],
-        "expectedHeightFraction": 0.8168,
-        "actualHeightFraction": 0.5651,
-        "detectedBoundsPx": [
-         673,
-         421,
-         1259,
-         1289
-        ]
-       }
-      ],
-      "detectedComponentCount": 2,
-      "method": "local-u2net-foreground-geometry-v1",
-      "zeroSpend": true,
-      "providerCalled": false
-     },
-     "conformanceScreening": {
-      "status": "fail",
-      "reason": "Two subjects are present and both are recognizable, but the opening frame misses the authored geography and contains a forbidden prop on Bo. Keen is placed left of Bo rather than following the contract, and Bo’s satchel is visible despite the no-body-mounted-bag constraint. Relative size is broadly acceptable.",
-      "checkedAt": "2026-09-01T16:22:40",
-      "screenVersion": 2,
-      "validatorModel": "gpt-5.4-mini",
-      "mediaProviderCalled": false,
-      "referenceHashes": {
-       "CB_Keen.jpeg": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
-       "CB_Bo.png": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
-       "CB_Bo_satchel.png": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
-       "Ep2_S4_plate_candidate_ff9d9499.png": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
-      },
-      "candidateSha256": "9c65f4df56ba342488ebabe31b5f93bf4a8b18dd29fecbca41575778a0a9b89f",
-      "review": {
-       "verdict": "revise",
-       "expectedCharacters": [
-        "Bo",
-        "Keen"
-       ],
-       "detectedCharacters": [
-        "Keen",
-        "Bo"
-       ],
-       "expectedSubjectCount": 2,
-       "subjectCount": 2,
-       "summary": "Two subjects are present and both are recognizable, but the opening frame misses the authored geography and contains a forbidden prop on Bo. Keen is placed left of Bo rather than following the contract, and Bo’s satchel is visible despite the no-body-mounted-bag constraint. Relative size is broadly acceptable.",
-       "identityAndDistinguishability": {
-        "score": 2,
-        "visibleEvidence": "Keen visibly matches the blue bear reference with pale crown tuft and gold wrist cuffs; Bo visibly matches the orange squirrel reference with cream muzzle, tall ears, and very large curled tail. No third character or obvious identity swap is present.",
-        "correction": "Keep both character identities unchanged."
-       },
-       "relativeScaleAndGeography": {
-        "score": 1,
-        "visibleEvidence": "Both characters appear in a similar foreground plane, with Keen standing to the left of Bo instead of Keen being slightly farther back and left of Bo. The intended screen-right travel arrangement and Bo-centered geography are not followed.",
-        "correction": "Reposition to the authored layout: Bo at center-right in the foreground, Keen left of Bo and slightly behind him."
-       },
-       "anatomyAndSilhouette": {
-        "score": 2,
-        "visibleEvidence": "Bo’s tail is large and fluffy, ears are pointed, and body proportions read as squirrel-like rather than bear-like. Keen’s silhouette is readable with bear anatomy intact; no malformed limbs are evident.",
-        "correction": "Preserve the current character anatomies and silhouettes."
-       },
-       "actionReadyComposition": {
-        "score": 1,
-        "visibleEvidence": "The frame is a readable story setup, but the characters are not aligned to the requested walking-anticipation composition along the path, and Bo’s satchel is prominent rather than excluded.",
-        "correction": "Stage both characters in a side-by-side walking-anticipation pose oriented screen-right, with Keen slightly behind Bo and Bo’s satchel removed from view."
-       },
-       "forbiddenContent": {
-        "score": 0,
-        "visibleEvidence": "Bo is carrying a visible satchel, which is forbidden by the contract. No text or watermark is visible.",
-        "correction": "Remove Bo’s satchel entirely; ensure no body-mounted bag or dangling load appears."
-       },
-       "recommendedCorrection": "Recompose the keyframe with Bo leading at center-right and Keen slightly left/back on the same path, keep both identities as-is, and remove Bo’s satchel so no body-mounted bag is visible."
-      }
-     },
-     "packageRevision": 3,
-     "contentHash": "9c65f4df56ba342488ebabe31b5f93bf4a8b18dd29fecbca41575778a0a9b89f"
-    }
-   ],
-   "keyframeCandidate": {
-    "candidateId": "A",
-    "label": "A - Seedream 5 Pro",
-    "provider": "byteplus",
-    "model": "dola-seedream-5-0-pro-260628",
-    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
-    "generatedAt": "2026-09-01T16:22:07",
-    "source": "generated",
-    "inputSignature": {
-     "cardHash": "03851c6a9c87e698788385caa5c9df9eb549bb2121a595121088be27d24a918d",
-     "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
-     "referenceHashes": {
-      "CB_Keen.jpeg": "b02f4c314f09a8ae5cc505aff970d24a",
-      "CB_Bo.png": "68076f0b3779ee745be0ac0473db13d8",
-      "CB_Bo_satchel.png": "977d88cb8e75812f5d89a399a31adb82",
-      "Ep2_S4_plate_candidate_ff9d9499.png": "f97b4176595fce9356cf30f3ddaa9489"
-     },
-     "briefHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
-     "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
-     "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045"
-    },
-    "promptContract": {
-     "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nWe are already inside Bo's moving coping game at his eye level, sharing a playful side-by-side rhythm that still leaves the path ahead present as pressure.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=prop:satchel; @图4=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the exact satchel prop authority; inherit design, material, construction and scale only; ignore its background and labels.\n- @图4 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ lower-right area; walking anticipation with body braced for the next counted tail-poof, satchel carried and readable; facing screen-right along the path with slight inward awareness toward Keen.\n- Keen @ middle-left area; walking alongside in upbeat supportive anticipation, keeping pace beside Bo; facing screen-right toward shared travel and Bo.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nCamera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.\nBo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.\nThe open path continues past them and stays readable behind Bo through center-right background depth.\nA fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.\nOverhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.\nAida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nHold open travel space frame-right and center-right for the path pressure and Bo's later stop at the fallen log.\nKeep frame-left upper-left branch veil readable and lightly open for Aida's later descent entrance.\nReserve a clear seated pocket around Bo's future stop point so the later trio can settle without a camera reset.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nModerately wide animated lens feel, roughly 32mm full-frame equivalent, camera at Bo's height on a gentle lateral travel matching their walk; close enough for body-read and satchel presence, wide enough to retain the path pocket, fallen log territory, and branch entry zone for Aida. Mild perspective separation is welcome but avoid distortion or heroic emphasis.\n\n[Light]\nWarm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nOpen on Bo and Keen already in motion at Bo's height; do not stage a fresh start or frontal presentation.\nKeep the path legible behind and beyond Bo from frame one so belonging-pressure is built into the composition.\nPreserve branch-veiled left-side entry geography for Aida; her later arrival must feel like joining the same pocket, not entering a new setup.\nMaintain enough foreground-to-midground clearance that the camera's travel can visibly die with Bo's abrupt stop without reframing the scene's logic.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No unapproved extra cast, props or body-mounted loads; include only the required referenced satchel with its approved owner. Preserve the locked Scene Look.",
-     "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
-     "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
-     "provider": "seedream",
-     "providerModelId": "dola-seedream-5-0-pro-260628",
-     "modelVersion": "dola-seedream-5-0-pro-260628",
-     "directionContract": {
-      "canonicalStyleVersion": "v1.0.0",
-      "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
-      "lightingAndDepth": "Warm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.",
-      "geography": [
-       "Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.",
-       "Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.",
-       "The open path continues past them and stays readable behind Bo through center-right background depth.",
-       "A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.",
-       "Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.",
-       "Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing."
-      ],
-      "charactersInFrame": [
-       "Bo",
-       "Keen"
-      ],
-      "emptySections": []
-     },
-     "contractHash": "73a02907142a90ca728a7dad2c03833517f505a5b8e9950e0e9d83eac52fcdcc"
-    },
-    "geometryScreening": {
-     "status": "fail",
-     "reason": "one or more subjects drifted outside authored position or size tolerances",
-     "candidateSize": [
-      2816,
-      1584
-     ],
-     "positionTolerance": 0.12,
-     "heightScaleTolerance": [
-      0.75,
-      1.25
-     ],
-     "matches": [
-      {
-       "character": "Bo",
-       "passed": false,
-       "positionDelta": 0.0524,
-       "heightScaleAgainstLayout": 1.449,
-       "expectedCenter": [
-        0.61,
-        0.62
-       ],
-       "actualCenter": [
-        0.5922,
-        0.5707
-       ],
-       "expectedHeightFraction": 0.4514,
-       "actualHeightFraction": 0.654,
-       "detectedBoundsPx": [
-        1333,
-        386,
-        2002,
-        1422
-       ]
-      },
-      {
-       "character": "Keen",
-       "passed": false,
-       "positionDelta": 0.047,
-       "heightScaleAgainstLayout": 0.7188,
-       "expectedCenter": [
-        0.36,
-        0.5716
-       ],
-       "actualCenter": [
-        0.3343,
-        0.5322
-       ],
-       "expectedHeightFraction": 0.8168,
-       "actualHeightFraction": 0.5871,
-       "detectedBoundsPx": [
-        578,
-        378,
-        1305,
-        1308
-       ]
-      }
-     ],
-     "detectedComponentCount": 2,
-     "method": "local-u2net-foreground-geometry-v1",
-     "zeroSpend": true,
-     "providerCalled": false
-    },
-    "conformanceScreening": {
-     "status": "fail",
-     "reason": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
-     "checkedAt": "2026-09-01T16:22:07",
-     "screenVersion": 2,
-     "validatorModel": "gpt-5.4-mini",
-     "mediaProviderCalled": false,
-     "referenceHashes": {
-      "CB_Keen.jpeg": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
-      "CB_Bo.png": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
-      "CB_Bo_satchel.png": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
-      "Ep2_S4_plate_candidate_ff9d9499.png": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
-     },
-     "candidateSha256": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
-     "review": {
-      "verdict": "block",
-      "expectedCharacters": [
-       "Bo",
-       "Keen"
-      ],
-      "detectedCharacters": [
-       "Keen",
-       "Bo"
-      ],
-      "expectedSubjectCount": 2,
-      "subjectCount": 2,
-      "summary": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
-      "identityAndDistinguishability": {
-       "score": 2,
-       "visibleEvidence": "Both named characters are visible and distinct: Keen is the blue bear with pale crown tuft and gold cuffs; Bo is the orange squirrel with cream muzzle, tall tufted ears, and a large curled tail.",
-       "correction": "Keep both characters clearly separated and preserve each character’s canonical colors, tufting, cuffs, tail, and facial structure without borrowing features."
-      },
-      "relativeScaleAndGeography": {
-       "score": 1,
-       "visibleEvidence": "The two characters are in the same forest environment, but Bo dominates the foreground more than the specified 0.42 frame placement and Keen sits farther left/back than the authored screen geography; the planned side-by-side staging is only approximate.",
-       "correction": "Reposition Bo to screen-right at the authored mid-foreground size and place Keen to screen-left slightly behind him, maintaining the intended side-by-side travel spacing."
-      },
-      "anatomyAndSilhouette": {
-       "score": 2,
-       "visibleEvidence": "Both figures have readable, complete anatomy and silhouettes: Keen’s bear form is intact, and Bo’s squirrel form shows the large fluffy curled tail, upright ears, and small body proportions.",
-       "correction": "Preserve the full tail volume, ear points, and clean limb shapes; avoid any malformed paws or cropped anatomy."
-      },
-      "actionReadyComposition": {
-       "score": 1,
-       "visibleEvidence": "The image is action-ready in a forest path setting, but Bo’s pose and satchel read more like a generic traveling character than the specified walking anticipation with readable satchel support; Keen’s supportive walk is present but not strongly matched in staging.",
-       "correction": "Adjust both characters into a clearer walking-anticipation pose along the path, with Bo’s satchel reading only if the contract permits, and Keen aligned in upbeat supportive pace beside him."
-      },
-      "forbiddenContent": {
-       "score": 0,
-       "visibleEvidence": "Bo has a visible brown satchel/body-mounted bag crossing the torso, which is explicitly forbidden as a generic backpack or satchel.",
-       "correction": "Remove Bo’s satchel entirely and ensure no body-mounted bags, dangling loads, text, logos, or watermarks appear."
-      },
-      "recommendedCorrection": "Remove Bo’s satchel, then shift Bo to the authored screen-right foreground and Keen to the authored screen-left slightly rear position, keeping both in a clear walking-anticipation side-by-side forest path composition with no extra props."
-     }
-    },
-    "packageRevision": 3,
-    "contentHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec"
-   },
-   "selectedKeyframeCandidateId": null,
+   "keyframeCandidates": [],
+   "keyframeCandidate": null,
+   "selectedKeyframeCandidateId": "A",
    "keyframeABTest": {
     "createdAt": "2026-09-01T16:22:40",
     "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
@@ -4650,7 +4143,156 @@
    "pendingSpendAuth": null,
    "lastBatchBinding": null,
    "disclosure": null,
-   "firedAt": null
+   "firedAt": null,
+   "keyframeApproval": {
+    "approved": true,
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
+    "at": "2026-09-01T19:14:29",
+    "reviewedBy": "Julian",
+    "source": "generated",
+    "inputSignature": {
+     "cardHash": "03851c6a9c87e698788385caa5c9df9eb549bb2121a595121088be27d24a918d",
+     "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+     "referenceHashes": {
+      "CB_Keen.jpeg": "b02f4c314f09a8ae5cc505aff970d24a",
+      "CB_Bo.png": "68076f0b3779ee745be0ac0473db13d8",
+      "CB_Bo_satchel.png": "977d88cb8e75812f5d89a399a31adb82",
+      "Ep2_S4_plate_candidate_ff9d9499.png": "f97b4176595fce9356cf30f3ddaa9489"
+     },
+     "briefHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+     "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+     "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045"
+    },
+    "promptContract": {
+     "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nWe are already inside Bo's moving coping game at his eye level, sharing a playful side-by-side rhythm that still leaves the path ahead present as pressure.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=prop:satchel; @图4=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the exact satchel prop authority; inherit design, material, construction and scale only; ignore its background and labels.\n- @图4 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ lower-right area; walking anticipation with body braced for the next counted tail-poof, satchel carried and readable; facing screen-right along the path with slight inward awareness toward Keen.\n- Keen @ middle-left area; walking alongside in upbeat supportive anticipation, keeping pace beside Bo; facing screen-right toward shared travel and Bo.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nCamera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.\nBo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.\nThe open path continues past them and stays readable behind Bo through center-right background depth.\nA fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.\nOverhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.\nAida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nHold open travel space frame-right and center-right for the path pressure and Bo's later stop at the fallen log.\nKeep frame-left upper-left branch veil readable and lightly open for Aida's later descent entrance.\nReserve a clear seated pocket around Bo's future stop point so the later trio can settle without a camera reset.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nModerately wide animated lens feel, roughly 32mm full-frame equivalent, camera at Bo's height on a gentle lateral travel matching their walk; close enough for body-read and satchel presence, wide enough to retain the path pocket, fallen log territory, and branch entry zone for Aida. Mild perspective separation is welcome but avoid distortion or heroic emphasis.\n\n[Light]\nWarm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nOpen on Bo and Keen already in motion at Bo's height; do not stage a fresh start or frontal presentation.\nKeep the path legible behind and beyond Bo from frame one so belonging-pressure is built into the composition.\nPreserve branch-veiled left-side entry geography for Aida; her later arrival must feel like joining the same pocket, not entering a new setup.\nMaintain enough foreground-to-midground clearance that the camera's travel can visibly die with Bo's abrupt stop without reframing the scene's logic.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No unapproved extra cast, props or body-mounted loads; include only the required referenced satchel with its approved owner. Preserve the locked Scene Look.",
+     "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+     "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+     "provider": "seedream",
+     "providerModelId": "dola-seedream-5-0-pro-260628",
+     "modelVersion": "dola-seedream-5-0-pro-260628",
+     "directionContract": {
+      "canonicalStyleVersion": "v1.0.0",
+      "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+      "lightingAndDepth": "Warm enclosed dappled daylight filtered through dense leaves, with soft sun patches on path and subtle cool-green ambient fill under the canopy. Foreground branch veil slightly darker and softer, characters cleanly keyed from the background without spotlighting. Depth should feel compressed into a sheltered pocket rather than expansive vista, with gentle leaf movement implied in layered foliage and the path remaining readable as emotional pressure.",
+      "geography": [
+       "Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.",
+       "Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.",
+       "The open path continues past them and stays readable behind Bo through center-right background depth.",
+       "A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.",
+       "Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.",
+       "Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing."
+      ],
+      "charactersInFrame": [
+       "Bo",
+       "Keen"
+      ],
+      "emptySections": []
+     },
+     "contractHash": "73a02907142a90ca728a7dad2c03833517f505a5b8e9950e0e9d83eac52fcdcc"
+    },
+    "abTest": {
+     "winner": "A",
+     "candidates": [
+      {
+       "candidateId": "A",
+       "label": "A - Seedream 5 Pro",
+       "provider": "byteplus",
+       "model": "dola-seedream-5-0-pro-260628",
+       "generatedAt": "2026-09-01T16:22:07",
+       "selected": true,
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png"
+      },
+      {
+       "candidateId": "B",
+       "label": "B - Nano Banana 2",
+       "provider": "google",
+       "model": "gemini-3.1-flash-image",
+       "generatedAt": "2026-09-01T16:22:40",
+       "selected": false,
+       "archivedFile": "media/archive/shots_superseded/Ep2_S4.SH1_see_ab_20260901T191429/Ep2_S4.SH1_keyframe_B_286cbd03.png"
+      }
+     ],
+     "contract": {
+      "createdAt": "2026-09-01T16:22:40",
+      "promptHash": "90961ae93d2b7484ca3b1e7c00b96e15f26ed0870d1e4363b3c1eef07b622fef",
+      "referenceHashes": [
+       "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+       "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+       "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
+       "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+      ],
+      "candidateIds": [
+       "A",
+       "B"
+      ],
+      "selectionRequired": true
+     }
+    },
+    "packageRevision": 3,
+    "contentHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
+    "conformanceScreening": {
+     "status": "fail",
+     "reason": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
+     "checkedAt": "2026-09-01T16:22:07",
+     "screenVersion": 2,
+     "validatorModel": "gpt-5.4-mini",
+     "mediaProviderCalled": false,
+     "referenceHashes": {
+      "CB_Keen.jpeg": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+      "CB_Bo.png": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+      "CB_Bo_satchel.png": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
+      "Ep2_S4_plate_candidate_ff9d9499.png": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+     },
+     "candidateSha256": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
+     "review": {
+      "verdict": "block",
+      "expectedCharacters": [
+       "Bo",
+       "Keen"
+      ],
+      "detectedCharacters": [
+       "Keen",
+       "Bo"
+      ],
+      "expectedSubjectCount": 2,
+      "subjectCount": 2,
+      "summary": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable.",
+      "identityAndDistinguishability": {
+       "score": 2,
+       "visibleEvidence": "Both named characters are visible and distinct: Keen is the blue bear with pale crown tuft and gold cuffs; Bo is the orange squirrel with cream muzzle, tall tufted ears, and a large curled tail.",
+       "correction": "Keep both characters clearly separated and preserve each character’s canonical colors, tufting, cuffs, tail, and facial structure without borrowing features."
+      },
+      "relativeScaleAndGeography": {
+       "score": 1,
+       "visibleEvidence": "The two characters are in the same forest environment, but Bo dominates the foreground more than the specified 0.42 frame placement and Keen sits farther left/back than the authored screen geography; the planned side-by-side staging is only approximate.",
+       "correction": "Reposition Bo to screen-right at the authored mid-foreground size and place Keen to screen-left slightly behind him, maintaining the intended side-by-side travel spacing."
+      },
+      "anatomyAndSilhouette": {
+       "score": 2,
+       "visibleEvidence": "Both figures have readable, complete anatomy and silhouettes: Keen’s bear form is intact, and Bo’s squirrel form shows the large fluffy curled tail, upright ears, and small body proportions.",
+       "correction": "Preserve the full tail volume, ear points, and clean limb shapes; avoid any malformed paws or cropped anatomy."
+      },
+      "actionReadyComposition": {
+       "score": 1,
+       "visibleEvidence": "The image is action-ready in a forest path setting, but Bo’s pose and satchel read more like a generic traveling character than the specified walking anticipation with readable satchel support; Keen’s supportive walk is present but not strongly matched in staging.",
+       "correction": "Adjust both characters into a clearer walking-anticipation pose along the path, with Bo’s satchel reading only if the contract permits, and Keen aligned in upbeat supportive pace beside him."
+      },
+      "forbiddenContent": {
+       "score": 0,
+       "visibleEvidence": "Bo has a visible brown satchel/body-mounted bag crossing the torso, which is explicitly forbidden as a generic backpack or satchel.",
+       "correction": "Remove Bo’s satchel entirely and ensure no body-mounted bags, dangling loads, text, logos, or watermarks appear."
+      },
+      "recommendedCorrection": "Remove Bo’s satchel, then shift Bo to the authored screen-right foreground and Keen to the authored screen-left slightly rear position, keeping both in a clear walking-anticipation side-by-side forest path composition with no extra props."
+     }
+    },
+    "conformanceAdvisoryDecision": {
+     "acceptedBy": "Julian",
+     "acceptedAt": "2026-09-01T19:14:29",
+     "statusAtDecision": "fail",
+     "reasonAtDecision": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable."
+    }
+   },
+   "keyframePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png"
   }
  ],
  "validation": {

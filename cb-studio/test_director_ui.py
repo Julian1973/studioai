@@ -424,6 +424,13 @@ def test_see_ab_comparison_is_visible_and_requires_explicit_selection():
     assert "Current Shot" in HTML
 
 
+def test_visible_keyframe_candidate_is_selected_by_the_approve_action():
+    assert 'cmd==="approve-keyframe"&&body.candidate==null' in APP
+    assert 'body.candidate=visibleCandidate.candidateId' in APP
+    assert 'cmd == "approve-keyframe" and d.get("candidate")' in SERVER
+    assert '_CBR.select_keyframe_candidate(' in SERVER
+
+
 def test_current_shot_has_inline_creation_and_animation_inputs():
     assert 'id="shot-inputs"' in HTML
     assert "renderShotInputs(session)" in JS

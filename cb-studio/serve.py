@@ -5128,6 +5128,19 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": "reject-voice needs a plain-language reason"}); return
                 if cmd == "reject-timing-slate" and not correction:
                     self._json(400, {"error": "reject-timing-slate needs a plain-language reason"}); return
+                if cmd == "approve-keyframe" and d.get("candidate") not in (None, ""):
+                    # SEE displays one current candidate. Approving that visible image is
+                    # also the explicit A/B selection; no hidden second decision is needed.
+                    keyframe_candidate = str(d.get("candidate")).strip().upper()
+                    if keyframe_candidate not in ("A", "B"):
+                        self._json(400, {"error": "approve-keyframe candidate must be A or B"}); return
+                    _CBR = _canonical_cb_render()
+                    try:
+                        _CBR.select_keyframe_candidate(
+                            scene, shot_id, keyframe_candidate, episode=episode,
+                            log=lambda message: print(message, flush=True))
+                    except _CBR.Refused as exc:
+                        self._json(409, {"error": str(exc)}); return
                 # THE NON-GENERATION OPENING-FRAME SOURCES (2026-07-18): 'select-upload' needs a
                 # server-side path from a prior /api/shot-keyframe-upload call; 'select-library'
                 # needs an item's path from /api/shot-keyframe-library — both validated as real,

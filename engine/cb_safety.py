@@ -271,6 +271,22 @@ def install(m):
              if record.get("inputSignature") == expected),
             (None, None),
         )
+        if not current_record and stage == "cinematography" and shot_id:
+            # Dialogue and voice-performance amendments explicitly preserve SEE.  The
+            # shot contract hash includes dialogue, so an otherwise identical DP record
+            # must not become stale merely because HEAR wording or cadence changed.
+            amendment = next((item for item in reversed(pkg.get("scopedAmendments") or [])
+                              if item.get("shotId") == shot_id and
+                              item.get("kind") in ("dialogue-correction",
+                                                   "voice-contract-correction") and
+                              "direction" in (item.get("preservedStages") or [])), None)
+            if amendment:
+                current_source, current_record = next(
+                    ((source, record) for source, record in existing
+                     if set(m._signature_diff(record.get("inputSignature"), expected)) <=
+                     {"shotContractHash"}),
+                    (None, None),
+                )
         contract_error = None
         if current_record and stage == "voice":
             try:
@@ -1419,6 +1435,20 @@ def install(m):
                                      "Objective identity and scale advice was unavailable."),
             }
         expected = keyframe_signature(pkg, shot, candidate, scene, episode)
+        signature_diff = set(m._signature_diff(candidate.get("inputSignature"), expected))
+        visual_carry = next(
+            (item for item in reversed(pkg.get("scopedAmendments") or [])
+             if item.get("shotId") == shot_id and
+             item.get("kind") in ("dialogue-correction", "voice-contract-correction") and
+             "keyframe" in (item.get("preservedStages") or []) and
+             item.get("sceneLookContentHash") == expected.get("sceneLookHash")),
+            None,
+        )
+        if visual_carry and signature_diff <= {"cardHash"}:
+            # Re-seal unchanged visual evidence against the current dialogue-only shot
+            # record. This changes provenance metadata only; approval remains the explicit
+            # human action below and no provider is contacted.
+            candidate["inputSignature"] = expected
         if (candidate.get("inputSignature") != expected or
                 candidate.get("contentHash") != file_sha256(candidate.get("path"))):
             raise m.Refused(f"REFUSED — {shot_id}'s keyframe inputs changed; regenerate or reselect it")

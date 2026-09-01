@@ -443,6 +443,38 @@ def test_dialogue_amendment_carries_exact_approved_keyframe(monkeypatch, tmp_pat
         "keyframeContentHash"] == record["contentHash"]
 
 
+def test_dialogue_amendment_keeps_unchanged_keyframe_candidate_reviewable(
+        monkeypatch, tmp_path):
+    media = tmp_path / "candidate.png"
+    media.write_bytes(b"unchanged candidate")
+    digest = cb_render._sha256_file(media)
+    candidate = {
+        "path": str(media), "contentHash": digest,
+        "inputSignature": {
+            "cardHash": "before-dialogue", "sceneLookHash": "look-v1",
+            "referenceHashes": {"Keen.png": "same"}, "briefHash": "same",
+            "model": "same", "canonProfileDigest": "same",
+        },
+    }
+    expected = {**candidate["inputSignature"], "cardHash": "after-dialogue"}
+    package = {"scopedAmendments": [{
+        "shotId": "S1.SH3", "kind": "dialogue-correction",
+        "sceneLookContentHash": "look-v1",
+        "preservedStages": ["direction", "scenelook", "keyframe"],
+    }]}
+    shot = {"shotId": "S1.SH3"}
+    monkeypatch.setattr(
+        cb_render, "_keyframe_record_input_signature",
+        lambda *args, **kwargs: expected)
+
+    assert cb_state._keyframe_candidate_current(
+        package, shot, candidate, "1", "Ep2") is True
+
+    candidate["contentHash"] = "tampered"
+    assert cb_state._keyframe_candidate_current(
+        package, shot, candidate, "1", "Ep2") is False
+
+
 @pytest.mark.parametrize(("stage", "preserved", "invalidated"), [
     ("direction", ["scenelook"],
      ["direction", "keyframe", "voice", "animation", "continuity", "final"]),

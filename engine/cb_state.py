@@ -133,10 +133,19 @@ def _keyframe_candidate_current(pkg, shot, candidate, scene, episode):
             pkg, shot, candidate, scene, episode)
     except (cb_render.Refused, OSError, ValueError):
         return False
-    return (
-        candidate.get("inputSignature") == expected and
-        candidate.get("contentHash") == cb_render._sha256_file(candidate["path"])
+    content_current = candidate.get("contentHash") == cb_render._sha256_file(candidate["path"])
+    if candidate.get("inputSignature") == expected:
+        return content_current
+    amendment = next(
+        (item for item in reversed(pkg.get("scopedAmendments") or [])
+         if item.get("shotId") == shot.get("shotId") and
+         item.get("kind") in ("dialogue-correction", "voice-contract-correction") and
+         "keyframe" in (item.get("preservedStages") or []) and
+         item.get("sceneLookContentHash") == expected.get("sceneLookHash")),
+        None,
     )
+    changed = set(cb_render._signature_diff(candidate.get("inputSignature"), expected))
+    return bool(amendment and content_current and changed <= {"cardHash"})
 
 
 def _batch_current(pkg, shot, ledger, scene, episode):

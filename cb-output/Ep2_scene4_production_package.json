@@ -4312,7 +4312,45 @@
      }
     }
    ],
-   "voiceApproval": null,
+   "voiceApproval": {
+    "approved": true,
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav",
+    "at": "2026-09-01T18:41:06",
+    "reviewedBy": "Julian",
+    "packageRevision": 3,
+    "inputSignature": {
+     "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+     "dialogueHash": "01cded761d74b24355f6ebb0ed4bf3a3388abd283d0e0323cacab406dce261e5",
+     "performanceHash": "520b7c7fb37af579e210435f36305ade487d19652df5786fbd8f49f42c3ebf8c",
+     "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+     "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+     "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+     "voiceCompilerVersion": "voice-director-v1",
+     "pronunciationOverrides": {
+      "Aida": "Ada"
+     },
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB",
+      "TCRj5m2u9xhZHJ8h9pMv",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "SHuZ9GyczU4QEDzU4QU4",
+      "TCRj5m2u9xhZHJ8h9pMv",
+      "SHuZ9GyczU4QEDzU4QU4",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "SHuZ9GyczU4QEDzU4QU4",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "SHuZ9GyczU4QEDzU4QU4",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "SHuZ9GyczU4QEDzU4QU4"
+     ]
+    },
+    "contentHash": "0a4ec698e2faca860c66a6e0354f2f2338b14050f85c27d32ddeaddfad3a0c77",
+    "rawContentHash": "0661cc3af91dc789b4acfeadee05cdfb64c575c2919e1441f6880291347699d6",
+    "timingContentHash": "3fcea43c5c739e9fa42221db9be18cb627a799a579b2d09b928fe7740c51f5f6",
+    "placementContentHash": "c94104a463407c000009af5927602687e4dd08b87080f6316c0e2504d5ff12ea"
+   },
    "voicePrevious": {
     "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_54d5241a.wav",
     "generatedFrom": [

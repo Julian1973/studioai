@@ -164,6 +164,25 @@ def test_current_prepared_direction_is_operational_without_fake_human_approval(
         package, shot["shotId"], "cinematography")["current"]
 
 
+def test_dialogue_amendment_does_not_stale_prepared_cinematography(
+        tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    monkeypatch.setattr(render, "_keyframe_input_signature",
+                        lambda *args, **kwargs: {"cardHash": "card-v1"})
+    _prepare_department(package, shot["shotId"], "cinematography")
+    shot["dialogueLines"] = [{"speaker": "Keen", "exactText": "Changed words."}]
+    package["scopedAmendments"] = [{
+        "shotId": shot["shotId"], "kind": "dialogue-correction",
+        "preservedStages": ["direction", "scenelook", "keyframe"],
+    }]
+
+    status = render._department_record_status(
+        package, shot["shotId"], "cinematography", "1", "Ep1")
+
+    assert status["current"] is True
+    assert status["source"] == "prepared"
+
+
 def test_invalid_voice_contract_is_never_treated_as_current_direction(tmp_path):
     package, shot, _ = _pkg(tmp_path)
     candidate = _prepare_department(package, shot["shotId"], "voice")

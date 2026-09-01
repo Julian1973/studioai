@@ -634,6 +634,13 @@ def production_state(scene, episode="Ep1", intake=None):
         package_exists = True
         lineage = cb_render.lineage_status(pkg, scene, episode)
         amendment = _scoped_shot_amendment(intake, scene, pkg)
+        preserved_scene = bool(
+            not intake_current and lineage["current"] and storyboard and
+            storyboard.get("approvalState") == "approved")
+        if preserved_scene:
+            storyboard_current = True
+            stages["storyboard"] = _stage(
+                "approved", "this scene is unchanged in the active script")
         package_current = bool(
             (pkg.get("validation") or {}).get("passed") and lineage["current"] and
             storyboard_current)
@@ -642,6 +649,7 @@ def production_state(scene, episode="Ep1", intake=None):
         package_exists = False
         package_current = False
         amendment = None
+        preserved_scene = False
         lineage = {"current": False, "reasonCodes": ["production-package-missing"]}
 
     if amendment:
@@ -872,7 +880,7 @@ def production_state(scene, episode="Ep1", intake=None):
             "action": first.get("action") or
                       "Resolve the listed canon issue and explicitly re-lock canon.",
         })
-    if script_current and not intake_current:
+    if script_current and not intake_current and not preserved_scene and not amendment:
         blockers.append({
             "code": "STORY_INTAKE_APPROVAL_REQUIRED",
             "stage": "storyboard",
@@ -917,6 +925,7 @@ def production_state(scene, episode="Ep1", intake=None):
         "canonLock": canon_summary,
         "packageExists": True,
         "packageCurrent": package_current,
+        "preservedScene": preserved_scene,
         "scopedAmendment": amendment,
         "packageRevision": pkg.get("revision"),
         "lineage": lineage,

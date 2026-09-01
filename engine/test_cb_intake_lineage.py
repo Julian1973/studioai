@@ -265,6 +265,34 @@ def test_scene_roster_ignores_a_stale_legacy_package(tmp_path, monkeypatch):
     assert roster["reason"] == "canonical-beat-package-stale"
 
 
+def test_scene_source_digest_changes_only_the_edited_scene():
+    before = (
+        "INT. CRYSTAL COVE - DAY 1\n\nKEEN\nHello.\n\n"
+        "EXT. HOLLOW OAK - DAY 2\n\nBO\nReady.\n")
+    after = before.replace("Ready.", "Really ready.")
+
+    old = cb_intake.scene_source_digests(before, roster=["Keen", "Bo"])
+    new = cb_intake.scene_source_digests(after, roster=["Keen", "Bo"])
+
+    assert old["1"] == new["1"]
+    assert old["2"] != new["2"]
+
+
+def test_package_scene_roster_keeps_scenes_without_production_packages():
+    package = {"beats": [
+        {"sceneNumber": 1, "beatCode": "1.B1", "location": "COVE", "time": "DAY"},
+        {"sceneNumber": 2, "beatCode": "2.B1", "location": "OAK", "time": "DAY"},
+    ]}
+
+    roster = cb_intake._package_scene_roster(package, [{
+        "sceneNumber": "1", "shotCount": 3, "package": "scene1.json"}])
+
+    assert [scene["sceneNumber"] for scene in roster] == ["1", "2"]
+    assert roster[0]["shotCount"] == 3
+    assert roster[1]["shotCount"] == 0
+    assert roster[1]["reason"] == "last-approved-story-direction"
+
+
 def test_legacy_lineage_cannot_manufacture_canon_provenance():
     with pytest.raises(cb_intake.Refused, match="cannot be retroactively signed"):
         cb_intake.migrate_legacy_lineage("Ep1", dry_run=True, log=lambda *_: None)

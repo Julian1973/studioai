@@ -161,6 +161,58 @@ def carried_scene_roster(episode):
         if str(item["sceneNumber"]).isdigit() else str(item["sceneNumber"]))
 
 
+def _package_scene_roster(pkg, carried=None):
+    """Project every signed scene even when the episode-wide script pointer advanced."""
+    carried = {str(item.get("sceneNumber")): item for item in (carried or [])}
+    by_scene = {}
+    for beat in pkg.get("beats", []):
+        scene_number = beat.get("sceneNumber")
+        if scene_number is None:
+            continue
+        by_scene.setdefault(str(scene_number), []).append(beat)
+    scenes = []
+    for scene_number in sorted(
+            by_scene, key=lambda value: int(value) if value.isdigit() else value):
+        beats = sorted(by_scene[scene_number], key=lambda beat: str(beat.get("beatCode", "")))
+        first = beats[0]
+        production = carried.get(scene_number) or {}
+        scenes.append({
+            "sceneNumber": scene_number,
+            "location": first.get("location", ""),
+            "time": first.get("time", ""),
+            "beatCount": len(beats),
+            "beatCodes": [beat.get("beatCode") for beat in beats],
+            "shotCount": production.get("shotCount", 0),
+            "package": production.get("package"),
+            "carried": True,
+            "reason": ("existing-production-package" if production else
+                       "last-approved-story-direction"),
+        })
+    return scenes
+
+
+def scene_source_digests(text, roster=None):
+    """Hash each scene's own heading and ordered events, independent of episode version."""
+    parsed = parse_script(text, roster or _load_roster(), log=lambda *_: None)
+    scene_meta = {str(scene["sceneNumber"]): scene for scene in parsed["scenes"]}
+    events = {}
+    for event in parsed["events"]:
+        events.setdefault(str(event["scene"]), []).append({
+            "type": event.get("type"),
+            "speaker": event.get("speaker"),
+            "text": event.get("text"),
+        })
+    return {
+        scene_number: cb_lineage.dependency_signature("script-scene-content", {
+            "sceneNumber": scene_number,
+            "location": meta.get("location", ""),
+            "time": meta.get("time", ""),
+            "orderedEvents": events.get(scene_number, []),
+        })["digest"]
+        for scene_number, meta in scene_meta.items()
+    }
+
+
 # ── scene roster — the Scene Board's ONLY source of "which scenes exist" ────────────────
 def scene_roster(episode="Ep1"):
     """Read-only view of the CANONICAL beat package's own scenes, for the Studio's Scene
@@ -175,29 +227,24 @@ def scene_roster(episode="Ep1"):
                 "reason": "story-intake-not-approved"}
     status = intake_status(episode)
     if not status.get("canonicalCurrent"):
+        pkg_path = pkgs[-1]
+        pkg = json.loads(pkg_path.read_text())
+        source_report = cb_lineage.validate_beat_package_source_contract(pkg)
+        signed_scenes = []
+        if (source_report["ok"] and
+                pkg.get("contentSignature") == cb_lineage.beat_package_signature(pkg)):
+            signed_scenes = _package_scene_roster(pkg, carried_scene_roster(episode))
         return {"episode": episode, "hasPackage": False, "package": pkgs[-1].name,
-                "scenes": [], "carriedScenes": carried_scene_roster(episode),
+                "scenes": signed_scenes, "carriedScenes": carried_scene_roster(episode),
                 "reason": "canonical-beat-package-stale",
                 "canonicalCurrent": False}
     pkg_path = pkgs[-1]
     pkg = json.loads(pkg_path.read_text())
-    by_scene = {}
-    for b in pkg.get("beats", []):
-        sn = b.get("sceneNumber")
-        if sn is None:
-            continue
-        by_scene.setdefault(sn, []).append(b)
-    scenes = []
-    for sn in sorted(by_scene):
-        beats = sorted(by_scene[sn], key=lambda b: str(b.get("beatCode", "")))
-        first = beats[0]
-        scenes.append({
-            "sceneNumber": sn,
-            "location": first.get("location", ""),
-            "time": first.get("time", ""),
-            "beatCount": len(beats),
-            "beatCodes": [b.get("beatCode") for b in beats],
-        })
+    scenes = _package_scene_roster(pkg)
+    for scene in scenes:
+        scene.pop("carried", None)
+        scene.pop("reason", None)
+        scene.pop("package", None)
     return {"episode": episode, "hasPackage": True, "package": pkg_path.name,
             "scenes": scenes, "reason": None, "canonicalCurrent": True}
 

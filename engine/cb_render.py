@@ -380,9 +380,9 @@ def lineage_status(pkg, scene, episode="Ep1"):
         direct_script_match = (
             package_script == current_script and
             (pkg.get("sourceScript") or {}).get("sha256") == current["sha256"])
-        # A scoped correction does not alter unrelated approved media. Permit the
-        # immediately preceding immutable script only for an earlier scene or when this
-        # package carries an explicit amendment for the changed shot.
+        # A script revision does not alter unrelated scenes. Compare this scene's actual
+        # parsed source content so repeated edits in another scene do not invalidate the
+        # whole episode merely because the episode-level version id advanced.
         scope = current.get("changeScope") or {}
         previous_source_match = False
         try:
@@ -391,6 +391,8 @@ def lineage_status(pkg, scene, episode="Ep1"):
             source = pkg.get("sourceScript") or {}
             source_path = (ROOT / str(source.get("contentPath") or "")).resolve()
             source_path.relative_to(ROOT.resolve())
+            current_path = (ROOT / str(current.get("contentPath") or "")).resolve()
+            current_path.relative_to(ROOT.resolve())
             amendment = next((item for item in (pkg.get("scopedAmendments") or [])
                               if item.get("shotId") == scope.get("shotId") and
                               item.get("scriptVersionId") == current_script and
@@ -399,13 +401,42 @@ def lineage_status(pkg, scene, episode="Ep1"):
                               package_script), None)
             scoped_package_match = bool(
                 prior_scene == changed_scene and scope.get("shotId") and amendment)
-            previous_source_match = bool(
+            unchanged_scene_match = False
+            amended_scene_match = False
+            if source_path.is_file() and current_path.is_file():
+                try:
+                    import cb_intake
+                    old_scene_digest = cb_intake.scene_source_digests(
+                        source_path.read_text(encoding="utf-8")).get(str(prior_scene))
+                    new_scene_digest = cb_intake.scene_source_digests(
+                        current_path.read_text(encoding="utf-8")).get(str(prior_scene))
+                    unchanged_scene_match = bool(
+                        old_scene_digest and old_scene_digest == new_scene_digest)
+                    for recorded in reversed(pkg.get("scopedAmendments") or []):
+                        recorded_shot = str(recorded.get("shotId") or "")
+                        if not recorded_shot.startswith(f"S{prior_scene}."):
+                            continue
+                        digest = cb_lineage.parse_script_version_id(
+                            recorded.get("scriptVersionId"))
+                        amended_path = SCRIPT_STORE.versions_root / episode / f"{digest}.txt"
+                        if not amended_path.is_file():
+                            continue
+                        amended_digest = cb_intake.scene_source_digests(
+                            amended_path.read_text(encoding="utf-8")).get(str(prior_scene))
+                        if amended_digest and amended_digest == new_scene_digest:
+                            amended_scene_match = True
+                            break
+                except (cb_intake.Refused, OSError, TypeError, ValueError):
+                    unchanged_scene_match = False
+            legacy_scoped_match = bool(
                 scope.get("kind") in ("dialogue-correction", "dialogue-format-cleanup") and
-                source_path.is_file() and
                 (scope.get("kind") == "dialogue-format-cleanup" or
                  scoped_package_match or
                  (prior_scene and changed_scene and prior_scene < changed_scene and
-                  package_script == current.get("previousScriptVersionId"))) and
+                  package_script == current.get("previousScriptVersionId"))))
+            previous_source_match = bool(
+                source_path.is_file() and
+                (unchanged_scene_match or amended_scene_match or legacy_scoped_match) and
                 cb_lineage.sha256_file(source_path) == source.get("sha256"))
         except (OSError, TypeError, ValueError):
             previous_source_match = False

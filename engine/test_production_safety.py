@@ -26,7 +26,7 @@ def test_show_specific_runtime_refuses_an_uninstalled_adapter(monkeypatch):
         raise AssertionError("Crystal Bears runtime accepted another show's adapter")
 
 
-def test_preflight_preserves_saved_shots_during_episode_story_direction_update(monkeypatch):
+def test_preflight_keeps_unchanged_scene_usable_during_episode_story_direction_update(monkeypatch):
     intake = dict(cb_intake.intake_status("Ep1"))
     intake.update({
         "hasScript": True,
@@ -42,22 +42,21 @@ def test_preflight_preserves_saved_shots_during_episode_story_direction_update(m
     assert report["zeroSpend"] is True
     assert report["lineage"]["current"] is True
     codes = {item["code"] for item in report["blockers"]}
-    assert "STORY_INTAKE_APPROVAL_REQUIRED" in codes
+    assert "STORY_INTAKE_APPROVAL_REQUIRED" not in codes
     assert "CANON_LOCK_REQUIRED" not in codes
     assert "STALE_PRODUCTION_GRAPH" not in codes
-    assert "SHOT_NOT_READY" not in codes
+    assert "SHOT_NOT_READY" in codes
     assert report["shots"]
     assert all(item["allowedActions"]["fireAnimation"] is False
                for item in report["shots"])
-    assert report["stages"]["storyboard"]["state"] == "awaiting"
+    assert report["stages"]["storyboard"]["state"] == "approved"
     assert report["providerCapabilities"]["selectionReady"] is True
     assert report["providerCapabilities"]["selectedVideoModelId"] == (
         "dreamina-seedance-2-5-260628")
     assert "VIDEO_PROVIDER_NOT_QUALIFIED" not in codes
     assert report["showProfile"]["showId"] == "crystal-bears"
     assert report["showProfile"]["adapterReady"] is True
-    assert report["nextAction"] == (
-        "Review and approve the current episode Story & Direction candidate.")
+    assert "Story & Direction" not in report["nextAction"]
 
 
 def test_preflight_blocks_an_unqualified_selected_video_model(monkeypatch):

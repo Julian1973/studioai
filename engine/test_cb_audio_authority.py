@@ -89,10 +89,25 @@ def test_trailing_third_person_giggle_routes_out_of_spoken_dialogue():
 
     routed = A.route_lines([source])
 
-    assert routed["spokenDialogue"][0]["exactText"] == (
-        "3,2,1… POOF! The tail does ‘The Thing’ again and again.")
+    assert routed["spokenDialogue"][0]["exactText"] == "3,2,1…"
     assert routed["seedanceSfxCues"][0]["kinds"] == ["laughter"]
-    assert routed["seedanceSfxCues"][0]["authoredCue"] == "Bo giggles."
+    assert routed["seedanceSfxCues"][0]["authoredCue"] == (
+        "POOF! The tail does ‘The Thing’ again and again. Bo giggles.")
+
+
+def test_screenplay_action_and_beat_are_never_sent_as_spoken_words():
+    routed = A.route_lines([
+        line("3,2,1 … POOF! The tail does ‘The Thing’ again and again. Bo giggles."),
+        line("They all know each other. Beat. But I don’t know them."),
+        line("Every single time. BEAT."),
+    ])
+
+    assert [item["exactText"] for item in routed["spokenDialogue"]] == [
+        "3,2,1…",
+        "They all know each other. But I don’t know them.",
+        "Every single time.",
+    ]
+    assert routed["seedanceSfxCues"][0]["authoredCue"].startswith("POOF!")
 
 
 def test_existing_voice_direction_is_projected_to_spoken_lane_without_laugh_tag():
@@ -113,8 +128,8 @@ def test_existing_voice_direction_is_projected_to_spoken_lane_without_laugh_tag(
 
     projected, spoken = A.route_voice_direction(direction, [source])
 
-    expected = "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again."
-    assert spoken[0]["exactText"] == expected.removeprefix("[playfully] ")
+    expected = "[playfully] 3,2,1…"
+    assert spoken[0]["exactText"] == "3,2,1…"
     assert projected["lines"][0]["performedText"] == expected
     assert projected["lines"][0]["takeRecipes"][0]["performedText"] == expected
 

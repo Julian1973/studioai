@@ -156,6 +156,8 @@ class DialogueLine(BaseModel):
     sourceEventId: Optional[str] = None            # exact source event that owns this line
     speaker: str = Field(min_length=1)            # canonical character name from the cast
     exactText: str = Field(min_length=1)          # VERBATIM from the locked beats — validated, never edited
+    voiceTreatment: Literal["single_voice", "group_chorus"] = "single_voice"
+    chorusMembers: List[str] = Field(default_factory=list)
     delivery: str = Field(min_length=1)           # acting direction: tone + physical behaviour, never words
     startSec: float                               # approximate window inside the shot
     endSec: float
@@ -740,7 +742,11 @@ def validate_scene_design(design, beats, characters_cfg):
         for j, ln in enumerate(sh.dialogueLines):
             lp = f"{path}.dialogueLines[{j}]"
             speaker_norm = _norm(ln.speaker)
-            if (speaker_norm not in in_frame
+            chorus_norms = {_norm(_canon_speaker(name, characters_cfg))
+                            for name in ln.chorusMembers}
+            chorus_present = (ln.voiceTreatment == "group_chorus" and chorus_norms and
+                               chorus_norms.issubset(in_frame | audible_offscreen))
+            if (not chorus_present and speaker_norm not in in_frame
                     and speaker_norm not in audible_offscreen
                     and speaker_norm != "all"):
                 add("ERROR", "SPEAKER_NOT_VISIBLE", lp, f"{ln.speaker} is not in charactersInFrame")
@@ -1196,10 +1202,12 @@ def _lip_sync_sentence(shot, characters_cfg):
         return ""
     speakers, seen = [], set()
     for ln in shot.dialogueLines:
-        name = _canon_speaker(ln.speaker, characters_cfg)
-        if _norm(name) not in seen:
-            seen.add(_norm(name))
-            speakers.append(name)
+        names = (ln.chorusMembers if ln.voiceTreatment == "group_chorus" and ln.chorusMembers
+                 else [_canon_speaker(ln.speaker, characters_cfg)])
+        for name in names:
+            if _norm(name) not in seen:
+                seen.add(_norm(name))
+                speakers.append(name)
     silent = [c for c in shot.charactersInFrame if _norm(c) not in seen]
     s = f"Use @Audio1 as the only voice. Lip-sync {' and '.join(speakers)}"
     if len(silent) == 1:

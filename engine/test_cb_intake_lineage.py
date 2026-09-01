@@ -166,19 +166,56 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
     )
 
 
-def test_episode_two_production_script_has_eight_scenes_and_58_exact_dialogue_lines():
+def test_episode_two_production_script_has_eight_scenes_and_59_exact_dialogue_lines():
     script_path = cb_intake.ROOT / "cb-studio/data/scripts/Ep2_Bos_Big_Day_V2.txt"
     parsed = cb_intake.parse_script(
         script_path.read_text(encoding="utf-8"), cb_intake._load_roster(),
         log=lambda *_: None)
     dialogue = [event for event in parsed["events"] if event["type"] == "dialogue"]
     assert len(parsed["scenes"]) == 8
-    assert len(dialogue) == 58
+    assert len(dialogue) == 59
     mum_lines = [event for event in dialogue if event["speaker"] == "Bo's Mum"]
     assert [event["text"] for event in mum_lines] == [
         "BO, it’s time for you to go to the Learning Circle? Don’t forget your lunch."
     ]
     assert all(event["text"] for event in dialogue)
+
+
+def test_parser_keeps_shared_cue_and_following_action_out_of_dialogue():
+    script = """EXT. FOREST PATH - DAY 4
+
+BO/KEEN
+3, 2, 1 …
+
+POOF! The tail does The Thing again.
+
+BO
+3,2,1 …
+POOF! The tail does The Thing again. Bo giggles.
+
+AIDA
+Every single time.
+BEAT.
+"""
+    parsed = cb_intake.parse_script(
+        script, roster=["Bo", "Keen", "Aida"], log=lambda *_: None)
+    dialogue = [event for event in parsed["events"] if event["type"] == "dialogue"]
+    action = [event["text"] for event in parsed["events"] if event["type"] == "action"]
+
+    assert dialogue == [
+        {"i": 0, "scene": 4, "type": "dialogue", "speaker": "Bo/Keen",
+         "text": "3, 2, 1 …", "voiceTreatment": "group_chorus",
+         "chorusMembers": ["Bo", "Keen"]},
+        {"i": 2, "scene": 4, "type": "dialogue", "speaker": "Bo",
+         "text": "3,2,1 …"},
+        {"i": 4, "scene": 4, "type": "dialogue", "speaker": "Aida",
+         "text": "Every single time."},
+    ]
+    assert action == [
+        "POOF! The tail does The Thing again.",
+        "POOF! The tail does The Thing again. Bo giggles.",
+        "BEAT.",
+    ]
 
 
 def test_outcome_compression_plan_groups_beats_by_scene():

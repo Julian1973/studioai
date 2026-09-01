@@ -1,24 +1,21 @@
 {
  "schemaVersion": 1,
  "episodeId": "Ep2",
- "scriptVersionId": "sha256:9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
- "sha256": "9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
- "byteLength": 9558,
- "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897.txt",
- "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897.json",
+ "scriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48",
+ "sha256": "c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48",
+ "byteLength": 9554,
+ "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48.txt",
+ "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48.json",
  "displayFile": "Ep2_Bo_s_Big_Day_V3.txt",
  "title": "Bo's Big Day V3",
- "activationId": "c057467c468e4934940f98f6d80642bd",
- "activatedAt": "2026-08-31T22:59:06+00:00",
+ "activationId": "a2e85d3c5e634f7bb973791f878cbbb8",
+ "activatedAt": "2026-09-01T15:53:54+00:00",
  "activatedBy": "Julian",
- "previousScriptVersionId": "sha256:6773581284020b2f4ff13c5e1055c18eb6282c31bc216e75a2aed3ef1982b9ef",
+ "previousScriptVersionId": "sha256:9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
  "changeScope": {
-  "kind": "dialogue-correction",
-  "scene": "3",
-  "shotId": "S3.SH4",
-  "dialogueOccurrenceId": "dialogue-occurrence:sha256:77783c379c77335836643191331d80cc5d37f83abb4121a4acf16eafb8144264",
-  "speaker": "Bo",
-  "previousExactText": "Im worried,  what if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?",
-  "correctedExactText": "Hi Keen, my name is Bo and I am really worried. What if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?"
+  "kind": "voice-contract-correction",
+  "scene": "4",
+  "shotId": "S4.SH1",
+  "summary": "Shared countdown, remove carryover text, and separate the confession beat."
  }
 }

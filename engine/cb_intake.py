@@ -257,6 +257,8 @@ _TRANSITION_RE = re.compile(
 _PAREN_ONLY_RE = re.compile(r"^\s*\(.*\)\s*$")
 _CONTD_RE = re.compile(r"\s*\(CONT'D\)\s*$", re.IGNORECASE)
 _APOS_RE = re.compile("[‘’ʼ′]")   # curly/prime apostrophe variants
+_GROUP_CUE_RE = re.compile(
+    r"^\s*(?:\d+\s*)?(.+?\s*/\s*.+?)(?:\s+\(CONT'D\))?\s*$", re.IGNORECASE)
 
 
 def _norm_apos(s):
@@ -316,6 +318,31 @@ def parse_script(text, roster=None, log=print):
     name_by_upper.update({_norm_apos(alias).upper(): canonical
                           for alias, canonical in aliases.items()})
     name_by_upper["ALL"] = "ALL"
+
+    def cue_record(value):
+        """Resolve one single or slash-separated cue using only the canon roster."""
+        normalized = _norm_apos(value).rstrip()
+        match = cue_re.match(normalized)
+        if match:
+            raw_name = _CONTD_RE.sub("", match.group(1)).strip().upper()
+            return {"speaker": name_by_upper.get(raw_name, raw_name)}
+        group = _GROUP_CUE_RE.match(normalized)
+        if not group:
+            return None
+        members = []
+        for raw_name in group.group(1).split("/"):
+            canonical = name_by_upper.get(raw_name.strip().upper())
+            if not canonical or canonical == "ALL":
+                return None
+            if canonical not in members:
+                members.append(canonical)
+        if len(members) < 2:
+            return None
+        return {
+            "speaker": "/".join(members),
+            "voiceTreatment": "group_chorus",
+            "chorusMembers": members,
+        }
     # A KNOWN, NARROW screenplay-formatting quirk in this exact script (previously found
     # and fixed the identical way in the now-retired cb_script.py, see CLAUDE.md's own
     # audit record): a trailing ACTION sentence sometimes directly follows a dialogue line
@@ -370,27 +397,28 @@ def parse_script(text, roster=None, log=print):
             flush_action()
             li += 1
             continue
-        cm = cue_re.match(_norm_apos(raw).rstrip())
-        if cm:
+        cue = cue_record(raw)
+        if cue:
             flush_action()
-            speaker_raw = _CONTD_RE.sub("", cm.group(1)).strip().upper()
-            speaker = name_by_upper.get(speaker_raw, speaker_raw)
+            speaker = cue["speaker"]
             li += 1
             if li < n and _PAREN_ONLY_RE.match(lines[li].strip()) and lines[li].strip():
                 li += 1   # a delivery-only parenthetical — never dialogue text
             text_lines = []
             while (li < n and lines[li].strip()
                    and not _SCENE_RE.match(lines[li].rstrip())
-                   and not cue_re.match(_norm_apos(lines[li]).rstrip())):
+                   and not cue_record(lines[li])):
                 if _PAREN_ONLY_RE.match(lines[li].strip()):
                     li += 1
                     continue
                 cand = lines[li].strip()
                 bleed = action_bleed_re.match(_norm_apos(cand)) if text_lines else None
-                if bleed:
+                stage_bleed = (re.match(
+                    r"^(?:[A-Z][A-Z'’-]{1,}[.!?…]+\s+(?:The|A|An|His|Her|Their)\s+[a-z]|"
+                    r"BEAT\.\s*$)", cand, re.IGNORECASE) if text_lines else None)
+                if bleed or stage_bleed:
                     log(f"ACTION-BLEED GUARD fired — stopped {speaker}'s dialogue before "
-                        f"a directly-following, no-blank-line action sentence naming "
-                        f"{bleed.group(1)}: {cand!r}")
+                        f"a directly-following, no-blank-line action sentence: {cand!r}")
                     break
                 text_lines.append(cand)
                 li += 1
@@ -402,8 +430,12 @@ def parse_script(text, roster=None, log=print):
                 # character speaking. Not expected in a real script, kept for robustness.
                 front_matter.append(f"{speaker}: {dlg}")
                 continue
-            events.append({"i": len(events), "scene": cur_scene, "type": "dialogue",
-                           "speaker": speaker, "text": dlg})
+            event = {"i": len(events), "scene": cur_scene, "type": "dialogue",
+                     "speaker": speaker, "text": dlg}
+            for key in ("voiceTreatment", "chorusMembers"):
+                if cue.get(key) is not None:
+                    event[key] = cue[key]
+            events.append(event)
             continue
         unknown_cue = _NUMBERED_CUE_RE.match(_norm_apos(raw).rstrip())
         if unknown_cue:
@@ -513,6 +545,8 @@ def _build_cuts(events, lo, hi):
                     "sourceType": "dialogue",
                     "dialogueOccurrenceId": e["dialogueOccurrenceId"],
                     "speaker": e["speaker"],
+                    "voiceTreatment": e.get("voiceTreatment", "single_voice"),
+                    "chorusMembers": e.get("chorusMembers") or [],
                     "exactText": e["text"],
                     "dialogue": f"{e['speaker']}: {e['text']}",
                     "action": None,

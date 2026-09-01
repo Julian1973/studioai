@@ -3496,6 +3496,174 @@ def apply_scoped_dialogue_correction(scene, shot_id, old_occurrence_id, old_exac
     return record
 
 
+def apply_scoped_voice_contract_correction(scene, shot_id, corrected_lines,
+                                           script_version_id,
+                                           previous_script_version_id,
+                                           correction, episode="Ep1",
+                                           reviewed_by="Julian", log=print):
+    """Replace one shot's spoken plan from current script events without reopening SEE.
+
+    This is for a human-directed performance correction that can remove screenplay action
+    accidentally compiled as speech, select an authored chorus occurrence, and retime the
+    remaining exact lines. It never generates media and never changes sibling shots.
+    """
+    if not str(correction or "").strip():
+        raise Refused("REFUSED — a scoped voice-contract correction needs a review reason")
+    if not isinstance(corrected_lines, list) or not corrected_lines:
+        raise Refused("REFUSED — a scoped voice-contract correction needs ordered lines")
+    pkg, path = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    ledger = _ledger(pkg, shot_id)
+    if ledger.get("voPath"):
+        raise Refused(
+            f"REFUSED — reject {shot_id}'s current voice take before changing its contract")
+
+    import cb_intake
+    script_path = SCRIPT_STORE.content_path(episode)
+    parsed = cb_intake.parse_script(
+        script_path.read_text(encoding="utf-8"), log=lambda *args, **kwargs: None)
+    cb_intake._annotate_source_events(parsed["events"], script_version_id)
+    available = [event for event in parsed["events"]
+                 if str(event.get("scene")) == str(scene) and
+                 event.get("type") == "dialogue"]
+    used = set()
+    normalized = []
+    previous_end = 0.0
+    for index, submitted in enumerate(corrected_lines, start=1):
+        speaker = str(submitted.get("speaker") or "").strip()
+        exact_text = str(submitted.get("exactText") or "").strip()
+        start = float(submitted.get("startSec"))
+        end = float(submitted.get("endSec"))
+        if not speaker or not exact_text or start < 0 or end <= start:
+            raise Refused(f"REFUSED — corrected voice line {index} is incomplete")
+        if start < previous_end:
+            raise Refused(f"REFUSED — corrected voice line {index} overlaps the previous line")
+        if end > float(shot.get("durationSec") or 0):
+            raise Refused(f"REFUSED — corrected voice line {index} exceeds the shot duration")
+        matches = [event for event in available
+                   if event["i"] not in used and event.get("speaker") == speaker and
+                   str(event.get("text") or "").strip() == exact_text]
+        if not matches:
+            raise Refused(
+                f"REFUSED — corrected voice line {index} is not an exact current-script "
+                f"occurrence for {speaker}: {exact_text}")
+        event = matches[0]
+        used.add(event["i"])
+        line = {
+            "dialogueOccurrenceId": event["dialogueOccurrenceId"],
+            "sourceEventId": event["sourceEventId"],
+            "speaker": speaker,
+            "exactText": exact_text,
+            "delivery": str(submitted.get("delivery") or exact_text).strip(),
+            "startSec": start,
+            "endSec": end,
+            "voiceTreatment": submitted.get(
+                "voiceTreatment", event.get("voiceTreatment", "single_voice")),
+            "chorusMembers": list(
+                submitted.get("chorusMembers") or event.get("chorusMembers") or []),
+            "performanceText": str(
+                submitted.get("performanceText") or exact_text).strip(),
+        }
+        normalized.append(line)
+        previous_end = end
+
+    shot["dialogueLines"] = normalized
+    shot["dialogueBinding"] = (
+        "Perform only the ordered approved dialogue occurrences. The opening countdown is "
+        "a synchronous Bo-and-Keen chorus. Screenplay action, sound labels and BEAT are silent.")
+    shot["voiceDirectorBrief"] = [{
+        "dialogueOccurrenceId": line["dialogueOccurrenceId"],
+        "sourceEventId": line["sourceEventId"],
+        "speaker": line["speaker"],
+        "exactDialogue": line["exactText"],
+        "elevenLabsV3Direction": line["delivery"],
+        "startSec": line["startSec"],
+        "endSec": line["endSec"],
+        "voiceTreatment": line["voiceTreatment"],
+        "chorusMembers": line["chorusMembers"],
+    } for line in normalized]
+    shot["audioBrief"] = "\n".join([
+        f"SHOT {shot_id} — voice-only performance for @Audio1.",
+        *[f"{line['speaker']}: \"{line['exactText']}\" — {line['delivery']} "
+          f"Target {line['startSec']:g}-{line['endSec']:g}s."
+          for line in normalized],
+        "Preserve the exact words. No narration, ad-libs, action labels, sound effects or music.",
+    ])
+
+    now = _now()
+    for stage in ("voice", "animation", "review-animation"):
+        work = (ledger.get("departmentWork") or {}).get(stage)
+        if not work:
+            continue
+        for key in ("approved", "candidate"):
+            record = work.get(key)
+            if record:
+                archived = json.loads(json.dumps(record))
+                archived.update({"outcome": "superseded-by-voice-contract-correction",
+                                 "decisionAt": now, "reviewedBy": reviewed_by})
+                work.setdefault("history", []).append(archived)
+            work[key] = None
+    ledger["voiceApproval"] = None
+    ledger["workingVoice"] = {
+        "lines": [{
+            "dialogueOccurrenceId": line["dialogueOccurrenceId"],
+            "sourceEventId": line["sourceEventId"],
+            "speaker": line["speaker"],
+            "text": line["performanceText"],
+        } for line in normalized],
+        "savedAt": now, "savedBy": reviewed_by,
+        "reason": "scoped-human-performance-correction",
+    }
+    ledger["voGeneratedFrom"] = None
+    ledger["voInputSignature"] = None
+    ledger["voiceStaleDueToScriptCorrection"] = {
+        "at": now, "scriptVersionId": script_version_id,
+        "reason": "human-directed-shot-voice-contract-correction",
+    }
+    for key in ("approval", "approvedCandidate", "approvedTake", "harvestFrame",
+                "candidatePaths", "batch", "batchId", "pendingSpendAuth",
+                "lastBatchBinding", "disclosure", "firedAt"):
+        ledger[key] = None
+    ledger["status"] = "designed"
+
+    amendment_dir = ROOT / "cb-output" / "creative" / "amendments"
+    amendment_dir.mkdir(parents=True, exist_ok=True)
+    suffix = script_version_id.split(":")[-1][:12]
+    amendment_path = amendment_dir / f"{episode}_{shot_id}_{suffix}_voice.json"
+    amendment_doc = {
+        "schemaVersion": 1, "approvalState": "approved", "approvedAt": now,
+        "approvedBy": reviewed_by, "kind": "voice-contract-correction",
+        "scene": str(scene), "shotId": shot_id,
+        "scriptVersionId": script_version_id,
+        "previousScriptVersionId": previous_script_version_id,
+        "baseScriptVersionId": (pkg.get("sourceScript") or {}).get("scriptVersionId"),
+        "correction": correction.strip(), "shot": shot,
+    }
+    amendment_path.write_text(
+        json.dumps(amendment_doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    scene_look_status_record = scenelook_status(scene, episode)
+    scene_look = (scene_look_status_record.get("active") or
+                  (_load_scenelook_rec(scene, episode).get("candidate") or {}) or
+                  (_load_scenelook_rec(scene, episode).get("approved") or {}))
+    record = {
+        "kind": "voice-contract-correction", "scene": str(scene), "shotId": shot_id,
+        "scriptVersionId": script_version_id,
+        "previousScriptVersionId": previous_script_version_id,
+        "baseScriptVersionId": (pkg.get("sourceScript") or {}).get("scriptVersionId"),
+        "storyboardPath": str(amendment_path.relative_to(ROOT)),
+        "storyboardSha256": _sha256_file(amendment_path),
+        "sceneLookContentHash": scene_look.get("hash"),
+        "sceneLookPath": scene_look.get("path"),
+        "preservedStages": ["direction", "scenelook", "keyframe"],
+        "invalidatedStages": ["voice", "animation", "continuity", "final"],
+        "approvedAt": now, "approvedBy": reviewed_by,
+    }
+    pkg.setdefault("scopedAmendments", []).append(record)
+    _save(pkg, path)
+    log(f"SCOPED VOICE CONTRACT CORRECTION — {shot_id}: SEE preserved; HEAR reopened")
+    return record
+
+
 def _department_candidate(stage, output, context):
     dep, worker, skill = _DEPARTMENT_WORKERS[stage]
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)

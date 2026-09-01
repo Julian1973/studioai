@@ -6,6 +6,7 @@ _TAG = re.compile(r"\[(snor(?:e|es|ing)?|snort(?:s|ing)?|sneez(?:e|es|ing)|laugh
 _PERFORMANCE_TAG = re.compile(r"\[[^\]]+\]")
 _SCRIPT_NUMBER = re.compile(r"^\s*\d+\s*\t")
 _TRAILING_STAGE_NOTE = re.compile(r"\s*\([^)]*\)\s*$")
+_STAGE_BEAT = re.compile(r"(?:^|(?<=[.!?…]))\s*BEAT\.\s*", re.I)
 _NONVERBAL_ACTION = r"laugh(?:s|ed|ing)?|giggl(?:e|es|ed|ing)|snort(?:s|ed|ing)?|sneez(?:e|es|ed|ing)|snor(?:e|es|ed|ing)"
 _SOUND = re.compile(
     r"\b(?:z{3,}|a+h+c+h+o+o+|achoo+|ha(?:\s*ha)+|snor(?:e|es|ing)|"
@@ -23,6 +24,16 @@ def _trailing_nonverbal_action(text, speaker):
     match = re.search(
         rf"(?:^|(?<=[.!?…]))\s*({re.escape(actor)}\s+(?:{_NONVERBAL_ACTION})[.!?…]*)\s*$",
         text, re.I)
+    if not match:
+        return text, None
+    return text[:match.start(1)].strip(), match.group(1).strip()
+
+
+def _trailing_screenplay_action(text):
+    """Split an all-caps effect followed by third-person screenplay action."""
+    match = re.search(
+        r"(?:^|(?<=[.!?…]))\s*((?:[A-Z][A-Z'’-]{1,})[.!?…]+\s+"
+        r"(?:The|A|An|His|Her|Their)\s+[a-z].*)$", text)
     if not match:
         return text, None
     return text[:match.start(1)].strip(), match.group(1).strip()
@@ -50,8 +61,11 @@ def route_line(line):
     # route to Seedance below.
     provider_text = _SCRIPT_NUMBER.sub("", original).strip()
     provider_text = _TRAILING_STAGE_NOTE.sub("", provider_text).strip()
-    provider_text, trailing_action = _trailing_nonverbal_action(
+    provider_text = _STAGE_BEAT.sub(" ", provider_text).strip()
+    provider_text, screenplay_action = _trailing_screenplay_action(provider_text)
+    provider_text, nonverbal_action = _trailing_nonverbal_action(
         provider_text, line.get("speaker"))
+    trailing_action = screenplay_action or nonverbal_action
     tag_matches = list(_TAG.finditer(provider_text))
     sound_matches = list(_SOUND.finditer(provider_text))
     matches = tag_matches + sound_matches

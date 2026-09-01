@@ -235,124 +235,166 @@
    "sourceShotId": null,
    "motionContinuityRequired": false,
    "cutInMotivation": "A cut would weaken the scene because the meaning is the unbroken drain from play into stuckness inside one exact geography; the audience must feel the relief run out in Bo's body rather than be handed a new dialogue phase.",
-   "dialogueBinding": "Keen's vocal beat performs per the approved voice design.",
+   "dialogueBinding": "Perform only the ordered approved dialogue occurrences. The opening countdown is a synchronous Bo-and-Keen chorus. Screenplay action, sound labels and BEAT are silent.",
    "dialogueLines": [
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:9ceeadde957ea106460445f17e189fc81fa52b67a37205ad6faf1dff388944bb",
-     "sourceEventId": "script-event:sha256:ad56dac171ba4c465968a7ccaf9d0b0c41057141c93d9683fd680c36c9454795",
-     "speaker": "Keen",
-     "exactText": "3,2,1 …",
-     "delivery": "[excited] 3,2,1 …",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:b66279148d0115bc657e049b6f721801e30d8769f3d6ae5ab5b5d4a660463ca4",
+     "sourceEventId": "script-event:sha256:56d49e7a2047d0d4d8d9d052fb9791f6a19787453b3f125db12a3c12c0d517b6",
+     "speaker": "Bo/Keen",
+     "exactText": "3, 2, 1 …",
+     "delivery": "Together, playful and perfectly synchronized; one shared countdown only.",
      "startSec": 1.2,
-     "endSec": 2.4
+     "endSec": 2.4,
+     "voiceTreatment": "group_chorus",
+     "chorusMembers": [
+      "Bo",
+      "Keen"
+     ],
+     "performanceText": "[excited] 3, 2, 1 …"
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d08afaf5bd292870a999f905198f72d39a0bd5341883cf90f65a4d54613c264a",
-     "sourceEventId": "script-event:sha256:582c991d6def71bfd6340805e3d0922f355e139b0d6d16fb8cf7efe29654d7a3",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:82738998fafc3c0cdbf3b9ded31acb5ace40b9e3a7c47dc4d2625c7842081369",
+     "sourceEventId": "script-event:sha256:6132391c5744a5fcadd3ddd7fe46893f15358e91763abbc704482b1a1fd4c61e",
      "speaker": "Bo",
-     "exactText": "3,2,1 … POOF! The tail does ‘The Thing’ again and again. Bo giggles.",
-     "delivery": "[nervous] 3,2,1 … POOF! The tail does ‘The Thing’ again and again. [laughs] Bo giggles.",
-     "startSec": 2.7,
-     "endSec": 6.0
+     "exactText": "I’m STILL worried about going to the Learning Circle.",
+     "delivery": "Quiet admission after the play stops; worry catches in the middle without rushing.",
+     "startSec": 5.8,
+     "endSec": 8.5,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[quietly] I’m STILL worried about going to the Learning Circle."
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:0c94860e8f33fe7e3313d296ad53903a9894591e60bcb8edc3ca455d6501db0b",
-     "sourceEventId": "script-event:sha256:96e953e5d905dec76cc26c93a3d8558d16e7208402083c01b0b88a4ffda462f1",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:622751e7ca822c2a3b3c1b981c1da34b106f404192f8151d6523c30b4e5dbb2e",
+     "sourceEventId": "script-event:sha256:7379df0e1d4d7508a8e3de2f9033db0ebb1af0ffc6f6d3688b5f60fce23bb76e",
      "speaker": "Bo",
-     "exactText": "I’m STILL worried about going to the to the Learning Circle.",
-     "delivery": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
-     "startSec": 8.3,
-     "endSec": 10.5
+     "exactText": "They all know each other.",
+     "delivery": "Small and certain, looking down the path.",
+     "startSec": 9.2,
+     "endSec": 10.6,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[nervous] They all know each other."
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:aecef6799f577e77bf8713cdf2fcce3290621ce6e04682613e8bdef1f63fb0c6",
-     "sourceEventId": "script-event:sha256:66978bf46ac8880b38bb10319b1565fd282aae3e6f151e7868ffef4db9d1a817",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b3ba475a2c72a5569dbd3adbde06977107885371be77f1f89647e3dbc45d9c0",
+     "sourceEventId": "script-event:sha256:68de2b0038b27e674df5c06361be5f2efa130b17ae6692a8ece2d95786e414e5",
      "speaker": "Bo",
-     "exactText": "They all know each other. Beat. But I don’t know them, and they don't know me.",
-     "delivery": "They all know each other. [pause] But I don’t know them, and they don't know me.",
+     "exactText": "But I don’t know them, and they don't know me.",
+     "delivery": "After a real beat, the private fear comes out plainly.",
      "startSec": 11.3,
-     "endSec": 15.0
+     "endSec": 14.0,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[quietly] But I don’t know them, and they don't know me."
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:7f8c98141447cdf11f01cb53190ce512215b51fbd7d1fd8bc4c2e2ad3ee47897",
-     "sourceEventId": "script-event:sha256:8199fdf7e9061fd2151d45cbdb5712a066402f3442f3a70321d369bcd76045aa",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:e746fed8302017a81926552953c009d5e3f2b685367f676b10fdd6c6506f5134",
+     "sourceEventId": "script-event:sha256:f382562fc42b14c13b7a1ee85f74038b3a7b875bedf50cd1312e0e3e80145291",
      "speaker": "Aida",
      "exactText": "Tricky trees.",
-     "delivery": "Tricky trees.",
-     "startSec": 16.3,
-     "endSec": 17.1
+     "delivery": "Soft, lightly self-aware arrival; never loud.",
+     "startSec": 15.0,
+     "endSec": 15.8,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[softly] Tricky trees."
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:be902fee96a290543bd5a5a75ebf0fb8b3cc3928d13d15baeb378a3e5822f132",
-     "sourceEventId": "script-event:sha256:70d13052d2839feb6b2ffa083eee145f5fd9df473771bfe1893683c952c397f8",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fd9e66270fd5e8b09f547dd0bc3527e2d280d6673c9f612874cf34522a1e2870",
+     "sourceEventId": "script-event:sha256:2dbd391ab3242934894aa0594ec95c9d0a4eb25562b98b92da7c692d001b1155",
      "speaker": "Keen",
      "exactText": "Bo, this is Aida.",
-     "delivery": "[quietly] Bo, this is Aida.",
-     "startSec": 17.6,
-     "endSec": 18.5
+     "delivery": "Gentle introduction that leaves the emotional space with Bo.",
+     "startSec": 16.3,
+     "endSec": 17.3,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[quietly] Bo, this is Aida."
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:8b2c9e81fd63758b13c0dce04478726f7e2d55fe761cbebdd0f9ae2e02637636",
-     "sourceEventId": "script-event:sha256:20c234a44fedda69fe881fde0d48b95987eaf765fce753af7d136c566a337c8f",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:15b364030922a20dc9b0d90f4f01fef7eee753f85909872f64632cb68ae58fb0",
+     "sourceEventId": "script-event:sha256:7d7ca19fc0fe2602f92c0b0e203b5d51d15b84049defe33336f1ae9dcf9bc3c9",
      "speaker": "Aida",
      "exactText": "You packed your bag.",
-     "delivery": "[quietly] You packed your bag.",
-     "startSec": 19.0,
-     "endSec": 19.9
+     "delivery": "Low, empathetic recognition with a settled downward ending; it is not a question.",
+     "startSec": 18.0,
+     "endSec": 19.0,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[softly] You packed your bag."
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:9611831565e8bfd90992cf8e741fb46942b7fd4a640bf2495a02db950d7d0fd2",
-     "sourceEventId": "script-event:sha256:3b4393c29d77c725219e43867b2190736205313802955ae8ff0a47393a043707",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:e827b6904e5bc726b074c2a33279f41089d5a533ea212e40a36824fccf69a503",
+     "sourceEventId": "script-event:sha256:cf43657bf9952da46322662111834db5a77c27980bdff3672a8b8e1bb9285edf",
      "speaker": "Bo",
      "exactText": "Four times.",
-     "delivery": "Four times.",
-     "startSec": 20.1,
-     "endSec": 20.6
+     "delivery": "A small honest answer, slightly embarrassed.",
+     "startSec": 19.5,
+     "endSec": 20.1,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[quietly] Four times."
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:be1de01acc2e659b826802a3dc1e4681beb0ba20e1c17fad24523d46aab1798e",
-     "sourceEventId": "script-event:sha256:a0f0ca5baffee0f96c62b15650005baa6dca1484d5efae0be14d97d7cb021a64",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:b48ec0ea4adea59def0f20db7ce2aca0617046fbb1e51b748003c678aa3df3a9",
+     "sourceEventId": "script-event:sha256:ef0959512b69eb02b468e5f66c026fc7b3463d51fcbb3801b9f919076ac6eb9a",
      "speaker": "Aida",
      "exactText": "I would have done five.",
-     "delivery": "I would have done five.",
-     "startSec": 20.8,
-     "endSec": 21.9
+     "delivery": "Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing.",
+     "startSec": 20.7,
+     "endSec": 22.0,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[softly] [warmly] I would have done five."
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:553ba6e9faf58e1b69ddfd808fbd85ee28c695e21129c6a8b4bbf6b00e7fc264",
-     "sourceEventId": "script-event:sha256:681e4e40424612444c8cc43115dd3f4477563e47099844acf2305b53a6ab668c",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:dbbd4a6ba7fdece7005487575876c45ba07ed4a5714186e4bb28b9a2f36a0b7f",
+     "sourceEventId": "script-event:sha256:b847842b44111af6387f8f484894b73cdd0548f990a95a1430807129a0e4896d",
      "speaker": "Bo",
      "exactText": "You get scared too?",
-     "delivery": "[quietly] You get scared too?",
-     "startSec": 22.5,
-     "endSec": 23.3
+     "delivery": "Genuine surprised question; hope enters because he feels less alone.",
+     "startSec": 22.7,
+     "endSec": 23.7,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[curious] You get scared too?"
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c5c1db3eb21229a7269bd9c6ef7f5dbc93d27deb6b865800d521f4f0b7b282b7",
-     "sourceEventId": "script-event:sha256:56e30c48f449c7a124e0bf7af50719b53ab978925a8a16c41f8e9a4951cdf9b1",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:deefbd8cd3c21a1e332b33661899f2864fd5ec64b290a9139ff88f2016dc5d61",
+     "sourceEventId": "script-event:sha256:a8a48370b98487161c7cef31b4b45726d7947d266e52741cab3634f0c29e6c82",
      "speaker": "Aida",
      "exactText": "Every single time.",
-     "delivery": "Every single time.",
-     "startSec": 23.5,
-     "endSec": 24.3
+     "delivery": "Quiet agreement, then leave a short clean gap.",
+     "startSec": 24.2,
+     "endSec": 25.1,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[softly] Every single time."
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:54a906703699a3f26205ab3f90d22e54ad43c8d4748eefdaf5fcb4da63bcaee7",
-     "sourceEventId": "script-event:sha256:448b97275a411f283e3c4dcf5b8d1d4e2c061f662e8178b6b40caa6d74863445",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d4163d7ade24be11aeecbd2ba2a3dd0d7776e8bbc7b3f9111b6e3bf231ba0ceb",
+     "sourceEventId": "script-event:sha256:04674705c1603ac53bb6bb285db7b28f6197a8f084643584208263525a589243",
      "speaker": "Bo",
      "exactText": "But you still go?",
-     "delivery": "But you still go?",
-     "startSec": 24.9,
-     "endSec": 25.7
+     "delivery": "Hopeful follow-up question after the gap; do not flatten the question mark.",
+     "startSec": 25.9,
+     "endSec": 26.9,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[curious] But you still go?"
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:7e9be7767046bc95527e622885d012054b3e1a0580ce12e792e2480fd72eacaf",
-     "sourceEventId": "script-event:sha256:f097b5fde07d34a52eac12d9c56410a111c99db91456a48bd45b3828106b9b5a",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:335059e16a3614af54b69cdda19312b8e6d1826443f341c222ed071db524fbf9",
+     "sourceEventId": "script-event:sha256:797e7a517f9a600df1fd6da53fdc00ef5f46cac12e7296c43cbd362ea5218b73",
      "speaker": "Aida",
-     "exactText": "Every single time. BEAT.",
-     "delivery": "Every single time. [pause]",
-     "startSec": 25.9,
-     "endSec": 26.6
+     "exactText": "Every single time.",
+     "delivery": "Quiet certainty and solidarity, followed by a held silent beat.",
+     "startSec": 27.6,
+     "endSec": 28.6,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "performanceText": "[quietly] Every single time."
     }
    ],
    "visualPayoff": "Bo seated on the fallen log with branches framing him in the foreground and the path still receding behind him, satchel held but no longer crushed tight, his gaze resting into the space ahead while Aida sits steady beside him.",
@@ -739,121 +781,150 @@
    "providerBoundaryExplanationApproved": "The scene's emotional event completes on the held wind beat after Aida's repeated truth; anything following begins a new dramatic movement and needs a fresh unit.",
    "voiceDirectorBrief": [
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:9ceeadde957ea106460445f17e189fc81fa52b67a37205ad6faf1dff388944bb",
-     "sourceEventId": "script-event:sha256:ad56dac171ba4c465968a7ccaf9d0b0c41057141c93d9683fd680c36c9454795",
-     "speaker": "Keen",
-     "exactDialogue": "3,2,1 …",
-     "elevenLabsV3Direction": "[excited] 3,2,1 …",
-     "expectedTiming": "Start just after the movement is established, not on frame one; quick and buoyant.",
-     "physicalActionRelationship": "Supports the playful propulsion of the body; voice leads the movement."
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:b66279148d0115bc657e049b6f721801e30d8769f3d6ae5ab5b5d4a660463ca4",
+     "sourceEventId": "script-event:sha256:56d49e7a2047d0d4d8d9d052fb9791f6a19787453b3f125db12a3c12c0d517b6",
+     "speaker": "Bo/Keen",
+     "exactDialogue": "3, 2, 1 …",
+     "elevenLabsV3Direction": "Together, playful and perfectly synchronized; one shared countdown only.",
+     "startSec": 1.2,
+     "endSec": 2.4,
+     "voiceTreatment": "group_chorus",
+     "chorusMembers": [
+      "Bo",
+      "Keen"
+     ]
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d08afaf5bd292870a999f905198f72d39a0bd5341883cf90f65a4d54613c264a",
-     "sourceEventId": "script-event:sha256:582c991d6def71bfd6340805e3d0922f355e139b0d6d16fb8cf7efe29654d7a3",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:82738998fafc3c0cdbf3b9ded31acb5ace40b9e3a7c47dc4d2625c7842081369",
+     "sourceEventId": "script-event:sha256:6132391c5744a5fcadd3ddd7fe46893f15358e91763abbc704482b1a1fd4c61e",
      "speaker": "Bo",
-     "exactDialogue": "3,2,1 … POOF! The tail does ‘The Thing’ again and again. Bo giggles.",
-     "elevenLabsV3Direction": "[nervous] 3,2,1 … POOF! The tail does ‘The Thing’ again and again. [laughs] Bo giggles.",
-     "expectedTiming": "Land after Keen's cue; keep the poof rhythm brisk and buoyant.",
-     "physicalActionRelationship": "Voice follows the body opening up—first held in, then genuinely released by the game."
+     "exactDialogue": "I’m STILL worried about going to the Learning Circle.",
+     "elevenLabsV3Direction": "Quiet admission after the play stops; worry catches in the middle without rushing.",
+     "startSec": 5.8,
+     "endSec": 8.5,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:0c94860e8f33fe7e3313d296ad53903a9894591e60bcb8edc3ca455d6501db0b",
-     "sourceEventId": "script-event:sha256:96e953e5d905dec76cc26c93a3d8558d16e7208402083c01b0b88a4ffda462f1",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:622751e7ca822c2a3b3c1b981c1da34b106f404192f8151d6523c30b4e5dbb2e",
+     "sourceEventId": "script-event:sha256:7379df0e1d4d7508a8e3de2f9033db0ebb1af0ffc6f6d3688b5f60fce23bb76e",
      "speaker": "Bo",
-     "exactDialogue": "I’m STILL worried about going to the to the Learning Circle.",
-     "elevenLabsV3Direction": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
-     "expectedTiming": "After a felt silence following the game stopping—let the stillness turn physical first.",
-     "physicalActionRelationship": "Strong support of the body's abrupt shut-down; voice gets smaller as the body closes."
+     "exactDialogue": "They all know each other.",
+     "elevenLabsV3Direction": "Small and certain, looking down the path.",
+     "startSec": 9.2,
+     "endSec": 10.6,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:aecef6799f577e77bf8713cdf2fcce3290621ce6e04682613e8bdef1f63fb0c6",
-     "sourceEventId": "script-event:sha256:66978bf46ac8880b38bb10319b1565fd282aae3e6f151e7868ffef4db9d1a817",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b3ba475a2c72a5569dbd3adbde06977107885371be77f1f89647e3dbc45d9c0",
+     "sourceEventId": "script-event:sha256:68de2b0038b27e674df5c06361be5f2efa130b17ae6692a8ece2d95786e414e5",
      "speaker": "Bo",
-     "exactDialogue": "They all know each other. Beat. But I don’t know them, and they don't know me.",
-     "elevenLabsV3Direction": "They all know each other. [pause] But I don’t know them, and they don't know me.",
-     "expectedTiming": "Don't rush the middle hold; let the silence carry his isolation.",
-     "physicalActionRelationship": "Voice stays tucked in with the body; the pause marks the point where general worry becomes personal exposure."
+     "exactDialogue": "But I don’t know them, and they don't know me.",
+     "elevenLabsV3Direction": "After a real beat, the private fear comes out plainly.",
+     "startSec": 11.3,
+     "endSec": 14.0,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:7f8c98141447cdf11f01cb53190ce512215b51fbd7d1fd8bc4c2e2ad3ee47897",
-     "sourceEventId": "script-event:sha256:8199fdf7e9061fd2151d45cbdb5712a066402f3442f3a70321d369bcd76045aa",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:e746fed8302017a81926552953c009d5e3f2b685367f676b10fdd6c6506f5134",
+     "sourceEventId": "script-event:sha256:f382562fc42b14c13b7a1ee85f74038b3a7b875bedf50cd1312e0e3e80145291",
      "speaker": "Aida",
      "exactDialogue": "Tricky trees.",
-     "elevenLabsV3Direction": "Tricky trees.",
-     "expectedTiming": "After the tiny branch snag business, once she has physically cleared herself.",
-     "physicalActionRelationship": "Supports the understated physical business; voice is matter-of-fact, not performative."
+     "elevenLabsV3Direction": "Soft, lightly self-aware arrival; never loud.",
+     "startSec": 15.0,
+     "endSec": 15.8,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:be902fee96a290543bd5a5a75ebf0fb8b3cc3928d13d15baeb378a3e5822f132",
-     "sourceEventId": "script-event:sha256:70d13052d2839feb6b2ffa083eee145f5fd9df473771bfe1893683c952c397f8",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fd9e66270fd5e8b09f547dd0bc3527e2d280d6673c9f612874cf34522a1e2870",
+     "sourceEventId": "script-event:sha256:2dbd391ab3242934894aa0594ec95c9d0a4eb25562b98b92da7c692d001b1155",
      "speaker": "Keen",
      "exactDialogue": "Bo, this is Aida.",
-     "elevenLabsV3Direction": "[quietly] Bo, this is Aida.",
-     "expectedTiming": "Place after Aida's line and settle, once the space feels safe enough to connect them.",
-     "physicalActionRelationship": "Voice reduces its energy to match his careful proximity and non-crowding support."
+     "elevenLabsV3Direction": "Gentle introduction that leaves the emotional space with Bo.",
+     "startSec": 16.3,
+     "endSec": 17.3,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:8b2c9e81fd63758b13c0dce04478726f7e2d55fe761cbebdd0f9ae2e02637636",
-     "sourceEventId": "script-event:sha256:20c234a44fedda69fe881fde0d48b95987eaf765fce753af7d136c566a337c8f",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:15b364030922a20dc9b0d90f4f01fef7eee753f85909872f64632cb68ae58fb0",
+     "sourceEventId": "script-event:sha256:7d7ca19fc0fe2602f92c0b0e203b5d51d15b84049defe33336f1ae9dcf9bc3c9",
      "speaker": "Aida",
      "exactDialogue": "You packed your bag.",
-     "elevenLabsV3Direction": "[quietly] You packed your bag.",
-     "expectedTiming": "Let it come after a beat of Aida taking in Bo and the satchel.",
-     "physicalActionRelationship": "Voice stays still with the body; the precision of the line is the action."
+     "elevenLabsV3Direction": "Low, empathetic recognition with a settled downward ending; it is not a question.",
+     "startSec": 18.0,
+     "endSec": 19.0,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:9611831565e8bfd90992cf8e741fb46942b7fd4a640bf2495a02db950d7d0fd2",
-     "sourceEventId": "script-event:sha256:3b4393c29d77c725219e43867b2190736205313802955ae8ff0a47393a043707",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:e827b6904e5bc726b074c2a33279f41089d5a533ea212e40a36824fccf69a503",
+     "sourceEventId": "script-event:sha256:cf43657bf9952da46322662111834db5a77c27980bdff3672a8b8e1bb9285edf",
      "speaker": "Bo",
      "exactDialogue": "Four times.",
-     "elevenLabsV3Direction": "Four times.",
-     "expectedTiming": "A prompt, involuntary answer—don't overthink it.",
-     "physicalActionRelationship": "Supports the first small physical reopening; the voice lets out a bit more air than before."
+     "elevenLabsV3Direction": "A small honest answer, slightly embarrassed.",
+     "startSec": 19.5,
+     "endSec": 20.1,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:be1de01acc2e659b826802a3dc1e4681beb0ba20e1c17fad24523d46aab1798e",
-     "sourceEventId": "script-event:sha256:a0f0ca5baffee0f96c62b15650005baa6dca1484d5efae0be14d97d7cb021a64",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:b48ec0ea4adea59def0f20db7ce2aca0617046fbb1e51b748003c678aa3df3a9",
+     "sourceEventId": "script-event:sha256:ef0959512b69eb02b468e5f66c026fc7b3463d51fcbb3801b9f919076ac6eb9a",
      "speaker": "Aida",
      "exactDialogue": "I would have done five.",
-     "elevenLabsV3Direction": "I would have done five.",
-     "expectedTiming": "Give it a clean, unhurried answer right after Bo's confession.",
-     "physicalActionRelationship": "Voice stays modest and exact, matching Aida's unfussy presence."
+     "elevenLabsV3Direction": "Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing.",
+     "startSec": 20.7,
+     "endSec": 22.0,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:553ba6e9faf58e1b69ddfd808fbd85ee28c695e21129c6a8b4bbf6b00e7fc264",
-     "sourceEventId": "script-event:sha256:681e4e40424612444c8cc43115dd3f4477563e47099844acf2305b53a6ab668c",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:dbbd4a6ba7fdece7005487575876c45ba07ed4a5714186e4bb28b9a2f36a0b7f",
+     "sourceEventId": "script-event:sha256:b847842b44111af6387f8f484894b73cdd0548f990a95a1430807129a0e4896d",
      "speaker": "Bo",
      "exactDialogue": "You get scared too?",
-     "elevenLabsV3Direction": "[quietly] You get scared too?",
-     "expectedTiming": "Let there be a tiny beat after Aida's line as Bo absorbs being understood.",
-     "physicalActionRelationship": "Voice mirrors the cautious physical uncurling—still small, but now reaching."
+     "elevenLabsV3Direction": "Genuine surprised question; hope enters because he feels less alone.",
+     "startSec": 22.7,
+     "endSec": 23.7,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c5c1db3eb21229a7269bd9c6ef7f5dbc93d27deb6b865800d521f4f0b7b282b7",
-     "sourceEventId": "script-event:sha256:56e30c48f449c7a124e0bf7af50719b53ab978925a8a16c41f8e9a4951cdf9b1",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:deefbd8cd3c21a1e332b33661899f2864fd5ec64b290a9139ff88f2016dc5d61",
+     "sourceEventId": "script-event:sha256:a8a48370b98487161c7cef31b4b45726d7947d266e52741cab3634f0c29e6c82",
      "speaker": "Aida",
      "exactDialogue": "Every single time.",
-     "elevenLabsV3Direction": "Every single time.",
-     "expectedTiming": "Immediate and clear—no hedge, no embarrassed laugh.",
-     "physicalActionRelationship": "Voice and body both refuse drama; that simplicity is what comforts."
+     "elevenLabsV3Direction": "Quiet agreement, then leave a short clean gap.",
+     "startSec": 24.2,
+     "endSec": 25.1,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:54a906703699a3f26205ab3f90d22e54ad43c8d4748eefdaf5fcb4da63bcaee7",
-     "sourceEventId": "script-event:sha256:448b97275a411f283e3c4dcf5b8d1d4e2c061f662e8178b6b40caa6d74863445",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d4163d7ade24be11aeecbd2ba2a3dd0d7776e8bbc7b3f9111b6e3bf231ba0ceb",
+     "sourceEventId": "script-event:sha256:04674705c1603ac53bb6bb285db7b28f6197a8f084643584208263525a589243",
      "speaker": "Bo",
      "exactDialogue": "But you still go?",
-     "elevenLabsV3Direction": "But you still go?",
-     "expectedTiming": "Place after a tiny absorbent beat following Aida's reassurance.",
-     "physicalActionRelationship": "Supports the final openness; voice is less clenched, more available."
+     "elevenLabsV3Direction": "Hopeful follow-up question after the gap; do not flatten the question mark.",
+     "startSec": 25.9,
+     "endSec": 26.9,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     },
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:7e9be7767046bc95527e622885d012054b3e1a0580ce12e792e2480fd72eacaf",
-     "sourceEventId": "script-event:sha256:f097b5fde07d34a52eac12d9c56410a111c99db91456a48bd45b3828106b9b5a",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:335059e16a3614af54b69cdda19312b8e6d1826443f341c222ed071db524fbf9",
+     "sourceEventId": "script-event:sha256:797e7a517f9a600df1fd6da53fdc00ef5f46cac12e7296c43cbd362ea5218b73",
      "speaker": "Aida",
-     "exactDialogue": "Every single time. BEAT.",
-     "elevenLabsV3Direction": "Every single time. [pause]",
-     "expectedTiming": "Deliver simply, then hold the final shared stillness long enough for Bo's thought-change to register.",
-     "physicalActionRelationship": "Voice opens the door, then the body-and-silence complete the comfort."
+     "exactDialogue": "Every single time.",
+     "elevenLabsV3Direction": "Quiet certainty and solidarity, followed by a held silent beat.",
+     "startSec": 27.6,
+     "endSec": 28.6,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
     }
    ],
    "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Bo, @图3 only for Keen, @图4 only for Aida, @图5 only for prop:satchel and @图6 only for the path set.\n\nBegin exactly on @图1, the approved opening frame — one continuous branch-veiled forest-path unit at Bo's height: start already travelling beside him mid-countdown as his tail-poof bursts inside forward motion, let the camera's travel die exactly when he stops and sits clutching his satchel,. Performance phases: anticipation: Bo Moving beside Keen, Bo braces through each counted beat, then begins joining the rhythm himself as his body prepares for the next tail-poof instead of recoiling from it; action: Bo Bo triggers the tail-poof on purpose more than once while still walking, opens into brief giggles, then abruptly halts, drops onto the fallen log, grips the satchel tight, tucks in, and later lifts his attention toward Aida when she notices the bag; reaction: Aida Aida climbs down through the branch veil slightly caught by twigs, brushes herself clear, sits beside Bo with space left between them, fixes on the satchel rather than his face, and holds her grounded stillness as Bo turns toward her; settle: ENVIRONMENT Wind moves gently through the leaves around the seated trio as the path remains open behind Bo and the group holds the silence without breaking the pocket. Cause and effect: The counted walking rhythm lets Bo prepare for and repeat the tail-poof as shared play, which opens him briefly; when that momentum runs out, his forward travel stops instantly, gravity drops him to the log, and his paws tighten on the satchel. Aida's branch-snag softens her arrival, her seated distance avoids crowding, and the untouched path plus moving leaves keep the pressure present while Bo's body eases from clenched to less shut. Visible turn: Bo shifts from laughing through the poof to visibly folded worry, then from folded isolation to cautious receptiveness once Aida notices his effort and calmly stays with the question. Land on: Bo remains seated in the same branch-veiled pocket with the path still ahead, satchel no longer crushed at maximum tension, and his posture reading quieter and more open rather than cured or ready to spring up. Acting freedom: Animators may vary the exact cadence of the repeated poofs, the size of Bo's giggle leaks, Keen's tiny settle beside him, Aida's twig-clearing business, and the amount of final loosening in Bo's paws, so long as the opening relief is real but temporary, the stop is sudden, Aida never crowds, and the final hold stays unresolved. Bo seated on the fallen log with branches framing him in the foreground and the path still receding behind him, satchel held but no longer crushed tight, his gaze resting into the space ahead while Aida sits steady beside him.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Keen and Bo and Aida. Preserve character identity and relative scale. Keep leaf behind ear visible.",
@@ -867,7 +938,7 @@
     "@图6": "scene plate",
     "@Audio1": "voice track"
    },
-   "audioBrief": "SHOT S4.SH1 — voice-only performance for @Audio1.\nKeen: \"3,2,1 …\" — [excited] 3,2,1 …. Target 1.2-2.4s.\nBo: \"3,2,1 … POOF! The tail does ‘The Thing’ again and again. Bo giggles.\" — [nervous] 3,2,1 … POOF! The tail does ‘The Thing’ again and again. [laughs] Bo giggles.. Target 2.7-6.0s.\nBo: \"I’m STILL worried about going to the to the Learning Circle.\" — [quietly] I’m STILL worried about going to the to the Learning Circle.. Target 8.3-10.5s.\nBo: \"They all know each other. Beat. But I don’t know them, and they don't know me.\" — They all know each other. [pause] But I don’t know them, and they don't know me.. Target 11.3-15.0s.\nAida: \"Tricky trees.\" — Tricky trees.. Target 16.3-17.1s.\nKeen: \"Bo, this is Aida.\" — [quietly] Bo, this is Aida.. Target 17.6-18.5s.\nAida: \"You packed your bag.\" — [quietly] You packed your bag.. Target 19.0-19.9s.\nBo: \"Four times.\" — Four times.. Target 20.1-20.6s.\nAida: \"I would have done five.\" — I would have done five.. Target 20.8-21.9s.\nBo: \"You get scared too?\" — [quietly] You get scared too?. Target 22.5-23.3s.\nAida: \"Every single time.\" — Every single time.. Target 23.5-24.3s.\nBo: \"But you still go?\" — But you still go?. Target 24.9-25.7s.\nAida: \"Every single time. BEAT.\" — Every single time. [pause]. Target 25.9-26.6s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "audioBrief": "SHOT S4.SH1 — voice-only performance for @Audio1.\nBo/Keen: \"3, 2, 1 …\" — Together, playful and perfectly synchronized; one shared countdown only. Target 1.2-2.4s.\nBo: \"I’m STILL worried about going to the Learning Circle.\" — Quiet admission after the play stops; worry catches in the middle without rushing. Target 5.8-8.5s.\nBo: \"They all know each other.\" — Small and certain, looking down the path. Target 9.2-10.6s.\nBo: \"But I don’t know them, and they don't know me.\" — After a real beat, the private fear comes out plainly. Target 11.3-14s.\nAida: \"Tricky trees.\" — Soft, lightly self-aware arrival; never loud. Target 15-15.8s.\nKeen: \"Bo, this is Aida.\" — Gentle introduction that leaves the emotional space with Bo. Target 16.3-17.3s.\nAida: \"You packed your bag.\" — Low, empathetic recognition with a settled downward ending; it is not a question. Target 18-19s.\nBo: \"Four times.\" — A small honest answer, slightly embarrassed. Target 19.5-20.1s.\nAida: \"I would have done five.\" — Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing. Target 20.7-22s.\nBo: \"You get scared too?\" — Genuine surprised question; hope enters because he feels less alone. Target 22.7-23.7s.\nAida: \"Every single time.\" — Quiet agreement, then leave a short clean gap. Target 24.2-25.1s.\nBo: \"But you still go?\" — Hopeful follow-up question after the gap; do not flatten the question mark. Target 25.9-26.9s.\nAida: \"Every single time.\" — Quiet certainty and solidarity, followed by a held silent beat. Target 27.6-28.6s.\nPreserve the exact words. No narration, ad-libs, action labels, sound effects or music.",
    "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: At Bo (@图1, squirrel)'s height on the branch-veiled forest path, the camera is already travelling beside him as his body is mid-poof reaction inside Keen (@图2, bear)'s ongoing countdown, with the path ahead slipping past in dappled depth.\n\n@图3 is the sole visual authority for Bo's satchel; use its identity and construction only, never its background or staging. Keep it with Bo in frame one in the physically plausible carried or worn state implied by the shot.\n\n@图4 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
    "keyframePromptWords": 172,
    "keyframeReferenceSlots": {
@@ -1210,315 +1281,313 @@
       "worker": "Voice Director",
       "skill": "skills/crystal-bears-voice-director/SKILL.md",
       "model": "gpt-5.4",
-      "preparedAt": "2026-09-01T16:25:31",
+      "preparedAt": "2026-09-01T17:00:37",
       "editedAt": null,
       "preparedBy": "specialist",
       "creativeDirectingStandardVersion": 4,
-      "sourceHash": "26f3a0c3b164757647c7ea9e74003f18c900eaf7c14a79d178945fddc89d906e",
+      "sourceHash": "d3b78ed9b5d764913585a89e4f2f2fac0aa2c96b839fec7aa2527dd5eef10dfe",
       "output": {
        "shotId": "S4.SH1",
-       "sceneIntention": "One unbroken emotional path: shared play gives Bo a brief way through embarrassment, then collapses into a body-first confession of belonging fear; Aida joins without crowding, notices effort instead of diagnosing feeling, and her calm steadiness lets Bo test whether scared can coexist with still going.",
+       "sceneIntention": "In one unbroken path-pocket, Bo's shared play briefly outruns embarrassment, then collapses into a body-first confession of belonging fear; Aida enters without pressure, notices his effort rather than diagnosing him, and her grounded stillness lets Bo reopen just enough to imagine going while still scared.",
        "lines": [
         {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:9ceeadde957ea106460445f17e189fc81fa52b67a37205ad6faf1dff388944bb",
-         "sourceEventId": "script-event:sha256:ad56dac171ba4c465968a7ccaf9d0b0c41057141c93d9683fd680c36c9454795",
-         "speaker": "Keen",
-         "character": "Keen",
-         "exactDialogue": "3,2,1 …",
-         "performedText": "[excited] 3,2,1 …",
-         "dramaticIntention": "Turn Bo's feared reaction into a simple shared game he can ride instead of brace against.",
-         "subtext": "I'm keeping this light so you don't have to feel alone in it.",
-         "cadenceAndBreath": "Bright counted propulsion; each number clean and quick, with a little lift into the ellipsis as he expects the poof.",
-         "timingAndBody": "Already moving beside Bo; this is in-step encouragement, not a presentational callout.",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:b66279148d0115bc657e049b6f721801e30d8769f3d6ae5ab5b5d4a660463ca4",
+         "sourceEventId": "script-event:sha256:56d49e7a2047d0d4d8d9d052fb9791f6a19787453b3f125db12a3c12c0d517b6",
+         "speaker": "Bo/Keen",
+         "character": "Bo/Keen",
+         "exactDialogue": "3, 2, 1 …",
+         "performedText": "[excited] 3, 2, 1 …",
+         "dramaticIntention": "Use the shared countdown to turn Bo's bracing into momentary participation and make the poof feel like a game they both understand.",
+         "subtext": "If we stay in the rhythm, maybe this can stay fun for one more beat.",
+         "cadenceAndBreath": "Perfectly synchronized, buoyant count with clean spacing between numbers; no strain, no overlap drift.",
+         "timingAndBody": "Already walking; both voices ride forward motion. Land the ellipsis as the release point into the poof rather than as a thoughtful trail.",
          "archetypeId": "chaos-chant",
          "performanceQuestions": {
-          "intention": "Can Keen make the countdown feel like an invitation rather than pressure?",
-          "subtext": "I'm with you in this.",
-          "thoughtBefore": "Here it comes again—let's make it fun first.",
-          "changeDuring": "The line exits with anticipatory lift toward the poof.",
+          "intention": "Invite the body into the game before fear returns.",
+          "subtext": "Shared rhythm feels safer than thinking ahead.",
+          "thoughtBefore": "Here comes the next poof—ready?",
+          "changeDuring": "Bo moves from braced to willingly joining.",
           "operativeWords": [
-           "3,2,1"
+           "3",
+           "2",
+           "1"
           ]
          },
-         "physicalState": "Walking, energized, companionable forward motion.",
+         "physicalState": "In motion, keyed up, mid-game anticipation.",
          "emotionalState": {
-          "entry": "playfully excited",
-          "exit": "expectant"
+          "entry": "playful bracing",
+          "exit": "brief shared delight"
          },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "The body keeps the rhythm so the voice can sound like movement made audible.",
-         "previousText": "None.",
+         "listener": "Each other",
+         "bodyVoiceRelationship": "Forward-moving bodies create the vocal unity; the chorus is generated by synchronized physical action, not by performance polish alone.",
+         "previousText": "Silence and moving forest path.",
          "startsAtSec": 1.2,
          "estimatedDurationSec": 1.2,
          "pauseReasons": [
-          "Ellipsis leaves room for the anticipated tail-poof reaction."
+          "Ellipsis releases into the physical poof action."
          ],
          "tagPurposes": [
           {
            "tag": "excited",
-           "purpose": "Gives the countdown buoyant forward energy so it reads as shared play, not management."
+           "purpose": "Launches the countdown with the brisk shared lift that makes Bo's participation feel real and temporary rather than already anxious."
           }
          ],
          "takeRecipes": [
           {
            "recipeId": "S4.SH1-L1-T1",
            "label": "Primary",
-           "performedText": "[excited] 3,2,1 …",
+           "performedText": "[excited] 3, 2, 1 …",
            "primary": true,
-           "takesCount": 3
+           "takesCount": 2
           }
          ]
         },
         {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:d08afaf5bd292870a999f905198f72d39a0bd5341883cf90f65a4d54613c264a",
-         "sourceEventId": "script-event:sha256:582c991d6def71bfd6340805e3d0922f355e139b0d6d16fb8cf7efe29654d7a3",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:82738998fafc3c0cdbf3b9ded31acb5ace40b9e3a7c47dc4d2625c7842081369",
+         "sourceEventId": "script-event:sha256:6132391c5744a5fcadd3ddd7fe46893f15358e91763abbc704482b1a1fd4c61e",
          "speaker": "Bo",
          "character": "Bo",
-         "exactDialogue": "3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo",
-         "performedText": "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again. [laughs] Bo",
-         "dramaticIntention": "Bo tries on mastery over the embarrassing body event by joining and repeating the rhythm himself.",
-         "subtext": "If I perform it before it happens to me, maybe it won't own me.",
-         "cadenceAndBreath": "Starts a little braced then quickly catches the game; 'POOF!' pops out clean; the descriptive phrase tumbles with delighted disbelief; end on a small involuntary laugh leaking through the word 'Bo.'",
-         "timingAndBody": "Still walking through repeated poofs; let the vocal rhythm feel body-led and slightly interrupted by bursts of movement.",
-         "archetypeId": "chaos-chant",
+         "exactDialogue": "I’m STILL worried about going to the Learning Circle.",
+         "performedText": "[quietly] I’m STILL worried about going to the Learning Circle.",
+         "dramaticIntention": "Admit the real problem once the game can no longer carry him.",
+         "subtext": "The fun stopped working, and I can't hide that anymore.",
+         "cadenceAndBreath": "Soft onset after a held silence; let STILL catch with honest emphasis, then continue without speeding up to cover it.",
+         "timingAndBody": "Said from the folded sit with satchel clutched; eyes still down-path more than toward anyone. Start only after the stop has fully landed.",
+         "archetypeId": "quiet-warning",
          "performanceQuestions": {
-          "intention": "Can Bo sound like he's discovering he can trigger the joke on purpose?",
-          "subtext": "Look, I can do this too—maybe I'm okay.",
-          "thoughtBefore": "Maybe if I join in, it won't feel so embarrassing.",
-          "changeDuring": "Nervous participation turns into real brief giggle-release.",
+          "intention": "Reveal the fear plainly enough to be heard.",
+          "subtext": "This isn't about the poof anymore.",
+          "thoughtBefore": "I can't keep pretending I'm okay.",
+          "changeDuring": "He moves from held-in pressure to spoken admission.",
           "operativeWords": [
-           "POOF",
-           "again and again",
-           "Bo"
+           "STILL",
+           "worried",
+           "Learning Circle"
           ]
          },
-         "physicalState": "In motion, tail-poofing repeatedly, body bouncing between brace and release.",
+         "physicalState": "Seated abruptly, tucked in, gripping the satchel tight.",
          "emotionalState": {
-          "entry": "nervous but trying",
-          "exit": "briefly delighted and open"
+          "entry": "collapsed worry",
+          "exit": "exposed honesty"
          },
-         "listener": "Keen",
-         "bodyVoiceRelationship": "The voice rides the poof rhythm; laughter is caused by the body finding temporary relief.",
-         "previousText": "3,2,1 …",
-         "startsAtSec": 2.7,
-         "estimatedDurationSec": 3.3,
+         "listener": "Keen, but mostly the open path and what it represents",
+         "bodyVoiceRelationship": "The compressed body limits volume; the voice slips out carefully because the body has already said the truth first.",
+         "previousText": "[excited] 3, 2, 1 …",
+         "startsAtSec": 5.8,
+         "estimatedDurationSec": 2.7,
          "pauseReasons": [
-          "Micro-break after the countdown to let the poof land physically.",
-          "Laugh interruption at the end comes from genuine release, not commentary."
+          "Protect the silence after the play dies so the confession feels compelled, not queued."
          ],
          "tagPurposes": [
           {
-           "tag": "playfully",
-           "purpose": "Marks the moment Bo actively joins the game and briefly rebrands embarrassment as play."
-          },
-          {
-           "tag": "laughs",
-           "purpose": "Lets a real giggle leak through at the end so the relief feels earned and temporary."
+           "tag": "quietly",
+           "purpose": "Keeps the line inside Bo's tucked body so the admission feels involuntary and truthful rather than performed for comfort."
           }
          ],
          "takeRecipes": [
           {
            "recipeId": "S4.SH1-L2-T1",
            "label": "Primary",
-           "performedText": "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again. [laughs] Bo",
-           "primary": true,
-           "takesCount": 4
-          }
-         ]
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:0c94860e8f33fe7e3313d296ad53903a9894591e60bcb8edc3ca455d6501db0b",
-         "sourceEventId": "script-event:sha256:96e953e5d905dec76cc26c93a3d8558d16e7208402083c01b0b88a4ffda462f1",
-         "speaker": "Bo",
-         "character": "Bo",
-         "exactDialogue": "I’m STILL worried about going to the to the Learning Circle.",
-         "performedText": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
-         "dramaticIntention": "Admit the game didn't solve the real fear.",
-         "subtext": "I wanted the laughing to fix this, but it didn't.",
-         "cadenceAndBreath": "After a felt silence, start low and contained; stress 'STILL'; let the doubled 'to the' happen without correction, a caught mind outrunning itself.",
-         "timingAndBody": "This follows the abrupt stop and seated fold; satchel clutched, eyes more down-path than at Keen.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Can Bo let the truth out without trying to make it neat?",
-          "subtext": "The problem is bigger than the joke.",
-          "thoughtBefore": "That was fun for a second... and it changed nothing.",
-          "changeDuring": "He moves from hiding inside silence to finally naming the fear.",
-          "operativeWords": [
-           "STILL",
-           "Learning Circle"
-          ]
-         },
-         "physicalState": "Seated hard on the log, tucked in, gripping the satchel.",
-         "emotionalState": {
-          "entry": "collapsed inward",
-          "exit": "exposed"
-         },
-         "listener": "Keen",
-         "bodyVoiceRelationship": "The body has stopped before the voice can catch up; speech comes from compression, not projection.",
-         "previousText": "3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo",
-         "startsAtSec": 8.3,
-         "estimatedDurationSec": 2.2,
-         "pauseReasons": [
-          "Prior silence is the physical comedown after play fails."
-         ],
-         "tagPurposes": [
-          {
-           "tag": "quietly",
-           "purpose": "Keeps the confession body-small and truthful after the abrupt collapse into stillness."
-          }
-         ],
-         "takeRecipes": [
-          {
-           "recipeId": "S4.SH1-L3-T1",
-           "label": "Primary",
-           "performedText": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
-           "primary": true,
-           "takesCount": 4
-          }
-         ]
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:aecef6799f577e77bf8713cdf2fcce3290621ce6e04682613e8bdef1f63fb0c6",
-         "sourceEventId": "script-event:sha256:66978bf46ac8880b38bb10319b1565fd282aae3e6f151e7868ffef4db9d1a817",
-         "speaker": "Bo",
-         "character": "Bo",
-         "exactDialogue": "They all know each other. Beat. But I don’t know them, and they don't know me.",
-         "performedText": "[softly] They all know each other. [sighs] Beat. But I don’t know them, and they don't know me.",
-         "dramaticIntention": "Move from naming the event he fears to naming the social loneliness underneath it.",
-         "subtext": "I'm afraid of arriving where everyone else already belongs.",
-         "cadenceAndBreath": "First sentence simple and resigned. Take a small breath-sigh before 'Beat.' Then the second thought lands more plainly than emotionally, because the clarity hurts.",
-         "timingAndBody": "Remain folded; this isn't to win comfort, it's the explanation he can't hold back anymore.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Can Bo reveal the belonging fear without becoming melodramatic?",
-          "subtext": "I'll be the one outside the circle.",
-          "thoughtBefore": "It's not just the place—it's the people already in it.",
-          "changeDuring": "The line deepens from observation into vulnerable self-placement outside the group.",
-          "operativeWords": [
-           "all",
-           "don’t know",
-           "me"
-          ]
-         },
-         "physicalState": "Still tucked, grip beginning to shift from crush to hold.",
-         "emotionalState": {
-          "entry": "ashamed and guarded",
-          "exit": "plainly vulnerable"
-         },
-         "listener": "Keen",
-         "bodyVoiceRelationship": "The breath does the emotional work; the body stays shut while the voice finally explains why.",
-         "previousText": "I’m STILL worried about going to the to the Learning Circle.",
-         "startsAtSec": 11.3,
-         "estimatedDurationSec": 3.7,
-         "pauseReasons": [
-          "Internal beat after the first sentence marks the thought becoming more personal."
-         ],
-         "tagPurposes": [
-          {
-           "tag": "softly",
-           "purpose": "Prevents the explanation from hardening into complaint; it stays tender and exposed."
-          },
-          {
-           "tag": "sighs",
-           "purpose": "Carries the weight of the internal beat before he admits the deeper belonging fear."
-          }
-         ],
-         "takeRecipes": [
-          {
-           "recipeId": "S4.SH1-L4-T1",
-           "label": "Primary",
-           "performedText": "[softly] They all know each other. [sighs] Beat. But I don’t know them, and they don't know me.",
-           "primary": true,
-           "takesCount": 4
-          }
-         ]
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:7f8c98141447cdf11f01cb53190ce512215b51fbd7d1fd8bc4c2e2ad3ee47897",
-         "sourceEventId": "script-event:sha256:8199fdf7e9061fd2151d45cbdb5712a066402f3442f3a70321d369bcd76045aa",
-         "speaker": "Aida",
-         "character": "Aida",
-         "exactDialogue": "Tricky trees.",
-         "performedText": "[deadpan] Tricky trees.",
-         "dramaticIntention": "Defuse formality and announce herself through small shared reality, not authority.",
-         "subtext": "I know this is delicate, and I'm not here to make it heavier.",
-         "cadenceAndBreath": "Dry, exact, unhurried; let the warmth appear only on the release of 'trees.'",
-         "timingAndBody": "She is brushing off the twig snag as she settles; the line should feel incidental but perfectly timed.",
-         "archetypeId": "deadpan-affection",
-         "performanceQuestions": {
-          "intention": "Can Aida make the branch mishap soften the room rather than steal it?",
-          "subtext": "We can enter this gently.",
-          "thoughtBefore": "Well, the forest made my entrance for me.",
-          "changeDuring": "The dryness melts by a degree into approachable warmth.",
-          "operativeWords": [
-           "Tricky",
-           "trees"
-          ]
-         },
-         "physicalState": "Finishing her branch-clear, lowering into a respectful seated space.",
-         "emotionalState": {
-          "entry": "matter-of-fact",
-          "exit": "gently warm"
-         },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "The body absorbs the awkwardness so the voice can stay calm and unembarrassed.",
-         "previousText": "They all know each other. Beat. But I don’t know them, and they don't know me.",
-         "startsAtSec": 16.3,
-         "estimatedDurationSec": 0.8,
-         "pauseReasons": [],
-         "tagPurposes": [
-          {
-           "tag": "deadpan",
-           "purpose": "Uses dry understatement to dissolve any grand entrance and keep the pocket safe."
-          }
-         ],
-         "takeRecipes": [
-          {
-           "recipeId": "S4.SH1-L5-T1",
-           "label": "Primary",
-           "performedText": "[deadpan] Tricky trees.",
+           "performedText": "[quietly] I’m STILL worried about going to the Learning Circle.",
            "primary": true,
            "takesCount": 3
           }
          ]
         },
         {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:be902fee96a290543bd5a5a75ebf0fb8b3cc3928d13d15baeb378a3e5822f132",
-         "sourceEventId": "script-event:sha256:70d13052d2839feb6b2ffa083eee145f5fd9df473771bfe1893683c952c397f8",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:622751e7ca822c2a3b3c1b981c1da34b106f404192f8151d6523c30b4e5dbb2e",
+         "sourceEventId": "script-event:sha256:7379df0e1d4d7508a8e3de2f9033db0ebb1af0ffc6f6d3688b5f60fce23bb76e",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "They all know each other.",
+         "performedText": "[nervous] They all know each other.",
+         "dramaticIntention": "Name the social fact that makes the path ahead feel closed to him.",
+         "subtext": "I'll be the only one arriving outside the circle.",
+         "cadenceAndBreath": "Small, contained line; simple downward shape with no ornament. Let 'all' and 'each other' carry the ache.",
+         "timingAndBody": "Still looking down the path, not yet turning to seek reassurance. Keep it compact, like a thought that has been looping.",
+         "archetypeId": "quiet-warning",
+         "performanceQuestions": {
+          "intention": "Make the invisible threat legible.",
+          "subtext": "Belonging already exists there without me.",
+          "thoughtBefore": "This is the part I can't get past.",
+          "changeDuring": "From general worry to specific social fear.",
+          "operativeWords": [
+           "all",
+           "know",
+           "each other"
+          ]
+         },
+         "physicalState": "Hunched, gaze fixed outward, paws still tight on the satchel.",
+         "emotionalState": {
+          "entry": "worried",
+          "exit": "certainly afraid"
+         },
+         "listener": "Keen",
+         "bodyVoiceRelationship": "His body stays closed while the voice narrows further, as if making the problem smaller won't make it hurt less.",
+         "previousText": "[quietly] I’m STILL worried about going to the Learning Circle.",
+         "startsAtSec": 9.2,
+         "estimatedDurationSec": 1.4,
+         "pauseReasons": [
+          "Comes after a breath-sized hold to let the first admission settle into a more specific fear."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "nervous",
+           "purpose": "Adds the tremor of social self-consciousness so the line reads as lived fear, not neutral explanation."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L3-T1",
+           "label": "Primary",
+           "performedText": "[nervous] They all know each other.",
+           "primary": true,
+           "takesCount": 3
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b3ba475a2c72a5569dbd3adbde06977107885371be77f1f89647e3dbc45d9c0",
+         "sourceEventId": "script-event:sha256:68de2b0038b27e674df5c06361be5f2efa130b17ae6692a8ece2d95786e414e5",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "But I don’t know them, and they don't know me.",
+         "performedText": "[quietly] But I don’t know them, and they don't know me.",
+         "dramaticIntention": "Say the most private fear plainly: mutual unfamiliarity means he feels unplaced.",
+         "subtext": "I'm afraid of being no one to them, and them being unreachable to me.",
+         "cadenceAndBreath": "After a real beat, begin gently on 'But'; keep the middle connective honest, then let 'know me' fall with a bare, vulnerable finish.",
+         "timingAndBody": "Still folded, but this is the line where the inside turns outward. No melodrama; the body stays tucked while the words finally do the work.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Let the hidden fear be received without disguising it.",
+          "subtext": "I don't yet belong anywhere at the end of that path.",
+          "thoughtBefore": "This is what I really mean.",
+          "changeDuring": "He stops describing the group and reveals himself in relation to them.",
+          "operativeWords": [
+           "I",
+           "don’t know",
+           "they don't know me"
+          ]
+         },
+         "physicalState": "Tucked in on the log, speaking without lifting fully out of himself.",
+         "emotionalState": {
+          "entry": "guarded vulnerability",
+          "exit": "plainly revealed fear"
+         },
+         "listener": "Keen, and newly the space itself",
+         "bodyVoiceRelationship": "The body remains compressed, but the voice risks more directness; the contrast is the heartbreak of the line.",
+         "previousText": "[nervous] They all know each other.",
+         "startsAtSec": 11.3,
+         "estimatedDurationSec": 2.7,
+         "pauseReasons": [
+          "A real beat before the line lets the more personal thought arrive as a threshold crossing."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "quietly",
+           "purpose": "Keeps the confession intimate and unforced so the fear feels privately true rather than theatrically announced."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L4-T1",
+           "label": "Primary",
+           "performedText": "[quietly] But I don’t know them, and they don't know me.",
+           "primary": true,
+           "takesCount": 3
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:e746fed8302017a81926552953c009d5e3f2b685367f676b10fdd6c6506f5134",
+         "sourceEventId": "script-event:sha256:f382562fc42b14c13b7a1ee85f74038b3a7b875bedf50cd1312e0e3e80145291",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "Tricky trees.",
+         "performedText": "[softly] Tricky trees.",
+         "dramaticIntention": "Enter the pocket by absorbing a little awkwardness, lowering pressure before addressing Bo directly.",
+         "subtext": "I know I arrived clumsily, and I'm making that harmless on purpose.",
+         "cadenceAndBreath": "Light, understated, almost to herself but audible; tiny self-aware smile in the release, not a joke button.",
+         "timingAndBody": "Delivered after the twig-snag business resolves and before she fully claims space by sitting. Keep it low so the entrance does not break the pocket.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Make arrival safe instead of intrusive.",
+          "subtext": "You don't need to reorganize yourself because I'm here.",
+          "thoughtBefore": "Let's make this smaller, gentler.",
+          "changeDuring": "She converts an awkward entrance into permission to stay calm.",
+          "operativeWords": [
+           "Tricky",
+           "trees"
+          ]
+         },
+         "physicalState": "Climbing down, brushing off twigs, slightly snagged but unfussed.",
+         "emotionalState": {
+          "entry": "mild self-aware awkwardness",
+          "exit": "grounded warmth"
+         },
+         "listener": "The pocket first, then Bo and Keen",
+         "bodyVoiceRelationship": "Her unhurried physical clearing is what earns the softness; the voice follows the body into calm rather than announcing comfort ahead of it.",
+         "previousText": "[quietly] But I don’t know them, and they don't know me.",
+         "startsAtSec": 15.0,
+         "estimatedDurationSec": 0.8,
+         "pauseReasons": [
+          "Arrives only once branch business resolves, so the line reads as diffusing pressure rather than interrupting confession."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "softly",
+           "purpose": "Prevents Aida's entrance from spiking the scene's pressure and lets her join the existing emotional pocket with care."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L5-T1",
+           "label": "Primary",
+           "performedText": "[softly] Tricky trees.",
+           "primary": true,
+           "takesCount": 2
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:fd9e66270fd5e8b09f547dd0bc3527e2d280d6673c9f612874cf34522a1e2870",
+         "sourceEventId": "script-event:sha256:2dbd391ab3242934894aa0594ec95c9d0a4eb25562b98b92da7c692d001b1155",
          "speaker": "Keen",
          "character": "Keen",
          "exactDialogue": "Bo, this is Aida.",
          "performedText": "[quietly] Bo, this is Aida.",
-         "dramaticIntention": "Make the introduction small enough not to break the pocket Aida just created.",
-         "subtext": "This is safe; no performance required.",
-         "cadenceAndBreath": "Gentle and spare, no salesmanship. Tiny placement on 'Aida' to offer connection, not push it.",
-         "timingAndBody": "Keen has already settled supportively nearby; keep it from the side, without leaning in.",
-         "archetypeId": "quiet-warning",
+         "dramaticIntention": "Bridge the introduction gently without taking over the emotional event.",
+         "subtext": "You're safe; I'm not pushing, just connecting you.",
+         "cadenceAndBreath": "Simple, clean, supportive; easy comma after 'Bo,' then a low handoff to Aida.",
+         "timingAndBody": "Keen stays nearby but leaves room. This line should feel like a soft placement, not a social announcement.",
+         "archetypeId": "deadpan-affection",
          "performanceQuestions": {
-          "intention": "Can Keen introduce Aida without turning the moment formal?",
-          "subtext": "You don't have to brace for this.",
-          "thoughtBefore": "Okay, now that it feels safe, I can name her.",
-          "changeDuring": "The line relaxes into the name.",
+          "intention": "Connect them without crowding Bo.",
+          "subtext": "I'll do only the minimum needed here.",
+          "thoughtBefore": "Let me make this easier, not bigger.",
+          "changeDuring": "Keen shifts from companion to quiet facilitator.",
           "operativeWords": [
            "Bo",
            "Aida"
           ]
          },
-         "physicalState": "Seated, careful, containing his earlier energy.",
+         "physicalState": "Settled beside Bo, folded supportively, careful not to lean in.",
          "emotionalState": {
-          "entry": "protective",
-          "exit": "reassuring"
+          "entry": "attentive gentleness",
+          "exit": "room-making support"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "His quieter body lets the voice reduce pressure instead of adding social demand.",
-         "previousText": "Tricky trees.",
-         "startsAtSec": 17.6,
-         "estimatedDurationSec": 0.9,
-         "pauseReasons": [],
+         "bodyVoiceRelationship": "Because Keen's body stays respectfully still, the voice can remain light-touch; he is not trying to fix the moment.",
+         "previousText": "[softly] Tricky trees.",
+         "startsAtSec": 16.3,
+         "estimatedDurationSec": 1.0,
+         "pauseReasons": [
+          "Placed after Aida's soft entrance so the introduction feels earned and non-intrusive."
+         ],
          "tagPurposes": [
           {
            "tag": "quietly",
-           "purpose": "Keeps the introduction from sounding ceremonial or intrusive in Bo's vulnerable pocket."
+           "purpose": "Keeps Keen from dominating the frame and leaves the emotional center where it belongs: with Bo's response."
           }
          ],
          "takeRecipes": [
@@ -1527,95 +1596,100 @@
            "label": "Primary",
            "performedText": "[quietly] Bo, this is Aida.",
            "primary": true,
-           "takesCount": 3
+           "takesCount": 2
           }
          ]
         },
         {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:8b2c9e81fd63758b13c0dce04478726f7e2d55fe761cbebdd0f9ae2e02637636",
-         "sourceEventId": "script-event:sha256:20c234a44fedda69fe881fde0d48b95987eaf765fce753af7d136c566a337c8f",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:15b364030922a20dc9b0d90f4f01fef7eee753f85909872f64632cb68ae58fb0",
+         "sourceEventId": "script-event:sha256:7d7ca19fc0fe2602f92c0b0e203b5d51d15b84049defe33336f1ae9dcf9bc3c9",
          "speaker": "Aida",
          "character": "Aida",
          "exactDialogue": "You packed your bag.",
-         "performedText": "[quietly] You packed your bag.",
-         "dramaticIntention": "Notice concrete effort instead of interrogating emotion.",
-         "subtext": "I see what you already did to try to be ready.",
-         "cadenceAndBreath": "Low-pressure observation, not a question. Place 'packed' with mild respect, and 'bag' gently so the satchel becomes the bridge.",
-         "timingAndBody": "Her eyes are on the satchel, not Bo's face; respectful space remains intact.",
-         "archetypeId": "deadpan-affection",
+         "performedText": "[softly] You packed your bag.",
+         "dramaticIntention": "Notice Bo's concrete effort instead of naming his feelings, giving him recognition without scrutiny.",
+         "subtext": "I see what you already tried to do for yourself, and that counts.",
+         "cadenceAndBreath": "Low and settled with a definite downward ending; absolutely not interrogative. 'Bag' lands softly but firmly.",
+         "timingAndBody": "Aida has sat with space between them and is looking at the satchel, not into Bo's face. Let the line come from that visual noticing.",
+         "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Can Aida make being seen feel relieving rather than exposing?",
-          "subtext": "Your effort counts.",
-          "thoughtBefore": "Start with what's true and visible.",
-          "changeDuring": "The line exits with a trace of warmth that invites response.",
+          "intention": "Offer accurate recognition that lowers shame.",
+          "subtext": "Your preparation matters more than your panic right now.",
+          "thoughtBefore": "Start with what is true and visible.",
+          "changeDuring": "She turns observation into connection.",
           "operativeWords": [
            "packed",
            "bag"
           ]
          },
-         "physicalState": "Still, grounded, seated with room between them.",
+         "physicalState": "Seated, grounded, eyes on the satchel, body non-intrusive.",
          "emotionalState": {
-          "entry": "observant",
-          "exit": "affirming"
+          "entry": "calm observation",
+          "exit": "empathetic recognition"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Because her body doesn't crowd him, the voice can land as a quiet fact instead of pressure.",
-         "previousText": "Bo, this is Aida.",
-         "startsAtSec": 19.0,
-         "estimatedDurationSec": 0.9,
-         "pauseReasons": [],
+         "bodyVoiceRelationship": "Her still body and downward gaze make the voice feel safe; she is not chasing eye contact, so the words can land without pressure.",
+         "previousText": "[quietly] Bo, this is Aida.",
+         "startsAtSec": 18.0,
+         "estimatedDurationSec": 1.0,
+         "pauseReasons": [
+          "A brief settle before speaking allows her presence to read as shelter first, dialogue second."
+         ],
          "tagPurposes": [
           {
-           "tag": "quietly",
-           "purpose": "Lets the observation feel private and non-invasive, preserving Bo's fragile openness."
+           "tag": "softly",
+           "purpose": "Lets the observation feel like gentle recognition rather than analysis or challenge."
           }
          ],
          "takeRecipes": [
           {
            "recipeId": "S4.SH1-L7-T1",
            "label": "Primary",
-           "performedText": "[quietly] You packed your bag.",
+           "performedText": "[softly] You packed your bag.",
            "primary": true,
-           "takesCount": 4
+           "takesCount": 3
           }
          ]
         },
         {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:9611831565e8bfd90992cf8e741fb46942b7fd4a640bf2495a02db950d7d0fd2",
-         "sourceEventId": "script-event:sha256:3b4393c29d77c725219e43867b2190736205313802955ae8ff0a47393a043707",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:e827b6904e5bc726b074c2a33279f41089d5a533ea212e40a36824fccf69a503",
+         "sourceEventId": "script-event:sha256:cf43657bf9952da46322662111834db5a77c27980bdff3672a8b8e1bb9285edf",
          "speaker": "Bo",
          "character": "Bo",
          "exactDialogue": "Four times.",
          "performedText": "[quietly] Four times.",
-         "dramaticIntention": "Answer quickly because he feels seen accurately and can't help revealing the extent of his effort.",
-         "subtext": "I really tried to get ready.",
-         "cadenceAndBreath": "Small, immediate, almost before he means to say it; no joke push, just truthful specificity.",
-         "timingAndBody": "First slight lift of attention toward Aida; paws still on the satchel.",
+         "dramaticIntention": "Answer honestly and a little sheepishly, testing whether his effort will be received kindly.",
+         "subtext": "I know it's a lot, and I need to admit that without being laughed at.",
+         "cadenceAndBreath": "Tiny line, quick but not snapped; slight embarrassed dip on 'times.'",
+         "timingAndBody": "Still seated, satchel held close, but this answer turns him a little more toward Aida than before.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Can Bo let the number come out as vulnerable fact, not punchline?",
-          "subtext": "Please notice I was trying.",
-          "thoughtBefore": "She noticed. She really noticed.",
-          "changeDuring": "He shifts from shut-down to first cautious engagement.",
+          "intention": "Offer a truthful detail without retreating again.",
+          "subtext": "Please let this be understandable, not ridiculous.",
+          "thoughtBefore": "She noticed. Okay—tell the truth.",
+          "changeDuring": "Embarrassment begins to convert into connection.",
           "operativeWords": [
-           "Four"
+           "Four",
+           "times"
           ]
          },
-         "physicalState": "Still seated and guarded, but attention turning outward.",
+         "physicalState": "Still guarded, but attention lifting toward Aida.",
          "emotionalState": {
-          "entry": "surprised to be seen",
-          "exit": "tentatively connected"
+          "entry": "embarrassed honesty",
+          "exit": "tentative engagement"
          },
          "listener": "Aida",
-         "bodyVoiceRelationship": "The body remains protective, but the voice slips out more quickly now that someone named the effort.",
-         "previousText": "You packed your bag.",
-         "startsAtSec": 20.1,
-         "estimatedDurationSec": 0.5,
-         "pauseReasons": [],
+         "bodyVoiceRelationship": "The body is still protective, yet the voice peeks out more directly because he has been accurately seen.",
+         "previousText": "[softly] You packed your bag.",
+         "startsAtSec": 19.5,
+         "estimatedDurationSec": 0.6,
+         "pauseReasons": [
+          "Quick reply shows he was already carrying this detail, ready once it felt safe enough to share."
+         ],
          "tagPurposes": [
           {
            "tag": "quietly",
-           "purpose": "Keeps the admission intimate and earnest rather than comic or boastful."
+           "purpose": "Preserves Bo's slight embarrassment and keeps the answer small, truthful, and unshowy."
           }
          ],
          "takeRecipes": [
@@ -1629,257 +1703,263 @@
          ]
         },
         {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:be1de01acc2e659b826802a3dc1e4681beb0ba20e1c17fad24523d46aab1798e",
-         "sourceEventId": "script-event:sha256:a0f0ca5baffee0f96c62b15650005baa6dca1484d5efae0be14d97d7cb021a64",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:b48ec0ea4adea59def0f20db7ce2aca0617046fbb1e51b748003c678aa3df3a9",
+         "sourceEventId": "script-event:sha256:ef0959512b69eb02b468e5f66c026fc7b3463d51fcbb3801b9f919076ac6eb9a",
          "speaker": "Aida",
          "character": "Aida",
          "exactDialogue": "I would have done five.",
-         "performedText": "[calm] I would have done five.",
-         "dramaticIntention": "Meet his effort with deadpan solidarity, not consolation.",
-         "subtext": "Scared people can be practical and still go; you're not strange to me.",
-         "cadenceAndBreath": "Matter-of-fact, dry, no wink. Let 'five' land as a simple escalation, warm on the exit.",
-         "timingAndBody": "No lean-in, no grin broadening the joke; she stays grounded so the humor shelters him.",
-         "archetypeId": "deadpan-affection",
+         "performedText": "[softly] [warmly] I would have done five.",
+         "dramaticIntention": "Normalize Bo's fear by gently placing herself one step behind him, not above him.",
+         "subtext": "You're not the only one who needs extra tries; in fact, I'd need more.",
+         "cadenceAndBreath": "Begin low and easy, then let warmth bloom subtly through 'five.' No wink, no punchline.",
+         "timingAndBody": "She stays matter-of-fact and seated with room between them. The comfort comes from calm certainty, not coaxing.",
+         "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Can Aida bond through precision rather than reassurance language?",
-          "subtext": "I belong in this feeling with you.",
-          "thoughtBefore": "Let's stand beside his effort, not above it.",
-          "changeDuring": "The line turns tiny humor into companionship.",
+          "intention": "Reduce shame through self-effacing solidarity.",
+          "subtext": "I am with you, not evaluating you.",
+          "thoughtBefore": "Meet him by lowering myself into the same terrain.",
+          "changeDuring": "Her observation becomes active reassurance.",
           "operativeWords": [
            "would",
            "five"
           ]
          },
-         "physicalState": "Settled and still, eyes still near the satchel line before lifting lightly.",
+         "physicalState": "Grounded, relaxed, making no move to crowd him.",
          "emotionalState": {
-          "entry": "dryly supportive",
-          "exit": "warmly aligned"
+          "entry": "steady empathy",
+          "exit": "inviting warmth"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Her physical stillness lets the dry line feel safe instead of performative.",
-         "previousText": "Four times.",
-         "startsAtSec": 20.8,
-         "estimatedDurationSec": 1.1,
-         "pauseReasons": [],
+         "bodyVoiceRelationship": "Her physical stillness keeps the line from becoming performative comfort; the warmth is vocal coloration laid lightly over steadiness.",
+         "previousText": "[quietly] Four times.",
+         "startsAtSec": 20.7,
+         "estimatedDurationSec": 1.3,
+         "pauseReasons": [
+          "Given a small breath after Bo's answer so her response feels considered and sincere, not automatic."
+         ],
          "tagPurposes": [
           {
-           "tag": "calm",
-           "purpose": "Keeps the deadpan solidarity grounded so the humor reduces pressure instead of playing for a laugh."
+           "tag": "softly",
+           "purpose": "Maintains the scene's low-pressure safety so the reassurance never sounds like instruction."
+          },
+          {
+           "tag": "warmly",
+           "purpose": "Adds the affiliative glow that turns self-effacing honesty into true solidarity for Bo."
           }
          ],
          "takeRecipes": [
           {
            "recipeId": "S4.SH1-L9-T1",
            "label": "Primary",
-           "performedText": "[calm] I would have done five.",
-           "primary": true,
-           "takesCount": 4
-          }
-         ]
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:553ba6e9faf58e1b69ddfd808fbd85ee28c695e21129c6a8b4bbf6b00e7fc264",
-         "sourceEventId": "script-event:sha256:681e4e40424612444c8cc43115dd3f4477563e47099844acf2305b53a6ab668c",
-         "speaker": "Bo",
-         "character": "Bo",
-         "exactDialogue": "You get scared too?",
-         "performedText": "[quietly] You get scared too?",
-         "dramaticIntention": "Test whether this calm person truly shares his fear, or only understands it from outside.",
-         "subtext": "If you're scared too, maybe being scared doesn't exile me.",
-         "cadenceAndBreath": "Careful, upward, almost afraid of hoping. Keep 'too' operative and searching.",
-         "timingAndBody": "He turns a little more toward Aida here; this is the first real reach.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Can Bo make the question a risk, not a casual follow-up?",
-          "subtext": "Tell me I'm not the only one built like this.",
-          "thoughtBefore": "Wait—do you actually know this feeling?",
-          "changeDuring": "The line opens from curiosity into hope he doesn't want to overcommit to.",
-          "operativeWords": [
-           "scared",
-           "too"
-          ]
-         },
-         "physicalState": "Less clenched, attention lifted, satchel held lower.",
-         "emotionalState": {
-          "entry": "cautious",
-          "exit": "hopeful but protected"
-         },
-         "listener": "Aida",
-         "bodyVoiceRelationship": "The body loosens just enough to let the question travel toward her.",
-         "previousText": "I would have done five.",
-         "startsAtSec": 22.5,
-         "estimatedDurationSec": 0.8,
-         "pauseReasons": [],
-         "tagPurposes": [
-          {
-           "tag": "quietly",
-           "purpose": "Preserves the tenderness of Bo's first genuine reach toward Aida."
-          }
-         ],
-         "takeRecipes": [
-          {
-           "recipeId": "S4.SH1-L10-T1",
-           "label": "Primary",
-           "performedText": "[quietly] You get scared too?",
-           "primary": true,
-           "takesCount": 4
-          }
-         ]
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:c5c1db3eb21229a7269bd9c6ef7f5dbc93d27deb6b865800d521f4f0b7b282b7",
-         "sourceEventId": "script-event:sha256:56e30c48f449c7a124e0bf7af50719b53ab978925a8a16c41f8e9a4951cdf9b1",
-         "speaker": "Aida",
-         "character": "Aida",
-         "exactDialogue": "Every single time.",
-         "performedText": "[calm] Every single time.",
-         "dramaticIntention": "Answer with complete simplicity so Bo doesn't have to doubt her truthfulness.",
-         "subtext": "Yes. Fully. You're not alone in this pattern.",
-         "cadenceAndBreath": "Plain and steady, with no softening apology. 'Every' and 'time' bookend certainty.",
-         "timingAndBody": "Hold still; the power is that she does not rush to soothe beyond the fact.",
-         "archetypeId": "deadpan-affection",
-         "performanceQuestions": {
-          "intention": "Can Aida make certainty feel sheltering?",
-          "subtext": "I won't flinch away from the reality of fear.",
-          "thoughtBefore": "He needs the truth, not a polished comfort line.",
-          "changeDuring": "No internal turn—its steadiness is the gift.",
-          "operativeWords": [
-           "Every",
-           "time"
-          ]
-         },
-         "physicalState": "Grounded, open, unmoving.",
-         "emotionalState": {
-          "entry": "certain",
-          "exit": "steadily warm"
-         },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "Her body remains relaxed and uninsistent, making the line trustworthy.",
-         "previousText": "You get scared too?",
-         "startsAtSec": 23.5,
-         "estimatedDurationSec": 0.8,
-         "pauseReasons": [
-          "Leave a tiny absorbent space after the line for Bo to take it in."
-         ],
-         "tagPurposes": [
-          {
-           "tag": "calm",
-           "purpose": "Makes the admission sound lived-in and trustworthy rather than dramatic or pitying."
-          }
-         ],
-         "takeRecipes": [
-          {
-           "recipeId": "S4.SH1-L11-T1",
-           "label": "Primary",
-           "performedText": "[calm] Every single time.",
+           "performedText": "[softly] [warmly] I would have done five.",
            "primary": true,
            "takesCount": 3
           }
          ]
         },
         {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:54a906703699a3f26205ab3f90d22e54ad43c8d4748eefdaf5fcb4da63bcaee7",
-         "sourceEventId": "script-event:sha256:448b97275a411f283e3c4dcf5b8d1d4e2c061f662e8178b6b40caa6d74863445",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:dbbd4a6ba7fdece7005487575876c45ba07ed4a5714186e4bb28b9a2f36a0b7f",
+         "sourceEventId": "script-event:sha256:b847842b44111af6387f8f484894b73cdd0548f990a95a1430807129a0e4896d",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "You get scared too?",
+         "performedText": "[curious] You get scared too?",
+         "dramaticIntention": "Test the possibility that he is not alone in this feeling.",
+         "subtext": "If that's true, maybe being scared doesn't disqualify me.",
+         "cadenceAndBreath": "A real question with surprised lift on 'too'; let hope enter, but keep it small and newly formed.",
+         "timingAndBody": "This is the first notable turn toward Aida. The body loosens a fraction before the voice does.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Reach toward companionship in fear.",
+          "subtext": "Please mean what you just said.",
+          "thoughtBefore": "Wait—you feel this too?",
+          "changeDuring": "Isolation shifts into tentative hope.",
+          "operativeWords": [
+           "scared",
+           "too"
+          ]
+         },
+         "physicalState": "Still seated and holding the satchel, but less clenched; attention now clearly on Aida.",
+         "emotionalState": {
+          "entry": "surprised vulnerability",
+          "exit": "hopeful curiosity"
+         },
+         "listener": "Aida",
+         "bodyVoiceRelationship": "The slight physical uncurl permits the upward question; the voice lifts because the body has finally turned outward.",
+         "previousText": "[softly] [warmly] I would have done five.",
+         "startsAtSec": 22.7,
+         "estimatedDurationSec": 1.0,
+         "pauseReasons": [
+          "A brief absorbent beat before speaking lets Aida's solidarity actually register in him."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "curious",
+           "purpose": "Brings in the first real hopeful reach, distinguishing this question from earlier worry-driven speech."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L10-T1",
+           "label": "Primary",
+           "performedText": "[curious] You get scared too?",
+           "primary": true,
+           "takesCount": 3
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:deefbd8cd3c21a1e332b33661899f2864fd5ec64b290a9139ff88f2016dc5d61",
+         "sourceEventId": "script-event:sha256:a8a48370b98487161c7cef31b4b45726d7947d266e52741cab3634f0c29e6c82",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "Every single time.",
+         "performedText": "[softly] Every single time.",
+         "dramaticIntention": "Answer with unembellished truth so Bo can rely on it.",
+         "subtext": "Yes—and I am not ashamed to say so.",
+         "cadenceAndBreath": "Simple, quiet agreement; evenly weighted across the phrase, then out. Leave clean air after it.",
+         "timingAndBody": "No leaning in to reassure him. She stays grounded and lets the truth do the work.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Confirm solidarity without dramatizing it.",
+          "subtext": "Fear can come every time and still be survivable.",
+          "thoughtBefore": "Give him the plain truth.",
+          "changeDuring": "Her presence becomes proof, not just comfort.",
+          "operativeWords": [
+           "Every",
+           "single",
+           "time"
+          ]
+         },
+         "physicalState": "Calm, settled, eyes steady.",
+         "emotionalState": {
+          "entry": "matter-of-fact empathy",
+          "exit": "trustworthy steadiness"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Because she does not move to soothe, the vocal simplicity carries greater credibility.",
+         "previousText": "[curious] You get scared too?",
+         "startsAtSec": 24.2,
+         "estimatedDurationSec": 0.9,
+         "pauseReasons": [
+          "A short clean gap after this line is essential for Bo to absorb that fear and continuation can coexist."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "softly",
+           "purpose": "Keeps the truth intimate and non-performative so Bo can receive it as real lived experience."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S4.SH1-L11-T1",
+           "label": "Primary",
+           "performedText": "[softly] Every single time.",
+           "primary": true,
+           "takesCount": 3
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:d4163d7ade24be11aeecbd2ba2a3dd0d7776e8bbc7b3f9111b6e3bf231ba0ceb",
+         "sourceEventId": "script-event:sha256:04674705c1603ac53bb6bb285db7b28f6197a8f084643584208263525a589243",
          "speaker": "Bo",
          "character": "Bo",
          "exactDialogue": "But you still go?",
-         "performedText": "[softly] But you still go?",
-         "dramaticIntention": "Reach for the possibility that courage might include fear rather than erase it.",
-         "subtext": "Tell me the path can stay hard and still be possible.",
-         "cadenceAndBreath": "Gentle, immediate after the absorbent beat; 'still' carries the line's hinge.",
-         "timingAndBody": "This is more open than the previous questions, but still careful—he doesn't spring up emotionally.",
+         "performedText": "[curious] But you still go?",
+         "dramaticIntention": "Take the next step in logic: if fear remains, is going still possible?",
+         "subtext": "Tell me there's a way forward that doesn't require the fear to disappear first.",
+         "cadenceAndBreath": "Hold the question mark alive; begin lightly on 'But' as a thinking bridge, then lift on 'go' with genuine hope.",
+         "timingAndBody": "Comes after the tiny absorbent gap. Bo is more open now, though still seated and not cured.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Can Bo ask for a model of living with fear rather than escaping it?",
-          "subtext": "Maybe I don't have to wait to stop being scared.",
-          "thoughtBefore": "If fear stays, what makes going possible?",
-          "changeDuring": "The question shifts him from identification toward action.",
+          "intention": "Find a workable path through fear.",
+          "subtext": "Maybe courage is not the absence of this feeling.",
+          "thoughtBefore": "Then how do you keep moving?",
+          "changeDuring": "His hope becomes practical curiosity.",
           "operativeWords": [
            "still",
            "go"
           ]
          },
-         "physicalState": "Seated, quieter, posture eased but unresolved.",
+         "physicalState": "Quieter, less shut, satchel no longer crushed at maximum tension.",
          "emotionalState": {
           "entry": "absorbing hope",
-          "exit": "seeking permission"
+          "exit": "seeking possibility"
          },
          "listener": "Aida",
-         "bodyVoiceRelationship": "The body stays seated in the problem while the voice reaches toward a future action.",
-         "previousText": "Every single time.",
-         "startsAtSec": 24.9,
-         "estimatedDurationSec": 0.8,
-         "pauseReasons": [],
+         "bodyVoiceRelationship": "The slight release in his paws supports the lifted question; the body is not ready to move, but it is ready to imagine movement.",
+         "previousText": "[softly] Every single time.",
+         "startsAtSec": 25.9,
+         "estimatedDurationSec": 1.0,
+         "pauseReasons": [
+          "Follows the clean gap so the question feels discovered, not immediate reassurance-seeking."
+         ],
          "tagPurposes": [
           {
-           "tag": "softly",
-           "purpose": "Keeps the question vulnerable and sincere as Bo tests a new possibility."
+           "tag": "curious",
+           "purpose": "Carries Bo's new forward-reaching hope and preserves the genuine lift of the question."
           }
          ],
          "takeRecipes": [
           {
            "recipeId": "S4.SH1-L12-T1",
            "label": "Primary",
-           "performedText": "[softly] But you still go?",
+           "performedText": "[curious] But you still go?",
            "primary": true,
-           "takesCount": 4
+           "takesCount": 3
           }
          ]
         },
         {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:7e9be7767046bc95527e622885d012054b3e1a0580ce12e792e2480fd72eacaf",
-         "sourceEventId": "script-event:sha256:f097b5fde07d34a52eac12d9c56410a111c99db91456a48bd45b3828106b9b5a",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:335059e16a3614af54b69cdda19312b8e6d1826443f341c222ed071db524fbf9",
+         "sourceEventId": "script-event:sha256:797e7a517f9a600df1fd6da53fdc00ef5f46cac12e7296c43cbd362ea5218b73",
          "speaker": "Aida",
          "character": "Aida",
-         "exactDialogue": "Every single time. BEAT.",
-         "performedText": "[calm] Every single time. [exhales] BEAT.",
-         "dramaticIntention": "Confirm the answer without fanfare, then let silence do the rest of the work.",
-         "subtext": "Yes—and you don't need a bigger speech than that.",
-         "cadenceAndBreath": "Same certainty as before, maybe even simpler. Small release after the sentence, then leave the beat alive rather than empty.",
-         "timingAndBody": "Stay grounded beside him with respectful space; this lands the scene and must not sound solved.",
+         "exactDialogue": "Every single time.",
+         "performedText": "[quietly] Every single time.",
+         "dramaticIntention": "Answer with quiet certainty that fear and going coexist, giving Bo a steady model rather than a pep talk.",
+         "subtext": "Yes. That's what doing it scared looks like.",
+         "cadenceAndBreath": "Lower, firmer, and a touch more grounded than the earlier repetition; no extra uplift. Let the phrase settle and then leave silence behind it.",
+         "timingAndBody": "Aida remains still beside him with respectful space. The held silence after this line is part of the performance.",
          "archetypeId": "deadpan-affection",
          "performanceQuestions": {
-          "intention": "Can Aida let repetition become reassurance through steadiness alone?",
-          "subtext": "I'm staying calm inside this truth so you can too.",
-          "thoughtBefore": "He needs the answer again, unchanged.",
-          "changeDuring": "The spoken certainty yields to shared silence.",
+          "intention": "Leave Bo with a usable truth.",
+          "subtext": "Nothing magical changes first; you just go anyway.",
+          "thoughtBefore": "Say it simply and let it stand.",
+          "changeDuring": "Her solidarity turns into quiet conviction.",
           "operativeWords": [
            "Every",
            "single",
-           "time",
-           "BEAT"
+           "time"
           ]
          },
-         "physicalState": "Seated, still, quietly present.",
+         "physicalState": "Steady, relaxed, fully settled in the branch-veiled pocket.",
          "emotionalState": {
-          "entry": "calm certainty",
-          "exit": "held warmth in silence"
+          "entry": "quiet certainty",
+          "exit": "held solidarity"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Her still body allows the exhale and ensuing silence to become shelter rather than closure.",
-         "previousText": "But you still go?",
-         "startsAtSec": 25.9,
-         "estimatedDurationSec": 0.7,
+         "bodyVoiceRelationship": "Because her body does nothing to sell the line, the voice can be plain and trustworthy; the stillness after it completes the reassurance.",
+         "previousText": "[curious] But you still go?",
+         "startsAtSec": 27.6,
+         "estimatedDurationSec": 1.0,
          "pauseReasons": [
-          "The final beat must open into held silence that carries through scene end."
+          "A held silent beat after the line allows the answer to transform the pocket without anyone explaining it further."
          ],
          "tagPurposes": [
           {
-           "tag": "calm",
-           "purpose": "Maintains her grounded, matter-of-fact truthfulness on the repeated answer."
-          },
-          {
-           "tag": "exhales",
-           "purpose": "Releases into the final held silence so the moment lands as lived-in calm, not a buttoned lesson."
+           "tag": "quietly",
+           "purpose": "Delivers conviction without pressure, allowing the line to land as solidarity and model rather than instruction."
           }
          ],
          "takeRecipes": [
           {
            "recipeId": "S4.SH1-L13-T1",
            "label": "Primary",
-           "performedText": "[calm] Every single time. [exhales] BEAT.",
+           "performedText": "[quietly] Every single time.",
            "primary": true,
-           "takesCount": 4
+           "takesCount": 3
           }
          ]
         }
@@ -1893,15 +1973,15 @@
         "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
        },
        "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
-       "shotContractHash": "5a963215356a206a1b74e80127c427dc230b59e30e0cf484ea37d6b5fac3aca6",
-       "dialogueHash": "6e9f76d1e67e0ccaef5e4eac8e01bb1a3108bd22bc0794282e4bebdfb0f30036",
-       "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+       "shotContractHash": "ff3c5e0f1c9e851e4ec6832ceae54148905877d5c29c78d44e4ef8970a35c01c",
+       "dialogueHash": "16ad78ad7bab66cb3a2c21bacf219be188e153dfe68cece15a4fa6b6f6fc4abf",
+       "workingPerformanceHash": "ea1ff660b74706f988ee331ff75c9ff7145bcdfb4a1dcf68f1ca2470d04880d5",
        "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
        "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
        "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
        "voiceCompilerVersion": "voice-director-v1",
        "voiceIds": [
-        "TCRj5m2u9xhZHJ8h9pMv",
+        null,
         "AAF2q3NCwTrLMMkEnRLB",
         "AAF2q3NCwTrLMMkEnRLB",
         "AAF2q3NCwTrLMMkEnRLB",
@@ -1915,15 +1995,731 @@
         "AAF2q3NCwTrLMMkEnRLB",
         "SHuZ9GyczU4QEDzU4QU4"
        ]
-      },
-      "durationCarryForward": {
-       "at": "2026-09-01T16:37:48",
-       "fromSec": 27.0,
-       "newDurationSec": 30.0,
-       "reason": "Approved direction carried across timing-only retime"
       }
      },
-     "history": []
+     "history": [
+      {
+       "department": "Voice",
+       "worker": "Voice Director",
+       "skill": "skills/crystal-bears-voice-director/SKILL.md",
+       "model": "gpt-5.4",
+       "preparedAt": "2026-09-01T16:25:31",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 4,
+       "sourceHash": "26f3a0c3b164757647c7ea9e74003f18c900eaf7c14a79d178945fddc89d906e",
+       "output": {
+        "shotId": "S4.SH1",
+        "sceneIntention": "One unbroken emotional path: shared play gives Bo a brief way through embarrassment, then collapses into a body-first confession of belonging fear; Aida joins without crowding, notices effort instead of diagnosing feeling, and her calm steadiness lets Bo test whether scared can coexist with still going.",
+        "lines": [
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:9ceeadde957ea106460445f17e189fc81fa52b67a37205ad6faf1dff388944bb",
+          "sourceEventId": "script-event:sha256:ad56dac171ba4c465968a7ccaf9d0b0c41057141c93d9683fd680c36c9454795",
+          "speaker": "Keen",
+          "character": "Keen",
+          "exactDialogue": "3,2,1 …",
+          "performedText": "[excited] 3,2,1 …",
+          "dramaticIntention": "Turn Bo's feared reaction into a simple shared game he can ride instead of brace against.",
+          "subtext": "I'm keeping this light so you don't have to feel alone in it.",
+          "cadenceAndBreath": "Bright counted propulsion; each number clean and quick, with a little lift into the ellipsis as he expects the poof.",
+          "timingAndBody": "Already moving beside Bo; this is in-step encouragement, not a presentational callout.",
+          "archetypeId": "chaos-chant",
+          "performanceQuestions": {
+           "intention": "Can Keen make the countdown feel like an invitation rather than pressure?",
+           "subtext": "I'm with you in this.",
+           "thoughtBefore": "Here it comes again—let's make it fun first.",
+           "changeDuring": "The line exits with anticipatory lift toward the poof.",
+           "operativeWords": [
+            "3,2,1"
+           ]
+          },
+          "physicalState": "Walking, energized, companionable forward motion.",
+          "emotionalState": {
+           "entry": "playfully excited",
+           "exit": "expectant"
+          },
+          "listener": "Bo",
+          "bodyVoiceRelationship": "The body keeps the rhythm so the voice can sound like movement made audible.",
+          "previousText": "None.",
+          "startsAtSec": 1.2,
+          "estimatedDurationSec": 1.2,
+          "pauseReasons": [
+           "Ellipsis leaves room for the anticipated tail-poof reaction."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "excited",
+            "purpose": "Gives the countdown buoyant forward energy so it reads as shared play, not management."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L1-T1",
+            "label": "Primary",
+            "performedText": "[excited] 3,2,1 …",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:d08afaf5bd292870a999f905198f72d39a0bd5341883cf90f65a4d54613c264a",
+          "sourceEventId": "script-event:sha256:582c991d6def71bfd6340805e3d0922f355e139b0d6d16fb8cf7efe29654d7a3",
+          "speaker": "Bo",
+          "character": "Bo",
+          "exactDialogue": "3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo",
+          "performedText": "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again. [laughs] Bo",
+          "dramaticIntention": "Bo tries on mastery over the embarrassing body event by joining and repeating the rhythm himself.",
+          "subtext": "If I perform it before it happens to me, maybe it won't own me.",
+          "cadenceAndBreath": "Starts a little braced then quickly catches the game; 'POOF!' pops out clean; the descriptive phrase tumbles with delighted disbelief; end on a small involuntary laugh leaking through the word 'Bo.'",
+          "timingAndBody": "Still walking through repeated poofs; let the vocal rhythm feel body-led and slightly interrupted by bursts of movement.",
+          "archetypeId": "chaos-chant",
+          "performanceQuestions": {
+           "intention": "Can Bo sound like he's discovering he can trigger the joke on purpose?",
+           "subtext": "Look, I can do this too—maybe I'm okay.",
+           "thoughtBefore": "Maybe if I join in, it won't feel so embarrassing.",
+           "changeDuring": "Nervous participation turns into real brief giggle-release.",
+           "operativeWords": [
+            "POOF",
+            "again and again",
+            "Bo"
+           ]
+          },
+          "physicalState": "In motion, tail-poofing repeatedly, body bouncing between brace and release.",
+          "emotionalState": {
+           "entry": "nervous but trying",
+           "exit": "briefly delighted and open"
+          },
+          "listener": "Keen",
+          "bodyVoiceRelationship": "The voice rides the poof rhythm; laughter is caused by the body finding temporary relief.",
+          "previousText": "3,2,1 …",
+          "startsAtSec": 2.7,
+          "estimatedDurationSec": 3.3,
+          "pauseReasons": [
+           "Micro-break after the countdown to let the poof land physically.",
+           "Laugh interruption at the end comes from genuine release, not commentary."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "playfully",
+            "purpose": "Marks the moment Bo actively joins the game and briefly rebrands embarrassment as play."
+           },
+           {
+            "tag": "laughs",
+            "purpose": "Lets a real giggle leak through at the end so the relief feels earned and temporary."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L2-T1",
+            "label": "Primary",
+            "performedText": "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again. [laughs] Bo",
+            "primary": true,
+            "takesCount": 4
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:0c94860e8f33fe7e3313d296ad53903a9894591e60bcb8edc3ca455d6501db0b",
+          "sourceEventId": "script-event:sha256:96e953e5d905dec76cc26c93a3d8558d16e7208402083c01b0b88a4ffda462f1",
+          "speaker": "Bo",
+          "character": "Bo",
+          "exactDialogue": "I’m STILL worried about going to the to the Learning Circle.",
+          "performedText": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
+          "dramaticIntention": "Admit the game didn't solve the real fear.",
+          "subtext": "I wanted the laughing to fix this, but it didn't.",
+          "cadenceAndBreath": "After a felt silence, start low and contained; stress 'STILL'; let the doubled 'to the' happen without correction, a caught mind outrunning itself.",
+          "timingAndBody": "This follows the abrupt stop and seated fold; satchel clutched, eyes more down-path than at Keen.",
+          "archetypeId": "held-heart",
+          "performanceQuestions": {
+           "intention": "Can Bo let the truth out without trying to make it neat?",
+           "subtext": "The problem is bigger than the joke.",
+           "thoughtBefore": "That was fun for a second... and it changed nothing.",
+           "changeDuring": "He moves from hiding inside silence to finally naming the fear.",
+           "operativeWords": [
+            "STILL",
+            "Learning Circle"
+           ]
+          },
+          "physicalState": "Seated hard on the log, tucked in, gripping the satchel.",
+          "emotionalState": {
+           "entry": "collapsed inward",
+           "exit": "exposed"
+          },
+          "listener": "Keen",
+          "bodyVoiceRelationship": "The body has stopped before the voice can catch up; speech comes from compression, not projection.",
+          "previousText": "3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo",
+          "startsAtSec": 8.3,
+          "estimatedDurationSec": 2.2,
+          "pauseReasons": [
+           "Prior silence is the physical comedown after play fails."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Keeps the confession body-small and truthful after the abrupt collapse into stillness."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L3-T1",
+            "label": "Primary",
+            "performedText": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
+            "primary": true,
+            "takesCount": 4
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:aecef6799f577e77bf8713cdf2fcce3290621ce6e04682613e8bdef1f63fb0c6",
+          "sourceEventId": "script-event:sha256:66978bf46ac8880b38bb10319b1565fd282aae3e6f151e7868ffef4db9d1a817",
+          "speaker": "Bo",
+          "character": "Bo",
+          "exactDialogue": "They all know each other. Beat. But I don’t know them, and they don't know me.",
+          "performedText": "[softly] They all know each other. [sighs] Beat. But I don’t know them, and they don't know me.",
+          "dramaticIntention": "Move from naming the event he fears to naming the social loneliness underneath it.",
+          "subtext": "I'm afraid of arriving where everyone else already belongs.",
+          "cadenceAndBreath": "First sentence simple and resigned. Take a small breath-sigh before 'Beat.' Then the second thought lands more plainly than emotionally, because the clarity hurts.",
+          "timingAndBody": "Remain folded; this isn't to win comfort, it's the explanation he can't hold back anymore.",
+          "archetypeId": "held-heart",
+          "performanceQuestions": {
+           "intention": "Can Bo reveal the belonging fear without becoming melodramatic?",
+           "subtext": "I'll be the one outside the circle.",
+           "thoughtBefore": "It's not just the place—it's the people already in it.",
+           "changeDuring": "The line deepens from observation into vulnerable self-placement outside the group.",
+           "operativeWords": [
+            "all",
+            "don’t know",
+            "me"
+           ]
+          },
+          "physicalState": "Still tucked, grip beginning to shift from crush to hold.",
+          "emotionalState": {
+           "entry": "ashamed and guarded",
+           "exit": "plainly vulnerable"
+          },
+          "listener": "Keen",
+          "bodyVoiceRelationship": "The breath does the emotional work; the body stays shut while the voice finally explains why.",
+          "previousText": "I’m STILL worried about going to the to the Learning Circle.",
+          "startsAtSec": 11.3,
+          "estimatedDurationSec": 3.7,
+          "pauseReasons": [
+           "Internal beat after the first sentence marks the thought becoming more personal."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "softly",
+            "purpose": "Prevents the explanation from hardening into complaint; it stays tender and exposed."
+           },
+           {
+            "tag": "sighs",
+            "purpose": "Carries the weight of the internal beat before he admits the deeper belonging fear."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L4-T1",
+            "label": "Primary",
+            "performedText": "[softly] They all know each other. [sighs] Beat. But I don’t know them, and they don't know me.",
+            "primary": true,
+            "takesCount": 4
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:7f8c98141447cdf11f01cb53190ce512215b51fbd7d1fd8bc4c2e2ad3ee47897",
+          "sourceEventId": "script-event:sha256:8199fdf7e9061fd2151d45cbdb5712a066402f3442f3a70321d369bcd76045aa",
+          "speaker": "Aida",
+          "character": "Aida",
+          "exactDialogue": "Tricky trees.",
+          "performedText": "[deadpan] Tricky trees.",
+          "dramaticIntention": "Defuse formality and announce herself through small shared reality, not authority.",
+          "subtext": "I know this is delicate, and I'm not here to make it heavier.",
+          "cadenceAndBreath": "Dry, exact, unhurried; let the warmth appear only on the release of 'trees.'",
+          "timingAndBody": "She is brushing off the twig snag as she settles; the line should feel incidental but perfectly timed.",
+          "archetypeId": "deadpan-affection",
+          "performanceQuestions": {
+           "intention": "Can Aida make the branch mishap soften the room rather than steal it?",
+           "subtext": "We can enter this gently.",
+           "thoughtBefore": "Well, the forest made my entrance for me.",
+           "changeDuring": "The dryness melts by a degree into approachable warmth.",
+           "operativeWords": [
+            "Tricky",
+            "trees"
+           ]
+          },
+          "physicalState": "Finishing her branch-clear, lowering into a respectful seated space.",
+          "emotionalState": {
+           "entry": "matter-of-fact",
+           "exit": "gently warm"
+          },
+          "listener": "Bo",
+          "bodyVoiceRelationship": "The body absorbs the awkwardness so the voice can stay calm and unembarrassed.",
+          "previousText": "They all know each other. Beat. But I don’t know them, and they don't know me.",
+          "startsAtSec": 16.3,
+          "estimatedDurationSec": 0.8,
+          "pauseReasons": [],
+          "tagPurposes": [
+           {
+            "tag": "deadpan",
+            "purpose": "Uses dry understatement to dissolve any grand entrance and keep the pocket safe."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L5-T1",
+            "label": "Primary",
+            "performedText": "[deadpan] Tricky trees.",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:be902fee96a290543bd5a5a75ebf0fb8b3cc3928d13d15baeb378a3e5822f132",
+          "sourceEventId": "script-event:sha256:70d13052d2839feb6b2ffa083eee145f5fd9df473771bfe1893683c952c397f8",
+          "speaker": "Keen",
+          "character": "Keen",
+          "exactDialogue": "Bo, this is Aida.",
+          "performedText": "[quietly] Bo, this is Aida.",
+          "dramaticIntention": "Make the introduction small enough not to break the pocket Aida just created.",
+          "subtext": "This is safe; no performance required.",
+          "cadenceAndBreath": "Gentle and spare, no salesmanship. Tiny placement on 'Aida' to offer connection, not push it.",
+          "timingAndBody": "Keen has already settled supportively nearby; keep it from the side, without leaning in.",
+          "archetypeId": "quiet-warning",
+          "performanceQuestions": {
+           "intention": "Can Keen introduce Aida without turning the moment formal?",
+           "subtext": "You don't have to brace for this.",
+           "thoughtBefore": "Okay, now that it feels safe, I can name her.",
+           "changeDuring": "The line relaxes into the name.",
+           "operativeWords": [
+            "Bo",
+            "Aida"
+           ]
+          },
+          "physicalState": "Seated, careful, containing his earlier energy.",
+          "emotionalState": {
+           "entry": "protective",
+           "exit": "reassuring"
+          },
+          "listener": "Bo",
+          "bodyVoiceRelationship": "His quieter body lets the voice reduce pressure instead of adding social demand.",
+          "previousText": "Tricky trees.",
+          "startsAtSec": 17.6,
+          "estimatedDurationSec": 0.9,
+          "pauseReasons": [],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Keeps the introduction from sounding ceremonial or intrusive in Bo's vulnerable pocket."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L6-T1",
+            "label": "Primary",
+            "performedText": "[quietly] Bo, this is Aida.",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:8b2c9e81fd63758b13c0dce04478726f7e2d55fe761cbebdd0f9ae2e02637636",
+          "sourceEventId": "script-event:sha256:20c234a44fedda69fe881fde0d48b95987eaf765fce753af7d136c566a337c8f",
+          "speaker": "Aida",
+          "character": "Aida",
+          "exactDialogue": "You packed your bag.",
+          "performedText": "[quietly] You packed your bag.",
+          "dramaticIntention": "Notice concrete effort instead of interrogating emotion.",
+          "subtext": "I see what you already did to try to be ready.",
+          "cadenceAndBreath": "Low-pressure observation, not a question. Place 'packed' with mild respect, and 'bag' gently so the satchel becomes the bridge.",
+          "timingAndBody": "Her eyes are on the satchel, not Bo's face; respectful space remains intact.",
+          "archetypeId": "deadpan-affection",
+          "performanceQuestions": {
+           "intention": "Can Aida make being seen feel relieving rather than exposing?",
+           "subtext": "Your effort counts.",
+           "thoughtBefore": "Start with what's true and visible.",
+           "changeDuring": "The line exits with a trace of warmth that invites response.",
+           "operativeWords": [
+            "packed",
+            "bag"
+           ]
+          },
+          "physicalState": "Still, grounded, seated with room between them.",
+          "emotionalState": {
+           "entry": "observant",
+           "exit": "affirming"
+          },
+          "listener": "Bo",
+          "bodyVoiceRelationship": "Because her body doesn't crowd him, the voice can land as a quiet fact instead of pressure.",
+          "previousText": "Bo, this is Aida.",
+          "startsAtSec": 19.0,
+          "estimatedDurationSec": 0.9,
+          "pauseReasons": [],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Lets the observation feel private and non-invasive, preserving Bo's fragile openness."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L7-T1",
+            "label": "Primary",
+            "performedText": "[quietly] You packed your bag.",
+            "primary": true,
+            "takesCount": 4
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:9611831565e8bfd90992cf8e741fb46942b7fd4a640bf2495a02db950d7d0fd2",
+          "sourceEventId": "script-event:sha256:3b4393c29d77c725219e43867b2190736205313802955ae8ff0a47393a043707",
+          "speaker": "Bo",
+          "character": "Bo",
+          "exactDialogue": "Four times.",
+          "performedText": "[quietly] Four times.",
+          "dramaticIntention": "Answer quickly because he feels seen accurately and can't help revealing the extent of his effort.",
+          "subtext": "I really tried to get ready.",
+          "cadenceAndBreath": "Small, immediate, almost before he means to say it; no joke push, just truthful specificity.",
+          "timingAndBody": "First slight lift of attention toward Aida; paws still on the satchel.",
+          "archetypeId": "held-heart",
+          "performanceQuestions": {
+           "intention": "Can Bo let the number come out as vulnerable fact, not punchline?",
+           "subtext": "Please notice I was trying.",
+           "thoughtBefore": "She noticed. She really noticed.",
+           "changeDuring": "He shifts from shut-down to first cautious engagement.",
+           "operativeWords": [
+            "Four"
+           ]
+          },
+          "physicalState": "Still seated and guarded, but attention turning outward.",
+          "emotionalState": {
+           "entry": "surprised to be seen",
+           "exit": "tentatively connected"
+          },
+          "listener": "Aida",
+          "bodyVoiceRelationship": "The body remains protective, but the voice slips out more quickly now that someone named the effort.",
+          "previousText": "You packed your bag.",
+          "startsAtSec": 20.1,
+          "estimatedDurationSec": 0.5,
+          "pauseReasons": [],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Keeps the admission intimate and earnest rather than comic or boastful."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L8-T1",
+            "label": "Primary",
+            "performedText": "[quietly] Four times.",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:be1de01acc2e659b826802a3dc1e4681beb0ba20e1c17fad24523d46aab1798e",
+          "sourceEventId": "script-event:sha256:a0f0ca5baffee0f96c62b15650005baa6dca1484d5efae0be14d97d7cb021a64",
+          "speaker": "Aida",
+          "character": "Aida",
+          "exactDialogue": "I would have done five.",
+          "performedText": "[calm] I would have done five.",
+          "dramaticIntention": "Meet his effort with deadpan solidarity, not consolation.",
+          "subtext": "Scared people can be practical and still go; you're not strange to me.",
+          "cadenceAndBreath": "Matter-of-fact, dry, no wink. Let 'five' land as a simple escalation, warm on the exit.",
+          "timingAndBody": "No lean-in, no grin broadening the joke; she stays grounded so the humor shelters him.",
+          "archetypeId": "deadpan-affection",
+          "performanceQuestions": {
+           "intention": "Can Aida bond through precision rather than reassurance language?",
+           "subtext": "I belong in this feeling with you.",
+           "thoughtBefore": "Let's stand beside his effort, not above it.",
+           "changeDuring": "The line turns tiny humor into companionship.",
+           "operativeWords": [
+            "would",
+            "five"
+           ]
+          },
+          "physicalState": "Settled and still, eyes still near the satchel line before lifting lightly.",
+          "emotionalState": {
+           "entry": "dryly supportive",
+           "exit": "warmly aligned"
+          },
+          "listener": "Bo",
+          "bodyVoiceRelationship": "Her physical stillness lets the dry line feel safe instead of performative.",
+          "previousText": "Four times.",
+          "startsAtSec": 20.8,
+          "estimatedDurationSec": 1.1,
+          "pauseReasons": [],
+          "tagPurposes": [
+           {
+            "tag": "calm",
+            "purpose": "Keeps the deadpan solidarity grounded so the humor reduces pressure instead of playing for a laugh."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L9-T1",
+            "label": "Primary",
+            "performedText": "[calm] I would have done five.",
+            "primary": true,
+            "takesCount": 4
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:553ba6e9faf58e1b69ddfd808fbd85ee28c695e21129c6a8b4bbf6b00e7fc264",
+          "sourceEventId": "script-event:sha256:681e4e40424612444c8cc43115dd3f4477563e47099844acf2305b53a6ab668c",
+          "speaker": "Bo",
+          "character": "Bo",
+          "exactDialogue": "You get scared too?",
+          "performedText": "[quietly] You get scared too?",
+          "dramaticIntention": "Test whether this calm person truly shares his fear, or only understands it from outside.",
+          "subtext": "If you're scared too, maybe being scared doesn't exile me.",
+          "cadenceAndBreath": "Careful, upward, almost afraid of hoping. Keep 'too' operative and searching.",
+          "timingAndBody": "He turns a little more toward Aida here; this is the first real reach.",
+          "archetypeId": "held-heart",
+          "performanceQuestions": {
+           "intention": "Can Bo make the question a risk, not a casual follow-up?",
+           "subtext": "Tell me I'm not the only one built like this.",
+           "thoughtBefore": "Wait—do you actually know this feeling?",
+           "changeDuring": "The line opens from curiosity into hope he doesn't want to overcommit to.",
+           "operativeWords": [
+            "scared",
+            "too"
+           ]
+          },
+          "physicalState": "Less clenched, attention lifted, satchel held lower.",
+          "emotionalState": {
+           "entry": "cautious",
+           "exit": "hopeful but protected"
+          },
+          "listener": "Aida",
+          "bodyVoiceRelationship": "The body loosens just enough to let the question travel toward her.",
+          "previousText": "I would have done five.",
+          "startsAtSec": 22.5,
+          "estimatedDurationSec": 0.8,
+          "pauseReasons": [],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Preserves the tenderness of Bo's first genuine reach toward Aida."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L10-T1",
+            "label": "Primary",
+            "performedText": "[quietly] You get scared too?",
+            "primary": true,
+            "takesCount": 4
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:c5c1db3eb21229a7269bd9c6ef7f5dbc93d27deb6b865800d521f4f0b7b282b7",
+          "sourceEventId": "script-event:sha256:56e30c48f449c7a124e0bf7af50719b53ab978925a8a16c41f8e9a4951cdf9b1",
+          "speaker": "Aida",
+          "character": "Aida",
+          "exactDialogue": "Every single time.",
+          "performedText": "[calm] Every single time.",
+          "dramaticIntention": "Answer with complete simplicity so Bo doesn't have to doubt her truthfulness.",
+          "subtext": "Yes. Fully. You're not alone in this pattern.",
+          "cadenceAndBreath": "Plain and steady, with no softening apology. 'Every' and 'time' bookend certainty.",
+          "timingAndBody": "Hold still; the power is that she does not rush to soothe beyond the fact.",
+          "archetypeId": "deadpan-affection",
+          "performanceQuestions": {
+           "intention": "Can Aida make certainty feel sheltering?",
+           "subtext": "I won't flinch away from the reality of fear.",
+           "thoughtBefore": "He needs the truth, not a polished comfort line.",
+           "changeDuring": "No internal turn—its steadiness is the gift.",
+           "operativeWords": [
+            "Every",
+            "time"
+           ]
+          },
+          "physicalState": "Grounded, open, unmoving.",
+          "emotionalState": {
+           "entry": "certain",
+           "exit": "steadily warm"
+          },
+          "listener": "Bo",
+          "bodyVoiceRelationship": "Her body remains relaxed and uninsistent, making the line trustworthy.",
+          "previousText": "You get scared too?",
+          "startsAtSec": 23.5,
+          "estimatedDurationSec": 0.8,
+          "pauseReasons": [
+           "Leave a tiny absorbent space after the line for Bo to take it in."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "calm",
+            "purpose": "Makes the admission sound lived-in and trustworthy rather than dramatic or pitying."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L11-T1",
+            "label": "Primary",
+            "performedText": "[calm] Every single time.",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:54a906703699a3f26205ab3f90d22e54ad43c8d4748eefdaf5fcb4da63bcaee7",
+          "sourceEventId": "script-event:sha256:448b97275a411f283e3c4dcf5b8d1d4e2c061f662e8178b6b40caa6d74863445",
+          "speaker": "Bo",
+          "character": "Bo",
+          "exactDialogue": "But you still go?",
+          "performedText": "[softly] But you still go?",
+          "dramaticIntention": "Reach for the possibility that courage might include fear rather than erase it.",
+          "subtext": "Tell me the path can stay hard and still be possible.",
+          "cadenceAndBreath": "Gentle, immediate after the absorbent beat; 'still' carries the line's hinge.",
+          "timingAndBody": "This is more open than the previous questions, but still careful—he doesn't spring up emotionally.",
+          "archetypeId": "held-heart",
+          "performanceQuestions": {
+           "intention": "Can Bo ask for a model of living with fear rather than escaping it?",
+           "subtext": "Maybe I don't have to wait to stop being scared.",
+           "thoughtBefore": "If fear stays, what makes going possible?",
+           "changeDuring": "The question shifts him from identification toward action.",
+           "operativeWords": [
+            "still",
+            "go"
+           ]
+          },
+          "physicalState": "Seated, quieter, posture eased but unresolved.",
+          "emotionalState": {
+           "entry": "absorbing hope",
+           "exit": "seeking permission"
+          },
+          "listener": "Aida",
+          "bodyVoiceRelationship": "The body stays seated in the problem while the voice reaches toward a future action.",
+          "previousText": "Every single time.",
+          "startsAtSec": 24.9,
+          "estimatedDurationSec": 0.8,
+          "pauseReasons": [],
+          "tagPurposes": [
+           {
+            "tag": "softly",
+            "purpose": "Keeps the question vulnerable and sincere as Bo tests a new possibility."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L12-T1",
+            "label": "Primary",
+            "performedText": "[softly] But you still go?",
+            "primary": true,
+            "takesCount": 4
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:7e9be7767046bc95527e622885d012054b3e1a0580ce12e792e2480fd72eacaf",
+          "sourceEventId": "script-event:sha256:f097b5fde07d34a52eac12d9c56410a111c99db91456a48bd45b3828106b9b5a",
+          "speaker": "Aida",
+          "character": "Aida",
+          "exactDialogue": "Every single time. BEAT.",
+          "performedText": "[calm] Every single time. [exhales] BEAT.",
+          "dramaticIntention": "Confirm the answer without fanfare, then let silence do the rest of the work.",
+          "subtext": "Yes—and you don't need a bigger speech than that.",
+          "cadenceAndBreath": "Same certainty as before, maybe even simpler. Small release after the sentence, then leave the beat alive rather than empty.",
+          "timingAndBody": "Stay grounded beside him with respectful space; this lands the scene and must not sound solved.",
+          "archetypeId": "deadpan-affection",
+          "performanceQuestions": {
+           "intention": "Can Aida let repetition become reassurance through steadiness alone?",
+           "subtext": "I'm staying calm inside this truth so you can too.",
+           "thoughtBefore": "He needs the answer again, unchanged.",
+           "changeDuring": "The spoken certainty yields to shared silence.",
+           "operativeWords": [
+            "Every",
+            "single",
+            "time",
+            "BEAT"
+           ]
+          },
+          "physicalState": "Seated, still, quietly present.",
+          "emotionalState": {
+           "entry": "calm certainty",
+           "exit": "held warmth in silence"
+          },
+          "listener": "Bo",
+          "bodyVoiceRelationship": "Her still body allows the exhale and ensuing silence to become shelter rather than closure.",
+          "previousText": "But you still go?",
+          "startsAtSec": 25.9,
+          "estimatedDurationSec": 0.7,
+          "pauseReasons": [
+           "The final beat must open into held silence that carries through scene end."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "calm",
+            "purpose": "Maintains her grounded, matter-of-fact truthfulness on the repeated answer."
+           },
+           {
+            "tag": "exhales",
+            "purpose": "Releases into the final held silence so the moment lands as lived-in calm, not a buttoned lesson."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S4.SH1-L13-T1",
+            "label": "Primary",
+            "performedText": "[calm] Every single time. [exhales] BEAT.",
+            "primary": true,
+            "takesCount": 4
+           }
+          ]
+         }
+        ]
+       },
+       "packageRevision": 3,
+       "inputSignature": {
+        "stage": "voice",
+        "model": "gpt-5.4",
+        "skillHashes": {
+         "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
+        },
+        "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+        "shotContractHash": "5a963215356a206a1b74e80127c427dc230b59e30e0cf484ea37d6b5fac3aca6",
+        "dialogueHash": "6e9f76d1e67e0ccaef5e4eac8e01bb1a3108bd22bc0794282e4bebdfb0f30036",
+        "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+        "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+        "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+        "voiceCompilerVersion": "voice-director-v1",
+        "voiceIds": [
+         "TCRj5m2u9xhZHJ8h9pMv",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "SHuZ9GyczU4QEDzU4QU4",
+         "TCRj5m2u9xhZHJ8h9pMv",
+         "SHuZ9GyczU4QEDzU4QU4",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "SHuZ9GyczU4QEDzU4QU4",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "SHuZ9GyczU4QEDzU4QU4",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "SHuZ9GyczU4QEDzU4QU4"
+        ]
+       },
+       "durationCarryForward": {
+        "at": "2026-09-01T16:37:48",
+        "fromSec": 27.0,
+        "newDurationSec": 30.0,
+        "reason": "Approved direction carried across timing-only retime"
+       },
+       "outcome": "superseded-by-voice-contract-correction",
+       "decisionAt": "2026-09-01T16:53:55",
+       "reviewedBy": "Julian"
+      }
+     ]
     }
    },
    "keyframeCandidates": [
@@ -2463,310 +3259,128 @@
      "dialogueStartChanges": []
     }
    ],
-   "voPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_48fc70b3.wav",
-   "voGeneratedFrom": [
+   "voPath": null,
+   "voGeneratedFrom": null,
+   "voRawPath": null,
+   "voTimingPath": null,
+   "voPlacementPath": null,
+   "voInputSignature": null,
+   "voPackageRevision": null,
+   "voiceRejections": [
     {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:9ceeadde957ea106460445f17e189fc81fa52b67a37205ad6faf1dff388944bb",
-     "sourceEventId": "script-event:sha256:ad56dac171ba4c465968a7ccaf9d0b0c41057141c93d9683fd680c36c9454795",
-     "speaker": "Keen",
-     "text": "[excited] 3,2,1 …",
-     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "None.",
-     "compiledHash": "deded96a579a5c3de10784947b797939db32585e2a58bcc0cf0dd707279fc3a0",
-     "recipeId": "S4.SH1-L1-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "TCRj5m2u9xhZHJ8h9pMv"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d08afaf5bd292870a999f905198f72d39a0bd5341883cf90f65a4d54613c264a",
-     "sourceEventId": "script-event:sha256:582c991d6def71bfd6340805e3d0922f355e139b0d6d16fb8cf7efe29654d7a3",
-     "speaker": "Bo",
-     "text": "[playfully] 3,2,1… POOF! The tail does ‘The Thing’ again and again.",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "3,2,1 …",
-     "compiledHash": "1cd99f2994a0842c31677ae56f372675da7ce4a7b68b0592b47ed168aa503182",
-     "recipeId": "S4.SH1-L2-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:0c94860e8f33fe7e3313d296ad53903a9894591e60bcb8edc3ca455d6501db0b",
-     "sourceEventId": "script-event:sha256:96e953e5d905dec76cc26c93a3d8558d16e7208402083c01b0b88a4ffda462f1",
-     "speaker": "Bo",
-     "text": "[quietly] I’m STILL worried about going to the to the Learning Circle.",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "3,2,1… POOF! The tail does ‘The Thing’ again and again. Bo",
-     "compiledHash": "f38e88093e5bed3c9a8c3958cb1b4b6c0b212fb8d345dd74c17d0ebdba0f8643",
-     "recipeId": "S4.SH1-L3-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:aecef6799f577e77bf8713cdf2fcce3290621ce6e04682613e8bdef1f63fb0c6",
-     "sourceEventId": "script-event:sha256:66978bf46ac8880b38bb10319b1565fd282aae3e6f151e7868ffef4db9d1a817",
-     "speaker": "Bo",
-     "text": "[softly] They all know each other. [sighs] Beat. But I don’t know them, and they don't know me.",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "I’m STILL worried about going to the to the Learning Circle.",
-     "compiledHash": "aef2a9d3d1df1d2b422088346e8bfacbcd5484a225e531c55359dd878a660a4d",
-     "recipeId": "S4.SH1-L4-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:7f8c98141447cdf11f01cb53190ce512215b51fbd7d1fd8bc4c2e2ad3ee47897",
-     "sourceEventId": "script-event:sha256:8199fdf7e9061fd2151d45cbdb5712a066402f3442f3a70321d369bcd76045aa",
-     "speaker": "Aida",
-     "text": "[deadpan] Tricky trees.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "They all know each other. Beat. But I don’t know them, and they don't know me.",
-     "compiledHash": "450b86f149c5aa8f21f57c560a7ab5fe52522a8d896c52d8902e7199f7a2fa97",
-     "recipeId": "S4.SH1-L5-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:be902fee96a290543bd5a5a75ebf0fb8b3cc3928d13d15baeb378a3e5822f132",
-     "sourceEventId": "script-event:sha256:70d13052d2839feb6b2ffa083eee145f5fd9df473771bfe1893683c952c397f8",
-     "speaker": "Keen",
-     "text": "[quietly] Bo, this is Aida.",
-     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Tricky trees.",
-     "compiledHash": "7d59d314cfa1e6d5011401afc57f31c8ba9bf1baf40caa9b1b47f2798144e5f9",
-     "recipeId": "S4.SH1-L6-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "TCRj5m2u9xhZHJ8h9pMv"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:8b2c9e81fd63758b13c0dce04478726f7e2d55fe761cbebdd0f9ae2e02637636",
-     "sourceEventId": "script-event:sha256:20c234a44fedda69fe881fde0d48b95987eaf765fce753af7d136c566a337c8f",
-     "speaker": "Aida",
-     "text": "[quietly] You packed your bag.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "Bo, this is Aida.",
-     "compiledHash": "7c94611ebed0a2b2befe4a7029d470b7c69d5b4c162e6cf907dbc098d9a70e7f",
-     "recipeId": "S4.SH1-L7-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:9611831565e8bfd90992cf8e741fb46942b7fd4a640bf2495a02db950d7d0fd2",
-     "sourceEventId": "script-event:sha256:3b4393c29d77c725219e43867b2190736205313802955ae8ff0a47393a043707",
-     "speaker": "Bo",
-     "text": "[quietly] Four times.",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "You packed your bag.",
-     "compiledHash": "16afeccc28c2d3775ff2844692ba9309208de4b11a1ecd07e6b6b014a6839f1a",
-     "recipeId": "S4.SH1-L8-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:be1de01acc2e659b826802a3dc1e4681beb0ba20e1c17fad24523d46aab1798e",
-     "sourceEventId": "script-event:sha256:a0f0ca5baffee0f96c62b15650005baa6dca1484d5efae0be14d97d7cb021a64",
-     "speaker": "Aida",
-     "text": "[calm] I would have done five.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "Four times.",
-     "compiledHash": "8c47aee4da8252fab568a553cca385b22c88d226cd01e6eaee6811e758f35bd5",
-     "recipeId": "S4.SH1-L9-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:553ba6e9faf58e1b69ddfd808fbd85ee28c695e21129c6a8b4bbf6b00e7fc264",
-     "sourceEventId": "script-event:sha256:681e4e40424612444c8cc43115dd3f4477563e47099844acf2305b53a6ab668c",
-     "speaker": "Bo",
-     "text": "[quietly] You get scared too?",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "I would have done five.",
-     "compiledHash": "47d2cbb5aeff27c02585a009e3384e494fea366487531e0b841421d2c7b08dca",
-     "recipeId": "S4.SH1-L10-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c5c1db3eb21229a7269bd9c6ef7f5dbc93d27deb6b865800d521f4f0b7b282b7",
-     "sourceEventId": "script-event:sha256:56e30c48f449c7a124e0bf7af50719b53ab978925a8a16c41f8e9a4951cdf9b1",
-     "speaker": "Aida",
-     "text": "[calm] Every single time.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "You get scared too?",
-     "compiledHash": "02d929e5bfe5444a6e060654d7228bf7139288d8a8411f5119954661bf210c1e",
-     "recipeId": "S4.SH1-L11-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:54a906703699a3f26205ab3f90d22e54ad43c8d4748eefdaf5fcb4da63bcaee7",
-     "sourceEventId": "script-event:sha256:448b97275a411f283e3c4dcf5b8d1d4e2c061f662e8178b6b40caa6d74863445",
-     "speaker": "Bo",
-     "text": "[softly] But you still go?",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Every single time.",
-     "compiledHash": "1421718468ee04acb980303b9207ad7f4ba7b16b352be54efb2f1a7ecb3b941e",
-     "recipeId": "S4.SH1-L12-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:7e9be7767046bc95527e622885d012054b3e1a0580ce12e792e2480fd72eacaf",
-     "sourceEventId": "script-event:sha256:f097b5fde07d34a52eac12d9c56410a111c99db91456a48bd45b3828106b9b5a",
-     "speaker": "Aida",
-     "text": "[calm] Every single time. [exhales] BEAT.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "But you still go?",
-     "compiledHash": "57bac3e046c8236802804433d427abcdc1ba4e5d88ccefe5c9418dfe611b7b6b",
-     "recipeId": "S4.SH1-L13-T1",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
+     "outcome": "rejected",
+     "rejectedAt": "2026-09-01T16:53:07",
+     "reason": "Rejected after human review: Bo and Keen must share the countdown; screenplay action and the word Bo were carried into speech; Aida is too loud and interrogative; her five-line must normalize Bo rather than compete; the final questions and answers need short truthful beats.",
+     "reviewedBy": "Julian",
+     "rejectedFile": "media/archive/shots_rejected/Ep2_S4.SH1_voice_20260901T165307/Ep2_S4.SH1_vo_candidate_48fc70b3.wav",
+     "timingBundle": {
+      "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8de25da7.mp3",
+      "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8de25da7.mp3.dialogue.json",
+      "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_48fc70b3.wav.timing.json"
+     }
     }
    ],
-   "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8de25da7.mp3",
-   "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8de25da7.mp3.dialogue.json",
-   "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_48fc70b3.wav.timing.json",
-   "voInputSignature": {
-    "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
-    "dialogueHash": "05db32e0ddc91312fdfb02d3a9355e2982a5418cdc0d9228ac336e4a009d68c8",
-    "performanceHash": "8e084946f2b4a0d7c0ce0c483583c555c5d4c9a490eb8f4a499739288d526318",
-    "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
-    "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
-    "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
-    "voiceCompilerVersion": "voice-director-v1",
-    "voiceIds": [
-     "TCRj5m2u9xhZHJ8h9pMv",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "SHuZ9GyczU4QEDzU4QU4",
-     "TCRj5m2u9xhZHJ8h9pMv",
-     "SHuZ9GyczU4QEDzU4QU4",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "SHuZ9GyczU4QEDzU4QU4",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "SHuZ9GyczU4QEDzU4QU4",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "SHuZ9GyczU4QEDzU4QU4"
-    ]
+   "voiceApproval": null,
+   "voicePrevious": null,
+   "workingVoice": {
+    "lines": [
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:b66279148d0115bc657e049b6f721801e30d8769f3d6ae5ab5b5d4a660463ca4",
+      "sourceEventId": "script-event:sha256:56d49e7a2047d0d4d8d9d052fb9791f6a19787453b3f125db12a3c12c0d517b6",
+      "speaker": "Bo/Keen",
+      "text": "[excited] 3, 2, 1 …"
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:82738998fafc3c0cdbf3b9ded31acb5ace40b9e3a7c47dc4d2625c7842081369",
+      "sourceEventId": "script-event:sha256:6132391c5744a5fcadd3ddd7fe46893f15358e91763abbc704482b1a1fd4c61e",
+      "speaker": "Bo",
+      "text": "[quietly] I’m STILL worried about going to the Learning Circle."
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:622751e7ca822c2a3b3c1b981c1da34b106f404192f8151d6523c30b4e5dbb2e",
+      "sourceEventId": "script-event:sha256:7379df0e1d4d7508a8e3de2f9033db0ebb1af0ffc6f6d3688b5f60fce23bb76e",
+      "speaker": "Bo",
+      "text": "[nervous] They all know each other."
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b3ba475a2c72a5569dbd3adbde06977107885371be77f1f89647e3dbc45d9c0",
+      "sourceEventId": "script-event:sha256:68de2b0038b27e674df5c06361be5f2efa130b17ae6692a8ece2d95786e414e5",
+      "speaker": "Bo",
+      "text": "[quietly] But I don’t know them, and they don't know me."
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:e746fed8302017a81926552953c009d5e3f2b685367f676b10fdd6c6506f5134",
+      "sourceEventId": "script-event:sha256:f382562fc42b14c13b7a1ee85f74038b3a7b875bedf50cd1312e0e3e80145291",
+      "speaker": "Aida",
+      "text": "[softly] Tricky trees."
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:fd9e66270fd5e8b09f547dd0bc3527e2d280d6673c9f612874cf34522a1e2870",
+      "sourceEventId": "script-event:sha256:2dbd391ab3242934894aa0594ec95c9d0a4eb25562b98b92da7c692d001b1155",
+      "speaker": "Keen",
+      "text": "[quietly] Bo, this is Aida."
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:15b364030922a20dc9b0d90f4f01fef7eee753f85909872f64632cb68ae58fb0",
+      "sourceEventId": "script-event:sha256:7d7ca19fc0fe2602f92c0b0e203b5d51d15b84049defe33336f1ae9dcf9bc3c9",
+      "speaker": "Aida",
+      "text": "[softly] You packed your bag."
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:e827b6904e5bc726b074c2a33279f41089d5a533ea212e40a36824fccf69a503",
+      "sourceEventId": "script-event:sha256:cf43657bf9952da46322662111834db5a77c27980bdff3672a8b8e1bb9285edf",
+      "speaker": "Bo",
+      "text": "[quietly] Four times."
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:b48ec0ea4adea59def0f20db7ce2aca0617046fbb1e51b748003c678aa3df3a9",
+      "sourceEventId": "script-event:sha256:ef0959512b69eb02b468e5f66c026fc7b3463d51fcbb3801b9f919076ac6eb9a",
+      "speaker": "Aida",
+      "text": "[softly] [warmly] I would have done five."
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:dbbd4a6ba7fdece7005487575876c45ba07ed4a5714186e4bb28b9a2f36a0b7f",
+      "sourceEventId": "script-event:sha256:b847842b44111af6387f8f484894b73cdd0548f990a95a1430807129a0e4896d",
+      "speaker": "Bo",
+      "text": "[curious] You get scared too?"
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:deefbd8cd3c21a1e332b33661899f2864fd5ec64b290a9139ff88f2016dc5d61",
+      "sourceEventId": "script-event:sha256:a8a48370b98487161c7cef31b4b45726d7947d266e52741cab3634f0c29e6c82",
+      "speaker": "Aida",
+      "text": "[softly] Every single time."
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:d4163d7ade24be11aeecbd2ba2a3dd0d7776e8bbc7b3f9111b6e3bf231ba0ceb",
+      "sourceEventId": "script-event:sha256:04674705c1603ac53bb6bb285db7b28f6197a8f084643584208263525a589243",
+      "speaker": "Bo",
+      "text": "[curious] But you still go?"
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:335059e16a3614af54b69cdda19312b8e6d1826443f341c222ed071db524fbf9",
+      "sourceEventId": "script-event:sha256:797e7a517f9a600df1fd6da53fdc00ef5f46cac12e7296c43cbd362ea5218b73",
+      "speaker": "Aida",
+      "text": "[quietly] Every single time."
+     }
+    ],
+    "savedAt": "2026-09-01T16:53:55",
+    "savedBy": "Julian",
+    "reason": "scoped-human-performance-correction"
    },
-   "voPackageRevision": 3
+   "voiceStaleDueToScriptCorrection": {
+    "at": "2026-09-01T16:53:55",
+    "scriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48",
+    "reason": "human-directed-shot-voice-contract-correction"
+   },
+   "approval": null,
+   "approvedCandidate": null,
+   "candidatePaths": null,
+   "batch": null,
+   "batchId": null,
+   "pendingSpendAuth": null,
+   "lastBatchBinding": null,
+   "disclosure": null,
+   "firedAt": null
   }
  ],
  "validation": {
@@ -7934,5 +8548,32 @@
    "S4.SH1"
   ],
   "rule": "full compiled shot + own creative card hash must be unchanged"
- }
+ },
+ "scopedAmendments": [
+  {
+   "kind": "voice-contract-correction",
+   "scene": "4",
+   "shotId": "S4.SH1",
+   "scriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48",
+   "previousScriptVersionId": "sha256:9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
+   "baseScriptVersionId": "sha256:9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
+   "storyboardPath": "cb-output/creative/amendments/Ep2_S4.SH1_c8c4dce13da3_voice.json",
+   "storyboardSha256": "0edc3fd10539fa4366fde9f15369b1102d976223376d6b1c5cde6837480f27aa",
+   "sceneLookContentHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+   "sceneLookPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_ff9d9499.png",
+   "preservedStages": [
+    "direction",
+    "scenelook",
+    "keyframe"
+   ],
+   "invalidatedStages": [
+    "voice",
+    "animation",
+    "continuity",
+    "final"
+   ],
+   "approvedAt": "2026-09-01T16:53:55",
+   "approvedBy": "Julian"
+  }
+ ]
 }

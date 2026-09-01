@@ -207,6 +207,8 @@ class DialogueOccurrence(BaseModel):
     sourceBeatId: str = Field(min_length=1)
     speaker: str = Field(min_length=1)
     exactText: str = Field(min_length=1)
+    voiceTreatment: Literal["single_voice", "group_chorus"] = "single_voice"
+    chorusMembers: List[str] = Field(default_factory=list)
 
 
 class BeatEmotionContract(BaseModel):
@@ -953,6 +955,8 @@ def _locked_dialogue(beats):
                     "sourceBeatId": b["sourceBeatId"],
                     "speaker": c["speaker"],
                     "exactText": c["exactText"],
+                    "voiceTreatment": c.get("voiceTreatment", "single_voice"),
+                    "chorusMembers": c.get("chorusMembers") or [],
                 })
     return out
 
@@ -966,6 +970,8 @@ def _beat_dialogue_occurrences(source_beat):
         sourceBeatId=source_beat["sourceBeatId"],
         speaker=cut["speaker"],
         exactText=cut["exactText"],
+        voiceTreatment=cut.get("voiceTreatment", "single_voice"),
+        chorusMembers=cut.get("chorusMembers") or [],
     ) for cut in (source_beat.get("cuts") or []) if cut.get("sourceType") == "dialogue"]
 
 

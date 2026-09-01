@@ -82,6 +82,22 @@ def test_dialogue_synthesis_allows_typographic_punctuation_variants():
     assert result["ready"] is True
 
 
+def test_dialogue_synthesis_accepts_ordered_repeated_script_line():
+    prompt = (
+        "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, "
+        "delivery, mouth timing and silence. No alternative performance is permitted. "
+        "Listeners remain silent and closed-mouth. No narration; no extra words; "
+        "no subtitles or captions. " + C.SINGLE_INSTANCE_DIALOGUE_LOCK + "\n"
+        "Dialogue placement: Aida, steady: {Every single time.}\n"
+        "Dialogue placement: Aida, affirming: {Every single time.}"
+    )
+    result = C.validate_dialogue_synthesis(prompt, [
+        {"speaker": "Aida", "text": "Every single time."},
+        {"speaker": "Aida", "text": "Every single time."},
+    ])
+    assert result["ready"] is True
+
+
 def test_dialogue_synthesis_refuses_a_second_generated_voice_contract():
     prompt = (
         "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, "

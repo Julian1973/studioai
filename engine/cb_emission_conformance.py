@@ -290,16 +290,26 @@ def validate_dialogue_synthesis(prompt, dialogue_lines):
         errors.append("dialogue authority is missing 'no extra words'")
 
     expected = []
+    expected_counts = {}
+    for line in lines:
+        key = tuple(dialogue_words(locked_dialogue_text(line)))
+        expected_counts[key] = expected_counts.get(key, 0) + 1
+    counted = set()
     for index, line in enumerate(lines):
         speaker = normalize_prose(line.get("speaker"))
         exact = locked_dialogue_text(line)
         marker = "{" + exact + "}"
         expected.append(marker)
         exact_count = text.count(marker)
-        matches = [marker] if exact_count == 1 else marker_word_matches(text, exact)
-        if len(matches) != 1:
+        matches = ([marker] * exact_count if exact_count else
+                   marker_word_matches(text, exact))
+        dialogue_key = tuple(dialogue_words(exact))
+        if (dialogue_key not in counted and
+                len(matches) != expected_counts[dialogue_key]):
             errors.append(
-                f"dialogue line {index + 1} must appear exactly once as {marker!r}")
+                f"dialogue line {index + 1} must appear exactly "
+                f"{expected_counts[dialogue_key]} time(s) as {marker!r}")
+        counted.add(dialogue_key)
         marker_pattern = re.escape(matches[0]) if matches else re.escape(marker)
         placement = re.compile(
             rf"(?:Dialogue placement|Spoken action):\s*{re.escape(speaker)}"

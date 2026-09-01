@@ -962,7 +962,7 @@
     "4.B4",
     "4.B5"
    ],
-   "status": "designed",
+   "status": "candidates-pending",
    "shotRole": "coverage",
    "establishJob": null,
    "buttonChange": null,
@@ -3447,6 +3447,546 @@
        "reviewedBy": "Julian"
       }
      ]
+    },
+    "animation": {
+     "approved": {
+      "department": "Animation",
+      "worker": "Seedance Production Director",
+      "skill": "skills/seedance-production-director/SKILL.md",
+      "model": "gpt-5.4",
+      "preparedAt": "2026-09-01T19:43:21",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "160cafc526bc012d7e61eded6ed6bc25ea523659b782c2996f8d784ef66b0abf",
+      "output": {
+       "shotId": "S4.SH1",
+       "durationSec": 30,
+       "taskMode": "reference-to-video",
+       "pacingMode": "timestamp",
+       "generationGoal": "In one accumulating forest-path unit, Bo rides a playful moving game into brief relief, abruptly folds into belonging fear, and becomes cautiously more open when Aida joins the pocket without crowding him.",
+       "deliveryPlan": "Use three motivated internal views inside one continuous path-pocket progression so the audience feels play drain into stuckness without a reset. The camera begins already traveling at Bo height with the opening frame state, spends its first job on shared motion and poof rhythm, then stores the stop in a dedicated seated view where travel dies with Bo, then widens and settles just enough to discover Aida through the existing branch veil and land on the final held triangle with the path still readable behind Bo. Dialogue remains entirely owned by @Audio1.",
+       "creativeTranslation": {
+        "interpretation": {
+         "jokeOrAche": "The ache is that Bo can borrow a game long enough to feel normal for a few seconds, but he cannot outrun the bigger fear of arriving where everyone already belongs.",
+         "mechanism": "A moving rhythm creates temporary bodily relief, then the same body cuts off all forward motion at once; Aida changes the meaning not by fixing him but by entering awkwardly, noticing the packed bag, and calmly staying present until fear and participation can coexist.",
+         "statusBefore": "Bo is in motion beside Keen, half-defended and using the countdown game to stay ahead of embarrassment.",
+         "statusAfter": "Bo is still on the path and still scared, but he is no longer collapsed shut; he remains present with Keen and Aida in a quieter shared pocket.",
+         "audienceProgression": [
+          "This playful moving countdown might actually carry Bo through the moment.",
+          "Oh, the relief runs out instantly; the real fear is belonging, not the tail-poof.",
+          "Aida does not solve the fear, but she makes staying with it feel possible."
+         ],
+         "emotionalHeart": "Being accurately seen for the effort you already made can loosen fear without erasing it."
+        },
+        "gagClocks": [
+         {
+          "beatCode": "4.B1",
+          "mode": "SMALL",
+          "setup": "Keen turns the feared tail-poof into a simple countdown game while they move along the path.",
+          "anticipation": "His body prepares for the next poof before it happens, and he starts choosing the rhythm instead of merely surviving it.",
+          "impact": "Bo starts triggering and repeating it as play, so the thing he dreads becomes briefly funny and shared.",
+          "reaction": "The giggle leaks out with real surprise and brief pride while his walk keeps carrying him forward.",
+          "recoveryHold": "Let the tiny aftermath of the poof and giggle register before pushing onward.",
+          "recoveryHoldSec": 1.0,
+          "button": "Bo's own giggle confirms the shift from humiliation to game.",
+          "retroactive": false,
+          "providerAction": "Bo and Keen keep walking in sync as Bo deliberately triggers repeated tail-poofs, loosens into brief giggles, and stays in forward motion with the path visible ahead."
+         },
+         {
+          "beatCode": "4.B3",
+          "mode": "SMALL",
+          "setup": "Aida enters a tender, vulnerable moment from the branchy path space rather than being ceremonially presented.",
+          "anticipation": "A steady elder arrival could turn formal or solemn.",
+          "impact": "The branches betray that formality first, and Aida answers the snag with a dry little 'Tricky trees.' before quietly noticing Bo's overpacked effort.",
+          "reaction": "Give the branch awkwardness and Bo's 'Four times.' a small beat so the warmth can land without rushing into advice.",
+          "recoveryHold": "Give the branch awkwardness and Bo's 'Four times.' a small beat so the warmth can land without rushing into advice.",
+          "recoveryHoldSec": 1.0,
+          "button": "'I would have done five.'",
+          "retroactive": false,
+          "providerAction": "Aida is discovered through the already-present branches, slightly snagged and leaf-marked; she notices Bo's packed bag, shares the small joke, answers that she gets scared every single time too, and the group holds the silence while Bo stays present with the path."
+         }
+        ],
+        "generationDesign": {
+         "packagingDecision": "single-unit",
+         "completeGagArcCount": 2,
+         "densityJudgement": "Compact but dialogue-rich action unit with travel, abrupt stop, and a reveal/discovery beat that need protected internal view changes without breaking the unbroken emotional path.",
+         "splitOrNonSplitRationale": "Do not split: the scene's meaning depends on the audience feeling relief drain away and Aida being discovered inside the same lived geography. Complexity is protected by three internal shots within one continuous unit rather than by adding more beats or resetting the staging.",
+         "handoffState": "Bo seated on the fallen log with branches framing him in the foreground and the path still receding behind him, satchel held but no longer crushed tight, his gaze resting into the space ahead while Aida sits steady beside him."
+        }
+       },
+       "dramaticBeat": "Bo borrows Keen's playful countdown to outrun embarrassment, fails to keep outrunning the deeper fear, and becomes cautiously more open when Aida quietly recognizes his preparation instead of his weakness.",
+       "audienceBefore": "Expecting a playful forest-path beat that may keep Bo buoyant.",
+       "audienceAfter": "Feeling that Bo is still scared but less alone, with the path pressure unchanged and the emotional pocket gently opened.",
+       "beatOwner": "4.B4",
+       "performanceFreedom": "Seedance may vary the exact cadence of Bo's repeated poofs, the size of the giggle leaks, Keen's tiny settling business, Aida's twig-clearing details, the exact pace of Bo's turn toward her, and the degree of final paw release, so long as the opening relief is real but temporary, the stop is sudden, Aida never crowds, and the landing remains unresolved rather than cured.",
+       "performanceArc": "Braced play becomes genuine brief release, then an abrupt collapse into belonging fear, then a small but real reopening through accurate recognition and shared stillness.",
+       "physicalCauseAndEffect": "The synchronized walking rhythm lets Bo prepare for and repeat the tail-poof as chosen play. Once that momentum expires, he stops instantly, gravity drops him onto the fallen log, and his satchel becomes the object that receives the full clamp of his fear. Aida's snag in the branches softens her entrance and keeps it unannounced; her seated distance and attention to the bag rather than Bo's face reduce pressure, allowing Bo's body to uncoil slightly without leaving the path pocket.",
+       "cameraBehaviour": "A continuous-feeling path-pocket grammar expressed through three motivated internal shots: lateral traveling beside Bo at his height, then a stored-energy settle as travel dies with his stop into a seated composition, then a gentle widening/reframing to reveal Aida through the existing branch veil and hold the final three-body arrangement with the path readable behind Bo.",
+       "timingAndRhythm": "Brisk counted locomotion and poof rhythm, one hard brake into silence, then unhurried discovery and conversational breathing with one clearly protected absorbent beat before the last hopeful turn and a final held silence.",
+       "landingBreath": "After Aida's last reassurance, let the trio remain still long enough for Bo's slight release, the path pressure, and the leaf-wind to register without anyone breaking the pocket.",
+       "directionDensity": "guided",
+       "precisionReasons": [
+        "Travel action requires multiple internal shots under R8 while preserving one unbroken emotional path.",
+        "The camera travel must visibly die with Bo's stop; resetting or floating through it would break the scene's core meaning.",
+        "The final composition must preserve the path ahead behind Bo, Aida's respectful spacing, and the exact continuity landing for the next unit."
+       ],
+       "shotPlan": [
+        {
+         "shotNumber": 1,
+         "purpose": "Carry the opening moving game and establish that the playful rhythm gives Bo real but temporary bodily relief while the path ahead remains active pressure.",
+         "framingLensAndCamera": "Shot 1: medium traveling two-shot at Bo height, useful 40mm feel, moving laterally with Bo and Keen along the branch-veiled path from the approved opening frame state.",
+         "causalAction": "Begin already in motion beside Bo and Keen as the shared countdown lands. Bo braces, then deliberately triggers repeated tail-poofs while continuing to walk; Keen keeps the shared rhythm light and synchronized rather than demonstrative.",
+         "observablePerformance": "Bo's reaction shifts from prepared flinch to chosen participation; brief giggle leaks surprise him while his steps keep going. Keen reads playful and supportive, never taking ownership away from Bo.",
+         "compositionLightAndMaterials": "Branch leaves frame the upper foreground, the path slips behind them in dappled depth, warm daylight filters from camera-right rear through the canopy, moss and crystal edges catch soft highlights, and Bo's satchel leather gives small moving specular glints with each step.",
+         "landingImage": "Bo is still moving, looser and giggling, with the path ahead readable beyond him and enough forward momentum stored to make the stop matter.",
+         "dialogueLineIndexes": [
+          1
+         ],
+         "dialogueDirections": [
+          "Together, playful and perfectly synchronized; one shared countdown only."
+         ],
+         "holdAfterDialogue": false,
+         "gagBeatIds": [
+          "4.B1"
+         ]
+        },
+        {
+         "shotNumber": 2,
+         "purpose": "Store and release the stop so the audience feels the playful motion die inside the same geography and Bo's belonging fear take over the frame.",
+         "framingLensAndCamera": "Shot 2: medium-to-medium-close single favoring Bo from front-right quarter at seated height, useful 50mm feel; the traveling camera decelerates with him and settles without a reset as he drops to the log.",
+         "causalAction": "As the laughter runs out, Bo stops dead, drops onto the fallen log, pulls the satchel tight into both paws, and folds inward. Keen comes down beside him with breathing room, supportive but not touching. The path stays open behind Bo.",
+         "observablePerformance": "Bo's body compresses before the full thought is out; his gaze stays down the path more than toward Keen, and the satchel takes the force of his worry. Keen shifts from propulsion to careful presence and leaves emotional space with Bo.",
+         "compositionLightAndMaterials": "The fallen log anchors the lower frame, branch veil remains in soft foreground, daylight grows slightly warmer and more enclosed in the pocket, leaf shadow mottles Bo's fur and satchel, and the worn leather bag creases visibly under his tightened grip.",
+         "landingImage": "Bo sits compressed on the log, clutching the satchel and staring down the path, with Keen beside but not crowding him.",
+         "dialogueLineIndexes": [
+          2,
+          3,
+          4,
+          5,
+          6
+         ],
+         "dialogueDirections": [
+          "Quiet admission after the play stops; worry catches in the middle without rushing.",
+          "Small and certain, looking down the path.",
+          "After a real beat, the private fear comes out plainly.",
+          "Soft, lightly self-aware arrival; never loud.",
+          "Gentle introduction that leaves the emotional space with Bo."
+         ],
+         "holdAfterDialogue": true,
+         "gagBeatIds": []
+        },
+        {
+         "shotNumber": 3,
+         "purpose": "Discover Aida inside the same branch pocket, let her lower the pressure through concrete notice and stillness, and land on the unresolved but gentler three-body hold.",
+         "framingLensAndCamera": "Shot 3: medium three-shot that begins as a reframed seated composition and gently widens/pivots toward the branch veil on camera-left before settling into the final triangular arrangement, useful 45mm feel.",
+         "causalAction": "Rustle in the existing branches reveals Aida descending slightly snagged by twigs; she brushes herself clear, leaves a leaf behind one ear, and sits beside Bo with respectful space. Her attention drops to the satchel first, not his face. Bo answers, turns toward her little by little, and loosens slightly as the conversation continues. Keen stays nearby, folded in supportively.",
+         "observablePerformance": "Aida is soft, lightly self-aware on arrival, then grounded and matter-of-fact. Bo's embarrassment becomes curiosity and tentative hope without springing open. Keen remains quiet emotional scaffolding rather than an interrupter.",
+         "compositionLightAndMaterials": "The branch veil parts just enough to reveal Aida through layered leaves, soft back-warmth catches her hair and robe surfaces, leaf movement continues around the trio, the path remains visible behind Bo as background pressure, and the satchel sits low in his paws with slightly less crushed deformation by the end.",
+         "landingImage": "Bo remains seated in the branch-veiled pocket on the log, center-right foreground with the satchel held low; Keen stays left-midground with breathing room; Aida sits center-left midground facing Bo, leaf behind her ear, while the path recedes behind him under dappled moving light.",
+         "dialogueLineIndexes": [
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+         ],
+         "dialogueDirections": [
+          "Low, empathetic recognition with a settled downward ending; it is not a question.",
+          "A small honest answer, slightly embarrassed.",
+          "Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing.",
+          "Genuine surprised question; hope enters because he feels less alone.",
+          "Quiet agreement, then leave a short clean gap.",
+          "Hopeful follow-up question after the gap; do not flatten the question mark.",
+          "Quiet certainty and solidarity, followed by a held silent beat."
+         ],
+         "holdAfterDialogue": true,
+         "gagBeatIds": [
+          "4.B3"
+         ]
+        }
+       ],
+       "timingBeats": [
+        {
+         "type": "travel",
+         "count": 1,
+         "source": "Opening lateral walk beside Bo and Keen through the branch-veiled path pocket."
+        },
+        {
+         "type": "load_release",
+         "count": 1,
+         "source": "Bo's prepared tail-poof rhythm opening into giggle relief while still walking."
+        },
+        {
+         "type": "settle",
+         "count": 1,
+         "source": "Camera travel and body motion die together as Bo stops and drops onto the log."
+        },
+        {
+         "type": "reaction",
+         "count": 1,
+         "source": "Protected silence after Bo's admissions while Keen stays nearby without crowding."
+        },
+        {
+         "type": "reveal",
+         "count": 1,
+         "source": "Aida discovered through the already-present branch veil with slight twig snag and leaf mark."
+        },
+        {
+         "type": "business",
+         "count": 1,
+         "source": "Aida brushes herself clear and sits with respectful space before noticing the satchel."
+        },
+        {
+         "type": "reaction",
+         "count": 1,
+         "source": "Bo's gradual turn toward Aida and slight easing after her solidarity."
+        }
+       ],
+       "witnessStagingSides": [
+        "Keen stays to Bo's left with breathing room and never leans onto him during the seated section.",
+        "Aida joins on Bo's left side but leaves visible respectful space, fixing on the satchel before meeting Bo emotionally."
+       ],
+       "stagePlan": [
+        {
+         "stageNumber": 1,
+         "beatIds": [
+          "4.B1"
+         ],
+         "purpose": "Playful moving relief",
+         "startSec": 0.0,
+         "endSec": 5.0,
+         "initialOrCarriedState": "At Bo's height on the branch-veiled forest path, the camera is already travelling beside Bo and Keen from the approved opening frame state, with dappled depth and the path slipping past behind them.",
+         "cause": "Keen and Bo are already moving together, and the shared countdown game is about to peak into the tail-poof rhythm.",
+         "primaryEvent": "Keen's countdown pulls Bo into triggering the tail-poof on purpose, and Bo joins fully enough to giggle while they keep moving down the path.",
+         "observableEndState": "Bo is still moving, looser and giggling, with the path ahead visible beyond him.",
+         "emotionOrCameraAnalysis": "The moving side-by-side camera lets the audience feel that the game genuinely works for a moment; keeping the path visible behind and beyond Bo prevents the relief from becoming a detached comedy reset."
+        },
+        {
+         "stageNumber": 2,
+         "beatIds": [
+          "4.B2"
+         ],
+         "purpose": "Abrupt stop into belonging fear",
+         "startSec": 5.0,
+         "endSec": 15.0,
+         "initialOrCarriedState": "Bo is still in forward motion, briefly loosened by the repeated poofs, with stored travel energy carrying both characters through the same path pocket.",
+         "cause": "The borrowed rhythm runs out, exposing the larger fear the play was covering.",
+         "primaryEvent": "Bo suddenly stops, sits on the fallen log, grips his satchel, and admits he is still worried because everyone else already knows each other and he does not.",
+         "observableEndState": "Bo sits compressed on the log, clutching the satchel and staring down the path, with Keen beside but not crowding him.",
+         "emotionOrCameraAnalysis": "This stage needs the camera's travel to die exactly with Bo's stop so the silence lands physically. Holding Bo in a seated front-right quarter composition keeps the open path behind him as the visual shape of the pressure he is describing."
+        },
+        {
+         "stageNumber": 3,
+         "beatIds": [
+          "4.B3",
+          "4.B4",
+          "4.B5"
+         ],
+         "purpose": "Aida's quiet discovery and the gentler landing",
+         "startSec": 15.0,
+         "endSec": 30.0,
+         "initialOrCarriedState": "Bo and Keen remain seated in the same branch-veiled pocket, with Bo folded around the satchel and the path still open behind him.",
+         "cause": "A rustle in the already-present branches introduces a new presence without breaking the geography or the silence of the pocket.",
+         "primaryEvent": "Aida is discovered through the already-present branches, slightly snagged and leaf-marked; she notices Bo's packed bag, shares the small joke, answers that she gets scared every single time too, and the group holds the silence while Bo stays present with the path.",
+         "observableEndState": "Bo remains seated with the path ahead unchanged, but his posture is no longer collapsed shut as the wind moves gently through the leaves.",
+         "emotionOrCameraAnalysis": "The reveal works because Aida enters through the same lived space rather than being announced by a cut. Her stillness and attention to the satchel lower pressure, and the final held three-body frame lets the audience register that the world is unchanged while Bo's posture is not."
+        }
+       ],
+       "geography": [
+        "Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path.",
+        "Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis.",
+        "The open path continues past them and stays readable behind Bo through center-right background depth.",
+        "A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops.",
+        "Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces.",
+        "Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing."
+       ],
+       "attributeOwnership": [
+        "Bo owns the tail-poof action, the satchel, the abrupt stop, the folded sit, and the gradual paw release; Keen and Aida must not inherit those actions.",
+        "Keen owns the opening shared countdown with Bo and the gentle spoken introduction; he does not crowd, touch, or take emotional focus after Bo stops.",
+        "Aida owns the branch-snagged entrance, twig-clearing business, leaf-behind-ear mark, seated respectful distance, and the first notice of the satchel.",
+        "The satchel remains Bo's held prop throughout and is never taken by Keen or Aida."
+       ],
+       "environmentContract": [
+        "The unit begins in active lateral travel through dappled forest light with branch veils and crystal-studded ground details already established.",
+        "During the stop, the same geography compresses around the fallen log without relocating the characters or losing the readable path behind Bo.",
+        "Branches on camera-left part only enough to reveal Aida's descent from the already-present veil; no new route or hidden clearing appears.",
+        "Leaf-wind continues gently through the seated landing, with the path ahead unchanged and visible to scene end."
+       ],
+       "motionVocabulary": [
+        {
+         "character": "Fuzzby",
+         "belongs": [
+          "careens",
+          "overcommits",
+          "barrels",
+          "bounces",
+          "improvises",
+          "presents",
+          "rockets"
+         ],
+         "banned": [
+          "slinks",
+          "hesitates",
+          "glides",
+          "sulks",
+          "waits",
+          "creeps"
+         ]
+        },
+        {
+         "character": "Zenny",
+         "belongs": [
+          "glides",
+          "observes",
+          "settles",
+          "arches",
+          "softens",
+          "levels"
+         ],
+         "banned": [
+          "scrambles",
+          "flails",
+          "rushes",
+          "panics",
+          "showboats"
+         ]
+        }
+       ],
+       "referenceContract": [
+        {
+         "assetTag": "@图1",
+         "role": "opening_frame",
+         "controls": "the exact first-frame composition and carried visible state from the approved opening keyframe",
+         "scope": "continuity"
+        },
+        {
+         "assetTag": "@图2",
+         "role": "character_identity",
+         "controls": "Aida identity, proportions, scale and approved wearable state",
+         "scope": "canon"
+        },
+        {
+         "assetTag": "@图3",
+         "role": "character_identity",
+         "controls": "Keen identity, proportions, scale and approved wearable state",
+         "scope": "canon"
+        },
+        {
+         "assetTag": "@图4",
+         "role": "character_identity",
+         "controls": "Bo identity, proportions, scale and approved wearable state",
+         "scope": "canon"
+        },
+        {
+         "assetTag": "@图5",
+         "role": "prop",
+         "controls": "the exact satchel design, materials, construction, scale and approved carried state",
+         "scope": "continuity"
+        },
+        {
+         "assetTag": "@图6",
+         "role": "location",
+         "controls": "the approved scene geography, world, light, materials and atmosphere",
+         "scope": "episode"
+        },
+        {
+         "assetTag": "@Audio1",
+         "role": "audio",
+         "controls": "approved dialogue, voice identity, cadence, delivery and mouth timing",
+         "scope": "continuity"
+        }
+       ],
+       "openingCarriedState": "At Bo's height on the branch-veiled forest path, the camera is already travelling beside him mid-poof reaction with Keen beside him and the path ahead slipping past in dappled depth.",
+       "openingMotionBridge": "Continue the existing lateral travel immediately, carrying Bo and Keen forward into the shared countdown and repeated poof rhythm without a reset.",
+       "actionOwnership": [
+        "Only Bo triggers the repeated tail-poofs and only Bo executes the dead stop and satchel-clutching seated drop.",
+        "Only Aida emerges through the branch veil, gets lightly snagged by twigs, clears herself, and leaves the leaf behind her ear.",
+        "Keen may settle beside Bo supportively but must not touch the satchel, pull focus with extra business, or physically lead Aida into frame."
+       ],
+       "consistencyContract": [
+        "Keep the unit as one unbroken emotional geography; internal shot changes may clarify story jobs but must not feel like a relocated setup.",
+        "Maintain the path ahead readable behind Bo through the seated section.",
+        "Aida enters from the existing branch veil slightly snagged and settles with visible respectful space from Bo.",
+        "End on the exact continuity landing: Bo center-right foreground on the log with satchel held low, Keen left-midground supportive, Aida center-left midground with leaf behind ear, dappled daylight and gentle leaf movement continuing."
+       ],
+       "audioContract": "@Audio1 is the sole authority for all dialogue, voice identity, cadence, delivery, mouth timing, and silence. Speakers: Bo and Keen together for the opening countdown; Bo alone for his admissions, answers, and hopeful questions; Aida alone for her arrival line, bag notice, and two solidarity lines; Keen alone for the introduction. Keep listeners' mouths closed when not speaking. Add no narration, ad-libs, humming, exertion, or other voices.",
+       "continuityFinish": "Bo remains seated on the fallen log in the same branch-veiled path pocket, no longer crushed fully inward. Keen stays seated nearby with respectful space. Aida sits beside Bo after entering through the branches, the leaf still caught behind her ear. Dappled daylight and gentle leaf-wind continue, with the path ahead still open as pressure behind Bo.",
+       "surgicalSafeguards": [
+        "Do not let camera drift remove the open path behind Bo during the seated and final hold sections.",
+        "Do not stage Aida as a clean entrance from an empty path; she must be discovered through the already-present branch veil with slight twig snag.",
+        "Do not over-open Bo by the end; his satchel grip may ease, but he stays seated, quiet, and unresolved rather than cured."
+       ],
+       "editScope": "",
+       "contentToPreserve": [],
+       "extensionDirection": "forward",
+       "transitionTrigger": "",
+       "transitionTransformation": "",
+       "transitionArrivalState": "",
+       "audioTransition": "",
+       "firstFrameTag": "",
+       "lastFrameTag": "",
+       "storyboardTag": "",
+       "storyboardReadingOrder": "",
+       "blockoutKind": "coarse",
+       "blockoutMappings": [],
+       "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Aida; @图3=Keen; @图4=Bo; @图5=prop; @图6=location; @Audio1=audio; never swap.\nAngles: @图2=one Aida; @图3=one Keen; @图4=one Bo; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Aida identity, proportions, scale and approved wearable state: Aida identity, proportions, scale and approved wearable state; Aida owns the branch-snagged entrance, twig-clearing business, leaf-behind-ear mark, seated respectful distance, and the first notice of the satchel; Aida approved wearable state: jewelled brow headdress. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图4 defines exactly one Bo identity, proportions, scale and approved wearable state: Bo identity, proportions, scale and approved wearable state; Bo owns the tail-poof action, the satchel, the abrupt stop, the folded sit, and the gradual paw release; Keen and Aida must not inherit those actions. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图5 defines the exact satchel design, materials, construction, scale and approved carried state. Exclude its background, people and composition.\n@图6 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nContinue the existing lateral travel immediately, carrying Bo and Keen forward into the shared countdown and repeated poof rhythm without a reset.\n\n[ACTION OWNERSHIP]\nOnly Bo triggers the repeated tail-poofs and only Bo executes the dead stop and satchel-clutching seated drop.\nOnly Aida emerges through the branch veil, gets lightly snagged by twigs, clears herself, and leaves the leaf behind her ear.\nKeen may settle beside Bo supportively but must not touch the satchel, pull focus with extra business, or physically lead Aida into frame.\n\n[ATTRIBUTE OWNERSHIP]\nBo owns the tail-poof action, the satchel, the abrupt stop, the folded sit, and the gradual paw release; Keen and Aida must not inherit those actions.\nKeen owns the opening shared countdown with Bo and the gentle spoken introduction; he does not crowd, touch, or take emotional focus after Bo stops.\nAida owns the branch-snagged entrance, twig-clearing business, leaf-behind-ear mark, seated respectful distance, and the first notice of the satchel.\nThe satchel remains Bo's held prop throughout and is never taken by Keen or Aida.\nKeen approved wearable state: gold wrist cuffs with aquamarine gems\nAida approved wearable state: jewelled brow headdress\n\n[ENVIRONMENT CONTRACT]\nThe unit begins in active lateral travel through dappled forest light with branch veils and crystal-studded ground details already established.\nDuring the stop, the same geography compresses around the fallen log without relocating the characters or losing the readable path behind Bo.\nBranches on camera-left part only enough to reveal Aida's descent from the already-present veil; no new route or hidden clearing appears.\nLeaf-wind continues gently through the seated landing, with the path ahead unchanged and visible to scene end.\n\n[One-Sentence Summary]\nIn one accumulating forest-path unit, Bo rides a playful moving game into brief relief, abruptly folds into belonging fear, and becomes cautiously more open when Aida joins the pocket without crowding him.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path. Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis. The open path continues past them and stays readable behind Bo through center-right background depth. A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops. Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces. Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Living Performance]\nLiving performance lock: Bo, Keen, Aida has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: medium traveling two-shot at Bo height, useful 40mm feel, moving laterally with Bo and Keen along the branch-veiled path from the approved opening frame state. Action: Begin already in motion beside Bo and Keen as the shared countdown lands. Bo braces, then deliberately triggers repeated tail-poofs while continuing to walk; Keen keeps the shared rhythm light and synchronized rather than demonstrative. Performance: Bo's reaction shifts from prepared flinch to chosen participation; brief giggle leaks surprise him while his steps keep going. Keen reads playful and supportive, never taking ownership away from Bo. End state: Bo is still moving, looser and giggling, with the path ahead readable beyond him and enough forward momentum stored to make the stop matter. Spoken action: Bo/Keen, Together, playful and perfectly synchronized; one shared countdown only: {3, 2, 1 …} Hold: 1.0s — Let the tiny aftermath of the poof and giggle register before pushing onward.\nPhase 2: Camera: medium-to-medium-close single favoring Bo from front-right quarter at seated height, useful 50mm feel; the traveling camera decelerates with him and settles without a reset as he drops to the log. Action: As the laughter runs out, Bo stops dead, drops onto the fallen log, pulls the satchel tight into both paws, and folds inward. Keen comes down beside him with breathing room, supportive but not touching. The path stays open behind Bo. Performance: Bo's body compresses before the full thought is out; his gaze stays down the path more than toward Keen, and the satchel takes the force of his worry. Keen shifts from propulsion to careful presence and leaves emotional space with Bo. End state: Bo sits compressed on the log, clutching the satchel and staring down the path, with Keen beside but not crowding him. Spoken action: Bo, Quiet admission after the play stops; worry catches in the middle without rushing: {I’m STILL worried about going to the Learning Circle.} The pose holds a full beat after the line ends. Spoken action: Bo, Small and certain, looking down the path: {They all know each other.} The pose holds a full beat after the line ends. Spoken action: Bo, After a real beat, the private fear comes out plainly: {But I don’t know them, and they don't know me.} The pose holds a full beat after the line ends. Spoken action: Aida, Soft, lightly self-aware arrival; never loud: {Tricky trees.} The pose holds a full beat after the line ends. Spoken action: Keen, Gentle introduction that leaves the emotional space with Bo: {Bo, this is Aida.} The pose holds a full beat after the line ends.\nPhase 3: Camera: medium three-shot that begins as a reframed seated composition and gently widens/pivots toward the branch veil on camera-left before settling into the final triangular arrangement, useful 45mm feel. Action: Rustle in the existing branches reveals Aida descending slightly snagged by twigs; she brushes herself clear, leaves a leaf behind one ear, and sits beside Bo with respectful space. Her attention drops to the satchel first, not his face. Bo answers, turns toward her little by little, and loosens slightly as the conversation continues. Keen stays nearby, folded in supportively. Performance: Aida is soft, lightly self-aware on arrival, then grounded and matter-of-fact. Bo's embarrassment becomes curiosity and tentative hope without springing open. Keen remains quiet emotional scaffolding rather than an interrupter. End state: Bo remains seated in the branch-veiled pocket on the log, center-right foreground with the satchel held low; Keen stays left-midground with breathing room; Aida sits center-left midground facing Bo, leaf behind her ear, while the path recedes behind him under dappled moving light. Spoken action: Aida, Low, empathetic recognition with a settled downward ending; it is not a question: {You packed your bag.} The pose holds a full beat after the line ends. Spoken action: Bo, A small honest answer, slightly embarrassed: {Four times.} The pose holds a full beat after the line ends. Spoken action: Aida, Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing: {I would have done five.} The pose holds a full beat after the line ends. Spoken action: Bo, Genuine surprised question; hope enters because he feels less alone: {You get scared too?} The pose holds a full beat after the line ends. Spoken action: Aida, Quiet agreement, then leave a short clean gap: {Every single time.} The pose holds a full beat after the line ends. Spoken action: Bo, Hopeful follow-up question after the gap; do not flatten the question mark: {But you still go?} The pose holds a full beat after the line ends. Spoken action: Aida, Quiet certainty and solidarity, followed by a held silent beat: {Every single time.} The pose holds a full beat after the line ends. Hold: 1.0s — Give the branch awkwardness and Bo's 'Four times.' a small beat so the warmth can land without rushing into advice.\nWitness staging: Keen stays to Bo's left with breathing room and never leans onto him during the seated section. Aida joins on Bo's left side but leaves visible respectful space, fixing on the satchel before meeting Bo emotionally. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Bo, one Keen and one Aida throughout; no duplicates of any character. Maintain the unit as one unbroken emotional geography; internal shot changes may clarify story jobs but must not feel like a relocated setup. Safeguard: Do not let camera drift remove the open path behind Bo during the seated and final hold sections. Safeguard: Do not stage Aida as a clean entrance from an empty path; she must be discovered through the already-present branch veil with slight twig snag. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Living performance lock: Bo, Keen, Aida has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Bo remains seated on the fallen log in the same branch-veiled path pocket, no longer crushed fully inward. Keen stays seated nearby with respectful space. Aida sits beside Bo after entering through the branches, the leaf still caught behind her ear. Dappled daylight and gentle leaf-wind continue, with the path ahead still open as pressure behind Bo."
+      },
+      "preflight": {
+       "verdict": "PASS",
+       "score": 10.0,
+       "maximum": 10,
+       "checkerVerdict": "PASS",
+       "findings": [],
+       "seedanceAuthoring": {
+        "status": "ready",
+        "score": 12,
+        "maximum": 12,
+        "normalizedScore": 10.0,
+        "firingFloor": 9.5,
+        "summary": "Prompt matches every required authoring check."
+       },
+       "contractCompleteness": {
+        "score": 20,
+        "maximum": 20,
+        "threshold": 17,
+        "needsRevision": false,
+        "criticalFailures": []
+       },
+       "qualityGate": {
+        "score": 20,
+        "maximum": 20,
+        "threshold": 17,
+        "needsRevision": false,
+        "criticalFailures": []
+       }
+      },
+      "performanceBudget": {
+       "applicable": true,
+       "ready": true,
+       "durationSec": 30.0,
+       "dialogueOccupiedSec": 16.6,
+       "dialogueOccupancyRatio": 0.553,
+       "availableUnvoicedSec": 13.4,
+       "requiredSilentActingAndLandingSec": 6.5,
+       "emotionalTurnCount": 1,
+       "propStateChangeCount": 2,
+       "reasons": [],
+       "recommendedAction": "proceed-to-animatic"
+      },
+      "packageRevision": 3,
+      "inputSignature": {
+       "stage": "animation",
+       "model": "gpt-5.4",
+       "skillHashes": {
+        "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
+       },
+       "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+       "shotContractHash": "ff3c5e0f1c9e851e4ec6832ceae54148905877d5c29c78d44e4ef8970a35c01c",
+       "shotHash": "853107ee21569de453505f0bea173c082fb542ffdcbe39fd2686c05c354c45eb",
+       "openingFrameHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
+       "openingStageContractHash": "941ff36f0dd9f1144d4c6cbaddddfd27b0b9933193a712cfebd24568e40f5fb1",
+       "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+       "referenceOrder": [
+        "@图1",
+        "@图2",
+        "@图3",
+        "@图4",
+        "@图5",
+        "@图6"
+       ],
+       "referenceBindings": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "opening keyframe",
+         "view": null,
+         "sameCharacterGroup": null
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图4",
+         "role": "Aida",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1"
+        },
+        {
+         "slot": "@图3",
+         "sourceSlot": "@图3",
+         "role": "Keen",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0"
+        },
+        {
+         "slot": "@图4",
+         "sourceSlot": "@图2",
+         "role": "Bo",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2"
+        },
+        {
+         "slot": "@图5",
+         "sourceSlot": "@图5",
+         "role": "prop:satchel",
+         "view": null,
+         "sameCharacterGroup": null
+        },
+        {
+         "slot": "@图6",
+         "sourceSlot": "@图6",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null
+        }
+       ],
+       "referenceHashes": [
+        "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
+        "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+        "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+        "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+        "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
+        "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+       ],
+       "voiceHash": "0a4ec698e2faca860c66a6e0354f2f2338b14050f85c27d32ddeaddfad3a0c77",
+       "voiceApprovalSignature": {
+        "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+        "dialogueHash": "01cded761d74b24355f6ebb0ed4bf3a3388abd283d0e0323cacab406dce261e5",
+        "performanceHash": "520b7c7fb37af579e210435f36305ade487d19652df5786fbd8f49f42c3ebf8c",
+        "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+        "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+        "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+        "voiceCompilerVersion": "voice-director-v1",
+        "pronunciationOverrides": {
+         "Aida": "Ada"
+        },
+        "voiceIds": [
+         "AAF2q3NCwTrLMMkEnRLB",
+         "TCRj5m2u9xhZHJ8h9pMv",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "SHuZ9GyczU4QEDzU4QU4",
+         "TCRj5m2u9xhZHJ8h9pMv",
+         "SHuZ9GyczU4QEDzU4QU4",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "SHuZ9GyczU4QEDzU4QU4",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "SHuZ9GyczU4QEDzU4QU4",
+         "AAF2q3NCwTrLMMkEnRLB",
+         "SHuZ9GyczU4QEDzU4QU4"
+        ]
+       },
+       "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
+      },
+      "outcome": "approved",
+      "decisionAt": "2026-09-01T19:44:04",
+      "reviewedBy": "Julian",
+      "note": ""
+     },
+     "candidate": null,
+     "history": []
     }
    },
    "keyframeCandidates": [],
@@ -4137,13 +4677,954 @@
    },
    "approval": null,
    "approvedCandidate": null,
-   "candidatePaths": null,
-   "batch": null,
-   "batchId": null,
+   "candidatePaths": [
+    "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4"
+   ],
+   "batch": {
+    "token": "4a015a9c94b9429a93ae75a5042b010b",
+    "bindingHash": "aa8313b245d08afa216fdd5c00481508",
+    "envelope": {
+     "shotId": "S4.SH1",
+     "prompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Aida; @图3=Keen; @图4=Bo; @图5=prop; @图6=location; @Audio1=audio; never swap.\nAngles: @图2=one Aida; @图3=one Keen; @图4=one Bo; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Aida identity, proportions, scale and approved wearable state: Aida identity, proportions, scale and approved wearable state; Aida owns the branch-snagged entrance, twig-clearing business, leaf-behind-ear mark, seated respectful distance, and the first notice of the satchel; Aida approved wearable state: jewelled brow headdress. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图4 defines exactly one Bo identity, proportions, scale and approved wearable state: Bo identity, proportions, scale and approved wearable state; Bo owns the tail-poof action, the satchel, the abrupt stop, the folded sit, and the gradual paw release; Keen and Aida must not inherit those actions. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图5 defines the exact satchel design, materials, construction, scale and approved carried state. Exclude its background, people and composition.\n@图6 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nContinue the existing lateral travel immediately, carrying Bo and Keen forward into the shared countdown and repeated poof rhythm without a reset.\n\n[ACTION OWNERSHIP]\nOnly Bo triggers the repeated tail-poofs and only Bo executes the dead stop and satchel-clutching seated drop.\nOnly Aida emerges through the branch veil, gets lightly snagged by twigs, clears herself, and leaves the leaf behind her ear.\nKeen may settle beside Bo supportively but must not touch the satchel, pull focus with extra business, or physically lead Aida into frame.\n\n[ATTRIBUTE OWNERSHIP]\nBo owns the tail-poof action, the satchel, the abrupt stop, the folded sit, and the gradual paw release; Keen and Aida must not inherit those actions.\nKeen owns the opening shared countdown with Bo and the gentle spoken introduction; he does not crowd, touch, or take emotional focus after Bo stops.\nAida owns the branch-snagged entrance, twig-clearing business, leaf-behind-ear mark, seated respectful distance, and the first notice of the satchel.\nThe satchel remains Bo's held prop throughout and is never taken by Keen or Aida.\nKeen approved wearable state: gold wrist cuffs with aquamarine gems\nAida approved wearable state: jewelled brow headdress\n\n[ENVIRONMENT CONTRACT]\nThe unit begins in active lateral travel through dappled forest light with branch veils and crystal-studded ground details already established.\nDuring the stop, the same geography compresses around the fallen log without relocating the characters or losing the readable path behind Bo.\nBranches on camera-left part only enough to reveal Aida's descent from the already-present veil; no new route or hidden clearing appears.\nLeaf-wind continues gently through the seated landing, with the path ahead unchanged and visible to scene end.\n\n[One-Sentence Summary]\nIn one accumulating forest-path unit, Bo rides a playful moving game into brief relief, abruptly folds into belonging fear, and becomes cautiously more open when Aida joins the pocket without crowding him.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path. Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis. The open path continues past them and stays readable behind Bo through center-right background depth. A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops. Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces. Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Living Performance]\nLiving performance lock: Bo, Keen, Aida has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: medium traveling two-shot at Bo height, useful 40mm feel, moving laterally with Bo and Keen along the branch-veiled path from the approved opening frame state. Action: Begin already in motion beside Bo and Keen as the shared countdown lands. Bo braces, then deliberately triggers repeated tail-poofs while continuing to walk; Keen keeps the shared rhythm light and synchronized rather than demonstrative. Performance: Bo's reaction shifts from prepared flinch to chosen participation; brief giggle leaks surprise him while his steps keep going. Keen reads playful and supportive, never taking ownership away from Bo. End state: Bo is still moving, looser and giggling, with the path ahead readable beyond him and enough forward momentum stored to make the stop matter. Spoken action: Bo/Keen, Together, playful and perfectly synchronized; one shared countdown only: {3, 2, 1 …} Hold: 1.0s — Let the tiny aftermath of the poof and giggle register before pushing onward.\nPhase 2: Camera: medium-to-medium-close single favoring Bo from front-right quarter at seated height, useful 50mm feel; the traveling camera decelerates with him and settles without a reset as he drops to the log. Action: As the laughter runs out, Bo stops dead, drops onto the fallen log, pulls the satchel tight into both paws, and folds inward. Keen comes down beside him with breathing room, supportive but not touching. The path stays open behind Bo. Performance: Bo's body compresses before the full thought is out; his gaze stays down the path more than toward Keen, and the satchel takes the force of his worry. Keen shifts from propulsion to careful presence and leaves emotional space with Bo. End state: Bo sits compressed on the log, clutching the satchel and staring down the path, with Keen beside but not crowding him. Spoken action: Bo, Quiet admission after the play stops; worry catches in the middle without rushing: {I’m STILL worried about going to the Learning Circle.} The pose holds a full beat after the line ends. Spoken action: Bo, Small and certain, looking down the path: {They all know each other.} The pose holds a full beat after the line ends. Spoken action: Bo, After a real beat, the private fear comes out plainly: {But I don’t know them, and they don't know me.} The pose holds a full beat after the line ends. Spoken action: Aida, Soft, lightly self-aware arrival; never loud: {Tricky trees.} The pose holds a full beat after the line ends. Spoken action: Keen, Gentle introduction that leaves the emotional space with Bo: {Bo, this is Aida.} The pose holds a full beat after the line ends.\nPhase 3: Camera: medium three-shot that begins as a reframed seated composition and gently widens/pivots toward the branch veil on camera-left before settling into the final triangular arrangement, useful 45mm feel. Action: Rustle in the existing branches reveals Aida descending slightly snagged by twigs; she brushes herself clear, leaves a leaf behind one ear, and sits beside Bo with respectful space. Her attention drops to the satchel first, not his face. Bo answers, turns toward her little by little, and loosens slightly as the conversation continues. Keen stays nearby, folded in supportively. Performance: Aida is soft, lightly self-aware on arrival, then grounded and matter-of-fact. Bo's embarrassment becomes curiosity and tentative hope without springing open. Keen remains quiet emotional scaffolding rather than an interrupter. End state: Bo remains seated in the branch-veiled pocket on the log, center-right foreground with the satchel held low; Keen stays left-midground with breathing room; Aida sits center-left midground facing Bo, leaf behind her ear, while the path recedes behind him under dappled moving light. Spoken action: Aida, Low, empathetic recognition with a settled downward ending; it is not a question: {You packed your bag.} The pose holds a full beat after the line ends. Spoken action: Bo, A small honest answer, slightly embarrassed: {Four times.} The pose holds a full beat after the line ends. Spoken action: Aida, Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing: {I would have done five.} The pose holds a full beat after the line ends. Spoken action: Bo, Genuine surprised question; hope enters because he feels less alone: {You get scared too?} The pose holds a full beat after the line ends. Spoken action: Aida, Quiet agreement, then leave a short clean gap: {Every single time.} The pose holds a full beat after the line ends. Spoken action: Bo, Hopeful follow-up question after the gap; do not flatten the question mark: {But you still go?} The pose holds a full beat after the line ends. Spoken action: Aida, Quiet certainty and solidarity, followed by a held silent beat: {Every single time.} The pose holds a full beat after the line ends. Hold: 1.0s — Give the branch awkwardness and Bo's 'Four times.' a small beat so the warmth can land without rushing into advice.\nWitness staging: Keen stays to Bo's left with breathing room and never leans onto him during the seated section. Aida joins on Bo's left side but leaves visible respectful space, fixing on the satchel before meeting Bo emotionally. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Bo, one Keen and one Aida throughout; no duplicates of any character. Maintain the unit as one unbroken emotional geography; internal shot changes may clarify story jobs but must not feel like a relocated setup. Safeguard: Do not let camera drift remove the open path behind Bo during the seated and final hold sections. Safeguard: Do not stage Aida as a clean entrance from an empty path; she must be discovered through the already-present branch veil with slight twig snag. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Living performance lock: Bo, Keen, Aida has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Bo remains seated on the fallen log in the same branch-veiled path pocket, no longer crushed fully inward. Keen stays seated nearby with respectful space. Aida sits beside Bo after entering through the branches, the leaf still caught behind her ear. Dappled daylight and gentle leaf-wind continue, with the path ahead still open as pressure behind Bo.",
+     "promptSource": "animation-director-current",
+     "durationSec": 30.0,
+     "provider": "byteplus",
+     "providerModelId": "dreamina-seedance-2-5-260628",
+     "modelVersion": "2.5-260628",
+     "transport": "byteplus-async",
+     "endpoint": "/api/v3/contents/generations/tasks",
+     "costRateKey": "seedance_25_byteplus_480p_per_sec",
+     "capabilityVerifiedAt": "2026-08-16",
+     "resolution": "480p",
+     "tier": "standard",
+     "candidateCount": 1,
+     "costPerCandidateUsd": 3.123,
+     "maxBatchCostUsd": 3.123,
+     "promptVersion": "91d37f82",
+     "references": [
+      {
+       "slot": "@图1",
+       "sourceSlot": "@图1",
+       "role": "opening keyframe",
+       "view": null,
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
+       "intactTurnaround": false,
+       "sameCharacterGroup": null,
+       "md5": "6f9fd64444b11bc33bd3e05f0640b1e7"
+      },
+      {
+       "slot": "@图2",
+       "sourceSlot": "@图4",
+       "role": "Aida",
+       "view": "complete-turnaround",
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+       "intactTurnaround": true,
+       "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
+       "md5": "6c60813ac1c5a47ce7bfb1f6f0552440"
+      },
+      {
+       "slot": "@图3",
+       "sourceSlot": "@图3",
+       "role": "Keen",
+       "view": "complete-turnaround",
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+       "intactTurnaround": true,
+       "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+       "md5": "b02f4c314f09a8ae5cc505aff970d24a"
+      },
+      {
+       "slot": "@图4",
+       "sourceSlot": "@图2",
+       "role": "Bo",
+       "view": "complete-turnaround",
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Bo.png",
+       "intactTurnaround": true,
+       "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2",
+       "md5": "68076f0b3779ee745be0ac0473db13d8"
+      },
+      {
+       "slot": "@图5",
+       "sourceSlot": "@图5",
+       "role": "prop:satchel",
+       "view": null,
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/props/CB_Bo_satchel.png",
+       "intactTurnaround": false,
+       "sameCharacterGroup": null,
+       "md5": "977d88cb8e75812f5d89a399a31adb82"
+      },
+      {
+       "slot": "@图6",
+       "sourceSlot": "@图6",
+       "role": "scene plate",
+       "view": null,
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_ff9d9499.png",
+       "intactTurnaround": false,
+       "sameCharacterGroup": null,
+       "md5": "f97b4176595fce9356cf30f3ddaa9489"
+      }
+     ],
+     "audio": {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav",
+      "md5": "3a380bd6d899a829d971d1b223f51076"
+     },
+     "executionPlan": {
+      "schemaVersion": 1,
+      "mode": "single-qualified-provider-call",
+      "continuityMode": "keyframe-handoff",
+      "studioShotId": "S4.SH1",
+      "studioDurationSec": 30.0,
+      "providerModelId": "dreamina-seedance-2-5-260628",
+      "comparisonRunId": null,
+      "parentPromptHash": "c268193aee35c3a1ca534099f4006af436551d9466e2ce02614132b2ba2cd923",
+      "costPerStudioCandidateUsd": 3.123,
+      "segments": [
+       {
+        "segmentIndex": 1,
+        "segmentCount": 1,
+        "globalStartSec": 0.0,
+        "globalEndSec": 30.0,
+        "durationSec": 30.0,
+        "stageNumbers": [],
+        "prompt": "[Locked Character Turnarounds]\n@图2 defines Aida's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n@图3 defines Keen's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n@图4 defines Bo's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n\nAUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Aida; @图3=Keen; @图4=Bo; @图5=prop; @图6=location; @Audio1=audio; never swap.\nAngles: @图2=one Aida; @图3=one Keen; @图4=one Bo; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Aida identity, proportions, scale and approved wearable state: Aida identity, proportions, scale and approved wearable state; Aida owns the branch-snagged entrance, twig-clearing business, leaf-behind-ear mark, seated respectful distance, and the first notice of the satchel; Aida approved wearable state: jewelled brow headdress. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图4 defines exactly one Bo identity, proportions, scale and approved wearable state: Bo identity, proportions, scale and approved wearable state; Bo owns the tail-poof action, the satchel, the abrupt stop, the folded sit, and the gradual paw release; Keen and Aida must not inherit those actions. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图5 defines the exact satchel design, materials, construction, scale and approved carried state. Exclude its background, people and composition.\n@图6 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nContinue the existing lateral travel immediately, carrying Bo and Keen forward into the shared countdown and repeated poof rhythm without a reset.\n\n[ACTION OWNERSHIP]\nOnly Bo triggers the repeated tail-poofs and only Bo executes the dead stop and satchel-clutching seated drop.\nOnly Aida emerges through the branch veil, gets lightly snagged by twigs, clears herself, and leaves the leaf behind her ear.\nKeen may settle beside Bo supportively but must not touch the satchel, pull focus with extra business, or physically lead Aida into frame.\n\n[ATTRIBUTE OWNERSHIP]\nBo owns the tail-poof action, the satchel, the abrupt stop, the folded sit, and the gradual paw release; Keen and Aida must not inherit those actions.\nKeen owns the opening shared countdown with Bo and the gentle spoken introduction; he does not crowd, touch, or take emotional focus after Bo stops.\nAida owns the branch-snagged entrance, twig-clearing business, leaf-behind-ear mark, seated respectful distance, and the first notice of the satchel.\nThe satchel remains Bo's held prop throughout and is never taken by Keen or Aida.\nKeen approved wearable state: gold wrist cuffs with aquamarine gems\nAida approved wearable state: jewelled brow headdress\n\n[ENVIRONMENT CONTRACT]\nThe unit begins in active lateral travel through dappled forest light with branch veils and crystal-studded ground details already established.\nDuring the stop, the same geography compresses around the fallen log without relocating the characters or losing the readable path behind Bo.\nBranches on camera-left part only enough to reveal Aida's descent from the already-present veil; no new route or hidden clearing appears.\nLeaf-wind continues gently through the seated landing, with the path ahead unchanged and visible to scene end.\n\n[One-Sentence Summary]\nIn one accumulating forest-path unit, Bo rides a playful moving game into brief relief, abruptly folds into belonging fear, and becomes cautiously more open when Aida joins the pocket without crowding him.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Camera travels alongside Bo and Keen at Bo's height, matching their forward movement along the forest path. Bo starts center-right foreground, slightly ahead of Keen, with Keen left-midground beside him on the same travel axis. The open path continues past them and stays readable behind Bo through center-right background depth. A fallen log sits ahead on Bo's side of the path, reachable without a cut when his movement stops. Overhanging branches and leaf clusters form a soft veil across the top and near frame edges without blocking faces. Aida's later entrance zone is the branch veil frame-left to upper-left, descending into the same pocket rather than from a separate clearing.\n\n[Living Performance]\nLiving performance lock: Bo, Keen, Aida has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: medium traveling two-shot at Bo height, useful 40mm feel, moving laterally with Bo and Keen along the branch-veiled path from the approved opening frame state. Action: Begin already in motion beside Bo and Keen as the shared countdown lands. Bo braces, then deliberately triggers repeated tail-poofs while continuing to walk; Keen keeps the shared rhythm light and synchronized rather than demonstrative. Performance: Bo's reaction shifts from prepared flinch to chosen participation; brief giggle leaks surprise him while his steps keep going. Keen reads playful and supportive, never taking ownership away from Bo. End state: Bo is still moving, looser and giggling, with the path ahead readable beyond him and enough forward momentum stored to make the stop matter. Spoken action: Bo/Keen, Together, playful and perfectly synchronized; one shared countdown only: {3, 2, 1 …} Hold: 1.0s — Let the tiny aftermath of the poof and giggle register before pushing onward.\nPhase 2: Camera: medium-to-medium-close single favoring Bo from front-right quarter at seated height, useful 50mm feel; the traveling camera decelerates with him and settles without a reset as he drops to the log. Action: As the laughter runs out, Bo stops dead, drops onto the fallen log, pulls the satchel tight into both paws, and folds inward. Keen comes down beside him with breathing room, supportive but not touching. The path stays open behind Bo. Performance: Bo's body compresses before the full thought is out; his gaze stays down the path more than toward Keen, and the satchel takes the force of his worry. Keen shifts from propulsion to careful presence and leaves emotional space with Bo. End state: Bo sits compressed on the log, clutching the satchel and staring down the path, with Keen beside but not crowding him. Spoken action: Bo, Quiet admission after the play stops; worry catches in the middle without rushing: {I’m STILL worried about going to the Learning Circle.} The pose holds a full beat after the line ends. Spoken action: Bo, Small and certain, looking down the path: {They all know each other.} The pose holds a full beat after the line ends. Spoken action: Bo, After a real beat, the private fear comes out plainly: {But I don’t know them, and they don't know me.} The pose holds a full beat after the line ends. Spoken action: Aida, Soft, lightly self-aware arrival; never loud: {Tricky trees.} The pose holds a full beat after the line ends. Spoken action: Keen, Gentle introduction that leaves the emotional space with Bo: {Bo, this is Aida.} The pose holds a full beat after the line ends.\nPhase 3: Camera: medium three-shot that begins as a reframed seated composition and gently widens/pivots toward the branch veil on camera-left before settling into the final triangular arrangement, useful 45mm feel. Action: Rustle in the existing branches reveals Aida descending slightly snagged by twigs; she brushes herself clear, leaves a leaf behind one ear, and sits beside Bo with respectful space. Her attention drops to the satchel first, not his face. Bo answers, turns toward her little by little, and loosens slightly as the conversation continues. Keen stays nearby, folded in supportively. Performance: Aida is soft, lightly self-aware on arrival, then grounded and matter-of-fact. Bo's embarrassment becomes curiosity and tentative hope without springing open. Keen remains quiet emotional scaffolding rather than an interrupter. End state: Bo remains seated in the branch-veiled pocket on the log, center-right foreground with the satchel held low; Keen stays left-midground with breathing room; Aida sits center-left midground facing Bo, leaf behind her ear, while the path recedes behind him under dappled moving light. Spoken action: Aida, Low, empathetic recognition with a settled downward ending; it is not a question: {You packed your bag.} The pose holds a full beat after the line ends. Spoken action: Bo, A small honest answer, slightly embarrassed: {Four times.} The pose holds a full beat after the line ends. Spoken action: Aida, Warmly self-effacing: Aida says she would have needed one more try than Bo, normalizing his fear rather than competing: {I would have done five.} The pose holds a full beat after the line ends. Spoken action: Bo, Genuine surprised question; hope enters because he feels less alone: {You get scared too?} The pose holds a full beat after the line ends. Spoken action: Aida, Quiet agreement, then leave a short clean gap: {Every single time.} The pose holds a full beat after the line ends. Spoken action: Bo, Hopeful follow-up question after the gap; do not flatten the question mark: {But you still go?} The pose holds a full beat after the line ends. Spoken action: Aida, Quiet certainty and solidarity, followed by a held silent beat: {Every single time.} The pose holds a full beat after the line ends. Hold: 1.0s — Give the branch awkwardness and Bo's 'Four times.' a small beat so the warmth can land without rushing into advice.\nWitness staging: Keen stays to Bo's left with breathing room and never leans onto him during the seated section. Aida joins on Bo's left side but leaves visible respectful space, fixing on the satchel before meeting Bo emotionally. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Bo, one Keen and one Aida throughout; no duplicates of any character. Maintain the unit as one unbroken emotional geography; internal shot changes may clarify story jobs but must not feel like a relocated setup. Safeguard: Do not let camera drift remove the open path behind Bo during the seated and final hold sections. Safeguard: Do not stage Aida as a clean entrance from an empty path; she must be discovered through the already-present branch veil with slight twig snag. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Living performance lock: Bo, Keen, Aida has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Bo remains seated on the fallen log in the same branch-veiled path pocket, no longer crushed fully inward. Keen stays seated nearby with respectful space. Aida sits beside Bo after entering through the branches, the leaf still caught behind her ear. Dappled daylight and gentle leaf-wind continue, with the path ahead still open as pressure behind Bo.",
+        "promptHash": "c268193aee35c3a1ca534099f4006af436551d9466e2ce02614132b2ba2cd923",
+        "signedPromptHash": "c268193aee35c3a1ca534099f4006af436551d9466e2ce02614132b2ba2cd923",
+        "promptAudit": {
+         "profile": "bytedance-seedance-2.5-2026-08-07",
+         "source": {
+          "title": "Dreamina Seedance 2.5 User Guide",
+          "url": "https://docs.byteplus.com/en/docs/ModelArk/2607689",
+          "larkUrl": "https://bytedance.larkoffice.com/docx/A88jd0B47oAd8zxWp5ycZFMfnxh",
+          "productUrl": "https://dreamina.capcut.com/seedance/seedance-2-5",
+          "apiQualificationUrl": "https://docs.byteplus.com/en/docs/modelark/1159178",
+          "skill": ".agents/skills/sd25-pe",
+          "lastUpdated": "2026-08-07",
+          "scope": "Official Dreamina/BytePlus prompt guidance; executable API schema, pricing and account access are separate"
+         },
+         "guideLimits": {
+          "standardDurationSec": {
+           "minimum": 4,
+           "maximum": 30
+          },
+          "betaLongVideoDurationSec": {
+           "minimum": 5,
+           "maximum": 180
+          },
+          "extensionDurationSec": {
+           "minimum": 4,
+           "maximum": 30
+          },
+          "outputResolutions": [
+           "480p",
+           "720p"
+          ],
+          "maxCombinedInputs": 50,
+          "maxImages": 30,
+          "maxVideos": 10,
+          "maxVideoDurationSec": 30,
+          "maxAudioClips": 10,
+          "maxAudioDurationSec": 30
+         },
+         "guideSemantics": {
+          "timestampControl": "Time ranges allocate pacing and exact time points improve alignment; they are not a frame-accurate edit guarantee.",
+          "extensionPreservation": "Preserve the source and match its boundary state, but review the join; generated continuation and boundary frames are not guaranteed pixel-identical.",
+          "negativeInstructions": "Explicit forbidden items improve reliability but remain probabilistic and require review.",
+          "identityStability": "Multi-character consistency is improved, not self-approving; identity and count still require visual review.",
+          "longVideoRoute": "The 5-180 second mode is a Dreamina beta product capability, not a qualified Studio API route.",
+          "audioOnly": "Dreamina product guidance describes audio-only creation; the current BytePlus Seedance 2.0 API still requires at least one image or video reference.",
+          "cleanOutput": "Dreamina advertises cleaner 4K output; the executable provider contract remains the authority for resolution and every render still requires QC.",
+          "watermarkPolicy": "The Studio never uses generative watermark removal as a production shortcut; source footage must be owned or licensed and delivered clean."
+         },
+         "taskMode": "reference-to-video",
+         "status": "ready",
+         "score": 11,
+         "maximum": 11,
+         "authorityScores": {
+          "official-guide": {
+           "label": "Official guide",
+           "score": 8,
+           "maximum": 8
+          },
+          "studio-policy": {
+           "label": "Studio production policy",
+           "score": 3,
+           "maximum": 3
+          }
+         },
+         "summary": "Prompt matches every required authoring check.",
+         "referenceCount": 7,
+         "referenceCounts": {
+          "image": 6,
+          "video": 0,
+          "audio": 1
+         },
+         "stageCount": 3,
+         "checks": [
+          {
+           "code": "goal",
+           "label": "One-sentence story summary",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "[One-Sentence Summary] states the central event.",
+           "nextAction": ""
+          },
+          {
+           "code": "reference-roles",
+           "label": "Reference roles",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "All 7 expected references are individually bound and scoped.",
+           "nextAction": ""
+          },
+          {
+           "code": "reference-limits",
+           "label": "Official reference-count limits",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "Mapped 6 image(s), 0 video(s) and 1 audio clip(s).",
+           "nextAction": ""
+          },
+          {
+           "code": "opening-frame",
+           "label": "Opening-frame authority",
+           "status": "pass",
+           "required": false,
+           "authority": "studio-policy",
+           "detail": "The opening reference explicitly controls the first visible state.",
+           "nextAction": ""
+          },
+          {
+           "code": "global-settings",
+           "label": "Global world and anti-collapse settings",
+           "status": "pass",
+           "required": false,
+           "authority": "official-guide",
+           "detail": "[Global Settings] establishes the world, look and camera language.",
+           "nextAction": ""
+          },
+          {
+           "code": "stages",
+           "label": "Consecutive directed shots",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "3 consecutive shot(s) carry the event progression.",
+           "nextAction": ""
+          },
+          {
+           "code": "approved-stage-plan",
+           "label": "Approved story plan",
+           "status": "pass",
+           "required": false,
+           "authority": "studio-policy",
+           "detail": "The typed approved stage plan remains the compiler source behind the shot sequence.",
+           "nextAction": ""
+          },
+          {
+           "code": "stage-direction",
+           "label": "Action and performance direction",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "Every internal shot has one camera job, action and visible end state.",
+           "nextAction": ""
+          },
+          {
+           "code": "stage-end-states",
+           "label": "Visible shot handoffs",
+           "status": "pass",
+           "required": true,
+           "authority": "studio-policy",
+           "detail": "Every internal shot ends on a visible handoff.",
+           "nextAction": ""
+          },
+          {
+           "code": "consistency",
+           "label": "Global continuity supplement",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "[Global Supplement] protects identity, ownership and screen geography.",
+           "nextAction": ""
+          },
+          {
+           "code": "audio",
+           "label": "Dialogue and audio authority",
+           "status": "pass",
+           "required": true,
+           "authority": "studio-policy",
+           "detail": "The prompt records silence, ambience or sound ownership.",
+           "nextAction": ""
+          },
+          {
+           "code": "pacing",
+           "label": "Pacing control",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "Storyline stages control pacing; timestamps are optional unless a critical handoff, entrance, exit, transition or dialogue cue needs timing.",
+           "nextAction": ""
+          },
+          {
+           "code": "request-parameters",
+           "label": "Request parameters stay outside the prompt",
+           "status": "pass",
+           "required": true,
+           "authority": "studio-policy",
+           "detail": "Duration, aspect ratio, resolution and model selection remain in the API contract.",
+           "nextAction": ""
+          },
+          {
+           "code": "guide-duration",
+           "label": "Guide duration",
+           "status": "pass",
+           "required": true,
+           "authority": "official-guide",
+           "detail": "30s is within the official 4-30 second standard window.",
+           "nextAction": ""
+          }
+         ],
+         "repairActions": [],
+         "advisoryOnly": true,
+         "providerAvailabilityChecked": false,
+         "providerCalled": false,
+         "authoringScore10": 10.0,
+         "authoringMaximum": 10,
+         "firingFloor10": 9.5,
+         "creativeGate": {
+          "score": 18,
+          "maximum": 20,
+          "threshold": 17,
+          "ready": true,
+          "criticalFailures": []
+         },
+         "contractCompleteness": {
+          "score": 18,
+          "maximum": 20,
+          "threshold": 17,
+          "ready": true,
+          "criticalFailures": []
+         }
+        },
+        "dynamicOpeningRelay": false,
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "opening keyframe",
+          "view": null,
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
+          "intactTurnaround": false,
+          "sameCharacterGroup": null,
+          "md5": "6f9fd64444b11bc33bd3e05f0640b1e7"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图4",
+          "role": "Aida",
+          "view": "complete-turnaround",
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+          "intactTurnaround": true,
+          "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
+          "md5": "6c60813ac1c5a47ce7bfb1f6f0552440"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图3",
+          "role": "Keen",
+          "view": "complete-turnaround",
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+          "intactTurnaround": true,
+          "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+          "md5": "b02f4c314f09a8ae5cc505aff970d24a"
+         },
+         {
+          "slot": "@图4",
+          "sourceSlot": "@图2",
+          "role": "Bo",
+          "view": "complete-turnaround",
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Bo.png",
+          "intactTurnaround": true,
+          "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2",
+          "md5": "68076f0b3779ee745be0ac0473db13d8"
+         },
+         {
+          "slot": "@图5",
+          "sourceSlot": "@图5",
+          "role": "prop:satchel",
+          "view": null,
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/props/CB_Bo_satchel.png",
+          "intactTurnaround": false,
+          "sameCharacterGroup": null,
+          "md5": "977d88cb8e75812f5d89a399a31adb82"
+         },
+         {
+          "slot": "@图6",
+          "sourceSlot": "@图6",
+          "role": "scene plate",
+          "view": null,
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_ff9d9499.png",
+          "intactTurnaround": false,
+          "sameCharacterGroup": null,
+          "md5": "f97b4176595fce9356cf30f3ddaa9489"
+         }
+        ],
+        "videoReferences": [],
+        "audio": {
+         "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav",
+         "md5": "3a380bd6d899a829d971d1b223f51076",
+         "sourcePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav",
+         "sourceMd5": "3a380bd6d899a829d971d1b223f51076"
+        },
+        "generateAudio": true,
+        "contract": {
+         "providerModelId": "dreamina-seedance-2-5-260628",
+         "provider": "byteplus",
+         "modelVersion": "2.5-260628",
+         "transport": "byteplus-async",
+         "mode": "reference-to-video",
+         "endpoint": "/api/v3/contents/generations/tasks",
+         "resolution": "480p",
+         "duration": 30,
+         "costRateKey": "seedance_25_byteplus_480p_per_sec",
+         "capabilityVerifiedAt": "2026-08-16",
+         "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757"
+        },
+        "costUsd": 3.123
+       }
+      ]
+     },
+     "comparisonRunId": null
+    },
+    "envelopeHash": "903a9f4a2f4376c827fd229472d1a262daea28b821a4c9af3dc4e094572ca30a",
+    "batchId": "S4.SH1-b1-20260901T194423-cb3ddd22",
+    "expected": 1,
+    "done": [
+     1
+    ],
+    "failed": [],
+    "disclosure": {
+     "shotId": "S4.SH1",
+     "candidateCount": 1,
+     "costPerCandidateUsd": 3.123,
+     "maxBatchCostUsd": 3.123,
+     "promptVersion": "91d37f82",
+     "bindingHash": "aa8313b245d08afa216fdd5c00481508",
+     "envelopeHash": "903a9f4a2f4376c827fd229472d1a262daea28b821a4c9af3dc4e094572ca30a",
+     "packageHash": "99b6743e5b1766cc",
+     "rerollOfUnchangedPackage": false,
+     "packageRevision": 3,
+     "referenceSlots": {
+      "@图1": "opening keyframe",
+      "@图2": "Aida · complete-turnaround turnaround view",
+      "@图3": "Keen · complete-turnaround turnaround view",
+      "@图4": "Bo · complete-turnaround turnaround view",
+      "@图5": "prop:satchel",
+      "@图6": "scene plate"
+     },
+     "logicalReferenceSlots": {
+      "@图1": "opening keyframe",
+      "@图2": "Bo",
+      "@图3": "Keen",
+      "@图4": "Aida",
+      "@图5": "prop:satchel",
+      "@图6": "scene plate",
+      "@Audio1": "voice track"
+     },
+     "openingAnchor": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
+     "audioAsset": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav",
+     "shotDurationSec": 30.0,
+     "provider": "byteplus",
+     "providerModelId": "dreamina-seedance-2-5-260628",
+     "modelVersion": "2.5-260628",
+     "resolution": "480p",
+     "promptScores": {
+      "contractCompleteness": {
+       "score": 18,
+       "maximum": 20,
+       "threshold": 17,
+       "ready": true,
+       "criticalFailures": []
+      },
+      "creative": {
+       "score": 18,
+       "maximum": 20,
+       "threshold": 17,
+       "ready": true,
+       "criticalFailures": []
+      },
+      "authoringScore10": 10.0,
+      "authoringMaximum": 10,
+      "firingFloor10": 9.5
+     },
+     "comparisonRunId": null,
+     "internalProviderCalls": [
+      {
+       "segmentIndex": 1,
+       "durationSec": 30.0,
+       "stageNumbers": []
+      }
+     ],
+     "tier": "standard"
+    },
+    "status": "complete",
+    "audioProvenance": {
+     "policyVersion": "dialogue-post-lane-v1",
+     "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav",
+     "approvedMasterSha256": "0a4ec698e2faca860c66a6e0354f2f2338b14050f85c27d32ddeaddfad3a0c77",
+     "providerUse": "performance-conditioning",
+     "passthroughGuaranteed": false,
+     "providerOutputRole": "guide-track-only",
+     "finalFilmDialogue": "approved-master-restored-in-post",
+     "guideCandidates": [
+      {
+       "candidate": 1,
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+       "sha256": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
+       "exactApprovedWaveformPassthrough": false
+      }
+     ],
+     "reviewCandidates": [
+      {
+       "candidate": 1,
+       "providerGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+       "providerGuideSha256": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
+       "reviewPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+       "reviewSha256": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
+       "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav",
+       "approvedMasterSha256": "0a4ec698e2faca860c66a6e0354f2f2338b14050f85c27d32ddeaddfad3a0c77",
+       "providerGuideRemoved": false,
+       "approvedHearRestored": false,
+       "providerFinalMixPreserved": true
+      }
+     ]
+    },
+    "transportCandidates": {
+     "1": {
+      "segments": [
+       {
+        "segmentIndex": 1,
+        "durationSec": 30.0,
+        "stageNumbers": [],
+        "promptHash": "c268193aee35c3a1ca534099f4006af436551d9466e2ce02614132b2ba2cd923",
+        "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+        "outputHash": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
+        "audioHash": "3a380bd6d899a829d971d1b223f51076",
+        "openingRelayPath": null,
+        "openingRelayHash": null
+       }
+      ],
+      "status": "joined",
+      "activeSegment": 1,
+      "lastProviderEvent": {
+       "event": "downloaded",
+       "at": "2026-09-01T20:02:19",
+       "segmentIndex": 1,
+       "taskId": "cgt-20260902024430-vtzg4",
+       "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+       "outputBytes": 14745385
+      },
+      "providerEvents": [
+       {
+        "event": "poll",
+        "at": "2026-09-01T19:59:11",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T19:59:22",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T19:59:32",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T19:59:43",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T19:59:54",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:00:05",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:00:16",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:00:26",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:00:37",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:00:48",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:00:59",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:01:10",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:01:20",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:01:31",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:01:42",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:01:53",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:02:04",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-01T20:02:14",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "status": "succeeded"
+       },
+       {
+        "event": "downloading",
+        "at": "2026-09-01T20:02:14",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4"
+       },
+       {
+        "event": "downloaded",
+        "at": "2026-09-01T20:02:19",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902024430-vtzg4",
+        "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+        "outputBytes": 14745385
+       }
+      ],
+      "providerTaskId": "cgt-20260902024430-vtzg4",
+      "providerGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "providerGuideHash": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
+      "approvedHearReviewPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "approvedHearReviewHash": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2",
+      "candidatePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "candidateHash": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2"
+     }
+    },
+    "inputSignature": {
+     "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+     "shotContractHash": "ff3c5e0f1c9e851e4ec6832ceae54148905877d5c29c78d44e4ef8970a35c01c",
+     "animationDirectionSignature": {
+      "stage": "animation",
+      "model": "gpt-5.4",
+      "skillHashes": {
+       "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
+      },
+      "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+      "shotContractHash": "ff3c5e0f1c9e851e4ec6832ceae54148905877d5c29c78d44e4ef8970a35c01c",
+      "shotHash": "853107ee21569de453505f0bea173c082fb542ffdcbe39fd2686c05c354c45eb",
+      "openingFrameHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
+      "openingStageContractHash": "941ff36f0dd9f1144d4c6cbaddddfd27b0b9933193a712cfebd24568e40f5fb1",
+      "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+      "referenceOrder": [
+       "@图1",
+       "@图2",
+       "@图3",
+       "@图4",
+       "@图5",
+       "@图6"
+      ],
+      "referenceBindings": [
+       {
+        "slot": "@图1",
+        "sourceSlot": "@图1",
+        "role": "opening keyframe",
+        "view": null,
+        "sameCharacterGroup": null
+       },
+       {
+        "slot": "@图2",
+        "sourceSlot": "@图4",
+        "role": "Aida",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1"
+       },
+       {
+        "slot": "@图3",
+        "sourceSlot": "@图3",
+        "role": "Keen",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0"
+       },
+       {
+        "slot": "@图4",
+        "sourceSlot": "@图2",
+        "role": "Bo",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2"
+       },
+       {
+        "slot": "@图5",
+        "sourceSlot": "@图5",
+        "role": "prop:satchel",
+        "view": null,
+        "sameCharacterGroup": null
+       },
+       {
+        "slot": "@图6",
+        "sourceSlot": "@图6",
+        "role": "scene plate",
+        "view": null,
+        "sameCharacterGroup": null
+       }
+      ],
+      "referenceHashes": [
+       "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
+       "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+       "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+       "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+       "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1",
+       "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+      ],
+      "voiceHash": "0a4ec698e2faca860c66a6e0354f2f2338b14050f85c27d32ddeaddfad3a0c77",
+      "voiceApprovalSignature": {
+       "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+       "dialogueHash": "01cded761d74b24355f6ebb0ed4bf3a3388abd283d0e0323cacab406dce261e5",
+       "performanceHash": "520b7c7fb37af579e210435f36305ade487d19652df5786fbd8f49f42c3ebf8c",
+       "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+       "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+       "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+       "voiceCompilerVersion": "voice-director-v1",
+       "pronunciationOverrides": {
+        "Aida": "Ada"
+       },
+       "voiceIds": [
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4"
+       ]
+      },
+      "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
+     },
+     "promptHash": "680917499bc6cd3afb4ef138e83a49cf6caddbd49cd354e452a0dcc5eaeace4b",
+     "audioReferencePolicy": "guide",
+     "openingFrameHash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec",
+     "references": [
+      {
+       "slot": "@图1",
+       "sourceSlot": "@图1",
+       "role": "opening keyframe",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "d1c6ab3c676fc2c952867710f368e163e7d62d9f53b3979c42c2efdbccf66bec"
+      },
+      {
+       "slot": "@图2",
+       "sourceSlot": "@图4",
+       "role": "Aida",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
+       "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+      },
+      {
+       "slot": "@图3",
+       "sourceSlot": "@图3",
+       "role": "Keen",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+       "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+      },
+      {
+       "slot": "@图4",
+       "sourceSlot": "@图2",
+       "role": "Bo",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2",
+       "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+      },
+      {
+       "slot": "@图5",
+       "sourceSlot": "@图5",
+       "role": "prop:satchel",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1"
+      },
+      {
+       "slot": "@图6",
+       "sourceSlot": "@图6",
+       "role": "scene plate",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+      }
+     ],
+     "audioHash": "0a4ec698e2faca860c66a6e0354f2f2338b14050f85c27d32ddeaddfad3a0c77",
+     "durationSec": 30.0,
+     "comparisonModelId": null,
+     "comparisonRunId": null,
+     "executionPlanHash": "6add82312a8a44fb9a9edadbf2108cd9bb93f86b346b340a07ee43b599abd497",
+     "provider": "byteplus",
+     "providerModelId": "dreamina-seedance-2-5-260628",
+     "modelVersion": "2.5-260628",
+     "transport": "byteplus-async",
+     "endpoint": "/api/v3/contents/generations/tasks",
+     "resolution": "480p",
+     "capabilityVerifiedAt": "2026-08-16",
+     "tier": "standard"
+    },
+    "candidateHashes": [
+     {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "sha256": "8706c5bad6f88696fa78ecc946bf6776122f0f9c7de6b76455d60f4e3c2f85d2"
+     }
+    ]
+   },
+   "batchId": "S4.SH1-b1-20260901T194423-cb3ddd22",
    "pendingSpendAuth": null,
-   "lastBatchBinding": null,
-   "disclosure": null,
-   "firedAt": null,
+   "lastBatchBinding": "aa8313b245d08afa216fdd5c00481508",
+   "disclosure": {
+    "shotId": "S4.SH1",
+    "candidateCount": 1,
+    "costPerCandidateUsd": 3.123,
+    "maxBatchCostUsd": 3.123,
+    "promptVersion": "91d37f82",
+    "bindingHash": "aa8313b245d08afa216fdd5c00481508",
+    "envelopeHash": "903a9f4a2f4376c827fd229472d1a262daea28b821a4c9af3dc4e094572ca30a",
+    "packageHash": "99b6743e5b1766cc",
+    "rerollOfUnchangedPackage": false,
+    "packageRevision": 3,
+    "referenceSlots": {
+     "@图1": "opening keyframe",
+     "@图2": "Aida · complete-turnaround turnaround view",
+     "@图3": "Keen · complete-turnaround turnaround view",
+     "@图4": "Bo · complete-turnaround turnaround view",
+     "@图5": "prop:satchel",
+     "@图6": "scene plate"
+    },
+    "logicalReferenceSlots": {
+     "@图1": "opening keyframe",
+     "@图2": "Bo",
+     "@图3": "Keen",
+     "@图4": "Aida",
+     "@图5": "prop:satchel",
+     "@图6": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "openingAnchor": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
+    "audioAsset": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav",
+    "shotDurationSec": 30.0,
+    "provider": "byteplus",
+    "providerModelId": "dreamina-seedance-2-5-260628",
+    "modelVersion": "2.5-260628",
+    "resolution": "480p",
+    "promptScores": {
+     "contractCompleteness": {
+      "score": 18,
+      "maximum": 20,
+      "threshold": 17,
+      "ready": true,
+      "criticalFailures": []
+     },
+     "creative": {
+      "score": 18,
+      "maximum": 20,
+      "threshold": 17,
+      "ready": true,
+      "criticalFailures": []
+     },
+     "authoringScore10": 10.0,
+     "authoringMaximum": 10,
+     "firingFloor10": 9.5
+    },
+    "comparisonRunId": null,
+    "internalProviderCalls": [
+     {
+      "segmentIndex": 1,
+      "durationSec": 30.0,
+      "stageNumbers": []
+     }
+    ],
+    "tier": "standard"
+   },
+   "firedAt": "2026-09-01T20:02:19",
    "keyframeApproval": {
     "approved": true,
     "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
@@ -4292,7 +5773,19 @@
      "reasonAtDecision": "Two subjects are present and the scene plate matches the forest path look, but the keyframe fails contract compliance because Bo is carrying a visible satchel, which is forbidden, and the opening composition/geography does not cleanly match the authored placements. Character identities are otherwise readable."
     }
    },
-   "keyframePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png"
+   "keyframePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
+   "durationProvenance": {
+    "authoritative": true,
+    "rulesVersion": "engine-rules-v4",
+    "costVersion": "beat-costs-v3",
+    "costSignature": "8056e9ce221145f7cddc26ad9502a0e363cd9ef1022dc366672d0c6f24f5deb5",
+    "costedAt": "2026-09-01T18:44:22.941894+00:00",
+    "unitDurationSec": 30.0,
+    "recommendedDurationSec": 15,
+    "ready": true
+   },
+   "lastPromptVersion": "91d37f82",
+   "candidatesGenerated": 1
   }
  ],
  "validation": {

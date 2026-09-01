@@ -1257,7 +1257,97 @@ def carry_approved_gag_clock_text(shot, direction):
         if item.get("mode") in {"SMALL", "BIG"}
     }
     translation = getattr(direction, "creativeTranslation", None)
-    for clock in list(getattr(translation, "gagClocks", None) or []):
+    clocks = list(getattr(translation, "gagClocks", None) or [])
+    if approved_by_code:
+        event_by_beat = {}
+        for event in animation_locked_visual_events(shot):
+            for beat_id in event.get("beatIds") or []:
+                event_by_beat[str(beat_id)] = str(event.get("primaryEvent") or "").strip()
+        authored_by_code = {str(clock.beatCode or ""): clock for clock in clocks}
+        clocks = []
+        for code, approved in approved_by_code.items():
+            clock = authored_by_code.get(code)
+            if clock is None:
+                clock = GagClockDirection(
+                    beatCode=code,
+                    mode=approved["mode"],
+                    setup=approved["setup"],
+                    anticipation=(approved.get("expectation") or approved["setup"]),
+                    impact=approved["disruption"],
+                    reaction=(approved.get("hold") or approved["button"]),
+                    recoveryHold=approved["hold"],
+                    recoveryHoldSec=float(approved.get("recoveryHoldSec") or 1.0),
+                    button=approved["button"],
+                    retroactive=False,
+                    providerAction=(event_by_beat.get(code) or approved["disruption"]),
+                )
+            clocks.append(clock)
+        translation.gagClocks = clocks
+        design = getattr(translation, "generationDesign", None)
+        if design is not None:
+            design.completeGagArcCount = len(clocks)
+        internal_shots = list(getattr(direction, "shotPlan", None) or [])
+        approved_stages = list(shot.get("storyboardStagePlanApproved") or [])
+        if internal_shots and len(internal_shots) == len(approved_stages):
+            for internal_shot, stage in zip(internal_shots, approved_stages):
+                internal_shot.gagBeatIds = [
+                    beat_id for beat_id in (stage.get("beatIds") or [])
+                    if str(beat_id) in approved_by_code
+                ]
+        else:
+            for internal_shot in internal_shots:
+                internal_shot.gagBeatIds = [
+                    beat_id for beat_id in (internal_shot.gagBeatIds or [])
+                    if str(beat_id) in approved_by_code
+                ]
+
+    # Dialogue ownership is occurrence-based, not text-based: repeated lines are
+    # separate approved audio events. Rebind them deterministically to the signed
+    # internal-shot story actions so a model cannot collapse identical wording.
+    internal_shots = list(getattr(direction, "shotPlan", None) or [])
+    dialogue = provider_dialogue_lines(shot)
+    approved_internal = list(shot.get("storyboardInternalShotPlanApproved") or [])
+    if internal_shots and dialogue:
+        owner_by_line = {}
+        for shot_index, internal_shot in enumerate(internal_shots):
+            for line_index in list(internal_shot.dialogueLineIndexes or []):
+                if 1 <= int(line_index) <= len(shot.get("dialogueLines") or []):
+                    owner_by_line.setdefault(int(line_index), shot_index)
+        if len(approved_internal) == len(internal_shots):
+            approved_words = [
+                " ".join(emission.dialogue_words(item.get("storyAction") or ""))
+                for item in approved_internal
+            ]
+            for fallback, line in enumerate(dialogue, start=1):
+                line_index = int(line.get("_sourceDialogueIndex") or fallback)
+                exact_words = " ".join(emission.dialogue_words(
+                    line.get("exactText") or line.get("text") or ""))
+                matches = [index for index, words in enumerate(approved_words)
+                           if exact_words and exact_words in words]
+                if matches:
+                    owner_by_line[line_index] = matches[0]
+        for fallback, line in enumerate(dialogue, start=1):
+            line_index = int(line.get("_sourceDialogueIndex") or fallback)
+            if line_index in owner_by_line:
+                continue
+            previous = next((owner_by_line[index] for index in range(line_index - 1, 0, -1)
+                             if index in owner_by_line), None)
+            following = next((owner_by_line[index] for index in range(
+                line_index + 1, len(shot.get("dialogueLines") or []) + 1)
+                              if index in owner_by_line), None)
+            owner_by_line[line_index] = following if following is not None else (
+                previous if previous is not None else 0)
+        source_lines = shot.get("dialogueLines") or []
+        for shot_index, internal_shot in enumerate(internal_shots):
+            indexes = sorted(index for index, owner in owner_by_line.items()
+                             if owner == shot_index)
+            internal_shot.dialogueLineIndexes = indexes
+            internal_shot.dialogueDirections = [
+                str((source_lines[index - 1].get("delivery") or
+                     "Perform exactly as approved in @Audio1.")).strip()
+                for index in indexes
+            ]
+    for clock in clocks:
         approved = approved_by_code.get(str(clock.beatCode or ""))
         if not approved:
             continue

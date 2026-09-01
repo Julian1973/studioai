@@ -285,6 +285,56 @@ def test_v4_forward_gate_accepts_exact_registered_scoped_director_amendment(
             package, changed, "1", "Ep2")
 
 
+def test_v4_forward_gate_preserves_see_after_voice_performance_note_change(
+        tmp_path, monkeypatch):
+    shot = {
+        "shotId": "S4.SH1",
+        "storyIntentApproved": {"narrativeFunction": "Bo admits his worry."},
+        "performanceBudgetApproved": {"minimumHonestDurationSec": 30},
+        "cinematographyContractApproved": {"storyPointOfView": "Stay with Bo."},
+        "performanceContractApproved": {"beatOwner": "4.B1"},
+        "dialogueLines": [{
+            "speaker": "Keen", "exactText": "Bo, this is Aida.",
+            "startSec": 16.3, "endSec": 17.3,
+            "delivery": "Bo, this is Aida.",
+            "performanceText": "[quietly] Bo, this is Aida.",
+        }],
+        "voiceDirectorBrief": [{"elevenLabsV3Direction": "Bo, this is Aida."}],
+        "audioBrief": "Keen: Bo, this is Aida.",
+    }
+    amendment_path = tmp_path / "amendment.json"
+    amendment_path.write_text(json.dumps({
+        "approvalState": "approved", "shotId": "S4.SH1",
+        "scriptVersionId": "sha256:" + "d" * 64,
+        "shot": shot,
+    }), encoding="utf-8")
+    package = {
+        "creativeDirectingStandardVersion": 4,
+        "sourceStoryboard": {
+            "path": amendment_path.name, "approvalState": "approved"},
+        "scopedAmendments": [{
+            "shotId": "S4.SH1", "kind": "dialogue-correction",
+            "scriptVersionId": "sha256:" + "d" * 64,
+            "preservedStages": ["direction", "scenelook", "keyframe"],
+        }],
+    }
+    current = json.loads(json.dumps(shot))
+    current["dialogueLines"][0]["delivery"] = (
+        "Gentle introduction that leaves the emotional space with Bo.")
+    current["voiceDirectorBrief"][0]["elevenLabsV3Direction"] = (
+        "Gentle introduction that leaves the emotional space with Bo.")
+    current["audioBrief"] = "Keen: gentle introduction."
+    monkeypatch.setattr(cb_render, "ROOT", tmp_path)
+
+    assert cb_render._require_forward_directing_source(
+        package, current, "4", "Ep2") == shot
+
+    current["dialogueLines"][0]["exactText"] = "Changed words."
+    with pytest.raises(cb_render.Refused, match="no longer matches"):
+        cb_render._require_forward_directing_source(
+            package, current, "4", "Ep2")
+
+
 def test_scoped_amendment_carries_only_the_exact_approved_scene_plate(
         tmp_path, monkeypatch):
     plate = tmp_path / "approved-plate.png"

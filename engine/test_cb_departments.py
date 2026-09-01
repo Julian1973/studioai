@@ -2137,6 +2137,52 @@ def test_human_working_prompt_derives_trace_from_approved_contracts_only_when_ex
     assert working["derivedFromApprovedContracts"] is True
 
 
+def test_animation_hydrates_omitted_gag_clocks_from_signed_contracts():
+    event = "Bo turns the feared tail-poof into play and giggles while moving."
+    shot = {
+        "comedyContractsApproved": [{
+            "beatCode": "4.B1", "mode": "SMALL",
+            "setup": "Keen begins a countdown game.",
+            "expectation": "The countdown may trigger embarrassment.",
+            "disruption": "Bo deliberately repeats the tail-poof as play.",
+            "hold": "Let Bo's giggle register.",
+            "button": "Bo's giggle confirms the shift.",
+        }],
+        "storyboardStagePlanApproved": [{
+            "stageNumber": 1, "beatIds": ["4.B1"],
+            "primaryEvent": event,
+            "observableEndState": "Bo keeps moving, looser and giggling.",
+        }],
+        "storyboardInternalShotPlanApproved": [{
+            "shotNumber": 1,
+            "storyAction": "Aida says Every single time. Then repeats Every single time.",
+        }],
+        "dialogueLines": [
+            {"speaker": "Aida", "exactText": "Every single time.",
+             "delivery": "Plain and steady."},
+            {"speaker": "Aida", "exactText": "Every single time.",
+             "delivery": "A settled confirmation."},
+        ],
+    }
+    direction = SimpleNamespace(
+        creativeTranslation=SimpleNamespace(
+            gagClocks=[], generationDesign=SimpleNamespace(completeGagArcCount=0)),
+        shotPlan=[SimpleNamespace(
+            gagBeatIds=["4.B1", "4.B2"], dialogueLineIndexes=[1],
+            dialogueDirections=["Model collapsed the duplicate."])],
+    )
+
+    repaired = D.carry_approved_gag_clock_text(shot, direction)
+
+    assert [clock.beatCode for clock in repaired.creativeTranslation.gagClocks] == ["4.B1"]
+    assert repaired.creativeTranslation.gagClocks[0].providerAction == event
+    assert repaired.creativeTranslation.generationDesign.completeGagArcCount == 1
+    assert repaired.shotPlan[0].gagBeatIds == ["4.B1"]
+    assert repaired.shotPlan[0].dialogueLineIndexes == [1, 2]
+    assert repaired.shotPlan[0].dialogueDirections == [
+        "Plain and steady.", "A settled confirmation."]
+
+
 def test_animation_reads_missing_beat_contracts_only_from_exact_approved_storyboard(tmp_path,
                                                                                     monkeypatch):
     monkeypatch.setattr(R, "ROOT", tmp_path)

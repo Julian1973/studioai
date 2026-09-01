@@ -3302,7 +3302,27 @@ def _require_forward_directing_source(pkg, shot, scene, episode):
         if not registered:
             raise Refused(
                 f"REFUSED — {shot['shotId']}'s scoped Director amendment is not registered")
-        if scoped_card != shot:
+        # Acting/cadence notes are a HEAR concern. They may be refined after an
+        # approved dialogue amendment without reopening the preserved SEE work.
+        # Keep every script, timing, staging and directing field exact while
+        # ignoring only voice-provider performance wording and its derived brief.
+        def forward_contract_view(card):
+            card = json.loads(json.dumps(card))
+            for line in card.get("dialogueLines") or []:
+                line.pop("delivery", None)
+                line.pop("performanceText", None)
+            card.pop("voiceDirectorBrief", None)
+            card.pop("audioBrief", None)
+            return card
+
+        scoped_match = scoped_card == shot
+        if (not scoped_match and
+                registered.get("kind") in ("dialogue-correction",
+                                            "voice-contract-correction") and
+                "direction" in (registered.get("preservedStages") or []) and
+                "keyframe" in (registered.get("preservedStages") or [])):
+            scoped_match = forward_contract_view(scoped_card) == forward_contract_view(shot)
+        if not scoped_match:
             raise Refused(
                 f"REFUSED — {shot['shotId']}'s scoped Director amendment no longer matches "
                 "the production shot")

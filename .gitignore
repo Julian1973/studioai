@@ -42,6 +42,7 @@ projects/*/canon/backup.json   # per-machine backup-drive setting, never project
 
 # Python
 __pycache__/
+.venv/
 *.pyc
 
 # Backups + scratch/archive folders left over from iteration

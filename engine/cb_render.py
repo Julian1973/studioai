@@ -4414,8 +4414,9 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
     if instance_lock:
         protections.insert(0, instance_lock)
     protections.append(cb_engine_rules.natural_keyframe_staging_boilerplate(shot))
+    opening_shot = {**shot, "charactersInFrame": list(contract["cast"])}
     protections.append(cb_engine_rules.living_performance_boilerplate(
-        shot, direction, medium="still"))
+        opening_shot, direction, medium="still"))
     reference_body = ("\n".join(reference_lines) + separation_line).strip()
     compact_reference_body = (
         "\n".join(compact_reference_lines) + compact_separation_line).strip()
@@ -4472,15 +4473,23 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
              "Animation owns performance, movement, recovery and camera evolution.")))
         if protections:
             sections.append(("Protect", "\n".join(protections)))
+        required_props = [str(value).strip() for value in
+                          shot.get("requiredPropReferences") or [] if str(value).strip()]
+        if required_props:
+            prop_rule = (
+                "No unapproved extra cast, props or body-mounted loads; include only the "
+                f"required referenced {' and '.join(required_props)} with its approved owner."
+            )
+        else:
+            prop_rule = "No extra cast, props, body-mounted bags, sacks, baskets or dangling loads."
         sections.append(("Forbidden",
                          ("No portrait/payoff, identity or scale drift, altered reference "
-                          "features, duplicates, anatomy errors, extra cast/props, text, "
-                          "watermarks or body-mounted loads."
+                          f"features, duplicates, anatomy errors, text or watermarks. {prop_rule}"
                           if compact_forbidden else
                           "No portrait, locked extreme action pose or payoff, identity or scale "
                           "drift, changed accessories, omitted reference features, duplicates, "
-                          "anatomy errors, extra props, text, watermark or body-mounted bags, "
-                          "sacks, baskets or dangling loads. Preserve the locked Scene Look.")))
+                          f"anatomy errors, text or watermark. {prop_rule} Preserve the locked "
+                          "Scene Look.")))
         return "\n\n".join(f"[{name}]\n{body}" for name, body in sections).strip()
 
     # Emit the complete approved direction. Prompt length never selects a shorter variant.

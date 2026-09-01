@@ -159,8 +159,9 @@ def living_performance_boilerplate(shot, direction=None, *, medium="animation"):
             if str(name).strip()]
     subjects = ", ".join(cast) if cast else "every visible character"
     if medium == "still":
+        verb = "each have" if len(cast) > 1 else "has"
         return (
-            f"Living performance lock: {subjects} has a specific motivated eyeline target "
+            f"Living performance lock: {subjects} {verb} a specific motivated eyeline target "
             "and a readable active thought in the eyes. Use a precise asymmetric expression; "
             "no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic "
             "camera-facing expression."

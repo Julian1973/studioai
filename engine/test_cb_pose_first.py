@@ -196,6 +196,38 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
     assert "[Starting Staging Envelope]" not in prompt
 
 
+def test_stage_prompt_uses_opening_cast_and_does_not_forbid_required_satchel(monkeypatch):
+    _stub_provider_identity(monkeypatch)
+    direction = {
+        **_approved_keyframe_fields(("Bo", "Keen")),
+        "audienceRead": "Bo and Keen are already travelling in the countdown game.",
+        "lensAndCameraRelationship": "Travel beside them at Bo's height.",
+        "lightingAndDepth": "Warm dappled forest light.",
+        "openingFrameLayout": {"sameDepth": False, "placements": [
+            {"character": "Bo", "pose": "walking with satchel",
+             "facing": "screen-right"},
+            {"character": "Keen", "pose": "walking beside Bo",
+             "facing": "screen-right"},
+        ]},
+    }
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
+        "Bo": {"heightIn": 30}, "Keen": {"heightIn": 57}, "Aida": {"heightIn": 60}})
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, {
+        "shotId": "S4.SH1",
+        "charactersInFrame": ["Bo", "Keen", "Aida"],
+        "openingCharactersInFrame": ["Bo", "Keen"],
+        "requiredPropReferences": ["satchel"],
+        "keyframeReferenceSlots": {
+            "@图1": "Bo", "@图2": "Keen", "@图3": "prop:satchel",
+            "@图4": "scene plate"},
+    })
+    sections = cb_departments.prompt_sections(prompt)
+    assert "Aida" not in sections["Protect"]
+    assert "Bo, Keen each have" in sections["Protect"]
+    assert "required referenced satchel with its approved owner" in sections["Forbidden"]
+    assert "body-mounted bags, sacks" not in sections["Forbidden"]
+
+
 def test_stage_prompt_preserves_verbose_specialist_direction(monkeypatch):
     _stub_provider_identity(monkeypatch)
     direction = {

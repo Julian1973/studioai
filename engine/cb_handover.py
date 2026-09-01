@@ -689,6 +689,47 @@ def _cast_for_shot(sb_shot, beats):
     return cast
 
 
+def _opening_cast_for_shot(sb_shot, beats, characters_cfg):
+    """Derive frame-one cast from the first approved stage, not the packed unit's full cast."""
+    stages = list(sb_shot.get("stagePlan") or [])
+    if not stages:
+        return None
+    participants = []
+    for beat_id in stages[0].get("beatIds") or []:
+        for character in (beats.get(beat_id) or {}).get("participatingCharacters") or []:
+            if character not in participants:
+                participants.append(character)
+    if not participants:
+        return None
+    opening_shot = dict(sb_shot)
+    opening_shot.update({
+        "principalPerformance": stages[0].get("primaryEvent") or "",
+        "physicalOrEmotionalChange": stages[0].get("emotionalOrComicTurn") or "",
+        "closingImage": stages[0].get("observableEndState") or "",
+        "physicalPerformance": "",
+        "animationTiming": "",
+    })
+    return _characters_in_frame(opening_shot, participants, characters_cfg)
+
+
+def _required_prop_references(sb_shot, pd, cast, characters_cfg):
+    """Bind canon prop plates when an approved packed shot visibly uses the prop."""
+    approved = json.dumps({
+        "shot": sb_shot,
+        "continuityInState": pd.get("continuityInState"),
+        "continuityOutState": pd.get("continuityOutState"),
+    }, ensure_ascii=False).casefold()
+    required = []
+    for character in cast:
+        for prop_id in ((characters_cfg.get(character) or {}).get("props") or {}):
+            prop_id = str(prop_id).strip().casefold()
+            if (prop_id and re.search(
+                    rf"(?<![a-z0-9]){re.escape(prop_id)}(?![a-z0-9])", approved)
+                    and prop_id not in required):
+                required.append(prop_id)
+    return required
+
+
 def place_voices_for_beat(beat_id, beat_shot_ids, voices, beat_dialogue, pd_by_shot):
     """Place exact occurrences from typed ProductionDetail assignments, never prose/text."""
     if any(not isinstance(item, dict) or not item.get("dialogueOccurrenceId")
@@ -926,7 +967,8 @@ def _cinematography_instruction(contract, shot_id):
 
 
 def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
-                comedy_stagings=None, comedy_contracts=None, emotion_contracts=None):
+                comedy_stagings=None, comedy_contracts=None, emotion_contracts=None,
+                opening_cast=None):
     """Map one approved storyboard shot into cb_engine's production contract. Executable
     performance, continuity and dialogue timing come only from typed fields; approved prose
     is retained for provenance and review, never treated as a substitute."""
@@ -999,7 +1041,10 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
         physicalStaging=physical_staging, physicalStagings=physical_stagings,
         prohibited=list(pd.get("essentialProviderProtections") or [])[:3],
         charactersInFrame=characters_in_frame,
+        openingCharactersInFrame=opening_cast,
         offscreenSpeakers=_offscreen_speakers(shot_voices, characters_cfg),
+        requiredPropReferences=_required_prop_references(
+            sb_shot, pd, characters_in_frame, characters_cfg),
         continuityIn=continuity_in,
         continuityOut=continuity_out)
     retained = {"continuityProseIn": pd.get("continuityIn", ""),
@@ -1125,7 +1170,8 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
             sb_shot, pd, cast, placement.get(sb_shot["shotId"], []), prev,
             characters_cfg, _owned_big_comedy_stagings(sb, sb_shot),
             _owned_beat_contracts(sb, sb_shot, "comedyContract"),
-            _owned_beat_contracts(sb, sb_shot, "emotionContract"))
+            _owned_beat_contracts(sb, sb_shot, "emotionContract"),
+            opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg))
         rec = _compile_one(shot, retained, scene, characters_cfg)
         line_count += len(shot.dialogueLines)
         shots_out.append(rec)
@@ -1251,7 +1297,8 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
         sb_shot, pd, cast, placement.get(shot_id, []), None, characters_cfg,
         _owned_big_comedy_stagings(sb, sb_shot),
         _owned_beat_contracts(sb, sb_shot, "comedyContract"),
-        _owned_beat_contracts(sb, sb_shot, "emotionContract"))
+        _owned_beat_contracts(sb, sb_shot, "emotionContract"),
+        opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg))
     rec = _compile_one(shot, retained, scene, characters_cfg)
     _assert_no_internal_leak([rec])
 
@@ -1349,7 +1396,8 @@ def _scoped_shot(storyboard, shot_id, characters_cfg, prev):
         sb_shot, pd, cast, placement.get(shot_id, []), prev, characters_cfg,
         _owned_big_comedy_stagings(storyboard, sb_shot),
         _owned_beat_contracts(storyboard, sb_shot, "comedyContract"),
-        _owned_beat_contracts(storyboard, sb_shot, "emotionContract"))
+        _owned_beat_contracts(storyboard, sb_shot, "emotionContract"),
+        opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg))
     return shot, retained, card_hash
 
 

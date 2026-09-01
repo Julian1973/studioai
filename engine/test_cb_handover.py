@@ -693,6 +693,26 @@ def test_canon_offscreen_speaker_is_audible_and_never_added_to_visible_cast():
     assert shot.offscreenSpeakers == ["Bo's Mum"]
 
 
+def test_first_stage_drives_opening_cast_and_visible_canon_props_are_bound():
+    sb_shot = _sb_shot("S4.SH1", ["4.B1", "4.B2"], "PLANNED_CUT")
+    sb_shot["stagePlan"] = [{
+        "beatIds": ["4.B1"], "primaryEvent": "Bo walks beside Keen",
+        "emotionalOrComicTurn": "play begins", "observableEndState": "Bo keeps moving",
+    }]
+    sb_shot["closingImage"] = "Aida sits beside Bo while he grips the satchel"
+    beats = {
+        "4.B1": {"participatingCharacters": ["Bo", "Keen"]},
+        "4.B2": {"participatingCharacters": ["Bo", "Keen", "Aida"]},
+    }
+    cfg = {
+        "Bo": {"props": {"satchel": "cb-seed/assets/props/CB_Bo_satchel.png"}},
+        "Keen": {}, "Aida": {},
+    }
+    assert H._opening_cast_for_shot(sb_shot, beats, cfg) == ["Bo", "Keen"]
+    assert H._required_prop_references(
+        sb_shot, _pd("S4.SH1", True), ["Bo", "Keen", "Aida"], cfg) == ["satchel"]
+
+
 def test_offscreen_speaker_is_removed_from_visual_continuity_boundary():
     boundary = {
         "lighting": "warm hollow light",

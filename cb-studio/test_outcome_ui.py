@@ -718,6 +718,14 @@ def test_keyframe_screen_keeps_scene_plate_and_opening_frame_distinct():
     assert 'mode==="keyframe"?visualAnchorPairHTML(m):""' in APP
 
 
+def test_keyframe_references_remain_open_during_live_polling():
+    assert 'return `<details class="techdetails" open><summary>References &amp; checks' in APP
+
+
+def test_keyframe_confirmation_formats_multi_provider_model_ids():
+    assert 'Object.entries(build.providerModelId).map(([key,value])=>key+" · "+value).join(" + ")' in APP
+
+
 def test_stale_voice_take_cannot_be_approved_against_corrected_words():
     assert "takeMatchesCurrent===false" in APP
     assert "Regenerate corrected performance" in APP

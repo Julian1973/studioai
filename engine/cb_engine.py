@@ -1005,24 +1005,26 @@ def _character_species(name, characters_cfg):
         return species
     if record.get("isBee"):
         return "bee"
+    # Species comes from positive identity evidence. Negative canon such as
+    # Bo's "avoid bee wings" must never turn him into a bee.
     identity = " ".join(str(record.get(key) or "") for key in (
-        "size", "key_features", "promptRole", "avoid",
+        "size", "key_features", "promptRole",
     )).lower()
     bible = record.get("bible") or {}
     identity += " " + " ".join(str(bible.get(key) or "") for key in (
         "title", "whoTheyAre",
     )).lower()
-    for candidate in ("dolphin", "bee", "bear"):
+    for candidate in ("squirrel", "dolphin", "bee", "bear"):
         if re.search(rf"\b{candidate}s?\b", identity):
             return candidate
     return "character"
 
 
-def _inline_bindings(text, shot, characters_cfg, start=2):
+def _inline_bindings(text, shot, characters_cfg, start=2, characters=None):
     """Bind each character's reference slot INLINE at their first mention — "Fuzzby (@图2, larger
     bee)" — identity, size and slot in one gesture, exactly where the model reads the name.
     Returns (text, next_slot) — next_slot is the first free @图N after the cast (the plate's slot)."""
-    order = sorted(shot.charactersInFrame,
+    order = sorted(characters if characters is not None else shot.charactersInFrame,
                    key=lambda c: (characters_cfg.get(c, {}).get("sizeRank") or 99))
     species = {c: _character_species(c, characters_cfg) for c in order}
     epithets = dict(species)
@@ -1051,7 +1053,10 @@ def reference_slots(shot, characters_cfg, for_keyframe=False):
     Deterministic (same sizeRank sort as _inline_bindings) and persisted in the package so a
     later characters.json edit can never silently reorder an already-compiled shot's uploads.
     A keyframe generation has no @图1 anchor (it MAKES the first frame): cast starts at @图1."""
-    order = sorted(shot.charactersInFrame,
+    cast = (shot.openingCharactersInFrame
+            if for_keyframe and shot.openingCharactersInFrame is not None
+            else shot.charactersInFrame)
+    order = sorted(cast,
                    key=lambda c: (characters_cfg.get(c, {}).get("sizeRank") or 99))
     slots, n = {}, 1
     if not for_keyframe:
@@ -1355,8 +1360,12 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
     camera holds at the opening instant, plus lighting) — never composition, never geography.
     When a caller's own mapping has (degenerately) duplicated one prose sentence into both
     continuityIn.lighting and continuityIn.cameraSide, it is stated once, not twice."""
-    pose, next_slot = _inline_bindings(shot.openingPose.strip().rstrip("."), shot,
-                                        characters_cfg, start=1)
+    opening_cast = (shot.openingCharactersInFrame
+                    if shot.openingCharactersInFrame is not None
+                    else shot.charactersInFrame)
+    pose, next_slot = _inline_bindings(
+        shot.openingPose.strip().rstrip("."), shot, characters_cfg, start=1,
+        characters=opening_cast)
     # correction #4: typed absence — None means nothing genuinely carries in, checked with
     # `is None`, never a sentinel-string comparison.
     if shot.continuityIn is None:
@@ -1372,7 +1381,17 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
             str(value).strip().casefold()
             for value in (shot.requiredPropReferences or [])
             if str(value).strip()}), start=next_slot):
+        owners = [name for name in opening_cast
+                  if prop_id in {
+                      str(key).strip().casefold()
+                      for key in ((characters_cfg.get(name) or {}).get("props") or {})
+                  }]
+        owned_label = f"{owners[0]}'s {prop_id}" if len(owners) == 1 else f"prop:{prop_id}"
         prop_lines.append(
+            f"@图{index} is the sole visual authority for {owned_label}; use its identity "
+            "and construction only, never its background or staging. Keep it with "
+            f"{owners[0]} in frame one in the physically plausible carried or worn state "
+            "implied by the shot." if len(owners) == 1 else
             f"@图{index} is the sole visual authority for prop:{prop_id}; use its prop "
             "identity and construction only, never its background or staging.")
     scene_plate_slot = next_slot + len(prop_lines)
@@ -1383,7 +1402,7 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
         f"{continuity_clause}@图{scene_plate_slot} scene plate anchors palette, materials and "
         f"lighting only — never composition or geography.",
         cb_engine_rules.living_performance_boilerplate(
-            {"charactersInFrame": list(shot.charactersInFrame)}, medium="still"),
+            {"charactersInFrame": list(opening_cast)}, medium="still"),
         ("Negative: character redesign, appearance drift from the references, extra "
          "characters, on-screen text."),
     ].copy())

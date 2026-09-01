@@ -369,8 +369,13 @@
     "Aida"
    ],
    "offscreenSpeakers": [],
-   "requiredPropReferences": [],
-   "openingCharactersInFrame": null,
+   "requiredPropReferences": [
+    "satchel"
+   ],
+   "openingCharactersInFrame": [
+    "Bo",
+    "Keen"
+   ],
    "closingCharactersInFrame": null,
    "continuityIn": null,
    "continuityOut": {
@@ -851,23 +856,24 @@
      "physicalActionRelationship": "Voice opens the door, then the body-and-silence complete the comfort."
     }
    ],
-   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Bo, @图3 only for Keen, @图4 only for Aida and @图5 only for the path set.\n\nBegin exactly on @图1, the approved opening frame — one continuous branch-veiled forest-path unit at Bo's height: start already travelling beside him mid-countdown as his tail-poof bursts inside forward motion, let the camera's travel die exactly when he stops and sits clutching his satchel,. Performance phases: anticipation: Bo Moving beside Keen, Bo braces through each counted beat, then begins joining the rhythm himself as his body prepares for the next tail-poof instead of recoiling from it; action: Bo Bo triggers the tail-poof on purpose more than once while still walking, opens into brief giggles, then abruptly halts, drops onto the fallen log, grips the satchel tight, tucks in, and later lifts his attention toward Aida when she notices the bag; reaction: Aida Aida climbs down through the branch veil slightly caught by twigs, brushes herself clear, sits beside Bo with space left between them, fixes on the satchel rather than his face, and holds her grounded stillness as Bo turns toward her; settle: ENVIRONMENT Wind moves gently through the leaves around the seated trio as the path remains open behind Bo and the group holds the silence without breaking the pocket. Cause and effect: The counted walking rhythm lets Bo prepare for and repeat the tail-poof as shared play, which opens him briefly; when that momentum runs out, his forward travel stops instantly, gravity drops him to the log, and his paws tighten on the satchel. Aida's branch-snag softens her arrival, her seated distance avoids crowding, and the untouched path plus moving leaves keep the pressure present while Bo's body eases from clenched to less shut. Visible turn: Bo shifts from laughing through the poof to visibly folded worry, then from folded isolation to cautious receptiveness once Aida notices his effort and calmly stays with the question. Land on: Bo remains seated in the same branch-veiled pocket with the path still ahead, satchel no longer crushed at maximum tension, and his posture reading quieter and more open rather than cured or ready to spring up. Acting freedom: Animators may vary the exact cadence of the repeated poofs, the size of Bo's giggle leaks, Keen's tiny settle beside him, Aida's twig-clearing business, and the amount of final loosening in Bo's paws, so long as the opening relief is real but temporary, the stop is sudden, Aida never crowds, and the final hold stays unresolved. Bo seated on the fallen log with branches framing him in the foreground and the path still receding behind him, satchel held but no longer crushed tight, his gaze resting into the space ahead while Aida sits steady beside him.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Keen and Bo and Aida. Preserve character identity and relative scale. Keep leaf behind ear visible.",
-   "promptWords": 482,
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Bo, @图3 only for Keen, @图4 only for Aida, @图5 only for prop:satchel and @图6 only for the path set.\n\nBegin exactly on @图1, the approved opening frame — one continuous branch-veiled forest-path unit at Bo's height: start already travelling beside him mid-countdown as his tail-poof bursts inside forward motion, let the camera's travel die exactly when he stops and sits clutching his satchel,. Performance phases: anticipation: Bo Moving beside Keen, Bo braces through each counted beat, then begins joining the rhythm himself as his body prepares for the next tail-poof instead of recoiling from it; action: Bo Bo triggers the tail-poof on purpose more than once while still walking, opens into brief giggles, then abruptly halts, drops onto the fallen log, grips the satchel tight, tucks in, and later lifts his attention toward Aida when she notices the bag; reaction: Aida Aida climbs down through the branch veil slightly caught by twigs, brushes herself clear, sits beside Bo with space left between them, fixes on the satchel rather than his face, and holds her grounded stillness as Bo turns toward her; settle: ENVIRONMENT Wind moves gently through the leaves around the seated trio as the path remains open behind Bo and the group holds the silence without breaking the pocket. Cause and effect: The counted walking rhythm lets Bo prepare for and repeat the tail-poof as shared play, which opens him briefly; when that momentum runs out, his forward travel stops instantly, gravity drops him to the log, and his paws tighten on the satchel. Aida's branch-snag softens her arrival, her seated distance avoids crowding, and the untouched path plus moving leaves keep the pressure present while Bo's body eases from clenched to less shut. Visible turn: Bo shifts from laughing through the poof to visibly folded worry, then from folded isolation to cautious receptiveness once Aida notices his effort and calmly stays with the question. Land on: Bo remains seated in the same branch-veiled pocket with the path still ahead, satchel no longer crushed at maximum tension, and his posture reading quieter and more open rather than cured or ready to spring up. Acting freedom: Animators may vary the exact cadence of the repeated poofs, the size of Bo's giggle leaks, Keen's tiny settle beside him, Aida's twig-clearing business, and the amount of final loosening in Bo's paws, so long as the opening relief is real but temporary, the stop is sudden, Aida never crowds, and the final hold stays unresolved. Bo seated on the fallen log with branches framing him in the foreground and the path still receding behind him, satchel held but no longer crushed tight, his gaze resting into the space ahead while Aida sits steady beside him.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Keen and Bo and Aida. Preserve character identity and relative scale. Keep leaf behind ear visible.",
+   "promptWords": 486,
    "referenceSlots": {
     "@图1": "opening keyframe",
     "@图2": "Bo",
     "@图3": "Keen",
     "@图4": "Aida",
-    "@图5": "scene plate",
+    "@图5": "prop:satchel",
+    "@图6": "scene plate",
     "@Audio1": "voice track"
    },
    "audioBrief": "SHOT S4.SH1 — voice-only performance for @Audio1.\nKeen: \"3,2,1 …\" — [excited] 3,2,1 …. Target 1.2-2.4s.\nBo: \"3,2,1 … POOF! The tail does ‘The Thing’ again and again. Bo giggles.\" — [nervous] 3,2,1 … POOF! The tail does ‘The Thing’ again and again. [laughs] Bo giggles.. Target 2.7-6.0s.\nBo: \"I’m STILL worried about going to the to the Learning Circle.\" — [quietly] I’m STILL worried about going to the to the Learning Circle.. Target 8.3-10.5s.\nBo: \"They all know each other. Beat. But I don’t know them, and they don't know me.\" — They all know each other. [pause] But I don’t know them, and they don't know me.. Target 11.3-15.0s.\nAida: \"Tricky trees.\" — Tricky trees.. Target 16.3-17.1s.\nKeen: \"Bo, this is Aida.\" — [quietly] Bo, this is Aida.. Target 17.6-18.5s.\nAida: \"You packed your bag.\" — [quietly] You packed your bag.. Target 19.0-19.9s.\nBo: \"Four times.\" — Four times.. Target 20.1-20.6s.\nAida: \"I would have done five.\" — I would have done five.. Target 20.8-21.9s.\nBo: \"You get scared too?\" — [quietly] You get scared too?. Target 22.5-23.3s.\nAida: \"Every single time.\" — Every single time.. Target 23.5-24.3s.\nBo: \"But you still go?\" — But you still go?. Target 24.9-25.7s.\nAida: \"Every single time. BEAT.\" — Every single time. [pause]. Target 25.9-26.6s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
-   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Aida (@图3, bear) is in frame. At Bo (@图1, bee)'s height on the branch-veiled forest path, the camera is already travelling beside him as his body is mid-poof reaction inside Keen (@图2, bear)'s ongoing countdown, with the path ahead slipping past in dappled depth.\n\n@图4 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nLiving performance lock: Bo, Keen, Aida has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
-   "keyframePromptWords": 139,
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: At Bo (@图1, squirrel)'s height on the branch-veiled forest path, the camera is already travelling beside him as his body is mid-poof reaction inside Keen (@图2, bear)'s ongoing countdown, with the path ahead slipping past in dappled depth.\n\n@图3 is the sole visual authority for Bo's satchel; use its identity and construction only, never its background or staging. Keep it with Bo in frame one in the physically plausible carried or worn state implied by the shot.\n\n@图4 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+   "keyframePromptWords": 172,
    "keyframeReferenceSlots": {
     "@图1": "Bo",
     "@图2": "Keen",
-    "@图3": "Aida",
+    "@图3": "prop:satchel",
     "@图4": "scene plate"
    },
    "internalConstraints": "Hard constraints: Keep the shot as one unbroken continuous unit whose camera travel visibly dies with Bo's stop; a reset setup would invalidate the scene's core meaning; Maintain the path ahead readable behind Bo through the seated section; losing that background pressure breaks the belonging-fear staging; no Aida must enter from the existing branch veil slightly snagged and settle with visible respectful space from Bo; a clean announced entrance or crowding changes her dramatic function; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
@@ -932,7 +938,137 @@
     ]
    },
    "approvedTake": null,
-   "harvestFrame": null
+   "harvestFrame": null,
+   "departmentWork": {
+    "cinematography": {
+     "approved": null,
+     "candidate": {
+      "department": "Cinematography",
+      "worker": "Cinematographer / DP",
+      "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+      "model": "gpt-5.4",
+      "preparedAt": "2026-09-01T14:49:58",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "7925e46bc2adda6c32e0bfae3e75f6e45fd904f1e4411db576daccbae674e2a9",
+      "output": {
+       "shotId": "S4.SH1",
+       "audienceRead": "We arrive already moving at Bo's height inside the game, so the path feels temporarily manageable; the frame must already contain the pressure of the road ahead and the branch-pocket that will later hold his stop.",
+       "composition": "Low lateral tracking two-shot in a compressed forest corridor, Bo carried as the emotional anchor at center-right foreground and Keen just off his left shoulder at matching travel pace. Use branch veils as soft near-foreground edges rather than blockage, keeping a readable tunnel of path receding behind and ahead of Bo. Favor a slightly front-right quarter on Bo so his body read, satchel presence, and the forward corridor all coexist in one frame.",
+       "lensAndCameraRelationship": "Moderately wide lens feel, roughly 32mm full-frame equivalent, camera at Bo eye-to-chest height, traveling parallel with the pair along the path. Perspective should feel intimate and inside their stride without caricatured distortion; enough width to hold both opening characters, the branch veil, and lead room down the path while preserving the later ability for travel to die naturally at Bo's abrupt stop.",
+       "lightingAndDepth": "Dappled daylight filtered through dense canopy, gently warmed within the branch pocket, with soft shafts and moving leaf breakup across the ground and fur. Background depth should remain layered and legible, but the immediate path pocket is slightly more enclosed than the wider forest beyond. Foreground branches and mossy trunks give soft depth brackets; keep the receding path luminous enough to play as quiet pressure.",
+       "geography": [
+        "Camera tracks beside Bo and Keen on their right side at Bo's height, moving in the same direction as their walk.",
+        "Bo holds the center-right foreground lane; Keen travels slightly screen-left of Bo, close enough for shared play without overlap.",
+        "The path runs diagonally from lower-left foreground toward upper-right background, staying visibly open ahead through the frame.",
+        "A fallen log sits ahead on Bo's side of the path corridor, reachable without changing camera side later.",
+        "Thin branch veils hang in the near foreground frame-left and upper frame, creating the pocket Aida will later descend through.",
+        "The deeper forest stands on both sides of the path with mossy trunks and crystal growths, but the corridor itself remains clear for performance travel."
+       ],
+       "charactersInFrame": [
+        "Bo",
+        "Keen"
+       ],
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "openingFrameLayout": {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Bo",
+        "referenceHeightFraction": 0.46,
+        "sameDepth": false,
+        "placements": [
+         {
+          "character": "Bo",
+          "centerX": 0.61,
+          "centerY": 0.63,
+          "apparentScale": 1.0,
+          "depthPlane": 1,
+          "bodyAngleDegrees": -18.0,
+          "facing": "screen-right along the path, attention held forward along the travel line",
+          "pose": "walking in anticipation, body braced mid-countdown with satchel carried and tail readying for the shared game"
+         },
+         {
+          "character": "Keen",
+          "centerX": 0.42,
+          "centerY": 0.61,
+          "apparentScale": 1.14,
+          "depthPlane": 1,
+          "bodyAngleDegrees": -12.0,
+          "facing": "screen-right along the path, subtly angled toward Bo",
+          "pose": "walking alongside Bo in upbeat anticipation, matching pace and leaving Bo clear as the focal read"
+         }
+        ]
+       },
+       "negativeSpace": [
+        "Hold open lead space frame-right and upper-right for the path pressure that Bo is moving toward.",
+        "Keep a readable empty corridor behind and slightly beyond Bo for the later seated hold on the same axis.",
+        "Reserve branch-veiled space frame-left upper-midground for Aida's later entrance through the existing foliage pocket."
+       ],
+       "referenceUse": [
+        "Bind Keen identity to the supplied Keen turnaround reference.",
+        "Bind Bo identity to the supplied Bo turnaround reference.",
+        "Bind satchel design, scale, leather color, strap, and clasp details to the supplied Bo's satchel reference.",
+        "Bind forest palette, mossy trunks, crystal growths, dappled daylight, and path geometry to the supplied scene look/environment reference."
+       ],
+       "continuityProtections": [
+        "Opening frame must include exactly Bo and Keen only; Aida is not yet visible.",
+        "Maintain camera on Bo's front-right quarter side so the later seated continuity can remain on the same side.",
+        "Keep the path ahead readable through the opening frame; do not crowd it with trunks or character overlap.",
+        "Satchel must already be present on Bo and readable as a carried object, but not yet crushed in a shutdown hold state because that belongs later in the performance arc."
+       ],
+       "providerPrompt": "S4.SH1 opening keyframe, 16:9 animated cinematic frame in Crystal Bears canon style. Use the supplied references in plan order: Keen turnaround for Keen identity, Bo turnaround for Bo identity, Bo's satchel sheet for satchel design and scale, forest scene look for environment palette/materials/light. At Bo's height inside a branch-veiled forest path, camera already traveling parallel beside the characters on their right side, intimate moderately wide lens feel around 32mm full-frame equivalent. Opening frame shows only Bo and Keen mid-walk during the countdown game, with Bo as emotional anchor at center-right foreground and Keen slightly screen-left beside him, both fully readable with lead room. Bo is a small reddish squirrel with his canon proportions from reference, carrying the referenced brown leather satchel; he is in a playable anticipation state, braced mid-countdown and preparing for the tail-poof game while still moving, not frozen into a big acted payoff. Keen matches pace supportively, upbeat and close but not overlapping or stealing focus. Preserve a clear receding path corridor running diagonally toward frame-right background so the audience feels the pressure of where Bo is headed. Include soft near-foreground branch veils and overhead limbs framing the pocket, mossy trunks, exposed roots, and subtle crystal growths from the approved scene look. Lighting is dappled daylight, gently warmed within the enclosed pocket, with soft shafts, leaf breakup, and layered forest depth; keep the path luminous and legible. Composition should feel intimate, playful for the moment, and already carrying the possibility of an abrupt stop later. No Aida visible yet, no reset angle, no exaggerated distortion, no blocked performance corridor, no loss of path readability."
+      },
+      "packageRevision": 3,
+      "inputSignature": {
+       "stage": "cinematography",
+       "model": "gpt-5.4",
+       "skillHashes": {
+        "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+        "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+       },
+       "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+       "shotContractHash": "4034193dd9b041ded04a4d4cc6f875050f78b35eb72c4676520ba7a8581b1583",
+       "sceneLookHash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b",
+       "references": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图2",
+         "role": "Keen",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "26151202911f2d373133dc0cc7c6e6d693c5bb77f6f4a67b1de7637fd9a1e166",
+         "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图1",
+         "role": "Bo",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "1c5e0e06b97b361f0c64bcbb8a0a3400193d993098800e002cc2b9a33171268d",
+         "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+        },
+        {
+         "slot": "@图3",
+         "sourceSlot": "@图3",
+         "role": "prop:satchel",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1"
+        },
+        {
+         "slot": "@图4",
+         "sourceSlot": "@图4",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b"
+        }
+       ]
+      }
+     },
+     "history": []
+    }
+   }
   }
  ],
  "validation": {
@@ -944,8 +1080,8 @@
   "scopeShotIds": [
    "S4.SH1"
   ],
-  "validatedAt": "2026-09-01T13:19:22",
-  "revision": 1
+  "validatedAt": "2026-09-01T14:48:57",
+  "revision": 3
  },
  "reviewCriteria": {
   "story": "approved audience experience and beat change remain legible",
@@ -5993,7 +6129,7 @@
   }
  },
  "sourceStoryboard": {
-  "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/creative/Ep2_scene4_storyboard.json",
+  "path": "cb-output/creative/Ep2_scene4_storyboard.json",
   "md5": "0e6c1ac9c77018b814fdbf1b1e08dcf6",
   "sha256": "f1e62eabe2b18ff5b654d237ac6c74a7e5b04e83327ac304b1a44f813fa230d8",
   "approvalState": "approved",
@@ -6074,16 +6210,7 @@
    },
    "algorithm": "sha256",
    "digest": "d434ef45000b30d6c57c3b7d42d3ed9dea80e24f3b8f70d09ce859e3e0ceb0fd"
-  },
-  "approvalLog": [
-   {
-    "target": "scene",
-    "state": "prepared",
-    "note": "Prepared automatically from the active scene script before production.",
-    "at": "2026-09-01T13:19:21",
-    "by": "Studio Director"
-   }
-  ]
+  }
  },
  "inputSignature": {
   "kind": "production-package",
@@ -6100,8 +6227,8 @@
   "algorithm": "sha256",
   "digest": "b0568df62b11c6f768e044f6963552f6118664bae05dc1693284690c93a87af2"
  },
- "revision": 1,
- "revisionNote": "Promoted S4.SH1 from human-approved storyboard Ep2_scene4_storyboard.json into the canonical package cb_render.py already reads. Revision 0's shots/ledger and every prior spend-token binding hash derived from them are stale (the package's own shots-hash changed).",
+ "revision": 3,
+ "revisionNote": "Promoted S4.SH1 from human-approved storyboard Ep2_scene4_storyboard.json into the canonical package cb_render.py already reads. Revision 2's shots/ledger and every prior spend-token binding hash derived from them are stale (the package's own shots-hash changed).",
  "repairLog": [],
  "handover": {
   "carriedForwardUnchangedShots": [],

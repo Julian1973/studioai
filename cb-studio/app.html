@@ -4379,7 +4379,7 @@ function referenceManifestHTML(tok,mode,data){
   if(mode!=="keyframe")return referencePanel;
   const prep=(data&&data.posePreparation)||{},needsAttention=!!((prep.items||[]).find(item=>!item.ready&&item.status==="needs-correction"));
   const details=`${referencePanel}${posePreparationHTML(tok,data)}${technicalControlsHTML(data)}`;
-  return `<details class="techdetails" ${needsAttention?"open":""}><summary>References &amp; checks · ${ready}/${refs.length} provider assets ready${prep.items&&prep.items.length?` · ${(prep.items||[]).filter(x=>x.ready).length}/${prep.items.length} poses qualified`:""}</summary>${details}</details>`;
+  return `<details class="techdetails" open><summary>References &amp; checks · ${ready}/${refs.length} provider assets ready${prep.items&&prep.items.length?` · ${(prep.items||[]).filter(x=>x.ready).length}/${prep.items.length} poses qualified`:""}</summary>${details}</details>`;
 }
 async function shPoseUpload(tok,character,input){
   const file=input.files&&input.files[0];if(!file)return;
@@ -5405,7 +5405,9 @@ async function openDisclosureModal(kind,ctx){
     const calls=Number.isFinite(Number(build.maxMediaCalls))?Number(build.maxMediaCalls):1;
     const maximum=build.estimatedMaxUsd!=null?Number(build.estimatedMaxUsd):(unit!=null?unit*calls:null);
     title="Build keyframe";
-    const modelLabel=build.providerModelId||"Seedream 5 Pro";
+    const modelLabel=(build.providerModelId&&typeof build.providerModelId==="object")
+      ?Object.entries(build.providerModelId).map(([key,value])=>key+" · "+value).join(" + ")
+      :(build.providerModelId||"Seedream 5 Pro");
     rows=[["Model",modelLabel],
           ["Format","16:9 still opening frame"],
           ["Creative target",inp.keyframePromptHeadline||"A performance-ready opening stage"],

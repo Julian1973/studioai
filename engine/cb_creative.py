@@ -67,6 +67,7 @@ from pydantic.json_schema import SkipJsonSchema
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
+import paths as P  # noqa: E402 — the project profile is the only path authority (T44)
 import cb_llm
 import cb_canon
 import cb_departments
@@ -75,7 +76,7 @@ import cb_lineage
 import cb_scripts
 import cb_unit_packing
 
-CREATIVE = ROOT / "projects" / "crystal-bears" / "creative"
+CREATIVE = pathlib.Path(P.CREATIVE)                  # T44: from the project profile
 OUT = ROOT / "cb-output" / "creative"
 CANON_VERSION = "1.0"
 ENGINE_VERSION = "creative-room-2.2 (2026-08-01, story-to-screen supervision contracts)"
@@ -807,12 +808,12 @@ class ShowrunnerReview(BaseModel):
 # CANON SOURCES + GATE 0 READINESS
 # ─────────────────────────────────────────────────────────────────────────────────────────
 _CANON_SOURCES = {
-    "showBible": ROOT / "projects/crystal-bears/canon/LOCKED_CANON.md",
+    "showBible": pathlib.Path(P.CANON),
     "studioBible": ROOT / "CRYSTAL_BEARS_STUDIO_BIBLE.md",
-    "characters": ROOT / "projects/crystal-bears/canon/characters.json",
-    "locations": ROOT / "projects/crystal-bears/canon/locations.json",
-    "continuity": ROOT / "projects/crystal-bears/canon/continuity.json",
-    "styleLaw": ROOT / "projects/crystal-bears/laws/style.txt",
+    "characters": pathlib.Path(P.CHARS),
+    "locations": pathlib.Path(P.LOCATIONS),
+    "continuity": pathlib.Path(P.CONTINUITY),
+    "styleLaw": pathlib.Path(P.STYLE_LAW),
     "showrunnerTaste": CREATIVE / "SHOWRUNNER_TASTE_CANON.md",
     "directorTaste": CREATIVE / "DIRECTOR_TASTE_CANON.md",
     "cinematographyTaste": CREATIVE / "CINEMATOGRAPHY_TASTE_CANON.md",
@@ -2715,7 +2716,7 @@ def migrate(episode="Ep1", log=print):
     for name, rec in chars.items():
         if not isinstance(rec, dict) or not rec.get("bible"):
             continue
-        entry = {"provenance": {"source": "projects/crystal-bears/canon/characters.json",
+        entry = {"provenance": {"source": P.rel(P.CHARS),
                                   "method": "mechanical field mapping", "at": _now()}}
         for field in _PERF_FIELDS:
             src = _BIBLE_MAP.get(field)

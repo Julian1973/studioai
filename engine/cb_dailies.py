@@ -11,9 +11,10 @@ import json
 import pathlib
 import uuid
 from collections import Counter
+import paths as P  # the project profile is the only path authority (T44)
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PATH = ROOT / "projects" / "crystal-bears" / "creative" / "learning" / "DAILIES_LIBRARY.jsonl"
+PATH = pathlib.Path(P.DAILIES_LIBRARY)               # T44: from the project profile
 
 
 def _now():

@@ -4,7 +4,7 @@ import pathlib
 import pytest
 
 import cb_scripts
-import studio_profile
+import project_profile as studio_profile
 
 
 def _profile(root, show_id="moon-lanterns", *, adapter="moon-lanterns-v1",

@@ -39,11 +39,13 @@ import uuid
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
-LEARNING = ROOT / "projects" / "crystal-bears" / "creative" / "learning"
+sys.path.insert(0, str(HERE))
+import paths as P  # noqa: E402 — the project profile is the only path authority (T44)
+LEARNING = pathlib.Path(P.LEARNING)                 # T44: from the project profile
 EVIDENCE_P = LEARNING / "EVIDENCE_LIBRARY.json"
 PATTERNS_P = LEARNING / "PATTERN_LIBRARY.json"
 ACTIVE_P = LEARNING / "ACTIVE_CREATIVE_MEMORY.json"
-EXEMPLARS_P = ROOT / "projects" / "crystal-bears" / "creative" / "EXEMPLAR_LIBRARY.json"
+EXEMPLARS_P = pathlib.Path(P.EXEMPLARS)             # T44: from the project profile
 ARCHIVE_V1 = ROOT / "cb-output" / "creative" / "archive_process_v1"
 
 SOURCES = ("show canon", "character-performance canon", "relationship canon",
@@ -73,13 +75,14 @@ def _save(p, data):
 # 1. EVIDENCE LIBRARY — immutable, append-only; the asset/decision/context/rationale is
 #    preserved, never only a summarised lesson
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def capture_evidence(outcome, userFeedback="", *, project="crystal-bears", episode="Ep1",
+def capture_evidence(outcome, userFeedback="", *, project=None, episode="Ep1",
                      scene=None, beat=None, shot=None, role=None, sourceVersion=None,
                      classification="", category="creative", scope="scene",
                      assetPointers=None, context="", capturedBy="system"):
     """Record ONE outcome as immutable evidence. Returns the record (with its evidenceId).
     Every field the directive names is present; missing knowledge stays empty rather than
     invented."""
+    project = project or P.PROJECT_ID
     if outcome not in OUTCOMES:
         raise ValueError(f"outcome must be one of {OUTCOMES}: {outcome!r}")
     lib = _load(EVIDENCE_P, {"note": "IMMUTABLE evidence — append-only, never edited or "
@@ -87,7 +90,7 @@ def capture_evidence(outcome, userFeedback="", *, project="crystal-bears", episo
                                        "rationale are preserved.", "records": []})
     rec = {"evidenceId": f"ev-{uuid.uuid4().hex[:10]}",
            "capturedAt": _now(), "capturedBy": capturedBy,
-           "project": project, "show": "Crystal Bears", "episode": episode,
+           "project": project, "show": P.PROJECT_NAME, "episode": episode,
            "scene": scene, "beat": beat, "shot": shot,
            "sourceVersion": sourceVersion,
            "creativeRole": role,

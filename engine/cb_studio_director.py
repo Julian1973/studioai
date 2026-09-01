@@ -15,6 +15,7 @@ import sys
 from typing import Any
 
 import cb_asset_registry
+import paths as P  # the project profile is the only path authority (T44)
 
 
 SCHEMA_VERSION = 1
@@ -33,7 +34,7 @@ _COMPLEXITY_SIGNALS = (
 
 def _scene_continuity_rules(episode: str, scene: str) -> list[dict[str, str]]:
     """Project the canonical character-state rules relevant to this scene."""
-    path = pathlib.Path(__file__).resolve().parent / "config" / "continuity.json"
+    path = pathlib.Path(P.CONTINUITY)                    # T44: from the project profile
     try:
         config = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):

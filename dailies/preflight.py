@@ -10,6 +10,14 @@ import json, os, pathlib, re, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ENGINE = ROOT / "engine"
+
+
+def _paths():
+    """engine/paths — the project profile is the only path authority (T44)."""
+    if str(ENGINE) not in sys.path:
+        sys.path.insert(0, str(ENGINE))
+    import paths
+    return paths
 PLAYBOOK = pathlib.Path(__file__).resolve().parent / "playbook.json"
 
 # Appearance vocabulary that must NEVER sit near a character (identity law: canon
@@ -104,8 +112,8 @@ def checks(plan: dict, beat_meta: dict, playbook: dict) -> list:
     if not re.search(r"NEGATIVE|Do not|constraints", prompt, re.I):
         add("NOTE", "no-negatives", "no negatives/constraints section detected", "segprompt v3 shape")
     # 9. Banned vocabulary (corrected-away ghosts)
-    banned_file = ROOT / "projects/crystal-bears/canon/banned_vocabulary.json"
-    if banned_file.exists():
+    banned_file = pathlib.Path(_paths().BANNED_VOCABULARY) if _paths().BANNED_VOCABULARY else None
+    if banned_file and banned_file.exists():
         try:
             for term in json.loads(banned_file.read_text()):
                 t = term if isinstance(term, str) else term.get("term", "")

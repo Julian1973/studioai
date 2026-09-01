@@ -10,10 +10,11 @@ import pathlib
 import re
 
 import cb_audio_authority
+import paths as P  # the project profile is the only path authority (T44)
 
 
 HERE = pathlib.Path(__file__).resolve().parent
-BEAT_COST_PATH = HERE / "config" / "beat_costs.json"
+BEAT_COST_PATH = pathlib.Path(P.BEAT_COSTS)          # T44: from the project profile
 RULES_VERSION = "engine-rules-v4"
 
 

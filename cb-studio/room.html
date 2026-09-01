@@ -564,7 +564,7 @@ const SCENES = [
 ];
 
 /* ── STATE ─────────────────────────────────────────────────────── */
-const KEY = "crystal-bears-room-v2";
+const KEY = "studioai-room-v2:" + ((new URLSearchParams(location.hash.replace(/^#/, ""))).get("p") || "default");  // T44: per-project local state
 let state = load();
 let openScene = state.openScene || 1;
 let openUnit = state.openUnit || null;

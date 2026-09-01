@@ -47,14 +47,15 @@ import cb_canon
 import cb_db
 import cb_lineage
 import cb_scripts
+import paths as P  # the project profile is the only path authority (T44)
 
-SCRIPTS = ROOT / "projects" / "crystal-bears" / "episodes" / "scripts"
+SCRIPTS = pathlib.Path(P.SCRIPTS)                    # T44: from the project profile
 STUDIO_SCRIPTS = ROOT / "cb-studio" / "data" / "scripts"
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 OUT = ROOT / "cb-output"
 CREATIVE_OUT = OUT / "creative"
 EPISODES_JSON = ROOT / "cb-studio" / "data" / "episodes.json"
-CHARACTERS_JSON = ROOT / "projects" / "crystal-bears" / "canon" / "characters.json"
+CHARACTERS_JSON = pathlib.Path(P.CHARS)              # T44: from the project profile
 ARCHIVE_DIR = OUT / "archive" / "story_intake_rejected"
 
 

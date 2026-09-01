@@ -32,6 +32,7 @@ cb-output/asset-registry/.*.tmp
 # instead via tools/backup_media.py (to the 5t external drive), not tracked here.
 /cb-seed/
 /projects/*/assets/
+projects/*/canon/backup.json   # per-machine backup-drive setting, never project data
 /archive/
 /cb_pages/
 

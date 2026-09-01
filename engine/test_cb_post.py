@@ -278,7 +278,14 @@ def test_load_sfx_library_gracefully_degrades_on_missing_manifest():
     """No config/sfx_library.json on disk -> an empty dict, never a crash (matching mix()'s own have_mus/
     have_amb file-exists convention, never gag_locks.json's hard-fail-on-missing-key one)."""
     def _run():
-        return cb_post._load_sfx_library()
+        # T44: the manifest path comes from the project profile (absolute), not the cwd — point the
+        # module at a path that does not exist inside the scratch dir to exercise "no manifest".
+        saved = cb_post.SFX_LIBRARY_PATH
+        cb_post.SFX_LIBRARY_PATH = os.path.join(os.getcwd(), "config", "sfx_library.json")
+        try:
+            return cb_post._load_sfx_library()
+        finally:
+            cb_post.SFX_LIBRARY_PATH = saved
     result = _scratch(_run)
     ok = result == {}
     print(f"  {'PASS' if ok else 'FAIL'}  missing manifest -> empty dict, no crash — got {result!r}")

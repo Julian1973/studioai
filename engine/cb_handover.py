@@ -92,10 +92,11 @@ import cb_db
 import cb_lineage
 import cb_scripts
 import cb_unit_packing
+import paths as P  # the project profile is the only path authority (T44)
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
-CHARS = HERE.parent / "projects" / "crystal-bears" / "canon" / "characters.json"
+CHARS = pathlib.Path(P.CHARS)                        # T44: from the project profile
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 
 APPROVED_STATE = "approved"          # what /api/storyboard-approve writes at top level

@@ -4,7 +4,7 @@
 Confirmed gap: engine/media/ (rendered clips, keyframes, plates, settle/re-mint frames — 453MB as of this
 writing) is gitignored by design (generated output, not source) and was found to have ZERO off-machine
 backup — a local-disk failure would lose every paid-for render with no recovery path, unlike canon/code
-which are safely in git -> GitHub. projects/crystal-bears/canon/ is already git-backed; it's included here too
+which are safely in git -> GitHub. the project's canon/ is already git-backed; it's included here too
 as a zero-cost belt-and-suspenders copy, not because it needed a new mechanism.
 
 Destination: the configured Google Drive Desktop folder under ``The Crystal Bears Final``. Never deletes or
@@ -29,7 +29,11 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CONFIG_PATH = os.path.join(ROOT, "engine", "config", "backup.json")
+sys.path.insert(0, os.path.join(ROOT, "engine"))
+import paths as P  # noqa: E402 — the project profile is the only path authority (T44)
+# backup.json is a per-machine setting (where the 5t drive is mounted), not project data — it lives
+# beside the project's canon so one file covers the project, and is git-ignored.
+CONFIG_PATH = os.path.join(P.CONFIG, "backup.json")
 
 
 def _load_config():
@@ -44,7 +48,7 @@ DRIVE = os.path.dirname(BACKUP_ROOT)
 
 SOURCES = [
     ("engine/media", "media"),
-    ("projects/crystal-bears/canon", "canon"),
+    (P.rel(P.CONFIG), "canon"),
     ("cb-output", "production-state"),
     # Added 2026-07-08 (workspace-clutter pass): these three are real, irreplaceable Crystal Bears assets
     # (cb-seed/ holds the locked character turnarounds cb_prompts.py references by filename — hand-curated,

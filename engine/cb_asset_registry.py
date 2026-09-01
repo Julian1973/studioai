@@ -26,7 +26,7 @@ MEDIA = pathlib.Path(paths.MEDIA).resolve()
 OUTPUT = pathlib.Path(paths.OUTPUT).resolve()
 if not (OUTPUT / "Ep1_The_Adventure_Begins_beat_package.json").exists():
     OUTPUT = (ROOT / "cb-output").resolve()
-ASSET_ROOT = (ROOT / "cb-seed" / "assets").resolve()
+ASSET_ROOT = pathlib.Path(paths.ASSETS).resolve()   # T44: from the project profile
 PROJECTS_ROOT = (ROOT / "projects").resolve()
 REGISTRY_DIR = OUTPUT / "asset-registry"
 REGISTRY_PATH = REGISTRY_DIR / "assets.json"

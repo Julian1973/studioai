@@ -14,12 +14,13 @@ import re
 from copy import deepcopy
 
 import cb_emission_conformance as emission
+import paths as P  # the project profile is the only path authority (T44)
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-VOICE_CARDS_PATH = ROOT / "projects/crystal-bears/canon/voice_cards.json"
-REGISTERS_PATH = ROOT / "projects/crystal-bears/creative/VOICE_ARCHETYPE_REGISTERS.json"
-RULEBOOK_PATH = ROOT / "projects/crystal-bears/creative/VOICE_DIRECTOR_RULEBOOK.json"
-PLAYBOOK_PATH = ROOT / "projects/crystal-bears/creative/learning/VOICE_PLAYBOOK.json"
+VOICE_CARDS_PATH = pathlib.Path(P.VOICE_CARDS)       # T44: from the project profile
+REGISTERS_PATH = pathlib.Path(P.VOICE_REGISTERS)
+RULEBOOK_PATH = pathlib.Path(P.VOICE_RULEBOOK)
+PLAYBOOK_PATH = pathlib.Path(P.VOICE_PLAYBOOK)
 COMPILER_VERSION = "voice-director-v1"
 
 _TAG_RE = re.compile(r"\[([^\]]+)\]")

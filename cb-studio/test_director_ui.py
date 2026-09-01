@@ -835,7 +835,10 @@ def test_workbench_gate_summary_is_dynamic_and_actionable():
 
 
 def test_workbench_state_is_persisted_for_project_reopen():
-    assert "/api/project-workbench-state?project=crystal-bears" in JS
+    # T44: the project id is never hard-coded in director.js — it comes from the route or the
+    # server's active profile (projectId()), and is URL-encoded into the workbench call.
+    assert "/api/project-workbench-state?project=${encodeURIComponent(await projectId())}" in JS
+    assert "project=crystal-bears" not in JS
     assert 'api("/api/project-workbench-state"' in JS
     assert "loadProjectWorkbenchState" in JS
     assert "saveProjectWorkbenchState" in JS

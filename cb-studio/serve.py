@@ -67,6 +67,14 @@ def _canonical_cb_state():
     return _canonical_engine_module("cb_state")
 
 ACTIVE_SHOW = studio_profile.load_show_profile(ROOT)
+ACTIVE_PROJECT_ID = ACTIVE_SHOW.profile.showId        # T44: never a hard-coded show id in this file
+ASSETS = ACTIVE_SHOW.assets_root or (ROOT / "cb-seed" / "assets")   # the project's reference media root
+
+
+def _paths():
+    """engine/paths — the project profile is the only path authority (T44)."""
+    import paths
+    return paths
 SHOW_PROFILE_STATUS = studio_profile.capability_report(ACTIVE_SHOW)
 CANON_CONFIG = ACTIVE_SHOW.canon_paths["characters"].parent
 # T43 (2026-09-01): ONE script store per project — the profile's episodes.scripts. The old
@@ -633,10 +641,11 @@ def _load_workbench_state():
 
 
 def _workbench_key(project, episode, scene):
-    return f"{project or 'crystal-bears'}:{episode or 'Ep1'}:{scene or '1'}"
+    return f"{project or ACTIVE_PROJECT_ID}:{episode or 'Ep1'}:{scene or '1'}"
 
 
-def _project_workbench_state(project="crystal-bears", episode="Ep1", scene="1"):
+def _project_workbench_state(project=None, episode="Ep1", scene="1"):
+    project = project or ACTIVE_PROJECT_ID
     payload = _load_workbench_state()
     key = _workbench_key(project, episode, scene)
     return payload.get("projects", {}).get(key, {
@@ -650,7 +659,7 @@ def _project_workbench_state(project="crystal-bears", episode="Ep1", scene="1"):
 
 
 def _save_project_workbench_state(update):
-    project = str(update.get("project") or "crystal-bears")
+    project = str(update.get("project") or ACTIVE_PROJECT_ID)
     episode = str(update.get("episode") or "Ep1")
     scene = str(update.get("scene") or "1")
     key = _workbench_key(project, episode, scene)
@@ -915,7 +924,7 @@ def visions_state():
     """{"Ep1": ["2.V1", ...], ...} — every declared vision shot code per episode, straight off continuity.json.
     Lets the Studio's relay-truth walk-back (app.html's keyframesFor) skip vision beats exactly like the
     engine's own cb_prompts.vision_for does server-side — a vision never chains and is never chained through."""
-    f = CBGEN / "config" / "continuity.json"
+    f = pathlib.Path(_paths().CONTINUITY)   # T44: from the project profile
     try:
         d = json.loads(f.read_text()) if f.exists() else {}
     except Exception:
@@ -1963,7 +1972,7 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
     session = cb_studio_director.build_session(
         **common, animation_contract=animation_contract)
     _expose_session_shot_media(session, media)
-    workbench = _project_workbench_state("crystal-bears", episode, scene)
+    workbench = _project_workbench_state(ACTIVE_PROJECT_ID, episode, scene)
     session["savedRetakeNotes"] = dict(workbench.get("retakeNotes") or {})
     return session
 
@@ -2393,16 +2402,30 @@ def _storyboard_approval(d):
 # chokepoint; it was never actually reachable and has been removed.
 #
 # Approved EXACT files the UI fetches by name (case-insensitive):
+def _project_approved_files():
+    """T44: every registered project's own characters.json / locked canon / show bible, derived from
+    each projects/<id>/profile.json — never a hand-typed per-project list."""
+    out = set()
+    for pid in studio_profile.list_project_ids(ROOT):
+        try:
+            prof = studio_profile.load_show_profile(ROOT, pid)
+        except studio_profile.ShowProfileError:
+            continue
+        for path in (prof.canon_paths.get("characters"), prof.canon_paths.get("lockedCanon"),
+                     prof.show_bible_path):
+            if path:
+                out.add("/" + os.path.relpath(str(path), str(ROOT)).replace(os.sep, "/").lower())
+    return out
+
+
 _APPROVED_FILES = {
     "/cb-studio/app.html",                # the SPA entry
     "/cb-studio/director.html",           # outcome-first creative entry
     "/cb-studio/room.html",               # Studio room assistant entry
     "/cb-studio/board.html",              # Studio board / rough-cut entry
-    "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
-    "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
-    f"/projects/{ACTIVE_SHOW.profile.showId}/canon/characters.json",
-    f"/projects/{ACTIVE_SHOW.profile.showId}/canon/locked_canon.md",
-}                                         # add a new project's showBibleFile / configBase characters.json here if it differs
+    "/engine/config/characters.json",     # compatibility link → the active project's canon (one release)
+    "/crystal_bears_locked_canon.md",     # compatibility link → the active project's canon (one release)
+} | _project_approved_files()
 _MEDIA_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico",
               ".mp4", ".webm", ".mov", ".m4v", ".mp3", ".wav", ".m4a", ".ogg",
               ".csv", ".srt"}   # retake sheet (csv) + review-overlay labels (srt) download/serve
@@ -2746,7 +2769,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         # [removed 2026-07-16 cutover: /api/masters — handled by the 410 gate above]
         if self.path == "/api/loclib":
             manifest = {}
-            mf = ROOT / "cb-seed" / "assets" / "locations" / "_manifest.json"
+            mf = ASSETS / "locations" / "_manifest.json"
             try:
                 if mf.exists():
                     manifest = json.loads(mf.read_text())
@@ -2808,7 +2831,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             # even ones not yet linked to a scene plate)
             refs = []
             try:
-                ad = ROOT / "cb-seed" / "assets"
+                ad = ASSETS
                 paths = list((ad / "ep1").glob("CB_Scene_*")) + list(ad.glob("CB_*_plate.*"))
                 for p in sorted(set(paths)):
                     if not p.is_file():
@@ -2865,7 +2888,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if urlsplit(self.path).path == "/api/project-workbench-state":
             from urllib.parse import urlparse, parse_qs
             q = parse_qs(urlparse(self.path).query)
-            project = (q.get("project") or ["crystal-bears"])[0]
+            project = (q.get("project") or [ACTIVE_PROJECT_ID])[0]
             ep = (q.get("episode") or ["Ep1"])[0]
             scene = (q.get("scene") or ["1"])[0]
             if not (_SHOT_TOKEN.match(project) and _SHOT_TOKEN.match(ep) and _SHOT_TOKEN.match(scene)):
@@ -3621,7 +3644,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/project-workbench-state":
             try:
                 d = self._body()
-                project = str(d.get("project") or "crystal-bears")
+                project = str(d.get("project") or ACTIVE_PROJECT_ID)
                 episode = str(d.get("episode") or "Ep1")
                 scene = str(d.get("scene") or "1")
                 if not (_SHOT_TOKEN.match(project) and _SHOT_TOKEN.match(episode) and _SHOT_TOKEN.match(scene)):
@@ -3902,7 +3925,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if raw.strip().startswith("data:") and "," in raw:
                     raw = raw.split(",", 1)[1]
                 safe = re.sub(r"[^A-Za-z0-9]+", "", name) or "Scene"
-                outdir = ROOT / "cb-seed" / "assets" / "ep1"
+                outdir = ASSETS / "ep1"
                 outdir.mkdir(parents=True, exist_ok=True)
                 fn = f"CB_Scene_{safe}_anchor.png"
                 (outdir / fn).write_bytes(base64.b64decode(raw))
@@ -3928,8 +3951,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                     if ext not in ("png", "jpg", "jpeg", "webp"):
                         ext = "png"
                     safe = "CB_" + re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_") + "_anchor." + ext
-                    (ROOT / "cb-seed" / "assets").mkdir(parents=True, exist_ok=True)
-                    (ROOT / "cb-seed" / "assets" / safe).write_bytes(base64.b64decode(raw))
+                    ASSETS.mkdir(parents=True, exist_ok=True)
+                    (ASSETS / safe).write_bytes(base64.b64decode(raw))
                     entry["anchor"] = "../cb-seed/assets/" + safe
                 if d.get("turnData"):
                     raw = d["turnData"]
@@ -3939,8 +3962,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                     if ext not in ("png", "jpg", "jpeg", "webp"):
                         ext = "png"
                     safe = "CB_" + re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_") + "_turn4." + ext
-                    (ROOT / "cb-seed" / "assets").mkdir(parents=True, exist_ok=True)
-                    (ROOT / "cb-seed" / "assets" / safe).write_bytes(base64.b64decode(raw))
+                    ASSETS.mkdir(parents=True, exist_ok=True)
+                    (ASSETS / safe).write_bytes(base64.b64decode(raw))
                     turn_path = "../cb-seed/assets/" + safe
                     entry["turn4"] = turn_path
                     entry.setdefault("refs", [])
@@ -3952,7 +3975,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if len(reference_data) > 12:
                     raise ValueError("a character update accepts at most 12 reference images")
                 if reference_data:
-                    char_dir = ROOT / "cb-seed" / "assets" / "characters" / slug(name)
+                    char_dir = ASSETS / "characters" / slug(name)
                     char_dir.mkdir(parents=True, exist_ok=True)
                     entry.setdefault("refs", [])
                     for index, reference in enumerate(reference_data, start=1):
@@ -4103,7 +4126,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     if not shot_id or stage not in ("1", "2", "3"):
                         self._json(400, {"error": "A shot and SEE, HEAR or WATCH stage are required."}); return
                     state = _save_project_workbench_state({
-                        "project": "crystal-bears", "episode": ep, "scene": scene,
+                        "project": ACTIVE_PROJECT_ID, "episode": ep, "scene": scene,
                         "retakeNotes": {f"{shot_id}:{stage}": note},
                     })
                     self._json(200, {"ok": True, "zeroSpend": True,
@@ -4132,7 +4155,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                         route = ("/cb-studio/director.html#view=pipeline&scene=" +
                                  quote(scene) + "&step=analysis")
                     else:
-                        route = ("/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=" +
+                        route = (f"/cb-studio/app.html#p={ACTIVE_PROJECT_ID}&pg=pipeline&ep=" +
                                  quote(ep) + "&sc=" + quote(scene) + "&st=" +
                                  quote(str(stage or "storyboard")) +
                                  (("&shot=" + quote(target)) if target else ""))
@@ -4150,7 +4173,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                             self._json(400, {"error": "Choose a scene plate source first."}); return
                         try:
                             sp = pathlib.Path(source_path).resolve()
-                            roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                            roots = (MEDIA.resolve(), ASSETS.resolve())
                             if not sp.exists() or not any(sp.is_relative_to(root) for root in roots):
                                 self._json(400, {"error": "sourcePath must be an existing file under engine/media or cb-seed/assets"}); return
                         except Exception:
@@ -4183,7 +4206,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                         self._json(400, {"error": "Choose a keyframe source first."}); return
                     try:
                         sp = pathlib.Path(source_path).resolve()
-                        roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                        roots = (MEDIA.resolve(), ASSETS.resolve())
                         if not sp.exists() or not any(sp.is_relative_to(root) for root in roots):
                             self._json(400, {"error": "sourcePath must be an existing file under engine/media or cb-seed/assets"}); return
                     except Exception:
@@ -4757,7 +4780,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": "Choose a scene plate source first."}); return
                 try:
                     sp = pathlib.Path(source_path).resolve()
-                    roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                    roots = (MEDIA.resolve(), ASSETS.resolve())
                     if not sp.exists() or not any(sp.is_relative_to(root) for root in roots):
                         self._json(400, {"error": "sourcePath must be an existing file under engine/media or cb-seed/assets"}); return
                 except Exception:
@@ -5168,7 +5191,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                         self._json(400, {"error": f"{cmd} needs a sourcePath"}); return
                     try:
                         sp = pathlib.Path(source_path).resolve()
-                        _roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                        _roots = (MEDIA.resolve(), ASSETS.resolve())
                         if not sp.exists() or not any(sp.is_relative_to(r) for r in _roots):
                             self._json(400, {"error": "sourcePath must be an existing file under "
                                                        "engine/media or cb-seed/assets"}); return
@@ -5192,7 +5215,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                         self._json(400, {"error": "sourcePath must be a string"}); return
                     try:
                         sp = pathlib.Path(source_path).resolve()
-                        _roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                        _roots = (MEDIA.resolve(), ASSETS.resolve())
                         if not sp.exists() or not any(sp.is_relative_to(r) for r in _roots):
                             self._json(400, {"error": "sourcePath must be an existing file under "
                                                        "engine/media or cb-seed/assets"}); return

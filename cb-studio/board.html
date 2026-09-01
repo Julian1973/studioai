@@ -109,7 +109,7 @@
 
 const SCENES = [1,2,3,4,5,6,7,8,9,10];
 const SLUGS = {1:"RAINFOREST",2:"SANCTUARY",3:"THE PIER",4:"AT SEA",5:"FOREST EDGE",6:"COVE STORM",7:"THE RESCUE",8:"ARRIVAL",9:"CEREMONY",10:"HONEY"};
-const KEY = "crystal-bears-board-v1";
+const KEY = "studioai-board-v1:" + ((new URLSearchParams(location.hash.replace(/^#/, ""))).get("p") || "default");  // T44: per-project local state
 const PIPE = {connected:false, episode:"Ep1"};
 
 let state = load();

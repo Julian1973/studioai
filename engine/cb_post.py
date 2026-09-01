@@ -25,7 +25,7 @@ what works — keeps what works, trims or replaces what doesn't. For a scene Pos
      SFX SWEETENING (2026-07-14, rule 82): before mastering, sweeten_cues_for_scene() layers the show's own
      signature one-shots (FWIP/THUP/POLLEN_PUFF/POP) onto a matching beat's own resolved archetype, additively,
      into the SAME mix() call, threaded through every platform master — see mix()'s own sfx_layers param. Best-
-     effort and asset-gated: a cue with no file yet on disk (projects/crystal-bears/canon/sfx/ is currently empty)
+     effort and asset-gated: a cue with no file yet on disk (the project's canon/sfx/ is currently empty)
      is silently skipped, never blocks Gate 5.
   3) Exports a 24-bit combined programme WAV. Generated clips do not carry separable
      dialogue, music and effects sources, so true stems remain an upstream production task.
@@ -50,6 +50,7 @@ import sys
 import uuid
 
 import cb_audio_authority
+import paths as P  # the project profile is the only path authority (T44)
 
 HELD = 1.6   # held last frame (tension beat)
 DELIVERY_FPS = 24.0
@@ -77,14 +78,14 @@ AUTO_MUSIC_BED = os.environ.get("CB_AUTO_MUSIC_BED", "") == "1"   # OFF by defau
 # ── SFX SWEETENING (2026-07-14, CLAUDE.md rule 82 — Julian: "go with those two things you flagged") ──────────
 # THE MECHANISM, NOT THE ASSETS: this closes the gap CAPCUT_README.txt itself once named as "confirmed, not
 # attempted here... needs real recorded/licensed audio assets this code-only pass has no way to source." That
-# is still true — no audio files exist yet (projects/crystal-bears/canon/sfx/ is empty, see its own README) — but
+# is still true — no audio files exist yet (the project's canon/sfx/ is empty, see its own README) — but
 # the SOFTWARE that will layer a real one-shot onto a weak comedy hit the moment a file is dropped in can be,
 # and now is, built and tested against zero-asset degradation. Scoped to EXACTLY the four signature one-shots
 # this show's own doctrine already names (CRYSTAL_BEARS_STUDIO_BIBLE.md, CLAUDE.md rule 57) — never expanded
 # to every archetype's own plausible sound on my own initiative; a research pass found several other archetypes
 # with a nameable sound (WHOOMP, THUMP, RUMBLE, SPLASH...) but adding those would be inventing new doctrine, not
 # building what's already named — left for Julian's own call, not decided here.
-SFX_LIBRARY_PATH = "config/sfx_library.json"   # -> projects/crystal-bears/canon/sfx_library.json, the usual symlink
+SFX_LIBRARY_PATH = P.SFX_LIBRARY                    # T44: from the project profile
 # ARCHETYPE -> CUE, grounded directly in each archetype's own physics_rule/visual_payoff_rule text (cb_seedance.
 # PHYSICAL_ARCHETYPES) — never a guess. POLLEN_SMEAR_TUMBLE maps to POP, not THUP, because that archetype's own
 # visual_payoff_rule is explicit: "The pop-up line is the finisher; the THUPs are mid-flight bounces, not the

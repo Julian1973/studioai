@@ -18,11 +18,12 @@ sys.path.insert(0, str(ENGINE))
 
 import cb_engine  # noqa: E402
 import cb_lineage  # noqa: E402
+import paths as P  # noqa: E402 — the project profile is the only path authority (T44)
 
 
 PACKAGE = ROOT / "cb-output" / "Ep1_scene4_production_package.json"
 STORYBOARD = ROOT / "cb-output" / "creative" / "Ep1_scene4_storyboard.json"
-CHARS = ROOT / "projects" / "crystal-bears" / "canon" / "characters.json"
+CHARS = pathlib.Path(P.CHARS)                        # T44: from the project profile
 
 
 def _shot(records: list[dict], shot_id: str) -> dict:

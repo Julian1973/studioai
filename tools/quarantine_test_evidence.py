@@ -12,10 +12,10 @@ import tempfile
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-DEFAULT_LIBRARY = (
-    ROOT / "projects" / "crystal-bears" / "creative" / "learning"
-    / "EVIDENCE_LIBRARY.json"
-)
+import sys  # noqa: E402
+sys.path.insert(0, str(ROOT / "engine"))
+import paths as P  # noqa: E402 — the project profile is the only path authority (T44)
+DEFAULT_LIBRARY = pathlib.Path(P.LEARNING) / "EVIDENCE_LIBRARY.json"
 
 
 def _atomic_json(path: pathlib.Path, value: object) -> None:

@@ -1,28 +1,36 @@
 #!/usr/bin/env python3
-"""RESTRUCTURE T30 PHASE 2+3 — every path constant in one file. Computed from __file__ + the active show's tenant
-directory, never a hardcoded directory name, so this module (and everything that imports it) survives a directory
-rename intact. New code should import from here rather than hand-rolling another HERE/ROOT pair.
+"""EVERY PATH THE ENGINE READS FOR THE ACTIVE PROJECT, IN ONE PLACE.
 
-Phase 3 note: CANON, CONFIG/CHARS/LOCATIONS, OUTPUT and SCRIPTS now point at their real projects/crystal-bears/
-locations. The old root-level paths (CRYSTAL_BEARS_LOCKED_CANON.md, engine/config, cb-output, cb-studio/data/scripts)
-are kept as symlinks to these real locations for any not-yet-updated consumer — do not remove them without first
-grepping for zero remaining references to the old paths.
+T44 (RESTRUCTURE_SPEC_PROJECTS.md, 2026-09-01): the project's profile.json is the only authority for where
+its files live; this module reads that profile once and exposes each location as a constant. No engine,
+studio, tool or dailies module builds a project path by hand — it imports from here. A path that is not
+declared in the profile does not exist as far as the engine is concerned.
 
-    ENGINE    this directory (was cb-gen, now engine/)
-    ROOT      the repo root (ENGINE's parent)
-    SHOW      the active show's project directory under projects/ (shows/ is a compatibility link) (env STUDIO_SHOW, default crystal-bears)
-    CANON     the show's locked-canon markdown (projects/<project>/canon/LOCKED_CANON.md)
-    CONFIG    the show's canon/ data directory (characters.json, locations.json, continuity.json, ...)
-    CHARS / LOCATIONS   the two most-read config files, as a convenience
-    MEDIA     generated review media (keyframes, clips, voice) — stays in the engine, show-agnostic scratch space
-    OUTPUT    the show's beat packages (projects/<project>/episodes/output)
-    SCRIPTS   the show's locked screenplays (projects/<project>/episodes/scripts)
-    LOCKED    the engine's gate-lock state file (locked.json)
-    NOTES     the engine's notes state file (notes.json)
+    ENGINE            this directory
+    ROOT              the repo root (ENGINE's parent)
+    PROJECT_ID        the active project's id (env STUDIO_PROJECT, else the profile marked "default")
+    PROJECT           projects/<id>/  (SHOW and SHOW_ID remain as aliases for one release)
+    CANON             the locked-canon markdown
+    CONFIG            the canon/ data directory
+    CHARS / LOCATIONS / CONTINUITY / EPISODE_ARC / GAG_LOCKS / BANNED_VOCABULARY / IDENTITY_PACKS
+    VOICE_CARDS / SFX_LIBRARY / SFX_DIR / BEAT_COSTS / LOCK_POLICY / CANON_LOCK / REFERENCE_SLOT_POLICY
+    STYLE_LAW / WING_LAW / FORBIDDEN_ELEMENTS / EMISSION_CHECKS / CAST_VOCABULARY   (None if undeclared)
+    CREATIVE          the project's creative/ (taste canons, exemplars, corpus)
+    LEARNING / EXEMPLARS / DAILIES_LIBRARY / VOICE_REGISTERS / VOICE_RULEBOOK / VOICE_PLAYBOOK
+    ASSETS            the project's reference media root (turnarounds, plates) — None if undeclared
+    SHOW_BIBLE / DOCS / CHAIRS
+    SCRIPTS           the project's locked screenplays
+    OUTPUT            the project's packages / evidence / prompt bank / asset registry
+    EPISODES_INDEX    the derived episode index the studio maintains for this project
+    MEDIA             generated review media — engine scratch, not project data
+    LOCKED / NOTES    the engine's gate-lock and notes state files
+
+The old paths (shows/, cb-output/, engine/config, cb-studio/data/scripts, cb-seed/) exist only as
+compatibility links for data files that still name them; tools/check_links.py verifies them.
 """
 import os
 import re
-import studio_profile
+import project_profile
 
 # FIXED 2026-07-11 (full-codebase audit, duplication finding): this exact pattern used to be hand-duplicated as
 # cb_director_schemas._PAUSEHOLD_RE and cb_preflight._HOLD_RE (a beat's pauseHold field must state a concrete
@@ -33,33 +41,70 @@ PAUSEHOLD_RE = re.compile(r"(\d+(?:\.\d+)?)[\s-]*second")
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(ENGINE)
 
-SHOW_PROFILE = studio_profile.load_show_profile(ROOT)
-SHOW_ID = SHOW_PROFILE.profile.showId
-ENGINE_ADAPTER = SHOW_PROFILE.profile.engineAdapter
-SHOW = str(SHOW_PROFILE.show_root)
+PROFILE = project_profile.load_project_profile(ROOT)
+SHOW_PROFILE = PROFILE                      # alias, one release
+PROJECT_ID = PROFILE.profile.showId
+SHOW_ID = PROJECT_ID                        # alias, one release
+PROJECT_NAME = PROFILE.profile.name
+ENGINE_ADAPTER = PROFILE.profile.engineAdapter
+PROJECT = str(PROFILE.project_root)
+SHOW = PROJECT                              # alias, one release
 
-_CANON_PATHS = SHOW_PROFILE.canon_paths
-CANON = str(_CANON_PATHS["lockedCanon"])
-CHARS = str(_CANON_PATHS["characters"])
-LOCATIONS = str(_CANON_PATHS["locations"])
-IDENTITY_PACKS = (str(_CANON_PATHS["identityPacks"])
-                  if _CANON_PATHS.get("identityPacks") else None)
+
+def _s(path):
+    return str(path) if path is not None else None
+
+
+_CANON = PROFILE.canon_paths
+CANON = _s(_CANON["lockedCanon"])
+CHARS = _s(_CANON["characters"])
+LOCATIONS = _s(_CANON["locations"])
+CONTINUITY = _s(_CANON["continuity"])
+EPISODE_ARC = _s(_CANON.get("episodeArc"))
+GAG_LOCKS = _s(_CANON.get("gagLocks"))
+IDENTITY_PACKS = _s(_CANON.get("identityPacks"))
+BANNED_VOCABULARY = _s(_CANON.get("bannedVocabulary"))
+VOICE_CARDS = _s(_CANON.get("voiceCards"))
+SFX_LIBRARY = _s(_CANON.get("sfxLibrary"))
+SFX_DIR = _s(_CANON.get("sfxDir"))
+BEAT_COSTS = _s(_CANON.get("beatCosts"))
+LOCK_POLICY = _s(_CANON.get("lockPolicy"))
+CANON_LOCK = _s(_CANON.get("canonLock"))
+REFERENCE_SLOT_POLICY = _s(_CANON.get("referenceSlotPolicy"))
 CONFIG = os.path.dirname(CHARS)
 
-MEDIA = os.path.join(ENGINE, "media")
-OUTPUT = str(SHOW_PROFILE.output_path)
-SCRIPTS = str(SHOW_PROFILE.scripts_path)
+_LAWS = PROFILE.laws_paths
+STYLE_LAW = _s(_LAWS.get("style"))
+WING_LAW = _s(_LAWS.get("wingLaw"))
+FORBIDDEN_ELEMENTS = _s(_LAWS.get("forbiddenElements"))
+EMISSION_CHECKS = _s(_LAWS.get("emissionChecks"))
+CAST_VOCABULARY = _s(_LAWS.get("castVocabulary"))
 
+CREATIVE = _s(PROFILE.creative_root)
+LEARNING = _s(PROFILE.creative_path("learning"))
+EXEMPLARS = _s(PROFILE.creative_path("exemplars"))
+DAILIES_LIBRARY = _s(PROFILE.creative_path("dailiesLibrary"))
+VOICE_REGISTERS = _s(PROFILE.creative_path("voiceRegisters"))
+VOICE_RULEBOOK = _s(PROFILE.creative_path("voiceRulebook"))
+VOICE_PLAYBOOK = _s(PROFILE.creative_path("voicePlaybook"))
+
+ASSETS = _s(PROFILE.assets_root)
+SHOW_BIBLE = _s(PROFILE.show_bible_path)
+DOCS = _s(PROFILE.docs_path)
+CHAIRS = _s(PROFILE.chairs_path)
+
+SCRIPTS = _s(PROFILE.scripts_path)
+OUTPUT = _s(PROFILE.output_path)
+EPISODES_INDEX = _s(PROFILE.episodes_index_path)
+
+MEDIA = os.path.join(ENGINE, "media")
 LOCKED = os.path.join(ENGINE, "locked.json")
 NOTES = os.path.join(ENGINE, "notes.json")
 
-# FLAGGED 2026-07-12 (full-codebase audit continued, dead-code finding): LOCATIONS, MEDIA, LOCKED and NOTES
-# above currently have zero callers anywhere in the repo — the real consumers (cb_pipeline.py's own
-# hand-rolled LOCK/NOTES constants + its locations.json path builds, cb-studio/serve.py's CBGEN-relative
-# paths, cb_replicator.py's _LOCK_PATH) each still independently recompute the identical path instead of
-# importing these. That migration is real and worth doing, but it touches several files outside this
-# module's own scope, so it isn't done here. Noted explicitly so a reader doesn't take this module's own
-# docstring ("every path constant in one file") as proof these four are already wired up — they aren't yet.
+
+def rel(path):
+    """A project path as the repo-relative string data files and URLs use (forward slashes)."""
+    return os.path.relpath(str(path), ROOT).replace(os.sep, "/")
 
 
 def load_show_bible():

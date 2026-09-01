@@ -444,6 +444,18 @@
     ],
   };
 
+  async function projectId() {
+    if (app.project) return app.project;
+    try {
+      const prof = await api("/api/show-profile");
+      app.project = prof.projectId || prof.showId || null;
+      app.projectName = prof.name || app.project;
+      const pn = document.querySelector(".project-name");
+      if (pn && app.projectName) pn.textContent = app.projectName;
+    } catch (_) { /* server unreachable — leave unset; the server defaults to its own active project */ }
+    return app.project || "";
+  }
+
   function readHash() {
     const params = new URLSearchParams(location.hash.replace(/^#/, ""));
     // The outer route is the canonical deep-link target. A stale hash from an
@@ -459,6 +471,9 @@
       ? requestedView : legacyAssetCategory ? "assets" : "director";
     app.assetCategory = params.get("asset") || legacyAssetCategory || app.assetCategory || "characters";
     if (!["characters", "scenes", "props"].includes(app.assetCategory)) app.assetCategory = "characters";
+    // T44: the project comes from the route (p=/project=), else from the server's active profile
+    // (/api/show-profile) — never a hard-coded show id in this file.
+    app.project = routeParams.get("project") || params.get("project") || params.get("p") || app.project || null;
     app.scene = params.get("scene") || "1";
     app.shotId = params.get("shot") || null;
     app.explicitLocation = params.has("scene") || params.has("shot");
@@ -487,7 +502,7 @@
     $("#pipeline-title").textContent = `Ep ${number}`;
     $("#nav-episode-label").textContent = `Episode ${number}`;
     $("#nav-episode-title").textContent = title;
-    $("#episodes-eyebrow").textContent = `Crystal Bears · Episode ${number}`;
+    $("#episodes-eyebrow").textContent = `${app.projectName || ""} · Episode ${number}`;
     $("#episodes-title").textContent = title;
   }
 
@@ -1546,7 +1561,7 @@
 
   async function loadProjectWorkbenchState() {
     try {
-      app.workbenchState = await api(`/api/project-workbench-state?project=crystal-bears&episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}`);
+      app.workbenchState = await api(`/api/project-workbench-state?project=${encodeURIComponent(await projectId())}&episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}`);
       if (!app.explicitBeat && app.workbenchState?.activeBeatId) {
         app.activeBeatId = app.workbenchState.activeBeatId;
       }
@@ -1562,7 +1577,7 @@
         app.workbenchState = await api("/api/project-workbench-state", {
           method: "POST",
           body: JSON.stringify({
-            project: "crystal-bears",
+            project: await projectId(),
             episode: app.episode,
             scene: app.scene,
             activeBeatId: app.activeBeatId,
@@ -2900,7 +2915,7 @@
     }).join("");
     host.innerHTML = `<div class="workbench-top">
       <div>
-        <span class="stage-label">Crystal Bears / Episode 1 / Scene 1</span>
+        <span class="stage-label">${esc(app.projectName || "")} / Episode 1 / Scene 1</span>
         <h2>${esc(sceneOneContract.title)}</h2>
         <p>${esc(sceneOneContract.promise)}</p>
       </div>
@@ -3161,7 +3176,7 @@
     $("#references-button").disabled = !session.selectedShotId;
     $("#request-button").disabled = !session.inspector?.providerRequest;
     $("#truth-note").textContent = session.inspector?.structuralClaim || "Creative quality is judged from the result.";
-    const inspectorUrl = `/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=${encodeURIComponent(session.episode)}&sc=${encodeURIComponent(session.scene)}&st=${encodeURIComponent(session.phase)}${session.selectedShotId ? `&shot=${encodeURIComponent(session.selectedShotId)}` : ""}`;
+    const inspectorUrl = `/cb-studio/app.html#p=${encodeURIComponent(app.project || "")}&pg=pipeline&ep=${encodeURIComponent(session.episode)}&sc=${encodeURIComponent(session.scene)}&st=${encodeURIComponent(session.phase)}${session.selectedShotId ? `&shot=${encodeURIComponent(session.selectedShotId)}` : ""}`;
     $("#full-inspector-link").href = inspectorUrl;
     $("#drawer-inspector-link").href = inspectorUrl;
     renderDirectorSceneStrip(session);
@@ -3213,7 +3228,7 @@
       audio: "voice",
       "rough-cut": "final",
     }[step] || "storyboard";
-    return `/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=${encodeURIComponent(app.episode)}&sc=${encodeURIComponent(app.scene)}&st=${encodeURIComponent(stage)}`;
+    return `/cb-studio/app.html#p=${encodeURIComponent(app.project || "")}&pg=pipeline&ep=${encodeURIComponent(app.episode)}&sc=${encodeURIComponent(app.scene)}&st=${encodeURIComponent(stage)}`;
   }
 
   function syncPipelineRail() {

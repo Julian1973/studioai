@@ -4,6 +4,7 @@
   "animationType": "Premium stylized 3D CGI",
   "aspectRatio": "16:9",
   "engineAdapter": "crystal-bears-v1",
+  "default": true,
   "canon": {
     "lockedCanon": "canon/LOCKED_CANON.md",
     "characters": "canon/characters.json",
@@ -11,7 +12,15 @@
     "continuity": "canon/continuity.json",
     "episodeArc": "canon/episode_arc.json",
     "gagLocks": "canon/gag_locks.json",
-    "identityPacks": "canon/identity_packs.json"
+    "identityPacks": "canon/identity_packs.json",
+    "bannedVocabulary": "canon/banned_vocabulary.json",
+    "voiceCards": "canon/voice_cards.json",
+    "sfxLibrary": "canon/sfx_library.json",
+    "sfxDir": "canon/sfx",
+    "beatCosts": "canon/beat_costs.json",
+    "lockPolicy": "canon/lock_policy.json",
+    "canonLock": "canon/CANON_LOCK.json",
+    "referenceSlotPolicy": "canon/reference_slot_policy.json"
   },
   "laws": {
     "style": "laws/style.txt",
@@ -22,10 +31,23 @@
   },
   "episodes": {
     "scripts": "episodes/scripts",
-    "output": "episodes/output"
+    "output": "episodes/output",
+    "index": "episodes/episodes.json"
   },
-  "creativeRoot": "creative",
+  "creative": {
+    "root": "creative",
+    "learning": "creative/learning",
+    "exemplars": "creative/EXEMPLAR_LIBRARY.json",
+    "dailiesLibrary": "creative/learning/DAILIES_LIBRARY.jsonl",
+    "voiceRegisters": "creative/VOICE_ARCHETYPE_REGISTERS.json",
+    "voiceRulebook": "creative/VOICE_DIRECTOR_RULEBOOK.json",
+    "voicePlaybook": "creative/learning/VOICE_PLAYBOOK.json"
+  },
+  "assets": {
+    "root": "assets"
+  },
+  "showBible": "SHOW_BIBLE.md",
   "docs": "docs",
   "chairs": "chairs",
-  "_note": "Authoritative tenant manifest. engineAdapter makes show-specific creative logic explicit; an unrecognized adapter blocks production instead of inheriting Crystal Bears assumptions."
+  "_note": "Authoritative project manifest (T44). Every path the engine reads for this project is declared here and resolved by engine/paths.py \u2014 no module builds a project path by hand. engineAdapter is on its way out (T55: capability flags)."
 }

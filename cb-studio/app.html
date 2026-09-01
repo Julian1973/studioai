@@ -2803,7 +2803,7 @@ function storyIntakePanelHTML(d){
       ${outcomePanelHTML({tone:"blocked",title:"A script is required",body:"Upload or paste the episode script before Story & Direction can run.",actions:[{label:"Open script workspace",onclick:"go('script')"},{label:"Episodes",onclick:"goHome()",kind:"secondary"}]})}</div>`;
   }
   const skillBadge=d.directorSkillLoaded
-    ? `<span style="color:var(--ok)">✓ crystal-bears-director skill loaded</span>`
+    ? `<span style="color:var(--ok)">✓ Director chair loaded</span>`
     : `<span style="color:var(--danger)">✗ Director skill could not be loaded</span>`;
   const canonReady=!!(d.canonLockCurrent&&d.canonEpisodeReady);
   const canonIssues=(d.canonBlockers||[]).map(x=>`<div class="canonissue"><span class="canonissue-msg">${_esc(x.message||x.code)}</span><span class="canonissue-action">${_esc(x.action||"")}</span></div>`).join("");
@@ -3678,7 +3678,7 @@ function scriptStageHTML(){
 
 async function approveScriptAndOpenScene(){
   await storyIntakeDecide('approve');
-  setTimeout(()=>{ location.hash=`p=crystal-bears&pg=pipeline&ep=${encodeURIComponent(SH_EP||'Ep2')}&sc=${encodeURIComponent(SH_SC||'1')}&st=storyboard`; renderControl(); },700);
+  setTimeout(()=>{ location.hash=`p=${encodeURIComponent((CURRENT_PROJECT&&CURRENT_PROJECT.id)||'')}&pg=pipeline&ep=${encodeURIComponent(SH_EP||'Ep2')}&sc=${encodeURIComponent(SH_SC||'1')}&st=storyboard`; renderControl(); },700);
 }
 
 // ── STORYBOARD ──
@@ -5831,7 +5831,7 @@ function renderFinalStage(){
   }
   if(has)attachDepartmentPanel(dec,"review-final",null);
   else dec.insertAdjacentHTML("beforeend",`<div class="deptpanel"><div class="deptperson"><div class="deptavatar">PS</div><div>
-    <div class="deptname">Post Supervisor</div><div class="deptmeta">Final & Post · loads crystal-bears-post</div></div></div>
+    <div class="deptname">Post Supervisor</div><div class="deptmeta">Final & Post · loads the Post chair</div></div></div>
     <div class="dec-caption">Waiting for a current QC-passed master candidate.</div></div>`);
 }
 

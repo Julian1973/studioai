@@ -585,7 +585,7 @@ def _required_prop_reference_roles(shot, scene, episode):
     }
     try:
         continuity = json.loads(
-            (ROOT / "engine" / "config" / "continuity.json").read_text())
+            pathlib.Path(P.CONTINUITY).read_text())
     except (OSError, ValueError, TypeError):
         continuity = {}
     records = ((continuity.get(str(episode)) or {}).get(
@@ -674,7 +674,7 @@ def _episode_character_state(character, shot, scene, episode):
         return None
     text = _shot_continuity_text(shot or {})
     try:
-        continuity = json.loads((ROOT / "engine" / "config" / "continuity.json").read_text())
+        continuity = json.loads(pathlib.Path(P.CONTINUITY).read_text())
     except (OSError, ValueError, TypeError):
         continuity = {}
     records = (((continuity.get(str(episode)) or {}).get("characterStates") or {})
@@ -736,7 +736,7 @@ def _provider_identity_record(name, characters_cfg, usage="keyframe", *, shot=No
         # multi-angle turnaround sheet has repeatedly blurred Fuzzby/Zenny identity in this
         # specific composition, so use the locked single-subject anchors as the provider's
         # character identity source for this scene.
-        anchor = ROOT / "cb-seed" / "assets" / f"CB_{canonical}_anchor.png"
+        anchor = pathlib.Path(P.ASSETS) / f"CB_{canonical}_anchor.png"
         if not anchor.exists():
             raise Refused(
                 f"REFUSED — Scene 10 bee anchor is missing for {canonical}: {anchor.name}")
@@ -937,8 +937,8 @@ def _compile_scenelook_prompt(scene, episode="Ep1"):
     fields — camera framing is a shot-composition concern, never the plate's job (Julian's
     own scope line, and locations.json's own "look" text already says as much: "No
     characters, no homes, no extra props")."""
-    loc_path = HERE.parent / "projects" / "crystal-bears" / "canon" / "locations.json"
-    style_path = HERE.parent / "projects" / "crystal-bears" / "laws" / "style.txt"
+    loc_path = pathlib.Path(P.LOCATIONS)
+    style_path = pathlib.Path(P.STYLE_LAW) if P.STYLE_LAW else pathlib.Path("/nonexistent")
     locs = json.load(open(loc_path)) if loc_path.exists() else {}
     entry = (locs.get(episode) or {}).get(str(scene)) or {}
     style = style_path.read_text().strip() if style_path.exists() else ""
@@ -1187,7 +1187,7 @@ def _reference_path_is_approved(path):
         (HERE / "media").resolve(),
         MEDIA.resolve(),
         MEDIA.parent.resolve(),
-        (ROOT / "cb-seed" / "assets").resolve(),
+        pathlib.Path(P.ASSETS).resolve(),
         (ROOT / "projects").resolve(),
     }
     return any(candidate.is_relative_to(root) for root in roots)
@@ -2618,7 +2618,7 @@ def _is_non_identity_image_role(role):
 
 
 def _reference_slot_policy():
-    path = ROOT / "projects" / "crystal-bears" / "canon" / "reference_slot_policy.json"
+    path = pathlib.Path(P.REFERENCE_SLOT_POLICY) if P.REFERENCE_SLOT_POLICY else ROOT / "nonexistent"
     try:
         policy = json.loads(path.read_text())
     except (OSError, ValueError, TypeError):
@@ -3036,8 +3036,8 @@ def department_status(scene, shot_id=None, episode="Ep1", stage=None):
 
 
 def _scene_context(pkg, scene, episode):
-    loc_path = HERE.parent / "projects/crystal-bears/canon/locations.json"
-    style_path = HERE.parent / "projects/crystal-bears/laws/style.txt"
+    loc_path = pathlib.Path(P.LOCATIONS)
+    style_path = pathlib.Path(P.STYLE_LAW) if P.STYLE_LAW else pathlib.Path("/nonexistent")
     locs = json.load(open(loc_path)) if loc_path.exists() else {}
     sb_path = _declared_storyboard_path(pkg, scene, episode)
     sb = json.load(open(sb_path)) if sb_path.exists() else {}

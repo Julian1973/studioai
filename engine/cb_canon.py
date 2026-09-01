@@ -14,12 +14,13 @@ import pathlib
 import re
 import sys
 from typing import Any, Iterable
+import paths as P  # the project profile is the only path authority (T44)
 
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
-POLICY_REL = pathlib.Path("projects/crystal-bears/canon/lock_policy.json")
-MANIFEST_REL = pathlib.Path("projects/crystal-bears/canon/CANON_LOCK.json")
+POLICY_REL = pathlib.Path(P.rel(P.LOCK_POLICY))      # T44: from the project profile
+MANIFEST_REL = pathlib.Path(P.rel(P.CANON_LOCK))
 SCHEMA_VERSION = 1
 
 
@@ -540,7 +541,7 @@ def _episode_cast(root: pathlib.Path, episode: str) -> list[str]:
 
 
 def _script_text(root: pathlib.Path, episode: str) -> tuple[str | None, str | None]:
-    current = root / "projects" / "crystal-bears" / "episodes" / "scripts" / "_current" / f"{episode}.json"
+    current = pathlib.Path(P.SCRIPTS) / "_current" / f"{episode}.json"
     try:
         record = json.loads(current.read_text(encoding="utf-8"))
         path = resolve_declared_path(record["contentPath"], root)
@@ -656,7 +657,7 @@ def _status_uncached(episode: str | None = None, cast: Iterable[str] | None = No
         policy = load_policy(base)
         manifest = load_manifest(base)
     except CanonLockError as exc:
-        return {"schemaVersion": SCHEMA_VERSION, "showId": "crystal-bears",
+        return {"schemaVersion": SCHEMA_VERSION, "showId": P.PROJECT_ID,
                 "current": False, "episode": episode, "episodeReady": False,
                 "manifestDigest": None, "profileDigests": {}, "sources": [],
                 "characters": [], "locations": [], "scriptCanon": None,

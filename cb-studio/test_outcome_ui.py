@@ -469,7 +469,7 @@ def test_populated_stage_is_a_top_level_media_and_decision_desk():
 
 
 def test_identity_screening_keeps_the_keyframe_visible_for_review():
-    assert 'resultFirst=!!(pending&&m.keyframe)' in APP
+    assert 'resultFirst=true;keyframeAnchorOwnsCurrent=!!(pending&&m.keyframe)' in APP
     assert 'keyframeRevisionMedia(m.keyframe,led,s,"NEEDS YOUR DECISION")' in APP
     assert 'approveKeyframeAdvisory' in APP
     assert 'Approve revision ${kfInfo.revision}' in APP
@@ -715,7 +715,16 @@ def test_keyframe_screen_keeps_scene_plate_and_opening_frame_distinct():
     assert 'The world and lighting' in APP
     assert '2 · Opening keyframe' in APP
     assert 'Characters and first composition' in APP
-    assert 'mode==="keyframe"?visualAnchorPairHTML(m):""' in APP
+    assert 'mode==="keyframe"?visualAnchorPairHTML(anchorMedia):""' in APP
+
+
+def test_see_stage_is_visual_first_and_demotes_repeated_context():
+    assert 'resultFirst=mode==="keyframe"' in APP
+    assert 'overview.innerHTML=stage==="keyframe"?"":sceneShotOverviewHTML()' in APP
+    assert 'class="see-focus-title">Opening frame</div>' in APP
+    assert '${visualAnchors}<div class="artefact-center see-supporting' in APP
+    assert '${referenceHTML}<details class="focus-evidence see-context"><summary>Shot brief &amp; continuity</summary>' in APP
+    assert 'workspace.classList.toggle("see-workspace",mode==="keyframe")' in APP
 
 
 def test_keyframe_references_remain_open_during_live_polling():

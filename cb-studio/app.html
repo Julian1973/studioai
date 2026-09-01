@@ -969,9 +969,10 @@ body{background:var(--bg);color:var(--ink)}
 .scene-look-done{display:flex;align-items:center;gap:9px;margin-bottom:12px;padding:10px 11px;border-left:3px solid var(--ok);background:var(--okbg);color:var(--text);font-size:11px;line-height:1.4}.scene-look-done b{color:var(--ok)}
 .scene-next-step{display:grid;gap:8px;padding:12px;border:1px solid var(--brand);border-radius:6px;background:var(--brandbg)}.scene-next-step-label{color:var(--brandink);font-size:9px;font-weight:900;text-transform:uppercase}.scene-next-step-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:800}.scene-next-step-meta span:last-child{color:var(--brandink);white-space:nowrap}.scene-next-step-purpose{color:var(--muted);font-size:11px;line-height:1.45}.scene-next-primary{min-height:48px!important;background:var(--brand)!important;color:#140d20!important;font-weight:900!important}.scene-next-secondary{font-size:11px!important;color:var(--muted)!important}
 .visual-anchor-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 14px}.visual-anchor{display:grid;grid-template-columns:96px minmax(0,1fr);min-height:82px;border:1px solid var(--line);background:var(--surface2);border-radius:7px;overflow:hidden;text-align:left;color:inherit}.visual-anchor button{all:unset;display:contents;cursor:pointer}.visual-anchor-media{width:96px;height:100%;min-height:82px;object-fit:cover;background:#090a0e}.visual-anchor-empty{display:grid;place-items:center;width:96px;min-height:82px;box-sizing:border-box;background:#090a0e;color:var(--muted);font-size:10px;text-align:center;padding:8px}.visual-anchor-copy{display:flex;flex-direction:column;justify-content:center;gap:4px;padding:10px;min-width:0}.visual-anchor-label{color:var(--hint);font-size:10px;font-weight:800;text-transform:uppercase}.visual-anchor-title{font-size:13px;font-weight:800}.visual-anchor-status{color:var(--muted);font-size:11px;line-height:1.35}
+.see-focus-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:2px 0 12px}.see-focus-title{font-size:19px;font-weight:850;line-height:1.2}.see-focus-brief{max-width:620px;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.45}.see-workspace .visual-anchor-pair{gap:12px}.see-workspace .visual-anchor{display:flex;flex-direction:column;min-height:0}.see-workspace .visual-anchor button{display:flex;flex-direction:column;height:100%}.see-workspace .visual-anchor-media,.see-workspace .visual-anchor-empty{width:100%;height:auto;min-height:0;aspect-ratio:16/9;object-fit:cover}.see-workspace .visual-anchor-copy{min-height:78px;padding:11px 12px}.see-workspace .see-supporting.has-anchor-keyframe>.kf-current{display:none}.see-workspace .see-supporting:empty{display:none}.see-context{margin-top:14px}.see-context .shot-context{margin:0;border:0;background:transparent;padding:0}
 @keyframes directorFade{from{opacity:0}to{opacity:1}}@keyframes directorSlide{from{transform:translateX(22px);opacity:.75}to{transform:translateX(0);opacity:1}}
 @media(max-width:900px){.focus-workspace.result-first{display:flex;max-width:780px}.focus-workspace.result-first .wcol-artefact{order:1}.focus-workspace.result-first .wcol-decision{order:2;position:static}.focus-workspace.result-first .focus-context{order:3}.watch-stage{grid-template-columns:minmax(0,1fr)}.watch-candidate-grid{grid-template-columns:minmax(0,1fr);padding:10px}.watch-change-below{margin:0 10px 10px}.director-chat{top:auto;left:0;width:100%;height:min(78dvh,720px);padding:16px max(14px,env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));border-left:0;border-top:1px solid var(--line);animation:directorRise .2s ease-out}.kf-revision-flow{grid-template-columns:96px minmax(0,1fr)}.kf-previous img{width:96px}.shot-glance{grid-template-columns:82px minmax(0,1fr)}.shot-dialogue-window{grid-column:1/-1}.shot-state-flow{grid-template-columns:1fr}.shot-state-text{-webkit-line-clamp:2}.stage-audio-placeholder{grid-template-columns:42px minmax(0,1fr);padding:14px}.stage-audio-play{width:42px;height:42px}.stage-audio-placeholder .btn{grid-column:1/-1;width:100%}@keyframes directorRise{from{transform:translateY(22px);opacity:.75}to{transform:translateY(0);opacity:1}}}
-@media(max-width:620px){.visual-anchor-pair{grid-template-columns:1fr}.visual-anchor{grid-template-columns:84px minmax(0,1fr)}.visual-anchor-media,.visual-anchor-empty{width:84px}}
+@media(max-width:620px){.visual-anchor-pair{grid-template-columns:1fr}.visual-anchor{grid-template-columns:84px minmax(0,1fr)}.visual-anchor-media,.visual-anchor-empty{width:84px}.see-workspace .visual-anchor{display:flex}.see-workspace .visual-anchor-media,.see-workspace .visual-anchor-empty{width:100%}.see-focus-head{display:block}.see-focus-brief{margin-top:6px}}
 @keyframes stage-spin{to{transform:rotate(360deg)}}
 .production-context{border-color:var(--line);max-width:none}.production-context>summary{color:var(--muted)}.agenthead{background:var(--brandbg)}.agentpanel{border-color:#4b376c}
 .artefact-empty{background:var(--surface2);border:1px dashed var(--line);border-radius:7px;padding:44px 24px;color:var(--muted)}
@@ -3618,9 +3619,9 @@ async function renderWorkspaceBody(){
   _syncHash();
   document.getElementById("railwrap").innerHTML=renderStageRail();
   const sceneAudio=document.getElementById("sceneaudio");if(sceneAudio)sceneAudio.innerHTML=completedSceneAudioHTML();
-  const overview=document.getElementById("shotoverview");if(overview)overview.innerHTML=sceneShotOverviewHTML();
-  renderJobBanner();
   const stage=pFocusedStage();
+  const overview=document.getElementById("shotoverview");if(overview)overview.innerHTML=stage==="keyframe"?"":sceneShotOverviewHTML();
+  renderJobBanner();
   if(stage==="review"){
     for(const id of ["studioagent","readiness","jobbanner"]){
       const node=document.getElementById(id);if(node)node.innerHTML="";
@@ -4923,7 +4924,7 @@ function visualAnchorPairHTML(media){
     </button></article>
     <article class="visual-anchor">
       ${keyframe?`<img class="visual-anchor-media zoom" data-cap="${_esc(shot)} · opening keyframe" src="${BASE}${_esc(keyframe)}?v=${MEDIA_V}" alt="Opening keyframe">`:`<span class="visual-anchor-empty">Awaiting frame</span>`}
-      <span class="visual-anchor-copy"><span class="visual-anchor-label">2 · Opening keyframe</span><span class="visual-anchor-title">Characters and first composition</span><span class="visual-anchor-status">${keyframe?"Current candidate shown below for your decision":"Choose, upload or build the Shot 1 frame below"}</span></span>
+      <span class="visual-anchor-copy"><span class="visual-anchor-label">2 · Opening keyframe</span><span class="visual-anchor-title">Characters and first composition</span><span class="visual-anchor-status">${keyframe?"Current candidate ready for your decision":"Use the decision controls to choose, upload or build the Shot 1 frame"}</span></span>
     </article>
   </section>`;
 }
@@ -4971,7 +4972,7 @@ function renderShotStage(mode){
     <span class="cnt">${_esc(productionUnitLabel(PSHOT_I))} of ${shots.length} · ${_esc(s.shotId)}</span>
     <button class="btn ghost" style="padding:6px 12px" ${PSHOT_I==shots.length-1?"disabled":""} onclick="PSHOT_I++;renderWorkspaceBody()">Next →</button>
   </div>`;
-  let body="", decActions=[], decVersion="—", decHistory="", resultFirst=false;
+  let body="", decActions=[], decVersion="—", decHistory="", resultFirst=mode==="keyframe", keyframeAnchorOwnsCurrent=false;
   if(mode=="keyframe"){
     const kfInfo=keyframeRevisionInfo(led);
     // PER-SHOT STATE (2026-07-18 correction): shotPipelineState is the ONE place a shot's own
@@ -5008,7 +5009,7 @@ function renderShotStage(mode){
         decActions=[`<button class="btn" onclick="openPreviousShotOutcome('animation')">Resolve the previous shot</button>`];
       } else if(pst.kf=="screening"){
         const qc=pst.keyframeScreening||{},pending=!!led.keyframeCandidate;
-        resultFirst=!!(pending&&m.keyframe);
+        resultFirst=true;keyframeAnchorOwnsCurrent=!!(pending&&m.keyframe);
         body=pending&&m.keyframe
           ?`${keyframeRevisionMedia(m.keyframe,led,s,"NEEDS YOUR DECISION")}
             <div class="review-warning"><b>${_esc(pst.label||"Identity check needs attention")}</b><span>${_esc(qc.reason||pst.sub||"The frame cannot be accepted until identity, relative scale and staging checks pass.")}</span></div>`
@@ -5020,7 +5021,7 @@ function renderShotStage(mode){
           pending?keyframeDecisionSourceActions(tok):"",
           `<div class="dec-caption">The automated review is advice. Your approval records the warning and keeps hard canon, reference, lineage and file-integrity checks active.</div>`];
       } else if(pst.kf=="stageBlocked"){
-        resultFirst=!!m.keyframe;
+        resultFirst=true;keyframeAnchorOwnsCurrent=!!m.keyframe;
         const qc=pst.keyframeScreening||{};
         const audioContext=shotDialogueWindow(s);
         body=m.keyframe
@@ -5040,6 +5041,7 @@ function renderShotStage(mode){
           :{label:"Continue to Animation",onclick:"openStageOutcome('animation')"})];
       } else if(pst.kf=="awaiting"){
         resultFirst=true;
+        keyframeAnchorOwnsCurrent=!!m.keyframe;
         // SELECTION DOES NOT EQUAL APPROVAL (2026-07-18, Julian's source-choice directive):
         // this is the ONE approval area for every opening-frame source alike — generated,
         // uploaded, library-picked or carried from the previous shot's final frame. "Choose
@@ -5056,6 +5058,7 @@ function renderShotStage(mode){
           keyframeDecisionSourceActions(tok)];
       } else if(pst.kf=="approved"){
         resultFirst=true;
+        keyframeAnchorOwnsCurrent=!!m.keyframe;
         // REPLACING AN APPROVED OPENING FRAME gets the SAME four-way source choice as a
         // first-time decision (2026-07-18) — a new candidate here is exactly as much "choose
         // its source" as the first one; it just happens to also have something to replace.
@@ -5252,7 +5255,8 @@ function renderShotStage(mode){
       s.seedancePrompt||"";
     body=watchProductionSurfaceHTML(s,led,m,body,currentPrompt);
   }
-  if(referenceMode)body+=referenceManifestHTML(tok,referenceMode,SH_REFERENCE_CACHE[refCacheKey(tok)]);
+  const referenceHTML=referenceMode?referenceManifestHTML(tok,referenceMode,SH_REFERENCE_CACHE[refCacheKey(tok)]):"";
+  if(referenceMode&&mode!=="keyframe")body+=referenceHTML;
   if(promptLabType)body+=`<details class="focus-evidence"><summary>Direction &amp; review evidence</summary><div class="focus-evidence-body">${promptLabPanelHTML(tok,promptLabType,SH_PROMPTLAB_CACHE[plCacheKey(tok,promptLabType)])}</div></details>`;
   const stageMedia={
     keyframe:["SEE","Opening keyframe"],
@@ -5262,10 +5266,13 @@ function renderShotStage(mode){
   const expandAction=mode==="keyframe"&&m.keyframe
     ?`<button type="button" class="media-expand" title="View keyframe full screen" aria-label="View keyframe full screen" onclick="expandCurrentStageImage()">⛶</button>`:"";
   const contextCard=shotContextCardHTML(mode,s,led,m);
-  const visualAnchors=mode==="keyframe"?visualAnchorPairHTML(m):"";
+  const anchorMedia=mode==="keyframe"?{...m,keyframe:keyframeAnchorOwnsCurrent?m.keyframe:null}:m;
+  const visualAnchors=mode==="keyframe"?visualAnchorPairHTML(anchorMedia):"";
   art.innerHTML=mode==="animation"
     ?`${nav}<div class="stage-media-label">${stageMedia[0]} <div class="stage-media-tools"><span>${stageMedia[1]}</span>${expandAction}</div></div><div class="artefact-center">${body}</div>${contextCard}`
-    :`${nav}${contextCard}${visualAnchors}<div class="stage-media-label">${stageMedia[0]} <div class="stage-media-tools"><span>${stageMedia[1]}</span>${expandAction}</div></div><div class="artefact-center">${body}</div>`;
+    :mode==="keyframe"
+      ?`${nav}<div class="see-focus-head"><div><div class="stage-media-label" style="margin:0">SEE · ${_esc(s.shotId)}</div><div class="see-focus-title">Opening frame</div><div class="see-focus-brief">${_esc(shotFocusCopy(mode,s))}</div></div>${expandAction}</div>${visualAnchors}<div class="artefact-center see-supporting ${keyframeAnchorOwnsCurrent?'has-anchor-keyframe':''}">${body}</div>${referenceHTML}<details class="focus-evidence see-context"><summary>Shot brief &amp; continuity</summary><div class="focus-evidence-body">${contextCard}</div></details>`
+      :`${nav}${contextCard}<div class="stage-media-label">${stageMedia[0]} <div class="stage-media-tools"><span>${stageMedia[1]}</span>${expandAction}</div></div><div class="artefact-center">${body}</div>`;
   // 2026-07-17 correction: this shared tail used to show s.seedancePrompt (the VIDEO/motion
   // brief, compile_shot_contract's output) unconditionally on EVERY mode — including
   // Keyframes, where the actual compiled artefact cb_render.keyframe_shot() sends to the
@@ -5277,7 +5284,7 @@ function renderShotStage(mode){
     ?`opening frame · ${_esc(s.sourceType||"")}`
     :`${_esc(s.durationSec||"")}s · ${_esc(s.sourceType||"")}${s.sourceShotId?" ← "+_esc(s.sourceShotId):""}`;
   const hasAnimationResult=!!((m.candidates||[]).length||m.clip||m.finalFrame);
-  const decisionTitle=mode==="keyframe"?(resultFirst?"Review the opening keyframe":"Build the opening keyframe"):
+  const decisionTitle=mode==="keyframe"?(keyframeAnchorOwnsCurrent?"Review the opening keyframe":"Build the opening keyframe"):
     mode==="voice"?(resultFirst?"Review the performance":"Create the performance"):
     (hasAnimationResult?"Review the animation take":"Create the animation take");
   dec.innerHTML=decisionShell(decisionTitle, `${tok} · ${decVersion}`, decActions, decHistory)+
@@ -5289,7 +5296,7 @@ function renderShotStage(mode){
   if(mode=="animation"&&((m.candidates||[]).length||m.clip||m.finalFrame))
     attachDepartmentPanel(dec,"review-animation",s.shotId);
   const workspace=document.getElementById("workspace");
-  if(workspace)workspace.classList.toggle("result-first",resultFirst);
+  if(workspace){workspace.classList.toggle("result-first",resultFirst);workspace.classList.toggle("see-workspace",mode==="keyframe");}
 }
 function currentProductionDirection(stage,shotId){
   const inputs=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs;

@@ -21,7 +21,15 @@ function Fail($msg) { Write-Host ("!! " + $msg) -ForegroundColor Red; Read-Host 
 # 0. run elevated - the studio relies on real symlinks and Windows only lets an administrator (or a
 #    Developer-Mode account after a fresh sign-in) create them. Windows asks once; click Yes.
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $isAdmin) {
+# With Developer Mode switched on (Settings > System > For developers) Windows lets an ordinary account
+# create symlinks, so no administrator prompt is needed at all - the prompt was never seen on Julian's PC.
+$devMode = $false
+try {
+    $dm = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" -Name AllowDevelopmentWithoutDevLicense -ErrorAction Stop
+    $devMode = ($dm.AllowDevelopmentWithoutDevLicense -eq 1)
+} catch { $devMode = $false }
+if ($devMode -and -not $isAdmin) { Write-Host "== Developer Mode is on - running without the administrator prompt" -ForegroundColor Cyan }
+if (-not $isAdmin -and -not $devMode) {
     Write-Host "== Re-launching as administrator (Windows will ask for permission: click Yes)" -ForegroundColor Cyan
     $self = $MyInvocation.MyCommand.Path
     Start-Process -FilePath "powershell.exe" -Verb RunAs -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ('"' + $self + '"'), $Branch

@@ -2360,7 +2360,12 @@ function shotPipelineStateLegacy(shots,i,ledgerFor,media,lineageOk,sceneLookOk,r
   // 2026-07-19: voiceOk means APPROVED, not merely generated — matching keyframe's own
   // "a generated-but-unapproved candidate is never a valid anchor" rule (the voice approval
   // step, cb_render.approve_voice/reject_voice).
-  const voiceOk=!talky||!!(led.voiceApproval&&led.voiceApproval.approved&&isCurrent(led.voiceApproval));
+  const voiceApproved=led.voiceApproval||{};
+  const voiceHashSealed=!!(
+    voiceApproved.approved&&voiceApproved.contentHash&&led.voPath&&
+    voiceApproved.path===led.voPath
+  );
+  const voiceOk=!talky||!!(voiceApproved.approved&&(isCurrent(voiceApproved)||voiceHashSealed));
   const animationCurrent=led.status=="approved"&&isCurrent(led.approval);
   const batchCurrent=led.status=="candidates-pending"&&isCurrent((led.batch||{}).disclosure||led.disclosure);
   const animState=animationCurrent?"approved":(batchCurrent?"candidates-pending":(led.status=="model-limited"?"model-limited":"designed"));
@@ -2509,7 +2514,7 @@ function deriveSceneStateLegacy(bundle,scriptApproved,scene){
   else if(running("shot")){ out.voice={state:"generating"}; }
   else{
     const talky=shots.filter(s=>(s.dialogueLines||[]).length);
-    const done=talky.filter(s=>{const led=ledgerFor(s.shotId); return !!(led.voiceApproval&&led.voiceApproval.approved&&led.voiceApproval.packageRevision===(bundle.pkg&&bundle.pkg.revision));}).length;
+    const done=talky.filter(s=>{const led=ledgerFor(s.shotId),voice=led.voiceApproval||{}; return !!(voice.approved&&(voice.packageRevision===(bundle.pkg&&bundle.pkg.revision)||(voice.contentHash&&led.voPath&&voice.path===led.voPath)));}).length;
     const generatedN=talky.filter(s=>(media[s.shotId]||{}).vo).length;
     const timingCurrent=!!(bundle.media&&bundle.media.timingSlateCurrent);
     const timingApproved=!!(bundle.media&&bundle.media.timingSlateApproved);
@@ -3237,14 +3242,16 @@ function focusDepartmentOutcome(){
 }
 function shotResolutionAction(pst,tok){
   const current=(pst&&pst.current)||{};
+  const led=shLedger(tok)||{},voice=led.voiceApproval||{},media=shMedia(tok)||{};
+  const voiceCurrent=!!(current.voice||(voice.approved&&voice.contentHash&&led.voPath&&voice.path===led.voPath&&media.vo));
   if(!pst||pst.label==="Production state unavailable")return {label:"Refresh scene state",onclick:"renderControl()"};
   if(pst.sceneLookGated)return {label:"Open Look Development",onclick:"openStageOutcome('scenelook')"};
   if(pst.kf==="waitingPrev")return {label:"Resolve the previous shot",onclick:"openPreviousShotOutcome('animation')"};
   if(pst.kf==="stageBlocked")return {label:"Return to See and correct the keyframe",onclick:"openShotOutcome('keyframe',PSHOT_I)"};
   if(pst.needsKeyframe&&!current.keyframe)return {label:"Open Cinematography",onclick:"openStageOutcome('keyframe')"};
-  if(pst.talky&&!current.voice)return {label:"Open Voice & Timing",onclick:"openStageOutcome('voice')"};
+  if(pst.talky&&!voiceCurrent)return {label:"Open Voice & Timing",onclick:"openStageOutcome('voice')"};
   if(!current.animationDirection){
-    return {label:"Fire animation",onclick:`shRender('${tok}')`};
+    return {label:"Fire Seedance 2.5",onclick:`shRender('${tok}')`};
   }
   if(["model-limited","stale","stale-batch"].includes(pst.animState)){
     return {label:"Prepare replacement Animation direction",onclick:`deptRun('animation','${tok}')`};

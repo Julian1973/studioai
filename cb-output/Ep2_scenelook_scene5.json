@@ -1,0 +1,64 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S5_plate_candidate_bf8cae92.png",
+  "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+  "inputSignature": {
+   "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+   "briefHash": "34073a00909200bee2bad84626d27cafa64f8d3083d1e87002ae9f147ec10ecd",
+   "referenceHashes": {},
+   "plateHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-02T00:08:42",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S4_plate_candidate_9f4bee15.png",
+  "approvedAt": "2026-09-02T00:08:42",
+  "reviewedBy": "StudioAI",
+  "selectionNote": "Approved zero-cost library binding: S5 is FOREST PATH CONTINUOUS from S4, so it inherits the approved S4 forest path scene plate."
+ },
+ "candidate": null,
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "deterministic-v4-scaffold",
+    "preparedAt": "2026-09-02T00:18:39",
+    "editedAt": null,
+    "preparedBy": "deterministic-v4-scaffold",
+    "creativeDirectingStandardVersion": 0,
+    "sourceHash": "",
+    "output": {
+     "creativeIntent": "Continue the exact S4 Forest Path world into Scene 5 so the end of S4 can join cleanly into S5.SH1 without changing geography.",
+     "storyOfPlace": "Forest Path Continuous: same child-scaled Crystal Woods path, same forked trail clearing, same warm daylight, same readable forward route.",
+     "paletteAndLighting": "Warm saturated Crystal Bears daylight/evening continuity, clear readable planes, soft family-animation contrast, no gloom or hard reset from the surrounding sequence.",
+     "materialsAndAtmosphere": "Feature-quality stylized 3D CGI Crystal Bears environment plate; warm saturated family-animation light; tactile foliage, crystal, path, rock, flower, honeycomb and moss materials; no characters unless the downstream shot keyframe adds them.",
+     "continuityRules": [
+      "Scene Look is environment authority only; characters are added by keyframe/shot direction.",
+      "Do not change the approved script, character identities, or scene geography because a downstream word changes.",
+      "Keep the plate current as a reusable world anchor until its own plate/style inputs change."
+     ],
+     "providerPrompt": "Use the approved S4 Crystal Woods forest path plate as the Scene 5 environment authority. Preserve the same path, light direction, crystal placements, leafy canopy, mossy trunks and camera-friendly open acting area so S4 can flow directly into S5. Environment-only plate authority; no new characters, no changed weather, no changed location."
+    },
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.4",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+     "sceneContextHash": "30a43b3575050c848040e74944e865bbda280c586470e3fd67ffd5103867e355"
+    },
+    "outcome": "approved",
+    "decisionAt": "2026-09-02T00:18:39",
+    "reviewedBy": "StudioAI",
+    "note": "Zero-cost deterministic Look Development approval added so the approved library scene plate is visible as current in the Studio gate."
+   },
+   "candidate": null,
+   "history": []
+  }
+ }
+}

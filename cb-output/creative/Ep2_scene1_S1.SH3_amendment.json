@@ -1,0 +1,355 @@
+{
+ "schemaVersion": 1,
+ "approvalState": "approved",
+ "approvedBy": "Julian",
+ "episode": "Ep2",
+ "scene": "1",
+ "shotId": "S1.SH3",
+ "scriptVersionId": "sha256:a8b1c490449e3fd996201c1fb0ecb5bc96a940cc80384f55156a314be31ed57c",
+ "previousScriptVersionId": "sha256:a6ec42ec756b336a0529fb0e8b580bda10d76f29fe061eb0a52a75dbfeb4dd13",
+ "shot": {
+  "shotId": "S1.SH3",
+  "beatCode": "1.B3",
+  "beatCodes": [
+   "1.B3"
+  ],
+  "shotRole": "coverage",
+  "establishJob": null,
+  "buttonChange": null,
+  "frameSource": null,
+  "durationSec": 12.0,
+  "purpose": "Land the failed raid as friendly rivalry, then let Zenny quietly reveal she enjoyed the whole performance.",
+  "performanceAssignment": "Keen walks away from the honeycomb amused rather than defeated and mutters his promise as private, friendly banter. Cut to Zenny sitting cross-legged and still. She opens one eye, smiles, gives one small wink, closes it again, then sustains her warm meditative tone while Keen recedes in the background.",
+  "camera": "Begin from the accepted opening keyframe. Track Keen walking away at ground level, then reveal Zenny in her established meditating position. Finish with a slow ground-level pullback and crane rise into an overhead cinematic wide as Keen becomes small on the woodland path.",
+  "openingPose": "Use the exact Julian-approved S1.SH3 opening keyframe without alteration.",
+  "sourceType": "opener",
+  "sourceShotId": null,
+  "motionContinuityRequired": false,
+  "cutInMotivation": "Cut from Keen’s muttered friendly challenge to Zenny’s tiny private reaction, then widen to release the whole nook.",
+  "dialogueBinding": "Keen and Zenny perform only the two exact approved lines through ElevenLabs v3 @Audio1.",
+  "dialogueLines": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:bfd0de790ad8338314f11a1c50fc8fc3190c27f448d34510c60af7b8466aaae6",
+    "sourceEventId": "script-event:sha256:de054c32fa59c205770fb18450a49a6ee825e0b377b91448044bb8167ce44e25",
+    "speaker": "Keen",
+    "exactText": "We’ll see, Fuzzby. We’ll see.",
+    "delivery": "ElevenLabs v3: [under his breath, amused, joking] We’ll see, Fuzzby. We’ll see. Friendly banter, never aggressive.",
+    "startSec": 1.2,
+    "endSec": 3.8
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:99a45858706cacbbeb84fe444e136e7b32867ab476f998a0e78db2b2cf9567e8",
+    "sourceEventId": "script-event:sha256:103bc5cdbbcdde14beb5f2fcd21285c57919e322949eabf48da629863447c9f5",
+    "speaker": "Zenny",
+    "exactText": "oooohhhhhhhhmmmmmmmmmmmm",
+    "delivery": "ElevenLabs v3: [calm, warm, sustained] oooohhhhhhhhmmmmmmmmmmmm. One continuous meditative tone; begin after the wink and hold as Keen recedes.",
+    "startSec": 6.0,
+    "endSec": 10.5
+   }
+  ],
+  "visualPayoff": "Zenny closes her eye after the wink and sustains OHHMMMMM as the camera rises to a warm overhead wide with Keen walking away in the distance.",
+  "physicalStaging": null,
+  "physicalStagings": [],
+  "prohibited": [
+   "Do not alter, paraphrase, duplicate or reassign either approved dialogue line.",
+   "Do not play Keen as angry, threatening or defeated; this is friendly rivalry.",
+   "Do not move Zenny from her established meditating position or add a second Zenny.",
+   "Do not omit the eye-open, smile, single wink, eye-close sequence.",
+   "Do not rush or remove the final pullback and overhead-wide landing."
+  ],
+  "charactersInFrame": [
+   "Keen",
+   "Zenny"
+  ],
+  "offscreenSpeakers": [],
+  "requiredPropReferences": [],
+  "openingCharactersInFrame": null,
+  "closingCharactersInFrame": null,
+  "continuityIn": {
+   "lighting": "Golden morning light continues in the nook, softened after the noisy sneeze-and-ban beat.",
+   "cameraSide": "Low near-stump side after the planned cut, positioned to let Keen's distance from the honeycomb increase before the final leaf reveal.",
+   "characters": [
+    {
+     "character": "Keen",
+     "screenZone": "near the stump at the start of the exit beat",
+     "facing": "turning away from the honeycomb",
+     "pose": "lowered standing posture beginning to leave, with no reach back",
+     "expression": "small, disappointed and trying to keep dignity",
+     "visibleMarks": [],
+     "heldProps": []
+    },
+    {
+     "character": "Zenny",
+     "screenZone": "offscreen nearby leaf pocket at the incoming boundary",
+     "facing": "settled inward with eyes closed",
+     "pose": "already cross-legged and still on the leaf, not yet revealed by the camera",
+     "expression": "calm and unbothered",
+     "visibleMarks": [],
+     "heldProps": []
+    }
+   ]
+  },
+  "continuityOut": {
+   "lighting": "Same warm golden nook light, now reading as calm warmth rather than tempting sparkle.",
+   "cameraSide": "Low settled leaf-side composition within the same nook geography, holding Zenny's stillness with Keen separated from the prize.",
+   "characters": [
+    {
+     "character": "Keen",
+     "screenZone": "away from the honeycomb at the edge of the nook space",
+     "facing": "away from the stump and not looking back with a new plan",
+     "pose": "soft retreat shape with shoulders dropped",
+     "expression": "gentle deflation, no tantrum",
+     "visibleMarks": [],
+     "heldProps": []
+    },
+    {
+     "character": "Zenny",
+     "screenZone": "stable focal area on the nearby leaf",
+     "facing": "forward in quiet inward focus, eyes closed",
+     "pose": "cross-legged and still with minimal breath motion",
+     "expression": "peaceful deadpan calm",
+     "visibleMarks": [],
+     "heldProps": []
+    }
+   ]
+  },
+  "continuityProseIn": "The only carry-in that matters is Keen's lowered, non-reaching state after Fuzzby's ban; Zenny has no prior-shot action to inherit and is simply present nearby for the coming reveal.",
+  "continuityProseOut": "The scene rests on quiet contrast: Keen is away from the honeycomb, and Zenny remains still on the leaf as the nook settles around her calm sound.",
+  "dialogueTimingProse": "Keen speaks softly during the walk-away, then leave a reaction breath for Zenny to open one eye, smile and wink before her sustained tone. Preserve the final overhead landing time.",
+  "referenceRolesProse": "Character references anchor Keen's softened retreat and Zenny's economical stillness. Scene Look anchors the same golden nook, leaf, stump and honeycomb continuity. Cinematography anchors the editorial abandonment from Keen's deflation to Zenny's calm button.",
+  "principalPerformanceApproved": "Friendly banter from Keen; Zenny answers with one private wink and serene comic authority.",
+  "physicalPerformanceApproved": "Keen keeps walking without anger. Zenny opens one eye, smiles, winks once, closes it, then remains cross-legged through the sustained tone.",
+  "animationTimingApproved": "0-4s Keen walk-away and exact line; 4-6s cut/reveal and Zenny eye-smile-wink; 6-10.5s sustained tone; 10.5-12s crane-rise landing.",
+  "performanceContractApproved": {
+   "beatOwner": "1.B4",
+   "playableIntention": "Keen accepts that this attempt is over, and Zenny’s effortless stillness quietly reveals how noisy his performed quiet has been.",
+   "phases": [
+    {
+     "phase": "anticipation",
+     "performer": "Keen",
+     "observableAction": "Keen’s shoulders sink, his gaze drops away from the honeycomb, and his body turns from the stump."
+    },
+    {
+     "phase": "action",
+     "performer": "Keen",
+     "observableAction": "Keen walks away with softened steps and no reach back toward the honeycomb."
+    },
+    {
+     "phase": "settle",
+     "performer": "Zenny",
+     "observableAction": "Zenny remains cross-legged on the leaf with eyes closed, body steady, releasing one calm sustained meditative tone as the nook rests around her."
+    }
+   ],
+   "physicalCauseAndEffect": "Fuzzby’s boundary has ended the raid, so Keen stops reaching and physically increases distance from the honeycomb. The camera’s attention shifts to Zenny’s stable seated body, making the same space read as calm instead of exposed.",
+   "visibleEmotionalTurn": "Keen’s tall raider shape drains into a quiet retreat; Zenny’s stillness changes the final mood from defeat to warm comic exhale.",
+   "requiredLanding": "The scene must land on Zenny still on the leaf, eyes closed and unbothered, with Keen away from the honeycomb and the nook visually settled.",
+   "performanceFreedom": "Keep Zenny extremely economical; allow only breath, tiny fur or leaf motion, and subtle balance. Keen may vary the softness of the retreat, but he must not tantrum, sneak again, or look back with a renewed plan.",
+   "characterTruths": [
+    {
+     "character": "Keen",
+     "canonTrait": "In the locked scene design, Keen’s over-brave control can drain into a soft collapse rather than a tantrum.",
+     "playableWant": "He wants to leave with a little dignity after the failed raid.",
+     "pressureResponse": "Instead of escalating, he lowers his posture and moves away from the prize.",
+     "observableSignature": "Dropped shoulders, lowered gaze, softened steps, no reaching back, and reduced vertical bravado.",
+     "substitutionTest": "Fuzzby would cover with pomp or sleep, and Zenny would not need to recover dignity; only Keen can make the exit feel like a small child’s brave pose quietly running out."
+    },
+    {
+     "character": "Zenny",
+     "canonTrait": "Zenny is Fuzzby’s calm, dry counterweight; her stillness and non-reaction are the joke against surrounding chaos.",
+     "playableWant": "She wants simply to remain in quiet balance, not to correct or rescue Keen.",
+     "pressureResponse": "She does less, not more: eyes closed, body settled, no commentary gesture toward the failed raid.",
+     "observableSignature": "Cross-legged stillness, closed eyes, minimal breath, steady posture, and a calm sustained tone without strain.",
+     "substitutionTest": "Keen’s stillness is effortful and Fuzzby’s quiet is sleep-chaos; only Zenny can make quiet read as effortless and deadpan by barely moving."
+    }
+   ],
+   "comedyStaging": null
+  },
+  "characterTruthsApproved": [
+   {
+    "character": "Keen",
+    "canonTrait": "In the locked scene design, Keen’s over-brave control can drain into a soft collapse rather than a tantrum.",
+    "playableWant": "He wants to leave with a little dignity after the failed raid.",
+    "pressureResponse": "Instead of escalating, he lowers his posture and moves away from the prize.",
+    "observableSignature": "Dropped shoulders, lowered gaze, softened steps, no reaching back, and reduced vertical bravado.",
+    "substitutionTest": "Fuzzby would cover with pomp or sleep, and Zenny would not need to recover dignity; only Keen can make the exit feel like a small child’s brave pose quietly running out."
+   },
+   {
+    "character": "Zenny",
+    "canonTrait": "Zenny is Fuzzby’s calm, dry counterweight; her stillness and non-reaction are the joke against surrounding chaos.",
+    "playableWant": "She wants simply to remain in quiet balance, not to correct or rescue Keen.",
+    "pressureResponse": "She does less, not more: eyes closed, body settled, no commentary gesture toward the failed raid.",
+    "observableSignature": "Cross-legged stillness, closed eyes, minimal breath, steady posture, and a calm sustained tone without strain.",
+    "substitutionTest": "Keen’s stillness is effortful and Fuzzby’s quiet is sleep-chaos; only Zenny can make quiet read as effortless and deadpan by barely moving."
+   }
+  ],
+  "comedyStagingApproved": null,
+  "comedyStagingsApproved": [],
+  "comedyContractsApproved": [
+   {
+    "beatCode": "1.B4",
+    "mode": "SMALL",
+    "mechanism": "Movement against stillness and deadpan contrast.",
+    "comicOwner": "Zenny",
+    "straightCharacter": "Keen",
+    "setup": "Keen has spent the whole scene working loudly to appear silent.",
+    "expectation": "Quiet requires effort, strain and control.",
+    "disruption": "Zenny is simply still, and her “Ommmm…” is calm rather than another betrayal sound.",
+    "button": "The calm sound makes Keen’s entire raid look even busier in retrospect.",
+    "hold": "Hold Zenny’s stillness long enough for the audience to exhale and understand that this is real quiet, not another trap.",
+    "physicalStaging": null
+   }
+  ],
+  "emotionContractsApproved": [
+   {
+    "beatCode": "1.B4",
+    "owner": "Keen",
+    "entryState": "Deflated after being banned from the honeycomb.",
+    "pressure": "The honey is still present, but continuing the raid would mean ignoring that he has been caught and stopped.",
+    "choiceOrRealisation": "Keen lets the attempt end and moves away rather than escalating.",
+    "exitState": "Softly disappointed, no tantrum, with his over-brave shape drained into a sigh.",
+    "observableEvidence": "He sighs away from the honeycomb; his body loses the high-knee raid energy and collapses into retreat.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "The audience carries the gap between performed quiet and real quiet, with the ache kept light by Zenny’s button."
+   }
+  ],
+  "cinematographyContractApproved": {
+   "storyPointOfView": "Keen’s deflation gives way to Zenny’s effortless quiet as the final opinion.",
+   "emotionalDistanceStart": "Close enough to feel Keen’s small disappointment after the ban.",
+   "emotionalDistanceEnd": "Calmer and more observational, resting with Zenny rather than following Keen further.",
+   "revealStrategy": "Reveal Zenny only after Keen has moved away so her stillness answers the whole previous noise pattern.",
+   "shotScale": "Small intimate exit for Keen, then a settled quiet composition on Zenny and the leaf.",
+   "lensIntent": "Use gentle proximity and steadiness to let the space breathe after the compressed gag rhythm.",
+   "cameraHeight": "Low enough to keep leaf, stump and character scale in the nook’s miniature world.",
+   "composition": "Distance Keen from the honeycomb, then give Zenny a stable pocket of space that contrasts with Keen’s stop-start path.",
+   "depthStrategy": "The honeycomb remains part of the nearby environment but loses dominance; Zenny’s leaf becomes the calm focal plane.",
+   "cameraBehavior": "Lags, then abandons; once on Zenny, remains still because stillness is the meaning.",
+   "focusStrategy": "Hold Keen’s retreat until his reaching energy is gone, then settle focus on Zenny without searching.",
+   "lightingFunction": "The same golden morning light softens from tempting sparkle into calm warmth.",
+   "paletteFunction": "Honey gold becomes less urgent; leaf green and morning glow support the exhale.",
+   "performanceVisibility": "Keen’s softened exit and Zenny’s unmoving meditation must both be readable; no added reaction is needed.",
+   "editorialPurpose": "Provide the comic release and thematic contrast between performed quiet and real quiet.",
+   "memorableLandingImage": "Zenny still on the leaf in the golden nook after Keen has left the honey behind.",
+   "providerInstruction": "Let Keen sigh and move away from the honeycomb with his raid energy drained, then cut to a still nearby leaf composition where Zenny remains cross-legged and calm through “Ommmm…”."
+  },
+  "performanceBudgetApproved": {
+   "emotionalTurnCount": 1,
+   "propStateChangeCount": 0,
+   "dialogueHeavy": false,
+   "silentActingReserveSec": 3.0,
+   "landingHoldSec": 2.0,
+   "minimumHonestDurationSec": 7.0,
+   "decision": "single-unit",
+   "rationale": "The beat is a concise exit-and-button: Keen’s soft retreat plus Zenny’s held stillness need breathing room but do not require another split."
+  },
+  "storyIntentApproved": {
+   "narrativeFunction": "Close the scene with a contrast that clarifies the difference between noisy performed carefulness and real quiet.",
+   "primaryAudienceFeeling": "Warm comic release.",
+   "secondaryAudienceFeeling": "A tiny sympathetic ache for Keen’s deflated effort.",
+   "outerAction": "Keen sighs away from the honeycomb; Zenny meditates nearby with one calm sound.",
+   "innerAction": "Keen lets the attempt end instead of forcing another try.",
+   "performanceDirection": "Keen should lose vertical bravado and walk away softly; Zenny should do less than everyone else has done and thereby land more.",
+   "mutedRead": "With sound off, Keen’s slumped retreat and Zenny’s still seated posture still show failed effort giving way to calm.",
+   "environmentPressure": "The honeycomb remains present but no longer pulls the scene; the nook itself settles when Zenny is revealed.",
+   "soundStory": "After CRUNCH, POP and sneeze, Zenny’s sustained sound is the first sound that does not fight the environment.",
+   "motifUse": "The reach-freeze-reach motif resolves by disappearing: Keen no longer reaches, and Zenny does not need to freeze.",
+   "thoughtChangeAndCut": "The final thought is that quiet is not the same as trying very hard to be quiet; the hold ends once that contrast has landed.",
+   "mustUnderstand": "Keen has given up the honeycomb for now, and Zenny’s calm is effortless.",
+   "mustNotKnowYet": "Do not imply Keen has fully learned the emotional lesson; this is a light scene button, not a complete transformation.",
+   "reactionBeat": "Zenny’s non-reaction changes the meaning of all Keen’s effort by contrast.",
+   "relationshipDistance": "Keen moves away from the honeycomb; Zenny is nearby but not intervening.",
+   "relationshipPowerDynamic": "No one fixes Keen; Zenny simply occupies calm space, which becomes the final authority.",
+   "touchOrAvoidance": "Keen avoids returning to the honey; Zenny touches nothing to demonstrate control.",
+   "eyelineRule": "Keen’s eyeline drops away from the honey as he exits; Zenny’s eyes stay closed.",
+   "silhouetteRead": "Keen’s once-tall sneaking silhouette has softened and left; Zenny’s cross-legged stillness is simple and stable.",
+   "silenceRule": "Protect the quiet before and after Zenny’s sound so the audience can exhale.",
+   "scoreInstruction": "Keep score absent or barely present; let the ambient nook and Zenny’s sustained sound close the beat."
+  },
+  "targetDurationSecApproved": 7,
+  "storyboardStagePlanApproved": [
+   {
+    "stageNumber": 1,
+    "beatIds": [
+     "1.B4"
+    ],
+    "purpose": "Let Keen accept the failed raid without turning it into a tantrum or lesson.",
+    "primaryEvent": "Keen sighs and walks away from the honeycomb, his high-knee raid energy gone.",
+    "emotionalOrComicTurn": "The big brave pose empties into a soft retreat.",
+    "cameraAndTransition": "Begin on the physical residue of the ban and lag a fraction behind Keen as he leaves the prize, letting the loss of height and energy read.",
+    "observableEndState": "Keen has moved away from the honeycomb, no longer reaching back toward it."
+   },
+   {
+    "stageNumber": 2,
+    "beatIds": [
+     "1.B4"
+    ],
+    "purpose": "Button the scene by contrasting performed quiet with effortless quiet.",
+    "primaryEvent": "Nearby, Zenny sits cross-legged on a leaf with eyes closed and gives “Ommmm…”.",
+    "emotionalOrComicTurn": "After all the noisy effort, real quiet arrives without strain.",
+    "cameraAndTransition": "Abandon Keen’s retreat for Zenny’s stillness; hold the calm composition long enough for the exhale and the joke to land.",
+    "observableEndState": "Zenny remains still on the leaf as the nook settles around her calm sound."
+   }
+  ],
+  "storyboardInternalShotPlanApproved": [
+   {
+    "shotNumber": 1,
+    "purpose": "Show Keen’s deflation as a physical exit from the treasure game.",
+    "framingAndCamera": "Near the stump, with Keen moving away from the honeycomb; the camera lags instead of chasing, allowing the distance from the prize to grow.",
+    "storyAction": "Keen sighs and walks away.",
+    "performanceFocus": "No tantrum: shoulders, steps and timing soften as the raid leaves his body.",
+    "landingImage": "Keen separated from the honeycomb, facing away from the prize.",
+    "cutReason": "The meaning changes from Keen’s disappointment to Zenny’s contrasting stillness, so abandoning him is the editorial joke."
+   },
+   {
+    "shotNumber": 2,
+    "purpose": "Land the final contrast: quiet that is not performed.",
+    "framingAndCamera": "Still frame on Zenny cross-legged on a leaf nearby, with enough surrounding golden nook to feel the same space has calmed.",
+    "storyAction": "Zenny remains still and voices “Ommmm…”.",
+    "performanceFocus": "Effortless calm: no display, no teaching, no reaction to Keen’s failure.",
+    "landingImage": "Zenny still on the leaf as the nook rests around her.",
+    "cutReason": "Final held view; no further cut inside the unit because the stillness is the button."
+   }
+  ],
+  "transitionType": "PLANNED_CUT",
+  "providerBoundaryReasonApproved": "scene_end",
+  "providerBoundaryExplanationApproved": "Final beat of the scene: Keen has retreated and Zenny’s stillness has delivered the comic exhale, so the next material belongs to a new scene or sequence unit.",
+  "voiceDirectorBrief": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:a5a4732bc3cc7093bf37622dabdc051e9943a3bee4198f64e1e0c60c0a7c5b4c",
+    "sourceEventId": "script-event:sha256:1356b17f615f5305fa0893f6c337d62421cfa3b4f2e14d32bfec1c2957853d56",
+    "speaker": "Zenny",
+    "exactDialogue": "Ommmm…",
+    "elevenLabsV3Direction": "ElevenLabs text: [quietly] Ommmm…  Purpose: quiet steadiness, not comic chanting; let it contrast Keen’s collapsed raid.",
+    "expectedTiming": "Start only after Keen’s sigh and first soft retreat step; hold stillness long enough for the contrast to register.",
+    "physicalActionRelationship": "Voice supports stillness; no effort, no performance of calm, just calm present in the body."
+   }
+  ],
+  "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Keen and @图4 only for the nook set.\n\nBegin exactly on @图1, the approved opening frame — let Keen sigh and move away from the honeycomb with his raid energy drained, then cut to a still nearby leaf composition where Zenny remains cross-legged and calm through “Ommmm…”. Performance phases: anticipation: Keen Keen’s shoulders sink, his gaze drops away from the honeycomb, and his body turns from the stump; action: Keen Keen walks away with softened steps and no reach back toward the honeycomb; settle: Zenny Zenny remains cross-legged on the leaf with eyes closed, body steady, releasing one calm sustained meditative tone as the nook rests around her. Cause and effect: Fuzzby’s boundary has ended the raid, so Keen stops reaching and physically increases distance from the honeycomb. The camera’s attention shifts to Zenny’s stable seated body, making the same space read as calm instead of exposed. Visible turn: Keen’s tall raider shape drains into a quiet retreat; Zenny’s stillness changes the final mood from defeat to warm comic exhale. Land on: The scene must land on Zenny still on the leaf, eyes closed and unbothered, with Keen away from the honeycomb and the nook visually settled. Acting freedom: Keep Zenny extremely economical; allow only breath, tiny fur or leaf motion, and subtle balance. Keen may vary the softness of the retreat, but he must not tantrum, sneak again, or look back with a renewed plan. Zenny sits cross-legged on the leaf with eyes closed as Keen is away from the honeycomb and the golden nook rests still.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Zenny; Keen's mouth remains closed. Preserve character identity and relative scale.",
+  "promptWords": 290,
+  "referenceSlots": {
+   "@图1": "opening keyframe",
+   "@图2": "Zenny",
+   "@图3": "Keen",
+   "@图4": "scene plate",
+   "@Audio1": "voice track"
+  },
+  "audioBrief": "SHOT S1.SH3 — voice-only performance for @Audio1.\nZenny: \"Ommmm…\" — ElevenLabs text: [quietly] Ommmm…  Purpose: quiet steadiness, not comic chanting; let it contrast Keen’s collapsed raid.. Target 3.2-6.1s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+  "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Zenny (@图1, bee) is in frame. Keen (@图2, bear) stands near the honeycomb with his posture lowered, already beginning to turn away from the stump.\n\nContinuity in: Golden morning light continues in the nook, softened after the noisy sneeze-and-ban beat; Low near-stump side after the planned cut, positioned to let Keen's distance from the honeycomb increase before the final leaf reveal. @图3 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nLiving performance lock: Keen, Zenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+  "keyframePromptWords": 155,
+  "keyframeReferenceSlots": {
+   "@图1": "Zenny",
+   "@图2": "Keen",
+   "@图3": "scene plate"
+  },
+  "internalConstraints": "Hard constraints: no Keen must move away without tantrum, renewed sneaking or a look-back plan; no Zenny must stay cross-legged, eyes closed and almost motionless; added reaction would break the button; no The shot must end on Zenny's stillness after Keen is separated from the honeycomb; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+ },
+ "acceptedKeyframe": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S1.SH3_keyframe_candidate_6df3d520.png",
+  "sha256": "8e7894025c817693427ea76a1df749911035081d740771d527ffabfb81e1c4bb"
+ },
+ "preservedSiblingShots": [
+  "S1.SH1",
+  "S1.SH2"
+ ],
+ "providerCalled": false,
+ "spendUsd": 0
+}

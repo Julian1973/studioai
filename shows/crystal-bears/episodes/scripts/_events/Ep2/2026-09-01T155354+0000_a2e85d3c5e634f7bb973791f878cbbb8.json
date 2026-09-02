@@ -1,0 +1,18 @@
+{
+ "schemaVersion": 1,
+ "eventId": "a2e85d3c5e634f7bb973791f878cbbb8",
+ "kind": "script-voice-contract-corrected",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48",
+ "previousScriptVersionId": "sha256:9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
+ "title": "Bo's Big Day V3",
+ "displayFile": "Ep2_Bo_s_Big_Day_V3.txt",
+ "activatedAt": "2026-09-01T15:53:54+00:00",
+ "activatedBy": "Julian",
+ "changeScope": {
+  "kind": "voice-contract-correction",
+  "scene": "4",
+  "shotId": "S4.SH1",
+  "summary": "Shared countdown, remove carryover text, and separate the confession beat."
+ }
+}

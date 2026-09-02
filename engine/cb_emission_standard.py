@@ -34,6 +34,7 @@ def _shots(text: str) -> list[str]:
 def preflight(prompt: str, *, duration_sec: float | None = None,
               timing_beats: Iterable[dict] | None = None) -> dict:
     findings: list[Finding] = []
+    typed_timing_beats = None if timing_beats is None else list(timing_beats)
 
     def add(severity: str, rule: str, message: str, fix: str, deduction: float):
         findings.append(Finding(severity, rule, message, fix, deduction))
@@ -68,7 +69,7 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
         add("FATAL", "R16", "A salient feature is introduced without an ownership block.",
             "Name the feature owner and explicitly keep every other character clean.", 2.0)
 
-    if duration_sec is not None and timing_beats:
+    if duration_sec is not None and typed_timing_beats:
         costs = {
             "travel": 1.8, "dodge": 1.0, "impact": 0.8, "load_release": 2.3,
             "aerial": 1.8, "tumble": 1.2, "settle": 1.0, "self_check": 1.2,
@@ -76,12 +77,17 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
             "reveal": 1.5, "business": 1.5, "hold": 2.0,
         }
         minimum = sum(costs.get(str(beat.get("type")), 0) * int(beat.get("count", 1))
-                      for beat in timing_beats) * 1.15
+                      for beat in typed_timing_beats) * 1.15
         if minimum > float(duration_sec) + 0.001:
             add("FATAL", "beat-cost", f"Beats need {minimum:.2f}s but unit requests {duration_sec:g}s.",
                 "Increase the request duration or split the unit; never trim the direction.", 2.0)
 
-    travel = _has(prompt, r"\bchase\b|\bpursuit\b|covers real ground|travelling deep")
+    travel = (
+        any(str(beat.get("type") or "").casefold() == "travel"
+            for beat in typed_timing_beats)
+        if typed_timing_beats is not None
+        else _has(prompt, r"\bchase\b|\bpursuit\b|covers real ground|travelling deep")
+    )
     traversal_parts = (
         r"three (?:parallax )?speeds", r"(?:passes|pass).*?(?:vanish|disappear).*?behind",
         r"pulls ahead.*?(?:shrink|smaller).*?camera surges", r"off[- ]centre|frame edge",
@@ -124,6 +130,7 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
     if not (
         _has(prompt, r"\bNo music\b")
         or _has(prompt, r"Seedance may generate non-verbal music, ambience and SFX")
+        or _has(prompt, r"Seedance 2\.5 must provide instrumental music, ambience and non-verbal SFX")
     ):
         add("FIX", "audio-policy", "Music/SFX policy is absent.",
             "State either No music or the approved Seedance non-verbal music/SFX policy.",

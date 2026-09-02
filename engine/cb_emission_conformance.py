@@ -237,12 +237,25 @@ def is_instance_lock_equivalent(value, characters):
             and any(word in text for word in ("duplicate", "duplicates", "blended")))
 
 
+SINGLE_INSTANCE_DIALOGUE_LOCK = (
+    "Use @Audio1 as the only voice authority. Only the character currently speaking "
+    "in @Audio1 may move their mouth. "
+    "Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and "
+    "instrumental music; it must not generate speech, sung lyrics or vocal music. "
+    "VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists "
+    "once in @Audio1. Use the written transcript only to assign the correct speaker and "
+    "mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. "
+    "The final render must contain exactly one audible dialogue performance: the supplied "
+    "@Audio1, unchanged."
+)
+
+
 def validate_dialogue_synthesis(prompt, dialogue_lines):
     """Validate the synthesis contract used by every Seedance render emission.
 
-    The provider receives the words so it can stage speech and lip sync, while the
-    approved audio reference remains the sole performance authority. Exact audio
-    passthrough is not assumed; the rendered voice is a guide track for post.
+    The provider receives the verbatim words only to stage speaker attribution and lip
+    sync. The approved audio reference is the sole audible performance authority and
+    must never be accompanied by a synthesized duplicate.
     """
     text = str(prompt or "")
     low = text.casefold()
@@ -263,6 +276,11 @@ def validate_dialogue_synthesis(prompt, dialogue_lines):
         "listeners remain silent and closed-mouth",
         "no narration",
         "no subtitles or captions",
+        "transcript only",
+        "already exists once in @audio1",
+        "do not synthesize, repeat, dub, echo, layer or replace",
+        "exactly one audible dialogue performance",
+        "@audio1, unchanged",
     )
     for phrase in required_phrases:
         if phrase not in low:
@@ -272,16 +290,26 @@ def validate_dialogue_synthesis(prompt, dialogue_lines):
         errors.append("dialogue authority is missing 'no extra words'")
 
     expected = []
+    expected_counts = {}
+    for line in lines:
+        key = tuple(dialogue_words(locked_dialogue_text(line)))
+        expected_counts[key] = expected_counts.get(key, 0) + 1
+    counted = set()
     for index, line in enumerate(lines):
         speaker = normalize_prose(line.get("speaker"))
         exact = locked_dialogue_text(line)
         marker = "{" + exact + "}"
         expected.append(marker)
         exact_count = text.count(marker)
-        matches = [marker] if exact_count == 1 else marker_word_matches(text, exact)
-        if len(matches) != 1:
+        matches = ([marker] * exact_count if exact_count else
+                   marker_word_matches(text, exact))
+        dialogue_key = tuple(dialogue_words(exact))
+        if (dialogue_key not in counted and
+                len(matches) != expected_counts[dialogue_key]):
             errors.append(
-                f"dialogue line {index + 1} must appear exactly once as {marker!r}")
+                f"dialogue line {index + 1} must appear exactly "
+                f"{expected_counts[dialogue_key]} time(s) as {marker!r}")
+        counted.add(dialogue_key)
         marker_pattern = re.escape(matches[0]) if matches else re.escape(marker)
         placement = re.compile(
             rf"(?:Dialogue placement|Spoken action):\s*{re.escape(speaker)}"

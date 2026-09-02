@@ -279,6 +279,23 @@ def test_prepare_voice_loads_the_skill_and_stops_at_structured_candidate(monkeyp
     assert "every bracketed audio tag" in seen["user"]
 
 
+def test_prepare_voice_repairs_generated_off_palette_tag_without_changing_words(monkeypatch):
+    def fake(system, user, schema, **kwargs):
+        line = _voice_line(performedText="[angry][nervous] Nailed it.")
+        line.takeRecipes[0].performedText = "[angry][nervous] Nailed it."
+        line.tagPurposes.append(D.VoiceTagPurpose(tag="angry", purpose="Invent anger."))
+        return schema(shotId="S1.SH1", sceneIntention="cover the wobble", lines=[line])
+
+    logs = []
+    monkeypatch.setattr(D.cb_llm, "structured", fake)
+    out = D.prepare_voice({"shotId": "S1.SH1"}, _locked(), log=logs.append)
+
+    assert out.lines[0].performedText == "[nervous] Nailed it."
+    assert out.lines[0].takeRecipes[0].performedText == "[nervous] Nailed it."
+    assert [item.tag for item in out.lines[0].tagPurposes] == ["nervous"]
+    assert any("removed unsupported generated tag(s)" in item for item in logs)
+
+
 def test_animation_provider_shell_enforces_audio_lock_and_continuity_contract():
     shot = {
         "dialogueLines": [
@@ -299,7 +316,7 @@ def test_animation_provider_shell_enforces_audio_lock_and_continuity_contract():
     assert "[AUDIO AND EXCLUSIONS]" in compiled
     assert "No improvised or extra words" in compiled
     assert "no duplicated cast members" in compiled
-    assert "Seedance may generate non-verbal music, ambience and SFX" in compiled
+    assert "Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX" in compiled
     assert "Spoken action: Fuzzby: {Nailed it.}" in compiled
     assert "Spoken action: Zenny: {Officially nuts!}" in compiled
     assert "@Audio1 remains the sole English dialogue and performance authority." in compiled
@@ -682,6 +699,36 @@ def test_creative_translation_preserves_approved_gag_clock_and_provider_action()
     assert "providerAction is absent" in report["errors"][0]
 
 
+def test_animation_carries_approved_gag_wording_over_model_paraphrase():
+    approved = {
+        "beatCode": "2.B2", "mode": "BIG",
+        "setup": "Keen's sneeze interrupts Aida's still ritual circle.",
+        "disruption": "The sneeze opens the circle into shared movement.",
+        "hold": "Aida includes Keen without losing her grounded calm.",
+        "button": "Aida's final blessing restores affectionate calm.",
+    }
+    clock = D.GagClockDirection(
+        beatCode="2.B2", mode="BIG", setup="A sneeze happens.",
+        anticipation="Keen's breath catches visibly.", impact="Aida looks up.",
+        reaction="Aida turns warmly toward Keen.",
+        recoveryHold="They pause together.", recoveryHoldSec=2.0,
+        button="The scene ends.",
+        providerAction="Keen sneezes and Aida turns toward him with a warm smile.")
+    direction = SimpleNamespace(
+        creativeTranslation=SimpleNamespace(gagClocks=[clock]))
+
+    D.carry_approved_gag_clock_text(
+        {"comedyContractsApproved": [approved]}, direction)
+
+    assert clock.mode == "BIG"
+    assert clock.setup == approved["setup"]
+    assert clock.impact == approved["disruption"]
+    assert clock.recoveryHold == approved["hold"]
+    assert clock.button == approved["button"]
+    assert clock.anticipation == "Keen's breath catches visibly."
+    assert clock.providerAction.startswith("Keen sneezes")
+
+
 def test_big_gag_requires_numeric_two_second_landing():
     common = {
         "beatCode": "1.B1", "mode": "BIG", "setup": "Fuzzby enters too fast.",
@@ -858,7 +905,7 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert "[AUDIO AND EXCLUSIONS]" in prompt
     assert "No narration. No improvised or extra words." in prompt
     assert "no duplicated cast members" in prompt
-    assert "Seedance may generate non-verbal music, ambience and SFX" in prompt
+    assert "Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX" in prompt
     assert "Hold: 2.2s" in prompt and "approximately 2.2s" not in prompt
     # Length is advisory. The production gate measures whether the compiled prompt
     # delivers the beat and satisfies the Seedance/craft contracts.
@@ -934,6 +981,54 @@ def test_character_reference_label_accepts_authority_first_contracts():
     assert D._character_reference_label("Guide's exact identity and turnaround.") == "Guide"
 
 
+def test_animation_compiler_ignores_legacy_gag_marker_without_approved_clock():
+    shot = {
+        "shotId": "S3.SH5",
+        "durationSec": 8,
+        "charactersInFrame": ["Bo", "Keen"],
+        "dialogueLines": [{
+            "speaker": "Keen", "exactText": "See? Nothing.",
+            "delivery": "light and kind", "startSec": 2.0, "endSec": 3.2,
+        }],
+    }
+    direction = {
+        "durationSec": 8,
+        "generationGoal": "Keen's harmless self-joke gives Bo room to soften.",
+        "creativeTranslation": {"interpretation": {}, "gagClocks": []},
+        "referenceContract": [{
+            "assetTag": "@Audio1", "role": "audio",
+            "controls": "the approved voice performance",
+        }],
+        "shotPlan": [{
+            "shotNumber": 1,
+            "framingLensAndCamera": "Hold both faces in a warm interior two-shot.",
+            "causalAction": "Keen presents his still tail while Bo watches.",
+            "observablePerformance": "Keen stays playful and Bo begins to relax.",
+            "landingImage": "Bo remains beside Keen with a cautious almost-smile.",
+            "dialogueLineIndexes": [1],
+            "gagBeatIds": ["3.B5.gag1"],
+        }],
+        "stagePlan": [{
+            "stageNumber": 1, "beatIds": ["3.B5"],
+            "initialOrCarriedState": "Bo and Keen begin together inside the hollow.",
+            "cause": "Keen redirects attention onto his own still tail.",
+            "primaryEvent": "Keen presents his tail and Bo watches.",
+            "emotionOrCameraAnalysis": "The shared frame makes the kindness readable.",
+            "observableEndState": "Bo remains beside Keen with a cautious almost-smile.",
+        }],
+        "consistencyContract": ["Keep Bo and Keen together inside the hollow."],
+        "geography": ["The doorway remains beyond them as their destination."],
+        "surgicalSafeguards": [],
+        "continuityFinish": "Bo remains beside Keen with a cautious almost-smile.",
+        "audioContract": "Use @Audio1 unchanged.",
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert prompt.count("{See? Nothing.}") == 1
+    assert "3.B5.gag1" not in prompt
+
+
 def test_creative_translation_derives_redundant_gag_count():
     payload = {
         "interpretation": {
@@ -986,7 +1081,7 @@ def test_physics_comes_from_general_approved_staging_registry():
     }
     prompt = D.compile_animation_provider_prompt(shot, direction)
     assert "Physics: The lantern pulls the rope taut" in prompt
-    assert "Seedance may generate non-verbal music, ambience and SFX" in prompt
+    assert "Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX" in prompt
 
 
 def test_animation_compiler_emits_continuous_internal_units_as_timed_phases():
@@ -1089,7 +1184,8 @@ def test_animation_compiler_normalizes_seedance_ready_watch_prompt():
     assert "Camera: Shot 1:" not in prompt
     assert "Camera: Cut to" not in prompt
     assert "[Performance Sequence]" not in prompt
-    assert "@Audio1 guides dialogue timing and mouth shapes" in prompt
+    assert "@Audio1 is the sole authority and sole performance authority" in prompt
+    assert "Seedance-generated non-dialogue SFX, ambience and instrumental" in prompt
     assert "No extra voices." in prompt
     assert prompt.count("{Are you sure?}") == 1
     assert prompt.count("{I've got this.}") == 1
@@ -1146,12 +1242,96 @@ def test_relay_animation_gets_previous_final_frame_reference_by_default():
     }
 
 
+def test_relay_keyframe_replaces_stale_opener_slots_with_previous_final_frame():
+    shot = {
+        "shotId": "S4.SH2",
+        "sourceType": "relay",
+        "sourceShotId": "S4.SH1",
+        "charactersInFrame": ["Aida", "Bo", "Keen"],
+        "keyframeReferenceSlots": {
+            "@图1": "Aida",
+            "@图2": "Bo",
+            "@图3": "Keen",
+            "@图4": "scene plate",
+        },
+    }
+
+    slots = R._effective_reference_slots({}, shot, "keyframeReferenceSlots", "4", "Ep2")
+
+    assert slots == {
+        "@图1": "previous shot final frame",
+        "@图2": "scene plate",
+        "@图3": "Aida",
+        "@图4": "Bo",
+        "@图5": "Keen",
+    }
+
+
+def test_relay_animation_replaces_stale_opening_keyframe_with_handoff_bundle():
+    shot = {
+        "shotId": "S4.SH2",
+        "sourceType": "relay",
+        "sourceShotId": "S4.SH1",
+        "charactersInFrame": ["Aida", "Bo", "Keen"],
+        "dialogueLines": [{"speaker": "Aida", "text": "Hi Keen."}],
+        "referenceSlots": {
+            "@图1": "opening keyframe",
+            "@图2": "Aida",
+            "@图3": "Bo",
+            "@图4": "Keen",
+            "@图5": "scene plate",
+            "@Audio1": "voice track",
+        },
+    }
+
+    slots = R._effective_reference_slots({}, shot, "referenceSlots", "4", "Ep2")
+
+    assert slots == {
+        "@图1": "previous shot final frame",
+        "@图2": "scene plate",
+        "@图3": "Aida",
+        "@图4": "Bo",
+        "@图5": "Keen",
+        "@Audio1": "voice track",
+    }
+
+
+def test_previous_final_frame_role_resolves_from_approved_source_shot(monkeypatch, tmp_path):
+    harvest = tmp_path / "S4.SH1_final_frame.png"
+    harvest.write_bytes(b"png")
+    pkg = {
+        "continuityLedger": [{
+            "shotId": "S4.SH1",
+            "status": "approved",
+            "harvestFrame": str(harvest),
+        }]
+    }
+
+    monkeypatch.setattr(R, "load_pkg", lambda scene, episode: (pkg, tmp_path / "pkg.json"))
+    monkeypatch.setattr(R, "_reference_path_is_approved", lambda path: True)
+
+    path = R._slot_path_for_role(
+        "previous shot final frame",
+        None,
+        "4",
+        "Ep2",
+        {},
+        shot={"shotId": "S4.SH2", "sourceType": "relay", "sourceShotId": "S4.SH1"},
+    )
+
+    assert path == str(harvest)
+
+
 def test_animation_slots_append_all_required_continuity_props(monkeypatch):
     shot = {
         "shotId": "6.B3.S1",
         "sourceType": "relay",
         "sourceShotId": "6.B1.S1",
         "charactersInFrame": ["Aida"],
+        "dialogueLines": [{
+            "speaker": "Aida", "exactText": "Ready.",
+            "startSec": 1, "endSec": 2,
+        }],
         "referenceSlots": {
             "@图1": "previous shot final frame",
             "@图2": "scene plate",
@@ -1169,6 +1349,61 @@ def test_animation_slots_append_all_required_continuity_props(monkeypatch):
     assert slots["@图4"] == "prop:story_vehicle"
     assert slots["@图5"] == "prop:story_vehicle_loaded_state"
     assert slots["@Audio1"] == "voice track"
+
+
+def test_animation_slots_append_shot_scoped_location_angles_without_changing_see():
+    shot = {
+        "shotId": "S3.SH3",
+        "charactersInFrame": ["Bo", "Keen"],
+        "referenceSlots": {
+            "@图1": "opening keyframe",
+            "@图2": "Bo",
+            "@图3": "Keen",
+            "@图4": "scene plate",
+            "@Audio1": "voice track",
+        },
+    }
+    pkg = {
+        "continuityLedger": [{
+            "shotId": "S3.SH3",
+            "additionalAnimationReferenceRoles": [
+                "location:Bo hollow reverse view",
+                "location:S3.SH1 approved room composition",
+            ],
+        }],
+    }
+
+    slots = R._effective_reference_slots(pkg, shot, "referenceSlots", "3", "Ep2")
+
+    assert slots["@图5"] == "location:Bo hollow reverse view"
+    assert slots["@图6"] == "location:S3.SH1 approved room composition"
+    assert shot["referenceSlots"] == {
+        "@图1": "opening keyframe",
+        "@图2": "Bo",
+        "@图3": "Keen",
+        "@图4": "scene plate",
+        "@Audio1": "voice track",
+    }
+
+
+def test_animation_slots_remove_stale_audio_for_seedance_only_sfx():
+    shot = {
+        "shotId": "S1.SH1",
+        "charactersInFrame": ["Fuzzby"],
+        "dialogueLines": [{
+            "speaker": "Fuzzby", "exactText": "ZZZZZ …",
+            "startSec": 2, "endSec": 4,
+        }],
+        "referenceSlots": {
+            "@图1": "opening keyframe",
+            "@图2": "Fuzzby",
+            "@Audio1": "voice track",
+        },
+    }
+
+    slots = R._effective_reference_slots({}, shot, "referenceSlots", "1", "Ep2")
+
+    assert slots == {"@图1": "opening keyframe", "@图2": "Fuzzby"}
 
 
 def test_relay_reference_bundle_blocks_missing_scene_and_character_refs():
@@ -1339,6 +1574,98 @@ def test_scene_continuity_locks_block_when_missing_from_prompt():
     report = R._scene_state_prompt_report(shot, "Keen looks at the water.")
     assert report["ok"] is False
     assert report["missing"] == ["Keen boat contents and departure props"]
+
+
+def test_animation_prompt_routes_pure_snore_to_seedance_sfx():
+    shot = {
+        "shotId": "S1.SH1",
+        "durationSec": 10,
+        "charactersInFrame": ["Fuzzby"],
+        "dialogueLines": [{
+            "dialogueOccurrenceId": "s1-snore-1",
+            "speaker": "FUZZBY",
+            "exactText": "ZZZZZ …",
+            "startSec": 2,
+            "endSec": 4,
+        }],
+    }
+    direction = {
+        "durationSec": 10,
+        "generationGoal": "Fuzzby sleeps peacefully while a natural snore establishes the quiet morning.",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Establish the sleeping boundary.",
+            "framingLensAndCamera": "Hold a low near-wide view of the honeycomb.",
+            "causalAction": "Keen approaches while Fuzzby remains asleep.",
+            "observablePerformance": "Keen moves carefully and Fuzzby stays settled.",
+            "landingImage": "Keen pauses short of the honeycomb.",
+            "dialogueLineIndexes": [],
+        }, {
+            "shotNumber": 2,
+            "purpose": "Let the sleeping owner interrupt the approach.",
+            "framingLensAndCamera": "Ease closer without changing screen direction.",
+            "causalAction": "Fuzzby's snore makes Keen freeze.",
+            "observablePerformance": "Fuzzby sleeps while Keen holds completely still.",
+            "landingImage": "Keen remains frozen beside the sleeping Fuzzby.",
+            "dialogueLineIndexes": [1],
+            "dialogueDirections": ["Keep this as a natural sleeping sound."],
+        }],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["1.B1"],
+            "purpose": "Resting temptation",
+            "initialOrCarriedState": "Fuzzby is asleep beside the honeycomb.",
+            "cause": "The honey scent keeps him deeply settled.",
+            "primaryEvent": "Fuzzby snores naturally while remaining asleep.",
+            "observableEndState": "Fuzzby remains asleep beside the honeycomb.",
+            "emotionOrCameraAnalysis": "Hold close enough to read peaceful sleep.",
+        }],
+        "audioContract": "Natural forest ambience and restrained score.",
+        "continuityFinish": "Fuzzby remains asleep beside the honeycomb.",
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "{ZZZZZ" not in prompt
+    assert "2-4s:" in prompt
+    assert "natural snore" in prompt
+    assert "Do not synthesize words or place this sound in @Audio1" in prompt
+
+
+def test_animation_prompt_keeps_leading_inline_sfx_with_its_spoken_order():
+    shot = {
+        "shotId": "S1.SH2",
+        "durationSec": 10,
+        "charactersInFrame": ["Fuzzby"],
+        "dialogueLines": [{
+            "dialogueOccurrenceId": "s1-mixed-1",
+            "speaker": "FUZZBY",
+            "exactText": "[sneeze] I am awake!",
+            "startSec": 1,
+            "endSec": 3,
+        }],
+    }
+    direction = {
+        "durationSec": 10,
+        "generationGoal": "Fuzzby wakes with a sneeze and delivers the approved spoken line.",
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["1.B2"],
+            "purpose": "Abrupt waking",
+            "initialOrCarriedState": "Fuzzby is asleep beside the honeycomb.",
+            "cause": "Pollen tickles Fuzzby's nose.",
+            "primaryEvent": "Fuzzby sneezes, wakes and speaks.",
+            "observableEndState": "Fuzzby is awake and blinking.",
+            "emotionOrCameraAnalysis": "Hold for the startled reaction.",
+        }],
+        "audioContract": "Use @Audio1 for the spoken words.",
+        "continuityFinish": "Fuzzby is awake and blinking.",
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert prompt.count("{[sneeze] I am awake!}") == 1
+    assert "Seedance-generated non-dialogue SFX" in prompt
 
 
 def test_relay_final_frame_is_state_handoff_not_geography_master():
@@ -1905,6 +2232,52 @@ def test_human_working_prompt_derives_trace_from_approved_contracts_only_when_ex
     assert working["ready"] is True
     assert working["compiledGagBeatCodes"] == ["1.B1"]
     assert working["derivedFromApprovedContracts"] is True
+
+
+def test_animation_hydrates_omitted_gag_clocks_from_signed_contracts():
+    event = "Bo turns the feared tail-poof into play and giggles while moving."
+    shot = {
+        "comedyContractsApproved": [{
+            "beatCode": "4.B1", "mode": "SMALL",
+            "setup": "Keen begins a countdown game.",
+            "expectation": "The countdown may trigger embarrassment.",
+            "disruption": "Bo deliberately repeats the tail-poof as play.",
+            "hold": "Let Bo's giggle register.",
+            "button": "Bo's giggle confirms the shift.",
+        }],
+        "storyboardStagePlanApproved": [{
+            "stageNumber": 1, "beatIds": ["4.B1"],
+            "primaryEvent": event,
+            "observableEndState": "Bo keeps moving, looser and giggling.",
+        }],
+        "storyboardInternalShotPlanApproved": [{
+            "shotNumber": 1,
+            "storyAction": "Aida says Every single time. Then repeats Every single time.",
+        }],
+        "dialogueLines": [
+            {"speaker": "Aida", "exactText": "Every single time.",
+             "delivery": "Plain and steady."},
+            {"speaker": "Aida", "exactText": "Every single time.",
+             "delivery": "A settled confirmation."},
+        ],
+    }
+    direction = SimpleNamespace(
+        creativeTranslation=SimpleNamespace(
+            gagClocks=[], generationDesign=SimpleNamespace(completeGagArcCount=0)),
+        shotPlan=[SimpleNamespace(
+            gagBeatIds=["4.B1", "4.B2"], dialogueLineIndexes=[1],
+            dialogueDirections=["Model collapsed the duplicate."])],
+    )
+
+    repaired = D.carry_approved_gag_clock_text(shot, direction)
+
+    assert [clock.beatCode for clock in repaired.creativeTranslation.gagClocks] == ["4.B1"]
+    assert repaired.creativeTranslation.gagClocks[0].providerAction == event
+    assert repaired.creativeTranslation.generationDesign.completeGagArcCount == 1
+    assert repaired.shotPlan[0].gagBeatIds == ["4.B1"]
+    assert repaired.shotPlan[0].dialogueLineIndexes == [1, 2]
+    assert repaired.shotPlan[0].dialogueDirections == [
+        "Plain and steady.", "A settled confirmation."]
 
 
 def test_animation_reads_missing_beat_contracts_only_from_exact_approved_storyboard(tmp_path,

@@ -40,6 +40,26 @@ def test_script_store_deduplicates_identical_bytes_without_losing_history(tmp_pa
     assert len(list((store.events_root / "Ep2").glob("*.json"))) == 2
 
 
+def test_script_store_records_a_scoped_dialogue_correction(tmp_path):
+    store = ScriptStore(
+        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
+    first = store.store("Ep2", "SCENE 8\nOld line\n", "Episode")
+    scope = {
+        "kind": "dialogue-correction", "scene": "8", "shotId": "S8.SH2",
+        "dialogueOccurrenceId": "dialogue-occurrence:sha256:test",
+    }
+    second = store.store(
+        "Ep2", "SCENE 8\nCorrected line\n", "Episode",
+        event_kind="script-dialogue-corrected", change_scope=scope)
+
+    assert second["previousScriptVersionId"] == first["scriptVersionId"]
+    assert second["changeScope"] == scope
+    events = sorted((store.events_root / "Ep2").glob("*.json"))
+    correction = next(json.loads(path.read_text()) for path in events
+                      if json.loads(path.read_text())["kind"] == "script-dialogue-corrected")
+    assert correction["changeScope"] == scope
+
+
 def test_script_store_detects_content_tampering(tmp_path):
     store = ScriptStore(
         tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")

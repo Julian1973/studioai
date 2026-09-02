@@ -5,6 +5,7 @@ HERE = Path(__file__).resolve().parent
 HTML = (HERE / "director.html").read_text(encoding="utf-8")
 CSS = (HERE / "director.css").read_text(encoding="utf-8")
 JS = (HERE / "director.js").read_text(encoding="utf-8")
+APP = (HERE / "app.html").read_text(encoding="utf-8")
 SERVER = (HERE / "serve.py").read_text(encoding="utf-8")
 ROOM = (HERE / "room.html").read_text(encoding="utf-8")
 BOARD = (HERE / "board.html").read_text(encoding="utf-8")
@@ -46,8 +47,12 @@ def test_director_includes_anyfilm_style_pipeline_plus_outcome_views():
     for view in ("pipeline", "episodes", "director", "review"):
         assert f'id="view-{view}"' in HTML
         assert f'data-view="{view}"' in HTML
-    for step in ("Upload", "Style", "Analysis", "Characters", "Props", "Locations", "Storyboard", "Footage", "Audio", "Rough Cut"):
+    for step in ("Script", "Production Package", "Render", "Review"):
         assert step in HTML
+    assert 'aria-label="Production phases"' in HTML
+    assert 'data-pipeline-step="style"' not in HTML
+    assert 'data-pipeline-step="analysis"' not in HTML
+    assert 'data-pipeline-step="characters"' not in HTML
     assert "Houses" not in HTML
     assert "Departments" not in HTML
     assert "Scene creation path" not in HTML
@@ -64,6 +69,7 @@ def test_frontend_consumes_one_authoritative_director_state_and_action_route():
         assert internal_route not in JS
     assert "allowed_action_ids(session)" in SERVER
     assert "That action is no longer current" in SERVER
+    assert "providerRequest" in JS
 
 
 def test_ai_director_advises_every_final_human_signoff_without_approval_authority():
@@ -152,6 +158,9 @@ def test_director_analysis_step_exposes_scene_storyboard_review_when_scene_packa
     assert '"/api/storyboard-approve"' in JS
     assert "scene-storyboard-snapshot" in SERVER
     assert "_snapshot_storyboard_handover" in SERVER
+    assert 'self.path == "/api/storyboard-handover"' in SERVER
+    assert "_ensure_storyboard_handover" in SERVER
+    assert '"approvalPreserved": True' in SERVER
     assert "production package source storyboard signature is stale" in SERVER
 
 
@@ -160,6 +169,18 @@ def test_story_intake_approval_is_idempotent_when_package_is_already_current():
     assert 'status.get("candidateCurrent")' in SERVER
     assert '"alreadyCurrent": True' in SERVER
     assert "Story & Direction is already approved for this script and canon lock." in SERVER
+
+
+def test_department_run_never_reuses_a_stale_candidate():
+    assert 'status.get("candidate") and status.get("candidateCurrent")' in SERVER
+    assert 'args = ["cb_render.py", "department-prepare"' in SERVER
+
+
+def test_studio_jobs_force_current_engine_env_over_parent_env():
+    assert "def _engine_env_overrides()" in SERVER
+    assert 'env_file = CBGEN / ".env"' in SERVER
+    assert "env.update(_engine_env_overrides())" in SERVER
+    assert "env=_engine_subprocess_env()" in SERVER
 
 
 def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
@@ -372,8 +393,10 @@ def test_success_is_published_only_after_director_cache_refresh():
     assert '!["running", "queued", "finalizing"].includes(job.status)' in JS
 
 
-def test_fresh_voice_track_is_visible_before_registry_catches_up():
-    assert 'record["vo"] = record.get("vo") or _url_from_abs(ledger.get("voPath"))' in SERVER
+def test_current_voice_track_comes_only_from_the_continuity_ledger():
+    assert 'record["vo"] = _url_from_abs(ledger.get("voPath"))' in SERVER
+    assert 'record["vo"] = record.get("vo") or' not in SERVER
+    assert 'record["voicePrevious"] = _url_from_abs(' in SERVER
 
 
 def test_keyframe_refire_is_one_visible_replacement_job():
@@ -382,6 +405,13 @@ def test_keyframe_refire_is_one_visible_replacement_job():
     assert "generating the A/B replacement pair" in JS
     assert '"cb_studio_director.py", "refire-keyframe"' in SERVER
     assert 'f"director:refire-keyframe:{target}"' in SERVER
+
+
+def test_hear_keeps_dialogue_above_returned_voice_media():
+    dialogue = APP.index("${dialogueEditor}${voiceMedia}${performanceEditor}")
+    legacy = "${voiceMedia}${dialogueEditor}${performanceEditor}"
+    assert dialogue >= 0
+    assert legacy not in APP
 
 
 def test_director_action_area_explains_current_outcome_before_button():
@@ -399,6 +429,13 @@ def test_see_ab_comparison_is_visible_and_requires_explicit_selection():
     assert "Review cost, references and prompt before pressing Render." in JS
     assert ".action-guidance" in CSS
     assert "Current Shot" in HTML
+
+
+def test_visible_keyframe_candidate_is_selected_by_the_approve_action():
+    assert 'cmd==="approve-keyframe"&&body.candidate==null' in APP
+    assert 'body.candidate=visibleCandidate.candidateId' in APP
+    assert 'cmd == "approve-keyframe" and d.get("candidate")' in SERVER
+    assert '_CBR.select_keyframe_candidate(' in SERVER
 
 
 def test_current_shot_has_inline_creation_and_animation_inputs():
@@ -538,6 +575,14 @@ def test_left_rail_has_project_asset_libraries():
     assert ".asset-add-panel" in CSS
     assert '.asset-add-panel input[type="file"]' in CSS
     assert ".primary:disabled, .secondary:disabled { opacity: .5; cursor: not-allowed; }" in CSS
+
+
+def test_character_api_accepts_multiple_identity_references_without_approval():
+    assert 'reference_data = d.get("referenceData") or []' in SERVER
+    assert 'len(reference_data) > 12' in SERVER
+    assert 'entry.setdefault("refs", [])' in SERVER
+    assert 'entry["refs"].append(rel)' in SERVER
+    assert '"canonAction": "Review this change, then explicitly re-lock canon."' in SERVER
 
 
 def test_client_bundle_has_no_fabricated_clip_fallbacks_or_banned_canon():
@@ -928,7 +973,9 @@ def test_production_pipeline_uses_the_canonical_creative_path():
     assert 'id: "audio"' in JS
     assert 'id: "rough-cut"' in JS
     assert JS.index('id: "audio"') < JS.index('id: "footage"')
-    assert HTML.index('data-pipeline-step="audio"') < HTML.index('data-pipeline-step="footage"')
+    assert HTML.index('data-pipeline-step="storyboard"') < HTML.index('data-pipeline-step="footage"')
+    assert 'data-pipeline-step="rough-cut"' in HTML
+    assert "Phase ${phasePosition} of 4" in JS
     assert "renderCanonicalPipelineStep(step)" in JS
     assert 'view: "director"' in JS
     assert '? requestedView : legacyAssetCategory ? "assets" : "director"' in JS
@@ -1042,6 +1089,31 @@ def test_rough_cut_uses_a_saved_approved_take_bin():
     assert "Add shot" in JS
     assert 'self.path == "/api/rough-cut-draft"' in SERVER
     assert "rough_cut_projection" in SERVER
+
+
+def test_approved_take_flows_to_next_shot_through_inherited_see_frame():
+    assert "async function continueToNextProductionShot()" in APP
+    assert 'prepareDirectionThen("cinematography",next.shotId' in APP
+    assert 'shRun("rescreen-keyframe",next.shotId' in APP
+    assert 'shRun("select-previous",next.shotId' in APP
+    assert 'openShotOutcome("keyframe",nextIndex)' in APP
+    assert "Use last frame from ${_esc(previousShot)} · no generation cost" in APP
+    assert "const previousShot=hasPrevious?((pShots()[PSHOT_I-1]||{}).shotId" in APP
+    assert "Continue to HEAR" in APP
+    assert "Continue to WATCH" in APP
+
+
+def test_fire_preserves_the_current_watch_screen_while_work_runs():
+    assert 'const preserveView=opts.preserveView!=null?!!opts.preserveView:cmd==="fire"' in APP
+    assert 'if(!view.querySelector("#workspace"))view.innerHTML=' in APP
+    assert 'showInlineSourceProgress(opts.progressLabel||stageWorkingLabel(cmd))' in APP
+
+
+def test_watch_reports_each_candidate_while_the_batch_is_rendering():
+    assert 'candidateStates=Array.from({length:expected}' in APP
+    assert 'candidate${expected===1?"":"s"} returned' in APP
+    assert 'watch-candidate-status' in APP
+    assert 'Live provider status' in APP
 
 
 def test_story_direction_exposes_episode_architecture_and_audience_information():

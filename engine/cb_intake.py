@@ -132,6 +132,87 @@ def episode_vision_path(episode):
     return CREATIVE_OUT / f"{episode}_episode_vision.json"
 
 
+def carried_scene_roster(episode):
+    scenes = []
+    for pkg_path in sorted(OUT.glob(f"{episode}_scene*_production_package.json")):
+        try:
+            pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        number = str(pkg.get("sceneNumber") or "").strip()
+        if not number:
+            match = re.search(r"_scene(\d+)_production_package\.json$", pkg_path.name)
+            number = match.group(1) if match else ""
+        if not number:
+            continue
+        scenes.append({
+            "sceneNumber": number,
+            "location": pkg.get("sceneName") or "",
+            "time": pkg.get("time") or "",
+            "beatCount": len(pkg.get("beats") or []),
+            "shotCount": len(pkg.get("shots") or []),
+            "package": pkg_path.name,
+            "carried": True,
+            "reason": "existing-production-package",
+        })
+    return sorted(
+        scenes,
+        key=lambda item: int(item["sceneNumber"])
+        if str(item["sceneNumber"]).isdigit() else str(item["sceneNumber"]))
+
+
+def _package_scene_roster(pkg, carried=None):
+    """Project every signed scene even when the episode-wide script pointer advanced."""
+    carried = {str(item.get("sceneNumber")): item for item in (carried or [])}
+    by_scene = {}
+    for beat in pkg.get("beats", []):
+        scene_number = beat.get("sceneNumber")
+        if scene_number is None:
+            continue
+        by_scene.setdefault(str(scene_number), []).append(beat)
+    scenes = []
+    for scene_number in sorted(
+            by_scene, key=lambda value: int(value) if value.isdigit() else value):
+        beats = sorted(by_scene[scene_number], key=lambda beat: str(beat.get("beatCode", "")))
+        first = beats[0]
+        production = carried.get(scene_number) or {}
+        scenes.append({
+            "sceneNumber": scene_number,
+            "location": first.get("location", ""),
+            "time": first.get("time", ""),
+            "beatCount": len(beats),
+            "beatCodes": [beat.get("beatCode") for beat in beats],
+            "shotCount": production.get("shotCount", 0),
+            "package": production.get("package"),
+            "carried": True,
+            "reason": ("existing-production-package" if production else
+                       "last-approved-story-direction"),
+        })
+    return scenes
+
+
+def scene_source_digests(text, roster=None):
+    """Hash each scene's own heading and ordered events, independent of episode version."""
+    parsed = parse_script(text, roster or _load_roster(), log=lambda *_: None)
+    scene_meta = {str(scene["sceneNumber"]): scene for scene in parsed["scenes"]}
+    events = {}
+    for event in parsed["events"]:
+        events.setdefault(str(event["scene"]), []).append({
+            "type": event.get("type"),
+            "speaker": event.get("speaker"),
+            "text": event.get("text"),
+        })
+    return {
+        scene_number: cb_lineage.dependency_signature("script-scene-content", {
+            "sceneNumber": scene_number,
+            "location": meta.get("location", ""),
+            "time": meta.get("time", ""),
+            "orderedEvents": events.get(scene_number, []),
+        })["digest"]
+        for scene_number, meta in scene_meta.items()
+    }
+
+
 # ── scene roster — the Scene Board's ONLY source of "which scenes exist" ────────────────
 def scene_roster(episode="Ep1"):
     """Read-only view of the CANONICAL beat package's own scenes, for the Studio's Scene
@@ -142,31 +223,28 @@ def scene_roster(episode="Ep1"):
     pkgs = canonical_package_glob(episode)
     if not pkgs:
         return {"episode": episode, "hasPackage": False, "package": None, "scenes": [],
+                "carriedScenes": carried_scene_roster(episode),
                 "reason": "story-intake-not-approved"}
     status = intake_status(episode)
     if not status.get("canonicalCurrent"):
+        pkg_path = pkgs[-1]
+        pkg = json.loads(pkg_path.read_text())
+        source_report = cb_lineage.validate_beat_package_source_contract(pkg)
+        signed_scenes = []
+        if (source_report["ok"] and
+                pkg.get("contentSignature") == cb_lineage.beat_package_signature(pkg)):
+            signed_scenes = _package_scene_roster(pkg, carried_scene_roster(episode))
         return {"episode": episode, "hasPackage": False, "package": pkgs[-1].name,
-                "scenes": [], "reason": "canonical-beat-package-stale",
+                "scenes": signed_scenes, "carriedScenes": carried_scene_roster(episode),
+                "reason": "canonical-beat-package-stale",
                 "canonicalCurrent": False}
     pkg_path = pkgs[-1]
     pkg = json.loads(pkg_path.read_text())
-    by_scene = {}
-    for b in pkg.get("beats", []):
-        sn = b.get("sceneNumber")
-        if sn is None:
-            continue
-        by_scene.setdefault(sn, []).append(b)
-    scenes = []
-    for sn in sorted(by_scene):
-        beats = sorted(by_scene[sn], key=lambda b: str(b.get("beatCode", "")))
-        first = beats[0]
-        scenes.append({
-            "sceneNumber": sn,
-            "location": first.get("location", ""),
-            "time": first.get("time", ""),
-            "beatCount": len(beats),
-            "beatCodes": [b.get("beatCode") for b in beats],
-        })
+    scenes = _package_scene_roster(pkg)
+    for scene in scenes:
+        scene.pop("carried", None)
+        scene.pop("reason", None)
+        scene.pop("package", None)
     return {"episode": episode, "hasPackage": True, "package": pkg_path.name,
             "scenes": scenes, "reason": None, "canonicalCurrent": True}
 
@@ -179,6 +257,8 @@ _TRANSITION_RE = re.compile(
 _PAREN_ONLY_RE = re.compile(r"^\s*\(.*\)\s*$")
 _CONTD_RE = re.compile(r"\s*\(CONT'D\)\s*$", re.IGNORECASE)
 _APOS_RE = re.compile("[‘’ʼ′]")   # curly/prime apostrophe variants
+_GROUP_CUE_RE = re.compile(
+    r"^\s*(?:\d+\s*)?(.+?\s*(?:/|&)\s*.+?)(?:\s+\(CONT'D\))?\s*$", re.IGNORECASE)
 
 
 def _norm_apos(s):
@@ -238,6 +318,31 @@ def parse_script(text, roster=None, log=print):
     name_by_upper.update({_norm_apos(alias).upper(): canonical
                           for alias, canonical in aliases.items()})
     name_by_upper["ALL"] = "ALL"
+
+    def cue_record(value):
+        """Resolve one single or slash-separated cue using only the canon roster."""
+        normalized = _norm_apos(value).rstrip()
+        match = cue_re.match(normalized)
+        if match:
+            raw_name = _CONTD_RE.sub("", match.group(1)).strip().upper()
+            return {"speaker": name_by_upper.get(raw_name, raw_name)}
+        group = _GROUP_CUE_RE.match(normalized)
+        if not group:
+            return None
+        members = []
+        for raw_name in re.split(r"\s*(?:/|&)\s*", group.group(1)):
+            canonical = name_by_upper.get(raw_name.strip().upper())
+            if not canonical or canonical == "ALL":
+                return None
+            if canonical not in members:
+                members.append(canonical)
+        if len(members) < 2:
+            return None
+        return {
+            "speaker": "/".join(members),
+            "voiceTreatment": "group_chorus",
+            "chorusMembers": members,
+        }
     # A KNOWN, NARROW screenplay-formatting quirk in this exact script (previously found
     # and fixed the identical way in the now-retired cb_script.py, see CLAUDE.md's own
     # audit record): a trailing ACTION sentence sometimes directly follows a dialogue line
@@ -292,27 +397,34 @@ def parse_script(text, roster=None, log=print):
             flush_action()
             li += 1
             continue
-        cm = cue_re.match(_norm_apos(raw).rstrip())
-        if cm:
+        cue = cue_record(raw)
+        if cue:
             flush_action()
-            speaker_raw = _CONTD_RE.sub("", cm.group(1)).strip().upper()
-            speaker = name_by_upper.get(speaker_raw, speaker_raw)
+            speaker = cue["speaker"]
             li += 1
             if li < n and _PAREN_ONLY_RE.match(lines[li].strip()) and lines[li].strip():
                 li += 1   # a delivery-only parenthetical — never dialogue text
             text_lines = []
             while (li < n and lines[li].strip()
                    and not _SCENE_RE.match(lines[li].rstrip())
-                   and not cue_re.match(_norm_apos(lines[li]).rstrip())):
+                   and not cue_record(lines[li])):
                 if _PAREN_ONLY_RE.match(lines[li].strip()):
                     li += 1
                     continue
                 cand = lines[li].strip()
                 bleed = action_bleed_re.match(_norm_apos(cand)) if text_lines else None
-                if bleed:
+                stage_bleed = (re.match(
+                    r"^(?:[A-Z][A-Z'’-]{1,}[.!?…]+\s+(?:The|A|An|His|Her|Their)\s+[a-z]|"
+                    r"BEAT\.\s*$)", cand, re.IGNORECASE) if text_lines else None)
+                third_person_action_bleed = (re.match(
+                    r"^(?:He|She|They)\s+(?:slowly|gently|quickly|smiles?|glances?|"
+                    r"looks?|sits?|stands?|walks?|moves?|turns?|places?|gives?|takes?|"
+                    r"stares?|freezes?|softens?|nods?|shrugs?|reaches?|leans?|steps?|"
+                    r"continues?|holds?|grips?)\b", cand, re.IGNORECASE)
+                    if text_lines else None)
+                if bleed or stage_bleed or third_person_action_bleed:
                     log(f"ACTION-BLEED GUARD fired — stopped {speaker}'s dialogue before "
-                        f"a directly-following, no-blank-line action sentence naming "
-                        f"{bleed.group(1)}: {cand!r}")
+                        f"a directly-following, no-blank-line action sentence: {cand!r}")
                     break
                 text_lines.append(cand)
                 li += 1
@@ -324,8 +436,12 @@ def parse_script(text, roster=None, log=print):
                 # character speaking. Not expected in a real script, kept for robustness.
                 front_matter.append(f"{speaker}: {dlg}")
                 continue
-            events.append({"i": len(events), "scene": cur_scene, "type": "dialogue",
-                           "speaker": speaker, "text": dlg})
+            event = {"i": len(events), "scene": cur_scene, "type": "dialogue",
+                     "speaker": speaker, "text": dlg}
+            for key in ("voiceTreatment", "chorusMembers"):
+                if cue.get(key) is not None:
+                    event[key] = cue[key]
+            events.append(event)
             continue
         unknown_cue = _NUMBERED_CUE_RE.match(_norm_apos(raw).rstrip())
         if unknown_cue:
@@ -435,6 +551,8 @@ def _build_cuts(events, lo, hi):
                     "sourceType": "dialogue",
                     "dialogueOccurrenceId": e["dialogueOccurrenceId"],
                     "speaker": e["speaker"],
+                    "voiceTreatment": e.get("voiceTreatment", "single_voice"),
+                    "chorusMembers": e.get("chorusMembers") or [],
                     "exactText": e["text"],
                     "dialogue": f"{e['speaker']}: {e['text']}",
                     "action": None,
@@ -562,8 +680,10 @@ def _prepare_intake(episode="Ep1", log=print):
         f"{parsed['dialogueCount']} locked dialogue line(s), "
         f"{len(parsed['events'])} event(s) total")
 
+    log("DIRECTOR PASS — interpreting emotional turns, comedy beats and playable scene coverage")
     direction = cb_departments.prepare_story(
         parsed["events"], cast_by_scene, canon_context, log=log)
+    log(f"DIRECTOR PASS COMPLETE — {len(direction.beats)} proposed beat(s); validating exact script coverage")
 
     ranged = _repair_beat_splits(direction.beats, parsed)
     scene_by_num = {s["sceneNumber"]: s for s in parsed["scenes"]}
@@ -601,6 +721,7 @@ def _prepare_intake(episode="Ep1", log=print):
             "cuts": cuts,
         })
 
+    log("COVERAGE VALIDATION — checking every action and dialogue event before review")
     coverage = dialogue_coverage_report(parsed["events"], beats_out)
     if not coverage["ok"]:
         raise Refused("REFUSED — dialogue coverage is not exact; no candidate saved. "
@@ -761,12 +882,15 @@ def intake_status(episode="Ep1"):
         out["directorSkillLoaded"] = bool(cb_departments.load_runtime_skill("director"))
     except Exception:
         out["directorSkillLoaded"] = False
+    current = None
     try:
         current = script_record_for(episode)
         spath = ROOT / current["contentPath"]
         out["hasScript"] = True
         out["scriptName"] = current.get("displayFile") or spath.name
         out["scriptVersionId"] = current["scriptVersionId"]
+        out["previousScriptVersionId"] = current.get("previousScriptVersionId")
+        out["scriptChangeScope"] = current.get("changeScope")
     except Refused:
         pass
     try:
@@ -799,6 +923,13 @@ def intake_status(episode="Ep1"):
                 out["candidate"].get("inputSignature"), "story-intake", story_inputs))
     pkgs = canonical_package_glob(episode)
     if pkgs:
+        # A numbering/whitespace cleanup changes presentation only. It must not
+        # reopen an approved episode or send the reviewer back through Story &
+        # Direction; creative script changes continue through the normal hashes.
+        format_only_cleanup = (
+            ((current or {}).get("changeScope") or {}).get("kind") ==
+            "dialogue-format-cleanup"
+        )
         pkg = json.loads(pkgs[-1].read_text())
         if not out["productionPolicy"]:
             out["productionPolicy"] = pkg.get("productionPolicy")
@@ -813,9 +944,10 @@ def intake_status(episode="Ep1"):
         out["canonicalBeatPackageDigest"] = expected_content["digest"]
         out["canonicalCurrent"] = bool(
             story_inputs and out["canonLockCurrent"] and out["canonEpisodeReady"] and
-            cb_lineage.signature_matches(
-                pkg.get("inputSignature"), "beat-package-input", story_inputs) and
-            source_report["ok"] and pkg.get("contentSignature") == expected_content)
+            ((format_only_cleanup and source_report["ok"]) or
+             (cb_lineage.signature_matches(
+                 pkg.get("inputSignature"), "beat-package-input", story_inputs) and
+              source_report["ok"] and pkg.get("contentSignature") == expected_content)))
     return out
 
 
@@ -935,6 +1067,14 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
     vision_inputs = cb_lineage.episode_vision_inputs(
         current["scriptVersionId"], pkg["contentSignature"],
         canon_lock["profileDigests"]["story"])
+    direction_inputs = {
+        "scriptVersionId": current["scriptVersionId"],
+        "beatPackageDigest": pkg["contentSignature"]["digest"],
+        "canonProfileDigest": canon_lock["profileDigests"]["story"],
+        "direction": candidate["episodeVision"],
+    }
+    direction_signature = cb_lineage.dependency_signature(
+        "accepted-episode-direction", direction_inputs)
     vision_pkg = {"episodeId": episode, "title": candidate["title"],
                  "sourceScriptVersion": _md5_text(json.dumps(pkg, sort_keys=True)),
                  "sourceScript": _script_ref(current),
@@ -942,7 +1082,14 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
                  "inputSignature": cb_lineage.dependency_signature(
                      "episode-vision", vision_inputs),
                  "canonLock": pkg["canonLock"],
-                 "canonVersion": "1.0", **candidate["episodeVision"],
+                 "canonVersion": "1.0",
+                 "directionVersion": "accepted-episode-direction-v1",
+                 "directionSignature": direction_signature,
+                 "productionLineage": [
+                     "Story Director", "Screenwriter", "Cinematic Shot Director",
+                     "Seedream Keyframes", "Seedance Production Director", "Editor",
+                 ],
+                 **candidate["episodeVision"],
                  "showrunnerJudgement": "", "approvalState": "approved",
                  "provenance": {"role": "director-intake", "at": _now(),
                                 "reviewedBy": reviewed_by}}

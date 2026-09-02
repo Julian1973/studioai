@@ -189,7 +189,6 @@ def register_asset(*, episode: str, scene: str | int, kind: str, path: str | pat
         if existing and pathlib.Path(existing[0].get("path", "")).resolve() == p
         else _now()
     )
-    data["assets"] = [a for a in data["assets"] if a.get("bindingKey") != key]
     rec = {
         "assetId": _asset_id(episode, scene, shot_id, kind, role, p),
         "bindingKey": key,
@@ -207,7 +206,12 @@ def register_asset(*, episode: str, scene: str | int, kind: str, path: str | pat
         "metadata": metadata or {},
         "registeredAt": registered_at,
     }
-    data["assets"].append(rec)
+    if existing:
+        index = next(i for i, item in enumerate(data["assets"])
+                     if item.get("bindingKey") == key)
+        data["assets"][index] = rec
+    else:
+        data["assets"].append(rec)
     _write(data)
     return rec
 
@@ -334,8 +338,11 @@ def migrate_existing(episode: str = "Ep1") -> dict[str, Any]:
         scene = str(pkg.get("sceneNumber") or path.stem.split("_scene")[-1].split("_")[0])
         for led in pkg.get("continuityLedger") or []:
             sid = led.get("shotId")
+            voice_status = (
+                "approved" if (led.get("voiceApproval") or {}).get("approved")
+                else "candidate")
             mappings = [
-                ("voice", "voice_track", led.get("voPath"), "approved"),
+                ("voice", "voice_track", led.get("voPath"), voice_status),
                 ("approved_take", "approved_take", led.get("approvedTake"), "approved"),
                 ("final_frame", "final_frame", led.get("harvestFrame"), "approved"),
                 ("keyframe_candidate", "keyframe_candidate", (led.get("keyframeCandidate") or {}).get("path"), "candidate"),

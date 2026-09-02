@@ -102,11 +102,9 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
 **Recurring guests (canon, separate tier — decided 2026-06-19):**
 - **Squeaky** — a male dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
 - **Keen's Mum** — a bear (single reference exists). Recurring guest / family.
-- **Bo** — a cub (T6 ruling, 2026-07-02, Julian: CONFIRMED recurring-guest tier, Ep2's lead). No reference art or
-  bible yet — a `characters.json` stub exists so Ep2's pipeline/canon isn't blocked, but species/appearance,
-  voice, sizeRank and the full character bible are still needed from Julian before Gate 2 can build Ep2 keyframes.
-  Ep2 is NOT yet producible — the stub only unblocks canon lookups, not rendering. "Bo's Mum" also needs her own
-  stub once Bo's is filled in.
+- **Bo** — a small russet squirrel youngster (recurring-guest tier and Ep2's lead). Julian supplied and locked
+  Bo's turnaround, satchel, house plates and ElevenLabs v3 voice on 2026-08-26. His large fluffy tail, tall
+  tufted ears, cream muzzle/belly, acorn-clasp satchel and exact conker are production identity anchors.
 
 ### Voice Cast — ElevenLabs IDs (locked 2026-06-19)
 
@@ -122,11 +120,12 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
 | Fuzzby | `DNK8oCkkHjIyEjzlCeQq` |
 | Zenny | `XEiPrIitaegdirIGkODX` ✅ |
 | Keen's Mum | `J4zlKWvIIVHQN0EIvCc4` ✅ |
+| Bo | `AAF2q3NCwTrLMMkEnRLB` ✅ |
 
 > All voice IDs confirmed 2026-06-19 (`XEiPrIitaegdirIGkODX` = Zenny; Keen's Mum = `J4zlKWvIIVHQN0EIvCc4`). Per-character ElevenLabs V3 settings (Stability/Similarity/Staggeration) live in `crystal-bears-voice`.
 
 **Other named characters seen in scripts (status to confirm):**
-- **Bo's Mum** — appears alongside Bo in an example episode. No assets in the library yet; needs her own stub + Julian's confirmation once Bo's entry is filled in.
+- **Bo's Mum** — locked as an offscreen-only recurring guest for Episode 2. ElevenLabs v3 voice `GGlVrqwKgiFPcO2pSZRz` is established by the approved HEAR asset; she must never appear visually.
 - **The Great Oak** — the world's wisdom-keeper (sentient tree). Canon environment-character; deep resonant voice.
 
 > The cast-lock check (`cb_director._script_roster`) reads `characters.json` dynamically — no hardcoded name list to amend. The `crystal-bears-continuity` skill's checklist wording ("cast lock — only the 7 bears + Fuzzby + Zenny, plus approved guests Squeaky/Keen's Mum") is updated to include Bo in the same commit as his stub.

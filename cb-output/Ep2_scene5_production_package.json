@@ -1,0 +1,1721 @@
+{
+ "schemaVersion": 1,
+ "episode": "Ep2",
+ "sceneNumber": 5,
+ "sceneTitle": "FOREST PATH",
+ "status": "designed",
+ "revision": 1,
+ "generatedAt": "2026-09-01T23:07:33Z",
+ "source": "locked episode beat package",
+ "sourceBeatPackage": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_Bo_and_the_Brave_Step_beat_package.json",
+ "sourceSignature": "5f68fc80631a28c889f75d5df72eae727ed5aef0ea11727863b63051d9ed5036",
+ "sourceScript": {
+  "schemaVersion": 1,
+  "episodeId": "Ep2",
+  "scriptVersionId": "sha256:d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67",
+  "sha256": "d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67",
+  "byteLength": 10090,
+  "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67.txt",
+  "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67.json",
+  "displayFile": "Ep2_Bo_s_Big_Day_V4.txt",
+  "title": "Bo's Big Day V4",
+  "activationId": "972bd099b2ee4b5382319038097808c8",
+  "activatedAt": "2026-09-01T21:54:29+00:00",
+  "activatedBy": "Julian",
+  "previousScriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48",
+  "changeScope": {
+   "kind": "scene-range-replacement",
+   "fromScene": "4",
+   "throughScene": "8",
+   "reason": "User supplied corrected script text from Scene 4 onward",
+   "previousScriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48"
+  }
+ },
+ "sourceStoryboard": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/creative/Ep2_scene5_storyboard.json",
+  "md5": "e62b2c3a64e8ce354dce83d23100933c",
+  "sha256": "604e04958ed3aa8537bde17fd0a480b6d0b12ce07c55599df6e4eee5b402a47d",
+  "approvalState": "approved",
+  "humanNote": "Approved as deterministic V4 production scaffolding so this scene can proceed through scene plate, SEE, HEAR and WATCH without rerunning the blocked Director text model.",
+  "creativeCardHashes": {},
+  "inputSignature": {
+   "kind": "scene-storyboard-snapshot",
+   "schemaVersion": 1,
+   "inputs": {
+    "scriptVersionId": "sha256:d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67",
+    "beatPackageDigest": "5f68fc80631a28c889f75d5df72eae727ed5aef0ea11727863b63051d9ed5036",
+    "sceneNumber": "5",
+    "sourceBeatIds": [
+     "source-beat:sha256:f755da285010f45ab9f26777b5085d2f43244dfb6d2a030045a52b7dc58baf44",
+     "source-beat:sha256:fe1944ffcb4023e73ae59105315c033c2a4592a2f637f8d8e32d2386c2c3e249",
+     "source-beat:sha256:bbb97711ddccb0e57e306462794d09eca210520c3eebc5e5daa9680711f78fc9",
+     "source-beat:sha256:e1f7b9811d87ff02e58af6710b203463c1de3294ccf8da1499d79edc76572307"
+    ],
+    "shotIds": [
+     "S5.SH1"
+    ]
+   },
+   "algorithm": "sha256",
+   "digest": "ee3a2095bda356e14daa659d1306283091ffa5ef6181ef67131068d193cad1ca"
+  }
+ },
+ "inputSignature": {
+  "kind": "production-package",
+  "schemaVersion": 1,
+  "inputs": {
+   "scriptVersionId": "sha256:d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67",
+   "beatPackageDigest": "5f68fc80631a28c889f75d5df72eae727ed5aef0ea11727863b63051d9ed5036",
+   "storyboardSha256": "604e04958ed3aa8537bde17fd0a480b6d0b12ce07c55599df6e4eee5b402a47d",
+   "creativeCardHashes": {},
+   "canonProfileDigest": null
+  },
+  "algorithm": "sha256",
+  "digest": "4e81e54c00b5cd5d7b257563967bb57130fb0d5d3dcfcdd4ceebd719109fb493"
+ },
+ "sourceContract": {
+  "schemaVersion": 1,
+  "eventCount": 130,
+  "dialogueOccurrenceCount": 62,
+  "scriptVersionId": "sha256:d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67",
+  "orderedSourceBeatIds": [
+   "source-beat:sha256:d61221d1f7ab5938aa224d6f62af54a16e82489c77f84119a912431da4601a40",
+   "source-beat:sha256:7bca21a3013c049236d3bb9745c02dc6af597a708f3b41826b9310601f5d4546",
+   "source-beat:sha256:ba2aaa058b8689d8312355e3ed11eae57227e2ad20e98266044802ad86603198",
+   "source-beat:sha256:2224af42f76cbb0db9c5d51160a09c59fdd00742483719a0cb0f358461b5f30a",
+   "source-beat:sha256:37054ea9a44b5e69e73aa074213149fc5d30a98ce65aa830686d1b6f4859389a",
+   "source-beat:sha256:ec7129807e0f614a4e78767049c50c9cdac0c9bce087c18cc3e3fe25b44e7089",
+   "source-beat:sha256:a4378805565cdbab375a34c6a7e70a239f68bc526c6f96ab3a0d60b312e1ce3a",
+   "source-beat:sha256:8464d26af3c3fb419e5bdd0427b7597a674bd6ad09461e759ac59d5b29fb3746",
+   "source-beat:sha256:a8529d4473352ac8c32afef5fec309707949386dc0c78d574721666a565231de",
+   "source-beat:sha256:5cd36485919965970f36ed8b22e4223a53aedcada557bff307c9e35f7b757bab",
+   "source-beat:sha256:72f64fc87cff4a7bd73885a33e3912c6ad731d74e4cf5436b290350097d5da48",
+   "source-beat:sha256:1a9ba0fe84664afda84b10eee58213a7d0d94d71a74dd02b230faafec950ae59",
+   "source-beat:sha256:3d9512fdf81241c4f7e581fd035a01eff997a2a82fdea31d30f0686afdee3493",
+   "source-beat:sha256:09180799b5c3fcb150d54f9d88b906131cff6e221efef47bd8795015a2dad192",
+   "source-beat:sha256:dea32848f892820f28d18fcfdbb78b0003889d28dae04aad3527382e46906c71",
+   "source-beat:sha256:d0352be891e5c95f78c752d78656453f2477f3387a7ffa22c6b85eb57d654aeb",
+   "source-beat:sha256:3095fc3c8cf46f6086f21e0e27dbcf55c82619c8a5898dd05459e0eb9f8c4efb",
+   "source-beat:sha256:a5b014fb9e2036b626e39d97b2942527f88ffac24ad72bfc33af0cf27b53820c",
+   "source-beat:sha256:fc15ee7532a4a8083e27ec8d75f3d2a307ba0d1b75ebbe34cafddd9424428e72",
+   "source-beat:sha256:f755da285010f45ab9f26777b5085d2f43244dfb6d2a030045a52b7dc58baf44",
+   "source-beat:sha256:fe1944ffcb4023e73ae59105315c033c2a4592a2f637f8d8e32d2386c2c3e249",
+   "source-beat:sha256:bbb97711ddccb0e57e306462794d09eca210520c3eebc5e5daa9680711f78fc9",
+   "source-beat:sha256:e1f7b9811d87ff02e58af6710b203463c1de3294ccf8da1499d79edc76572307",
+   "source-beat:sha256:b77dcca683e225ae4dce5b99684e8cba786cbb06a4fca8c71bf19657b49628f4",
+   "source-beat:sha256:309a737c90d911e518709f080159427b56efda8dd63e7fadc202221e2ed083b5",
+   "source-beat:sha256:eb3a43c540b9559e88e3c33cc897dd8d18c0d004032658ac8b7e8237ee460e21",
+   "source-beat:sha256:0bd870e5b3b295ca8569120f01ed2d0cf688719822f8b564d05e3e497374ad53",
+   "source-beat:sha256:f5d1c0c4e5af6a0fe881261ce82ffc7036354915fd410c111121bb522eac5f5f",
+   "source-beat:sha256:31b480e344aa6def8f0a8580efe8d9832a9605245346b3ed633e227cbe199c3d",
+   "source-beat:sha256:445a87a193bf75d8e0cc856f1f3716bfc2c59bbfd20fb5d339e4af568d3d9a2b",
+   "source-beat:sha256:912c83157da087f6f2f70288f48af572d96d07d83dbcc64260941bbf6a3d1f81",
+   "source-beat:sha256:dd033ce36021a6ad083fa413e7e5c9046457ee7dc8c53bd4e1e71506a49fa649"
+  ],
+  "sourceBeatSignatureDigests": [
+   "d61221d1f7ab5938aa224d6f62af54a16e82489c77f84119a912431da4601a40",
+   "7bca21a3013c049236d3bb9745c02dc6af597a708f3b41826b9310601f5d4546",
+   "ba2aaa058b8689d8312355e3ed11eae57227e2ad20e98266044802ad86603198",
+   "2224af42f76cbb0db9c5d51160a09c59fdd00742483719a0cb0f358461b5f30a",
+   "37054ea9a44b5e69e73aa074213149fc5d30a98ce65aa830686d1b6f4859389a",
+   "ec7129807e0f614a4e78767049c50c9cdac0c9bce087c18cc3e3fe25b44e7089",
+   "a4378805565cdbab375a34c6a7e70a239f68bc526c6f96ab3a0d60b312e1ce3a",
+   "8464d26af3c3fb419e5bdd0427b7597a674bd6ad09461e759ac59d5b29fb3746",
+   "a8529d4473352ac8c32afef5fec309707949386dc0c78d574721666a565231de",
+   "5cd36485919965970f36ed8b22e4223a53aedcada557bff307c9e35f7b757bab",
+   "72f64fc87cff4a7bd73885a33e3912c6ad731d74e4cf5436b290350097d5da48",
+   "1a9ba0fe84664afda84b10eee58213a7d0d94d71a74dd02b230faafec950ae59",
+   "3d9512fdf81241c4f7e581fd035a01eff997a2a82fdea31d30f0686afdee3493",
+   "09180799b5c3fcb150d54f9d88b906131cff6e221efef47bd8795015a2dad192",
+   "dea32848f892820f28d18fcfdbb78b0003889d28dae04aad3527382e46906c71",
+   "d0352be891e5c95f78c752d78656453f2477f3387a7ffa22c6b85eb57d654aeb",
+   "3095fc3c8cf46f6086f21e0e27dbcf55c82619c8a5898dd05459e0eb9f8c4efb",
+   "a5b014fb9e2036b626e39d97b2942527f88ffac24ad72bfc33af0cf27b53820c",
+   "fc15ee7532a4a8083e27ec8d75f3d2a307ba0d1b75ebbe34cafddd9424428e72",
+   "f755da285010f45ab9f26777b5085d2f43244dfb6d2a030045a52b7dc58baf44",
+   "fe1944ffcb4023e73ae59105315c033c2a4592a2f637f8d8e32d2386c2c3e249",
+   "bbb97711ddccb0e57e306462794d09eca210520c3eebc5e5daa9680711f78fc9",
+   "e1f7b9811d87ff02e58af6710b203463c1de3294ccf8da1499d79edc76572307",
+   "b77dcca683e225ae4dce5b99684e8cba786cbb06a4fca8c71bf19657b49628f4",
+   "309a737c90d911e518709f080159427b56efda8dd63e7fadc202221e2ed083b5",
+   "eb3a43c540b9559e88e3c33cc897dd8d18c0d004032658ac8b7e8237ee460e21",
+   "0bd870e5b3b295ca8569120f01ed2d0cf688719822f8b564d05e3e497374ad53",
+   "f5d1c0c4e5af6a0fe881261ce82ffc7036354915fd410c111121bb522eac5f5f",
+   "31b480e344aa6def8f0a8580efe8d9832a9605245346b3ed633e227cbe199c3d",
+   "445a87a193bf75d8e0cc856f1f3716bfc2c59bbfd20fb5d339e4af568d3d9a2b",
+   "912c83157da087f6f2f70288f48af572d96d07d83dbcc64260941bbf6a3d1f81",
+   "dd033ce36021a6ad083fa413e7e5c9046457ee7dc8c53bd4e1e71506a49fa649"
+  ],
+  "orderedSourceEventIds": [
+   "script-event:sha256:40ac29e580a3c9ff4ec11051d117d98b301e3f70f26d2ec5554a9414f546e653",
+   "script-event:sha256:3828df1fcd4f7431f06be18995dee4616ae57032d02fdb08929d05c295a33200",
+   "script-event:sha256:4b312abb05c138cd7726f9ccd7d0618fff69176e3254c591a420e6cce0d7cff0",
+   "script-event:sha256:9df47f3d92bb0d89b491b7ce07b96f7b5c97372ca0477f37d93809f1165bbb3b",
+   "script-event:sha256:ec35ed5dccfcd785ea6a614647f0d8912fa248bd66c3636e9581ff37850c10fa",
+   "script-event:sha256:fbea42975061fc3411fd049ba87b2e45e32840e315d317a94abd614091648763",
+   "script-event:sha256:4fbd7c4f3e9d2f69a56eaf1f37f4df5959c30d134eb6f0f4eba41dd398669bfe",
+   "script-event:sha256:f9180428d2d95d460a2467c52ac36f7a333eabc473d6ff0993a737f46b6fc040",
+   "script-event:sha256:d9646178175a37da7b01d000ad7485145b4f4a9b6397f30f846d9765ba345377",
+   "script-event:sha256:5d9b25d871787167e8a608a237ec26af5159c547d46073ab5fc0c7375e0a0419",
+   "script-event:sha256:f6aab2e4ad91fd37822133c44370361f07e937bfb8d37324fd82ca9097d8d0b7",
+   "script-event:sha256:782871fde6c9b629fe3cc6f5889ae97e26c8d302a8743e66d27af724b14af4c8",
+   "script-event:sha256:30d08cc22c8682aaa8961ff6cea9788fc801172f00aca4dea3b17ec37b597194",
+   "script-event:sha256:a02e65adcb19903bfded8fe9dbfc47ef8b595361fcf16e9c2d4c8517bda11661",
+   "script-event:sha256:37471cf7510d18edad9229db633895654bb9d7879c55f94f60c00ec7447d301f",
+   "script-event:sha256:352c34896e44bb5cb4eb02264f7bb79ff7e8d720da6cbeb16ed235f0c72ec2db",
+   "script-event:sha256:6b304bcfad8b1e775199117332a6771f72785610721b1bfa12dec282ccf61ffb",
+   "script-event:sha256:174179c87867ffae702b05d3db078df978b6271200dd3f314441efb969b5e34e",
+   "script-event:sha256:96a0b32340c33f0df2614a87a019e0f2ea9af776b27342f3ee954f6b403c531b",
+   "script-event:sha256:5c4384657d887690630c5dc4cd7f19b68ebf2adf178b4031ac18939d2eed8ff4",
+   "script-event:sha256:dd6c62d5a5439b9a70f913ebad95e1714e798d10f3fbe40816b707e2a3e2fbdd",
+   "script-event:sha256:2a3849c700b960a3b9c9e214db8f37e54f42951e0030ca8d7e3463f736f50f97",
+   "script-event:sha256:d875de5e3f5959fe8334c5a52570a8a68e69beca7b9aca26c9d639369ac16e33",
+   "script-event:sha256:ba1f7406a537ec7cef37b2a22fb799d50b9ab0f5b6c6370db18dc38a63dc2d12",
+   "script-event:sha256:bc412edfd50edf7e9dd4a95d9267e9d1ee62acafeabf92fca2ae84b9912799ec",
+   "script-event:sha256:542a1db301e12763c969e4093d73b1553501a65834484f32e26eb01212197687",
+   "script-event:sha256:e99cc13e91591132e52775b30311eff4ee94ee294ca55a414e5b167b0312fb59",
+   "script-event:sha256:3099efc8bc1f0d4d2ead84f0d063eabd7fab308d2853f0bd3ceeafc131cfb671",
+   "script-event:sha256:f5469743f0ddeaa578ab1cfb599a3d25f88e30b0417937f61b5c62dd3b3b722b",
+   "script-event:sha256:b35d3b6dbd9fd42b23f73f0cd027db22873d2984ba098bb9137c637983d74f16",
+   "script-event:sha256:f7cbe323615f620c9d5f19282d2c865d800b696109ba563a6bf07b61c7114c9c",
+   "script-event:sha256:55f716d09132a654b26c5402413b4228c8bd4431594019a8d1af6af648950a1c",
+   "script-event:sha256:e27dbe96dcefea1b04e22e52e35c773a41405b3893f3ccee38dda53c64965b42",
+   "script-event:sha256:d2ae4bca6a3ffdf21263c32bb080603ba82a8a1b75f9465a7697536ec009152b",
+   "script-event:sha256:0ca50dcfe66ceda4775bf797b6e6239a3123cb3d0a754fc572151fd70828b6a5",
+   "script-event:sha256:2276b820dfaf467f97b2bdcb3e199a990f76638b420ff12c04ea123da91844ab",
+   "script-event:sha256:7e2d41cdbe9c8ef4b4f7bd67b2bb74a548c7b412f2bea36683173d12d46a3983",
+   "script-event:sha256:eef033cdc219e5013ff29b3faf1525955e13a6c1d6a51abc4da7c0c2ba218f5e",
+   "script-event:sha256:b0658bf64376c471c0b7be85b93e83940ea9fcbe81998574c4b01f8c92fdb42e",
+   "script-event:sha256:3f3dab07099d4eb0af09a8a81807066961449674c9f66d4bcf9798a25ddbcfe5",
+   "script-event:sha256:47766dad234a2cf87b2698fa1fdb3a81ac835e098e2126894a35cd2f6a05286b",
+   "script-event:sha256:8d3eb4d5c25103a50e490232f070e9a730651d0ec80cea11d6ff28e1a92c7145",
+   "script-event:sha256:ed91bdb874cc69a3f01966c6d7dd73f31b57cd966d2971e1439029eb73702aea",
+   "script-event:sha256:2be4c708ede0c20ad529295c94f121d4917ae012fab3a2e69dab12bcdf02d0ef",
+   "script-event:sha256:2dfbd0a43ba6412d93050f85c83f4731d175af34fb945d8ed960dbebeae7a4d1",
+   "script-event:sha256:1fac71be2d6a9372806606aefddcfc0998c26da8976cd17945418b39d4e0cb38",
+   "script-event:sha256:0eabc5e104dfbebb76a42200773c61180a20cc1ebe8e63a33c2863ddae77bc65",
+   "script-event:sha256:02a8fc66f1d9f9a532e4c13c449a6dbf091101dadb5a0fda025bf4d2909b00d9",
+   "script-event:sha256:3abe9397dfe920fd6d6df9e4bd6d2b6441629b94b774c7c3bcab47c1135e4449",
+   "script-event:sha256:8c4d1d1be7dac29c5493772af84a261acb1d790357523a765bd47a8a18b5fe46",
+   "script-event:sha256:65591dd0cea5879153763d61bdc0001127540a098063e359a3b8e216d142340f",
+   "script-event:sha256:d752fcacbbc2cb2b7db9041ef9d38812dc8c053af1a787d96da39f80c4daa1fa",
+   "script-event:sha256:ccfbe6c74089c131f5ea0e123cc763bbda3faf4b5ffed1235466afb69635b0e8",
+   "script-event:sha256:9908956e11c6087714d81cff6a0fb19993d5e89035dca0c645956a27fe36cf0f",
+   "script-event:sha256:3d82c3075dcb31eaf5c42e9148e1ee382fcab8ba98dcb45d9ca0abfa290cfb4a",
+   "script-event:sha256:2a6a3fc3f6f1ba66cd4f6ef3b004cb21a274fd5d0822a93bba97e72d2a9bc5f3",
+   "script-event:sha256:6009b8f26d00f8504daede3a9f923f0adda601de24b6015dab2fae7934b07111",
+   "script-event:sha256:f812525ffef449bd45eec489a07cf40c700d43839358a6bad98a70c03bb04fe3",
+   "script-event:sha256:319528d3967a835b116ba288e1e26ae8a40e015b79bb6a8cff4c67e4bd4d6653",
+   "script-event:sha256:ab75655cf0365abd6bd5633b69ff46b097b8fb07276cfe0147b5a2eff7f4c380",
+   "script-event:sha256:0c6b061b443a24af2c454e4bd1e17d2bdac35ba584849c4f707098c193d0ce0b",
+   "script-event:sha256:879239cd7936ea4cce6b00574997ae748b7e558635d217be908c49014408545d",
+   "script-event:sha256:75d525571ce1ce2f96164fc9cb611c1c1bd5d6dd2eaa93d53dee881efa17eba8",
+   "script-event:sha256:973d2e8d67715440c4623ff6605e2526055ca195faaaa39bfab77113b02c7225",
+   "script-event:sha256:64cae4a46ad967d94c65e3e34f185ef47af027ece07a3a230aee7b941d448d10",
+   "script-event:sha256:9ee8fd2abdbce4b88ba9349d1a65fb4bcc0334f422785361b4e348ebf11a9160",
+   "script-event:sha256:c25b75ba16a6d4556edd27caec4223fdaa2f25fa777b4311b2c0704f12595c5d",
+   "script-event:sha256:7f85f6bcc4e7c2aafc70175cacd5c6fdee412154dc03d016200835992058953c",
+   "script-event:sha256:fc9a66299f064affd39294b25b349814a8d97d143b92a743aeb8df9fb5fa99fb",
+   "script-event:sha256:1402b19e4ef3d73d5a5c0b113adaeb19b2b5fc8da7322387f27855102ee83c14",
+   "script-event:sha256:2fa77b79f9808b2cb3b899ee83c92ab7a0a303819a13830fa44496b30c0b4166",
+   "script-event:sha256:557e9735ec2b44746ae48f26d3bf8b190c03ede80654f42e3c20b6acd1451a97",
+   "script-event:sha256:b826cd575ebb48469bb5b46d3f4dac858660fb6c24db27382acbc1a3ee5fd273",
+   "script-event:sha256:1adc1d5f8027a7f6407b9f8d3f3e912d31a95e5671f2e7a75cd684123eaffc40",
+   "script-event:sha256:ef69ac078c8d2b01be54bcac7b401028bafb01a6e5defffa480583b42ed31aaa",
+   "script-event:sha256:1fde90a5212c908bace6ae111f5ca9cfee8c4ac81e6959cb1447f5a0ef752018",
+   "script-event:sha256:af585985bc9e3c10be4e72f9866aa5643c535bb2708eab779eaf870b744d4ee1",
+   "script-event:sha256:6b05ff9daa7d6497719f1bfc9c94e0dd7103a3724c21bd1ba701ce8a0fdfc448",
+   "script-event:sha256:3c7ee893f53d80a390325b76a6d70542375749e6568087dc2e92fb70c3f19e43",
+   "script-event:sha256:6c81bee76c25a64a3748b09bf5e17d04b560e6098a52f2df73860b9868b81cdd",
+   "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
+   "script-event:sha256:a1727562f9ce49e9e2f91c2d9fe5f31937a499c7df5175292e73b67b0318a2ff",
+   "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
+   "script-event:sha256:7ba43b9b63fde91a8ae0f7c4aa9c7a874164a1f5192fe0b6496acfe396744644",
+   "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
+   "script-event:sha256:6c0e3e14fbe0fe300d6d10ce38286f9dc8a6f7d20dc8130c90a33e66c08a0ecd",
+   "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
+   "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
+   "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
+   "script-event:sha256:2f8846758c021606ac5aa741cf5bb6212b2d80510dcae1de812b74b1c67ee134",
+   "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
+   "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
+   "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
+   "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
+   "script-event:sha256:9ddac9981834d15e3cd4936f89810ca8653a2c8fd5220ae5ee1d4698b9f74241",
+   "script-event:sha256:646de5871266ef1a22d3610eda7ed943685a88d1bd670a0d28d8fa461346d7be",
+   "script-event:sha256:80a594f4679559a0aa42960dfb24b60882c9dfa8de7a23811655c724c73298a7",
+   "script-event:sha256:953d5e3e8329d98d09f4a0e2f1b44dafeded10110ce7ef89e40fadbac31181c2",
+   "script-event:sha256:cc128d1ba820fa0b0d6dab7fd8fd5e1a2a3a34afac6af9126c08448cad348566",
+   "script-event:sha256:dfd5a786b3dc648eb6348104da30531c63b20ce75275bca90fc88280416c9276",
+   "script-event:sha256:b5469ca0b7f2c96b57edcb738819d993a9a2bdd207881860875454182fa9b21e",
+   "script-event:sha256:a64338e51193f161a0332806b77cd574af6a8850d50b7401d76c7d2548557e83",
+   "script-event:sha256:058f358df9a49a88ab467ab37e7fa7290fbd8e11dd1fd644d64e79c53dd6bd58",
+   "script-event:sha256:db788c450b2e196f9953787af9fb714a9870d64970ef4013d543b9185973d728",
+   "script-event:sha256:012616c8dfea2d067460c8f7eab6481e8509a20a3a861f1e898b49855231ecc7",
+   "script-event:sha256:a8ea56e67c97d50c3aeb2863669bac70b14532df79c2c8d86c82c71aeb992f0c",
+   "script-event:sha256:3fea56871249bf846553142e7306b081fce2dc2a49da90efd4dec633cd6682cb",
+   "script-event:sha256:a776ef3e176155c3e29f7a6dc197878d481d7581addff6ea114f92bda5e068e9",
+   "script-event:sha256:446ab49613ff4e2a809cdf53f99f465f1ff5d55baf71d061a76d1b8b5dd249ed",
+   "script-event:sha256:67a25648b41d3a2c4e6935093d91a495ee6646c8539b3ec52b534caca040ed26",
+   "script-event:sha256:f0ff2268a31323f8fb3986359db7462dd70a428903e2138dd10323e3784df853",
+   "script-event:sha256:5ab15d8ed92d468f8c460064c907b06d2d3fc30699a60b4095fb86d7cfbaf0d8",
+   "script-event:sha256:2c5d12622de093b4fe420671e4d8212b55e6abbbb4d67a02556faf78aeb4fff9",
+   "script-event:sha256:d152ff438d43d08c1402e1129c9c12804b869dcd3b6cf674084cdda7bc6f9260",
+   "script-event:sha256:b581e501e71e1066cde8b355c1c1f7e223dacbf5a38bdde0dd6d31aced0f4862",
+   "script-event:sha256:316ca73129b8a04ff55b1ebee0d020ec0972aba9f4a0e614612ef3e2f87ca7bc",
+   "script-event:sha256:63cc0adeb58496b9d6940eb2bdca414291a30d43a512cbd10b0e0a5555d34836",
+   "script-event:sha256:ab1fe81eb10660373a44773c292bd4cf65cfb003e358f9d2a2ae690041d7eac8",
+   "script-event:sha256:56b9cb70b56e17407bd6ce633f69cd53c8d11ffe7faa40eae4059ae9df0ea817",
+   "script-event:sha256:0cda0ff996203684efce90e970ab7095dead4151ae3ad86e1f5e43ee43caa59a",
+   "script-event:sha256:d6b981abbee4361842b1eb70903395cb81b5d53265bd23628a7c5500a9e84c9e",
+   "script-event:sha256:5da71113b34f1b65a1ec328c54924b05bdd8f8dea16d57120e6f341cad952b4c",
+   "script-event:sha256:1dfd8f4b115684b516fd45a5a8522574e2c711a2e242a9bf58bc46074840c48a",
+   "script-event:sha256:dadb7d288a95b6b44d52719f83c95f21653a00d7c5af30813eed2a77959bffdc",
+   "script-event:sha256:755ad02f9da00478cd8fc37ea1dd9d8aa5b6ee1cf78562c4928df41afd3e2758",
+   "script-event:sha256:f66fb7011809b63467e848149ac2b2189a9bf7dd9649fa2699f51fdc4b08dacc",
+   "script-event:sha256:9316ffc2c48af12d17f3672e89a0191d0dfb22e1a7132cb9028c1a71ffb1f52d",
+   "script-event:sha256:59747ccbf5426059e6cd4563f5ff2ae6bdb62e25013d05f60d65c71e0d092287",
+   "script-event:sha256:c66d71a18aa443a86273f6b43c68eafbe47a915233398897df1656085c66b1f9",
+   "script-event:sha256:65d45b94a9a346546c4b90f8ff750649fdf1056fb234ce921167e08faa32e07d"
+  ],
+  "orderedDialogueOccurrenceIds": [
+   "dialogue-occurrence:sha256:0d1229b415e34a7c2647a3d7b8006e5cf5a56c935127c2bcdcd533dcf88e7019",
+   "dialogue-occurrence:sha256:1fda6544d44d057ec363ad19b44269cc015351f1f8b3ce9d192097c7bfc06eff",
+   "dialogue-occurrence:sha256:27eba4dd2e0cdf55f13a7e2704947a3251bccd56c6d22d2bdb5b479dc2a9e6ce",
+   "dialogue-occurrence:sha256:e6aad716bbf4773f26b0dc2f1067897b5af8679572b92714cb0bd37276f62bbb",
+   "dialogue-occurrence:sha256:e2208ca472b7839913b7bff537a2330def526e0dc7b50c151159fa0b92698b1c",
+   "dialogue-occurrence:sha256:8c3b071b32ce0b298375d6f86318557b7a755e7936e893daf0b127131165fbe0",
+   "dialogue-occurrence:sha256:9691ed0ceadb76ffda0976395feaa27808367858a7b55bf58163842afc6cba14",
+   "dialogue-occurrence:sha256:7572a3df1414c1799711456299094e0004a57b8f5ef23e4ff09f2cdf34f60b8b",
+   "dialogue-occurrence:sha256:1dc5f3d1e324964c1ae21cd8e26ef7cdbc387b6ec838f6cb5b0869e6a06161f8",
+   "dialogue-occurrence:sha256:651f6b90e4345b04181bd56e4b4f669c7dcfc3871555da06e9d66aa5367ac647",
+   "dialogue-occurrence:sha256:2e236016f8ba83cd6c063e4ee37a9c8be5a14f9db68186701d7f2554460e8e81",
+   "dialogue-occurrence:sha256:d72950d28d5ea5919e416acfdf8a704512a7196d5777222eea7e29a5fe822863",
+   "dialogue-occurrence:sha256:24e5f48896cffa4ff75118c7c432b836fd3913cc6943d847f7f4eeaccdd384c3",
+   "dialogue-occurrence:sha256:f4a1541c3ffb9eb08233fa564590e7cff1a59ca358e4c6d63eb4a987d4852549",
+   "dialogue-occurrence:sha256:bfbee99166b8bf28faa707302b7203aa7340d46da4587c8b31cffb6eff87c566",
+   "dialogue-occurrence:sha256:6362725ec3c05ff7d9b72e6904c386bf6544a6143b62c268e645a248af57a97c",
+   "dialogue-occurrence:sha256:38d45d84052d774e67db49dbf615940e44669e7d8320b2b3acd7f5392e1f11ac",
+   "dialogue-occurrence:sha256:e02ece11dc67e2c3b8e0e16de96679442bd3510df5743d518bd7c486f69a7b4b",
+   "dialogue-occurrence:sha256:e31553f7d830d6e3c1d02f0856cc1d52028120ff2401f16fe766fcb215cafbab",
+   "dialogue-occurrence:sha256:b14280d94224797f52cd4e2b2ce365cf6d90d1eb1fa31a7d5c59d8e6cfe4c068",
+   "dialogue-occurrence:sha256:6e940b2f16849553f97f9b72aeda6e57183382bf6c61d7313b163754e888f6e6",
+   "dialogue-occurrence:sha256:e56b45a8bdd0c660428223343e1ef40272bb871c86ce32b4293c178540171934",
+   "dialogue-occurrence:sha256:b0dbcd28cc5ef41c68a33b3ba147c9fbef1d1a620534c8349e5eee04db38f7ee",
+   "dialogue-occurrence:sha256:215e19e27c2ab1ef8488089c10911a376f044abe51e7dee38b9f7ca8a91f7bc8",
+   "dialogue-occurrence:sha256:b9a8077cae89fcd011b559a2754b2dc1c636a8f794254f028fe73bb639ed88d1",
+   "dialogue-occurrence:sha256:f334a69091c8988fd6a770f31d7d03cbfff8c7808e55d7731a85ae61d140b1fd",
+   "dialogue-occurrence:sha256:63e88485d350307e91bdd83d8602de6b1081c6afaebe4c6395a1aa4470f037da",
+   "dialogue-occurrence:sha256:b3a7c3a38aa5d153e8dc0e4d65174e0e9b10c60be09f74ae60922c2ef5cb49f1",
+   "dialogue-occurrence:sha256:64cea75def8ff136a67d26abe9a40f255f436b5d3dacc65f311e2bc749619f98",
+   "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
+   "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
+   "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
+   "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
+   "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
+   "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
+   "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
+   "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
+   "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
+   "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
+   "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
+   "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
+   "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
+   "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
+   "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
+   "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
+   "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
+   "dialogue-occurrence:sha256:8ee71708df606fa390adb33b5d0638311511120b10ee0254358f141b1c5b4b60",
+   "dialogue-occurrence:sha256:34cae96e72f2bc88f4f684829dfc14d4adacacbdf178f691084b18afc91c2a97",
+   "dialogue-occurrence:sha256:7179bb0a9a2453113b26736de250684a3cba811d2b9e8910151dc901552093df",
+   "dialogue-occurrence:sha256:dfe42c45ca8d38c54868bc7f69e96e703fa5c91f82b0267210da7370ae321ee9",
+   "dialogue-occurrence:sha256:9a01eb3a0e30c7f955d2c74a043a759bec4db6f1756dab85c2b9620ef3931c15",
+   "dialogue-occurrence:sha256:ebef73f3fe80100f3ccaddc0f900763d8c6cf8ad3b02e2557d63a72e0ff14478",
+   "dialogue-occurrence:sha256:450607625d109a5b7677a4516f99e815fe292cdf8e7309823a13e16a9205909a",
+   "dialogue-occurrence:sha256:52e0436cd4ff75b8434edc9300a9e57afd2289a976a02e864bffde2dc6a1213b",
+   "dialogue-occurrence:sha256:295db412e8fc4dfc5009b42694cf2037869b42f372d0481d8a19c9063d3f890e",
+   "dialogue-occurrence:sha256:04bbf2aaba094eb4adf28134389367e06c0ac72baf560b52df619b84f7e2e9e1",
+   "dialogue-occurrence:sha256:057b8ce83da5dfeee239b0f1f038975c88e431be8c3e97ae0a444c67be6c49b0",
+   "dialogue-occurrence:sha256:f83dcad59128e0d333668200870dcc8b2438acb44b105c5cf6004e7c14a2b39f",
+   "dialogue-occurrence:sha256:18ae37db445c2905fae1628d7d963391893b889f99b1bdcf62be222a44fef1b8",
+   "dialogue-occurrence:sha256:a0c099eb368c78a75ff5abb799378dd753207e023b31d1f94d327ebdd6113f21",
+   "dialogue-occurrence:sha256:dc48e62ccf858fcb3e8eb831d13aec1259aaf4c0c23b5a984a959945acc511bf",
+   "dialogue-occurrence:sha256:5711685c7e87dd399a40a451651ec77cf7f13920c0dc9d6643c5ea30ffe10685"
+  ],
+  "inputSignature": {
+   "kind": "script-event-contract",
+   "schemaVersion": 1,
+   "inputs": {
+    "scriptVersionId": "sha256:d96cb3552bf50320379edda0e87016b83c41cefe21671516ba59741226d3cf67",
+    "orderedSourceBeatIds": [
+     "source-beat:sha256:d61221d1f7ab5938aa224d6f62af54a16e82489c77f84119a912431da4601a40",
+     "source-beat:sha256:7bca21a3013c049236d3bb9745c02dc6af597a708f3b41826b9310601f5d4546",
+     "source-beat:sha256:ba2aaa058b8689d8312355e3ed11eae57227e2ad20e98266044802ad86603198",
+     "source-beat:sha256:2224af42f76cbb0db9c5d51160a09c59fdd00742483719a0cb0f358461b5f30a",
+     "source-beat:sha256:37054ea9a44b5e69e73aa074213149fc5d30a98ce65aa830686d1b6f4859389a",
+     "source-beat:sha256:ec7129807e0f614a4e78767049c50c9cdac0c9bce087c18cc3e3fe25b44e7089",
+     "source-beat:sha256:a4378805565cdbab375a34c6a7e70a239f68bc526c6f96ab3a0d60b312e1ce3a",
+     "source-beat:sha256:8464d26af3c3fb419e5bdd0427b7597a674bd6ad09461e759ac59d5b29fb3746",
+     "source-beat:sha256:a8529d4473352ac8c32afef5fec309707949386dc0c78d574721666a565231de",
+     "source-beat:sha256:5cd36485919965970f36ed8b22e4223a53aedcada557bff307c9e35f7b757bab",
+     "source-beat:sha256:72f64fc87cff4a7bd73885a33e3912c6ad731d74e4cf5436b290350097d5da48",
+     "source-beat:sha256:1a9ba0fe84664afda84b10eee58213a7d0d94d71a74dd02b230faafec950ae59",
+     "source-beat:sha256:3d9512fdf81241c4f7e581fd035a01eff997a2a82fdea31d30f0686afdee3493",
+     "source-beat:sha256:09180799b5c3fcb150d54f9d88b906131cff6e221efef47bd8795015a2dad192",
+     "source-beat:sha256:dea32848f892820f28d18fcfdbb78b0003889d28dae04aad3527382e46906c71",
+     "source-beat:sha256:d0352be891e5c95f78c752d78656453f2477f3387a7ffa22c6b85eb57d654aeb",
+     "source-beat:sha256:3095fc3c8cf46f6086f21e0e27dbcf55c82619c8a5898dd05459e0eb9f8c4efb",
+     "source-beat:sha256:a5b014fb9e2036b626e39d97b2942527f88ffac24ad72bfc33af0cf27b53820c",
+     "source-beat:sha256:fc15ee7532a4a8083e27ec8d75f3d2a307ba0d1b75ebbe34cafddd9424428e72",
+     "source-beat:sha256:f755da285010f45ab9f26777b5085d2f43244dfb6d2a030045a52b7dc58baf44",
+     "source-beat:sha256:fe1944ffcb4023e73ae59105315c033c2a4592a2f637f8d8e32d2386c2c3e249",
+     "source-beat:sha256:bbb97711ddccb0e57e306462794d09eca210520c3eebc5e5daa9680711f78fc9",
+     "source-beat:sha256:e1f7b9811d87ff02e58af6710b203463c1de3294ccf8da1499d79edc76572307",
+     "source-beat:sha256:b77dcca683e225ae4dce5b99684e8cba786cbb06a4fca8c71bf19657b49628f4",
+     "source-beat:sha256:309a737c90d911e518709f080159427b56efda8dd63e7fadc202221e2ed083b5",
+     "source-beat:sha256:eb3a43c540b9559e88e3c33cc897dd8d18c0d004032658ac8b7e8237ee460e21",
+     "source-beat:sha256:0bd870e5b3b295ca8569120f01ed2d0cf688719822f8b564d05e3e497374ad53",
+     "source-beat:sha256:f5d1c0c4e5af6a0fe881261ce82ffc7036354915fd410c111121bb522eac5f5f",
+     "source-beat:sha256:31b480e344aa6def8f0a8580efe8d9832a9605245346b3ed633e227cbe199c3d",
+     "source-beat:sha256:445a87a193bf75d8e0cc856f1f3716bfc2c59bbfd20fb5d339e4af568d3d9a2b",
+     "source-beat:sha256:912c83157da087f6f2f70288f48af572d96d07d83dbcc64260941bbf6a3d1f81",
+     "source-beat:sha256:dd033ce36021a6ad083fa413e7e5c9046457ee7dc8c53bd4e1e71506a49fa649"
+    ],
+    "sourceBeatSignatureDigests": [
+     "d61221d1f7ab5938aa224d6f62af54a16e82489c77f84119a912431da4601a40",
+     "7bca21a3013c049236d3bb9745c02dc6af597a708f3b41826b9310601f5d4546",
+     "ba2aaa058b8689d8312355e3ed11eae57227e2ad20e98266044802ad86603198",
+     "2224af42f76cbb0db9c5d51160a09c59fdd00742483719a0cb0f358461b5f30a",
+     "37054ea9a44b5e69e73aa074213149fc5d30a98ce65aa830686d1b6f4859389a",
+     "ec7129807e0f614a4e78767049c50c9cdac0c9bce087c18cc3e3fe25b44e7089",
+     "a4378805565cdbab375a34c6a7e70a239f68bc526c6f96ab3a0d60b312e1ce3a",
+     "8464d26af3c3fb419e5bdd0427b7597a674bd6ad09461e759ac59d5b29fb3746",
+     "a8529d4473352ac8c32afef5fec309707949386dc0c78d574721666a565231de",
+     "5cd36485919965970f36ed8b22e4223a53aedcada557bff307c9e35f7b757bab",
+     "72f64fc87cff4a7bd73885a33e3912c6ad731d74e4cf5436b290350097d5da48",
+     "1a9ba0fe84664afda84b10eee58213a7d0d94d71a74dd02b230faafec950ae59",
+     "3d9512fdf81241c4f7e581fd035a01eff997a2a82fdea31d30f0686afdee3493",
+     "09180799b5c3fcb150d54f9d88b906131cff6e221efef47bd8795015a2dad192",
+     "dea32848f892820f28d18fcfdbb78b0003889d28dae04aad3527382e46906c71",
+     "d0352be891e5c95f78c752d78656453f2477f3387a7ffa22c6b85eb57d654aeb",
+     "3095fc3c8cf46f6086f21e0e27dbcf55c82619c8a5898dd05459e0eb9f8c4efb",
+     "a5b014fb9e2036b626e39d97b2942527f88ffac24ad72bfc33af0cf27b53820c",
+     "fc15ee7532a4a8083e27ec8d75f3d2a307ba0d1b75ebbe34cafddd9424428e72",
+     "f755da285010f45ab9f26777b5085d2f43244dfb6d2a030045a52b7dc58baf44",
+     "fe1944ffcb4023e73ae59105315c033c2a4592a2f637f8d8e32d2386c2c3e249",
+     "bbb97711ddccb0e57e306462794d09eca210520c3eebc5e5daa9680711f78fc9",
+     "e1f7b9811d87ff02e58af6710b203463c1de3294ccf8da1499d79edc76572307",
+     "b77dcca683e225ae4dce5b99684e8cba786cbb06a4fca8c71bf19657b49628f4",
+     "309a737c90d911e518709f080159427b56efda8dd63e7fadc202221e2ed083b5",
+     "eb3a43c540b9559e88e3c33cc897dd8d18c0d004032658ac8b7e8237ee460e21",
+     "0bd870e5b3b295ca8569120f01ed2d0cf688719822f8b564d05e3e497374ad53",
+     "f5d1c0c4e5af6a0fe881261ce82ffc7036354915fd410c111121bb522eac5f5f",
+     "31b480e344aa6def8f0a8580efe8d9832a9605245346b3ed633e227cbe199c3d",
+     "445a87a193bf75d8e0cc856f1f3716bfc2c59bbfd20fb5d339e4af568d3d9a2b",
+     "912c83157da087f6f2f70288f48af572d96d07d83dbcc64260941bbf6a3d1f81",
+     "dd033ce36021a6ad083fa413e7e5c9046457ee7dc8c53bd4e1e71506a49fa649"
+    ],
+    "orderedSourceEventIds": [
+     "script-event:sha256:40ac29e580a3c9ff4ec11051d117d98b301e3f70f26d2ec5554a9414f546e653",
+     "script-event:sha256:3828df1fcd4f7431f06be18995dee4616ae57032d02fdb08929d05c295a33200",
+     "script-event:sha256:4b312abb05c138cd7726f9ccd7d0618fff69176e3254c591a420e6cce0d7cff0",
+     "script-event:sha256:9df47f3d92bb0d89b491b7ce07b96f7b5c97372ca0477f37d93809f1165bbb3b",
+     "script-event:sha256:ec35ed5dccfcd785ea6a614647f0d8912fa248bd66c3636e9581ff37850c10fa",
+     "script-event:sha256:fbea42975061fc3411fd049ba87b2e45e32840e315d317a94abd614091648763",
+     "script-event:sha256:4fbd7c4f3e9d2f69a56eaf1f37f4df5959c30d134eb6f0f4eba41dd398669bfe",
+     "script-event:sha256:f9180428d2d95d460a2467c52ac36f7a333eabc473d6ff0993a737f46b6fc040",
+     "script-event:sha256:d9646178175a37da7b01d000ad7485145b4f4a9b6397f30f846d9765ba345377",
+     "script-event:sha256:5d9b25d871787167e8a608a237ec26af5159c547d46073ab5fc0c7375e0a0419",
+     "script-event:sha256:f6aab2e4ad91fd37822133c44370361f07e937bfb8d37324fd82ca9097d8d0b7",
+     "script-event:sha256:782871fde6c9b629fe3cc6f5889ae97e26c8d302a8743e66d27af724b14af4c8",
+     "script-event:sha256:30d08cc22c8682aaa8961ff6cea9788fc801172f00aca4dea3b17ec37b597194",
+     "script-event:sha256:a02e65adcb19903bfded8fe9dbfc47ef8b595361fcf16e9c2d4c8517bda11661",
+     "script-event:sha256:37471cf7510d18edad9229db633895654bb9d7879c55f94f60c00ec7447d301f",
+     "script-event:sha256:352c34896e44bb5cb4eb02264f7bb79ff7e8d720da6cbeb16ed235f0c72ec2db",
+     "script-event:sha256:6b304bcfad8b1e775199117332a6771f72785610721b1bfa12dec282ccf61ffb",
+     "script-event:sha256:174179c87867ffae702b05d3db078df978b6271200dd3f314441efb969b5e34e",
+     "script-event:sha256:96a0b32340c33f0df2614a87a019e0f2ea9af776b27342f3ee954f6b403c531b",
+     "script-event:sha256:5c4384657d887690630c5dc4cd7f19b68ebf2adf178b4031ac18939d2eed8ff4",
+     "script-event:sha256:dd6c62d5a5439b9a70f913ebad95e1714e798d10f3fbe40816b707e2a3e2fbdd",
+     "script-event:sha256:2a3849c700b960a3b9c9e214db8f37e54f42951e0030ca8d7e3463f736f50f97",
+     "script-event:sha256:d875de5e3f5959fe8334c5a52570a8a68e69beca7b9aca26c9d639369ac16e33",
+     "script-event:sha256:ba1f7406a537ec7cef37b2a22fb799d50b9ab0f5b6c6370db18dc38a63dc2d12",
+     "script-event:sha256:bc412edfd50edf7e9dd4a95d9267e9d1ee62acafeabf92fca2ae84b9912799ec",
+     "script-event:sha256:542a1db301e12763c969e4093d73b1553501a65834484f32e26eb01212197687",
+     "script-event:sha256:e99cc13e91591132e52775b30311eff4ee94ee294ca55a414e5b167b0312fb59",
+     "script-event:sha256:3099efc8bc1f0d4d2ead84f0d063eabd7fab308d2853f0bd3ceeafc131cfb671",
+     "script-event:sha256:f5469743f0ddeaa578ab1cfb599a3d25f88e30b0417937f61b5c62dd3b3b722b",
+     "script-event:sha256:b35d3b6dbd9fd42b23f73f0cd027db22873d2984ba098bb9137c637983d74f16",
+     "script-event:sha256:f7cbe323615f620c9d5f19282d2c865d800b696109ba563a6bf07b61c7114c9c",
+     "script-event:sha256:55f716d09132a654b26c5402413b4228c8bd4431594019a8d1af6af648950a1c",
+     "script-event:sha256:e27dbe96dcefea1b04e22e52e35c773a41405b3893f3ccee38dda53c64965b42",
+     "script-event:sha256:d2ae4bca6a3ffdf21263c32bb080603ba82a8a1b75f9465a7697536ec009152b",
+     "script-event:sha256:0ca50dcfe66ceda4775bf797b6e6239a3123cb3d0a754fc572151fd70828b6a5",
+     "script-event:sha256:2276b820dfaf467f97b2bdcb3e199a990f76638b420ff12c04ea123da91844ab",
+     "script-event:sha256:7e2d41cdbe9c8ef4b4f7bd67b2bb74a548c7b412f2bea36683173d12d46a3983",
+     "script-event:sha256:eef033cdc219e5013ff29b3faf1525955e13a6c1d6a51abc4da7c0c2ba218f5e",
+     "script-event:sha256:b0658bf64376c471c0b7be85b93e83940ea9fcbe81998574c4b01f8c92fdb42e",
+     "script-event:sha256:3f3dab07099d4eb0af09a8a81807066961449674c9f66d4bcf9798a25ddbcfe5",
+     "script-event:sha256:47766dad234a2cf87b2698fa1fdb3a81ac835e098e2126894a35cd2f6a05286b",
+     "script-event:sha256:8d3eb4d5c25103a50e490232f070e9a730651d0ec80cea11d6ff28e1a92c7145",
+     "script-event:sha256:ed91bdb874cc69a3f01966c6d7dd73f31b57cd966d2971e1439029eb73702aea",
+     "script-event:sha256:2be4c708ede0c20ad529295c94f121d4917ae012fab3a2e69dab12bcdf02d0ef",
+     "script-event:sha256:2dfbd0a43ba6412d93050f85c83f4731d175af34fb945d8ed960dbebeae7a4d1",
+     "script-event:sha256:1fac71be2d6a9372806606aefddcfc0998c26da8976cd17945418b39d4e0cb38",
+     "script-event:sha256:0eabc5e104dfbebb76a42200773c61180a20cc1ebe8e63a33c2863ddae77bc65",
+     "script-event:sha256:02a8fc66f1d9f9a532e4c13c449a6dbf091101dadb5a0fda025bf4d2909b00d9",
+     "script-event:sha256:3abe9397dfe920fd6d6df9e4bd6d2b6441629b94b774c7c3bcab47c1135e4449",
+     "script-event:sha256:8c4d1d1be7dac29c5493772af84a261acb1d790357523a765bd47a8a18b5fe46",
+     "script-event:sha256:65591dd0cea5879153763d61bdc0001127540a098063e359a3b8e216d142340f",
+     "script-event:sha256:d752fcacbbc2cb2b7db9041ef9d38812dc8c053af1a787d96da39f80c4daa1fa",
+     "script-event:sha256:ccfbe6c74089c131f5ea0e123cc763bbda3faf4b5ffed1235466afb69635b0e8",
+     "script-event:sha256:9908956e11c6087714d81cff6a0fb19993d5e89035dca0c645956a27fe36cf0f",
+     "script-event:sha256:3d82c3075dcb31eaf5c42e9148e1ee382fcab8ba98dcb45d9ca0abfa290cfb4a",
+     "script-event:sha256:2a6a3fc3f6f1ba66cd4f6ef3b004cb21a274fd5d0822a93bba97e72d2a9bc5f3",
+     "script-event:sha256:6009b8f26d00f8504daede3a9f923f0adda601de24b6015dab2fae7934b07111",
+     "script-event:sha256:f812525ffef449bd45eec489a07cf40c700d43839358a6bad98a70c03bb04fe3",
+     "script-event:sha256:319528d3967a835b116ba288e1e26ae8a40e015b79bb6a8cff4c67e4bd4d6653",
+     "script-event:sha256:ab75655cf0365abd6bd5633b69ff46b097b8fb07276cfe0147b5a2eff7f4c380",
+     "script-event:sha256:0c6b061b443a24af2c454e4bd1e17d2bdac35ba584849c4f707098c193d0ce0b",
+     "script-event:sha256:879239cd7936ea4cce6b00574997ae748b7e558635d217be908c49014408545d",
+     "script-event:sha256:75d525571ce1ce2f96164fc9cb611c1c1bd5d6dd2eaa93d53dee881efa17eba8",
+     "script-event:sha256:973d2e8d67715440c4623ff6605e2526055ca195faaaa39bfab77113b02c7225",
+     "script-event:sha256:64cae4a46ad967d94c65e3e34f185ef47af027ece07a3a230aee7b941d448d10",
+     "script-event:sha256:9ee8fd2abdbce4b88ba9349d1a65fb4bcc0334f422785361b4e348ebf11a9160",
+     "script-event:sha256:c25b75ba16a6d4556edd27caec4223fdaa2f25fa777b4311b2c0704f12595c5d",
+     "script-event:sha256:7f85f6bcc4e7c2aafc70175cacd5c6fdee412154dc03d016200835992058953c",
+     "script-event:sha256:fc9a66299f064affd39294b25b349814a8d97d143b92a743aeb8df9fb5fa99fb",
+     "script-event:sha256:1402b19e4ef3d73d5a5c0b113adaeb19b2b5fc8da7322387f27855102ee83c14",
+     "script-event:sha256:2fa77b79f9808b2cb3b899ee83c92ab7a0a303819a13830fa44496b30c0b4166",
+     "script-event:sha256:557e9735ec2b44746ae48f26d3bf8b190c03ede80654f42e3c20b6acd1451a97",
+     "script-event:sha256:b826cd575ebb48469bb5b46d3f4dac858660fb6c24db27382acbc1a3ee5fd273",
+     "script-event:sha256:1adc1d5f8027a7f6407b9f8d3f3e912d31a95e5671f2e7a75cd684123eaffc40",
+     "script-event:sha256:ef69ac078c8d2b01be54bcac7b401028bafb01a6e5defffa480583b42ed31aaa",
+     "script-event:sha256:1fde90a5212c908bace6ae111f5ca9cfee8c4ac81e6959cb1447f5a0ef752018",
+     "script-event:sha256:af585985bc9e3c10be4e72f9866aa5643c535bb2708eab779eaf870b744d4ee1",
+     "script-event:sha256:6b05ff9daa7d6497719f1bfc9c94e0dd7103a3724c21bd1ba701ce8a0fdfc448",
+     "script-event:sha256:3c7ee893f53d80a390325b76a6d70542375749e6568087dc2e92fb70c3f19e43",
+     "script-event:sha256:6c81bee76c25a64a3748b09bf5e17d04b560e6098a52f2df73860b9868b81cdd",
+     "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
+     "script-event:sha256:a1727562f9ce49e9e2f91c2d9fe5f31937a499c7df5175292e73b67b0318a2ff",
+     "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
+     "script-event:sha256:7ba43b9b63fde91a8ae0f7c4aa9c7a874164a1f5192fe0b6496acfe396744644",
+     "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
+     "script-event:sha256:6c0e3e14fbe0fe300d6d10ce38286f9dc8a6f7d20dc8130c90a33e66c08a0ecd",
+     "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
+     "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
+     "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
+     "script-event:sha256:2f8846758c021606ac5aa741cf5bb6212b2d80510dcae1de812b74b1c67ee134",
+     "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
+     "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
+     "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
+     "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
+     "script-event:sha256:9ddac9981834d15e3cd4936f89810ca8653a2c8fd5220ae5ee1d4698b9f74241",
+     "script-event:sha256:646de5871266ef1a22d3610eda7ed943685a88d1bd670a0d28d8fa461346d7be",
+     "script-event:sha256:80a594f4679559a0aa42960dfb24b60882c9dfa8de7a23811655c724c73298a7",
+     "script-event:sha256:953d5e3e8329d98d09f4a0e2f1b44dafeded10110ce7ef89e40fadbac31181c2",
+     "script-event:sha256:cc128d1ba820fa0b0d6dab7fd8fd5e1a2a3a34afac6af9126c08448cad348566",
+     "script-event:sha256:dfd5a786b3dc648eb6348104da30531c63b20ce75275bca90fc88280416c9276",
+     "script-event:sha256:b5469ca0b7f2c96b57edcb738819d993a9a2bdd207881860875454182fa9b21e",
+     "script-event:sha256:a64338e51193f161a0332806b77cd574af6a8850d50b7401d76c7d2548557e83",
+     "script-event:sha256:058f358df9a49a88ab467ab37e7fa7290fbd8e11dd1fd644d64e79c53dd6bd58",
+     "script-event:sha256:db788c450b2e196f9953787af9fb714a9870d64970ef4013d543b9185973d728",
+     "script-event:sha256:012616c8dfea2d067460c8f7eab6481e8509a20a3a861f1e898b49855231ecc7",
+     "script-event:sha256:a8ea56e67c97d50c3aeb2863669bac70b14532df79c2c8d86c82c71aeb992f0c",
+     "script-event:sha256:3fea56871249bf846553142e7306b081fce2dc2a49da90efd4dec633cd6682cb",
+     "script-event:sha256:a776ef3e176155c3e29f7a6dc197878d481d7581addff6ea114f92bda5e068e9",
+     "script-event:sha256:446ab49613ff4e2a809cdf53f99f465f1ff5d55baf71d061a76d1b8b5dd249ed",
+     "script-event:sha256:67a25648b41d3a2c4e6935093d91a495ee6646c8539b3ec52b534caca040ed26",
+     "script-event:sha256:f0ff2268a31323f8fb3986359db7462dd70a428903e2138dd10323e3784df853",
+     "script-event:sha256:5ab15d8ed92d468f8c460064c907b06d2d3fc30699a60b4095fb86d7cfbaf0d8",
+     "script-event:sha256:2c5d12622de093b4fe420671e4d8212b55e6abbbb4d67a02556faf78aeb4fff9",
+     "script-event:sha256:d152ff438d43d08c1402e1129c9c12804b869dcd3b6cf674084cdda7bc6f9260",
+     "script-event:sha256:b581e501e71e1066cde8b355c1c1f7e223dacbf5a38bdde0dd6d31aced0f4862",
+     "script-event:sha256:316ca73129b8a04ff55b1ebee0d020ec0972aba9f4a0e614612ef3e2f87ca7bc",
+     "script-event:sha256:63cc0adeb58496b9d6940eb2bdca414291a30d43a512cbd10b0e0a5555d34836",
+     "script-event:sha256:ab1fe81eb10660373a44773c292bd4cf65cfb003e358f9d2a2ae690041d7eac8",
+     "script-event:sha256:56b9cb70b56e17407bd6ce633f69cd53c8d11ffe7faa40eae4059ae9df0ea817",
+     "script-event:sha256:0cda0ff996203684efce90e970ab7095dead4151ae3ad86e1f5e43ee43caa59a",
+     "script-event:sha256:d6b981abbee4361842b1eb70903395cb81b5d53265bd23628a7c5500a9e84c9e",
+     "script-event:sha256:5da71113b34f1b65a1ec328c54924b05bdd8f8dea16d57120e6f341cad952b4c",
+     "script-event:sha256:1dfd8f4b115684b516fd45a5a8522574e2c711a2e242a9bf58bc46074840c48a",
+     "script-event:sha256:dadb7d288a95b6b44d52719f83c95f21653a00d7c5af30813eed2a77959bffdc",
+     "script-event:sha256:755ad02f9da00478cd8fc37ea1dd9d8aa5b6ee1cf78562c4928df41afd3e2758",
+     "script-event:sha256:f66fb7011809b63467e848149ac2b2189a9bf7dd9649fa2699f51fdc4b08dacc",
+     "script-event:sha256:9316ffc2c48af12d17f3672e89a0191d0dfb22e1a7132cb9028c1a71ffb1f52d",
+     "script-event:sha256:59747ccbf5426059e6cd4563f5ff2ae6bdb62e25013d05f60d65c71e0d092287",
+     "script-event:sha256:c66d71a18aa443a86273f6b43c68eafbe47a915233398897df1656085c66b1f9",
+     "script-event:sha256:65d45b94a9a346546c4b90f8ff750649fdf1056fb234ce921167e08faa32e07d"
+    ],
+    "orderedDialogueOccurrenceIds": [
+     "dialogue-occurrence:sha256:0d1229b415e34a7c2647a3d7b8006e5cf5a56c935127c2bcdcd533dcf88e7019",
+     "dialogue-occurrence:sha256:1fda6544d44d057ec363ad19b44269cc015351f1f8b3ce9d192097c7bfc06eff",
+     "dialogue-occurrence:sha256:27eba4dd2e0cdf55f13a7e2704947a3251bccd56c6d22d2bdb5b479dc2a9e6ce",
+     "dialogue-occurrence:sha256:e6aad716bbf4773f26b0dc2f1067897b5af8679572b92714cb0bd37276f62bbb",
+     "dialogue-occurrence:sha256:e2208ca472b7839913b7bff537a2330def526e0dc7b50c151159fa0b92698b1c",
+     "dialogue-occurrence:sha256:8c3b071b32ce0b298375d6f86318557b7a755e7936e893daf0b127131165fbe0",
+     "dialogue-occurrence:sha256:9691ed0ceadb76ffda0976395feaa27808367858a7b55bf58163842afc6cba14",
+     "dialogue-occurrence:sha256:7572a3df1414c1799711456299094e0004a57b8f5ef23e4ff09f2cdf34f60b8b",
+     "dialogue-occurrence:sha256:1dc5f3d1e324964c1ae21cd8e26ef7cdbc387b6ec838f6cb5b0869e6a06161f8",
+     "dialogue-occurrence:sha256:651f6b90e4345b04181bd56e4b4f669c7dcfc3871555da06e9d66aa5367ac647",
+     "dialogue-occurrence:sha256:2e236016f8ba83cd6c063e4ee37a9c8be5a14f9db68186701d7f2554460e8e81",
+     "dialogue-occurrence:sha256:d72950d28d5ea5919e416acfdf8a704512a7196d5777222eea7e29a5fe822863",
+     "dialogue-occurrence:sha256:24e5f48896cffa4ff75118c7c432b836fd3913cc6943d847f7f4eeaccdd384c3",
+     "dialogue-occurrence:sha256:f4a1541c3ffb9eb08233fa564590e7cff1a59ca358e4c6d63eb4a987d4852549",
+     "dialogue-occurrence:sha256:bfbee99166b8bf28faa707302b7203aa7340d46da4587c8b31cffb6eff87c566",
+     "dialogue-occurrence:sha256:6362725ec3c05ff7d9b72e6904c386bf6544a6143b62c268e645a248af57a97c",
+     "dialogue-occurrence:sha256:38d45d84052d774e67db49dbf615940e44669e7d8320b2b3acd7f5392e1f11ac",
+     "dialogue-occurrence:sha256:e02ece11dc67e2c3b8e0e16de96679442bd3510df5743d518bd7c486f69a7b4b",
+     "dialogue-occurrence:sha256:e31553f7d830d6e3c1d02f0856cc1d52028120ff2401f16fe766fcb215cafbab",
+     "dialogue-occurrence:sha256:b14280d94224797f52cd4e2b2ce365cf6d90d1eb1fa31a7d5c59d8e6cfe4c068",
+     "dialogue-occurrence:sha256:6e940b2f16849553f97f9b72aeda6e57183382bf6c61d7313b163754e888f6e6",
+     "dialogue-occurrence:sha256:e56b45a8bdd0c660428223343e1ef40272bb871c86ce32b4293c178540171934",
+     "dialogue-occurrence:sha256:b0dbcd28cc5ef41c68a33b3ba147c9fbef1d1a620534c8349e5eee04db38f7ee",
+     "dialogue-occurrence:sha256:215e19e27c2ab1ef8488089c10911a376f044abe51e7dee38b9f7ca8a91f7bc8",
+     "dialogue-occurrence:sha256:b9a8077cae89fcd011b559a2754b2dc1c636a8f794254f028fe73bb639ed88d1",
+     "dialogue-occurrence:sha256:f334a69091c8988fd6a770f31d7d03cbfff8c7808e55d7731a85ae61d140b1fd",
+     "dialogue-occurrence:sha256:63e88485d350307e91bdd83d8602de6b1081c6afaebe4c6395a1aa4470f037da",
+     "dialogue-occurrence:sha256:b3a7c3a38aa5d153e8dc0e4d65174e0e9b10c60be09f74ae60922c2ef5cb49f1",
+     "dialogue-occurrence:sha256:64cea75def8ff136a67d26abe9a40f255f436b5d3dacc65f311e2bc749619f98",
+     "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
+     "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
+     "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
+     "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
+     "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
+     "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
+     "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
+     "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
+     "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
+     "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
+     "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
+     "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
+     "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
+     "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
+     "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
+     "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
+     "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
+     "dialogue-occurrence:sha256:8ee71708df606fa390adb33b5d0638311511120b10ee0254358f141b1c5b4b60",
+     "dialogue-occurrence:sha256:34cae96e72f2bc88f4f684829dfc14d4adacacbdf178f691084b18afc91c2a97",
+     "dialogue-occurrence:sha256:7179bb0a9a2453113b26736de250684a3cba811d2b9e8910151dc901552093df",
+     "dialogue-occurrence:sha256:dfe42c45ca8d38c54868bc7f69e96e703fa5c91f82b0267210da7370ae321ee9",
+     "dialogue-occurrence:sha256:9a01eb3a0e30c7f955d2c74a043a759bec4db6f1756dab85c2b9620ef3931c15",
+     "dialogue-occurrence:sha256:ebef73f3fe80100f3ccaddc0f900763d8c6cf8ad3b02e2557d63a72e0ff14478",
+     "dialogue-occurrence:sha256:450607625d109a5b7677a4516f99e815fe292cdf8e7309823a13e16a9205909a",
+     "dialogue-occurrence:sha256:52e0436cd4ff75b8434edc9300a9e57afd2289a976a02e864bffde2dc6a1213b",
+     "dialogue-occurrence:sha256:295db412e8fc4dfc5009b42694cf2037869b42f372d0481d8a19c9063d3f890e",
+     "dialogue-occurrence:sha256:04bbf2aaba094eb4adf28134389367e06c0ac72baf560b52df619b84f7e2e9e1",
+     "dialogue-occurrence:sha256:057b8ce83da5dfeee239b0f1f038975c88e431be8c3e97ae0a444c67be6c49b0",
+     "dialogue-occurrence:sha256:f83dcad59128e0d333668200870dcc8b2438acb44b105c5cf6004e7c14a2b39f",
+     "dialogue-occurrence:sha256:18ae37db445c2905fae1628d7d963391893b889f99b1bdcf62be222a44fef1b8",
+     "dialogue-occurrence:sha256:a0c099eb368c78a75ff5abb799378dd753207e023b31d1f94d327ebdd6113f21",
+     "dialogue-occurrence:sha256:dc48e62ccf858fcb3e8eb831d13aec1259aaf4c0c23b5a984a959945acc511bf",
+     "dialogue-occurrence:sha256:5711685c7e87dd399a40a451651ec77cf7f13920c0dc9d6643c5ea30ffe10685"
+    ]
+   },
+   "algorithm": "sha256",
+   "digest": "99666e211edcca65a271b9bb2385e089922481610e35c05306d5f59be94ad3f9"
+  }
+ },
+ "shots": [
+  {
+   "shotId": "S5.SH1",
+   "sceneNumber": 5,
+   "beatCode": "5.B1",
+   "beatCodes": [
+    "5.B1",
+    "5.B2",
+    "5.B3",
+    "5.B4"
+   ],
+   "title": "Aida offers her paw and Bo hesitates at the exact threshold between understanding and doin",
+   "durationSec": 30,
+   "purpose": "Aida offers her paw and Bo hesitates at the exact threshold between understanding and doing; Keen’s nod is the quiet bridge that keeps the choice Bo’s. / Aida’s Crystal Call turns her earlier verbal truth into visible emotional safety, making the forest itself feel like it can hold Bo. / Keen answers with his own call, joining Aida’s support with peer courage; the path becomes something walked together, not alone. / The lights reach Bo’s feet, but the real climax is not the magic — it is Bo breathing and stepping anyway, then borrowing Aida’s words as his own brave ritual.",
+   "visualPayoff": "She offers her paw and waits. / Aida makes pink magic light. / Keen adds blue light too. / Bo walks on the glowing path.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "location": "FOREST PATH",
+   "time": "CONTINUOUS",
+   "charactersInFrame": [
+    "Aida",
+    "Bo",
+    "Keen"
+   ],
+   "storyBeat": "Aida offers her paw and Bo hesitates at the exact threshold between understanding and doing; Keen’s nod is the quiet bridge that keeps the choice Bo’s. / Aida’s Crystal Call turns her earlier verbal truth into visible emotional safety, making the forest itself feel like it can hold Bo. / Keen answers with his own call, joining Aida’s support with peer courage; the path becomes something walked together, not alone. / The lights reach Bo’s feet, but the real climax is not the magic — it is Bo breathing and stepping anyway, then borrowing Aida’s words as his own brave ritual.",
+   "emotionalIntent": "Sacred hesitation before action. / Wonder with maternal reassurance. / Shared courage building into momentum. / Earned release and uplift.",
+   "kidRead": "She offers her paw and waits. / Aida makes pink magic light. / Keen adds blue light too. / Bo walks on the glowing path.",
+   "adultRead": "The most respectful kind of encouragement: no dragging, just availability. / An elder embodying calm confidence rather than merely advising it. / The child who was helped now helping someone else using the same truth. / A child taking the first social step while still afraid, using someone else’s steadiness until it becomes his own.",
+   "action": "Aida offers her paw. Bo hesitates. Keen gives a small nod. Aida touches her pendant. Pink light spreads across the forest floor. Leaves gently lift and shimmer in the glow. Keen touches his wristbands. Blue light joins the pink. The forest path glows. Bo is amazed and smiles bigger than ever before as the light surrounds him and reaches his feet and continues down the path towards the Learning Circle. He looks down. Bo takes a breath. He steps forward. Then another step. They walk together.",
+   "dialogueLines": [
+    {
+     "speaker": "Aida",
+     "text": "With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:8ee71708df606fa390adb33b5d0638311511120b10ee0254358f141b1c5b4b60",
+     "sourceEventId": "script-event:sha256:953d5e3e8329d98d09f4a0e2f1b44dafeded10110ce7ef89e40fadbac31181c2",
+     "sourceEventIndex": 97,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Keen",
+     "text": "Brave and bright, with all my might — Aquamarine, shine with light!",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:34cae96e72f2bc88f4f684829dfc14d4adacacbdf178f691084b18afc91c2a97",
+     "sourceEventId": "script-event:sha256:dfd5a786b3dc648eb6348104da30531c63b20ce75275bca90fc88280416c9276",
+     "sourceEventIndex": 99,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Bo",
+     "text": "Every single time. CUT TO:",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:7179bb0a9a2453113b26736de250684a3cba811d2b9e8910151dc901552093df",
+     "sourceEventId": "script-event:sha256:a64338e51193f161a0332806b77cd574af6a8850d50b7401d76c7d2548557e83",
+     "sourceEventIndex": 101,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    }
+   ],
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "Aida",
+    "@图3": "Bo",
+    "@图4": "Keen",
+    "@图5": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "keyframeReferenceSlots": {
+    "@图1": "Aida",
+    "@图2": "Bo",
+    "@图3": "Keen",
+    "@图4": "scene plate"
+   },
+   "openingCharactersInFrame": [
+    "Aida",
+    "Bo",
+    "Keen"
+   ],
+   "continuityConstraints": [
+    {
+     "label": "Keen wristband state",
+     "value": "Keen starts this scene with bare wrists. No wristbands, bands, bracelets, cuffs, crystals or straps appear on either wrist.",
+     "severity": "critical"
+    },
+    {
+     "label": "Keen wristband state",
+     "value": "Wristband continuity must remain explicit: Keen has no aquamarine stones or crystal glow in this scene.",
+     "severity": "critical"
+    }
+   ],
+   "directorRecord": {
+    "storyBeat": "Aida offers her paw and Bo hesitates at the exact threshold between understanding and doing; Keen’s nod is the quiet bridge that keeps the choice Bo’s. / Aida’s Crystal Call turns her earlier verbal truth into visible emotional safety, making the forest itself feel like it can hold Bo. / Keen answers with his own call, joining Aida’s support with peer courage; the path becomes something walked together, not alone. / The lights reach Bo’s feet, but the real climax is not the magic — it is Bo breathing and stepping anyway, then borrowing Aida’s words as his own brave ritual.",
+    "emotionalIntent": "Sacred hesitation before action. / Wonder with maternal reassurance. / Shared courage building into momentum. / Earned release and uplift.",
+    "kidRead": "She offers her paw and waits. / Aida makes pink magic light. / Keen adds blue light too. / Bo walks on the glowing path.",
+    "adultRead": "The most respectful kind of encouragement: no dragging, just availability. / An elder embodying calm confidence rather than merely advising it. / The child who was helped now helping someone else using the same truth. / A child taking the first social step while still afraid, using someone else’s steadiness until it becomes his own.",
+    "action": "Aida offers her paw. Bo hesitates. Keen gives a small nod. Aida touches her pendant. Pink light spreads across the forest floor. Leaves gently lift and shimmer in the glow. Keen touches his wristbands. Blue light joins the pink. The forest path glows. Bo is amazed and smiles bigger than ever before as the light surrounds him and reaches his feet and continues down the path towards the Learning Circle. He looks down. Bo takes a breath. He steps forward. Then another step. They walk together.",
+    "dialogueLines": [
+     {
+      "speaker": "Aida",
+      "text": "With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:8ee71708df606fa390adb33b5d0638311511120b10ee0254358f141b1c5b4b60",
+      "sourceEventId": "script-event:sha256:953d5e3e8329d98d09f4a0e2f1b44dafeded10110ce7ef89e40fadbac31181c2",
+      "sourceEventIndex": 97,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Keen",
+      "text": "Brave and bright, with all my might — Aquamarine, shine with light!",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:34cae96e72f2bc88f4f684829dfc14d4adacacbdf178f691084b18afc91c2a97",
+      "sourceEventId": "script-event:sha256:dfd5a786b3dc648eb6348104da30531c63b20ce75275bca90fc88280416c9276",
+      "sourceEventIndex": 99,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Bo",
+      "text": "Every single time. CUT TO:",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:7179bb0a9a2453113b26736de250684a3cba811d2b9e8910151dc901552093df",
+      "sourceEventId": "script-event:sha256:a64338e51193f161a0332806b77cd574af6a8850d50b7401d76c7d2548557e83",
+      "sourceEventIndex": 101,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     }
+    ],
+    "continuityConstraints": [
+     {
+      "label": "Keen wristband state",
+      "value": "Keen starts this scene with bare wrists. No wristbands, bands, bracelets, cuffs, crystals or straps appear on either wrist.",
+      "severity": "critical"
+     },
+     {
+      "label": "Keen wristband state",
+      "value": "Wristband continuity must remain explicit: Keen has no aquamarine stones or crystal glow in this scene.",
+      "severity": "critical"
+     }
+    ]
+   },
+   "sourceBeatId": "source-beat:sha256:f755da285010f45ab9f26777b5085d2f43244dfb6d2a030045a52b7dc58baf44",
+   "sourceBeatIds": [
+    "source-beat:sha256:f755da285010f45ab9f26777b5085d2f43244dfb6d2a030045a52b7dc58baf44",
+    "source-beat:sha256:fe1944ffcb4023e73ae59105315c033c2a4592a2f637f8d8e32d2386c2c3e249",
+    "source-beat:sha256:bbb97711ddccb0e57e306462794d09eca210520c3eebc5e5daa9680711f78fc9",
+    "source-beat:sha256:e1f7b9811d87ff02e58af6710b203463c1de3294ccf8da1499d79edc76572307"
+   ],
+   "sourceEventRange": {
+    "firstEventIndex": 96,
+    "lastEventIndex": 101,
+    "firstEventId": "script-event:sha256:80a594f4679559a0aa42960dfb24b60882c9dfa8de7a23811655c724c73298a7",
+    "lastEventId": "script-event:sha256:a64338e51193f161a0332806b77cd574af6a8850d50b7401d76c7d2548557e83",
+    "eventCount": 6
+   },
+   "sourceEventIds": [
+    "script-event:sha256:80a594f4679559a0aa42960dfb24b60882c9dfa8de7a23811655c724c73298a7",
+    "script-event:sha256:953d5e3e8329d98d09f4a0e2f1b44dafeded10110ce7ef89e40fadbac31181c2",
+    "script-event:sha256:cc128d1ba820fa0b0d6dab7fd8fd5e1a2a3a34afac6af9126c08448cad348566",
+    "script-event:sha256:dfd5a786b3dc648eb6348104da30531c63b20ce75275bca90fc88280416c9276",
+    "script-event:sha256:b5469ca0b7f2c96b57edcb738819d993a9a2bdd207881860875454182fa9b21e",
+    "script-event:sha256:a64338e51193f161a0332806b77cd574af6a8850d50b7401d76c7d2548557e83"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:8ee71708df606fa390adb33b5d0638311511120b10ee0254358f141b1c5b4b60",
+    "dialogue-occurrence:sha256:34cae96e72f2bc88f4f684829dfc14d4adacacbdf178f691084b18afc91c2a97",
+    "dialogue-occurrence:sha256:7179bb0a9a2453113b26736de250684a3cba811d2b9e8910151dc901552093df"
+   ]
+  }
+ ],
+ "continuityLedger": [
+  {
+   "shotId": "S5.SH1",
+   "status": "designed",
+   "sourceBeatId": "source-beat:sha256:f755da285010f45ab9f26777b5085d2f43244dfb6d2a030045a52b7dc58baf44",
+   "sourceBeatIds": [
+    "source-beat:sha256:f755da285010f45ab9f26777b5085d2f43244dfb6d2a030045a52b7dc58baf44",
+    "source-beat:sha256:fe1944ffcb4023e73ae59105315c033c2a4592a2f637f8d8e32d2386c2c3e249",
+    "source-beat:sha256:bbb97711ddccb0e57e306462794d09eca210520c3eebc5e5daa9680711f78fc9",
+    "source-beat:sha256:e1f7b9811d87ff02e58af6710b203463c1de3294ccf8da1499d79edc76572307"
+   ],
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "keyframeApproval": null,
+   "voiceApproval": null,
+   "approvedTake": null,
+   "harvestFrame": null,
+   "candidatePaths": null,
+   "departmentWork": {
+    "cinematography": {
+     "approved": {
+      "department": "Cinematography",
+      "worker": "Cinematographer / DP",
+      "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+      "model": "gpt-5.4",
+      "preparedAt": "2026-09-02T00:11:47",
+      "editedAt": null,
+      "preparedBy": "deterministic-v4-scaffold",
+      "creativeDirectingStandardVersion": 0,
+      "sourceHash": "bb7845e360190e2898fd1fac885b1540999ff98592489e075f1c940f450c56f8",
+      "output": {
+       "shotId": "S5.SH1",
+       "audienceRead": "Aida offers her paw and Bo hesitates at the exact threshold between understanding and doing; Keen’s nod is the quiet bridge that keeps the choice Bo’s. / Aida’s Crystal Call turns her earlier verbal truth into visible emotional safety, making the forest itself feel like it can hold Bo. / Keen answers with his own call, joining Aida’s support with peer courage; the path becomes something walked together, not alone. / The lights reach Bo’s feet, but the real climax is not the magic — it is Bo breathing and stepping anyway, then borrowing Aida’s words as his own brave ritual. The viewer understands the next brave step before the action payoff.",
+       "composition": "16:9 opening frame for FOREST PATH. Keep the active characters readable with a clear action corridor and no premature payoff pose.",
+       "lensAndCameraRelationship": "Child-height medium-wide camera with stable geography. Do not crop ears, feet, tails, wings, props or magic effects; keep space for the first scripted action.",
+       "lightingAndDepth": "Use the approved scene plate for FOREST PATH as the authority for light, materials, colour, path direction and depth.",
+       "geography": [
+        "Scene 5 is FOREST PATH.",
+        "The approved scene plate is the world anchor for camera, atmosphere, materials and staging depth.",
+        "The opening frame is anticipation for S5.SH1, not the action payoff."
+       ],
+       "charactersInFrame": [
+        "Aida",
+        "Bo",
+        "Keen"
+       ],
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "openingFrameLayout": {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Aida",
+        "referenceHeightFraction": 0.34,
+        "sameDepth": true,
+        "placements": [
+         {
+          "character": "Aida",
+          "centerX": 0.42,
+          "centerY": 0.58,
+          "apparentScale": 1.0,
+          "depthPlane": 0,
+          "bodyAngleDegrees": 0.0,
+          "facing": "three-quarter toward the scene action",
+          "pose": "natural readable starting pose with full body visible and room to animate"
+         },
+         {
+          "character": "Bo",
+          "centerX": 0.58,
+          "centerY": 0.58,
+          "apparentScale": 1.0,
+          "depthPlane": 0,
+          "bodyAngleDegrees": 0.0,
+          "facing": "three-quarter toward the scene action",
+          "pose": "natural readable starting pose with full body visible and room to animate"
+         },
+         {
+          "character": "Keen",
+          "centerX": 0.3,
+          "centerY": 0.58,
+          "apparentScale": 1.0,
+          "depthPlane": 0,
+          "bodyAngleDegrees": 0.0,
+          "facing": "three-quarter toward the scene action",
+          "pose": "natural readable starting pose with full body visible and room to animate"
+         }
+        ]
+       },
+       "negativeSpace": [
+        "Leave clear travel and performance space for the next scripted action.",
+        "Keep room for magic glow, tail puff, sneeze or group reaction when the script calls for it."
+       ],
+       "referenceUse": [
+        "Use character references only for identity and proportion.",
+        "Use the scene plate only for world, light, material and geography."
+       ],
+       "continuityProtections": [
+        "No extra cast in the opening frame.",
+        "No premature payoff pose in the keyframe.",
+        "Preserve exact character identity, scale, props and scene geography."
+       ],
+       "providerPrompt": "[Opening Stage]\nCreate a playable 16:9 opening for S5.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nAida offers her paw and Bo hesitates at the exact threshold between understanding and doing; Keen’s nod is the quiet bridge that keeps the choice Bo’s. / Aida’s Crystal Call turns her earlier verbal truth into visible emotional safety, making the forest itself feel like it can hold Bo. / Keen answers with his own call, joining Aida’s support with peer courage; the path becomes something walked together, not alone. / The lights reach Bo’s feet, but the real climax is not the magic — it is Bo breathing and stepping anyway, then borrowing Aida’s words as his own brave ritual. The viewer understands the next brave step before the action payoff.\n\n[References]\n- Project-stable slots: @图1=Aida; @图2=Keen; @图3=Bo; @图4=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Aida; @图2=one Keen; @图3=one Bo; views are angles, not extra characters.\n- @图1: Aida's complete, uncropped 360 turnaround is the 100% identity authority. Match Aida exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图4 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Aida and Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Aida\n- Bo\n- Keen\n\n[Frame]\n- Aida @ middle-centre area; natural readable starting pose with full body visible and room to animate; facing three-quarter toward the scene action.\n- Bo @ middle-centre area; natural readable starting pose with full body visible and room to animate; facing three-quarter toward the scene action.\n- Keen @ middle-left area; natural readable starting pose with full body visible and room to animate; facing three-quarter toward the scene action.\n- Same depth: Aida 60 inches; Bo 30 inches; Keen 57 inches; preserve relative-size truth only.\n\n[Geography]\nScene 5 is FOREST PATH.\nThe approved scene plate is the world anchor for camera, atmosphere, materials and staging depth.\nThe opening frame is anticipation for S5.SH1, not the action payoff.\n\n[Negative Space]\nLeave clear travel and performance space for the next scripted action.\nKeep room for magic glow, tail puff, sneeze or group reaction when the script calls for it.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nChild-height medium-wide camera with stable geography. Do not crop ears, feet, tails, wings, props or magic effects; keep space for the first scripted action.\n\n[Light]\nUse the approved scene plate for FOREST PATH as the authority for light, materials, colour, path direction and depth.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Aida, one Bo and one Keen appear in this image.\nKeep Aida, Bo, Keen at the same distance from the camera; preserve their canonical relative heights.\nNo extra cast in the opening frame.\nNo premature payoff pose in the keyframe.\nPreserve exact character identity, scale, props and scene geography.\nNatural staging lock: restage Aida, Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Aida, Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look."
+      },
+      "outcome": "approved",
+      "decisionAt": "2026-09-02T00:11:47",
+      "reviewedBy": "StudioAI",
+      "inputSignature": {
+       "stage": "cinematography",
+       "model": "gpt-5.4",
+       "skillHashes": {
+        "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+        "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+       },
+       "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+       "shotContractHash": "4ef8b96180ac53bc4c15e4ec82fe56d24d37bdbaf8e0020ef4d19ba2736fa2e7",
+       "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+       "references": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "Aida",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "604c38221823234148f458c625509ae3127b535eb4750076d0ed65825cbb6566",
+         "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图3",
+         "role": "Keen",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "26151202911f2d373133dc0cc7c6e6d693c5bb77f6f4a67b1de7637fd9a1e166",
+         "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+        },
+        {
+         "slot": "@图3",
+         "sourceSlot": "@图2",
+         "role": "Bo",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "1c5e0e06b97b361f0c64bcbb8a0a3400193d993098800e002cc2b9a33171268d",
+         "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+        },
+        {
+         "slot": "@图4",
+         "sourceSlot": "@图4",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+        }
+       ]
+      }
+     },
+     "candidate": null,
+     "history": []
+    },
+    "voice": {
+     "approved": {
+      "department": "Voice",
+      "worker": "Voice Director",
+      "skill": "skills/crystal-bears-voice-director/SKILL.md",
+      "model": "gpt-5.4",
+      "preparedAt": "2026-09-02T00:11:47",
+      "editedAt": null,
+      "preparedBy": "deterministic-v4-scaffold",
+      "creativeDirectingStandardVersion": 0,
+      "sourceHash": "bb7845e360190e2898fd1fac885b1540999ff98592489e075f1c940f450c56f8",
+      "output": {
+       "shotId": "S5.SH1",
+       "sceneIntention": "Aida offers her paw and Bo hesitates at the exact threshold between understanding and doing; Keen’s nod is the quiet bridge that keeps the choice Bo’s. / Aida’s Crystal Call turns her earlier verbal truth into visible emotional safety, making the forest itself feel like it can hold Bo. / Keen answers with his own call, joining Aida’s support with peer courage; the path becomes something walked together, not alone. / The lights reach Bo’s feet, but the real climax is not the magic — it is Bo breathing and stepping anyway, then borrowing Aida’s words as his own brave ritual.",
+       "lines": [
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:8ee71708df606fa390adb33b5d0638311511120b10ee0254358f141b1c5b4b60",
+         "sourceEventId": "script-event:sha256:953d5e3e8329d98d09f4a0e2f1b44dafeded10110ce7ef89e40fadbac31181c2",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+         "performedText": "With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+         "dramaticIntention": "Warm empathy and steady courage; never loud, never superior.",
+         "subtext": "I know fear too, and we can still go together.",
+         "cadenceAndBreath": "Natural conversational cadence with acting in breath and stress, not changed words or banned tags.",
+         "timingAndBody": "Starts around 0.55s and leaves the next visual beat clear.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Warm empathy and steady courage; never loud, never superior.",
+          "subtext": "I know fear too, and we can still go together.",
+          "thoughtBefore": "Opening silence: the character is already thinking before speaking.",
+          "changeDuring": "The line moves the character from private feeling into shared action.",
+          "operativeWords": [
+           "with",
+           "heart",
+           "open",
+           "wide",
+           "i",
+           "stand"
+          ]
+         },
+         "physicalState": "Body remains readable in the staged action; voice follows the visible performance.",
+         "emotionalState": {
+          "entry": "present and specific",
+          "exit": "changed by the listener or visible reaction"
+         },
+         "listener": "the nearest friend in the scene",
+         "bodyVoiceRelationship": "The voice supports the visible body action without adding new words.",
+         "previousText": "Opening silence: the character is already thinking before speaking.",
+         "startsAtSec": 0.55,
+         "estimatedDurationSec": 3.3,
+         "pauseReasons": [
+          "The written pause holds the visible beat before the next action."
+         ],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s5sh1-l1-natural",
+           "label": "Natural truthful take",
+           "performedText": "With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+           "primary": true,
+           "takesCount": 1
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:34cae96e72f2bc88f4f684829dfc14d4adacacbdf178f691084b18afc91c2a97",
+         "sourceEventId": "script-event:sha256:dfd5a786b3dc648eb6348104da30531c63b20ce75275bca90fc88280416c9276",
+         "speaker": "Keen",
+         "character": "Keen",
+         "exactDialogue": "Brave and bright, with all my might — Aquamarine, shine with light!",
+         "performedText": "Brave and bright, with all my might — Aquamarine, shine with light!",
+         "dramaticIntention": "Kind, practical encouragement with childlike sincerity.",
+         "subtext": "I am trying too, and I am with you.",
+         "cadenceAndBreath": "Natural conversational cadence with acting in breath and stress, not changed words or banned tags.",
+         "timingAndBody": "Starts around 4.15s and leaves the next visual beat clear.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Kind, practical encouragement with childlike sincerity.",
+          "subtext": "I am trying too, and I am with you.",
+          "thoughtBefore": "Aida: With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+          "changeDuring": "The line moves the character from private feeling into shared action.",
+          "operativeWords": [
+           "brave",
+           "and",
+           "bright",
+           "with",
+           "all",
+           "my"
+          ]
+         },
+         "physicalState": "Body remains readable in the staged action; voice follows the visible performance.",
+         "emotionalState": {
+          "entry": "present and specific",
+          "exit": "changed by the listener or visible reaction"
+         },
+         "listener": "the nearest friend in the scene",
+         "bodyVoiceRelationship": "The voice supports the visible body action without adding new words.",
+         "previousText": "Aida: With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+         "startsAtSec": 4.15,
+         "estimatedDurationSec": 3.3,
+         "pauseReasons": [
+          "The written pause holds the visible beat before the next action."
+         ],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s5sh1-l2-natural",
+           "label": "Natural truthful take",
+           "performedText": "Brave and bright, with all my might — Aquamarine, shine with light!",
+           "primary": true,
+           "takesCount": 1
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:7179bb0a9a2453113b26736de250684a3cba811d2b9e8910151dc901552093df",
+         "sourceEventId": "script-event:sha256:a64338e51193f161a0332806b77cd574af6a8850d50b7401d76c7d2548557e83",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "Every single time. CUT TO:",
+         "performedText": "Every single time. CUT TO:",
+         "dramaticIntention": "Honest small courage; fear is present but not winning.",
+         "subtext": "This is scary, but I am still here.",
+         "cadenceAndBreath": "Natural conversational cadence with acting in breath and stress, not changed words or banned tags.",
+         "timingAndBody": "Starts around 7.75s and leaves the next visual beat clear.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Honest small courage; fear is present but not winning.",
+          "subtext": "This is scary, but I am still here.",
+          "thoughtBefore": "Keen: Brave and bright, with all my might — Aquamarine, shine with light!",
+          "changeDuring": "The line moves the character from private feeling into shared action.",
+          "operativeWords": [
+           "every",
+           "single",
+           "time",
+           "cut",
+           "to:"
+          ]
+         },
+         "physicalState": "Body remains readable in the staged action; voice follows the visible performance.",
+         "emotionalState": {
+          "entry": "present and specific",
+          "exit": "changed by the listener or visible reaction"
+         },
+         "listener": "the nearest friend in the scene",
+         "bodyVoiceRelationship": "The voice supports the visible body action without adding new words.",
+         "previousText": "Keen: Brave and bright, with all my might — Aquamarine, shine with light!",
+         "startsAtSec": 7.75,
+         "estimatedDurationSec": 1.9,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s5sh1-l3-natural",
+           "label": "Natural truthful take",
+           "performedText": "Every single time. CUT TO:",
+           "primary": true,
+           "takesCount": 1
+          }
+         ]
+        }
+       ]
+      },
+      "outcome": "approved",
+      "decisionAt": "2026-09-02T00:11:47",
+      "reviewedBy": "StudioAI",
+      "inputSignature": {
+       "stage": "voice",
+       "model": "gpt-5.4",
+       "skillHashes": {
+        "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
+       },
+       "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+       "shotContractHash": "4ef8b96180ac53bc4c15e4ec82fe56d24d37bdbaf8e0020ef4d19ba2736fa2e7",
+       "dialogueHash": "66d85fb128ac5ffd38a3e108094c8c7f232c4c56cc98602729a0c3cc6646a9b2",
+       "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+       "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+       "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+       "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+       "voiceCompilerVersion": "voice-director-v1",
+       "voiceIds": [
+        "SHuZ9GyczU4QEDzU4QU4",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "AAF2q3NCwTrLMMkEnRLB"
+       ]
+      },
+      "compiledTrack": {
+       "compiler": "voice-director-v1",
+       "shotId": "S5.SH1",
+       "lines": [
+        {
+         "schemaVersion": 1,
+         "compiler": "voice-director-v1",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:8ee71708df606fa390adb33b5d0638311511120b10ee0254358f141b1c5b4b60",
+         "sourceEventId": "script-event:sha256:953d5e3e8329d98d09f4a0e2f1b44dafeded10110ce7ef89e40fadbac31181c2",
+         "character": "Aida",
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly.",
+         "exactDialogue": "With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+         "performanceQuestions": {
+          "intention": "Warm empathy and steady courage; never loud, never superior.",
+          "subtext": "I know fear too, and we can still go together.",
+          "thoughtBefore": "Opening silence: the character is already thinking before speaking.",
+          "changeDuring": "The line moves the character from private feeling into shared action.",
+          "operativeWords": [
+           "with",
+           "heart",
+           "open",
+           "wide",
+           "i",
+           "stand"
+          ]
+         },
+         "physicalState": "Body remains readable in the staged action; voice follows the visible performance.",
+         "emotionalState": {
+          "entry": "present and specific",
+          "exit": "changed by the listener or visible reaction"
+         },
+         "listener": "the nearest friend in the scene",
+         "bodyVoiceRelationship": "The voice supports the visible body action without adding new words.",
+         "previousText": "Opening silence: the character is already thinking before speaking.",
+         "startsAtSec": 0.55,
+         "estimatedDurationSec": 3.3,
+         "pauseReasons": [
+          "The written pause holds the visible beat before the next action."
+         ],
+         "tagPurposes": {},
+         "archetype": {
+          "archetypeId": "held-heart",
+          "patternCards": [
+           "heart",
+           "receiving",
+           "connection"
+          ],
+          "intent": "Let the listener receive a truth the speaker can no longer hide.",
+          "cadence": "Breath-led sincerity; silence is motivated and the exit differs from the entry.",
+          "allowedTags": [
+           "softly",
+           "warmly",
+           "gently",
+           "quietly",
+           "sighs",
+           "exhales",
+           "cries"
+          ],
+          "auditFocus": [
+           "subtext is audible",
+           "pause has a reason",
+           "emotion is not announced"
+          ]
+         },
+         "takeRecipes": [
+          {
+           "recipeId": "s5sh1-l1-natural",
+           "label": "Natural truthful take",
+           "performedText": "With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+           "primary": true,
+           "takesCount": 1
+          }
+         ],
+         "postDirectionAudit": {
+          "passed": true,
+          "checks": [
+           {
+            "code": "five-performance-questions",
+            "passed": true,
+            "message": "All five performance questions are answered."
+           },
+           {
+            "code": "dialogue-occurrence-lock",
+            "passed": true,
+            "message": "Dialogue occurrence matches the locked script."
+           },
+           {
+            "code": "speaker-lock",
+            "passed": true,
+            "message": "Character matches the locked script speaker."
+           },
+           {
+            "code": "exact-dialogue-lock",
+            "passed": true,
+            "message": "Exact dialogue preserves every locked script word."
+           },
+           {
+            "code": "recipe-count",
+            "passed": true,
+            "message": "Each line has one to three take-direction recipes."
+           },
+           {
+            "code": "script-fidelity:s5sh1-l1-natural",
+            "passed": true,
+            "message": "s5sh1-l1-natural preserves every locked script word."
+           },
+           {
+            "code": "complete-sentence:s5sh1-l1-natural",
+            "passed": true,
+            "message": "s5sh1-l1-natural ends as a complete spoken sentence."
+           },
+           {
+            "code": "tag-palette:s5sh1-l1-natural",
+            "passed": true,
+            "message": "s5sh1-l1-natural uses only the character and archetype tag palette."
+           },
+           {
+            "code": "tag-density:s5sh1-l1-natural",
+            "passed": true,
+            "message": "s5sh1-l1-natural uses no more than two tags per segment."
+           },
+           {
+            "code": "take-count:s5sh1-l1-natural",
+            "passed": true,
+            "message": "s5sh1-l1-natural has a positive takes count."
+           },
+           {
+            "code": "tag-purposes",
+            "passed": true,
+            "message": "Every audio tag has a named dramatic purpose."
+           },
+           {
+            "code": "pause-reasons",
+            "passed": true,
+            "message": "Every pause/hesitation notation has a named reason."
+           },
+           {
+            "code": "line-duration",
+            "passed": true,
+            "message": "The directed line has a positive duration no longer than 15 seconds."
+           },
+           {
+            "code": "frame-one-space",
+            "passed": true,
+            "message": "Dialogue begins after frame one, preserving the thought-before space."
+           },
+           {
+            "code": "physical-state",
+            "passed": true,
+            "message": "Physical state is explicit."
+           },
+           {
+            "code": "emotional-state",
+            "passed": true,
+            "message": "Emotional entry and exit are explicit."
+           },
+           {
+            "code": "listener",
+            "passed": true,
+            "message": "The listener is explicit."
+           },
+           {
+            "code": "body-voice-relationship",
+            "passed": true,
+            "message": "The body/voice relationship is explicit."
+           },
+           {
+            "code": "archetype-register",
+            "passed": true,
+            "message": "The line is bound to a known beat archetype register."
+           }
+          ]
+         },
+         "humanVerdictQuestions": [
+          "Does the subtext colour the read rather than replace the locked words?",
+          "Does stress land only on the operative word or words?",
+          "Does every pause have its named dramatic reason?",
+          "Would the delivery become wrong if aimed at a different listener?",
+          "Does each tag add colour the words alone cannot supply?",
+          "Is the chosen support or contradiction between voice and body visible?",
+          "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
+          "Would a four-year-old feel the intended turn?"
+         ],
+         "compiledHash": "b2291702933bc5a53126c43f44acf768ae4b12963ad732c1337483251de7cab5"
+        },
+        {
+         "schemaVersion": 1,
+         "compiler": "voice-director-v1",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:34cae96e72f2bc88f4f684829dfc14d4adacacbdf178f691084b18afc91c2a97",
+         "sourceEventId": "script-event:sha256:dfd5a786b3dc648eb6348104da30531c63b20ce75275bca90fc88280416c9276",
+         "character": "Keen",
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "TCRj5m2u9xhZHJ8h9pMv"
+         ],
+         "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
+         "physicalSignature": "Breath catches before the body commits forward.",
+         "exactDialogue": "Brave and bright, with all my might — Aquamarine, shine with light!",
+         "performanceQuestions": {
+          "intention": "Kind, practical encouragement with childlike sincerity.",
+          "subtext": "I am trying too, and I am with you.",
+          "thoughtBefore": "Aida: With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+          "changeDuring": "The line moves the character from private feeling into shared action.",
+          "operativeWords": [
+           "brave",
+           "and",
+           "bright",
+           "with",
+           "all",
+           "my"
+          ]
+         },
+         "physicalState": "Body remains readable in the staged action; voice follows the visible performance.",
+         "emotionalState": {
+          "entry": "present and specific",
+          "exit": "changed by the listener or visible reaction"
+         },
+         "listener": "the nearest friend in the scene",
+         "bodyVoiceRelationship": "The voice supports the visible body action without adding new words.",
+         "previousText": "Aida: With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+         "startsAtSec": 4.15,
+         "estimatedDurationSec": 3.3,
+         "pauseReasons": [
+          "The written pause holds the visible beat before the next action."
+         ],
+         "tagPurposes": {},
+         "archetype": {
+          "archetypeId": "held-heart",
+          "patternCards": [
+           "heart",
+           "receiving",
+           "connection"
+          ],
+          "intent": "Let the listener receive a truth the speaker can no longer hide.",
+          "cadence": "Breath-led sincerity; silence is motivated and the exit differs from the entry.",
+          "allowedTags": [
+           "softly",
+           "warmly",
+           "gently",
+           "quietly",
+           "sighs",
+           "exhales",
+           "cries"
+          ],
+          "auditFocus": [
+           "subtext is audible",
+           "pause has a reason",
+           "emotion is not announced"
+          ]
+         },
+         "takeRecipes": [
+          {
+           "recipeId": "s5sh1-l2-natural",
+           "label": "Natural truthful take",
+           "performedText": "Brave and bright, with all my might — Aquamarine, shine with light!",
+           "primary": true,
+           "takesCount": 1
+          }
+         ],
+         "postDirectionAudit": {
+          "passed": true,
+          "checks": [
+           {
+            "code": "five-performance-questions",
+            "passed": true,
+            "message": "All five performance questions are answered."
+           },
+           {
+            "code": "dialogue-occurrence-lock",
+            "passed": true,
+            "message": "Dialogue occurrence matches the locked script."
+           },
+           {
+            "code": "speaker-lock",
+            "passed": true,
+            "message": "Character matches the locked script speaker."
+           },
+           {
+            "code": "exact-dialogue-lock",
+            "passed": true,
+            "message": "Exact dialogue preserves every locked script word."
+           },
+           {
+            "code": "recipe-count",
+            "passed": true,
+            "message": "Each line has one to three take-direction recipes."
+           },
+           {
+            "code": "script-fidelity:s5sh1-l2-natural",
+            "passed": true,
+            "message": "s5sh1-l2-natural preserves every locked script word."
+           },
+           {
+            "code": "complete-sentence:s5sh1-l2-natural",
+            "passed": true,
+            "message": "s5sh1-l2-natural ends as a complete spoken sentence."
+           },
+           {
+            "code": "tag-palette:s5sh1-l2-natural",
+            "passed": true,
+            "message": "s5sh1-l2-natural uses only the character and archetype tag palette."
+           },
+           {
+            "code": "tag-density:s5sh1-l2-natural",
+            "passed": true,
+            "message": "s5sh1-l2-natural uses no more than two tags per segment."
+           },
+           {
+            "code": "take-count:s5sh1-l2-natural",
+            "passed": true,
+            "message": "s5sh1-l2-natural has a positive takes count."
+           },
+           {
+            "code": "tag-purposes",
+            "passed": true,
+            "message": "Every audio tag has a named dramatic purpose."
+           },
+           {
+            "code": "pause-reasons",
+            "passed": true,
+            "message": "Every pause/hesitation notation has a named reason."
+           },
+           {
+            "code": "line-duration",
+            "passed": true,
+            "message": "The directed line has a positive duration no longer than 15 seconds."
+           },
+           {
+            "code": "frame-one-space",
+            "passed": true,
+            "message": "Dialogue begins after frame one, preserving the thought-before space."
+           },
+           {
+            "code": "physical-state",
+            "passed": true,
+            "message": "Physical state is explicit."
+           },
+           {
+            "code": "emotional-state",
+            "passed": true,
+            "message": "Emotional entry and exit are explicit."
+           },
+           {
+            "code": "listener",
+            "passed": true,
+            "message": "The listener is explicit."
+           },
+           {
+            "code": "body-voice-relationship",
+            "passed": true,
+            "message": "The body/voice relationship is explicit."
+           },
+           {
+            "code": "archetype-register",
+            "passed": true,
+            "message": "The line is bound to a known beat archetype register."
+           }
+          ]
+         },
+         "humanVerdictQuestions": [
+          "Does the subtext colour the read rather than replace the locked words?",
+          "Does stress land only on the operative word or words?",
+          "Does every pause have its named dramatic reason?",
+          "Would the delivery become wrong if aimed at a different listener?",
+          "Does each tag add colour the words alone cannot supply?",
+          "Is the chosen support or contradiction between voice and body visible?",
+          "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
+          "Would a four-year-old feel the intended turn?"
+         ],
+         "compiledHash": "cd0acdd39c8a46cdfbaad05775a9dcfa228b34ff87c10619091fec26abb803ea"
+        },
+        {
+         "schemaVersion": 1,
+         "compiler": "voice-director-v1",
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:7179bb0a9a2453113b26736de250684a3cba811d2b9e8910151dc901552093df",
+         "sourceEventId": "script-event:sha256:a64338e51193f161a0332806b77cd574af6a8850d50b7401d76c7d2548557e83",
+         "character": "Bo",
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits.",
+         "exactDialogue": "Every single time. CUT TO:",
+         "performanceQuestions": {
+          "intention": "Honest small courage; fear is present but not winning.",
+          "subtext": "This is scary, but I am still here.",
+          "thoughtBefore": "Keen: Brave and bright, with all my might — Aquamarine, shine with light!",
+          "changeDuring": "The line moves the character from private feeling into shared action.",
+          "operativeWords": [
+           "every",
+           "single",
+           "time",
+           "cut",
+           "to:"
+          ]
+         },
+         "physicalState": "Body remains readable in the staged action; voice follows the visible performance.",
+         "emotionalState": {
+          "entry": "present and specific",
+          "exit": "changed by the listener or visible reaction"
+         },
+         "listener": "the nearest friend in the scene",
+         "bodyVoiceRelationship": "The voice supports the visible body action without adding new words.",
+         "previousText": "Keen: Brave and bright, with all my might — Aquamarine, shine with light!",
+         "startsAtSec": 7.75,
+         "estimatedDurationSec": 1.9,
+         "pauseReasons": [],
+         "tagPurposes": {},
+         "archetype": {
+          "archetypeId": "held-heart",
+          "patternCards": [
+           "heart",
+           "receiving",
+           "connection"
+          ],
+          "intent": "Let the listener receive a truth the speaker can no longer hide.",
+          "cadence": "Breath-led sincerity; silence is motivated and the exit differs from the entry.",
+          "allowedTags": [
+           "softly",
+           "warmly",
+           "gently",
+           "quietly",
+           "sighs",
+           "exhales",
+           "cries"
+          ],
+          "auditFocus": [
+           "subtext is audible",
+           "pause has a reason",
+           "emotion is not announced"
+          ]
+         },
+         "takeRecipes": [
+          {
+           "recipeId": "s5sh1-l3-natural",
+           "label": "Natural truthful take",
+           "performedText": "Every single time. CUT TO:",
+           "primary": true,
+           "takesCount": 1
+          }
+         ],
+         "postDirectionAudit": {
+          "passed": true,
+          "checks": [
+           {
+            "code": "five-performance-questions",
+            "passed": true,
+            "message": "All five performance questions are answered."
+           },
+           {
+            "code": "dialogue-occurrence-lock",
+            "passed": true,
+            "message": "Dialogue occurrence matches the locked script."
+           },
+           {
+            "code": "speaker-lock",
+            "passed": true,
+            "message": "Character matches the locked script speaker."
+           },
+           {
+            "code": "exact-dialogue-lock",
+            "passed": true,
+            "message": "Exact dialogue preserves every locked script word."
+           },
+           {
+            "code": "recipe-count",
+            "passed": true,
+            "message": "Each line has one to three take-direction recipes."
+           },
+           {
+            "code": "script-fidelity:s5sh1-l3-natural",
+            "passed": true,
+            "message": "s5sh1-l3-natural preserves every locked script word."
+           },
+           {
+            "code": "complete-sentence:s5sh1-l3-natural",
+            "passed": true,
+            "message": "s5sh1-l3-natural ends as a complete spoken sentence."
+           },
+           {
+            "code": "tag-palette:s5sh1-l3-natural",
+            "passed": true,
+            "message": "s5sh1-l3-natural uses only the character and archetype tag palette."
+           },
+           {
+            "code": "tag-density:s5sh1-l3-natural",
+            "passed": true,
+            "message": "s5sh1-l3-natural uses no more than two tags per segment."
+           },
+           {
+            "code": "take-count:s5sh1-l3-natural",
+            "passed": true,
+            "message": "s5sh1-l3-natural has a positive takes count."
+           },
+           {
+            "code": "tag-purposes",
+            "passed": true,
+            "message": "Every audio tag has a named dramatic purpose."
+           },
+           {
+            "code": "pause-reasons",
+            "passed": true,
+            "message": "Every pause/hesitation notation has a named reason."
+           },
+           {
+            "code": "line-duration",
+            "passed": true,
+            "message": "The directed line has a positive duration no longer than 15 seconds."
+           },
+           {
+            "code": "frame-one-space",
+            "passed": true,
+            "message": "Dialogue begins after frame one, preserving the thought-before space."
+           },
+           {
+            "code": "physical-state",
+            "passed": true,
+            "message": "Physical state is explicit."
+           },
+           {
+            "code": "emotional-state",
+            "passed": true,
+            "message": "Emotional entry and exit are explicit."
+           },
+           {
+            "code": "listener",
+            "passed": true,
+            "message": "The listener is explicit."
+           },
+           {
+            "code": "body-voice-relationship",
+            "passed": true,
+            "message": "The body/voice relationship is explicit."
+           },
+           {
+            "code": "archetype-register",
+            "passed": true,
+            "message": "The line is bound to a known beat archetype register."
+           }
+          ]
+         },
+         "humanVerdictQuestions": [
+          "Does the subtext colour the read rather than replace the locked words?",
+          "Does stress land only on the operative word or words?",
+          "Does every pause have its named dramatic reason?",
+          "Would the delivery become wrong if aimed at a different listener?",
+          "Does each tag add colour the words alone cannot supply?",
+          "Is the chosen support or contradiction between voice and body visible?",
+          "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
+          "Would a four-year-old feel the intended turn?"
+         ],
+         "compiledHash": "169dbd87c9d5a3fe85bf52ac6ddd65b466dc033378bc12ddce1cce47eb74f059"
+        }
+       ],
+       "compiledHash": "ad223933a3c707f42d9c43c794dbfd797154c5a276b6665ec57b44f3acebbb88"
+      }
+     },
+     "candidate": null,
+     "history": []
+    }
+   }
+  }
+ ],
+ "validation": {
+  "passed": true,
+  "errors": []
+ }
+}

@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "provider": "elevenlabs",
+  "endpoint": "/v1/text-to-speech isolated-dialogue",
+  "model": "eleven_v3",
+  "audioPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_623e9729.mp3",
+  "audioSha256": "bd181aabd4b49c7824247959c51c51bf2fd6a2e63d5477dc6079571667847498",
+  "inputCount": 7,
+  "pronunciationOverrides": {
+    "Aida": "ada",
+    "Ada": "ada"
+  },
+  "voiceSegments": [
+    {
+      "voiceId": "GROUP_CHORUS",
+      "dialogueInputIndex": 0,
+      "startTimeSec": 0.0,
+      "endTimeSec": 2.4,
+      "characterStartIndex": 0,
+      "characterEndIndex": 8,
+      "voiceIds": [
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+    },
+    {
+      "voiceId": "GROUP_CHORUS",
+      "dialogueInputIndex": 1,
+      "startTimeSec": 2.4,
+      "endTimeSec": 4.96,
+      "characterStartIndex": 0,
+      "characterEndIndex": 8,
+      "voiceIds": [
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+    },
+    {
+      "voiceId": "GROUP_CHORUS",
+      "dialogueInputIndex": 2,
+      "startTimeSec": 4.96,
+      "endTimeSec": 7.52,
+      "characterStartIndex": 0,
+      "characterEndIndex": 8,
+      "voiceIds": [
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+    },
+    {
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "dialogueInputIndex": 3,
+      "startTimeSec": 7.52,
+      "endTimeSec": 10.48,
+      "characterStartIndex": 0,
+      "characterEndIndex": 53,
+      "voiceIds": [
+        "AAF2q3NCwTrLMMkEnRLB"
+      ]
+    },
+    {
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "dialogueInputIndex": 4,
+      "startTimeSec": 10.48,
+      "endTimeSec": 11.68,
+      "characterStartIndex": 0,
+      "characterEndIndex": 25,
+      "voiceIds": [
+        "AAF2q3NCwTrLMMkEnRLB"
+      ]
+    },
+    {
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "dialogueInputIndex": 5,
+      "startTimeSec": 11.68,
+      "endTimeSec": 14.559999999999999,
+      "characterStartIndex": 0,
+      "characterEndIndex": 46,
+      "voiceIds": [
+        "AAF2q3NCwTrLMMkEnRLB"
+      ]
+    },
+    {
+      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+      "dialogueInputIndex": 6,
+      "startTimeSec": 14.559999999999999,
+      "endTimeSec": 18.16,
+      "characterStartIndex": 0,
+      "characterEndIndex": 69,
+      "voiceIds": [
+        "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+    }
+  ],
+  "isolatedDialogueAssembly": true,
+  "separatedDialogueAssembly": true
+}

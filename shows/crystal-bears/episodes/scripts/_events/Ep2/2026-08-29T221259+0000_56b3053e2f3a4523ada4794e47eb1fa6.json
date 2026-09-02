@@ -1,0 +1,12 @@
+{
+ "schemaVersion": 1,
+ "eventId": "56b3053e2f3a4523ada4794e47eb1fa6",
+ "kind": "script-dialogue-corrected",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:7b0b15bbd86734bb2a743b169050acef77331f52a2a8b7681e4bbc9087889d7d",
+ "previousScriptVersionId": "sha256:fdb4840751f2c9ab96712052fc25f7b2ac989e1024531658bec3cd0a616b5d7d",
+ "title": "Bo's Big Day V2",
+ "displayFile": "Ep2_Bo_s_Big_Day_V2.txt",
+ "activatedAt": "2026-08-29T22:12:59+00:00",
+ "activatedBy": "Julian"
+}

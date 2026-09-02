@@ -49,6 +49,8 @@ import subprocess
 import sys
 import uuid
 
+import cb_audio_authority
+
 HELD = 1.6   # held last frame (tension beat)
 DELIVERY_FPS = 24.0
 DELIVERY_AUDIO_HZ = 48000
@@ -226,7 +228,7 @@ EDGE_FRAMES = 4     # "3 to 5 frames" — trimmed off EVERY clip's own opening e
                     # where the motion is alive, not where it's still ramping up or ramping down.
 DEFAULT_FPS = DELIVERY_FPS  # fallback only if a clip's own fps can't be read.
 POST_SCHEMA_VERSION = 2
-POST_POLICY_VERSION = "scene-post-v2-delivery-qc"
+POST_POLICY_VERSION = "scene-post-v3-director-cut"
 
 def _clip_fps(clip):
     r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
@@ -238,7 +240,8 @@ def _clip_fps(clip):
         return DEFAULT_FPS
 
 
-def conform_plan(clips, protected_windows=None, settle_trim=None, edge_frames=EDGE_FRAMES):
+def conform_plan(clips, protected_windows=None, settle_trim=None, edge_frames=EDGE_FRAMES,
+                 edit_decisions=None):
     """Calculate the one authoritative trim and scene-time map used by picture and captions.
     Dialogue windows are protected from the generic edge/settle trim; a clip shorter than an
     approved line refuses instead of clipping words off the final film."""
@@ -247,6 +250,8 @@ def conform_plan(clips, protected_windows=None, settle_trim=None, edge_frames=ED
     protected_windows = protected_windows or [[] for _ in clips]
     if len(protected_windows) != len(clips):
         raise ValueError("protected dialogue windows must align one-for-one with clips")
+    if edit_decisions is not None and len(edit_decisions) != len(clips):
+        raise ValueError("edit decisions must align one-for-one with clips")
     durs = [_dur(clip) for clip in clips]
     fpss = [_clip_fps(clip) for clip in clips]
     if any(duration <= 0 for duration in durs):
@@ -255,9 +260,19 @@ def conform_plan(clips, protected_windows=None, settle_trim=None, edge_frames=ED
     for index, (clip, duration, fps, windows) in enumerate(
             zip(clips, durs, fpss, protected_windows)):
         edge = edge_frames / fps
-        start = edge
-        end = duration if index == len(clips) - 1 else max(
-            start + 0.5, duration - settle_trim - edge)
+        decision = (edit_decisions or [{} for _ in clips])[index] or {}
+        if decision.get("manualTrim"):
+            try:
+                start = float(decision["inSec"])
+                end = float(decision["outSec"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise ValueError(f"malformed edit decision for {clip}") from exc
+            if start < 0 or end <= start or end > duration + 0.01:
+                raise ValueError(f"edit decision falls outside {clip}'s {duration:.3f}s duration")
+        else:
+            start = edge
+            end = duration if index == len(clips) - 1 else max(
+                start + 0.5, duration - settle_trim - edge)
         if windows:
             starts, ends = [], []
             for window in windows:
@@ -758,11 +773,13 @@ def _asset_record(actual_path, final_path, probe=False):
 
 
 def replace_guide_dialogue(video, approved_voice, out):
-    """Keep Seedance's sound bed and lay the approved full-shot voice over it.
+    """Replace a provider guide soundtrack with the approved HEAR master.
 
-    The approved HEAR performance is padded to the picture duration. Seedance remains
-    responsible for non-verbal SFX, ambience and music; its guide voice is instructed
-    away at generation time and is kept only as transport evidence when present.
+    Provider audio is audit evidence, not a safe production bed: a video model can embed
+    synthesized speech in the same stream as its SFX and music. Mixing any percentage of
+    that stream beneath @Audio1 can therefore create duplicate dialogue. Dialogue review
+    media uses the approved master exclusively; non-dialogue stems must be added through a
+    separately verified post lane.
     """
     duration = _dur(video)
     if duration <= 0 or not approved_voice or not os.path.exists(approved_voice):
@@ -770,12 +787,9 @@ def replace_guide_dialogue(video, approved_voice, out):
     cmd = [
         "ffmpeg", "-y", "-i", str(video), "-i", str(approved_voice),
         "-filter_complex",
-        (f"[0:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
-         "volume=0.35[seedance_bed];"
-         f"[1:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
-         f"apad,atrim=0:{duration:.6f}[dialogue];"
-         "[seedance_bed][dialogue]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0[mix]"),
-        "-map", "0:v:0", "-map", "[mix]", "-c:v", "copy",
+        (f"[1:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
+         f"apad,atrim=0:{duration:.6f}[dialogue]"),
+        "-map", "0:v:0", "-map", "[dialogue]", "-c:v", "copy",
         "-c:a", "aac", "-ar", str(DELIVERY_AUDIO_HZ), "-ac", "2",
         "-b:a", "256k", "-movflags", "+faststart", str(out),
     ]
@@ -787,7 +801,7 @@ def replace_guide_dialogue(video, approved_voice, out):
 
 def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                      platform=DEFAULT_PLATFORM, candidate_id=None, music=None,
-                     ambience=None):
+                     ambience=None, edit_decisions=None):
     """Build one immutable post candidate transactionally.
 
     Nothing is exposed at its final path until conform, mix, vertical derivative, captions,
@@ -814,7 +828,7 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
         post_sources = []
         audio_provenance = []
         for index, (shot, clip) in enumerate(zip(shots, clips), start=1):
-            if shot.get("dialogueLines"):
+            if cb_audio_authority.spoken_dialogue_lines(shot):
                 voice = shot.get("approvedVoice")
                 provenance = shot.get("audioProvenance") or {}
                 if not voice or not os.path.exists(voice):
@@ -843,7 +857,14 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                 post_sources.append(clip)
         normalized = _norm(post_sources)
         protected = [shot.get("dialogueLines") or [] for shot in shots]
-        plan = conform_plan(normalized, protected_windows=protected)
+        if edit_decisions is None:
+            edit_decisions = [{
+                "inSec": shot.get("editInSec", 0),
+                "outSec": shot.get("editOutSec"),
+                "manualTrim": bool(shot.get("manualTrim")),
+            } for shot in shots]
+        plan = conform_plan(
+            normalized, protected_windows=protected, edit_decisions=edit_decisions)
 
         names = {
             "conformedPicture": "picture_conformed.mp4",
@@ -967,8 +988,9 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
             "inputSignature": input_signature,
             "orderedShots": [{"shotId": shot["shotId"],
                                "approvedTake": str(shot["approvedTake"]),
-                               "approvedTakeHash": _sha256(shot["approvedTake"])}
-                              for shot in shots],
+                               "approvedTakeHash": _sha256(shot["approvedTake"]),
+                               "editDecision": edit_decisions[index]}
+                              for index, shot in enumerate(shots)],
             "audioProvenance": [
                 {**item, "postSourcePath": str(
                     final_dir / pathlib.Path(item["postSourcePath"]).name)}

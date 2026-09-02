@@ -1,0 +1,21 @@
+{
+ "schemaVersion": 1,
+ "eventId": "c057467c468e4934940f98f6d80642bd",
+ "kind": "script-dialogue-corrected",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:9dfa15c013a8ffa49c1f38dc53d4f63a995b94fa96add69570d26d5801e5c897",
+ "previousScriptVersionId": "sha256:6773581284020b2f4ff13c5e1055c18eb6282c31bc216e75a2aed3ef1982b9ef",
+ "title": "Bo's Big Day V3",
+ "displayFile": "Ep2_Bo_s_Big_Day_V3.txt",
+ "activatedAt": "2026-08-31T22:59:06+00:00",
+ "activatedBy": "Julian",
+ "changeScope": {
+  "kind": "dialogue-correction",
+  "scene": "3",
+  "shotId": "S3.SH4",
+  "dialogueOccurrenceId": "dialogue-occurrence:sha256:77783c379c77335836643191331d80cc5d37f83abb4121a4acf16eafb8144264",
+  "speaker": "Bo",
+  "previousExactText": "Im worried,  what if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?",
+  "correctedExactText": "Hi Keen, my name is Bo and I am really worried. What if nobody likes me at the Learning Circle? I don't think I can go today. What if my tail does the THING?"
+ }
+}

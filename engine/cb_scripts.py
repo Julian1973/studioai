@@ -104,7 +104,8 @@ class ScriptStore:
 
     def store(self, episode: str | int, text: str, title: str, *, source_name: str = "",
               activated_by: str = "Julian", activated_at: str | None = None,
-              event_kind: str = "script-uploaded") -> dict:
+              event_kind: str = "script-uploaded",
+              change_scope: dict | None = None) -> dict:
         episode_id = self.normalize_episode(episode)
         if not isinstance(text, str) or not text.strip():
             raise ScriptStoreError("script text cannot be empty")
@@ -160,6 +161,8 @@ class ScriptStore:
             "activatedAt": at,
             "activatedBy": str(activated_by or ""),
         }
+        if change_scope:
+            event["changeScope"] = dict(change_scope)
         _atomic_json(self.events_root / episode_id / f"{at.replace(':', '')}_{activation_id}.json", event)
         current = {
             "schemaVersion": 1,
@@ -176,6 +179,8 @@ class ScriptStore:
             "activatedBy": str(activated_by or ""),
             "previousScriptVersionId": (previous or {}).get("scriptVersionId"),
         }
+        if change_scope:
+            current["changeScope"] = dict(change_scope)
         _atomic_json(self._current_path(episode_id), current)
         return current
 

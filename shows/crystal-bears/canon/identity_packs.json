@@ -277,6 +277,52 @@
         "rounded smiling face and warm expressive eyes"
       ],
       "mustNotBorrow": ["bear ears, bear limbs, clothing or another character's crystal"]
+    },
+    "Bo": {
+    "schemaVersion": 1,
+    "source": "cb-seed/assets/final_turnarounds/CB_Bo.png",
+    "coverage": "360",
+    "providerViews": {
+      "default": {
+        "view": "front",
+        "crop": [0.02, 0.07, 0.19, 0.61]
+      }
+    },
+    "turnaroundViews": [
+      {
+        "view": "front",
+        "crop": [0.02, 0.07, 0.19, 0.61]
+      },
+      {
+        "view": "three-quarter",
+        "crop": [0.19, 0.07, 0.38, 0.61]
+      },
+      {
+        "view": "side",
+        "crop": [0.38, 0.07, 0.61, 0.61]
+      },
+      {
+        "view": "three-quarter-rear",
+        "crop": [0.61, 0.07, 0.79, 0.61]
+      },
+      {
+        "view": "rear",
+        "crop": [0.79, 0.07, 0.98, 0.61]
+      }
+    ],
+    "distinguishingFeatures": [
+      "russet-orange squirrel fur",
+      "cream muzzle, chest and belly",
+      "tall pointed ears with tufts",
+      "very large fluffy curled tail",
+      "large expressive brown eyes"
+    ],
+    "mustNotBorrow": [
+      "bear ears or bear cub proportions",
+      "another character's crystal or jewellery",
+      "generic backpack or satchel",
+      "small, thin or missing tail"
+    ]
     }
   }
 }

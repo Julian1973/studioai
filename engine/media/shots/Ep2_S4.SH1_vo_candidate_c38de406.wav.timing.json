@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "assemblyMode": "continuous-dialogue-performance",
+  "rawAudioPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_c38de406_chorus.mp3",
+  "rawAudioSha256": "0b7f8a69990efea9ce97196e174cc17b9c8b518ba81c5b0bfd607e714990d3ef",
+  "dialogueTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_c38de406_chorus.mp3.dialogue.json",
+  "dialogueTimingSha256": "b79b71ee849675b1f2eb545a505e44532a1c475b45ff1a5629624cf4e8fc0d03",
+  "durationSec": 30.0,
+  "authoredPerformanceTargetStartSec": 0.8,
+  "performanceTargetStartSec": 0.8,
+  "performanceTargetEndSec": 21.078,
+  "performanceStartShiftSec": 0.0,
+  "tempoAdjusted": false,
+  "tempoFactor": 1.0,
+  "providerCalledForTimingRecovery": false,
+  "placements": [
+    {
+      "dialogueIndex": 0,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
+      "sourceStartSec": 0.0,
+      "sourceEndSec": 2.732,
+      "targetStartSec": 0.8,
+      "targetEndSec": 3.532,
+      "continuousPerformance": true,
+      "tempoFactor": 1.0
+    },
+    {
+      "dialogueIndex": 1,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
+      "sourceStartSec": 2.732,
+      "sourceEndSec": 5.224,
+      "targetStartSec": 3.532,
+      "targetEndSec": 6.024,
+      "continuousPerformance": true,
+      "tempoFactor": 1.0
+    },
+    {
+      "dialogueIndex": 2,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
+      "sourceStartSec": 5.224,
+      "sourceEndSec": 7.396000000000001,
+      "targetStartSec": 6.024,
+      "targetEndSec": 8.196000000000002,
+      "continuousPerformance": true,
+      "tempoFactor": 1.0
+    },
+    {
+      "dialogueIndex": 3,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
+      "sourceStartSec": 7.396000000000001,
+      "sourceEndSec": 12.116,
+      "targetStartSec": 8.196000000000002,
+      "targetEndSec": 12.916,
+      "continuousPerformance": true,
+      "tempoFactor": 1.0
+    },
+    {
+      "dialogueIndex": 4,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
+      "sourceStartSec": 12.116,
+      "sourceEndSec": 13.237,
+      "targetStartSec": 12.916,
+      "targetEndSec": 14.037,
+      "continuousPerformance": true,
+      "tempoFactor": 1.0
+    },
+    {
+      "dialogueIndex": 5,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
+      "sourceStartSec": 13.237,
+      "sourceEndSec": 16.277,
+      "targetStartSec": 14.037,
+      "targetEndSec": 17.077,
+      "continuousPerformance": true,
+      "tempoFactor": 1.0
+    },
+    {
+      "dialogueIndex": 6,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
+      "sourceStartSec": 16.277,
+      "sourceEndSec": 20.278000000000002,
+      "targetStartSec": 17.077,
+      "targetEndSec": 21.078000000000003,
+      "continuousPerformance": true,
+      "tempoFactor": 1.0
+    }
+  ],
+  "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_c38de406.wav",
+  "outputSha256": "2e2953f3f0ce3dec41a4a0f7eb4da12260ba2545e722fb927037d0116eadedaa"
+}

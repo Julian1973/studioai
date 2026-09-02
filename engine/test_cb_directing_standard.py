@@ -9,6 +9,13 @@ import cb_departments as D
 import cb_render as R
 
 
+def test_scene_director_uses_a_cross_process_serialisation_lock():
+    source = pathlib.Path(C.__file__).read_text()
+    assert "episode-scene-director.lock" in source
+    assert "fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)" in source
+    assert "@_serial_scene_director\ndef run_scene(" in source
+
+
 def _cinematography():
     return {
         "storyPointOfView": "Stay with Bo's private hesitation.",
@@ -132,6 +139,30 @@ def test_timing_slate_requires_and_records_human_rhythm_approval(tmp_path, monke
     assert R.timing_slate_status("3", "EpT")["approved"] is True
 
 
+def test_watch_uses_hear_approval_without_a_duplicate_rhythm_gate():
+    source = pathlib.Path(R.__file__).read_text()
+    fire_source = source[source.index("def fire_shot("):source.index("def next_shot(")]
+    assert "_performance_budget_report(" in fire_source
+    assert "voice-timed performance budget is overloaded" in fire_source
+    assert "needs Julian's rhythm approval" not in fire_source
+
+
+def test_fresh_validation_keeps_full_script_occurrences_for_mixed_sfx_dialogue():
+    source = pathlib.Path(R.__file__).read_text()
+    validation = source[source.index("def _fresh_validation("):source.index("def _prompt_version(")]
+    assert 'target_lines = list(target_rec.get("dialogueLines") or [])' in validation
+    assert "target_lines = cb_audio_authority.spoken_dialogue_lines(target_rec)" not in validation
+
+
+def test_voice_direction_save_is_scoped_to_spoken_dialogue():
+    source = pathlib.Path(R.__file__).read_text()
+    scoped_validation = (
+        'cb_departments.validate_voice_direction(\n'
+        '            model, cb_audio_authority.spoken_dialogue_lines(shot))'
+    )
+    assert scoped_validation in source
+
+
 def test_prompt_score_is_named_contract_completeness_not_artistic_quality():
     report = R._prompt_contract_completeness(
         {"dialogueLines": []},
@@ -166,20 +197,21 @@ def test_forward_department_work_requires_signed_v3_director_card(tmp_path, monk
         R._require_forward_directing_source(pkg, {"shotId": "3.B1.S1"}, "3", "Ep2")
 
 
-def test_v3_runtime_is_versioned_without_changing_legacy_canon_skill():
-    legacy = D.load_runtime_skill("director")
-    forward_v3 = D.load_runtime_skill("director", 3)
-    forward = D.load_runtime_skill("director", 4)
-    assert "Director v3" not in legacy
-    assert "Director v3" in forward_v3
-    assert "Director v4" in forward
-    assert "ordinary-life test" in D.load_runtime_skill("heart-director", 4)
+def test_runtime_roles_have_one_current_owner_and_compatibility_aliases():
+    current = D.load_runtime_skill("director")
+    assert "Crystal Bears Director" in current
+    assert D.load_runtime_skill("director", 3) == current
+    assert D.load_runtime_skill("director", 4) == current
+    assert D.load_runtime_skill("heart-director", 4) == current
+    assert D.load_runtime_skill("story-director") == current
     assert R._department_skill_ref("animation", "seedance-production-director", 0) == (
         "skills/seedance-production-director/SKILL.md")
     assert R._department_skill_ref("animation", "seedance-production-director", 3) == (
-        "skills/seedance-production-director-v3/SKILL.md")
+        "skills/seedance-production-director/SKILL.md")
     assert R._department_skill_ref("animation", "seedance-production-director", 4) == (
-        "skills/seedance-production-director-v4/SKILL.md")
+        "skills/seedance-production-director/SKILL.md")
+    assert R._department_skill_ref("cinematography", "dp", 4) == (
+        "skills/crystal-bears-cinematographer/SKILL.md")
 
 
 def test_v3_source_contract_remains_valid_without_v4_heart_fields(tmp_path, monkeypatch):

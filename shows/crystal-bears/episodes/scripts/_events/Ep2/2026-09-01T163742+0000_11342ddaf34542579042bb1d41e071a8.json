@@ -1,0 +1,21 @@
+{
+ "schemaVersion": 1,
+ "eventId": "11342ddaf34542579042bb1d41e071a8",
+ "kind": "script-dialogue-corrected",
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:c8c4dce13da36535d4fefc359df0efa30614f94fe7fdd34ab805760afb6e7c48",
+ "previousScriptVersionId": "sha256:c0d0abe03e8cd64a04d935c01e79729fd78ae777aa394174d80df76ffde74213",
+ "title": "Bo's Big Day V3",
+ "displayFile": "Ep2_Bo_s_Big_Day_V3.txt",
+ "activatedAt": "2026-09-01T16:37:42+00:00",
+ "activatedBy": "Julian",
+ "changeScope": {
+  "kind": "dialogue-correction",
+  "scene": "4",
+  "shotId": "S4.SH1",
+  "dialogueOccurrenceId": "dialogue-occurrence:sha256:70a243a21ad08e88b89657075aa958f4470f3fd03adc0e1a7f2326f4fc98af43",
+  "speaker": "Keen",
+  "previousExactText": "Bo, this is Ada",
+  "correctedExactText": "Bo, this is Aida."
+ }
+}

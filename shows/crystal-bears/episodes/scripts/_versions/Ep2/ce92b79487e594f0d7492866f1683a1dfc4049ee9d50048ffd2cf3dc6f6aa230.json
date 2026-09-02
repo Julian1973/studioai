@@ -1,0 +1,11 @@
+{
+ "schemaVersion": 1,
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:ce92b79487e594f0d7492866f1683a1dfc4049ee9d50048ffd2cf3dc6f6aa230",
+ "algorithm": "sha256",
+ "sha256": "ce92b79487e594f0d7492866f1683a1dfc4049ee9d50048ffd2cf3dc6f6aa230",
+ "byteLength": 9597,
+ "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/ce92b79487e594f0d7492866f1683a1dfc4049ee9d50048ffd2cf3dc6f6aa230.txt",
+ "createdAt": "2026-08-30T19:07:40+00:00",
+ "sourceName": "Ep2_Bo_s_Big_Day_V2.txt"
+}

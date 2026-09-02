@@ -22,7 +22,7 @@ corrected above to match what the code actually does.
 Keys come from cb-gen/.env (gitignored): GEMINI_API_KEY, ELEVENLABS_API_KEY.
 Endpoints verified against ai.google.dev + elevenlabs.io docs (June 2026).
 """
-import os, sys, json, time, base64, hashlib, mimetypes, argparse, pathlib, subprocess, tempfile
+import os, sys, json, time, base64, hashlib, mimetypes, argparse, pathlib, re, subprocess, tempfile
 import urllib.parse
 import requests
 import cb_costs
@@ -63,6 +63,22 @@ FAL_KEY = os.environ.get("FAL_KEY", "")
 FAL = "https://queue.fal.run"
 BYTEPLUS_ARK_KEY = os.environ.get("BYTEPLUS_ARK_API_KEY", "")
 BYTEPLUS_ARK = "https://ark.ap-southeast.bytepluses.com"
+
+# Canon keeps the character name "Aida". ElevenLabs pronounces that spelling
+# incorrectly, so only the provider-facing voice text uses the phonetic "ada".
+ELEVEN_PRONUNCIATION_OVERRIDES = {"Aida": "ada", "Ada": "ada"}
+
+
+def _eleven_voice_text(text):
+    spoken = str(text or "")
+    for canonical, phonetic in ELEVEN_PRONUNCIATION_OVERRIDES.items():
+        spoken = re.sub(rf"\b{re.escape(canonical)}\b", phonetic, spoken)
+    return spoken
+
+
+def _eleven_dialogue_inputs(inputs):
+    return [{**item, "text": _eleven_voice_text(item.get("text"))}
+            for item in (inputs or [])]
 BYTEPLUS_MAX_REQUEST_BYTES = 64 * 1024 * 1024
 
 def _b64(path):
@@ -270,10 +286,13 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
         "content": content,
         "generate_audio": bool(generate_audio),
         "resolution": resolution,
-        "duration": seconds,
         "watermark": False,
         "return_last_frame": True,
     }
+    if contract.get("mode") == "video-editing":
+        body["duration"] = -1
+    else:
+        body["duration"] = seconds
     if not video_refs:
         body["ratio"] = "16:9"
     body_bytes = len(json.dumps(body, ensure_ascii=False).encode("utf-8"))
@@ -607,7 +626,7 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
                                 duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False,
                                 production_route=None, model_id=None,
                                 comparison_run_id=None, generate_audio=True,
-                                progress_callback=None):
+                                progress_callback=None, operation_mode=None):
     _require_production_route(production_route, "generate_video_seedance_ref")
     """Seedance reference-to-video through the exact selected capability-gated transport.
 
@@ -618,9 +637,10 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     fal 2.0 comparison inside cb_render's ordinary approval and candidate path.
     raw_prompt=True sends the prompt STRING verbatim (the DEFINITIVE bible prose already carries REFERENCE LAW / AUDIO /
     NEGATIVES — no JSON envelope, so nothing can contradict it). Otherwise the legacy path wraps prose into JSON.
-    video_urls: used only by the ruled video-extension continuity mode. Ordinary render
-    continuity remains keyframe handoff; a populated video reference must be disclosed in
-    the sealed envelope and capability-checked before upload."""
+    video_urls: used only by a disclosed video-extension or video-editing operation. Ordinary
+    render continuity remains keyframe handoff; a populated video reference must be disclosed
+    in the sealed envelope and capability-checked before upload. ``operation_mode`` must name
+    that operation explicitly so an edit can never be recorded as an extension."""
     if isinstance(image_urls, str):
         image_urls = [image_urls]
     else:
@@ -642,8 +662,14 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     }
     if comparison_run_id:
         contract_kwargs["comparison_run_id"] = comparison_run_id
+    if operation_mode and operation_mode not in ("video-extension", "video-editing"):
+        raise cb_providers.ProviderCapabilityError(
+            f"unsupported Seedance video operation: {operation_mode}")
+    if operation_mode and not video_urls:
+        raise cb_providers.ProviderCapabilityError(
+            f"{operation_mode} requires an existing video input")
     if not comparison_run_id and video_urls:
-        contract_kwargs["mode"] = "video-extension"
+        contract_kwargs["mode"] = operation_mode or "video-extension"
     contract = contract_builder(**contract_kwargs)
     _pr = (str(prompt) if raw_prompt or contract["transport"] == "byteplus-async" else
            _seedance_json_prompt(
@@ -668,6 +694,7 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
             resolution=resolution, duration=str(duration), seconds=seconds, fast=False,
             num_image_refs=len(image_urls), num_audio_refs=len(audio_urls),
             num_video_refs=len(video_urls),
+            operationMode=contract["mode"],
             returnedDuration=(task or {}).get("duration"),
             completionTokens=((task or {}).get("usage") or {}).get("completion_tokens"))
         return str(outp)
@@ -751,27 +778,28 @@ def eleven_tts(text, voice_id, model_id="eleven_v3", out="vo.mp3",
     The tag sets the colour; the TEXT does the acting; 1-2 tags per segment. Never use_speaker_boost in v3."""
     _need_eleven_key()
     url = f"{XI}/v1/text-to-speech/{voice_id}"
-    request_body = {"text": text, "model_id": model_id,
+    provider_text = _eleven_voice_text(text)
+    request_body = {"text": provider_text, "model_id": model_id,
                     "voice_settings": {"stability": stability,
                                        "similarity_boost": similarity_boost,
                                        "style": style}}
     # ElevenLabs currently rejects previous_text with eleven_v3. Keep the argument at this
     # transport boundary for models that support it, but never send an unsupported V3 field.
     if model_id != "eleven_v3" and str(previous_text or "").strip():
-        request_body["previous_text"] = str(previous_text).strip()
+        request_body["previous_text"] = _eleven_voice_text(previous_text).strip()
     r = _rpost(url, headers={"xi-api-key": ELEVEN_KEY, "accept": "audio/mpeg",
                             "Content-Type": "application/json"},
                json=request_body, timeout=120)
     r.raise_for_status()
     outp = MEDIA / out; outp.write_bytes(r.content)
-    cb_costs.log_spend("elevenlabs_tts", cb_costs.estimate_tts_cost(text), out=out, meta={"model": model_id})
+    cb_costs.log_spend("elevenlabs_tts", cb_costs.estimate_tts_cost(provider_text), out=out, meta={"model": model_id})
     cb_costs.write_gen_sidecar(
         outp, op="elevenlabs_tts", model=model_id, voice_id=voice_id,
         stability=stability, similarity_boost=similarity_boost, style=style,
         previousTextProvided=(model_id != "eleven_v3" and
                               bool(str(previous_text or "").strip())),
         directionContextRunwayProvided=bool(str(previous_text or "").strip()),
-        chars=len(text or ""))
+        chars=len(provider_text), pronunciationOverrides=ELEVEN_PRONUNCIATION_OVERRIDES)
     return str(outp)
 
 def _ffprobe_duration(path):
@@ -791,22 +819,23 @@ def _concat_audio_parts(parts, outp):
     if len(parts) == 1:
         outp.write_bytes(pathlib.Path(parts[0]).read_bytes())
         return
-    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
-        concat_file = pathlib.Path(f.name)
-        for part in parts:
-            safe = str(pathlib.Path(part).resolve()).replace("'", "'\\''")
-            f.write(f"file '{safe}'\n")
-    try:
-        subprocess.run(
-            ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-             "-f", "concat", "-safe", "0", "-i", str(concat_file),
-             "-c", "copy", str(outp)],
-            check=True, capture_output=True)
-    finally:
-        try:
-            concat_file.unlink()
-        except OSError:
-            pass
+    command = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
+    for part in parts:
+        command.extend(["-i", str(pathlib.Path(part))])
+    filters, labels = [], []
+    for index in range(len(parts)):
+        label = f"a{index}"
+        filters.append(
+            f"[{index}:a]aformat=sample_rates=48000:channel_layouts=stereo[{label}]")
+        labels.append(f"[{label}]")
+    filters.append("".join(labels) + f"concat=n={len(parts)}:v=0:a=1[out]")
+    codec = (["-codec:a", "libmp3lame", "-q:a", "2"]
+             if pathlib.Path(outp).suffix.lower() == ".mp3"
+             else ["-c:a", "pcm_s16le"])
+    subprocess.run(
+        command + ["-filter_complex", ";".join(filters), "-map", "[out]",
+                   "-ar", "48000", "-ac", "2", *codec, str(outp)],
+        check=True, capture_output=True)
 
 
 def replace_group_chorus_segments(raw_audio, timing_path, performances,
@@ -922,10 +951,123 @@ def replace_group_chorus_segments(raw_audio, timing_path, performances,
         "audioSha256": __import__("hashlib").sha256(rebuilt_audio.read_bytes()).hexdigest(),
         "voiceSegments": rebuilt_segments,
         "groupChorusResolved": True,
+        "separatedDialogueAssembly": True,
     })
     rebuilt_timing.write_text(
         json.dumps(timing, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return str(rebuilt_audio), str(rebuilt_timing)
+
+
+def eleven_isolated_dialogue(performances, out="vo.mp3", *, production_route=None):
+    """Generate each approved line as an isolated ElevenLabs TTS part.
+
+    Use this for repeated chorus/countdown shots where Text-to-Dialogue can carry
+    phrase bleed from one identical turn into the next. The returned timing file
+    deliberately marks the audio as separated so downstream placement never
+    preserves it as one continuous provider conversation.
+    """
+    _require_production_route(production_route, "eleven_isolated_dialogue")
+    _need_eleven_key()
+    with tempfile.TemporaryDirectory(prefix="cb-isolated-dialogue-") as tmp:
+        tmp_path = pathlib.Path(tmp)
+        parts = []
+        segments = []
+        cursor = 0.0
+        total_chars = 0
+        for index, performance in enumerate(performances or []):
+            text = str(performance.get("text") or "").strip()
+            if not text:
+                raise RuntimeError("isolated dialogue requires text for every line")
+            total_chars += len(_eleven_voice_text(text))
+            voice_ids = list(performance.get("voiceIds") or [])
+            if performance.get("voiceTreatment") == "group_chorus" and voice_ids:
+                voices = []
+                for member_index, voice_id in enumerate(voice_ids):
+                    voice = tmp_path / f"line_{index:02d}_chorus_{member_index:02d}.mp3"
+                    eleven_tts(
+                        text, voice_id, model_id=performance.get("modelId", "eleven_v3"),
+                        out=str(voice), stability=float(
+                            performance.get("voiceSettings", {}).get("stability", 0.4)),
+                        similarity_boost=float(performance.get(
+                            "voiceSettings", {}).get("similarity_boost", 0.9)),
+                        style=float(performance.get("voiceSettings", {}).get("style", 0.15)),
+                        production_route=production_route)
+                    voices.append(voice)
+                durations = [_ffprobe_duration(path) for path in voices]
+                target = max(durations)
+                if target <= 0:
+                    raise RuntimeError("isolated chorus voices returned no playable audio")
+                part = tmp_path / f"line_{index:02d}.wav"
+                command = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
+                for voice in voices:
+                    command.extend(["-i", str(voice)])
+                filters = []
+                labels = []
+                for member_index, duration in enumerate(durations):
+                    tempo = max(0.5, min(2.0, duration / target))
+                    label = f"v{member_index}"
+                    filters.append(
+                        f"[{member_index}:a]atempo={tempo:.6f},"
+                        f"apad,atrim=0:{target:.6f}[{label}]")
+                    labels.append(f"[{label}]")
+                filters.append(
+                    "".join(labels) + f"amix=inputs={len(labels)}:normalize=1,"
+                    "alimiter=limit=0.92[out]")
+                command.extend([
+                    "-filter_complex", ";".join(filters), "-map", "[out]",
+                    "-ar", "48000", "-ac", "2", str(part),
+                ])
+                subprocess.run(command, check=True)
+                voice_id = "GROUP_CHORUS"
+            else:
+                voice_id = performance.get("voiceId") or (voice_ids[0] if voice_ids else None)
+                if not voice_id:
+                    raise RuntimeError("isolated dialogue requires a voiceId for every line")
+                part = tmp_path / f"line_{index:02d}.mp3"
+                eleven_tts(
+                    text, voice_id, model_id=performance.get("modelId", "eleven_v3"),
+                    out=str(part), stability=float(
+                        performance.get("voiceSettings", {}).get("stability", 0.4)),
+                    similarity_boost=float(performance.get(
+                        "voiceSettings", {}).get("similarity_boost", 0.9)),
+                    style=float(performance.get("voiceSettings", {}).get("style", 0.15)),
+                    production_route=production_route)
+            duration = _ffprobe_duration(part)
+            parts.append(part)
+            segments.append({
+                "voiceId": voice_id,
+                "dialogueInputIndex": index,
+                "startTimeSec": cursor,
+                "endTimeSec": cursor + duration,
+                "characterStartIndex": 0,
+                "characterEndIndex": len(text),
+                "voiceIds": voice_ids or [voice_id],
+            })
+            cursor += duration
+        outp = MEDIA / out
+        outp.parent.mkdir(parents=True, exist_ok=True)
+        _concat_audio_parts(parts, outp)
+    timing_path = pathlib.Path(str(outp) + ".dialogue.json")
+    timing_path.write_text(
+        json.dumps({
+            "schemaVersion": 1,
+            "provider": "elevenlabs",
+            "endpoint": "/v1/text-to-speech isolated-dialogue",
+            "model": "eleven_v3",
+            "audioPath": str(outp.resolve()),
+            "audioSha256": __import__("hashlib").sha256(outp.read_bytes()).hexdigest(),
+            "inputCount": len(performances or []),
+            "pronunciationOverrides": ELEVEN_PRONUNCIATION_OVERRIDES,
+            "voiceSegments": segments,
+            "isolatedDialogueAssembly": True,
+            "separatedDialogueAssembly": True,
+        }, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8")
+    cb_costs.write_gen_sidecar(
+        outp, op="elevenlabs_isolated_dialogue", model="eleven_v3",
+        chars=total_chars, voices=len(performances or []), timestampEndpoint=False,
+        dialogueTimingPath=str(timing_path))
+    return str(outp)
 
 
 def _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, error_text):
@@ -1007,14 +1149,16 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
     v3 guide wants context, not one-liners). `inputs` = ordered [{"text","voice_id"}] (<=2000 chars total, <=10
     voices). Lower stability = broader emotional range (0.30 = the expressive 'Creative' zone; never use_speaker_boost)."""
     _need_eleven_key()
+    provider_inputs = _eleven_dialogue_inputs(inputs)
     try:
         r = _rpost(f"{XI}/v1/text-to-dialogue/with-timestamps",
                    headers={"xi-api-key": ELEVEN_KEY, "Content-Type": "application/json"},
-                   json={"inputs": inputs, "model_id": model_id, "settings": {"stability": stability},
+                   json={"inputs": provider_inputs, "model_id": model_id, "settings": {"stability": stability},
                          "apply_text_normalization": "auto"}, timeout=180)
     except requests.HTTPError as exc:
         if os.environ.get("CB_ELEVEN_DIALOGUE_TTS_FALLBACK", "1") != "0":
-            return _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, exc)
+            return _eleven_dialogue_tts_fallback(
+                provider_inputs, out, model_id, generation_kind, exc)
         raise
     r.raise_for_status()
     try:
@@ -1025,7 +1169,7 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
         raise RuntimeError(
             "ElevenLabs dialogue response omitted the timestamped audio contract"
         ) from exc
-    expected_indexes = set(range(len(inputs or [])))
+    expected_indexes = set(range(len(provider_inputs)))
     try:
         returned_indexes = {
             int(item["dialogue_input_index"]) for item in voice_segments
@@ -1047,7 +1191,8 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
         "model": model_id,
         "audioPath": str(outp.resolve()),
         "audioSha256": __import__("hashlib").sha256(audio).hexdigest(),
-        "inputCount": len(inputs or []),
+        "inputCount": len(provider_inputs),
+        "pronunciationOverrides": ELEVEN_PRONUNCIATION_OVERRIDES,
         "voiceSegments": [
             {
                 "voiceId": item.get("voice_id"),
@@ -1059,20 +1204,25 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
             }
             for item in voice_segments
         ],
+        # Preserve the provider's character-level timing. Voice segment envelopes have
+        # occasionally ended before the final spoken words; keeping the alignment lets
+        # downstream assembly audit that condition instead of silently clipping dialogue.
+        "alignment": payload.get("alignment"),
+        "normalizedAlignment": payload.get("normalized_alignment"),
     }
     timing_path.write_text(
         json.dumps(timing_payload, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
-    _chars = sum(len(str(i.get("text") or "")) for i in (inputs or []))
-    _billing = cb_costs.dialogue_billing(inputs, model_id=model_id,
+    _chars = sum(len(str(i.get("text") or "")) for i in provider_inputs)
+    _billing = cb_costs.dialogue_billing(provider_inputs, model_id=model_id,
                                           generation_kind=generation_kind)
-    _billing["voices"] = len(inputs or [])
+    _billing["voices"] = len(provider_inputs)
     cb_costs.log_spend("elevenlabs_dialogue", _billing["estimatedCostUsdExTax"], out=out,
                         meta=_billing)
     cb_costs.write_gen_sidecar(
         outp, op="elevenlabs_dialogue", model=model_id, stability=stability,
-        chars=_chars, voices=len(inputs or []), billing=_billing,
+        chars=_chars, voices=len(provider_inputs), billing=_billing,
         timestampEndpoint=True, dialogueTimingPath=str(timing_path),
     )
     return str(outp)

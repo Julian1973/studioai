@@ -629,7 +629,9 @@ def _validate_unit_packing_contract(storyboard):
     current_contract = storyboard.get("unitPackingContractVersion") == 1
     if not current_contract and "unitPackingAudit" not in storyboard:
         return
-    if not storyboard.get("packingPasses"):
+    automatic = ((storyboard.get("automaticPreparation") or {}).get("mode") ==
+                 "script-to-scene-direction")
+    if not storyboard.get("packingPasses") and not automatic:
         raise HandoverRefused(
             "REFUSED - the Showrunner did not approve the 30-second production-unit packing")
     try:
@@ -645,15 +647,34 @@ def _validate_unit_packing_contract(storyboard):
             "REFUSED - the storyboard's 30-second packing audit is missing or stale")
 
 
-def _characters_in_frame(sb_shot, participants):
+def _characters_in_frame(sb_shot, participants, characters_cfg):
     """Who is visible: the beat's participants that the shot's own approved creative prose
     names (word-boundary, mechanical — never an LLM guess). Falls back to all participants
     rather than guessing a subset."""
     prose = " ".join(str(sb_shot.get(k) or "") for k in
                      ("openingImage", "principalPerformance", "physicalOrEmotionalChange",
                       "closingImage", "physicalPerformance", "animationTiming"))
-    named = [c for c in participants if _mentions(c, prose)]
-    return named or list(participants)
+    visible_participants = [
+        c for c in participants
+        if not bool((characters_cfg.get(c) or {}).get("offscreenOnly"))
+    ]
+    named = [c for c in visible_participants if _mentions(c, prose)]
+    return named or visible_participants
+
+
+def _offscreen_speakers(shot_voices, characters_cfg):
+    """Return only canon-declared offscreen dialogue speakers for this unit.
+
+    An ordinary speaker omitted from the frame must still fail SPEAKER_NOT_VISIBLE. The
+    exception is therefore owned by locked character canon, never inferred from prose.
+    """
+    speakers = []
+    for voice in shot_voices:
+        speaker = str(voice.get("speaker") or "").strip()
+        if (speaker and bool((characters_cfg.get(speaker) or {}).get("offscreenOnly"))
+                and speaker not in speakers):
+            speakers.append(speaker)
+    return speakers
 
 
 def _cast_for_shot(sb_shot, beats):
@@ -666,6 +687,47 @@ def _cast_for_shot(sb_shot, beats):
             if c not in cast:
                 cast.append(c)
     return cast
+
+
+def _opening_cast_for_shot(sb_shot, beats, characters_cfg):
+    """Derive frame-one cast from the first approved stage, not the packed unit's full cast."""
+    stages = list(sb_shot.get("stagePlan") or [])
+    if not stages:
+        return None
+    participants = []
+    for beat_id in stages[0].get("beatIds") or []:
+        for character in (beats.get(beat_id) or {}).get("participatingCharacters") or []:
+            if character not in participants:
+                participants.append(character)
+    if not participants:
+        return None
+    opening_shot = dict(sb_shot)
+    opening_shot.update({
+        "principalPerformance": stages[0].get("primaryEvent") or "",
+        "physicalOrEmotionalChange": stages[0].get("emotionalOrComicTurn") or "",
+        "closingImage": stages[0].get("observableEndState") or "",
+        "physicalPerformance": "",
+        "animationTiming": "",
+    })
+    return _characters_in_frame(opening_shot, participants, characters_cfg)
+
+
+def _required_prop_references(sb_shot, pd, cast, characters_cfg):
+    """Bind canon prop plates when an approved packed shot visibly uses the prop."""
+    approved = json.dumps({
+        "shot": sb_shot,
+        "continuityInState": pd.get("continuityInState"),
+        "continuityOutState": pd.get("continuityOutState"),
+    }, ensure_ascii=False).casefold()
+    required = []
+    for character in cast:
+        for prop_id in ((characters_cfg.get(character) or {}).get("props") or {}):
+            prop_id = str(prop_id).strip().casefold()
+            if (prop_id and re.search(
+                    rf"(?<![a-z0-9]){re.escape(prop_id)}(?![a-z0-9])", approved)
+                    and prop_id not in required):
+                required.append(prop_id)
+    return required
 
 
 def place_voices_for_beat(beat_id, beat_shot_ids, voices, beat_dialogue, pd_by_shot):
@@ -794,6 +856,19 @@ def _continuity_state(boundary, cast, field_name):
         raise HandoverRefused(f"REFUSED - malformed {field_name}") from exc
 
 
+def _visible_continuity_boundary(boundary, characters_cfg):
+    """Remove canon offscreen-only speakers from visual continuity evidence."""
+    if not isinstance(boundary, dict):
+        return boundary
+    visible = dict(boundary)
+    visible["characters"] = [
+        character for character in (boundary.get("characters") or [])
+        if not bool((characters_cfg.get(character.get("characterId")) or {}).get(
+            "offscreenOnly"))
+    ]
+    return visible
+
+
 def _performance_assignment(contract, beat_ids, cast, shot_id):
     """Validate and deterministically compile Gate 5's typed performance truth."""
     if not isinstance(contract, dict):
@@ -892,7 +967,8 @@ def _cinematography_instruction(contract, shot_id):
 
 
 def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
-                comedy_stagings=None, comedy_contracts=None, emotion_contracts=None):
+                comedy_stagings=None, comedy_contracts=None, emotion_contracts=None,
+                opening_cast=None):
     """Map one approved storyboard shot into cb_engine's production contract. Executable
     performance, continuity and dialogue timing come only from typed fields; approved prose
     is retained for provenance and review, never treated as a substitute."""
@@ -928,13 +1004,25 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
     except (TypeError, ValueError) as exc:
         raise HandoverRefused(
             f"REFUSED - {sb_shot['shotId']} has an invalid beat-owned comedy staging: {exc}") from exc
+    visible_cast = [
+        character for character in cast
+        if not bool((characters_cfg.get(character) or {}).get("offscreenOnly"))
+    ]
     continuity_in = _continuity_state(
-        pd.get("continuityInState"), cast, f"{sb_shot['shotId']}.continuityInState")
+        _visible_continuity_boundary(pd.get("continuityInState"), characters_cfg),
+        visible_cast, f"{sb_shot['shotId']}.continuityInState")
     continuity_out = _continuity_state(
-        pd.get("continuityOutState"), cast, f"{sb_shot['shotId']}.continuityOutState")
+        _visible_continuity_boundary(pd.get("continuityOutState"), characters_cfg),
+        visible_cast, f"{sb_shot['shotId']}.continuityOutState")
     if continuity_out is None:
         raise HandoverRefused(
             f"REFUSED - {sb_shot['shotId']} has no continuityOutState")
+    characters_in_frame = _characters_in_frame(
+        sb_shot, visible_cast, characters_cfg)
+    for voice in shot_voices:
+        speaker = str(voice.get("speaker") or "").strip()
+        if speaker in visible_cast and speaker not in characters_in_frame:
+            characters_in_frame.append(speaker)
 
     shot = cb_engine.Shot(
         shotId=sb_shot["shotId"], beatCode=sb_shot["beatIds"][0],
@@ -952,7 +1040,11 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
         visualPayoff=sb_shot["closingImage"],
         physicalStaging=physical_staging, physicalStagings=physical_stagings,
         prohibited=list(pd.get("essentialProviderProtections") or [])[:3],
-        charactersInFrame=_characters_in_frame(sb_shot, cast),
+        charactersInFrame=characters_in_frame,
+        openingCharactersInFrame=opening_cast,
+        offscreenSpeakers=_offscreen_speakers(shot_voices, characters_cfg),
+        requiredPropReferences=_required_prop_references(
+            sb_shot, pd, characters_in_frame, characters_cfg),
         continuityIn=continuity_in,
         continuityOut=continuity_out)
     retained = {"continuityProseIn": pd.get("continuityIn", ""),
@@ -1078,7 +1170,8 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
             sb_shot, pd, cast, placement.get(sb_shot["shotId"], []), prev,
             characters_cfg, _owned_big_comedy_stagings(sb, sb_shot),
             _owned_beat_contracts(sb, sb_shot, "comedyContract"),
-            _owned_beat_contracts(sb, sb_shot, "emotionContract"))
+            _owned_beat_contracts(sb, sb_shot, "emotionContract"),
+            opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg))
         rec = _compile_one(shot, retained, scene, characters_cfg)
         line_count += len(shot.dialogueLines)
         shots_out.append(rec)
@@ -1136,7 +1229,7 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
             f"({len(shots_out)} shots, ~{round(total)}s); nothing written, no provider call, "
             f"no media, no token.")
         return pkg
-    json.dump(pkg, open(pkg_path, "w"), indent=1, ensure_ascii=False)
+    cb_db.atomic_write_json(ROOT, pkg_path, pkg)
     log(f"HANDOVER — wrote {pkg_path.name} revision {new_rev}: {len(shots_out)} shots, "
         f"~{round(total)}s. All prior spend authorisations are stale.")
     return pkg
@@ -1204,7 +1297,8 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
         sb_shot, pd, cast, placement.get(shot_id, []), None, characters_cfg,
         _owned_big_comedy_stagings(sb, sb_shot),
         _owned_beat_contracts(sb, sb_shot, "comedyContract"),
-        _owned_beat_contracts(sb, sb_shot, "emotionContract"))
+        _owned_beat_contracts(sb, sb_shot, "emotionContract"),
+        opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg))
     rec = _compile_one(shot, retained, scene, characters_cfg)
     _assert_no_internal_leak([rec])
 
@@ -1241,10 +1335,24 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
         log(f"SINGLE-SHOT HANDOVER DRY RUN — {shot_id}, revision {new_rev}, "
             f"{shot.durationSec}s; nothing written, no provider call, no media, no token.")
         return pkg
-    json.dump(pkg, open(pkg_path, "w"), indent=1, ensure_ascii=False)
+    merged = dict(old)
+    merged.update(pkg)
+    shots = {str(item.get("shotId")): item for item in (old.get("shots") or [])}
+    shots[shot_id] = rec
+    merged["shots"] = list(shots.values())
+    merged["totalSec"] = round(sum(
+        float(item.get("durationSec") or 0) for item in merged["shots"]), 1)
+    if old.get("continuityLedger"):
+        merged["continuityLedger"] = old["continuityLedger"]
+    old_cards = ((old.get("sourceStoryboard") or {}).get("creativeCardHashes") or {})
+    merged["sourceStoryboard"]["creativeCardHashes"] = {
+        **old_cards,
+        **pkg["sourceStoryboard"]["creativeCardHashes"],
+    }
+    cb_db.atomic_write_json(ROOT, pkg_path, merged)
     log(f"SINGLE-SHOT HANDOVER — wrote {pkg_path.name} revision {new_rev}: {shot_id}, "
         f"{shot.durationSec}s.")
-    return pkg
+    return merged
 
 
 def _scoped_shot(storyboard, shot_id, characters_cfg, prev):
@@ -1288,7 +1396,8 @@ def _scoped_shot(storyboard, shot_id, characters_cfg, prev):
         sb_shot, pd, cast, placement.get(shot_id, []), prev, characters_cfg,
         _owned_big_comedy_stagings(storyboard, sb_shot),
         _owned_beat_contracts(storyboard, sb_shot, "comedyContract"),
-        _owned_beat_contracts(storyboard, sb_shot, "emotionContract"))
+        _owned_beat_contracts(storyboard, sb_shot, "emotionContract"),
+        opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg))
     return shot, retained, card_hash
 
 
@@ -1433,6 +1542,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     pkg_path = cb_engine.canonical_package_path(scene_num, episode)
     old_rev = 0
     old_pkg_exists = pkg_path.exists()
+    old_pkg = {}
     old_digest = None
     if old_pkg_exists:
         if dry_run:
@@ -1443,13 +1553,72 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     new_rev = old_rev + 1
     stamp = datetime.datetime.now().strftime("%Y%m%d")
 
+    selected_ids = set(shot_ids)
+    storyboard_ids = [
+        item.get("shotId") for item in (sb.get("shots") or []) if item.get("shotId")]
+    old_shots = {s.get("shotId"): s for s in (old_pkg.get("shots") or [])}
+    old_ledger = {e.get("shotId"): e for e in (old_pkg.get("continuityLedger") or [])}
+    old_cards = ((old_pkg.get("sourceStoryboard") or {}).get("creativeCardHashes") or {})
+    selected_shots = {s.get("shotId"): s for s in shots_out}
+    selected_ledger = {e.get("shotId"): e for e in ledger_out}
+
+    # A scoped promotion refreshes only the named shots. Unchanged sibling production
+    # units remain in the canonical package in storyboard order, together with their
+    # approval ledger and media history. Removed storyboard units are deliberately not
+    # carried, so obsolete shots cannot remain live forever.
+    combined_shots = []
+    combined_ledger = []
+    effective_card_hashes = {}
+    carried = []
+    reset = []
+    for sid in storyboard_ids:
+        if sid in selected_ids:
+            rec = selected_shots.get(sid)
+            led = selected_ledger.get(sid)
+            if rec is None or led is None:
+                continue
+            if (old_shots.get(sid) == rec and old_cards.get(sid) == card_hashes.get(sid)
+                    and sid in old_ledger):
+                # Preserve operational history and human decisions while refreshing every
+                # structural field from the current compiled contract. Older promotion
+                # paths could leave stale relay metadata in the ledger even when the shot
+                # itself was an opener, which then made valid downstream continuity appear
+                # broken.
+                operational = dict(old_ledger[sid])
+                structural = {
+                    key: value for key, value in led.items()
+                    if key not in {"status", "approvedTake", "harvestFrame"}
+                }
+                led = {**operational, **structural}
+                carried.append(sid)
+            else:
+                reset.append(sid)
+            combined_shots.append(rec)
+            combined_ledger.append(led)
+            effective_card_hashes[sid] = card_hashes[sid]
+        elif sid in old_shots:
+            combined_shots.append(old_shots[sid])
+            if sid in old_ledger:
+                combined_ledger.append(old_ledger[sid])
+            if sid in old_cards:
+                effective_card_hashes[sid] = old_cards[sid]
+            carried.append(sid)
+
+    # A new package may be intentionally bootstrapped from a selected subset. Keep the
+    # selected output even when no older sibling package exists yet.
+    if not combined_shots:
+        combined_shots = list(shots_out)
+        combined_ledger = list(ledger_out)
+        effective_card_hashes = dict(card_hashes)
+        reset = [s["shotId"] for s in shots_out]
+
     errs = [i for i in report["issues"] if i["severity"] == "ERROR"]
     storyboard_sha256 = cb_lineage.sha256_file(storyboard_path)
     package_inputs = {
         "scriptVersionId": current_script["scriptVersionId"],
         "beatPackageDigest": source_beat_signature["digest"],
         "storyboardSha256": storyboard_sha256,
-        "creativeCardHashes": card_hashes,
+        "creativeCardHashes": effective_card_hashes,
         "canonProfileDigest": canon_lock["profileDigests"]["storyboard"],
     }
     new_pkg = {
@@ -1460,10 +1629,13 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
                      "cb_render canonical package format (2026-07-17 source-level handover)",
         "directorStatement": director_statement,
         "creativeIntent": creative_intent,
-        "beatCodes": selected_beat_codes,
-        "shots": shots_out,
-        "totalSec": round(sum(rec["durationSec"] for rec in shots_out), 1),
-        "continuityLedger": ledger_out,
+        "beatCodes": list(dict.fromkeys(
+            beat_code for rec in combined_shots
+            for beat_code in (rec.get("beatCodes") or [rec.get("beatCode")])
+            if beat_code)),
+        "shots": combined_shots,
+        "totalSec": round(sum(rec["durationSec"] for rec in combined_shots), 1),
+        "continuityLedger": combined_ledger,
         "validation": {"passed": report["passed"],
                         "errors": len(errs),
                         "warnings": len([i for i in report["issues"] if i["severity"] == "WARNING"]),
@@ -1472,6 +1644,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
                             "order are validated against this promotion's exact shot scope; "
                             "every BIG-comedy physical staging is compiled from its typed beat "
                             "contract onto the selected packed production unit.",
+                        "scopeShotIds": list(shot_ids),
                         "validatedAt": _now(), "revision": new_rev},
         "reviewCriteria": {
             "story": "approved audience experience and beat change remain legible",
@@ -1500,7 +1673,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
                               "humanNote": sb.get("humanNote", ""),
                               "creativeDirectingStandardVersion": sb.get(
                                   "creativeDirectingStandardVersion", 0),
-                              "creativeCardHashes": card_hashes,
+                              "creativeCardHashes": effective_card_hashes,
                               "inputSignature": sb.get("inputSignature")},
         "inputSignature": cb_lineage.dependency_signature(
             "production-package", package_inputs),
@@ -1524,20 +1697,9 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     # cannot erase SH1's approved keyframe, voice work or animation state.  A changed shot
     # receives its fresh ledger entry and must be reviewed again.  There is no heuristic
     # field merge and no blanket package-revision invalidation.
-    carried = []
-    if old_pkg_exists:
-        old_shots = {s.get("shotId"): s for s in (old_pkg.get("shots") or [])}
-        old_ledger = {e.get("shotId"): e for e in (old_pkg.get("continuityLedger") or [])}
-        old_cards = (old_pkg.get("sourceStoryboard") or {}).get("creativeCardHashes") or {}
-        for i, rec in enumerate(shots_out):
-            sid = rec.get("shotId")
-            if (sid in old_ledger and old_shots.get(sid) == rec and
-                    old_cards.get(sid) == card_hashes.get(sid)):
-                ledger_out[i] = old_ledger[sid]
-                carried.append(sid)
     new_pkg["handover"] = {
         "carriedForwardUnchangedShots": carried,
-        "resetChangedShots": [s["shotId"] for s in shots_out if s["shotId"] not in carried],
+        "resetChangedShots": reset,
         "rule": "full compiled shot + own creative card hash must be unchanged"
     }
 
@@ -1601,8 +1763,10 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     except cb_db.StateConflict as exc:
         raise HandoverRefused(
             f"REFUSED — canonical package changed during promotion: {exc}") from exc
-    cb_db.void_scene_authorizations(
-        ROOT, episode, scene_num, f"canonical-promotion-revision-{new_rev}")
+    for shot_id in reset:
+        cb_db.void_shot_authorizations(
+            ROOT, episode, scene_num, shot_id,
+            f"canonical-shot-promotion-revision-{new_rev}")
     log(f"CANONICAL PROMOTION — {', '.join(shot_ids)} -> {pkg_path.name} revision {new_rev}.")
     return new_pkg, archived
 

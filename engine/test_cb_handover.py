@@ -676,6 +676,58 @@ def test_repeated_identical_dialogue_keeps_distinct_numeric_windows():
         (0.4, 1.1), (2.0, 2.7)]
 
 
+def test_canon_offscreen_speaker_is_audible_and_never_added_to_visible_cast():
+    sb_shot = _sb_shot("S1.SH1", ["1.B1"], "PLANNED_CUT")
+    vp = _vp("Bo's Mum", "Time to go.")
+    pd = _pd("S1.SH1", True, occurrence_ids=[vp["dialogueOccurrenceId"]])
+    cfg = {
+        "Fuzzby": {"avoid": ""},
+        "Zenny": {"avoid": ""},
+        "Bo's Mum": {"avoid": "", "offscreenOnly": True},
+    }
+    shot, _ = H.distil_shot(
+        sb_shot, pd, ["Fuzzby", "Zenny", "Bo's Mum"], [vp], None, cfg)
+
+    assert "Fuzzby" in shot.charactersInFrame
+    assert "Bo's Mum" not in shot.charactersInFrame
+    assert shot.offscreenSpeakers == ["Bo's Mum"]
+
+
+def test_first_stage_drives_opening_cast_and_visible_canon_props_are_bound():
+    sb_shot = _sb_shot("S4.SH1", ["4.B1", "4.B2"], "PLANNED_CUT")
+    sb_shot["stagePlan"] = [{
+        "beatIds": ["4.B1"], "primaryEvent": "Bo walks beside Keen",
+        "emotionalOrComicTurn": "play begins", "observableEndState": "Bo keeps moving",
+    }]
+    sb_shot["closingImage"] = "Aida sits beside Bo while he grips the satchel"
+    beats = {
+        "4.B1": {"participatingCharacters": ["Bo", "Keen"]},
+        "4.B2": {"participatingCharacters": ["Bo", "Keen", "Aida"]},
+    }
+    cfg = {
+        "Bo": {"props": {"satchel": "cb-seed/assets/props/CB_Bo_satchel.png"}},
+        "Keen": {}, "Aida": {},
+    }
+    assert H._opening_cast_for_shot(sb_shot, beats, cfg) == ["Bo", "Keen"]
+    assert H._required_prop_references(
+        sb_shot, _pd("S4.SH1", True), ["Bo", "Keen", "Aida"], cfg) == ["satchel"]
+
+
+def test_offscreen_speaker_is_removed_from_visual_continuity_boundary():
+    boundary = {
+        "lighting": "warm hollow light",
+        "cameraSide": "inside the doorway axis",
+        "characters": [
+            {"characterId": "Bo"},
+            {"characterId": "Bo's Mum"},
+        ],
+    }
+    visible = H._visible_continuity_boundary(
+        boundary, {"Bo": {}, "Bo's Mum": {"offscreenOnly": True}})
+    assert [item["characterId"] for item in visible["characters"]] == ["Bo"]
+    assert len(boundary["characters"]) == 2
+
+
 def test_typed_continuity_maps_each_field_without_prose_duplication():
     sb_shot = _sb_shot("S1.SH1", ["1.B1"], "PLANNED_CUT")
     pd = _pd("S1.SH1", True, continuity_in_state=None)
@@ -781,6 +833,29 @@ def test_promote_shot_scoped_to_one_shot_only():
     assert pkg["shots"][0]["sourceType"] == "opener"
     assert pkg["shots"][0]["durationSec"] == 6.0                 # midpoint of "5-7s"
     assert pkg["shots"][0]["dialogueLines"][0]["exactText"] == "Nailed it."
+
+
+def test_promote_shot_write_preserves_existing_sibling_units():
+    sb_p, pkg_p = _tmp()
+    old = json.load(open(pkg_p))
+    old["shots"].append({
+        "shotId": "S1.SH2", "durationSec": 7.0,
+        "seedancePrompt": "APPROVED SIBLING PROMPT",
+    })
+    old["continuityLedger"] = [{
+        "shotId": "S1.SH2", "status": "approved",
+        "approval": {"approved": True, "candidate": 1},
+    }]
+    json.dump(old, open(pkg_p, "w"))
+
+    pkg = H.promote_shot(
+        sb_p, "S1.SH1", pkg_p, dry_run=False, log=lambda *a, **k: None)
+
+    shots = {item["shotId"]: item for item in pkg["shots"]}
+    assert shots["S1.SH1"]["dialogueLines"][0]["exactText"] == "Nailed it."
+    assert shots["S1.SH2"]["seedancePrompt"] == "APPROVED SIBLING PROMPT"
+    assert pkg["continuityLedger"][0]["status"] == "approved"
+    assert json.load(open(pkg_p)) == pkg
 
 
 def test_place_voices_for_beat_splits_by_line_content_not_bare_speaker_name():
@@ -1054,6 +1129,64 @@ def test_promote_to_canonical_writes_canonical_shape_and_archives_the_old_packag
     assert ledger_ids == ["S1.SH1"]
 
 
+def test_scoped_canonical_promotion_preserves_unselected_sibling_and_approval(
+        tmp_path, monkeypatch):
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    first, _ = H.promote_to_canonical(
+        sb_p, "1", ["S1.SH1", "S1.SH2"], episode="Ep1",
+        dry_run=False, log=lambda *a, **k: None)
+    package_path = pkg_dir / "Ep1_scene1_production_package.json"
+    sibling = next(item for item in first["shots"] if item["shotId"] == "S1.SH2")
+    sibling_ledger = next(
+        item for item in first["continuityLedger"] if item["shotId"] == "S1.SH2")
+    sibling_ledger["status"] = "approved"
+    sibling_ledger["approval"] = {
+        "approved": True, "candidate": 2, "path": "/kept/sibling.mp4"}
+    json.dump(first, open(package_path, "w"))
+
+    promoted, _ = H.promote_to_canonical(
+        sb_p, "1", ["S1.SH1"], episode="Ep1",
+        dry_run=False, log=lambda *a, **k: None)
+
+    shots = {item["shotId"]: item for item in promoted["shots"]}
+    ledgers = {item["shotId"]: item for item in promoted["continuityLedger"]}
+    assert shots["S1.SH2"] == sibling
+    assert ledgers["S1.SH2"] == sibling_ledger
+    assert "S1.SH2" in promoted["handover"]["carriedForwardUnchangedShots"]
+    assert "S1.SH2" not in promoted["handover"]["resetChangedShots"]
+
+
+def test_unchanged_selected_shot_preserves_approval_but_refreshes_ledger_structure(
+        tmp_path, monkeypatch):
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    first, _ = H.promote_to_canonical(
+        sb_p, "1", ["S1.SH1", "S1.SH2"], episode="Ep1",
+        dry_run=False, log=lambda *a, **k: None)
+    package_path = pkg_dir / "Ep1_scene1_production_package.json"
+    ledger = next(
+        item for item in first["continuityLedger"] if item["shotId"] == "S1.SH1")
+    ledger.update({
+        "status": "approved",
+        "approvedTake": "/kept/selected.mp4",
+        "approval": {"approved": True, "candidate": 2},
+        "sourceType": "relay",
+        "sourceShotId": "S1.SH1",
+    })
+    json.dump(first, open(package_path, "w"))
+
+    promoted, _ = H.promote_to_canonical(
+        sb_p, "1", ["S1.SH1"], episode="Ep1",
+        dry_run=False, log=lambda *a, **k: None)
+
+    current = next(
+        item for item in promoted["continuityLedger"] if item["shotId"] == "S1.SH1")
+    assert current["status"] == "approved"
+    assert current["approvedTake"] == "/kept/selected.mp4"
+    assert current["approval"] == {"approved": True, "candidate": 2}
+    assert current["sourceType"] == "opener"
+    assert current["sourceShotId"] is None
+
+
 def test_promote_to_canonical_refuses_missing_typed_continuity_before_candidate(tmp_path, monkeypatch):
     """A malformed typed boundary cannot be degraded into an invalid candidate package."""
     sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
@@ -1149,6 +1282,12 @@ def test_current_packing_contract_requires_showrunner_acceptance():
     }
     with pytest.raises(H.HandoverRefused, match="Showrunner did not approve"):
         H._validate_unit_packing_contract(storyboard)
+
+    storyboard["automaticPreparation"] = {
+        "mode": "script-to-scene-direction",
+        "humanGates": ["see", "hear", "watch"],
+    }
+    H._validate_unit_packing_contract(storyboard)
 
 
 if __name__ == "__main__":

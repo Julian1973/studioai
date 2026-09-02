@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import pathlib
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -31,6 +32,116 @@ def _storyboard_path(scene: str, episode: str) -> pathlib.Path:
     return OUTPUT / "creative" / f"{episode}_scene{scene}_storyboard.json"
 
 
+def _episode_beat_package_path(episode: str) -> pathlib.Path:
+    current = SCRIPT_STORE.current(episode, required=True)
+    matches = []
+    for path in sorted(OUTPUT.glob(f"{episode}_*beat_package.json")):
+        try:
+            pkg = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        source = pkg.get("sourceScript") or {}
+        if source.get("scriptVersionId") == current.get("scriptVersionId"):
+            matches.append(path)
+    if matches:
+        return max(matches, key=lambda item: item.stat().st_mtime)
+    fallback = OUTPUT / f"{episode}_The_Adventure_Begins_beat_package.json"
+    if fallback.exists():
+        return fallback
+    raise FileNotFoundError(
+        f"Current beat package not found for {episode} and script "
+        f"{current.get('scriptVersionId')}")
+
+
+def _scene_plan_units(source: dict[str, Any], scene_s: str,
+                      beats: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    by_code = {beat.get("beatCode"): beat for beat in beats}
+    plan = source.get("productionPlan") or []
+    if isinstance(plan, dict):
+        plan = plan.get("scenes") or []
+    units = []
+    for item in plan:
+        if str(item.get("sceneNumber") or item.get("scene")) != scene_s:
+            continue
+        codes = [code for code in item.get("sourceBeatCodes") or [] if code in by_code]
+        if codes:
+            units.append([by_code[code] for code in codes])
+    return units or [[beat] for beat in beats]
+
+
+def _combined_dialogue_lines(beats: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    lines = []
+    for beat in beats:
+        for line in _dialogue_lines(beat):
+            lines.append(line)
+    return lines
+
+
+def _combined_action_text(beats: list[dict[str, Any]]) -> str:
+    return " ".join(part for part in (_action_text(beat) for beat in beats) if part)
+
+
+def _combined_characters(beats: list[dict[str, Any]]) -> list[str]:
+    seen = set()
+    chars = []
+    for beat in beats:
+        for name in beat.get("characters") or []:
+            clean = str(name).strip()
+            if clean and clean not in seen:
+                chars.append(clean)
+                seen.add(clean)
+    return chars
+
+
+def _opening_event_characters(beat: dict[str, Any]) -> list[str]:
+    declared = [str(name).strip() for name in beat.get("characters") or []
+                if str(name).strip()]
+    declared_by_key = {name.casefold(): name for name in declared}
+    events = ((beat.get("sourceEventSignature") or {}).get("inputs") or {}).get(
+        "orderedEvents") or []
+    seen = set()
+    out = []
+    for event in events:
+        speakers = [
+            str(name).strip() for name in (event.get("chorusMembers") or [])
+            if str(name).strip()
+        ]
+        if not speakers:
+            speaker = str(event.get("speaker") or "").strip()
+            speakers = [speaker] if speaker else []
+        for speaker in speakers:
+            canonical = declared_by_key.get(speaker.casefold(), speaker)
+            if canonical not in seen:
+                out.append(canonical)
+                seen.add(canonical)
+        text = str(event.get("text") or "")
+        for name in declared:
+            if name in seen:
+                continue
+            if re.search(rf"\b{re.escape(name)}\b", text, re.I):
+                out.append(name)
+                seen.add(name)
+    return out or declared
+
+
+def _combined_constraints(beats: list[dict[str, Any]]) -> list[dict[str, str]]:
+    constraints = []
+    seen = set()
+    for beat in beats:
+        for item in _continuity_constraints(beat):
+            key = (item.get("label"), item.get("value"))
+            if key not in seen:
+                constraints.append(item)
+                seen.add(key)
+    return constraints
+
+
+def _shot_duration(unit: list[dict[str, Any]], plan_item: dict[str, Any] | None) -> int:
+    if plan_item and plan_item.get("targetDurationSec"):
+        return int(plan_item["targetDurationSec"])
+    return min(30, max(6, sum(_duration_for_beat(beat) for beat in unit)))
+
+
 def _write_storyboard_snapshot(*, scene: str, episode: str, source: dict[str, Any],
                                beats: list[dict[str, Any]], shots: list[dict[str, Any]]) -> dict[str, Any]:
     path = _storyboard_path(scene, episode)
@@ -44,7 +155,7 @@ def _write_storyboard_snapshot(*, scene: str, episode: str, source: dict[str, An
         "builtAt": _now(),
         "sourceScript": current_script,
         "sourceBeatPackage": {
-            "path": str((OUTPUT / f"{episode}_The_Adventure_Begins_beat_package.json").relative_to(ROOT)),
+            "path": str(_episode_beat_package_path(episode).relative_to(ROOT)),
             "contentSignature": beat_signature,
         },
         "approvalState": "generated-pending-human-review",
@@ -142,6 +253,8 @@ def _dialogue_lines(beat: dict[str, Any]) -> list[dict[str, Any]]:
             "dialogueOccurrenceId": event.get("dialogueOccurrenceId"),
             "sourceEventId": event.get("sourceEventId"),
             "sourceEventIndex": event.get("sourceEventIndex"),
+            "voiceTreatment": event.get("voiceTreatment", "single_voice"),
+            "chorusMembers": event.get("chorusMembers") or [],
         })
     return out
 
@@ -239,9 +352,7 @@ def _reference_slots(characters: list[str], *, opener: bool,
 
 
 def build_scene_package(scene: str | int, episode: str = "Ep1") -> tuple[dict[str, Any], pathlib.Path]:
-    beat_path = OUTPUT / f"{episode}_The_Adventure_Begins_beat_package.json"
-    if not beat_path.exists():
-        raise FileNotFoundError(f"Beat package not found: {beat_path}")
+    beat_path = _episode_beat_package_path(episode)
     source = json.loads(beat_path.read_text(encoding="utf-8"))
     scene_s = str(scene)
     beats = [beat for beat in source.get("beats") or []
@@ -251,57 +362,96 @@ def build_scene_package(scene: str | int, episode: str = "Ep1") -> tuple[dict[st
 
     shots = []
     ledger = []
-    for idx, beat in enumerate(beats, 1):
-        beat_code = beat.get("beatCode") or f"{scene_s}.B{idx}"
-        shot_id = f"{beat_code}.S1"
+    by_plan_codes = []
+    plan = source.get("productionPlan") or []
+    if isinstance(plan, dict):
+        plan = plan.get("scenes") or []
+    for item in plan:
+        if str(item.get("sceneNumber") or item.get("scene")) == scene_s:
+            by_plan_codes.append(item)
+    units = _scene_plan_units(source, scene_s, beats)
+    for idx, unit in enumerate(units, 1):
+        plan_item = by_plan_codes[idx - 1] if idx - 1 < len(by_plan_codes) else None
+        beat_codes = [beat.get("beatCode") or f"{scene_s}.B{n}"
+                      for n, beat in enumerate(unit, 1)]
+        beat_code = beat_codes[0]
+        shot_id = f"S{scene_s}.SH{idx}"
         previous_shot_id = shots[-1]["shotId"] if shots else None
-        duration = _duration_for_beat(beat)
-        dialogue_lines = _dialogue_lines(beat)
-        reference_slots, keyframe_reference_slots = _reference_slots(
-            beat.get("characters") or [], opener=idx == 1,
+        duration = _shot_duration(unit, plan_item)
+        dialogue_lines = _combined_dialogue_lines(unit)
+        characters = _combined_characters(unit)
+        opening_characters = _opening_event_characters(unit[0])
+        action = _combined_action_text(unit)
+        story_parts = [beat.get("storyBeat") for beat in unit if beat.get("storyBeat")]
+        story_beat = " / ".join(story_parts)
+        kid_parts = [beat.get("kidRead") or beat.get("emotionalIntent") for beat in unit
+                     if beat.get("kidRead") or beat.get("emotionalIntent")]
+        visual_payoff = " / ".join(kid_parts)
+        reference_slots, _ = _reference_slots(
+            characters, opener=idx == 1,
+            has_dialogue=bool(dialogue_lines))
+        _, keyframe_reference_slots = _reference_slots(
+            opening_characters, opener=idx == 1,
             has_dialogue=bool(dialogue_lines))
         shot = {
             "shotId": shot_id,
             "sceneNumber": int(scene_s) if scene_s.isdigit() else scene_s,
             "beatCode": beat_code,
-            "title": beat.get("storyBeat", beat_code)[:90],
+            "beatCodes": beat_codes,
+            "title": (story_beat or beat_code)[:90],
             "durationSec": duration,
-            "purpose": beat.get("storyBeat"),
-            "visualPayoff": beat.get("kidRead") or beat.get("emotionalIntent"),
+            "purpose": story_beat,
+            "visualPayoff": visual_payoff,
             "sourceType": "opener" if idx == 1 else "relay",
             "sourceShotId": previous_shot_id,
-            "location": beat.get("location"),
-            "time": beat.get("time"),
-            "charactersInFrame": beat.get("characters") or [],
-            "storyBeat": beat.get("storyBeat"),
-            "emotionalIntent": beat.get("emotionalIntent"),
-            "kidRead": beat.get("kidRead"),
-            "adultRead": beat.get("adultRead"),
-            "action": _action_text(beat),
+            "location": unit[0].get("location"),
+            "time": unit[0].get("time"),
+            "charactersInFrame": characters,
+            "storyBeat": story_beat,
+            "emotionalIntent": " / ".join(
+                beat.get("emotionalIntent") for beat in unit if beat.get("emotionalIntent")),
+            "kidRead": " / ".join(beat.get("kidRead") for beat in unit if beat.get("kidRead")),
+            "adultRead": " / ".join(beat.get("adultRead") for beat in unit if beat.get("adultRead")),
+            "action": action,
             "dialogueLines": dialogue_lines,
             "referenceSlots": reference_slots,
             "keyframeReferenceSlots": keyframe_reference_slots,
-            "openingCharactersInFrame": beat.get("characters") or [],
-            "continuityConstraints": _continuity_constraints(beat),
+            "openingCharactersInFrame": opening_characters,
+            "continuityConstraints": _combined_constraints(unit),
             "directorRecord": {
-                "storyBeat": beat.get("storyBeat"),
-                "emotionalIntent": beat.get("emotionalIntent"),
-                "kidRead": beat.get("kidRead"),
-                "adultRead": beat.get("adultRead"),
-                "action": _action_text(beat),
+                "storyBeat": story_beat,
+                "emotionalIntent": " / ".join(
+                    beat.get("emotionalIntent") for beat in unit if beat.get("emotionalIntent")),
+                "kidRead": " / ".join(beat.get("kidRead") for beat in unit if beat.get("kidRead")),
+                "adultRead": " / ".join(beat.get("adultRead") for beat in unit if beat.get("adultRead")),
+                "action": action,
                 "dialogueLines": dialogue_lines,
-                "continuityConstraints": _continuity_constraints(beat),
+                "continuityConstraints": _combined_constraints(unit),
             },
-            "sourceBeatId": beat.get("sourceBeatId"),
-            "sourceEventRange": beat.get("sourceEventRange"),
-            "sourceEventIds": beat.get("sourceEventIds") or [],
-            "dialogueOccurrenceIds": beat.get("dialogueOccurrenceIds") or [],
+            "sourceBeatId": unit[0].get("sourceBeatId"),
+            "sourceBeatIds": [beat.get("sourceBeatId") for beat in unit],
+            "sourceEventRange": {
+                "firstEventIndex": (unit[0].get("sourceEventRange") or {}).get("firstEventIndex"),
+                "lastEventIndex": (unit[-1].get("sourceEventRange") or {}).get("lastEventIndex"),
+                "firstEventId": (unit[0].get("sourceEventRange") or {}).get("firstEventId"),
+                "lastEventId": (unit[-1].get("sourceEventRange") or {}).get("lastEventId"),
+                "eventCount": sum((beat.get("sourceEventRange") or {}).get("eventCount") or 0
+                                  for beat in unit),
+            },
+            "sourceEventIds": [
+                event for beat in unit for event in (beat.get("sourceEventIds") or [])
+            ],
+            "dialogueOccurrenceIds": [
+                occurrence for beat in unit
+                for occurrence in (beat.get("dialogueOccurrenceIds") or [])
+            ],
         }
         shots.append(shot)
         ledger.append({
             "shotId": shot_id,
             "status": "designed",
-            "sourceBeatId": beat.get("sourceBeatId"),
+            "sourceBeatId": unit[0].get("sourceBeatId"),
+            "sourceBeatIds": [beat.get("sourceBeatId") for beat in unit],
             "sourceType": shot["sourceType"],
             "sourceShotId": previous_shot_id,
             "keyframeApproval": None,

@@ -149,6 +149,14 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
         current["scriptVersionId"], pkg["contentSignature"], CANON_DIGEST)
     assert cb_lineage.signature_matches(
         vision["inputSignature"], "episode-vision", expected_inputs)
+    assert vision["directionVersion"] == "accepted-episode-direction-v1"
+    assert cb_lineage.signature_matches(
+        vision["directionSignature"], "accepted-episode-direction",
+        vision["directionSignature"]["inputs"])
+    assert vision["productionLineage"] == [
+        "Story Director", "Screenwriter", "Cinematic Shot Director",
+        "Seedream Keyframes", "Seedance Production Director", "Editor",
+    ]
     status = cb_intake.intake_status("Ep1")
     assert status["candidateCurrent"] is True
     assert status["canonicalCurrent"] is True
@@ -156,6 +164,71 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
     assert status["candidate"]["approval"]["canonicalPackage"] == (
         result["canonicalPackage"].rsplit("/", 1)[-1]
     )
+
+
+def test_episode_two_production_script_has_eight_scenes_and_59_exact_dialogue_lines():
+    script_path = cb_intake.ROOT / "cb-studio/data/scripts/Ep2_Bos_Big_Day_V2.txt"
+    parsed = cb_intake.parse_script(
+        script_path.read_text(encoding="utf-8"), cb_intake._load_roster(),
+        log=lambda *_: None)
+    dialogue = [event for event in parsed["events"] if event["type"] == "dialogue"]
+    assert len(parsed["scenes"]) == 8
+    assert len(dialogue) == 59
+    mum_lines = [event for event in dialogue if event["speaker"] == "Bo's Mum"]
+    assert [event["text"] for event in mum_lines] == [
+        "BO, it’s time for you to go to the Learning Circle? Don’t forget your lunch."
+    ]
+    assert all(event["text"] for event in dialogue)
+
+
+def test_parser_keeps_shared_cue_and_following_action_out_of_dialogue():
+    script = """EXT. FOREST PATH - DAY 4
+
+BO/KEEN
+3, 2, 1 …
+
+POOF! The tail does The Thing again.
+
+BO & KEEN
+Together.
+
+BO
+3,2,1 …
+POOF! The tail does The Thing again. Bo giggles.
+
+BO
+I’m STILL worried about going to the Learning Circle.
+He slowly sits on a nearby fallen log. Keen gently sits on a fallen log beside him.
+
+AIDA
+Every single time.
+BEAT.
+"""
+    parsed = cb_intake.parse_script(
+        script, roster=["Bo", "Keen", "Aida"], log=lambda *_: None)
+    dialogue = [event for event in parsed["events"] if event["type"] == "dialogue"]
+    action = [event["text"] for event in parsed["events"] if event["type"] == "action"]
+
+    assert dialogue == [
+        {"i": 0, "scene": 4, "type": "dialogue", "speaker": "Bo/Keen",
+         "text": "3, 2, 1 …", "voiceTreatment": "group_chorus",
+         "chorusMembers": ["Bo", "Keen"]},
+        {"i": 2, "scene": 4, "type": "dialogue", "speaker": "Bo/Keen",
+         "text": "Together.", "voiceTreatment": "group_chorus",
+         "chorusMembers": ["Bo", "Keen"]},
+        {"i": 3, "scene": 4, "type": "dialogue", "speaker": "Bo",
+         "text": "3,2,1 …"},
+        {"i": 5, "scene": 4, "type": "dialogue", "speaker": "Bo",
+         "text": "I’m STILL worried about going to the Learning Circle."},
+        {"i": 7, "scene": 4, "type": "dialogue", "speaker": "Aida",
+         "text": "Every single time."},
+    ]
+    assert action == [
+        "POOF! The tail does The Thing again.",
+        "POOF! The tail does The Thing again. Bo giggles.",
+        "He slowly sits on a nearby fallen log. Keen gently sits on a fallen log beside him.",
+        "BEAT.",
+    ]
 
 
 def test_outcome_compression_plan_groups_beats_by_scene():
@@ -240,6 +313,34 @@ def test_scene_roster_ignores_a_stale_legacy_package(tmp_path, monkeypatch):
     assert roster["hasPackage"] is False
     assert roster["scenes"] == []
     assert roster["reason"] == "canonical-beat-package-stale"
+
+
+def test_scene_source_digest_changes_only_the_edited_scene():
+    before = (
+        "INT. CRYSTAL COVE - DAY 1\n\nKEEN\nHello.\n\n"
+        "EXT. HOLLOW OAK - DAY 2\n\nBO\nReady.\n")
+    after = before.replace("Ready.", "Really ready.")
+
+    old = cb_intake.scene_source_digests(before, roster=["Keen", "Bo"])
+    new = cb_intake.scene_source_digests(after, roster=["Keen", "Bo"])
+
+    assert old["1"] == new["1"]
+    assert old["2"] != new["2"]
+
+
+def test_package_scene_roster_keeps_scenes_without_production_packages():
+    package = {"beats": [
+        {"sceneNumber": 1, "beatCode": "1.B1", "location": "COVE", "time": "DAY"},
+        {"sceneNumber": 2, "beatCode": "2.B1", "location": "OAK", "time": "DAY"},
+    ]}
+
+    roster = cb_intake._package_scene_roster(package, [{
+        "sceneNumber": "1", "shotCount": 3, "package": "scene1.json"}])
+
+    assert [scene["sceneNumber"] for scene in roster] == ["1", "2"]
+    assert roster[0]["shotCount"] == 3
+    assert roster[1]["shotCount"] == 0
+    assert roster[1]["reason"] == "last-approved-story-direction"
 
 
 def test_legacy_lineage_cannot_manufacture_canon_provenance():

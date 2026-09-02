@@ -630,6 +630,13 @@ def _led(scene="9", ep="EpT"):
     return {e["shotId"]: e for e in pkg["continuityLedger"]}
 
 
+def _lock_scene_cut(scene="9", ep="EpT"):
+    output = R.HERE.parent / "cb-output"
+    state = R.cb_rough_cut.scene_status(ep, scene, out=output)
+    return R.cb_rough_cut.save_scene_cut(
+        ep, scene, state["sequence"], confirm=True, out=output)
+
+
 def _fixture_reference_contract(shot):
     contract = []
     for tag, controls in (shot.get("referenceSlots") or {}).items():
@@ -1040,6 +1047,7 @@ def test_golden_path_package_to_approved_scene_master(world):
         _approve_director_review("review-animation", shot_id)
 
     # Post builds an immutable, QC-passed candidate with every approved shot in order.
+    _lock_scene_cut("9", "EpT")
     master = R.stitch_scene("9", "EpT", log=lambda *a, **k: None)
     data = pathlib.Path(master).read_bytes()
     i1 = data.find(b"1.B1.S1_c2.mp4"); i2 = data.find(b"1.B1.S2_c1.mp4")
@@ -1147,7 +1155,7 @@ def test_unavailable_keyframe_identity_screen_preserves_candidate_for_human_acce
     assert len(prov.image_calls) == 2
 
 
-def test_watch_refuses_human_accepted_keyframe_with_physical_stage_failure(
+def test_watch_honors_human_accepted_keyframe_with_physical_stage_warning(
         world, monkeypatch):
     def physical_stage_failure(context=None, images=None, **kwargs):
         expected = list((context or {}).get("expectedCharacters") or ["Fuzzby", "Zenny"])
@@ -1200,9 +1208,40 @@ def test_watch_refuses_human_accepted_keyframe_with_physical_stage_failure(
     approval = _led()["1.B1.S1"]["keyframeApproval"]
     assert approval["conformanceAdvisoryDecision"]["acceptedBy"] == "TestReviewer"
 
-    with pytest.raises(R.Refused, match="SEE frame does not prove the physical stage contract"):
+    # Approval is persisted in the package. Both UI state derivation and the fire gate
+    # consume this same record after a fresh load, so a reload cannot resurrect the warning.
+    reloaded_pkg, _ = R.load_pkg("9", "EpT")
+    reloaded_approval = R._ledger(
+        reloaded_pkg, "1.B1.S1")["keyframeApproval"]
+    assert R._keyframe_stage_contract_report(reloaded_approval) == {
+        "ready": True,
+        "reason": None,
+    }
+
+    # The human accepted the exact advisory during SEE. WATCH must not demand a
+    # second hidden approval for the same automated composition warning.
+    with pytest.raises(R.Refused) as exc:
         R.fire_shot("9", "1.B1.S1", "EpT", candidates=1,
                     log=lambda *a, **k: None)
+    assert "SEE frame does not prove the physical stage contract" not in str(exc.value)
+
+
+def test_watch_blocks_unapproved_physical_stage_warning(world):
+    record = {
+        "approved": True,
+        "conformanceScreening": {
+            "status": "block",
+            "reason": "Opening geography and physical staging fail.",
+            "review": {
+                "summary": "The prop placement does not match the authored stage.",
+                "recommendedCorrection": "Correct the opening frame before WATCH.",
+            },
+        },
+    }
+
+    report = R._keyframe_stage_contract_report(record)
+    assert report["ready"] is False
+    assert report["reason"] == "Opening geography and physical staging fail."
 
 
 def test_watch_allows_explicit_stage_contract_override(world, monkeypatch):
@@ -1385,7 +1424,7 @@ def test_same_process_comparison_returns_one_candidate_from_approved_stage_relay
     assert calls[1]["image_urls"][0].endswith("segment_1_final.png")
     assert len(joined) == 1 and len(joined[0]) == 2
     assert len(paths) == 1 and pathlib.Path(paths[0]).read_bytes() == \
-        b"JOINED-COMPARISON-CANDIDATE|APPROVED_HEAR"
+        b"JOINED-COMPARISON-CANDIDATE"
     final_ledger = _led()[shot["shotId"]]
     assert final_ledger["status"] == "candidates-pending"
     assert final_ledger["batch"]["transportCandidates"]["1"]["status"] == "joined"
@@ -1641,6 +1680,7 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
     R.approve_shot("1", "S1.SH1", 1, "Ep1", reviewed_by="TestReviewer",
                    log=lambda *a, **k: None)
     _approve_director_review("review-animation", "S1.SH1", "1", "Ep1")
+    _lock_scene_cut("1", "Ep1")
     master = R.stitch_scene("1", "Ep1", log=lambda *a, **k: None)
     _approve_director_review("review-final", None, "1", "Ep1")
 

@@ -1,0 +1,64 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S6_plate_candidate_0fe36408.png",
+  "hash": "8ccffc25c1badb5b7f36d8b914d1022f9ee046cfc8307ddc2a40ebac489f9a0c",
+  "inputSignature": {
+   "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+   "briefHash": "544f725e92a185a0007c822929f12d736a31c8d2acdf5d4678073999d9034d9a",
+   "referenceHashes": {},
+   "plateHash": "8ccffc25c1badb5b7f36d8b914d1022f9ee046cfc8307ddc2a40ebac489f9a0c"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-02T00:08:43",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/locations/crystal_woods_learning_circle.png",
+  "approvedAt": "2026-09-02T00:08:43",
+  "reviewedBy": "StudioAI",
+  "selectionNote": "Approved zero-cost library binding: Crystal Woods Learning Circle plate matches Scene 6."
+ },
+ "candidate": null,
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "deterministic-v4-scaffold",
+    "preparedAt": "2026-09-02T00:18:39",
+    "editedAt": null,
+    "preparedBy": "deterministic-v4-scaffold",
+    "creativeDirectingStandardVersion": 0,
+    "sourceHash": "",
+    "output": {
+     "creativeIntent": "Establish the Crystal Woods Learning Circle as a calm teaching space for Ada and the children after the forest-path confession.",
+     "storyOfPlace": "Learning Circle: warm woodland clearing with child-readable circular staging, gentle crystals, soft flowers, open central space and safe layered depth.",
+     "paletteAndLighting": "Warm saturated Crystal Bears daylight/evening continuity, clear readable planes, soft family-animation contrast, no gloom or hard reset from the surrounding sequence.",
+     "materialsAndAtmosphere": "Feature-quality stylized 3D CGI Crystal Bears environment plate; warm saturated family-animation light; tactile foliage, crystal, path, rock, flower, honeycomb and moss materials; no characters unless the downstream shot keyframe adds them.",
+     "continuityRules": [
+      "Scene Look is environment authority only; characters are added by keyframe/shot direction.",
+      "Do not change the approved script, character identities, or scene geography because a downstream word changes.",
+      "Keep the plate current as a reusable world anchor until its own plate/style inputs change."
+     ],
+     "providerPrompt": "Crystal Woods Learning Circle scene plate for premium stylized 3D CGI family animation. Warm daylight, circular woodland teaching space, tactile moss, flowers, small crystals, readable open centre, soft layered trees, no characters, no text, no menace. The environment must support Ada guiding the group and the children watching clearly."
+    },
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.4",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+     "sceneContextHash": "07c147bacd14fd2e3c162719f9f03e295f5b398e842b26683e5fbd28380fac5e"
+    },
+    "outcome": "approved",
+    "decisionAt": "2026-09-02T00:18:39",
+    "reviewedBy": "StudioAI",
+    "note": "Zero-cost deterministic Look Development approval added so the approved library scene plate is visible as current in the Studio gate."
+   },
+   "candidate": null,
+   "history": []
+  }
+ }
+}

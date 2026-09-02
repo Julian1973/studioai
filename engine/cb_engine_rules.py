@@ -9,6 +9,8 @@ import math
 import pathlib
 import re
 
+import cb_audio_authority
+
 
 HERE = pathlib.Path(__file__).resolve().parent
 BEAT_COST_PATH = HERE / "config" / "beat_costs.json"
@@ -17,6 +19,15 @@ RULES_VERSION = "engine-rules-v4"
 
 def _norm(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
+
+
+def _text_list(value):
+    if value is None:
+        return []
+    if isinstance(value, str):
+        text = _norm(value)
+        return [text] if text else []
+    return [_norm(item) for item in value if _norm(item)]
 
 
 def _line_text(line):
@@ -93,6 +104,25 @@ def travel_traversal_boilerplate(shot, direction):
     )
 
 
+def repeated_contact_boilerplate(shot, direction):
+    """Make repeated impacts separately readable and visibly escalating."""
+    count = next((int(item.get("count", 1)) for item in infer_timing_beats(shot, direction)
+                  if item["type"] == "impact"), 0)
+    if count <= 1:
+        return ""
+    clauses = [
+        "Repeated-contact escalation: separate the first and second contacts with a "
+        "readable recovery between them.",
+        "The first contact is small and contained.",
+        "The second contact is larger than the first, with a stronger visible cause, "
+        "reaction and recovery.",
+    ]
+    if count >= 3:
+        clauses.append(
+            "The third contact is larger than the second and completes the escalation.")
+    return " ".join(clauses)
+
+
 def sailing_departure_boilerplate(shot, direction):
     """Require visible real-world cause and effect for a wind-powered departure."""
     values = [shot.get("title"), shot.get("purpose"), shot.get("storyBeat"),
@@ -138,8 +168,9 @@ def living_performance_boilerplate(shot, direction=None, *, medium="animation"):
             if str(name).strip()]
     subjects = ", ".join(cast) if cast else "every visible character"
     if medium == "still":
+        verb = "each have" if len(cast) > 1 else "has"
         return (
-            f"Living performance lock: {subjects} has a specific motivated eyeline target "
+            f"Living performance lock: {subjects} {verb} a specific motivated eyeline target "
             "and a readable active thought in the eyes. Use a precise asymmetric expression; "
             "no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic "
             "camera-facing expression."
@@ -284,7 +315,8 @@ def action_unit_report(shot, direction, prompt=""):
             re.search(r"\bno cuts?\b|\bno handheld\b", prompt_text, re.I)):
         errors.append("R14 action unit incorrectly prohibits cuts or handheld camera")
 
-    dialogue = list(shot.get("dialogueLines") or [])
+    dialogue = cb_audio_authority.route_lines(
+        shot.get("dialogueLines") or [])["spokenDialogue"]
     dialogue_owners = {}
     for internal_shot in internal:
         directions = list(internal_shot.get("dialogueDirections") or [])
@@ -300,7 +332,8 @@ def action_unit_report(shot, direction, prompt=""):
             r"(?:Shot|Phase)\s+(\d+):\s*(.*?)(?=\n(?:Shot|Phase)\s+\d+:|\nWitness staging:|\n\[|\Z)",
             raw_prompt, re.I | re.S)
     }
-    for line_number, line in enumerate(dialogue, start=1):
+    for fallback_number, line in enumerate(dialogue, start=1):
+        line_number = int(line.get("_sourceDialogueIndex") or fallback_number)
         exact = _line_text(line)
         speaker = _norm(line.get("speaker"))
         owner = dialogue_owners.get(line_number)
@@ -417,8 +450,8 @@ def geometry_agreement(cinematography, animation):
     cine = cinematography or {}
     anim = animation or {}
     errors = []
-    cine_geo = [_norm(item) for item in cine.get("geography") or []]
-    anim_geo = [_norm(item) for item in anim.get("geography") or []]
+    cine_geo = _text_list(cine.get("geography"))
+    anim_geo = _text_list(anim.get("geography"))
     if anim_geo and cine_geo != anim_geo:
         errors.append("keyframe and render geography are not verbatim-identical")
     shot_plan = anim.get("shotPlan") or []

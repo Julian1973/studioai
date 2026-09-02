@@ -157,6 +157,34 @@ def test_project_policy_stabilizes_slots_independent_of_authored_slot_order(monk
     assert roles_a == roles_b == ["Zenny", "Fuzzby", "scene plate"]
 
 
+def test_relay_keyframe_policy_keeps_previous_final_frame_first(monkeypatch):
+    characters = {"Aida": {}, "Bo": {}, "Keen": {}}
+    monkeypatch.setattr(cb_render, "_reference_slot_policy", lambda: {
+        "characterOrder": ["Aida", "Keen", "Bo"],
+        "keyframeRoleOrder": [
+            "previous shot final frame", "scene plate", "character_identity"],
+    })
+    monkeypatch.setattr(cb_render, "_provider_identity_records", lambda role, *_, **__: [{
+        "character": role, "view": "complete-turnaround"}])
+    shot = {
+        "sourceType": "relay",
+        "sourceShotId": "S4.SH1",
+        "charactersInFrame": ["Aida", "Bo", "Keen"],
+        "keyframeReferenceSlots": {
+            "@图1": "previous shot final frame",
+            "@图2": "scene plate",
+            "@图3": "Aida",
+            "@图4": "Bo",
+            "@图5": "Keen",
+        },
+    }
+
+    roles = [item["role"] for item in cb_render._expanded_reference_blueprint(
+        shot, "keyframeReferenceSlots", characters)]
+
+    assert roles == ["previous shot final frame", "scene plate", "Aida", "Keen", "Bo"]
+
+
 def test_keen_identity_reference_follows_episode_wristband_state(monkeypatch):
     # The state-selection contract is deterministic; the large production turnaround
     # media is an operator input and is not required by this unit test.
@@ -229,6 +257,7 @@ def test_reference_manifest_exposes_keyframe_and_animation_in_provider_order(
     package = {
         "shots": [{
             "shotId": "S1.SH1", "sourceType": "opener",
+            "dialogueLines": [{"speaker": "Fuzzby", "exactText": "Hello."}],
             "keyframeReferenceSlots": {
                 "@图1": "Fuzzby", "@图2": "scene plate"},
             "referenceSlots": {

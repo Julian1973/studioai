@@ -165,6 +165,9 @@ def source_event_record(script_version_id_value: str,
     if payload["type"] == "dialogue":
         record["dialogueOccurrenceId"] = dialogue_occurrence_id(
             script_version_id_value, payload)
+        record["voiceTreatment"] = str(
+            event.get("voiceTreatment") or "single_voice")
+        record["chorusMembers"] = list(event.get("chorusMembers") or [])
     return record
 
 
@@ -195,6 +198,8 @@ def _cut_as_event(cut: Mapping[str, Any], scene_number: Any) -> dict:
         "speaker": cut.get("speaker") if source_type == "dialogue" else None,
         "text": (cut.get("exactText") if source_type == "dialogue"
                  else cut.get("action")),
+        "voiceTreatment": cut.get("voiceTreatment", "single_voice"),
+        "chorusMembers": cut.get("chorusMembers") or [],
     }
 
 

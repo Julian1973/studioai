@@ -1,4 +1,4 @@
-"""Provider transport planning for one approved Studio animation unit.
+"""Legacy comparison-only transport planning for one approved Studio animation unit.
 
 Studio shots remain the creative and review unit. When an explicitly selected comparison
 provider has a shorter request limit, this module groups consecutive approved Animation
@@ -21,6 +21,7 @@ import cb_seedance_pipeline
 
 
 COMPARISON_MODEL_ID = "fal-seedance-2.0"
+MODE = "legacy_compare"
 MIN_SEGMENT_SEC = 4.0
 MAX_SEGMENT_SEC = 15.0
 
@@ -252,8 +253,8 @@ def _segment_task(base_task, shot_id, segment, segment_count, dialogue_lines):
             f"mouth timing and silence for {speaker_names}. The exact braced dialogue "
             "markers below place approved words only; no alternative performance is "
             "permitted. Listeners remain silent and closed-mouth. No narration, no extra "
-            "words, and no subtitles or captions. The rendered dialogue is a guide track; "
-            "approved @Audio1 remains the film dialogue in post.\n" + "\n".join(
+            "words, and no subtitles or captions. "
+            + emission.SINGLE_INSTANCE_DIALOGUE_LOCK + "\n" + "\n".join(
                 emission.dialogue_placement_line(line) for line in dialogue_lines
             ) + "\nSeedance may generate only non-dialogue ambience, foley, comedy "
             "impacts, wing buzzes, plant movement, and low supportive underscore."
@@ -314,7 +315,8 @@ def build_comparison_plan(*, shot, approved_direction, base_task, parent_prompt,
                 "AUDIO-AUTHORITY: @Audio1 is the sole authority for English voice identity, "
                 "cadence, delivery, mouth timing and silence; no alternative performance "
                 "is permitted. Listeners remain silent and closed-mouth. No narration, no "
-                "extra words, and no subtitles or captions.\n" + prompt
+                "extra words, and no subtitles or captions. "
+                + emission.SINGLE_INSTANCE_DIALOGUE_LOCK + "\n" + prompt
             )
             synthesis = emission.validate_dialogue_synthesis(
                 prompt, segment_dialogue)

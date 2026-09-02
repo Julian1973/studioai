@@ -132,6 +132,15 @@ def test_speaker_not_visible_blocks():
     assert "SPEAKER_NOT_VISIBLE" in _codes(E.validate_scene_design(d, BEATS, CFG))
 
 
+def test_declared_offscreen_speaker_is_audible_without_becoming_visible():
+    d = _clean_design()
+    d.shots[0].charactersInFrame = ["Zenny"]
+    d.shots[0].offscreenSpeakers = ["Fuzzby"]
+    d.shots[0].continuityIn = _state(["Zenny"])
+    d.shots[0].continuityOut = _state(["Zenny"], marks=["pollen dust"])
+    assert "SPEAKER_NOT_VISIBLE" not in _codes(E.validate_scene_design(d, BEATS, CFG))
+
+
 def test_dialogue_overrun_and_bad_timing_block():
     d = _clean_design()
     d.shots[0].dialogueLines[0].endSec = 99.0
@@ -184,6 +193,24 @@ def test_later_entrant_does_not_pollute_opening_continuity_cast():
     shot.continuityIn.characters = shot.continuityIn.characters[:1]
     assert "CONTINUITY_CAST_INCOMPLETE" not in _codes(
         E.validate_scene_design(d, BEATS, CFG))
+
+
+def test_keyframe_uses_opening_cast_and_positive_species_evidence_only():
+    shot = _clean_design().shots[0]
+    shot.charactersInFrame = ["Bo", "Keen", "Aida"]
+    shot.openingCharactersInFrame = ["Bo", "Keen"]
+    shot.openingPose = "Bo walks beside Keen on the forest path"
+    cfg = {
+        "Bo": {"sizeRank": 1, "size": "small squirrel child", "avoid": "bee wings"},
+        "Keen": {"sizeRank": 2, "size": "young bear"},
+        "Aida": {"sizeRank": 3, "size": "adult bear"},
+    }
+    prompt, _, slots = E.compile_keyframe_prompt(
+        shot, {"sceneName": "Crystal Woods"}, cfg)
+    assert "Bo (@图1, squirrel)" in prompt
+    assert "Keen (@图2, bear)" in prompt
+    assert "Aida" not in prompt
+    assert slots == {"@图1": "Bo", "@图2": "Keen", "@图3": "scene plate"}
 
 
 def test_opener_continuity_in_not_cleared_blocks():

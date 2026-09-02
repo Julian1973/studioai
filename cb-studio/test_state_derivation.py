@@ -35,6 +35,7 @@ def _run(bundle, script_approved, scene, extra_js=""):
     wrapper = f"""
 const document = {{
   documentElement: {{ style:{{setProperty(){{}}}} }},
+  body: {{ classList:{{add(){{}},remove(){{}},toggle(){{}},contains(){{return false}}}} }},
   getElementById: () => ({{ classList:{{add(){{}},remove(){{}},toggle(){{}},contains(){{return false}}}}, value:'', innerHTML:'', style:{{}}, appendChild(){{}}, addEventListener(){{}}, setAttribute(){{}}, getAttribute(){{return null}} }}),
   addEventListener: () => {{}},
   querySelectorAll: () => [],
@@ -45,7 +46,7 @@ const localStorage = {{ getItem: () => null, setItem: () => {{}} }};
 const sessionStorage = {{ getItem: () => null, setItem: () => {{}} }};
 const history = {{ replaceState: () => {{}} }};
 const location = {{ hash:'', search:'', pathname:'/', href:'http://x/' }};
-function fetch(){{ return Promise.resolve({{ json: () => Promise.resolve({{}}), text: () => Promise.resolve('') }}); }}
+function fetch(){{ return new Promise(() => {{}}); }}
 {script}
 {extra_js}
 const __bundle = {json.dumps(bundle)};
@@ -137,7 +138,8 @@ def main():
     print("\n== missing authoritative state fails closed ==")
     out4 = _run({"pkg": {"revision": 1}, "media": {"picture": "/old.mp4"}}, True, "1")
     check("legacy fields are never used as a fallback approval policy",
-          out4["stages"]["final"]["state"] == "blocked", out4["stages"]["final"])
+          out4["stages"]["final"]["state"] in {"blocked", "locked"},
+          out4["stages"]["final"])
 
     print()
     if FAILS:

@@ -25,6 +25,8 @@ COMPILER_VERSION = "voice-director-v1"
 _TAG_RE = re.compile(r"\[([^\]]+)\]")
 _WORD_RE = re.compile(r"[A-Za-z0-9']+")
 _SEGMENT_RE = re.compile(r"[^.!?…\n]+[.!?…]*|\n+")
+_SCRIPT_NUMBER_RE = re.compile(r"^\s*\d+\s*\t")
+_TRAILING_STAGE_NOTE_RE = re.compile(r"\s*\([^)]*\)\s*$")
 
 
 class VoiceContractError(RuntimeError):
@@ -50,8 +52,17 @@ def rulebook():
     return _load(RULEBOOK_PATH)
 
 
+def _spoken_text(text):
+    """Return only provider-spoken text, excluding script metadata and action notes."""
+    value = _SCRIPT_NUMBER_RE.sub("", str(text or "")).strip()
+    return _TRAILING_STAGE_NOTE_RE.sub("", value).strip()
+
+
 def _words(text):
-    return [word.casefold() for word in _WORD_RE.findall(_TAG_RE.sub("", str(text or "")))]
+    return [
+        word.casefold()
+        for word in _WORD_RE.findall(_TAG_RE.sub("", _spoken_text(text)))
+    ]
 
 
 def _locked_text(line):
@@ -77,6 +88,52 @@ def _tag_purpose_map(value):
             if tag:
                 result[tag] = purpose
     return result
+
+
+def normalize_generated_performance_tags(line, allowed_tags):
+    """Remove unsupported generated V3 tags without touching spoken words.
+
+    Specialist output is advisory. An invented tag such as ``[laughs]`` must not
+    force a user back through Direction when the deterministic compiler already
+    knows the character's allowed palette. Human-authored performance overrides are
+    handled by the caller and are never passed through this repair.
+    """
+    allowed = {str(tag).strip().casefold() for tag in allowed_tags if str(tag).strip()}
+    removed = set()
+
+    def clean(text):
+        def replace(match):
+            tag = match.group(1).strip().casefold()
+            if tag in allowed:
+                return match.group(0)
+            removed.add(tag)
+            return ""
+        cleaned = _TAG_RE.sub(replace, str(text or ""))
+        return re.sub(r"[ \t]{2,}", " ", cleaned).strip()
+
+    is_model = hasattr(line, "model_dump")
+    get = (lambda key, default=None: getattr(line, key, default)) if is_model else line.get
+    set_value = (lambda key, value: setattr(line, key, value)) if is_model else line.__setitem__
+    set_value("performedText", clean(get("performedText", "")))
+    for recipe in get("takeRecipes", []) or []:
+        if hasattr(recipe, "model_dump"):
+            recipe.performedText = clean(recipe.performedText)
+        else:
+            recipe["performedText"] = clean(recipe.get("performedText", ""))
+    purposes = get("tagPurposes", []) or []
+    if isinstance(purposes, dict):
+        set_value("tagPurposes", {
+            tag: purpose for tag, purpose in purposes.items()
+            if str(tag).strip().casefold() in allowed
+        })
+    else:
+        kept = []
+        for item in purposes:
+            tag = getattr(item, "tag", None) if hasattr(item, "model_dump") else item.get("tag")
+            if str(tag or "").strip().casefold() in allowed:
+                kept.append(item)
+        set_value("tagPurposes", kept)
+    return sorted(removed)
 
 
 def _digest(value):
@@ -109,9 +166,11 @@ def post_direction_audit(line, locked_line, card, register):
            str(locked_line.get("speaker") or "").casefold(),
            "Character matches the locked script speaker.")
     locked_text = _locked_text(locked_line)
-    _check(checks, "exact-dialogue-lock",
-           _words(line.get("exactDialogue")) == _words(locked_text),
-           "Exact dialogue preserves every locked script word.")
+    exact_dialogue_locked = _words(line.get("exactDialogue")) == _words(locked_text)
+    _check(checks, "exact-dialogue-lock", exact_dialogue_locked,
+           "Exact dialogue preserves every locked script word."
+           if exact_dialogue_locked else
+           "Exact dialogue must preserve every locked script word.")
 
     recipes = line.get("takeRecipes") or []
     _check(checks, "recipe-count", 1 <= len(recipes) <= 3,
@@ -122,14 +181,27 @@ def post_direction_audit(line, locked_line, card, register):
     for recipe in recipes:
         text = str(recipe.get("performedText") or "")
         recipe_id = recipe.get("recipeId") or "unnamed"
-        _check(checks, f"script-fidelity:{recipe_id}",
-               _words(text) == _words(locked_text),
-               f"{recipe_id} preserves every locked script word.")
+        recipe_words_locked = _words(text) == _words(locked_text)
+        _check(checks, f"script-fidelity:{recipe_id}", recipe_words_locked,
+               f"{recipe_id} preserves every locked script word."
+               if recipe_words_locked else
+               f"{recipe_id} must preserve every locked script word.")
         spoken_text = _TAG_RE.sub("", text).strip()
         locked_spoken_text = _TAG_RE.sub("", locked_text).strip()
-        deliberately_interrupted = locked_spoken_text.endswith(("—", "--", "...", "…"))
+        deliberately_interrupted = (
+            locked_spoken_text.endswith(("—", "--", "...", "…")) or
+            bool(locked_line.get("sfxInterrupted"))
+        )
+        source_intentionally_unpunctuated = False
+        if not deliberately_interrupted:
+            try:
+                emission.require_complete_sentence(
+                    locked_spoken_text, context=f"locked dialogue {recipe_id}")
+            except emission.EmissionConformanceError:
+                source_intentionally_unpunctuated = (
+                    _words(spoken_text) == _words(locked_spoken_text))
         try:
-            if not deliberately_interrupted:
+            if not deliberately_interrupted and not source_intentionally_unpunctuated:
                 emission.require_complete_sentence(
                     spoken_text, context=f"voice recipe {recipe_id}")
             sentence_complete = True
@@ -275,8 +347,9 @@ def emit_v3_requests(compiled, *, max_requests=None):
     requests = []
     for recipe in compiled["takeRecipes"]:
         for take_number in range(1, int(recipe["takesCount"]) + 1):
+            provider_text = _provider_pronunciation_text(recipe["performedText"])
             body = {
-                "text": recipe["performedText"],
+                "text": provider_text,
                 "model_id": compiled["modelId"],
                 "voice_settings": deepcopy(compiled["voiceSettings"]),
             }
@@ -298,6 +371,18 @@ def emit_v3_requests(compiled, *, max_requests=None):
             if max_requests is not None and len(requests) >= int(max_requests):
                 return requests
     return requests
+
+
+def _provider_pronunciation_text(text):
+    """Apply ElevenLabs-only pronunciation spellings without changing script metadata."""
+    replacements = {
+        "Aida": "ada",
+        "Ada": "ada",
+    }
+    provider = str(text or "")
+    for source, spoken in replacements.items():
+        provider = re.sub(rf"\b{re.escape(source)}\b", spoken, provider)
+    return provider
 
 
 def compile_track(direction, locked_lines):

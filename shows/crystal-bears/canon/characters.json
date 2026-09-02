@@ -987,6 +987,36 @@
     "promptRole": "the smaller, calm, deadpan bee",
     "isBee": true
   },
+  "Bo's Mum": {
+    "_status": "LOCKED audio-only recurring guest. The approved Episode 2 script requires her voice from offscreen and explicitly forbids her appearing in frame.",
+    "anchor": "engine/media/shots/Ep2_3.B1.S1_HEAR_LOCKED_1b6f22e1.mp3",
+    "voiceId": "GGlVrqwKgiFPcO2pSZRz",
+    "sizeRank": 1.6,
+    "size": "adult squirrel; offscreen-only in the approved Episode 2 script",
+    "cadence": "warm, practical and gently encouraging; makes leaving sound ordinary without pushing Bo",
+    "key_features": "offscreen voice presence only; never render a body, silhouette, shadow, paw or reflection",
+    "bible": {
+      "character": "Bo's Mum",
+      "title": "The Offscreen Nudge",
+      "essence": "A warm practical voice from elsewhere in the hollow who gives Bo an ordinary reason to begin despite his anxiety.",
+      "voice": "ElevenLabs v3 voice ID GGlVrqwKgiFPcO2pSZRz, established by the approved Episode 2 HEAR asset.",
+      "speech": "Warm, domestic and matter-of-fact. She does not dramatise Bo's departure or speak additional words.",
+      "staging": "Offscreen-only. She may be heard but can never appear in frame, cast a shadow, enter a reflection or articulate visually.",
+      "dos": [
+        "Use the locked ElevenLabs v3 voice identity for her exact approved dialogue",
+        "Keep her entirely offscreen",
+        "Let her practical warmth contrast with Bo's internal anxiety"
+      ],
+      "donts": [
+        "Do not show or design Bo's Mum",
+        "Do not substitute Keen's Mum or another character's identity",
+        "Do not invent additional dialogue"
+      ]
+    },
+    "promptRole": "Bo's offscreen mother voice",
+    "offscreenOnly": true,
+    "isBee": false
+  },
   "Keen's Mum": {
     "turnaround": "../cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
     "anchor": "../cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
@@ -1151,19 +1181,65 @@
     "cameraRegister": "Stage him in and around water \u2014 leaping arcs, surface play, half-submerged; cut to his big expressive eyes for emotional beats, hold the rescue beat to let it breathe. (extracted from the character's own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)"
   },
   "Bo": {
-    "_status": "STUB (T6 ruling, 2026-07-02, Julian) \u2014 confirmed as recurring-guest tier so Ep2's pipeline/canon isn't blocked. The ONE fact already in canon: Bo is a cub, and 'Bo's Mum' also appears as a related character needing her own stub. Everything else \u2014 species/appearance, reference art (turnaround), voice, sizeRank, role in Ep2's story, full character bible \u2014 is still needed from Julian before Gate 2 can build keyframes for Ep2. Do NOT invent these.",
-    "turnaround": "",
-    "anchor": "",
-    "voiceId": null,
-    "size": "a cub (exact size/build TBD \u2014 not yet placed on the size chart)",
-    "cadence": "",
-    "key_features": "",
-    "turn4": "",
-    "refs": [],
-    "bible": null,
-    "sizeRank": null,
-    "render_ref": "",
-    "promptRole": "",
+    "_status": "LOCKED (2026-08-26, Julian supplied turnaround, satchel, house plates and ElevenLabs voice). Bo is production-usable for Ep2. Do not redesign or substitute species.",
+    "turnaround": "../cb-seed/assets/final_turnarounds/CB_Bo.png",
+    "anchor": "../cb-seed/assets/final_turnarounds/CB_Bo.png",
+    "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+    "size": "small squirrel child/youngster, smaller and slimmer than every bear, much larger than Fuzzby and Zenny",
+    "cadence": "bright, nimble, curious and slightly nervous; quick little bursts when excited, softer when unsure",
+    "actingNote": "Bo moves like a young squirrel: alert, springy, quick paws, expressive tail, curious head tilts. Keep him warm and childlike, never generic bear-shaped. His big tail is part of every readable silhouette unless framing deliberately crops it.",
+    "key_features": "russet-orange squirrel with cream muzzle, cream chest and belly, large expressive brown eyes, tall pointed ears with tufts, small brown nose, slim paws and feet, and a very large fluffy curled tail; carries/wears Bo\u2019s brown leather satchel when scripted; may carry Bo\u2019s exact glossy reddish-brown conker when scripted",
+    "markers": "large fluffy curled tail, tall tufted squirrel ears, cream belly and muzzle, russet-orange fur, Bo\u2019s brown satchel with acorn clasp, Bo\u2019s glossy conker with pale tan patch",
+    "avoid": "bear cub proportions, bear ears, blue fur, bee wings, crystal jewellery unless explicitly scripted, missing or tiny tail, wrong satchel clasp, generic backpack, generic acorn/conker/nut replacing Bo\u2019s locked conker reference",
+    "turn4": "../cb-seed/assets/final_turnarounds/CB_Bo.png",
+    "refs": [
+      "../cb-seed/assets/characters/Bo/CB_Bo_char-turnaround.png",
+      "../cb-seed/assets/props/CB_Bo_satchel.png",
+      "../cb-seed/assets/houses/CB_Bo_house-turnaround.png",
+      "../cb-seed/assets/houses/CB_Bo_house-int-door-view.png",
+      "../cb-seed/assets/houses/CB_Bo_house-int-reverse-view.png",
+      "../cb-seed/assets/props/CB_Bo_conker_turnaround.png",
+      "../cb-seed/assets/characters/Bo/CB_Bo_conker_turnaround.png"
+    ],
+    "props": {
+      "satchel": "cb-seed/assets/props/CB_Bo_satchel.png",
+      "satchelDesc": "small brown leather cross-body satchel with stitched edges, tan strap and brass acorn clasp; belongs only to Bo",
+      "conker": "cb-seed/assets/props/CB_Bo_conker_turnaround.png",
+      "conkerDesc": "Bo\u2019s exact conker: glossy reddish-brown horse chestnut, round 8 cm prop, pale tan circular patch on one side, natural pitted shell texture; belongs only to Bo."
+    },
+    "house": {
+      "interior": "cb-seed/assets/houses/CB_Bo_house-int-door-view.png",
+      "interiorReverse": "cb-seed/assets/houses/CB_Bo_house-int-reverse-view.png",
+      "turnaround": "cb-seed/assets/houses/CB_Bo_house-turnaround.png",
+      "interiorDesc": "A cosy hollow tree house interior made from twisting roots and bark, stone floor, round wooden table and stools, shelves of jars and pottery, rope coils, crystals, fireplace, circular windows and a rounded wooden door.",
+      "exteriorDesc": "Large living tree house with root-wrapped wooden door, round window, moss, forest flowers and crystals; exact exterior scale and continuity from Bo\u2019s house turnaround."
+    },
+    "bible": {
+      "character": "Bo",
+      "title": "The New Forest Friend",
+      "essence": "A small russet squirrel whose curiosity and worry pull the episode toward kindness, problem-solving and belonging.",
+      "voice": "ElevenLabs voice ID AAF2q3NCwTrLMMkEnRLB. Young, warm, nimble, slightly anxious when under pressure, bright when reassured.",
+      "speech": "Short, quick, sincere lines. He does not sound grand or pompous; nervous beats should land through tiny pauses and breath, not exaggerated panic.",
+      "staging": "Stage with squirrel physics: light steps, quick turns, tail balancing emotion and movement, paws close to chest when worried, satchel held or worn when relevant. His tree house and satchel are identity anchors, not generic props.",
+      "dos": [
+        "Use the supplied Bo turnaround as the identity authority for every Bo render",
+        "Keep Bo clearly squirrel-shaped with tall tufted ears and a large fluffy tail",
+        "Use Bo\u2019s satchel reference whenever the satchel appears",
+        "Use the supplied tree-house interior/turnaround plates for Bo\u2019s home geography"
+      ],
+      "donts": [
+        "Do not render Bo as a bear cub",
+        "Do not omit or shrink the tail when the full body is visible",
+        "Do not replace Bo\u2019s acorn-clasp satchel with a generic bag",
+        "Do not reuse another character\u2019s voice, jewellery, species or proportions"
+      ]
+    },
+    "height": "2'6\" (76 cm)",
+    "heightIn": 30,
+    "sizeRank": 0.8,
+    "sizeRef": "smaller than Amie and Sunny; larger than Fuzzby and Zenny",
+    "render_ref": "../cb-seed/assets/final_turnarounds/CB_Bo.png",
+    "promptRole": "the small russet squirrel youngster",
     "isBee": false
   }
 }

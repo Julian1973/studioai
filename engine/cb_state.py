@@ -15,9 +15,86 @@ import cb_intake
 import cb_lineage
 import cb_quality
 import cb_render
+import cb_audio_authority
+import cb_rough_cut
 
 
-POLICY_VERSION = "canon-locked-current-direction-outcome-approval-v4"
+POLICY_VERSION = "canon-locked-current-direction-outcome-approval-v5"
+
+_SHOT_STAGE_DEPENDENCIES = {
+    "direction": {
+        "preserved": ["scenelook"],
+        "invalidated": ["direction", "keyframe", "voice", "animation", "continuity", "final"],
+    },
+    "keyframe": {
+        "preserved": ["direction", "scenelook", "voice"],
+        "invalidated": ["keyframe", "animation", "continuity", "final"],
+    },
+    "voice": {
+        "preserved": ["direction", "scenelook", "keyframe"],
+        "invalidated": ["voice", "animation", "continuity", "final"],
+    },
+    "animation": {
+        "preserved": ["direction", "scenelook", "keyframe", "voice"],
+        "invalidated": ["animation", "continuity", "final"],
+    },
+}
+
+
+def _amendment_stage(scope):
+    explicit = str(scope.get("changedStage") or scope.get("stage") or "").strip().lower()
+    aliases = {"see": "keyframe", "hear": "voice", "watch": "animation"}
+    explicit = aliases.get(explicit, explicit)
+    if explicit in _SHOT_STAGE_DEPENDENCIES:
+        return explicit
+    if scope.get("kind") == "dialogue-correction":
+        return "voice"
+    return None
+
+
+def _scoped_shot_amendment(intake, scene, pkg):
+    """Describe a same-scene edit that may reuse the previous signed package as a base.
+
+    This is a presentation/workflow allowance, not a generation-lineage bypass.  It keeps
+    sibling shots and approved visual inputs visible while the named shot's changed
+    dependencies are rebuilt and re-approved.
+    """
+    scope = intake.get("scriptChangeScope") or {}
+    shot_id = str(scope.get("shotId") or "").strip()
+    package_script = (pkg.get("sourceScript") or {}).get("scriptVersionId")
+    try:
+        current_scene = int("".join(ch for ch in str(scene) if ch.isdigit()) or "0")
+        changed_scene = int("".join(
+            ch for ch in str(scope.get("scene")) if ch.isdigit()) or "0")
+    except (TypeError, ValueError):
+        return None
+    changed_stage = _amendment_stage(scope)
+    explicit = next((item for item in reversed(pkg.get("scopedAmendments") or [])
+                     if item.get("shotId") == shot_id and
+                     item.get("scriptVersionId") == intake.get("scriptVersionId") and
+                     item.get("kind") == scope.get("kind") and
+                     item.get("baseScriptVersionId", package_script) == package_script), None)
+    if not (
+        changed_stage and shot_id and
+        current_scene and current_scene == changed_scene and
+        (package_script == intake.get("previousScriptVersionId") or explicit)
+    ):
+        return None
+    package_shots = {shot.get("shotId") for shot in _active_package_shots(pkg)}
+    if shot_id not in package_shots:
+        return None
+    dependency = _SHOT_STAGE_DEPENDENCIES[changed_stage]
+    return {
+        "active": True,
+        "shotId": shot_id,
+        "kind": scope.get("kind"),
+        "changedStage": changed_stage,
+        "preservedStages": list(dependency["preserved"]),
+        "invalidatedStages": list(dependency["invalidated"]),
+        "previousScriptVersionId": intake.get("previousScriptVersionId"),
+        "currentScriptVersionId": intake.get("scriptVersionId"),
+        "record": explicit,
+    }
 
 
 def _read_json(path):
@@ -56,10 +133,19 @@ def _keyframe_candidate_current(pkg, shot, candidate, scene, episode):
             pkg, shot, candidate, scene, episode)
     except (cb_render.Refused, OSError, ValueError):
         return False
-    return (
-        candidate.get("inputSignature") == expected and
-        candidate.get("contentHash") == cb_render._sha256_file(candidate["path"])
+    content_current = candidate.get("contentHash") == cb_render._sha256_file(candidate["path"])
+    if candidate.get("inputSignature") == expected:
+        return content_current
+    amendment = next(
+        (item for item in reversed(pkg.get("scopedAmendments") or [])
+         if item.get("shotId") == shot.get("shotId") and
+         item.get("kind") in ("dialogue-correction", "voice-contract-correction") and
+         "keyframe" in (item.get("preservedStages") or []) and
+         item.get("sceneLookContentHash") == expected.get("sceneLookHash")),
+        None,
     )
+    changed = set(cb_render._signature_diff(candidate.get("inputSignature"), expected))
+    return bool(amendment and content_current and changed <= {"cardHash"})
 
 
 def _batch_current(pkg, shot, ledger, scene, episode):
@@ -80,6 +166,14 @@ def _batch_current(pkg, shot, ledger, scene, episode):
     ]
     return bool(recorded_files) and (
         batch.get("inputSignature") == expected and recorded_files == current_files)
+
+
+def _approved_file_intact(record):
+    path = (record or {}).get("path")
+    if not ((record or {}).get("approved") and path and os.path.exists(path)):
+        return False
+    content_hash = (record or {}).get("contentHash")
+    return not content_hash or content_hash == cb_render._sha256_file(path)
 
 
 def _storyboard_status(scene, episode, intake):
@@ -107,11 +201,51 @@ def _storyboard_status(scene, episode, intake):
         signature_ok = cb_lineage.signature_matches(
             signature, "scene-storyboard", inputs)
         canon_ok = inputs.get("canonProfileDigest") == active_canon_digest
+    scope = intake.get("scriptChangeScope") or {}
+    try:
+        scene_number = int("".join(ch for ch in str(scene) if ch.isdigit()) or "0")
+        changed_scene = int("".join(ch for ch in str(scope.get("scene")) if ch.isdigit()) or "0")
+        from_scene = int("".join(ch for ch in str(scope.get("fromScene")) if ch.isdigit()) or "0")
+        through_scene = int("".join(ch for ch in str(scope.get("throughScene")) if ch.isdigit()) or "0")
+    except (TypeError, ValueError):
+        scene_number = changed_scene = from_scene = through_scene = 0
+    scene_source_unchanged = False
+    source = storyboard.get("sourceScript") or {}
+    try:
+        source_path = (cb_render.ROOT / str(source.get("contentPath") or "")).resolve()
+        current_path = cb_render.SCRIPT_STORE.content_path(episode).resolve()
+        source_path.relative_to(cb_render.ROOT.resolve())
+        current_path.relative_to(cb_render.ROOT.resolve())
+        old_scene_digest = cb_intake.scene_source_digests(
+            source_path.read_text(encoding="utf-8")).get(str(scene_number))
+        new_scene_digest = cb_intake.scene_source_digests(
+            current_path.read_text(encoding="utf-8")).get(str(scene_number))
+        scene_source_unchanged = bool(
+            old_scene_digest and old_scene_digest == new_scene_digest)
+    except (OSError, TypeError, ValueError, cb_intake.Refused):
+        scene_source_unchanged = False
+    outside_replaced_scene_range = bool(
+        scope.get("kind") == "scene-range-replacement" and scene_number and
+        ((from_scene and scene_number < from_scene) or
+         (through_scene and scene_number > through_scene))
+    )
+    scoped_previous = bool(
+        (scene_source_unchanged or outside_replaced_scene_range or
+         (scope.get("kind") == "dialogue-format-cleanup") or
+         (scope.get("kind") == "dialogue-correction" and scene_number and
+          changed_scene and scene_number < changed_scene)) and
+        source_version)
+    if scoped_previous and signature.get("kind") == "scene-storyboard-snapshot":
+        # Its own signed snapshot remains valid; only the episode-wide active script and
+        # beat-package pointers advanced for a later-scene correction.
+        signature_ok = cb_lineage.signature_matches(
+            signature, "scene-storyboard-snapshot", inputs)
+    version_current = source_version == intake.get("scriptVersionId") or scoped_previous
+    beat_current = inputs.get("beatPackageDigest") == active_beat_digest or scoped_previous
     current = bool(
         intake.get("canonicalCurrent") and
         storyboard.get("approvalState") == "approved" and signature_ok and
-        source_version and source_version == intake.get("scriptVersionId") and
-        inputs.get("beatPackageDigest") == active_beat_digest and canon_ok)
+        source_version and version_current and beat_current and canon_ok)
     reason = None
     if not intake.get("canonicalCurrent"):
         reason = "story-intake-source-contract-missing-or-stale"
@@ -119,19 +253,20 @@ def _storyboard_status(scene, episode, intake):
         reason = storyboard.get("approvalState") or "awaiting-human-storyboard-approval"
     elif not signature_ok:
         reason = "storyboard-input-signature-mismatch"
-    elif source_version != intake.get("scriptVersionId"):
+    elif not version_current:
         reason = "storyboard-script-version-mismatch"
-    elif inputs.get("beatPackageDigest") != active_beat_digest:
+    elif not beat_current:
         reason = "storyboard-beat-package-mismatch"
     elif not canon_ok:
         reason = "storyboard-canon-lock-mismatch"
     return storyboard, current, reason
 
 
-def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
+def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
+                amendment=None):
     shot_id = shot["shotId"]
     ledger = cb_render._ledger(pkg, shot_id)
-    needs_keyframe = shot.get("sourceType") == "opener"
+    needs_keyframe = cb_render._shot_uses_own_keyframe(shot, ledger)
 
     cine = cb_render._department_record_status(
         pkg, shot_id, "cinematography", scene, episode)
@@ -148,17 +283,27 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
     if needs_keyframe:
         keyframe = cb_render._keyframe_record_status(
             pkg, shot, keyframe_approval, scene, episode)
+        stage_contract = cb_render._keyframe_stage_contract_report(keyframe_approval)
         candidate_current = _keyframe_candidate_current(
             pkg, shot, keyframe_candidate, scene, episode)
+        non_generated_candidate = keyframe_candidate.get("source") in {
+            "uploaded", "library", "previousFinalFrame", "ab-import",
+        }
         if keyframe_candidate:
-            if candidate_current and keyframe_screening.get("status") == "pass":
+            if (
+                candidate_current and
+                (
+                    keyframe_screening.get("status") == "pass" or
+                    (non_generated_candidate and keyframe_screening.get("status") != "fail")
+                )
+            ):
                 kf = "awaiting"
             elif candidate_current:
                 kf = "screening"
             else:
                 kf = "staleInputs"
         elif keyframe["current"]:
-            kf = "approved"
+            kf = "approved" if stage_contract["ready"] else "stageBlocked"
         elif (keyframe_approval and
               keyframe.get("reason") == "keyframe-conformance-not-passed"):
             kf = "screening"
@@ -169,7 +314,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
         else:
             kf = "ready"
         keyframe_satisfied = keyframe["current"]
-        source_shot_id = None
+        source_shot_id = shot.get("sourceShotId")
     else:
         source_shot_id = shot.get("sourceShotId")
         source_state = None
@@ -180,13 +325,22 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
                     pkg, source_shot, scene, episode)
             except cb_render.Refused:
                 source_state = None
+            # Approved relay media may survive a scoped package refresh while the old
+            # approval ledger is being rehydrated. A recorded predecessor final frame is
+            # sufficient to show the handoff in SEE; it does not authorise WATCH spend.
+            if not (source_state and source_state["current"]):
+                final_frame = (cb_render.ROOT / "engine" / "media" / "shots" /
+                               f"{episode}_{source_shot_id}_final_frame.png")
+                if final_frame.is_file():
+                    source_state = {"current": True, "reason": "verified predecessor final frame",
+                                    "harvestFrame": str(final_frame)}
         keyframe_satisfied = bool(source_state and source_state["current"])
         kf = "inherited" if keyframe_satisfied else "waitingPrev"
         keyframe = source_state or {"current": False, "reason": "source-shot-not-approved"}
         candidate_current = False
 
     voice = cb_render._voice_approval_status(pkg, shot, scene, episode)
-    talky = bool(shot.get("dialogueLines"))
+    talky = bool(cb_audio_authority.spoken_dialogue_lines(shot))
     voice_ok = voice["current"]
     # Once HEAR is signed, the immutable approved media bundle is the operational
     # performance direction. A later unapproved draft cannot make that decision stale.
@@ -213,6 +367,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
     scene_look_gated = not scene_look_current
     ready_to_animate = bool(
         package_current and scene_look_current and keyframe_satisfied and voice_ok and
+        (not needs_keyframe or stage_contract["ready"]) and
         animation_direction["current"] and
         animation_state not in ("approved", "candidates-pending", "model-limited"))
 
@@ -241,6 +396,14 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
             "retry the objective identity and scale check; no media regeneration is needed",
             "blocked",
         )
+    elif kf == "stageBlocked":
+        label, sub, badge = (
+            "Opening keyframe must be corrected",
+            "Audio is ready as Seedance 2.5 SFX; no ElevenLabs track is required. "
+            "The image-only blocker is: " + (stage_contract.get("reason") or
+            "the approved image does not prove the required physical stage"),
+            "blocked",
+        )
     elif kf == "waitingPrev":
         label, sub, badge = (
             f"Waiting for {source_shot_id} final frame",
@@ -264,6 +427,14 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
              "generate, listen and choose Accept or Iterate"),
             "ready",
         )
+    elif animation_state == "approved" and not continuity_current:
+        label, sub, badge = (
+            "Animation accepted",
+            "Director Review still needs a current sign-off",
+            "ready",
+        )
+    elif animation_state == "approved":
+        label, sub, badge = "Complete", None, "approved"
     elif not animation_direction["current"]:
         label, sub, badge = (
             "Ready to fire animation",
@@ -297,7 +468,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
     else:
         label, sub, badge = "Complete", None, "approved"
 
-    return {
+    result = {
         "shotId": shot_id,
         "sourceType": shot.get("sourceType"),
         "sourceShotId": source_shot_id,
@@ -364,6 +535,86 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
             "reviewAnimation": bool(animation["current"]),
         },
     }
+    if amendment and shot_id == amendment.get("shotId"):
+        # A dialogue/timing amendment does not erase an approved opening image.  HEAR and
+        # WATCH remain closed until the amended shot has a newly signed production record.
+        changed_stage = amendment.get("changedStage") or "voice"
+        preserved = set(
+            amendment.get("preservedStages") or
+            _SHOT_STAGE_DEPENDENCIES[changed_stage]["preserved"])
+        if "keyframe" in preserved and _approved_file_intact(keyframe_approval):
+            result["kf"] = "approved"
+            result["keyframeSatisfied"] = True
+            result["current"]["keyframe"] = True
+        changed_stage_current = {
+            "direction": bool(result["current"]["cinematographyDirection"]),
+            "keyframe": bool(result["current"]["keyframe"]),
+            "voice": bool(result["current"]["voice"]),
+            "animation": bool(result["current"]["animation"]),
+        }[changed_stage]
+        result["amendment"] = {
+            **amendment,
+            "active": not changed_stage_current,
+            "changedStageCurrent": changed_stage_current,
+        }
+        if changed_stage_current:
+            # Recompute the first downstream action after any preserved approval has been
+            # restored above. The initial action map was built before that scoped carry-forward.
+            result["allowedActions"]["prepareAnimation"] = bool(
+                package_current and scene_look_current and
+                result["current"]["keyframe"] and result["current"]["voice"])
+        if not changed_stage_current:
+            if "voice" not in preserved:
+                result["voiceOk"] = False
+                result["current"]["voice"] = False
+            result["animState"] = "amendment-pending"
+            result["readyToAnimate"] = False
+            phase = {"direction": "DIRECTION", "keyframe": "SEE",
+                     "voice": "HEAR", "animation": "WATCH"}[changed_stage]
+            result["label"] = f"Shot amendment needs {phase}"
+            result["sub"] = (
+                "Earlier approved stages are preserved. Review this scoped change; only its "
+                "genuine downstream dependencies will reopen.")
+            result["badgeState"] = "ready"
+            result["current"]["animationDirection"] = False
+            result["current"]["animationBatch"] = False
+            result["current"]["animation"] = False
+            result["current"]["directorReview"] = False
+            result["current"]["continuity"] = False
+            result["pending"]["voice"] = False
+            result["pending"]["animation"] = False
+            result["allowedActions"]["prepareAnimation"] = False
+            result["allowedActions"]["fireAnimation"] = False
+            result["allowedActions"]["approveAnimation"] = False
+            result["allowedActions"]["reviewAnimation"] = False
+    elif amendment:
+        # Sibling shots retain the decisions made against the previous immutable package.
+        # Verify every referenced file before displaying it as preserved.
+        preserved_keyframe = _approved_file_intact(keyframe_approval)
+        preserved_voice = _approved_file_intact(ledger.get("voiceApproval") or {})
+        approved_take = ledger.get("approvedTake")
+        preserved_animation = bool(
+            ledger.get("status") == "approved" and approved_take and
+            os.path.exists(approved_take))
+        if preserved_keyframe:
+            result["kf"] = "approved"
+            result["keyframeSatisfied"] = True
+            result["current"]["keyframe"] = True
+        if preserved_voice:
+            result["voiceOk"] = True
+            result["current"]["voice"] = True
+        if preserved_animation:
+            result["animState"] = "approved"
+            result["current"]["animation"] = True
+            result["label"] = "Approved work preserved"
+            result["sub"] = "This shot is unaffected by the scoped amendment."
+            result["badgeState"] = "approved"
+        result["amendment"] = {
+            "active": False,
+            "preservedFromSiblingAmendment": True,
+            "changedShotId": amendment.get("shotId"),
+        }
+    return result
 
 
 def _active_package_shots(pkg):
@@ -427,64 +678,18 @@ def production_state(scene, episode="Ep1", intake=None):
     else:
         stages["storyboard"] = _stage("awaiting", storyboard_reason)
 
-    if script_current and not canon_ready:
-        for name in ("scenelook", "voice", "keyframe", "animation", "continuity", "final"):
-            stages[name] = _stage("locked")
-        first = (canon_summary["blockers"] or [{}])[0]
-        return _with_quality({
-            "policyVersion": POLICY_VERSION,
-            "episode": episode,
-            "scene": scene,
-            "canonLock": canon_summary,
-            "packageExists": False,
-            "packageCurrent": False,
-            "staleBeatPackageIgnored": bool(intake.get("hasCanonicalPackage")),
-            "lineage": {"current": False, "reasonCodes": ["canon-lock-required"]},
-            "stages": stages,
-            "shots": [],
-            "_per": [],
-            "blockers": [{
-                "code": "CANON_LOCK_REQUIRED",
-                "stage": "storyboard",
-                "message": first.get("message") or
-                           "The approved canon snapshot is missing, stale or incomplete.",
-                "action": first.get("action") or
-                          "Resolve the listed canon issue and explicitly re-lock canon.",
-            }],
-        })
-
-    if script_current and not intake_current:
-        action = (
-            "Review and approve the current episode Story & Direction candidate."
-            if intake.get("hasCandidate") and intake.get("candidateCurrent")
-            else "Run Story & Direction for the active script."
-        )
-        for name in ("scenelook", "voice", "keyframe", "animation", "continuity", "final"):
-            stages[name] = _stage("locked")
-        return _with_quality({
-            "policyVersion": POLICY_VERSION,
-            "episode": episode,
-            "scene": scene,
-            "canonLock": canon_summary,
-            "packageExists": False,
-            "packageCurrent": False,
-            "staleBeatPackageIgnored": bool(intake.get("hasCanonicalPackage")),
-            "lineage": {"current": False, "reasonCodes": ["story-intake-not-approved"]},
-            "stages": stages,
-            "shots": [],
-            "_per": [],
-            "blockers": [{
-                "code": "STORY_INTAKE_APPROVAL_REQUIRED",
-                "stage": "storyboard",
-                "message": "The active script has no current approved episode Story & Direction package.",
-                "action": action,
-            }],
-        })
-
     try:
         pkg, _ = cb_render.load_pkg(scene, episode)
         package_exists = True
         lineage = cb_render.lineage_status(pkg, scene, episode)
+        amendment = _scoped_shot_amendment(intake, scene, pkg)
+        preserved_scene = bool(
+            not intake_current and lineage["current"] and storyboard and
+            storyboard.get("approvalState") == "approved")
+        if preserved_scene:
+            storyboard_current = True
+            stages["storyboard"] = _stage(
+                "approved", "this scene is unchanged in the active script")
         package_current = bool(
             (pkg.get("validation") or {}).get("passed") and lineage["current"] and
             storyboard_current)
@@ -492,37 +697,17 @@ def production_state(scene, episode="Ep1", intake=None):
         pkg = None
         package_exists = False
         package_current = False
+        amendment = None
+        preserved_scene = False
         lineage = {"current": False, "reasonCodes": ["production-package-missing"]}
 
-    storyboard_approval = str((storyboard or {}).get("approvalState") or "")
-    if storyboard and storyboard_approval != "approved":
-        rejected = "reject" in storyboard_approval.lower()
-        action = (
-            "Run Story & Direction again from the human iteration note."
-            if rejected else
-            "Review the current Story & Direction candidate and choose Approve or Iterate."
-        )
-        for name in ("scenelook", "voice", "keyframe", "animation", "continuity", "final"):
-            stages[name] = _stage("locked", "Story & Direction needs a human decision first")
-        return _with_quality({
-            "policyVersion": POLICY_VERSION,
-            "episode": episode,
-            "scene": scene,
-            "canonLock": canon_summary,
-            "packageExists": package_exists,
-            "packageCurrent": False,
-            "packageRevision": pkg.get("revision") if pkg else None,
-            "lineage": {"current": False, "reasonCodes": ["storyboard-not-approved"]},
-            "stages": stages,
-            "shots": [],
-            "_per": [],
-            "blockers": [{
-                "code": "STORYBOARD_NOT_APPROVED",
-                "stage": "storyboard",
-                "message": "The current Story & Direction candidate needs a human decision.",
-                "action": action,
-            }],
-        })
+    if amendment:
+        # Keep the signed package as the production baseline while the one named shot is
+        # amended.  This does not make the package generation-current; per-shot actions
+        # below keep the amended HEAR/WATCH path closed until it is resynchronised.
+        package_current = bool((pkg.get("validation") or {}).get("passed"))
+        stages["storyboard"] = _stage(
+            "approved", "accepted direction retained; one shot amendment is in progress")
 
     if not pkg:
         downstream = (
@@ -561,8 +746,21 @@ def production_state(scene, episode="Ep1", intake=None):
     look_direction = cb_render._department_record_status(
         pkg, None, "look", scene, episode)
     scene_look_current = bool(scene_look.get("current"))
+    if amendment:
+        carried_look = ((amendment.get("record") or {}).get("sceneLookPath") and {
+            "path": (amendment.get("record") or {}).get("sceneLookPath"),
+            "hash": (amendment.get("record") or {}).get("sceneLookContentHash"),
+        }) or scene_look.get("active") or look_record.get("candidate") or \
+            look_record.get("approved") or {}
+        look_path = carried_look.get("path")
+        scene_look_current = bool(
+            look_path and os.path.exists(look_path) and
+            carried_look.get("hash") == cb_render._sha256_file(look_path))
 
-    if production_block:
+    if amendment and scene_look_current:
+        stages["scenelook"] = _stage(
+            "approved", "approved scene world preserved for the scoped shot amendment")
+    elif production_block:
         stages["scenelook"] = production_block
     elif look_work.get("candidate") and not look_direction["current"]:
         stages["scenelook"] = _stage(
@@ -589,7 +787,8 @@ def production_state(scene, episode="Ep1", intake=None):
             "ready", "direction ready; generate or select one plate candidate")
 
     shots = [
-        _shot_state(pkg, shot, scene, episode, scene_look_current, package_current)
+        _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
+                    amendment=amendment)
         for shot in _active_package_shots(pkg)
     ]
 
@@ -674,28 +873,31 @@ def production_state(scene, episode="Ep1", intake=None):
             f"{approved_animation} accepted; {ready_animation} ready; "
             f"{max(0, len(shots) - approved_animation - ready_animation)} waiting")
 
-    continuity_count = sum(
-        1 for shot in shots if shot["current"]["continuity"])
-    pending_reviews = sum(
-        1 for shot in shots if shot["pending"]["directorReview"])
-    if stages["animation"]["state"] != "approved":
-        stages["continuity"] = _stage("locked", "accept every current animation take first")
-    elif pending_reviews:
-        stages["continuity"] = _stage(
-            "awaiting", f"{pending_reviews} Director Review decision(s) pending")
-    elif shots and continuity_count == len(shots):
-        stages["continuity"] = _stage(
-            "approved", f"{continuity_count} of {len(shots)} reviewed")
+    if approved_animation == 0:
+        stages["continuity"] = _stage("locked", "accept the first WATCH take to open Director's Seat")
     else:
-        stages["continuity"] = _stage(
-            "ready", f"{continuity_count} of {len(shots)} reviewed")
+        try:
+            cut = cb_rough_cut.scene_status(
+                episode, str(scene), out=cb_render.HERE.parent / "cb-output")
+        except (OSError, ValueError) as exc:
+            stages["continuity"] = _stage("blocked", f"Director's Seat could not load: {exc}")
+        else:
+            if cut["staleCount"]:
+                stages["continuity"] = _stage(
+                    "blocked", f"{cut['staleCount']} approved cut source(s) changed")
+            elif cut["confirmedCurrent"]:
+                stages["continuity"] = _stage(
+                    "approved", f"{len(cut['sequence'])} approved take(s) locked in the scene cut")
+            else:
+                stages["continuity"] = _stage(
+                    "ready", f"{cut['approvedCount']} of {cut['expectedCount']} approved take(s) ready in Director's Seat")
 
     post = cb_render.post_status(pkg, scene, episode)
     final_status = cb_render._department_record_status(
         pkg, None, "review-final", scene, episode)
     final_work = (pkg.get("departmentWork") or {}).get("review-final") or {}
     if stages["continuity"]["state"] != "approved":
-        stages["final"] = _stage("locked", "approve every current Director Review first")
+        stages["final"] = _stage("locked", "lock the scene cut in Director's Seat first")
     elif post["candidate"]["exists"] and not post["candidate"]["current"]:
         stages["final"] = _stage("blocked", "post candidate is stale or changed; rebuild it")
     elif post["candidate"]["current"] and final_work.get("candidate"):
@@ -717,7 +919,38 @@ def production_state(scene, episode="Ep1", intake=None):
             "ready", "build conform, mix, captions, delivery masters and QC manifest")
 
     blockers = []
-    if not package_current:
+    if script_current and not canon_ready:
+        first = (canon_summary["blockers"] or [{}])[0]
+        blockers.append({
+            "code": "CANON_LOCK_REQUIRED",
+            "stage": "storyboard",
+            "message": first.get("message") or
+                       "The approved canon snapshot is missing, stale or incomplete.",
+            "action": first.get("action") or
+                      "Resolve the listed canon issue and explicitly re-lock canon.",
+        })
+    if script_current and not intake_current and not preserved_scene and not amendment:
+        blockers.append({
+            "code": "STORY_INTAKE_APPROVAL_REQUIRED",
+            "stage": "storyboard",
+            "message": "The active script has a pending Story & Direction update.",
+            "action": (
+                "Review and approve the current episode Story & Direction candidate."
+                if intake.get("hasCandidate") and intake.get("candidateCurrent")
+                else "Run Story & Direction for the active script."),
+        })
+    storyboard_approval = str((storyboard or {}).get("approvalState") or "")
+    if storyboard and storyboard_approval != "approved" and not amendment:
+        blockers.append({
+            "code": "STORYBOARD_NOT_APPROVED",
+            "stage": "storyboard",
+            "message": "The current Story & Direction candidate needs a human decision.",
+            "action": (
+                "Run Story & Direction again from the human iteration note."
+                if "reject" in storyboard_approval.lower() else
+                "Review the candidate and choose Approve or Iterate."),
+        })
+    if not package_current and not blockers:
         blockers.append({
             "code": "STALE_PRODUCTION_GRAPH",
             "stage": "storyboard",
@@ -725,7 +958,7 @@ def production_state(scene, episode="Ep1", intake=None):
             "action": "Promote the current approved Story & Direction package.",
         })
     for shot in shots:
-        if shot["badgeState"] in ("blocked", "locked"):
+        if package_current and shot["badgeState"] in ("blocked", "locked"):
             blockers.append({
                 "code": "SHOT_NOT_READY",
                 "stage": "animation",
@@ -741,6 +974,8 @@ def production_state(scene, episode="Ep1", intake=None):
         "canonLock": canon_summary,
         "packageExists": True,
         "packageCurrent": package_current,
+        "preservedScene": preserved_scene,
+        "scopedAmendment": amendment,
         "packageRevision": pkg.get("revision"),
         "lineage": lineage,
         "sceneLook": {

@@ -50,11 +50,15 @@ def test_platform_shell_is_ip_agnostic_and_projects_supply_identity():
     assert 'style="--brand:${theme.accent};--brandink:${theme.ink};--brandbg:${theme.soft}"' in APP
 
 
-def test_first_viewport_names_the_slate_and_next_decision():
-    assert '<div class="screen-eyebrow">Studio slate</div>' in APP
-    assert 'eyebrow:"Episode slate"' in APP
+def test_first_viewport_names_productions_and_keeps_episode_decisions_inside_them():
+    assert '<div class="screen-eyebrow">Studio workspace</div>' in APP
+    assert '<h1>Productions</h1>' in APP
+    assert 'Production library' in APP
+    assert 'Props & references' in APP
+    assert 'function productionLibraryHTML(active)' in APP
     assert 'opts.kicker||"Next decision"' in APP
-    assert 'title:"Continue "+primary.name' in APP
+    assert "if(pg=='assets'){showAssets();return true;}" in APP
+    assert 'if(page=="assets")return renderAssets();' in APP
     assert "if(EXPLICIT_START_HASH){bootProjects();return;}" in APP
 
 

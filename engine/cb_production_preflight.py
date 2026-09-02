@@ -7,6 +7,7 @@ import pathlib
 import shutil
 
 import cb_gen
+import cb_audio_authority
 import cb_providers
 import cb_render
 import cb_state
@@ -143,7 +144,8 @@ def _legacy_production_preflight(scene, episode="Ep1"):
         }
 
     for provider in ("fal", "elevenlabs"):
-        if provider == "elevenlabs" and not any(s.get("dialogueLines") for s in pkg.get("shots") or []):
+        if provider == "elevenlabs" and not any(
+                cb_audio_authority.spoken_dialogue_lines(s) for s in pkg.get("shots") or []):
             continue
         try:
             cb_render._require_confirmed_billing(provider)
@@ -153,7 +155,7 @@ def _legacy_production_preflight(scene, episode="Ep1"):
     if cb_gen.IMAGE_PROVIDER == "seedream" and not cb_gen.FAL_KEY:
         block("CONFIG_FAL_KEY", "configuration", "FAL_KEY is not configured.",
               "Preserve the Desktop .env or add the fal.ai key before paid work.")
-    if any(s.get("dialogueLines") for s in pkg.get("shots") or []) and not cb_gen.ELEVEN_KEY:
+    if any(cb_audio_authority.spoken_dialogue_lines(s) for s in pkg.get("shots") or []) and not cb_gen.ELEVEN_KEY:
         block("CONFIG_ELEVENLABS_KEY", "configuration", "ELEVENLABS_API_KEY is not configured.",
               "Preserve the Desktop .env or add the ElevenLabs key before voice work.")
     if cb_gen.IMAGE_PROVIDER == "seedream" and not cb_gen.SEEDREAM_T2I_ENDPOINT:
@@ -211,7 +213,8 @@ def _legacy_production_preflight(scene, episode="Ep1"):
                 block("REFERENCE_MISSING", "keyframe", str(exc),
                       "Restore the named approved identity/environment reference.", sid)
 
-        if shot.get("dialogueLines"):
+        spoken_dialogue = cb_audio_authority.spoken_dialogue_lines(shot)
+        if spoken_dialogue:
             voice = _department(ledger, "voice")
             voice_lines = (voice.get("output") or {}).get("lines") or []
             voice_ok = voice.get("packageRevision") == pkg.get("revision") and bool(voice_lines)
@@ -228,7 +231,7 @@ def _legacy_production_preflight(scene, episode="Ep1"):
                 input_row["voiceLines"] = [{
                     "speaker": x.get("speaker"), "performedText": x.get("text")}
                     for x in ledger.get("voGeneratedFrom") or []]
-            missing_voice_ids = [ln["speaker"] for ln in shot.get("dialogueLines") or []
+            missing_voice_ids = [ln["speaker"] for ln in spoken_dialogue
                                  if not (characters.get(cb_render._resolve_char(
                                      ln["speaker"], characters)) or {}).get("voiceId")]
             if missing_voice_ids:
@@ -444,7 +447,8 @@ def production_preflight(scene, episode="Ep1", state=None):
     if fal_required and not cb_gen.FAL_KEY:
         block("CONFIG_FAL_KEY", "configuration", "FAL_KEY is not configured.",
               "Preserve the Desktop .env or add the fal.ai key before paid work.")
-    if (package and any(shot.get("dialogueLines") for shot in package.get("shots") or []) and
+    if (package and any(cb_audio_authority.spoken_dialogue_lines(shot)
+                        for shot in package.get("shots") or []) and
             not cb_gen.ELEVEN_KEY):
         block("CONFIG_ELEVENLABS_KEY", "configuration",
               "ELEVENLABS_API_KEY is not configured.",

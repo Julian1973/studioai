@@ -23,12 +23,12 @@
     "voicePerformance": "shows/crystal-bears/creative/VOICE_PERFORMANCE_CANON.md",
     "styleLaw": "shows/crystal-bears/laws/style.txt",
     "wingLaw": "shows/crystal-bears/laws/wing_law.txt",
-    "runtimeCamera": "skills/crystal-bears-camera/SKILL.md",
+    "runtimeCamera": "skills/crystal-bears-cinematographer/SKILL.md",
     "runtimeCinematographer": "skills/crystal-bears-cinematographer/SKILL.md",
     "runtimeComposer": "skills/crystal-bears-composer/SKILL.md",
     "runtimeContinuity": "skills/crystal-bears-continuity/SKILL.md",
     "runtimeDirector": "skills/crystal-bears-director/SKILL.md",
-    "runtimeDp": "skills/crystal-bears-dp/SKILL.md",
+    "runtimeDp": "skills/crystal-bears-cinematographer/SKILL.md",
     "runtimePost": "skills/crystal-bears-post/SKILL.md",
     "runtimeVoice": "skills/crystal-bears-voice-director/SKILL.md",
     "runtimeWriter": "skills/crystal-bears-writer/SKILL.md",
@@ -137,11 +137,13 @@
     "Zenny": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
     "Keen's Mum": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3"},
     "Squeaky": {"tier": "recurring-guest", "status": "locked", "voiceMode": "nonverbal-sfx"},
-    "Bo": {"tier": "recurring-guest", "status": "stub", "voiceMode": "unassigned"}
+    "Bo": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Bo's Mum": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3", "presenceMode": "offscreen-only"}
   },
   "characterAliases": {
     "HOWIE": "Howey",
-    "SQUEEKY": "Squeaky"
+    "SQUEEKY": "Squeaky",
+    "BO'S MUM": "Bo's Mum"
   },
   "scriptChecks": {
     "forbiddenPatterns": [

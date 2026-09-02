@@ -1,0 +1,64 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S8_plate_candidate_e2be237e.jpeg",
+  "hash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f",
+  "inputSignature": {
+   "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+   "briefHash": "9df037a803d6733fe6d651a01e21c2ca47db1262f45c26c9dd5039a72be8db33",
+   "referenceHashes": {},
+   "plateHash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-02T00:08:43",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/ep1/CB_Scene_BuzzingNook_anchor.jpeg",
+  "approvedAt": "2026-09-02T00:08:43",
+  "reviewedBy": "StudioAI",
+  "selectionNote": "Temporary approved zero-cost fallback: closest existing garden/honeycomb library plate for Keen garden evening; replace if a bespoke Keen garden plate is supplied."
+ },
+ "candidate": null,
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "deterministic-v4-scaffold",
+    "preparedAt": "2026-09-02T00:18:39",
+    "editedAt": null,
+    "preparedBy": "deterministic-v4-scaffold",
+    "creativeDirectingStandardVersion": 0,
+    "sourceHash": "",
+    "output": {
+     "creativeIntent": "Provide a temporary Keen garden / honeycomb fallback plate with flowers and pollen route until a bespoke garden plate is supplied.",
+     "storyOfPlace": "Keen garden evening fallback: flower bed, pollen route, honeycomb presence, warm garden detail and enough space for the Fuzzby disguise gag.",
+     "paletteAndLighting": "Warm saturated Crystal Bears daylight/evening continuity, clear readable planes, soft family-animation contrast, no gloom or hard reset from the surrounding sequence.",
+     "materialsAndAtmosphere": "Feature-quality stylized 3D CGI Crystal Bears environment plate; warm saturated family-animation light; tactile foliage, crystal, path, rock, flower, honeycomb and moss materials; no characters unless the downstream shot keyframe adds them.",
+     "continuityRules": [
+      "Scene Look is environment authority only; characters are added by keyframe/shot direction.",
+      "Do not change the approved script, character identities, or scene geography because a downstream word changes.",
+      "Keep the plate current as a reusable world anchor until its own plate/style inputs change."
+     ],
+     "providerPrompt": "Temporary Crystal Bears garden scene plate authority for S8. Warm evening garden with flowers in the foreground, pollen route, honeycomb detail, soft foliage, friendly crystals and clear action space for the Fuzzby flower disguise. Preserve child-safe premium 3D CGI style. No characters baked into the plate, no text, no menace. Replace later with bespoke Keen garden plate if supplied."
+    },
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.4",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+     "sceneContextHash": "cee501c9d1826c281917974d5796fdac44f5235ee1b122b132ed97b4c63ab9c1"
+    },
+    "outcome": "approved",
+    "decisionAt": "2026-09-02T00:18:39",
+    "reviewedBy": "StudioAI",
+    "note": "Zero-cost deterministic Look Development approval added so the approved library scene plate is visible as current in the Studio gate."
+   },
+   "candidate": null,
+   "history": []
+  }
+ }
+}

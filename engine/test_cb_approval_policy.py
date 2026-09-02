@@ -104,6 +104,25 @@ def _approve_department(package, shot_id, stage):
     return work["approved"]
 
 
+def test_seedance_provider_payload_keeps_verbatim_transcript_for_lip_sync():
+    prompt = (
+        "AUDIO-AUTHORITY: @Audio1 is the sole authority. "
+        + render.emission.SINGLE_INSTANCE_DIALOGUE_LOCK
+        + "\nSpoken action: Keen: {ACHOO! ... Oh, Ah, Hi Fuzzby}\n"
+        + "Fuzzby reacts after \u201cACHOO! ... Oh, Ah, Hi Fuzzby\u201d."
+    )
+    lines = [{"speaker": "Keen", "exactText": "ACHOO! ... Oh, Ah, Hi Fuzzby"}]
+
+    provider = render._provider_safe_dialogue_prompt(prompt, lines)
+
+    assert provider == prompt
+    assert provider.count("ACHOO! ... Oh, Ah, Hi Fuzzby") == 2
+    assert "{ACHOO! ... Oh, Ah, Hi Fuzzby}" in provider
+    assert "written transcript only to assign the correct speaker and mouth timing" in provider
+    assert "Do not synthesize, repeat, dub, echo, layer" in provider
+    assert "@Audio1" in provider
+
+
 def _prepare_department(package, shot_id, stage):
     ledger = render._ledger(package, shot_id)
     work = ledger.setdefault("departmentWork", {}).setdefault(
@@ -145,6 +164,167 @@ def test_current_prepared_direction_is_operational_without_fake_human_approval(
         package, shot["shotId"], "cinematography")["current"]
 
 
+def test_complex_relay_uses_its_approved_see_keyframe_as_watch_anchor(tmp_path):
+    package, shot, opening_frame = _pkg(tmp_path)
+    shot.update({
+        "sourceType": "relay",
+        "sourceShotId": "S1.PREV",
+        "charactersInFrame": ["Aida", "Bo", "Keen"],
+        "dialogueLines": [
+            {"speaker": "Aida", "exactText": "Hello."},
+            {"speaker": "Bo", "exactText": "Hello."},
+            {"speaker": "Keen", "exactText": "Hello."},
+        ],
+    })
+    ledger = render._ledger(package, shot["shotId"])
+
+    assert render._shot_uses_own_keyframe(shot, ledger) is True
+    assert render._anchor_for(package, shot) == str(opening_frame)
+
+    ledger["continuityMode"] = "video-extension"
+    assert render._shot_uses_own_keyframe(shot, ledger) is False
+
+
+def test_simple_relay_still_inherits_predecessor_frame(tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    shot.update({
+        "sourceType": "relay",
+        "sourceShotId": "S1.PREV",
+        "charactersInFrame": ["Bo", "Keen"],
+        "dialogueLines": [{"speaker": "Bo", "exactText": "Ready."}],
+    })
+
+    assert render._shot_uses_own_keyframe(
+        shot, render._ledger(package, shot["shotId"])) is False
+
+
+def test_dialogue_amendment_does_not_stale_prepared_cinematography(
+        tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    monkeypatch.setattr(render, "_keyframe_input_signature",
+                        lambda *args, **kwargs: {"cardHash": "card-v1"})
+    _prepare_department(package, shot["shotId"], "cinematography")
+    shot["dialogueLines"] = [{"speaker": "Keen", "exactText": "Changed words."}]
+    package["scopedAmendments"] = [{
+        "shotId": shot["shotId"], "kind": "dialogue-correction",
+        "preservedStages": ["direction", "scenelook", "keyframe"],
+    }]
+
+    status = render._department_record_status(
+        package, shot["shotId"], "cinematography", "1", "Ep1")
+
+    assert status["current"] is True
+    assert status["source"] == "prepared"
+
+
+def test_dialogue_change_does_not_stale_cinematography_without_special_case(
+        tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    monkeypatch.setattr(render, "_keyframe_input_signature",
+                        lambda *args, **kwargs: {"cardHash": "card-v1"})
+    _prepare_department(package, shot["shotId"], "cinematography")
+
+    shot["dialogueLines"] = [{"speaker": "Keen", "exactText": "Changed words."}]
+
+    status = render._department_record_status(
+        package, shot["shotId"], "cinematography", "1", "Ep1")
+    assert status["current"] is True
+    assert status["source"] == "prepared"
+
+
+def test_visual_reference_change_does_not_stale_prepared_voice_direction(
+        tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    shot["dialogueLines"] = [{"speaker": "Keen", "exactText": "I can do this."}]
+    candidate = _prepare_department(package, shot["shotId"], "voice")
+    candidate["output"] = {"shotId": shot["shotId"], "lines": []}
+    monkeypatch.setattr(
+        render.cb_audio_authority, "route_voice_direction",
+        lambda direction, original_lines: (direction, original_lines))
+    monkeypatch.setattr(
+        render.cb_departments.VoiceDirection, "model_validate",
+        lambda output: output)
+    monkeypatch.setattr(
+        render.cb_departments, "validate_voice_direction",
+        lambda direction, lines: None)
+
+    shot["keyframeReferenceSlots"] = {"@图1": "new scene plate"}
+    shot["referenceSlots"] = {"@图1": "new opening keyframe"}
+
+    status = render._department_record_status(
+        package, shot["shotId"], "voice", "1", "Ep1")
+    assert status["current"] is True
+
+    shot["dialogueLines"][0]["exactText"] = "The words really changed."
+    assert render._department_record_status(
+        package, shot["shotId"], "voice", "1", "Ep1")["current"] is False
+
+
+def test_legacy_whole_shot_department_signature_remains_current(tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    monkeypatch.setattr(render, "_keyframe_input_signature",
+                        lambda *args, **kwargs: {"cardHash": "card-v1"})
+    candidate = _prepare_department(package, shot["shotId"], "cinematography")
+    signature = dict(candidate["inputSignature"])
+    signature.pop("shotContractScope")
+    signature["shotContractHash"] = hashlib.sha256(json.dumps(
+        shot, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+    ).encode()).hexdigest()
+    candidate["inputSignature"] = signature
+
+    assert render._department_record_status(
+        package, shot["shotId"], "cinematography", "1", "Ep1")["current"] is True
+
+
+def test_legacy_voice_direction_survives_visual_reference_change(tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    shot["dialogueLines"] = [{"speaker": "Keen", "exactText": "I can do this."}]
+    candidate = _prepare_department(package, shot["shotId"], "voice")
+    candidate["output"] = {"shotId": shot["shotId"], "lines": []}
+    legacy = dict(candidate["inputSignature"])
+    legacy.pop("shotContractScope")
+    legacy["shotContractHash"] = hashlib.sha256(json.dumps(
+        shot, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+    ).encode()).hexdigest()
+    candidate["inputSignature"] = legacy
+    monkeypatch.setattr(
+        render.cb_audio_authority, "route_voice_direction",
+        lambda direction, original_lines: (direction, original_lines))
+    monkeypatch.setattr(
+        render.cb_departments.VoiceDirection, "model_validate", lambda output: output)
+    monkeypatch.setattr(
+        render.cb_departments, "validate_voice_direction", lambda direction, lines: None)
+
+    shot["keyframeReferenceSlots"] = {"@图1": "new scene plate"}
+    shot["referenceSlots"] = {"@图1": "new opening keyframe"}
+
+    assert render._department_record_status(
+        package, shot["shotId"], "voice", "1", "Ep1")["current"] is True
+
+
+def test_voice_signature_expands_group_chorus_members(tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    shot["dialogueLines"] = [{
+        "speaker": "Bo/Keen",
+        "text": "3, 2, 1...",
+        "voiceTreatment": "group_chorus",
+        "chorusMembers": ["Bo", "Keen"],
+    }]
+    monkeypatch = pytest.MonkeyPatch()
+    try:
+        monkeypatch.setattr(render, "_characters_cfg", lambda: {
+            "Bo": {"voiceId": "bo-voice"},
+            "Keen": {"voiceId": "keen-voice"},
+        })
+
+        signature = render._department_input_signature(
+            package, "voice", shot["shotId"], "1", "Ep1")
+    finally:
+        monkeypatch.undo()
+
+    assert signature["voiceIds"] == ["bo-voice", "keen-voice"]
+
+
 def test_invalid_voice_contract_is_never_treated_as_current_direction(tmp_path):
     package, shot, _ = _pkg(tmp_path)
     candidate = _prepare_department(package, shot["shotId"], "voice")
@@ -159,6 +339,32 @@ def test_invalid_voice_contract_is_never_treated_as_current_direction(tmp_path):
 
     assert status["current"] is False
     assert status["reason"].startswith("voice-contract-invalid:")
+
+
+def test_voice_direction_freshness_excludes_seedance_only_sfx(tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    spoken = {"speaker": "Keen", "exactText": "Hello"}
+    sneeze = {"speaker": "Keen", "exactText": "ACHOO!"}
+    shot["dialogueLines"] = [sneeze, spoken]
+    candidate = _prepare_department(package, shot["shotId"], "voice")
+    candidate["output"] = {"shotId": shot["shotId"], "lines": [spoken]}
+    checked = {}
+
+    monkeypatch.setattr(
+        render.cb_departments.VoiceDirection, "model_validate",
+        lambda output: output)
+    monkeypatch.setattr(
+        render.cb_audio_authority, "route_voice_direction",
+        lambda direction, original_lines: (direction, [spoken]))
+    monkeypatch.setattr(
+        render.cb_departments, "validate_voice_direction",
+        lambda direction, lines: checked.setdefault("lines", lines))
+
+    status = render._department_record_status(
+        package, shot["shotId"], "voice", "1", "Ep1")
+
+    assert status["current"] is True
+    assert checked["lines"] == [spoken]
 
 
 def test_animation_direction_without_provider_prompt_is_not_current(tmp_path, monkeypatch):
@@ -402,6 +608,44 @@ def test_animation_approval_carries_forward_and_tracks_its_own_graph(
     assert not render._animation_approval_status(package, shot)["current"]
 
 
+def test_approved_animation_survives_compiler_only_change_but_not_shot_change(
+        tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    monkeypatch.setattr(
+        cb_safety.cb_providers, "request_contract", _test_seedance_25_contract)
+    monkeypatch.setattr(render, "_keyframe_input_signature",
+                        lambda *args, **kwargs: {
+                            "cardHash": "card-v1",
+                            "canonProfileDigest": TEST_CANON_DIGEST})
+    monkeypatch.setattr(render, "_reference_path_is_approved", lambda path: True)
+    _approve_department(package, shot["shotId"], "animation")
+    take = tmp_path / "take.mp4"
+    harvest = tmp_path / "final.png"
+    take.write_bytes(b"take-v1")
+    harvest.write_bytes(b"final-v1")
+    signature = render._animation_generation_signature(
+        package, shot, "1", "Ep1", fast=False)
+    ledger = render._ledger(package, shot["shotId"])
+    ledger.update({
+        "status": "approved", "approvedTake": str(take),
+        "harvestFrame": str(harvest),
+        "approval": {
+            "approved": True, "inputSignature": signature,
+            "contentHash": render._sha256_file(take),
+            "harvestHash": render._sha256_file(harvest),
+        },
+    })
+    ledger["departmentWork"]["animation"]["approved"]["inputSignature"] = {
+        "staleCompilerSignature": True}
+
+    carried = render._animation_approval_status(package, shot)
+    assert carried["current"] is True
+    assert carried["carriedForward"] == "approved-media-direct-inputs-current"
+
+    shot["durationSec"] = 6
+    assert render._animation_approval_status(package, shot)["current"] is False
+
+
 def test_external_director_accepted_animation_tracks_contract_anchor_and_content(
         tmp_path, monkeypatch):
     package, shot, opening_frame = _pkg(tmp_path)
@@ -486,24 +730,56 @@ def test_current_working_scene_look_feeds_keyframes_without_plate_approval(
     assert state["approved"]["path"] == str(plate)
 
 
+def test_scene_look_survives_model_upgrade_but_not_scene_change(tmp_path, monkeypatch):
+    package, _, _ = _pkg(tmp_path)
+    context = {"scene": "1", "story": "unchanged"}
+    record = {
+        "approved": None,
+        "candidate": None,
+        "history": [],
+        "departmentWork": {
+            "look": {"approved": None, "candidate": None, "history": []}
+        },
+    }
+    monkeypatch.setattr(render, "_scene_context", lambda *args, **kwargs: context)
+    monkeypatch.setattr(render, "_load_scenelook_rec", lambda *args, **kwargs: record)
+
+    signature = render._department_input_signature(
+        package, "look", None, "1", "Ep1")
+    signature["model"] = "previous-director-model"
+    record["departmentWork"]["look"]["candidate"] = {
+        "output": {"providerPrompt": "prepared environment direction"},
+        "inputSignature": signature,
+    }
+
+    status = render._department_record_status(
+        package, None, "look", "1", "Ep1")
+    assert status["current"] is True
+    assert status["source"] == "prepared"
+
+    context["story"] = "changed scene content"
+    assert render._department_record_status(
+        package, None, "look", "1", "Ep1")["current"] is False
+
+
 def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatch):
     package, shot, _ = _pkg(tmp_path)
     shot["dialogueLines"] = [{
         "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
-        "speaker": "Fuzzby", "exactText": "I still feel him... every day.",
+        "speaker": "Fuzzby", "exactText": "Bo, this is Aida.",
     }]
     ledger = render._ledger(package, shot["shotId"])
     ledger["workingVoice"] = {"lines": [{
         "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
-        "speaker": "Fuzzby", "text": "[quietly] I still feel him, every day.",
+        "speaker": "Fuzzby", "text": "[empathetically] Bo, this is Ada...",
     }]}
     directed = {
         "shotId": shot["shotId"], "sceneIntention": "Connected memory.",
         "lines": [{
             "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
             "speaker": "Fuzzby", "character": "Fuzzby",
-            "exactDialogue": "I still feel him... every day.",
-            "performedText": "[quietly] I still feel him... [exhales] every day.",
+            "exactDialogue": "Bo, this is Aida.",
+            "performedText": "Bo, this is Aida.",
             "dramaticIntention": "Keep the thought connected.", "subtext": "Memory lives on.",
             "cadenceAndBreath": "Quiet and connected.", "timingAndBody": "Stay still.",
             "archetypeId": "held-heart", "performanceQuestions": {
@@ -515,11 +791,10 @@ def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatc
             "listener": "Zenny", "bodyVoiceRelationship": "Still body.",
             "previousText": "A quiet look.", "startsAtSec": 1.0,
             "estimatedDurationSec": 2.0, "pauseReasons": [],
-            "tagPurposes": [{"tag": "quietly", "purpose": "Intimacy"},
-                            {"tag": "exhales", "purpose": "Release"}],
+            "tagPurposes": [],
             "takeRecipes": [{"recipeId": "A", "label": "Primary",
-                              "performedText": "[quietly] I still feel him... [exhales] every day.",
-                              "primary": True, "takesCount": 1}],
+                              "performedText": "Bo, this is Aida.",
+                              "primary": True, "takesCount": 2}],
         }],
     }
     ledger.setdefault("departmentWork", {}).setdefault(
@@ -532,4 +807,4 @@ def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatc
 
     emitted = render._approved_voice_lines(package, shot)
 
-    assert emitted[0]["text"] == "[quietly] I still feel him, every day."
+    assert emitted[0]["text"] == "[empathetically] Bo, this is ada..."

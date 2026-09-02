@@ -73,6 +73,16 @@ def test_geometry_must_agree_between_keyframe_and_render():
     assert rules.geometry_agreement(bad, _direction())["ready"] is False
 
 
+def test_geometry_agreement_treats_string_geography_as_one_statement():
+    cine = {
+        "geography": "Travel runs toward frame-right.",
+        "negativeSpace": ["Lead room stays open frame-right."],
+    }
+    animation = {"geography": ["Travel runs toward frame-right."], "stagePlan": []}
+
+    assert rules.geometry_agreement(cine, animation)["ready"] is True
+
+
 def test_front_facing_opening_allows_a_later_motivated_follow_camera():
     cine = {
         "geography": ["Travel runs toward frame-right."],

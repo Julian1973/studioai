@@ -520,6 +520,29 @@ def test_gate5_mechanically_attaches_big_comedy_staging_inside_a_packed_unit(mon
     assert result[0].performanceContract.comedyStaging.model_dump() == staging.model_dump()
 
 
+def test_gate5_retries_once_when_performance_pass_drops_a_shot(monkeypatch):
+    shots = [_card("S1.SH1"), _card("S1.SH2")]
+    calls = []
+
+    def fake(system, user, schema, label="", **kwargs):
+        assert schema is C.PerformancePass
+        calls.append(user)
+        ids = ["S1.SH1"] if len(calls) == 1 else ["S1.SH1", "S1.SH2"]
+        return C.PerformancePass(shots=[C.PerformanceCard(
+            shotId=shot_id, physicalPerformance="The body settles visibly.",
+            animationTiming="One clear anticipation, action and landing.",
+            performanceContract=_performance_contract()) for shot_id in ids])
+
+    monkeypatch.setattr(cb_llm, "structured", fake)
+    result = C.gate5_performance(
+        "Ep1", 1, _treatment("A"), C.SceneDirection(scene=_scene(), beats=[_beat()]),
+        shots, log=lambda *args, **kwargs: None)
+
+    assert [shot.shotId for shot in result] == ["S1.SH1", "S1.SH2"]
+    assert len(calls) == 2
+    assert "DROPPED/DUPLICATED/REORDERED" in calls[1]
+
+
 def test_production_detail_refuses_a_missing_shot_instead_of_inventing_fallback(monkeypatch):
     def fake(system, user, schema, label="", **kwargs):
         if schema is C.ProductionPass:
@@ -731,7 +754,7 @@ def test_top_level_approvalState_is_sole_gate_a_authority(monkeypatch, tmp_path)
         H.promote(str(draft_top_approved_nested), str(pkg), dry_run=True)
 
 
-def test_production_detail_added_only_after_pass(monkeypatch):
+def test_production_detail_is_prepared_after_the_creative_sequence_freezes(monkeypatch):
     record = []
     _isolated(monkeypatch, record)
     pkg = C.run_scene(1, "Ep1", log=lambda *a, **k: None)
@@ -746,8 +769,8 @@ def test_production_detail_added_only_after_pass(monkeypatch):
                                           returnTo="gate4")
     _isolated(monkeypatch, record2, review_script=fail)
     pkg2 = C.run_scene(1, "Ep1", log=lambda *a, **k: None)
-    assert pkg2["escalation"] and pkg2["productionDetail"] == []      # never on a failed scene
-    assert not any(s == "ProductionPass" for _, s, _ in record2)
+    assert pkg2["escalation"] and pkg2["productionDetail"]
+    assert any(s == "ProductionPass" for _, s, _ in record2)
 
 
 # ── gate 6: adversarial, treatment-compared, capped, escalates ──────────────────────────
@@ -811,6 +834,98 @@ def test_verbatim_dialogue_snap_and_voice_lock(monkeypatch):
                        [_card()], log=lambda *a, **k: None)
 
 
+def test_canonical_voice_occurrence_restores_exact_words_after_acting_pass(monkeypatch):
+    occurrence = "dialogue-occurrence:sha256:digest-1"
+    locked = {"dialogueOccurrenceId": occurrence, "sourceEventId": "event-1",
+              "sourceEventIndex": 3, "beatId": "1.B1", "sourceBeatId": "source-1",
+              "speaker": "FUZZBY", "exactText": "ZZZZZ …"}
+    voice = C.VoicePerformance(
+        dialogueOccurrenceId="dialogue-occurrence:digest-1", speaker="FUZZBY", exactDialogue="ZZZZ …",
+        dramaticIntention="sleep deeply", subtext="none", relationshipTarget="room",
+        emotionalEntry="asleep", emotionalExit="asleep", operativeWords=["ZZZZ"],
+        pace="slow", rhythm="even", pauses="natural", breaths="sleep breaths",
+        nonVerbalActions="sleep", elevenLabsV3Direction="sleeping vocalisation",
+        physicalActionRelationship="body remains asleep", expectedTiming="1s")
+    monkeypatch.setattr(C, "_script_beats", lambda *_args: ([{}], {}))
+    monkeypatch.setattr(C, "_locked_dialogue", lambda _beats: [locked])
+    monkeypatch.setattr(C.cb_llm, "structured",
+                        lambda *_args, **_kwargs: C.VoiceScript(performances=[voice]))
+
+    result = C.gate5_voice("Ep2", 1, None, [_card()], log=lambda *_: None)
+
+    assert result[0].dialogueOccurrenceId == occurrence
+    assert result[0].exactDialogue == "ZZZZZ …"
+    assert result[0].speaker == "FUZZBY"
+
+
+def test_cut_boundary_mechanically_preserves_marks_and_held_props():
+    first = _detail("S1.SH1")
+    first.continuityOutState.characters[0].visibleMarks = ["pollen"]
+    first.continuityOutState.characters[0].heldProps = ["honey spoon"]
+    second = _detail("S1.SH2")
+    second.continuityInState.characters[0].visibleMarks = []
+    second.continuityInState.characters[0].heldProps = []
+
+    C._carry_cut_boundary_identity([first, second])
+
+    carried = second.continuityInState.characters[0]
+    assert carried.visibleMarks == ["pollen"]
+    assert carried.heldProps == ["honey spoon"]
+
+
+def test_continuous_boundary_inherits_the_complete_previous_state():
+    first = _detail("S1.SH1")
+    second = _detail("S1.SH2")
+    second.continuityInState.cameraSide = "wrong side"
+    continuous = _card("S1.SH2", transition="CONTINUOUS")
+
+    C._carry_cut_boundary_identity([first, second], [_card("S1.SH1"), continuous])
+
+    assert (second.continuityInState.model_dump() ==
+            first.continuityOutState.model_dump())
+
+
+def test_dialogue_assignment_repairs_only_a_unique_long_hash_abbreviation():
+    full = "dialogue-occurrence:sha256:c30e400b3246adc794f4e3ba97aded0b12888a65431c48f4c34e17d5c12bf052"
+    shortened = "dialogue-occurrence:sha256:c30e400b3246adc794f4c34e17d5c12bf052"
+    voice = C.VoicePerformance(
+        dialogueOccurrenceId=full, beatId="1.B1", speaker="KEEN", exactDialogue="Hi!",
+        dramaticIntention="greet", subtext="friendly", relationshipTarget="Bo",
+        emotionalEntry="open", emotionalExit="open", operativeWords=["Hi"], pace="warm",
+        rhythm="simple", pauses="none", breaths="natural", nonVerbalActions="wave",
+        elevenLabsV3Direction="friendly greeting", physicalActionRelationship="wave",
+        expectedTiming="1s")
+    detail = _detail(occurrence_ids=[shortened])
+
+    result = C._assign_dialogue_occurrences([_card()], [voice], [detail])
+
+    assert result[0].dialogueOccurrenceIds == [full]
+
+
+def test_dialogue_assignment_repairs_invented_hashes_by_same_shot_order():
+    first = C.VoicePerformance(
+        dialogueOccurrenceId="dialogue-occurrence:sha256:first", beatId="1.B1",
+        speaker="KEEN", exactDialogue="We'll see.", dramaticIntention="tease",
+        subtext="friendly", relationshipTarget="Fuzzby", emotionalEntry="amused",
+        emotionalExit="amused", operativeWords=["see"], pace="quiet", rhythm="simple",
+        pauses="brief", breaths="natural", nonVerbalActions="walk",
+        elevenLabsV3Direction="muttered playful challenge",
+        physicalActionRelationship="walking away", expectedTiming="2s")
+    second = first.model_copy(update={
+        "dialogueOccurrenceId": "dialogue-occurrence:sha256:second",
+        "speaker": "ZENNY", "exactDialogue": "Ommmm.",
+    })
+    detail = _detail(occurrence_ids=[
+        "dialogue-occurrence:sha256:invented-one",
+        "dialogue-occurrence:sha256:invented-two",
+    ])
+
+    result = C._assign_dialogue_occurrences([_card()], [first, second], [detail])
+
+    assert result[0].dialogueOccurrenceIds == [
+        first.dialogueOccurrenceId, second.dialogueOccurrenceId]
+
+
 # ── the rejected exemplar feeds the room; no provider access ────────────────────────────
 def test_rejected_exemplar_reaches_role_minds_and_no_provider_access():
     mind = C._mind("DIRECTOR", ["directorTaste"], "charge")
@@ -819,6 +934,45 @@ def test_rejected_exemplar_reaches_role_minds_and_no_provider_access():
     src = (HERE / "cb_creative.py").read_text()
     assert "import cb_gen" not in src and "import cb_render" not in src
     assert "generate_video" not in src and "_fal_" not in src
+
+
+def test_scene_direction_card_unifies_departments_without_changing_dialogue():
+    beat = _beat()
+    shot = _card()
+    detail = _detail(occurrence_ids=["dlg-1"])
+    voice = C.VoicePerformance(
+        dialogueOccurrenceId="dlg-1", sourceEventId="event-1", sourceEventIndex=4,
+        beatId="1.B1", sourceBeatId="source-beat-1", speaker="FUZZBY",
+        exactDialogue="Nailed it.", voiceIdentity="fuzzby-voice",
+        dramaticIntention="cover the wobble", subtext="please believe me",
+        relationshipTarget="Zenny", emotionalEntry="buoyant",
+        emotionalExit="privately rattled", operativeWords=["Nailed"], pace="quick",
+        rhythm="bright then held", pauses="hold after the line", breaths="one settling breath",
+        nonVerbalActions="recover the grin", elevenLabsV3Direction="play confidence past impact",
+        physicalActionRelationship="line follows the rebound", expectedTiming="1.0-2.0s")
+    vision = {
+        "directionVersion": "accepted-episode-direction-v1",
+        "directionSignature": C.cb_lineage.dependency_signature(
+            "accepted-episode-direction", {"direction": "locked"}),
+        "theme": "connection survives visible imperfection",
+        "emotionalThesis": "honesty preserves belonging",
+        "audiencePromise": "warm character comedy",
+        "emotionalStoryToScreenContract": _heart_contract().model_dump(),
+    }
+    card = C.build_scene_direction_card(
+        vision, _scene(), [beat], [shot], [voice], [detail])
+
+    assert card["productionLineage"] == C.PRODUCTION_LINEAGE
+    assert card["episodeDirection"]["signature"] == vision["directionSignature"]
+    assert [line["exactText"] for line in card["exactDialogueAllocation"]] == ["Nailed it."]
+    assert card["elevenLabsV3VoiceAndTiming"]["model"] == "eleven_v3"
+    assert card["elevenLabsV3VoiceAndTiming"]["audioAuthority"] == "@Audio1"
+    assert "listeners remain silent and closed-mouth" in card["elevenLabsV3VoiceAndTiming"]["listenerRule"]
+    assert card["seedance25MotionCoverageAndContinuity"]["productionVersion"] == "Seedance 2.5"
+    assert card["seedance25MotionCoverageAndContinuity"]["seedance20Policy"] == "comparison-only"
+    assert C.cb_lineage.signature_matches(
+        card["inputSignature"], "scene-direction-card",
+        card["inputSignature"]["inputs"])
 
 
 def test_no_fixed_lane_or_mandatory_coverage_language_in_contract():

@@ -1,0 +1,81 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S2_plate_candidate_e7be89c0.png",
+  "hash": "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921",
+  "inputSignature": {
+   "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+   "briefHash": "f02c3b0f5e9deed15ecdacb4583533b661fa8b0541ef93d2381d5febbbefb92d",
+   "referenceHashes": {},
+   "plateHash": "300c5fe33c64f199748ba043011c79280dd4120e52d95004db57e00f08498921"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-08-30T22:10:26",
+  "source": "uploaded",
+  "preservedOriginal": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/uploads/Ep2_S2_scenelook_upload_0bb19231.png",
+  "packageRevision": 4,
+  "approvedAt": "2026-08-30T22:11:32",
+  "reviewedBy": "Julian"
+ },
+ "candidate": null,
+ "history": [
+  {
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep2_S2_plate_candidate_82c85aa3.png",
+   "hash": "9e746596e6b666d28435fd0ef91b53baf33a567d718969038b047d72cf13d1ba",
+   "inputSignature": {
+    "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+    "briefHash": "f02c3b0f5e9deed15ecdacb4583533b661fa8b0541ef93d2381d5febbbefb92d",
+    "referenceHashes": {},
+    "plateHash": "9e746596e6b666d28435fd0ef91b53baf33a567d718969038b047d72cf13d1ba"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-30T21:55:02",
+   "packageRevision": 4,
+   "outcome": "rejected",
+   "rejectedAt": "2026-08-30T22:10:25",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Replace stale Scene 2 plate with Julian supplied Crystal Clearing plate",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260830T221025/Ep2_S2_plate_candidate_82c85aa3.png"
+  }
+ ],
+ "departmentWork": {
+  "look": {
+   "approved": null,
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-08-30T21:52:45",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "creativeDirectingStandardVersion": 4,
+    "sourceHash": "1ff7d165fc868d1483ed627c1a438d8a448fac64f77d7fe93ecac704ec184117",
+    "output": {
+     "creativeIntent": "Create an environment-only Scene Look plate for the Crystal Clearing in morning: a sacred, child-readable glade where quiet rose-lit listening feels magical, warm, and safe, while the surrounding world remains gently alive enough for playful mess to enter later. The environment should feel still but not sterile, mystical but tactile, emotionally prepared for hush to become friendship.",
+     "storyOfPlace": "A hidden clearing ringed by friendly faceted crystals, soft moss, tiny morning flowers, dew beads, rounded roots, and rose-quartz growths that make the place feel naturally ceremonial rather than built. The centre of the clearing carries a subtle listening-circle identity through natural crystal arcs, petal-like ground patterns, and a faint rose glow in the air. The outer edge can hold a few tiny golden pollen specks and sticky honey glints as environmental foreshadowing only, never becoming the subject.",
+     "paletteAndLighting": "Warm saturated morning light with peach-gold sun, rose-pink haze, lavender shadows, and cool cyan highlights refracted through crystals. The clearing should have a luminous rose core that softly tints nearby moss and stones, while the crystal perimeter catches brighter gold rim light. Lighting is gentle, volumetric, and magical, with visible soft beams, prismatic flecks, and dew sparkle; no harsh contrast or spooky darkness.",
+     "materialsAndAtmosphere": "Crystals are translucent, rounded, and toy-like with believable refraction, internal veining, softened facets, and subtle rainbow caustics. Moss is plush and velvety, roots are smooth and rounded, flowers are simple and legible for ages 4-8, and dew feels touchable. Atmosphere is hushed, breathable, and rose-scented in feeling: suspended glowing motes, faint petal-like haze, delicate mist close to the ground, and a warm CGI storybook finish with real weight and polished Pixar-caliber material response.",
+     "continuityRules": [
+      "Environment-only plate: no characters, no silhouettes, no body parts, no footprints implying current character placement.",
+      "Do not stage a camera shot, action beat, or character blocking; present the scene-wide look, layout language, palette, material, and atmosphere only.",
+      "Keep the Crystal Clearing morning setting readable as a safe sacred listening place, not a cave, not a throne room, not a generic forest.",
+      "Rose light belongs to the atmosphere of the clearing, especially the natural listening-circle centre; it must feel warm, caring, and magical rather than ominous.",
+      "Crystals should be friendly rounded fantasy geology, not sharp dangerous shards; maintain child-safe shapes and tactile surfaces throughout."
+     ],
+     "providerPrompt": "Environment-only Scene Look plate for an original 3D CGI animated children’s series, ages 4-8, Pixar-caliber finish. Location: CRYSTAL CLEARING, morning. Design a hidden forest glade with a naturally ceremonial rose-quartz listening circle at its centre, surrounded by plush moss, rounded roots, tiny simple flowers, dew beads, and friendly translucent crystal formations. The scene-wide look should feel sacred, quiet, warm, and safe: rose-pink luminous haze in the centre, peach-gold morning sunlight filtering through leaves, lavender soft shadows, cool cyan crystal refractions, prismatic flecks, and gentle volumetric beams. Crystals have softened facets, internal veining, believable refraction, subtle rainbow caustics, and toy-like rounded safety; moss is velvety and saturated; stones and roots are smooth and tactile. Add suspended glowing motes and low delicate mist, with very subtle golden pollen specks and tiny sticky honey glints only at the far environmental edge as light foreshadowing. Bold legible staging language, warm saturated color, polished high-end 3D animation materials, magical but grounded. No characters, no animals, no silhouettes, no footprints, no props held by anyone, no action, no text, no logos, no scary sharp crystal spikes, no dark cave mood."
+    },
+    "packageRevision": 4,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "8e025d57ddfd6039aa9c3b7e5f3248183b9759eb15ebc5c8d127cef6261c82e3",
+     "sceneContextHash": "e932dce137e682fb7828d926c92249dba661439bb8f2e4f30c3cc1dd470944a1"
+    }
+   },
+   "history": []
+  }
+ }
+}

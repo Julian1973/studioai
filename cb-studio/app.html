@@ -2805,11 +2805,23 @@ function storyIntakeProgressHTML(job){
   if(/STORY INTAKE CANDIDATE/i.test(activity)||job.status==="done"){percent=100;label="Direction ready for review";}
   const parsed=activity.match(/MECHANICAL PARSE[^\n]*?(\d+) scene\(s\),\s*(\d+) locked dialogue line\(s\),\s*(\d+) event\(s\)/i);
   const counts=parsed?`${parsed[1]} scenes · ${parsed[2]} dialogue lines · ${parsed[3]} story events`:"Preparing episode structure";
-  return `<section class="storyboard-progress" aria-label="Story and Direction progress" aria-live="polite" style="margin:12px 0;padding:12px 13px;border:1px solid var(--line);background:var(--surface);border-radius:8px">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;margin-bottom:7px"><b>${_esc(label)}</b><span style="color:var(--muted)">${percent}%</span></div>
-    <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}" style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden"><div style="height:100%;width:${percent}%;background:var(--brand);transition:width .3s ease"></div></div>
-    <div style="font-size:11px;color:var(--hint);margin-top:7px">${_esc(counts)}</div>
+  // ALWAYS VISIBLY ALIVE (2026-09-02, Julian: "I don't know if it has failed or it's running"): the
+  // Director's thinking call can sit on one stage for minutes with no new log line. The bar now
+  // creeps forward with elapsed time inside its current stage (never past the next stage's mark),
+  // shows how long the run has been going, the last thing the Director said, and the expected wait.
+  const elapsed=Math.max(0,Math.floor(Date.now()/1000-(job.started||Date.now()/1000)));
+  const mm=Math.floor(elapsed/60),ss=String(elapsed%60).padStart(2,"0");
+  const stageCap={12:29,30:54,55:77,78:89,90:99,100:100}[percent]||percent;
+  const creep=Math.min(stageCap,percent+Math.floor(elapsed/20));
+  const shown=job.status==="done"?100:creep;
+  const lastLine=((job.log||"").trim().split("\n").pop()||"").slice(0,160);
+  return `<section class="storyboard-progress" aria-label="Story and Direction progress" aria-live="polite" style="margin:12px 0;padding:12px 13px;border:1px solid var(--brand);background:var(--surface);border-radius:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;margin-bottom:7px"><b><span class="pulse">●</span> ${_esc(label)}</b><span style="color:var(--muted)">${shown}% · running ${mm}m ${ss}s</span></div>
+    <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${shown}" style="height:10px;background:var(--surface2);border-radius:5px;overflow:hidden"><div style="height:100%;width:${shown}%;background:repeating-linear-gradient(45deg,var(--brand) 0 10px,color-mix(in srgb,var(--brand) 70%,#fff) 10px 20px);background-size:28px 28px;animation:sbstripe 1s linear infinite;transition:width .6s ease"></div></div>
+    <div style="font-size:11px;color:var(--hint);margin-top:7px">${_esc(counts)} · the Director's full pass usually takes 3–10 minutes; the page updates itself every 2 seconds.</div>
     <div style="font-size:11px;color:var(--muted);margin-top:3px">${_esc(job.step||"The Director is working")}</div>
+    ${lastLine&&lastLine!==job.step?`<div style="font-size:11px;color:var(--hint);margin-top:2px;font-family:ui-monospace,monospace">${_esc(lastLine)}</div>`:""}
+    <style>@keyframes sbstripe{from{background-position:0 0}to{background-position:28px 0}}</style>
   </section>`;
 }
 function storyIntakePanelHTML(d){
@@ -2872,7 +2884,9 @@ function storyIntakePanelHTML(d){
   }
   if(!d.candidateCurrent){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
-      ${outcomePanelHTML({tone:"review",title:"Run Story & Direction",body:"The previous candidate is safely preserved, but it does not match the active script and canon.",actions:[{label:"Run Story & Direction",onclick:"storyIntakeRun()",disabled:!!job}]})}
+      ${failedRun}
+      ${outcomePanelHTML({tone:job?"working":"review",title:job?"The Director is working":"Run Story & Direction",body:job?"Stop the current run or wait for its visible candidate.":"The previous candidate is safely preserved, but it does not match the active script and canon.",actions:job?[{label:"Stop",onclick:`stopFiring('${job.jobId}')`,kind:"secondary"}]:[{label:"Run Story & Direction",onclick:"storyIntakeRun()"}]})}
+      ${visibleJobProgress}
       ${carriedReferences}
       ${productionChecks(`${stalePackage}<button class="btn ghost" onclick="storyIntakeDecide('reject','Superseded by the active script and canon lock.')">Archive stale candidate</button>`)}
       </div>`;

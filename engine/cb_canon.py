@@ -849,11 +849,22 @@ def story_context(cast: Iterable[str], episode: str,
         if descriptions:
             record["homeCanon"] = descriptions
 
-    def text(source_id: str) -> str:
-        return resolve_declared_path(policy["sources"][source_id], base).read_text(
-            encoding="utf-8")
+    # OPTIONAL SOURCES (2026-09-02, The Box Monsters' first Gate-1 fire): only `showBible` and
+    # `characters` are required of every project. Everything else here is one show's optional
+    # creative canon — a project that declares none of it gets an empty text / empty mapping,
+    # never another project's, and never a KeyError (T55: production is refused only for
+    # MISSING REQUIRED CONTENT, and each such file is named by path). A DECLARED source whose
+    # file is missing still raises — a declared promise must be kept.
+    declared = policy.get("sources") or {}
 
-    def data(source_id: str) -> Any:
+    def text(source_id: str) -> str:
+        if source_id not in declared:
+            return ""
+        return resolve_declared_path(declared[source_id], base).read_text(encoding="utf-8")
+
+    def data(source_id: str, empty: Any = None) -> Any:
+        if source_id not in declared:
+            return {} if empty is None else empty
         return _read_json_source(policy, source_id, base)
 
     performance = (data("characterPerformance").get("characters") or {})

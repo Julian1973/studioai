@@ -809,7 +809,9 @@ class ShowrunnerReview(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 _CANON_SOURCES = {
     "showBible": pathlib.Path(P.CANON),
-    "studioBible": ROOT / "CRYSTAL_BEARS_STUDIO_BIBLE.md",
+    # the active project's own show bible (2026-09-02: this used to name the first show's
+    # root file, so a second project's canon envelope listed another show's bible)
+    "studioBible": pathlib.Path(P.SHOW_BIBLE),
     "characters": pathlib.Path(P.CHARS),
     "locations": pathlib.Path(P.LOCATIONS),
     "continuity": pathlib.Path(P.CONTINUITY),

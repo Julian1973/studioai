@@ -125,8 +125,13 @@ def resolve_declared_path(value: str, root: str | pathlib.Path | None = None) ->
     raw = pathlib.Path(str(value or ""))
     if not str(raw):
         raise CanonLockError("blank canon asset path")
+    # `raw.parts[0] == ".."`, never `str(raw).startswith("../")`: pathlib renders a relative path
+    # with the platform separator, so on Windows the legacy form reads "..\cb-seed\..." and the
+    # string test missed every one of them — the first project's whole cast resolved one level
+    # above the workspace and canon refused to load (found on the PC, 2026-09-02).
+    legacy_engine_relative = bool(raw.parts) and raw.parts[0] == ".."
     path = raw if raw.is_absolute() else ((base / "engine" / raw)
-                                          if str(raw).startswith("../") else (base / raw))
+                                          if legacy_engine_relative else (base / raw))
     return _inside(base, path)
 
 

@@ -287,3 +287,26 @@ def test_repository_ep1_human_canon_decisions_are_locked():
     assert "With open heart and love so bright" not in script
     assert "Zenny’s." not in script
     assert "Zenny's crystal" not in script
+
+
+def test_legacy_engine_relative_asset_paths_resolve_inside_the_workspace(tmp_path):
+    r"""A declared "../cb-seed/..." path is engine-relative, on Windows too.
+
+    pathlib renders a relative path with the platform separator, so the old
+    `str(raw).startswith("../")` test read "..\cb-seed\..." on Windows and missed every
+    legacy path: the first project's whole cast resolved one level ABOVE the workspace and
+    canon refused to load with "canon path escapes the workspace" (found on the PC,
+    2026-09-02). The parts test is separator-blind.
+    """
+    resolved = cb_canon.resolve_declared_path(
+        "../cb-seed/assets/final_turnarounds/CB_Aida.jpeg", tmp_path)
+    assert resolved == (tmp_path / "cb-seed" / "assets" / "final_turnarounds"
+                        / "CB_Aida.jpeg").resolve()
+    # A repository-relative path still resolves straight off the root.
+    plain = cb_canon.resolve_declared_path("projects/crystal-bears/canon/characters.json",
+                                           tmp_path)
+    assert plain == (tmp_path / "projects" / "crystal-bears" / "canon"
+                     / "characters.json").resolve()
+    # And a path that genuinely leaves the workspace is still refused.
+    with pytest.raises(cb_canon.CanonLockError):
+        cb_canon.resolve_declared_path("../../elsewhere/secret.png", tmp_path)

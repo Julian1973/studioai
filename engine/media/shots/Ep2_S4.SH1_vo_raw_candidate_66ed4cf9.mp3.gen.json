@@ -1,0 +1,29 @@
+{
+  "ts": 1788347000.5223591,
+  "recorded_at": "2026-09-02T12:03:20",
+  "op": "elevenlabs_dialogue",
+  "model": "eleven_v3",
+  "stability": 0.4,
+  "chars": 217,
+  "voices": 7,
+  "billing": {
+    "provider": "elevenlabs",
+    "model": "eleven_v3",
+    "charactersSubmitted": 217,
+    "creditsConsumed": 217.0,
+    "billingPlan": "pro",
+    "planConfirmed": true,
+    "billingCadence": "monthly",
+    "cadenceConfirmed": true,
+    "pricingTableVersion": "2026-08-07.2",
+    "pricingEffectiveDate": "2026-07-16",
+    "pricingSource": "https://elevenlabs.io/pricing",
+    "estimatedCostUsdExTax": 0.035805,
+    "costBasis": "estimated allocated cost ex tax — published pro plan, plan CONFIRMED",
+    "generationKind": "regeneration",
+    "creditsWereConsumed": true,
+    "voices": 7
+  },
+  "timestampEndpoint": true,
+  "dialogueTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_66ed4cf9.mp3.dialogue.json"
+}

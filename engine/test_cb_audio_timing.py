@@ -308,6 +308,7 @@ def test_group_chorus_uses_rebuilt_segments_not_stale_character_alignment(tmp_pa
         "audioSha256": cb_audio_timing.file_sha256(raw),
         "endpoint": "/v1/text-to-dialogue/with-timestamps",
         "groupChorusResolved": True,
+        "separatedDialogueAssembly": True,
         "voiceSegments": [
             {"dialogueInputIndex": 0, "startTimeSec": 0, "endTimeSec": 1},
             {"dialogueInputIndex": 1, "startTimeSec": 1, "endTimeSec": 4},
@@ -325,6 +326,35 @@ def test_group_chorus_uses_rebuilt_segments_not_stale_character_alignment(tmp_pa
         4, tmp_path / "master.wav")
 
     assert result["placements"][-1]["targetEndSec"] == pytest.approx(4)
+    assert result.get("assemblyMode") != "continuous-dialogue-performance"
+
+
+def test_separated_dialogue_assembly_refuses_overlapping_line_anchors(tmp_path):
+    raw = tmp_path / "chorus.mp3"
+    _silent_audio(raw, 6)
+    timing = cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({
+        "audioSha256": cb_audio_timing.file_sha256(raw),
+        "endpoint": "/v1/text-to-dialogue/with-timestamps",
+        "groupChorusResolved": True,
+        "separatedDialogueAssembly": True,
+        "voiceSegments": [
+            {"dialogueInputIndex": 0, "startTimeSec": 0, "endTimeSec": 2.5},
+            {"dialogueInputIndex": 1, "startTimeSec": 2.5, "endTimeSec": 5.0},
+        ],
+    }), encoding="utf-8")
+
+    with pytest.raises(cb_audio_timing.AudioTimingError, match="only 1.70s remains"):
+        cb_audio_timing.render_timed_dialogue_master(
+            raw, timing,
+            [{"startSec": 0.8, "endSec": 2.0}, {"startSec": 2.5, "endSec": 4.0}],
+            8, tmp_path / "master.wav")
+
+    cascade = cb_audio_timing.cascade_retime_for_natural_performance(
+        raw, timing,
+        [{"startSec": 0.8, "endSec": 2.0}, {"startSec": 2.5, "endSec": 4.0}])
+
+    assert cascade["lines"][1]["startSec"] == pytest.approx(3.45)
 
 
 def test_final_line_tolerance_never_clips_audio_past_the_master(tmp_path):

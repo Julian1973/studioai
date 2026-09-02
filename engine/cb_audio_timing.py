@@ -106,6 +106,8 @@ def cascade_retime_for_natural_performance(raw_audio_path, timing_path, dialogue
     if timing.get("audioSha256") != file_sha256(raw_audio_path):
         raise AudioTimingError("dialogue timing metadata does not match the raw audio bytes")
     ranges = _source_ranges(timing, len(dialogue_lines))
+    if timing.get("separatedDialogueAssembly") and minimum_gap_sec <= 0:
+        minimum_gap_sec = 0.15
     if _needs_continuous_assembly(raw_audio_path, timing, ranges):
         if not dialogue_lines:
             return {"lines": [], "requiredDurationSec": 0.0,
@@ -274,6 +276,8 @@ def _needs_continuous_assembly(raw_audio_path, timing, ranges):
     """
     if not ranges:
         return False
+    if timing.get("separatedDialogueAssembly"):
+        return False
     # ElevenLabs Text-to-Dialogue returns one directed conversation. Its ranges
     # identify turns inside that performance; they are not isolated clips to be
     # moved back onto authored estimates. Preserve the provider's acting and pauses
@@ -427,7 +431,10 @@ def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
             raise AudioTimingError(
                 f"dialogue line {index + 1}'s start anchor is not before the next line"
             )
-        tolerance = WINDOW_TOLERANCE_SEC if position + 1 < len(authored) else 0.0
+        tolerance = (
+            0.0 if timing.get("separatedDialogueAssembly")
+            else WINDOW_TOLERANCE_SEC if position + 1 < len(authored) else 0.0
+        )
         if source_duration > available_duration + tolerance:
             raise AudioTimingError(
                 f"dialogue line {index + 1}'s approved take is {source_duration:.2f}s but only "

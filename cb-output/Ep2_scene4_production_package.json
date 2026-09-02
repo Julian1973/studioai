@@ -628,7 +628,7 @@
     "4.B3"
    ],
    "title": "Forest path countdown and Keen reassurance",
-   "durationSec": 30,
+   "durationSec": 30.0,
    "purpose": "Bo and Keen turn the tail puff into a shared countdown game, then Bo’s confidence falters when the Learning Circle becomes real. Keen gives the simple reassurance that meeting new people can still be good.",
    "visualPayoff": "Bo’s tail puffs on the shared countdown, his smile drops at the Learning Circle sound, and Keen steadies him without forcing the next step.",
    "sourceType": "opener",
@@ -1519,7 +1519,7 @@
         "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
        },
        "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
-       "shotContractHash": "b9f0891fdf4d98bb1c7ca4c31e935c373ed03dc38d0efb22df7efc87809601f8",
+       "shotContractHash": "2f02aa7d974825d08801d01d1b8a0a6697d5b66e91258633674a72dfcb1ea82e",
        "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
        "references": [
         {
@@ -1547,6 +1547,12 @@
          "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
         }
        ]
+      },
+      "durationCarryForward": {
+       "at": "2026-09-02T12:03:30",
+       "fromSec": 30.0,
+       "newDurationSec": 30.0,
+       "reason": "Approved direction carried across timing-only retime"
       }
      },
      "candidate": null,
@@ -2112,7 +2118,7 @@
         "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
        },
        "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
-       "shotContractHash": "b9f0891fdf4d98bb1c7ca4c31e935c373ed03dc38d0efb22df7efc87809601f8",
+       "shotContractHash": "2f02aa7d974825d08801d01d1b8a0a6697d5b66e91258633674a72dfcb1ea82e",
        "dialogueHash": "23475a38db90862fdb6721e60db84add22fb16edf8d19504589a40c96f04b647",
        "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
        "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
@@ -3569,6 +3575,12 @@
         }
        ],
        "compiledHash": "3d0412a0cb817860fd0a9381688d692e6915ecf02cbc56bc27664e815f89d181"
+      },
+      "durationCarryForward": {
+       "at": "2026-09-02T12:03:30",
+       "fromSec": 30.0,
+       "newDurationSec": 30.0,
+       "reason": "Approved direction carried across timing-only retime"
       }
      },
      "candidate": null,
@@ -3580,7 +3592,7 @@
    "keyframeCandidates": [],
    "selectedKeyframeCandidateId": null,
    "voicePlacementFailure": null,
-   "voPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_c38de406.wav",
+   "voPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_66ed4cf9.wav",
    "voGeneratedFrom": [
     {
      "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
@@ -3742,9 +3754,9 @@
      ]
     }
    ],
-   "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_c38de406_chorus.mp3",
-   "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_c38de406_chorus.mp3.dialogue.json",
-   "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_c38de406.wav.timing.json",
+   "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_66ed4cf9_chorus.mp3",
+   "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_66ed4cf9_chorus.mp3.dialogue.json",
+   "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_66ed4cf9.wav.timing.json",
    "voInputSignature": {
     "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
     "dialogueHash": "673b502100e31b55b8a0d0269272c31524ebddee9bb73690241fc0887746ce75",
@@ -3772,10 +3784,10 @@
    },
    "voPackageRevision": 2,
    "voicePrevious": {
-    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_732fdefb.wav",
-    "rawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8e0bdcab_chorus.mp3",
-    "timingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8e0bdcab_chorus.mp3.dialogue.json",
-    "placementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_732fdefb.wav.timing.json",
+    "path": "media/shots/Ep2_S4.SH1_vo_candidate_d2b4008e.wav",
+    "rawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_d2b4008e_chorus.mp3",
+    "timingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_d2b4008e_chorus.mp3.dialogue.json",
+    "placementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_d2b4008e.wav.timing.json",
     "generatedFrom": [
      {
       "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
@@ -3790,8 +3802,8 @@
        "style": 0.2
       },
       "previousText": "Opening silence: Bo and Keen are walking; Bo is working up courage.",
-      "compiledHash": "cb469f6b55044bc1e9611ef4ce385e9342af328955523c63573c1cf2bac2eea8",
-      "recipeId": "s4sh1-l1-natural",
+      "compiledHash": "6087dd0e772ce33b14f92e7b9b1019916bc5a67fbe394d18e079cd33d07a160a",
+      "recipeId": "shared-countdown-1",
       "voiceTreatment": "group_chorus",
       "chorusMembers": [
        "Bo",
@@ -3815,8 +3827,8 @@
        "style": 0.2
       },
       "previousText": "Bo/Keen: 3, 2, 1…",
-      "compiledHash": "0ecc3332645b9ebf8f44150ba51c81ab4cdf1f384f0a0e23e60d9f46414ab33c",
-      "recipeId": "s4sh1-l2-natural",
+      "compiledHash": "d0af6b35aa127424bf29d1a7d02b2beeae43e91315b62c4d1163d756c0a8b3ce",
+      "recipeId": "shared-countdown-2",
       "voiceTreatment": "group_chorus",
       "chorusMembers": [
        "Bo",
@@ -3840,8 +3852,8 @@
        "style": 0.2
       },
       "previousText": "Bo/Keen: 3, 2, 1…",
-      "compiledHash": "9ab6d0da78980db90828ce996feb7fa227f47a35248bb50d39157ee1b309f227",
-      "recipeId": "s4sh1-l3-natural",
+      "compiledHash": "6a76284f99f3a8648be643bd9f992ccc2e3a8c54a2699f7dc9843aa22a43b144",
+      "recipeId": "shared-countdown-3",
       "voiceTreatment": "group_chorus",
       "chorusMembers": [
        "Bo",
@@ -3865,8 +3877,8 @@
        "style": 0.2
       },
       "previousText": "Bo: 3, 2, 1…",
-      "compiledHash": "085550c3f5b56050b37bd791e377df54ce568322c0bacede1d3d2fc2843fdb06",
-      "recipeId": "s4sh1-l4-natural",
+      "compiledHash": "45f0454a6da7c473e9b817edf372c91c0f0586c91372ff80fbb5dae863de46c4",
+      "recipeId": "bo-worry-learning-circle",
       "voiceTreatment": "single_voice",
       "chorusMembers": [],
       "voiceIds": [
@@ -3886,8 +3898,8 @@
        "style": 0.2
       },
       "previousText": "Bo: I’m STILL worried about going to the Learning Circle.",
-      "compiledHash": "b2e50fadafed3263f428619b34321399f4aae5ac17ab2e19c8d7cd2b4957a8a1",
-      "recipeId": "s4sh1-l5-natural",
+      "compiledHash": "251b4cbf27e8c79cf7bccd971076ba3d2151b2725d2e8591594a571c7f794520",
+      "recipeId": "bo-they-know-each-other",
       "voiceTreatment": "single_voice",
       "chorusMembers": [],
       "voiceIds": [
@@ -3907,8 +3919,8 @@
        "style": 0.2
       },
       "previousText": "Bo: They all know each other.",
-      "compiledHash": "4905f99e5e351338380f289854785975222017033ab1e3224a815aa01fd83109",
-      "recipeId": "s4sh1-l6-natural",
+      "compiledHash": "e0fca91f8e916752848c2deef715256d7c13eba2c3a2fb5a6908fd0eabf1afac",
+      "recipeId": "bo-i-dont-know-them",
       "voiceTreatment": "single_voice",
       "chorusMembers": [],
       "voiceIds": [
@@ -3928,227 +3940,16 @@
        "style": 0.2
       },
       "previousText": "Bo: But I don’t know them, and they don’t know me.",
-      "compiledHash": "834405b3ff96d62ff4d0159c169f73674cddfc05c123972e918312d45e17e6c3",
-      "recipeId": "s4sh1-l7-natural",
+      "compiledHash": "dcde5961d0a9a54a8243c1a3a2c936f0b2c6ec53cc63839e447ba050c341e717",
+      "recipeId": "keen-new-friends",
       "voiceTreatment": "single_voice",
       "chorusMembers": [],
       "voiceIds": [
        "TCRj5m2u9xhZHJ8h9pMv"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
-      "sourceEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
-      "speaker": "Aida",
-      "text": "Hi Keen, I see you have met a new friend.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
-      "compiledHash": "a70af2f6e77f3f3f9d0bff0a3d7eb282a210ddf4227797ead53f8e9cf43f2678",
-      "recipeId": "s4sh1-l8-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
-      "sourceEventId": "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
-      "speaker": "Keen",
-      "text": "Yes.",
-      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "ada: Hi Keen, I see you have met a new friend.",
-      "compiledHash": "60904374149e236ef3079ab67a76f11495c6c6a86bf2b8b331057f7a218eefb5",
-      "recipeId": "s4sh1-l9-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "TCRj5m2u9xhZHJ8h9pMv"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
-      "sourceEventId": "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
-      "speaker": "Keen",
-      "text": "Bo, this is ada.",
-      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Keen: Yes.",
-      "compiledHash": "726883a48a60f1de5a49b2c47fc14b5b39e98876558a4c5a01ce17238c349a76",
-      "recipeId": "s4sh1-l10-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "TCRj5m2u9xhZHJ8h9pMv"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
-      "sourceEventId": "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
-      "speaker": "Aida",
-      "text": "You packed your bag.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Keen: Bo, this is ada.",
-      "compiledHash": "7fc49217cb983def1cd3a8cfcd42e26f37d3b4441ab49ca657e9a91597b979cf",
-      "recipeId": "s4sh1-l11-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
-      "sourceEventId": "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
-      "speaker": "Bo",
-      "text": "Four times.",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "ada: You packed your bag.",
-      "compiledHash": "9404119bd89218e3f95b5bc732452727a87fa330a637346142d3ebb23125783c",
-      "recipeId": "s4sh1-l12-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
-      "sourceEventId": "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
-      "speaker": "Aida",
-      "text": "I would have done five.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Bo: Four times.",
-      "compiledHash": "4d57986d81827f65fc1f93d95d541a092a897ab1b996b3517650b7e86d85e6dd",
-      "recipeId": "s4sh1-l13-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
-      "sourceEventId": "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
-      "speaker": "Bo",
-      "text": "You get scared too?",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "ada: I would have done five.",
-      "compiledHash": "daeb0ca5d9d0b8e3cb6772838b56ded5a998fb80244a7a7decb9af2b9108235e",
-      "recipeId": "s4sh1-l14-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
-      "sourceEventId": "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
-      "speaker": "Aida",
-      "text": "Every single time.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Bo: You get scared too?",
-      "compiledHash": "6866a2104ebdd9e40d755fcd4207b9858b0eebdfcd813c7a2115ed017461df0c",
-      "recipeId": "s4sh1-l15-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
-      "sourceEventId": "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
-      "speaker": "Bo",
-      "text": "But you still go?",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "ada: Every single time.",
-      "compiledHash": "19fb171d32a178ef750cd9770e73e5db76833ca19df8dac89b277bb87ca69736",
-      "recipeId": "s4sh1-l16-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
-      "sourceEventId": "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
-      "speaker": "Aida",
-      "text": "Every single time.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Bo: But you still go?",
-      "compiledHash": "c75bfac678bb339d4836500d597b36bd43d4db9a822a7b7ee986c92b64ef1531",
-      "recipeId": "s4sh1-l17-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
       ]
      }
     ],
-    "supersededAt": "2026-09-02T09:23:09Z",
-    "reason": "Scene 4 split; old voice candidate covered both new shots and was too rushed."
+    "supersededAt": "2026-09-02T12:03:30"
    },
    "voiceCorrections": [
     {
@@ -4160,7 +3961,37 @@
    ],
    "voiceAuditions": null,
    "voiceAuditionSelections": {},
-   "voiceAuditionSelectionsByHash": []
+   "voiceAuditionSelectionsByHash": [],
+   "durationRetimes": [
+    {
+     "at": "2026-09-02T12:03:30",
+     "fromSec": 30.0,
+     "toSec": 30.0,
+     "reason": "Preserve the approved final dialogue take without clipping or time compression, using the available landing room.",
+     "source": "ElevenLabs-v3-natural-performance",
+     "providerCalled": false,
+     "dialogueStartChanges": [
+      {
+       "dialogueIndex": 1,
+       "fromSec": 3.1,
+       "toSec": 3.1220000000000003,
+       "shiftSec": 0.02200000000000024
+      },
+      {
+       "dialogueIndex": 2,
+       "fromSec": 5.5,
+       "toSec": 5.764,
+       "shiftSec": 0.26400000000000023
+      },
+      {
+       "dialogueIndex": 4,
+       "fromSec": 12.8,
+       "toSec": 13.989021,
+       "shiftSec": 1.1890209999999986
+      }
+     ]
+    }
+   ]
   },
   {
    "shotId": "S4.SH2",

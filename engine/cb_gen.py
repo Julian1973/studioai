@@ -950,6 +950,7 @@ def replace_group_chorus_segments(raw_audio, timing_path, performances,
         "audioSha256": __import__("hashlib").sha256(rebuilt_audio.read_bytes()).hexdigest(),
         "voiceSegments": rebuilt_segments,
         "groupChorusResolved": True,
+        "separatedDialogueAssembly": True,
     })
     rebuilt_timing.write_text(
         json.dumps(timing, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

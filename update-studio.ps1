@@ -118,44 +118,17 @@ if (-not $fresh) {
 }
 Say "Studio at $studioRoot - currently $beforeBranch @ $before"
 
-# 1. keep local work (in-place updates only - a fresh checkout has nothing local yet) - EDITED tracked
-#    files go to a named git stash; NEW files are MOVED into a dated side folder, never deleted.
+# 1. keep local work (in-place updates only - a fresh checkout has nothing local yet).
+#    2026-09-02 CORRECTION: the studio's own production data lives INSIDE this folder (each project's
+#    episodes/output, media, assets, canon lock, the studio's data/ state). An earlier version of this
+#    step stashed EVERY edited tracked file and moved EVERY new file aside, which silently removed the
+#    Box Monsters' approved Story & Direction, its beat package and its scene directions on each update.
+#    Now: only a tracked file that BOTH has local edits AND is changed by the incoming update is stashed
+#    (git could not fast-forward over it otherwise); every other edited file and every new file stays
+#    exactly where it is. Untracked files never block a fast-forward unless the branch tracks them - those
+#    few are moved aside in step 2, nothing else.
 $dirty = 0
 $aside = $null
-if (-not $fresh) {
-    $edited = @(git status --porcelain --untracked-files=no | Where-Object { $_ })
-    $dirty = $edited.Count
-    if ($dirty -gt 0) {
-        $label = "local-edits-before-update-$stamp"
-        Say "Saving $dirty edited file(s) to git stash '$label' (nothing is deleted)"
-        git stash push --message $label | Out-Host
-        if ($LASTEXITCODE -ne 0) {
-            $saved = (git stash list | Select-String -SimpleMatch $label)
-            if ($saved) {
-                Say "The stash entry is saved but git could not finish resetting the tree - the saved copy is safe, resetting now"
-                git reset --hard HEAD | Out-Host
-            } else {
-                Fail "Could not save the local edits to a stash - stopping before anything is touched."
-            }
-        }
-        Say "Recover later with:  git stash list   /   git stash show -p stash@{0}   /   git checkout stash@{0} -- <path>"
-    } else {
-        Say "No edited tracked files to save"
-    }
-    $untracked = @(git ls-files --others --exclude-standard | Where-Object { $_ -and -not ($_ -like ".venv/*") -and -not ($_ -like ".venv-old-*") -and -not ($_ -like "_local-work-*") -and -not ($_ -like ".pytest_cache/*") -and -not ($_ -like "*__pycache__*") -and -not ($_ -like "studio-update.bundle") -and -not ($_ -like "update-studio.*") -and -not ($_ -like "HANDOVER_*") })
-    if ($untracked.Count -gt 0) {
-        $aside = Join-Path $studioRoot ("_local-work-" + $stamp)
-        Say ("Moving " + $untracked.Count + " new local file(s) aside into " + $aside + " (nothing is deleted)")
-        foreach ($rel in $untracked) {
-            $src = Join-Path $studioRoot $rel
-            $dst = Join-Path $aside $rel
-            $dstDir = Split-Path -Parent $dst
-            if (-not (Test-Path -LiteralPath $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
-            try { Move-Item -LiteralPath $src -Destination $dst -Force } catch { Warn ("could not move " + $rel + ": " + $_.Exception.Message) }
-        }
-    }
-}
-
 $requirementsBefore = ""
 if (Test-Path -LiteralPath "requirements.txt") { $requirementsBefore = (Get-FileHash requirements.txt).Hash }
 
@@ -196,6 +169,22 @@ if (-not $fresh) {
     }
 }
 
+if (-not $fresh) {
+    $edited = @(git status --porcelain --untracked-files=no | Where-Object { $_ } | ForEach-Object { $_.Substring(3).Trim().Trim('"') })
+    $incoming = @(git diff --name-only HEAD $source | Where-Object { $_ })
+    $conflicting = @($edited | Where-Object { $incoming -contains $_ })
+    $dirty = $conflicting.Count
+    if ($dirty -gt 0) {
+        $label = "local-edits-before-update-$stamp"
+        Say "Saving $dirty edited file(s) the update also changes to git stash '$label' (nothing is deleted)"
+        git stash push --message $label -- $conflicting | Out-Host
+        if ($LASTEXITCODE -ne 0) { Fail "Could not save the local edits to a stash - stopping before anything is touched." }
+        Say "Recover later with:  git stash list   /   git stash show -p stash@{0}   /   git checkout stash@{0} -- <path>"
+    } else {
+        Say "No edited file collides with this update - all local work stays in place"
+    }
+}
+
 Say "Switching to $Branch (from $source)"
 $haveLocal = (git rev-parse --verify --quiet "refs/heads/$Branch")
 if ($haveLocal) {
@@ -209,17 +198,18 @@ if ($haveLocal) {
     if ($source -eq "origin/$Branch") { git branch --set-upstream-to "origin/$Branch" $Branch | Out-Null }
 }
 if ($source -like "bundle/*") { Say "This update came from the bundle - publish it with:  git push -u origin $Branch" }
-# symlinks written as text files by an older checkout become real links on re-checkout, and every
-# tracked file is rewritten from the index so the line endings follow .gitattributes (LF), not an
-# earlier autocrlf setting
-git checkout -- . | Out-Host
+# (a blanket "git checkout -- ." used to run here; it discarded the studio's own edits to tracked
+#  state files - removed 2026-09-02. Text-file links are repaired individually in step 3.)
 $probe = Join-Path $studioRoot "projects\crystal-bears\episodes\scripts\Ep1_The_Adventure_Begins.txt"
 if (Test-Path -LiteralPath $probe) {
     $bytes = [IO.File]::ReadAllBytes($probe)
     if ($bytes -contains 13) {
         Say "Line endings were converted on an earlier checkout - rewriting every tracked file from git (LF)"
+        $keep = @(git status --porcelain --untracked-files=no | Where-Object { $_ } | ForEach-Object { $_.Substring(3).Trim().Trim('"') })
+        if ($keep.Count -gt 0) { git stash push --message "line-ending-rewrite-$stamp" -- $keep | Out-Host }
         git rm -r -q --cached . | Out-Null
         git reset -q --hard HEAD | Out-Host
+        if ($keep.Count -gt 0) { git stash pop | Out-Host }
         $bytes = [IO.File]::ReadAllBytes($probe)
         if ($bytes -contains 13) { Warn "the checkout still carries CRLF line endings - tell Claude" } else { Say "Line endings are LF again" }
     } else {
@@ -359,7 +349,7 @@ if ($LASTEXITCODE -ne 0) {
             } catch { Warn ("could not replace " + $l + ": " + $_.Exception.Message) }
         }
     }
-    git checkout -- . | Out-Host
+    git checkout -- $links | Out-Host
     & $python "tools\check_links.py" | Out-Host
     if ($LASTEXITCODE -ne 0) {
         Warn "The links are still not real. Turn on Developer Mode (Settings > System > For developers), sign out and back in, then run this script again."

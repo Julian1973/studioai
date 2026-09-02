@@ -176,6 +176,13 @@ def test_department_run_never_reuses_a_stale_candidate():
     assert 'args = ["cb_render.py", "department-prepare"' in SERVER
 
 
+def test_studio_jobs_force_current_engine_env_over_parent_env():
+    assert "def _engine_env_overrides()" in SERVER
+    assert 'env_file = CBGEN / ".env"' in SERVER
+    assert "env.update(_engine_env_overrides())" in SERVER
+    assert "env=_engine_subprocess_env()" in SERVER
+
+
 def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
     assert 'app.view === "pipeline" &&' in JS
     assert 'session.phase === "story" &&' in JS

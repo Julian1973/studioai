@@ -15,6 +15,33 @@ MEDIA = ROOT / "engine" / "media"
 OUT = ROOT / "cb-output"
 DATA = ROOT / "cb-studio" / "data"
 DATA.mkdir(parents=True, exist_ok=True)
+
+def _engine_env_overrides():
+    """Load engine/.env values for backend subprocesses.
+
+    The engine loader uses setdefault so an older Studio parent environment can
+    otherwise keep stale provider flags. Studio-launched jobs must follow the
+    current local .env file because that is where provider routing is managed.
+    """
+    env_file = CBGEN / ".env"
+    values = {}
+    if not env_file.exists():
+        return values
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        text = line.strip()
+        if not text or text.startswith("#") or "=" not in text:
+            continue
+        key, value = text.split("=", 1)
+        key = key.strip()
+        if key:
+            values[key] = value.strip()
+    return values
+
+def _engine_subprocess_env():
+    env = os.environ.copy()
+    env.update(_engine_env_overrides())
+    return env
+
 import cb_scripts
 import cb_db
 import cb_asset_registry
@@ -1036,6 +1063,7 @@ def _stream(jobId, args):
             p = subprocess.Popen(["python3", "-u"] + args, cwd=str(CBGEN),
                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  text=True, bufsize=1, stdin=subprocess.DEVNULL,
+                                 env=_engine_subprocess_env(),
                                  # Own process group, so STOP kills the gate and every
                                  # render child it spawns without inheriting server stdin.
                                  start_new_session=True)

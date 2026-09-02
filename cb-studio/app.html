@@ -3201,7 +3201,7 @@ function approvedShotNextActionHTML(shots){
   if(PSHOT_I<shots.length-1){
     return `<button class="btn" onclick="continueToNextProductionShot()">Continue to ${_esc(shots[PSHOT_I+1].shotId)} →</button>`;
   }
-  return nextSceneActionHTML("shot");
+  return nextSceneActionHTML("scene");
 }
 function openPreviousShotOutcome(stage){
   if(PSHOT_I>0){PSHOT_I--;PSTAGE=stage;renderWorkspaceBody();_syncHash();return;}

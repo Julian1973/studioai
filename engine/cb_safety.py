@@ -996,6 +996,42 @@ def install(m):
             "tier": "fast" if fast else "standard",
         }
 
+    def animation_direct_inputs_current(recorded, pkg, shot, scene, episode):
+        """Validate fired pixels against current creative inputs without reopening direction.
+
+        A completed provider batch owns the exact signed prompt and execution plan that
+        produced it.  Changing the text model, compiler, or specialist record afterwards
+        must not prevent the human Director from approving those already-rendered pixels.
+        Script/shot, canon, opening-frame, reference, duration, and approved-audio changes
+        still invalidate the batch.
+        """
+        if not isinstance(recorded, dict):
+            return False
+        try:
+            anchor = m._anchor_for(pkg, shot)
+            current_shot = m._with_effective_reference_slots(
+                pkg, shot, "referenceSlots", scene, episode)
+            current_refs = ordered_slot_signature(
+                current_shot, "referenceSlots", anchor, scene, episode)
+            has_dialogue = bool(cb_audio_authority.spoken_dialogue_lines(shot))
+            voice = voice_approval_status(pkg, shot, scene, episode)
+            if has_dialogue and not voice["current"]:
+                return False
+            return bool(
+                recorded.get("canonProfileDigest") ==
+                require_canon(pkg, episode, "animation") and
+                recorded.get("shotContractHash") == json_sha256(current_shot) and
+                recorded.get("openingFrameHash") == file_sha256(anchor) and
+                recorded.get("durationSec") == shot.get("durationSec") and
+                recorded.get("audioHash") == (
+                    file_sha256(m._ledger(pkg, shot["shotId"]).get("voPath"))
+                    if has_dialogue else None) and
+                normalized_reference_evidence(recorded.get("references")) ==
+                normalized_reference_evidence(current_refs)
+            )
+        except (m.Refused, OSError, TypeError, ValueError):
+            return False
+
     def animation_approval_status(pkg, shot, scene=None, episode=None):
         scene = str(scene if scene is not None else pkg.get("sceneNumber"))
         episode = episode or pkg.get("episode", "Ep1")
@@ -1028,34 +1064,6 @@ def install(m):
         take = ledger.get("approvedTake")
         harvest = ledger.get("harvestFrame")
 
-        def approved_direct_inputs_current():
-            """Keep accepted picture current across compiler-only implementation changes."""
-            if not isinstance(recorded, dict):
-                return False
-            try:
-                anchor = m._anchor_for(pkg, shot)
-                current_shot = m._with_effective_reference_slots(
-                    pkg, shot, "referenceSlots", scene, episode)
-                current_refs = ordered_slot_signature(
-                    current_shot, "referenceSlots", anchor, scene, episode)
-                has_dialogue = bool(cb_audio_authority.spoken_dialogue_lines(shot))
-                voice = voice_approval_status(pkg, shot, scene, episode)
-                if has_dialogue and not voice["current"]:
-                    return False
-                return bool(
-                    recorded.get("canonProfileDigest") ==
-                    require_canon(pkg, episode, "animation") and
-                    recorded.get("shotContractHash") == json_sha256(current_shot) and
-                    recorded.get("openingFrameHash") == file_sha256(anchor) and
-                    recorded.get("durationSec") == shot.get("durationSec") and
-                    recorded.get("audioHash") == (
-                        file_sha256(ledger.get("voPath")) if has_dialogue else None) and
-                    normalized_reference_evidence(recorded.get("references")) ==
-                    normalized_reference_evidence(current_refs)
-                )
-            except (m.Refused, OSError, TypeError, ValueError):
-                return False
-
         media_current = bool(
             ledger.get("status") == "approved" and approval.get("approved") and
             take and harvest and os.path.exists(take) and os.path.exists(harvest) and
@@ -1067,7 +1075,8 @@ def install(m):
                 comparison_model_id=comparison_model_id,
                 comparison_run_id=comparison_run_id)
         except (m.Refused, OSError, ValueError) as exc:
-            if media_current and approved_direct_inputs_current():
+            if media_current and animation_direct_inputs_current(
+                    recorded, pkg, shot, scene, episode):
                 return {"approved": True, "current": True, "reason": None,
                         "record": approval, "expectedInputSignature": recorded,
                         "carriedForward": "approved-media-direct-inputs-current"}
@@ -1076,7 +1085,8 @@ def install(m):
                     "expectedInputSignature": None}
         current = bool(
             media_current and
-            (recorded == expected or approved_direct_inputs_current()))
+            (recorded == expected or animation_direct_inputs_current(
+                recorded, pkg, shot, scene, episode)))
         return {"approved": bool(approval.get("approved")), "current": current,
                 "reason": None if current else "animation-approval-input-or-content-mismatch",
                 "record": approval, "expectedInputSignature": expected,
@@ -1924,22 +1934,15 @@ def install(m):
         pkg, _ = current_package(scene, episode)
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
         batch = ledger.get("batch") or {}
-        fast = ((batch.get("envelope") or {}).get("tier") == "fast")
-        envelope = batch.get("envelope") or {}
-        comparison_model_id = (
-            envelope.get("providerModelId") if envelope.get("comparisonRunId") else None)
-        comparison_run_id = envelope.get("comparisonRunId")
-        current_signature = animation_generation_signature(
-            pkg, shot, scene, episode, fast=fast,
-            comparison_model_id=comparison_model_id,
-            comparison_run_id=comparison_run_id)
+        fired_signature = batch.get("inputSignature")
         recorded_hashes = batch.get("candidateHashes") or []
         current_hashes = [
             {"path": candidate_path, "sha256": file_sha256(candidate_path)}
             for candidate_path in (ledger.get("candidatePaths") or [])
         ]
         if (batch.get("status") != "complete" or
-                batch.get("inputSignature") != current_signature or
+                not animation_direct_inputs_current(
+                    fired_signature, pkg, shot, str(scene), episode) or
                 not recorded_hashes or recorded_hashes != current_hashes):
             raise m.Refused(
                 f"REFUSED — {shot_id}'s candidate batch is stale, incomplete or changed on disk")
@@ -1947,7 +1950,7 @@ def install(m):
         pkg, path = m.load_pkg(scene, episode); approval = m._ledger(pkg, shot_id)["approval"]
         ledger = m._ledger(pkg, shot_id)
         approval.update({"packageRevision": pkg.get("revision"),
-                         "inputSignature": current_signature,
+                         "inputSignature": fired_signature,
                          "contentHash": file_sha256(ledger.get("approvedTake")),
                          "harvestHash": file_sha256(ledger.get("harvestFrame")),
                          "batchId": batch.get("batchId")})

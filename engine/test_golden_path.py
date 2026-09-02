@@ -1937,6 +1937,36 @@ def test_animation_direction_goes_stale_when_approved_opening_frame_changes(worl
         R._approved_seedance_prompt(pkg, R._shot(pkg, "1.B1.S1"))
 
 
+def test_completed_batch_can_be_approved_after_direction_runtime_changes(world):
+    """Human approval binds returned pixels to their fired inputs, not a later text runtime."""
+    _voice_and_approve()
+    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
+    R.approve_keyframe(
+        "9", "1.B1.S1", "EpT", reviewed_by="TestReviewer",
+        log=lambda *a, **k: None)
+    token = _token("1.B1.S1", candidates=1)
+    R.fire_shot(
+        "9", "1.B1.S1", "EpT", candidates=1, spend_token=token,
+        log=lambda *a, **k: None)
+
+    pkg, path = R.load_pkg("9", "EpT")
+    animation = R._ledger(pkg, "1.B1.S1")["departmentWork"]["animation"]["approved"]
+    animation["inputSignature"] = {**animation["inputSignature"], "model": "retired-model"}
+    R._save(pkg, path)
+
+    R.approve_shot(
+        "9", "1.B1.S1", 1, "EpT", reviewed_by="TestReviewer",
+        log=lambda *a, **k: None)
+    pkg, _ = R.load_pkg("9", "EpT")
+    ledger = R._ledger(pkg, "1.B1.S1")
+    assert ledger["status"] == "approved"
+    assert ledger["approvedCandidate"] == 1
+    assert R._animation_approval_status(
+        pkg, R._shot(pkg, "1.B1.S1"), "9", "EpT")["current"] is True
+
+
 def test_reference_slot_validator_accepts_possessive_character_name():
     """Keen's Mum is one canonical role, not a conflicting assignment to Keen."""
     R._require_prompt_slot_text_consistency(

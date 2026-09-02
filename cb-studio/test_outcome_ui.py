@@ -195,7 +195,7 @@ def test_episode_continue_prefers_newest_script_when_upstream_changes_stale_pack
 def test_completed_shots_and_scenes_have_a_clean_next_step():
     assert "function nextSceneActionHTML(kind)" in APP
     assert "function approvedShotNextActionHTML(shots)" in APP
-    assert 'return nextSceneActionHTML("shot");' in APP
+    assert 'return nextSceneActionHTML("scene");' in APP
     assert 'nextSceneActionHTML("scene")' in APP
     assert "Finish scene then continue to Scene" in APP
     assert "Continue to Scene" in APP

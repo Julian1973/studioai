@@ -164,6 +164,40 @@ def test_current_prepared_direction_is_operational_without_fake_human_approval(
         package, shot["shotId"], "cinematography")["current"]
 
 
+def test_complex_relay_uses_its_approved_see_keyframe_as_watch_anchor(tmp_path):
+    package, shot, opening_frame = _pkg(tmp_path)
+    shot.update({
+        "sourceType": "relay",
+        "sourceShotId": "S1.PREV",
+        "charactersInFrame": ["Aida", "Bo", "Keen"],
+        "dialogueLines": [
+            {"speaker": "Aida", "exactText": "Hello."},
+            {"speaker": "Bo", "exactText": "Hello."},
+            {"speaker": "Keen", "exactText": "Hello."},
+        ],
+    })
+    ledger = render._ledger(package, shot["shotId"])
+
+    assert render._shot_uses_own_keyframe(shot, ledger) is True
+    assert render._anchor_for(package, shot) == str(opening_frame)
+
+    ledger["continuityMode"] = "video-extension"
+    assert render._shot_uses_own_keyframe(shot, ledger) is False
+
+
+def test_simple_relay_still_inherits_predecessor_frame(tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    shot.update({
+        "sourceType": "relay",
+        "sourceShotId": "S1.PREV",
+        "charactersInFrame": ["Bo", "Keen"],
+        "dialogueLines": [{"speaker": "Bo", "exactText": "Ready."}],
+    })
+
+    assert render._shot_uses_own_keyframe(
+        shot, render._ledger(package, shot["shotId"])) is False
+
+
 def test_dialogue_amendment_does_not_stale_prepared_cinematography(
         tmp_path, monkeypatch):
     package, shot, _ = _pkg(tmp_path)

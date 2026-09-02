@@ -266,7 +266,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
                 amendment=None):
     shot_id = shot["shotId"]
     ledger = cb_render._ledger(pkg, shot_id)
-    needs_keyframe = shot.get("sourceType") == "opener"
+    needs_keyframe = cb_render._shot_uses_own_keyframe(shot, ledger)
 
     cine = cb_render._department_record_status(
         pkg, shot_id, "cinematography", scene, episode)
@@ -314,7 +314,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
         else:
             kf = "ready"
         keyframe_satisfied = keyframe["current"]
-        source_shot_id = None
+        source_shot_id = shot.get("sourceShotId")
     else:
         source_shot_id = shot.get("sourceShotId")
         source_state = None

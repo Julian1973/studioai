@@ -4972,7 +4972,7 @@ function visualAnchorPairHTML(media){
     </button><span class="visual-anchor-copy"><span class="visual-anchor-label">1 · Scene plate</span><span class="visual-anchor-title">The world and lighting</span><span class="visual-anchor-status">${plateJob?"Replacement is generating here":plate?_esc(plateStatus):"Scene Look must be supplied first"}</span></span>${scenePlateProgressHTML(plateJob)}${scenePlateSourceActionsHTML(!!plate,!!plateJob)}</article>
     <article class="visual-anchor">
       ${keyframe?`<img class="visual-anchor-media zoom" data-cap="${_esc(shot)} · opening keyframe" src="${BASE}${_esc(keyframe)}?v=${MEDIA_V}" alt="Opening keyframe">`:`<span class="visual-anchor-empty">Awaiting frame</span>`}
-      <span class="visual-anchor-copy"><span class="visual-anchor-label">2 · Opening keyframe</span><span class="visual-anchor-title">Characters and first composition</span><span class="visual-anchor-status">${keyframe?"Current candidate ready for your decision":"Use the decision controls to choose, upload or build the Shot 1 frame"}</span></span>
+      <span class="visual-anchor-copy"><span class="visual-anchor-label">2 · Opening keyframe</span><span class="visual-anchor-title">Characters and first composition</span><span class="visual-anchor-status">${keyframe?"Current candidate ready for your decision":"Use the decision controls to choose, upload or build this shot's frame"}</span></span>
     </article>
   </section>`;
 }

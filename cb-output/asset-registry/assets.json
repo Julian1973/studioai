@@ -11646,6 +11646,23 @@
       "source": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_scene4_production_package.json",
       "status": "approved",
       "url": "/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav"
+    },
+    {
+      "assetId": "b2c3290110a170ef97fd7d48",
+      "bindingKey": "Ep2|4|S4.SH2|voice|voice_track",
+      "displayType": "audio",
+      "episode": "Ep2",
+      "kind": "voice",
+      "label": "S4.SH2 voice_track",
+      "metadata": {},
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH2_vo_candidate_fb991f16.wav",
+      "registeredAt": "2026-09-02T14:34:14Z",
+      "role": "voice_track",
+      "scene": "4",
+      "shotId": "S4.SH2",
+      "source": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_scene4_production_package.json",
+      "status": "approved",
+      "url": "/engine/media/shots/Ep2_S4.SH2_vo_candidate_fb991f16.wav"
     }
   ],
   "deletedBindingKeys": [

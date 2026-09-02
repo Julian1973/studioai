@@ -309,6 +309,15 @@ def _requires_stage_contract_keyframe(shot):
         text, re.I))
 
 
+def _shot_uses_own_keyframe(shot, ledger=None):
+    """Whether SEE must author and approve a shot-owned opening frame."""
+    if shot.get("sourceType") == "opener":
+        return True
+    if not _requires_stage_contract_keyframe(shot):
+        return False
+    return str((ledger or {}).get("continuityMode") or "") != "video-extension"
+
+
 def _require_stage_contract_keyframe(shot, ledger):
     if not _requires_stage_contract_keyframe(shot):
         return
@@ -1341,7 +1350,7 @@ def prepare_opening_composition_master(scene, shot_id, episode="Ep1", log=print)
     _require_valid(pkg)
     _require_current_lineage(pkg, scene, episode)
     shot = _shot(pkg, shot_id)
-    if shot.get("sourceType") != "opener":
+    if not _shot_uses_own_keyframe(shot, _ledger(pkg, shot_id)):
         raise Refused(
             f"REFUSED — {shot_id} is a relay shot and inherits its opening composition")
     control = _ensure_opening_composition_master(
@@ -1692,7 +1701,7 @@ def generate_pose_reference(scene, shot_id, character, episode="Ep1", log=print)
     _require_current_lineage(pkg, scene, episode)
     _require_confirmed_billing("fal")
     shot = _shot(pkg, shot_id)
-    if shot.get("sourceType") != "opener":
+    if not _shot_uses_own_keyframe(shot, _ledger(pkg, shot_id)):
         raise Refused(f"REFUSED — {shot_id} inherits its opening frame and needs no pose pass")
     name = _resolve_char(character, _characters_cfg())
     cast = [_resolve_char(item, _characters_cfg())
@@ -2137,7 +2146,7 @@ def keyframe_build_status(scene, shot_id, episode="Ep1"):
     pkg, _ = load_pkg(scene, episode)
     shot = _shot(pkg, shot_id)
     ledger = _ledger(pkg, shot_id)
-    if shot.get("sourceType") != "opener":
+    if not _shot_uses_own_keyframe(shot, ledger):
         return {
             "state": "not-applicable", "buildable": False,
             "reason": "This shot inherits its opening frame.",
@@ -2218,7 +2227,7 @@ def build_keyframe(scene, shot_id, episode="Ep1", log=print):
     _require_confirmed_billing("google")
     _require_current_scenelook(scene, episode)
     shot = _shot(pkg, shot_id)
-    if shot.get("sourceType") != "opener":
+    if not _shot_uses_own_keyframe(shot, _ledger(pkg, shot_id)):
         raise Refused(f"REFUSED — {shot_id} inherits its opening frame and needs no build")
     if (_ledger(pkg, shot_id).get("keyframeCandidate") or
             _ledger(pkg, shot_id).get("keyframeCandidates")):
@@ -2956,7 +2965,7 @@ def shot_reference_manifest(scene, shot_id, episode="Ep1"):
             "message": message,
         })
 
-    keyframe_applies = shot.get("sourceType") == "opener"
+    keyframe_applies = _shot_uses_own_keyframe(shot, ledger)
     scale_control = _load_character_scale_control(
         shot, scene, episode, characters_cfg)
     composition_control = _load_opening_composition_master(
@@ -4883,14 +4892,8 @@ def _with_character_scale_control(prompt, shot, slots_key, scene, episode):
 
 
 def _resolve_keyframe_prompt(pkg, shot):
-    """A relay/non-opener shot legitimately has no keyframePrompt at all (it opens off its
-    source shot's harvested final frame, never its own keyframe — keyframe_shot itself
-    refuses to generate one) — returns None for that shot rather than crashing. Every real
-    caller either already guards sourceType=="opener" first (keyframe_shot/regen paths) or
-    is a read-only report over EVERY shot (evidence_pack) that must tolerate a relay shot's
-    honest "no keyframe prompt" the same way it already tolerates a silent shot's "no voice
-    track" — a missing value here is the truthful record, never a gap to paper over."""
-    if shot.get("sourceType") != "opener":
+    """Return a prompt only when this shot must own an approved SEE frame."""
+    if not _shot_uses_own_keyframe(shot, _ledger(pkg, shot["shotId"])):
         return None
     work = _approved_department_output(pkg, shot["shotId"], "cinematography") or {}
     plan = _expanded_reference_blueprint(
@@ -5935,7 +5938,7 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
     _require_confirmed_billing("google")
     _require_current_scenelook(scene, episode)                # no keyframe without a current approved Scene Look Plate
     shot = _shot(pkg, shot_id)
-    if shot["sourceType"] != "opener":
+    if not _shot_uses_own_keyframe(shot, _ledger(pkg, shot_id)):
         raise Refused(f"REFUSED — {shot_id} is a relay shot; it anchors on its source shot's "
                       f"harvested final frame, never its own keyframe")
     led = _ledger(pkg, shot_id)
@@ -6474,7 +6477,7 @@ def _anchor_for(pkg, shot):
                 f"REFUSED — openingFrameOverride for {shot['shotId']} resolves outside "
                 "the approved Studio media and asset libraries")
         return str(candidate)
-    if shot["sourceType"] == "opener":
+    if _shot_uses_own_keyframe(shot, led):
         # A GENERATED-BUT-UNAPPROVED CANDIDATE CAN NEVER ANCHOR A FIRE (2026-07-17 state-
         # integrity checkpoint, corrected 2026-07-18 — direct-input lineage): file existence
         # alone used to be enough here — the exact class of bug that let a rejected S1.SH1
@@ -8748,7 +8751,8 @@ def _prompt_lab_snapshot(scene, shot_id, artifact_type, episode="Ep1", candidate
     pkg, _ = load_pkg(scene, episode)
     shot = _shot(pkg, shot_id)
     ledger = _ledger(pkg, shot_id)
-    if artifact_type == "keyframe" and shot.get("sourceType") != "opener":
+    if (artifact_type == "keyframe" and
+            not _shot_uses_own_keyframe(shot, ledger)):
         raise Refused(f"REFUSED — {shot_id} inherits its opening frame and has no keyframe prompt")
     assets = _prompt_lab_assets(pkg, shot, ledger, artifact_type)
     selected = None

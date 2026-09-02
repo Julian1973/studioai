@@ -219,7 +219,10 @@ def test_story_intake_remembers_runs_and_names_the_lock_boundary():
     assert 'title:"Story & Direction accepted"' in APP
     assert "Approved & locked" in APP
     assert "verdict,note,by:REVIEWER" in APP
-    assert 'subprocess.Popen(["python3", "-u"] + args' in SERVER
+    # 2026-09-02: jobs launch with the interpreter running serve.py, never the literal
+    # "python3" (the Microsoft Store stub on Windows).
+    assert 'subprocess.Popen([PYTHON, "-u"] + args' in SERVER
+    assert 'PYTHON = sys.executable or "python3"' in SERVER
     assert "cb_db.interrupt_running_jobs(ROOT, server_key=SERVER_KEY)" in SERVER
     assert "restored_jobs = cb_db.load_jobs(ROOT, server_key=SERVER_KEY)" in SERVER
     assert '!r.ok||!Array.isArray(payload)' in APP

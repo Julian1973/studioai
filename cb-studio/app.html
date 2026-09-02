@@ -2854,8 +2854,16 @@ function storyIntakePanelHTML(d){
   }
   const stalePackage=d.hasCanonicalPackage&&!d.canonicalCurrent
     ?`<div class="live" style="color:var(--warn);margin:10px 0">The older beat package is preserved, but it does not match this immutable script and exact canon lock.</div>`:"";
+  // THE VISIBLE FAILURE (2026-09-02): a run that died seconds after the green "reading the
+  // script" toast used to leave the panel looking untouched — its only trace was a collapsed
+  // "Last run details" inside "Production checks". A failed last run now says so, up top,
+  // with the one line that explains it.
+  const failedRun=(!job&&lastJob&&lastJob.status==="failed")
+    ?outcomePanelHTML({tone:"blocked",title:"The last Story & Direction run failed",body:(lastJob.error||lastJob.step||"The Director's process ended without a result.")+" — open “Production checks → Last run details” below for the full log.",actions:[{label:"Run again",onclick:"storyIntakeRun()"}]})
+    :"";
   if(!d.hasCandidate){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
+      ${failedRun}
       ${outcomePanelHTML({tone:job?"working":"ready",title:job?"The Director is working":"Run Story & Direction",body:job?"Stop the current run or wait for its visible candidate.":"Read the active script and propose the episode without generating image, voice or video.",actions:job?[{label:"Stop",onclick:`stopFiring('${job.jobId}')`,kind:"secondary"}]:[{label:"Run Story & Direction",onclick:"storyIntakeRun()"},{label:"Open script",onclick:"go('script')",kind:"secondary"}]})}
       ${visibleJobProgress}
       ${carriedReferences}

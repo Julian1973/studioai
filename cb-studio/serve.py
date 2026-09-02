@@ -217,10 +217,24 @@ def _source_fingerprint():
 _STARTED_FP = _source_fingerprint()
 def _is_stale():
     return _source_fingerprint() > _STARTED_FP + 0.5      # 0.5s slop for save races
+RESTART_EXIT_CODE = 75   # "restart me": start-studio.ps1 loops on this code (Windows reload path)
+
 def _reexec():
-    """Reload the studio process with the CURRENT code (idle auto-reload + the restart endpoint)."""
+    """Reload the studio process with the CURRENT code (idle auto-reload, the restart endpoint and the
+    project switch). POSIX: os.execv replaces the process in place. Windows (2026-09-02): execv would
+    spawn a child that inherits the launcher console and the still-bound port, so the studio instead
+    EXITS with RESTART_EXIT_CODE and start-studio.ps1 relaunches it in the same window, same env."""
     sys.stdout.flush()
+    if os.name == "nt":
+        try:
+            if _HTTPD is not None:
+                _HTTPD.server_close()
+        except Exception:
+            pass
+        os._exit(RESTART_EXIT_CODE)
     os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)] + sys.argv[1:])
+
+_HTTPD = None   # the live ThreadingHTTPServer, set by main() so _reexec can release the port first
 def _freshness_watch():
     """Self-heal: when the source changes and NO job is running, reload with the latest code (seamless when idle).
     FIXED 2026-07-12 (full-codebase audit continued): this only ever checked PROCS (async render jobs) — several
@@ -987,7 +1001,7 @@ def visions_state():
 
 def continuity_state():
     try:
-        p = subprocess.run(["python3", "cb_continuity.py", "--json"], cwd=str(CBGEN),
+        p = subprocess.run([PYTHON, "cb_continuity.py", "--json"], cwd=str(CBGEN),
                            capture_output=True, text=True, timeout=60, stdin=subprocess.DEVNULL)
         return json.loads(p.stdout or "[]")
     except Exception as e:
@@ -1060,6 +1074,13 @@ def _humanise(line, gate=None):
     return l[:90]
 
 
+# THE INTERPRETER (2026-09-02, first Windows fire of the projects branch): every job used to be
+# launched as the literal command "python3". On Julian's PC that name resolves to the Microsoft
+# Store stub ("Python was not found"), so the Director's Story & Direction job died the instant
+# it started, with a green "running" toast and no progress. The studio always launches its jobs
+# with the SAME interpreter that is running serve.py — the .venv's python on every platform.
+PYTHON = sys.executable or "python3"
+
 def _process_lines_until_exit(process, timeout=0.5):
     """Yield live stdout without waiting forever on an inherited pipe.
 
@@ -1068,7 +1089,35 @@ def _process_lines_until_exit(process, timeout=0.5):
     pipe even after the actual render worker has exited. Polling between readable
     events lets the Studio publish the completed artifacts as soon as its worker
     is done while preserving live progress output.
+
+    On Windows ``select()`` only works on sockets, never on a pipe, so the same job
+    is served by a reader thread feeding a queue — identical contract, live lines,
+    and the loop still returns as soon as the worker itself has exited.
     """
+    if os.name == "nt":
+        import queue
+        q = queue.Queue()
+
+        def _reader():
+            try:
+                for line in iter(process.stdout.readline, ""):
+                    q.put(line)
+            except Exception:
+                pass
+            finally:
+                q.put(None)
+
+        threading.Thread(target=_reader, daemon=True).start()
+        while True:
+            try:
+                line = q.get(timeout=timeout)
+            except queue.Empty:
+                if process.poll() is not None:
+                    return
+                continue
+            if line is None:
+                return
+            yield line
     selector = selectors.DefaultSelector()
     selector.register(process.stdout, selectors.EVENT_READ)
     try:
@@ -1083,6 +1132,31 @@ def _process_lines_until_exit(process, timeout=0.5):
     finally:
         selector.close()
 
+def _popen_kwargs():
+    """Own process group (POSIX) / own process group flag (Windows), so STOP can kill the
+    gate and every render child it spawned without either inheriting the server's stdin."""
+    if os.name == "nt":
+        return {"creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)}
+    return {"start_new_session": True}
+
+def _kill_tree(p):
+    """Hard-kill a job's whole process tree on either platform."""
+    if os.name == "nt":
+        try:
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)],
+                           capture_output=True, timeout=15)
+            return
+        except Exception:
+            pass
+    else:
+        try:
+            os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+            return
+        except Exception:
+            pass
+    try: p.kill()
+    except Exception: pass
+
 def _stream(jobId, args):
     """Run cb_pipeline streaming, so the job's current STEP is live (not blank until it finishes)."""
     job = JOBS[jobId]
@@ -1092,12 +1166,17 @@ def _stream(jobId, args):
                 job["status"] = "stopped"
                 job["step"] = "Stopped by user."
                 return
-            p = subprocess.Popen(["python3", "-u"] + args, cwd=str(CBGEN),
+            p = subprocess.Popen([PYTHON, "-u"] + args, cwd=str(CBGEN),
                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  text=True, bufsize=1, stdin=subprocess.DEVNULL,
+                                 encoding="utf-8", errors="replace",
+                                 # The engine prints "—", "✓", "⚠" in its progress lines; a
+                                 # Windows child writing to a pipe would default to cp1252 and
+                                 # crash on the first one. UTF-8 on both ends, every platform.
+                                 env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"},
                                  # Own process group, so STOP kills the gate and every
                                  # render child it spawns without inheriting server stdin.
-                                 start_new_session=True)
+                                 **_popen_kwargs())
             PROCS[jobId] = p
             job["pid"] = p.pid
         _persist_job(job)
@@ -1420,10 +1499,7 @@ def stop_job(jobId):
         if job: job["stopped"] = True
         p = PROCS.get(jobId)
     if p:
-        try: os.killpg(os.getpgid(p.pid), signal.SIGKILL)
-        except Exception:
-            try: p.kill()
-            except Exception: pass
+        _kill_tree(p)
     with _JOB_LOCK:
         if job and job.get("status") == "running":
             job["status"] = "stopped"; job["step"] = "Stopped by user."; job["ended"] = time.time()
@@ -5475,6 +5551,17 @@ class H(http.server.SimpleHTTPRequestHandler):
         pass
 
 def main():
+    # WINDOWS UTF-8 (2026-09-02): the engine reads and writes its JSON, canon and prompts as UTF-8
+    # and prints "—"/"✓" in its logs; a Windows Python outside UTF-8 mode defaults every open()
+    # and pipe to cp1252 and fails on the first non-ASCII character. If this process was started
+    # without PYTHONUTF8=1 (a bare "python serve.py"), run the studio in a child that has it and
+    # relay its exit code — the same window, the same credentials, no other change.
+    if os.name == "nt" and not sys.flags.utf8_mode and os.environ.get("CB_STUDIO_UTF8_CHILD") != "1":
+        env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8", "CB_STUDIO_UTF8_CHILD": "1"}
+        while True:
+            rc = subprocess.call([sys.executable, os.path.abspath(__file__)] + sys.argv[1:], env=env)
+            if rc != RESTART_EXIT_CODE:
+                sys.exit(rc)
     os.chdir(ROOT)
     # T43 (2026-09-01): refuse to serve from a checkout whose compatibility links are not
     # real links (a Windows clone without symlink support turns each into a text file).
@@ -5515,6 +5602,8 @@ def main():
     # automatic collector keeps this long-running local UI responsive.
     gc.disable()
     with http.server.ThreadingHTTPServer((BIND_HOST, PORT), H) as httpd:
+        global _HTTPD
+        _HTTPD = httpd
         base_url = PUBLIC_ORIGIN or f"http://{BIND_HOST}:{PORT}"
         launch_url = f"{base_url}/cb-studio/director.html?launchToken={LAUNCH_TOKEN}"
         print(f"Animation Studio launch URL -> {launch_url}", flush=True)

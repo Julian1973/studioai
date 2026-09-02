@@ -27,4 +27,10 @@ foreach ($match in $matches) {
 }
 
 Set-Location -LiteralPath $studioRoot
-& $python "cb-studio\serve.py"
+# The studio reloads itself (new code, project switch) by exiting with code 75 -
+# relaunch it in this same window, same credentials, until it stops for real.
+do {
+    & $python "cb-studio\serve.py"
+    $code = $LASTEXITCODE
+    if ($code -eq 75) { Write-Host "Studio is reloading with the latest code..." }
+} while ($code -eq 75)

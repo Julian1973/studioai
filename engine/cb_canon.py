@@ -785,11 +785,27 @@ def status(episode: str | None = None, cast: Iterable[str] | None = None,
 
 
 def require_locked(episode: str | None = None, cast: Iterable[str] | None = None,
-                   root: str | pathlib.Path | None = None) -> dict:
+                   root: str | pathlib.Path | None = None,
+                   allow_incomplete_cast: bool = False, log=None) -> dict:
+    """Refuse unless canon is locked and current for this episode's cast.
+
+    allow_incomplete_cast (2026-09-02, The Box Monsters' first scene-direction pass): a
+    TEXT-ONLY pass (Story & Direction, scene direction) may proceed while a scripted role is
+    still a declared stub without an approved reference or voice — the same rule the intake
+    already applies (CAST_CANON_INCOMPLETE is a warning there, never a hard blocker). Every
+    stage that puts a character on screen or gives it a voice keeps the strict rule: it calls
+    this with the default and is refused, naming the character and what it lacks."""
     result = status(episode, cast, root)
     issues = list(result.get("blockers") or [])
     if episode:
-        issues.extend(result.get("episodeBlockers") or [])
+        episode_issues = list(result.get("episodeBlockers") or [])
+        if allow_incomplete_cast:
+            deferred = [i for i in episode_issues if i.get("code") == "CAST_CANON_INCOMPLETE"]
+            episode_issues = [i for i in episode_issues if i.get("code") != "CAST_CANON_INCOMPLETE"]
+            if deferred and log:
+                log("CAST CANON INCOMPLETE (direction proceeds; See/Hear/Watch will need these) — "
+                    + " | ".join(str(i.get("message")) for i in deferred))
+        issues.extend(episode_issues)
     if issues:
         messages = [str(item.get("message") or item.get("code")) for item in issues[:5]]
         raise CanonLockError("CANON LOCK REFUSED - " + " | ".join(messages))

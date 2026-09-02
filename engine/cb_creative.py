@@ -851,7 +851,10 @@ def _script_package(episode, cast_scope=None, validate_canon=True):
     lock = cb_canon.status(episode, cast, root=ROOT)
     if validate_canon:
         try:
-            lock = cb_canon.require_locked(episode, cast, root=ROOT)
+            # the direction pass is text-only: a scripted stub role is a warning here, the
+            # refusal belongs to the stage that puts the character on screen (cb_handover)
+            lock = cb_canon.require_locked(episode, cast, root=ROOT,
+                                           allow_incomplete_cast=True, log=print)
         except cb_canon.CanonLockError as exc:
             raise RuntimeError(str(exc)) from exc
     expected_input = cb_lineage.dependency_signature(
@@ -882,7 +885,8 @@ def load_canon_envelope(episode="Ep1", cast_scope=None, log=print):
         name for beat in pkg.get("beats") or []
         for name in beat.get("characters") or [] if name})
     try:
-        lock = cb_canon.require_locked(episode, cast, root=ROOT)
+        lock = cb_canon.require_locked(episode, cast, root=ROOT,
+                                       allow_incomplete_cast=True, log=log)
     except cb_canon.CanonLockError as exc:
         raise RuntimeError(str(exc)) from exc
     env["sources"]["scriptPackage"] = {

@@ -11,11 +11,21 @@ import os
 
 if os.name == "nt":
     import msvcrt
+    import time
 
     def lock(fh) -> None:
-        # msvcrt locks a byte range from the current position; lock the first byte, blocking.
+        # msvcrt locks a byte range from the current position; lock the first byte. LK_LOCK
+        # gives up after ten one-second tries with "[Errno 36] Resource deadlock avoided" —
+        # found live 2026-09-02 when four scene directors queued on the serial lock at once.
+        # flock blocks for as long as it takes; so does this: non-blocking tries, forever.
         fh.seek(0)
-        msvcrt.locking(fh.fileno(), msvcrt.LK_LOCK, 1)
+        while True:
+            try:
+                msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+                return
+            except OSError:
+                time.sleep(0.25)
+                fh.seek(0)
 
     def unlock(fh) -> None:
         try:

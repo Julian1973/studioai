@@ -665,6 +665,14 @@ def test_top_corridor_keeps_completed_current_shot_phases_green():
     assert '.pstage.done.active{border-color:var(--ok)' in APP
 
 
+def test_missing_required_keyframe_never_presents_watch_as_ready():
+    assert 'if(policy.needsKeyframe&&!current.keyframe)return "locked";' in APP
+    assert 'if(phase.id==="see")return policy.pending&&policy.pending.keyframe?"Review keyframe":"Keyframe required";' in APP
+    assert 'if(phase.id==="watch")return "Waiting for SEE";' in APP
+    assert '?{label:"Continue to SEE keyframe",onclick:"openShotOutcome(\'keyframe\',PSHOT_I)"}' in APP
+    assert 'if(policy.needsKeyframe&&!current.keyframe){openShotOutcome("keyframe",PSHOT_I);return;}' in APP
+
+
 def test_fire_is_acknowledged_in_watch_before_the_first_job_poll():
     assert 'PJOBS[j.jobId]={jobId:j.jobId' in APP
     assert 'Submitting the sealed Seedance 2.5 request' in APP

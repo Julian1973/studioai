@@ -3199,8 +3199,10 @@ function openShotOutcome(stage,index){
   PSTAGE=stage;renderWorkspaceBody();_syncHash();
 }
 function continueCurrentShotToWatch(){
-  // Keep the current production unit selected. Scene-level HEAR can remain open for a
-  // later spoken shot without redirecting this Seedance-SFX-only shot away from WATCH.
+  const shots=pShots(),policy=shotPipelineState(shots,PSHOT_I),current=policy.current||{};
+  // A completed HEAR stage does not make a complex shot ready for WATCH. Keep the
+  // reviewer on the missing human decision instead of opening a contradictory WATCH page.
+  if(policy.needsKeyframe&&!current.keyframe){openShotOutcome("keyframe",PSHOT_I);return;}
   openShotOutcome("animation",PSHOT_I);
 }
 async function continueToNextProductionShot(){
@@ -3288,11 +3290,21 @@ function corridorPhaseState(phase,stages){
     if(pending.voice)return "awaiting";
   }
   if(phase.id==="watch"){
+    if(policy.needsKeyframe&&!current.keyframe)return "locked";
     if(current.animation)return "approved";
     if(pending.animation||policy.animState==="candidates-pending")return "awaiting";
     if(activeWatchJob(shot.shotId)||durableWatchJob(shLedger(shot.shotId)))return "generating";
   }
   return aggregate;
+}
+
+function corridorPhaseLabel(phase,state){
+  const policy=shotPipelineState(pShots(),PSHOT_I),current=policy.current||{};
+  if(policy.needsKeyframe&&!current.keyframe){
+    if(phase.id==="see")return policy.pending&&policy.pending.keyframe?"Review keyframe":"Keyframe required";
+    if(phase.id==="watch")return "Waiting for SEE";
+  }
+  return STATE_LABEL[state];
 }
 
 function renderStageRail(){
@@ -3306,9 +3318,10 @@ function renderStageRail(){
     const st=phase.id!=="direction"&&pStatus("script")!=="approved"?"locked":corridorPhaseState(phase,stages);
     const cls=[st=="locked"?"locked":"", st=="approved"?"done":"", (st=="rejected"||st=="blocked")?"rejected":"",
                focusedPhase&&focusedPhase.id===phase.id?"active":""].filter(Boolean).join(" ");
-    parts.push(`<button type="button" class="pstage ${cls}" onclick="openPhaseOutcome('${phase.id}')" title="${_esc(STATE_LABEL[st])}">
+    const phaseLabel=corridorPhaseLabel(phase,st);
+    parts.push(`<button type="button" class="pstage ${cls}" onclick="openPhaseOutcome('${phase.id}')" title="${_esc(phaseLabel)}">
       <div class="pglyph">${STATE_GLYPH[st]}</div><div class="pname">${_esc(phase.name)}</div>
-      <div class="pstate" style="color:var(${STATE_COLOR[st]})">${_esc(STATE_LABEL[st])}</div>
+      <div class="pstate" style="color:var(${STATE_COLOR[st]})">${_esc(phaseLabel)}</div>
     </button>`);
     if(i<PRODUCER_PHASES.length-1){ parts.push(`<div class="pconn ${st=="approved"?'fill':''}"></div>`); }
   });
@@ -3356,8 +3369,12 @@ function completedSceneAudioHTML(){
   const revision=shotRevision("voice",ledger);
   const policy=shotPipelineState(shots,PSHOT_I),approved=!!(policy.current&&policy.current.voice);
   const state=approved?"Approved":"Ready for review";
+  const current=policy.current||{};
+  const needsSee=!!(policy.needsKeyframe&&!current.keyframe);
   const action=approved
-    ?{label:"Continue to WATCH",onclick:"continueCurrentShotToWatch()"}
+    ?(needsSee
+      ?{label:"Continue to SEE keyframe",onclick:"openShotOutcome('keyframe',PSHOT_I)"}
+      :{label:"Continue to WATCH",onclick:"continueCurrentShotToWatch()"})
     :{label:"Review HEAR",onclick:"openStageOutcome('voice')"};
   return `<section class="scene-audio-strip" aria-label="Completed voice performance for ${_esc(shot.shotId)}">
     <div class="scene-audio-strip-copy"><b>${_esc(shot.shotId)} · Voice revision ${revision}</b><span><span class="scene-audio-strip-state">${_esc(state)}</span> · ElevenLabs v3 dialogue and mouth timing</span></div>
@@ -5202,8 +5219,12 @@ function renderShotStage(mode){
       } else if(voApproved){
         resultFirst=true;
         decVersion=`Voice revision ${voiceRevision} · Approved`;
+        const current=shotPolicy.current||{};
+        const needsSee=!!(shotPolicy.needsKeyframe&&!current.keyframe);
         decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
-          `<button class="btn" onclick="continueCurrentShotToWatch()">Continue to WATCH</button>`,
+          needsSee
+            ?`<button class="btn" onclick="openShotOutcome('keyframe',PSHOT_I)">Continue to SEE keyframe</button>`
+            :`<button class="btn" onclick="continueCurrentShotToWatch()">Continue to WATCH</button>`,
           `<button class="btn ghost" style="margin-top:8px" onclick="directorStartRejection('voice','${_esc(s.shotId)}','')">Discuss / change voice revision ${voiceRevision}</button>`];
       } else {
         resultFirst=true;

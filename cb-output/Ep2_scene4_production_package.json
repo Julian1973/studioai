@@ -1574,16 +1574,16 @@
          "character": "Bo/Keen",
          "exactDialogue": "3, 2, 1…",
          "performedText": "3, 2, 1…",
-         "dramaticIntention": "Support Bo without rushing him; keep the courage practical and friendly.",
-         "subtext": "I am beside you, and we can take the next step together.",
-         "cadenceAndBreath": "Even, gentle, encouraging; leave a small breath before short replies.",
-         "timingAndBody": "Starts around 0.55s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Bo and Keen count together softly, like a private game; warm, small, not loud.",
+         "subtext": "We can make the scary tail thing safe by doing it together.",
+         "cadenceAndBreath": "Matched gentle voices, tiny smiles in the breath; leave air after one for the tail puff.",
+         "timingAndBody": "Starts around 0.80s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Opening silence: Bo and Keen are walking; Bo is working up courage.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo and Keen count together softly, like a private game; warm, small, not loud.",
+          "subtext": "We can make the scary tail thing safe by doing it together.",
+          "thoughtBefore": "We can make the scary tail thing safe by doing it together.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "3",
            "2",
@@ -1592,22 +1592,22 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Opening silence: Bo and Keen are walking; Bo is working up courage.",
-         "startsAtSec": 0.55,
-         "estimatedDurationSec": 1.05,
+         "startsAtSec": 0.8,
+         "estimatedDurationSec": 1.2,
          "pauseReasons": [
-          "The pause holds the courage beat and gives the visual tail-puff or reaction room."
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
          ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l1-natural",
-           "label": "Natural truthful take",
+           "recipeId": "shared-countdown-1",
+           "label": "Emotion-first truthful take",
            "performedText": "3, 2, 1…",
            "primary": true,
            "takesCount": 2,
@@ -1621,7 +1621,9 @@
             "AAF2q3NCwTrLMMkEnRLB",
             "TCRj5m2u9xhZHJ8h9pMv"
            ],
-           "voiceId": "AAF2q3NCwTrLMMkEnRLB"
+           "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+           "directorNote": "Matched gentle voices, tiny smiles in the breath; leave air after one for the tail puff.",
+           "actingIntent": "Bo and Keen count together softly, like a private game; warm, small, not loud."
           }
          ],
          "voiceTreatment": "group_chorus",
@@ -1650,16 +1652,16 @@
          "character": "Bo/Keen",
          "exactDialogue": "3, 2, 1…",
          "performedText": "3, 2, 1…",
-         "dramaticIntention": "Count together as one small brave ritual before Bo’s tail puff lands visually.",
-         "subtext": "We are doing this together.",
-         "cadenceAndBreath": "Synchronous count, tiny breath between numbers, warm and playful but not shouted.",
-         "timingAndBody": "Starts around 1.81s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Second shared count has a little more confidence; still intimate, not shouted.",
+         "subtext": "It worked once, maybe it can work again.",
+         "cadenceAndBreath": "Synchronous and playful; the final one lands with a delighted held breath for the puff.",
+         "timingAndBody": "Starts around 3.10s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Count together as one small brave ritual before Bo’s tail puff lands visually.",
-          "subtext": "We are doing this together.",
-          "thoughtBefore": "Keen: 3, 2, 1…",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Second shared count has a little more confidence; still intimate, not shouted.",
+          "subtext": "It worked once, maybe it can work again.",
+          "thoughtBefore": "It worked once, maybe it can work again.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "3",
            "2",
@@ -1668,22 +1670,22 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "gathering courage together",
-          "exit": "released into the tail-puff beat"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo and Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo/Keen: 3, 2, 1…",
-         "startsAtSec": 1.81,
-         "estimatedDurationSec": 1.05,
+         "startsAtSec": 3.1,
+         "estimatedDurationSec": 1.2,
          "pauseReasons": [
-          "The pause holds the courage beat and gives the visual tail-puff or reaction room."
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
          ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l2-natural",
-           "label": "Natural truthful take",
+           "recipeId": "shared-countdown-2",
+           "label": "Emotion-first truthful take",
            "performedText": "3, 2, 1…",
            "primary": true,
            "takesCount": 2,
@@ -1697,7 +1699,9 @@
             "AAF2q3NCwTrLMMkEnRLB",
             "TCRj5m2u9xhZHJ8h9pMv"
            ],
-           "voiceId": "AAF2q3NCwTrLMMkEnRLB"
+           "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+           "directorNote": "Synchronous and playful; the final one lands with a delighted held breath for the puff.",
+           "actingIntent": "Second shared count has a little more confidence; still intimate, not shouted."
           }
          ],
          "voiceTreatment": "group_chorus",
@@ -1726,16 +1730,16 @@
          "character": "Bo/Keen",
          "exactDialogue": "3, 2, 1…",
          "performedText": "3, 2, 1…",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 3.08s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Third shared count tips into giggly courage, then leaves room for Bo to notice the Learning Circle.",
+         "subtext": "I can do this while Keen is with me.",
+         "cadenceAndBreath": "Light, smiling count together; do not rush into the worry turn.",
+         "timingAndBody": "Starts around 5.50s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Bo/Keen: 3, 2, 1…",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Third shared count tips into giggly courage, then leaves room for Bo to notice the Learning Circle.",
+          "subtext": "I can do this while Keen is with me.",
+          "thoughtBefore": "I can do this while Keen is with me.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "3",
            "2",
@@ -1744,22 +1748,22 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo/Keen: 3, 2, 1…",
-         "startsAtSec": 3.08,
-         "estimatedDurationSec": 1.05,
+         "startsAtSec": 5.5,
+         "estimatedDurationSec": 1.2,
          "pauseReasons": [
-          "The pause holds the courage beat and gives the visual tail-puff or reaction room."
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
          ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l3-natural",
-           "label": "Natural truthful take",
+           "recipeId": "shared-countdown-3",
+           "label": "Emotion-first truthful take",
            "performedText": "3, 2, 1…",
            "primary": true,
            "takesCount": 2,
@@ -1773,7 +1777,9 @@
             "AAF2q3NCwTrLMMkEnRLB",
             "TCRj5m2u9xhZHJ8h9pMv"
            ],
-           "voiceId": "AAF2q3NCwTrLMMkEnRLB"
+           "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+           "directorNote": "Light, smiling count together; do not rush into the worry turn.",
+           "actingIntent": "Third shared count tips into giggly courage, then leaves room for Bo to notice the Learning Circle."
           }
          ],
          "voiceTreatment": "group_chorus",
@@ -1802,16 +1808,16 @@
          "character": "Bo",
          "exactDialogue": "I’m STILL worried about going to the Learning Circle.",
          "performedText": "I’m STILL worried about going to the Learning Circle.",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 4.34s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Bo’s courage drops when the Learning Circle becomes real; the line is honest, not whiny.",
+         "subtext": "I was brave for a moment, but I am still scared of everyone seeing me.",
+         "cadenceAndBreath": "Small voice, slower than the countdown, with “STILL” carrying exposed worry rather than volume.",
+         "timingAndBody": "Starts around 9.20s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Bo: 3, 2, 1…",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo’s courage drops when the Learning Circle becomes real; the line is honest, not whiny.",
+          "subtext": "I was brave for a moment, but I am still scared of everyone seeing me.",
+          "thoughtBefore": "I was brave for a moment, but I am still scared of everyone seeing me.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "i’m",
            "still",
@@ -1823,24 +1829,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: 3, 2, 1…",
-         "startsAtSec": 4.34,
-         "estimatedDurationSec": 2.32,
-         "pauseReasons": [],
+         "startsAtSec": 9.2,
+         "estimatedDurationSec": 2.6,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l4-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-worry-learning-circle",
+           "label": "Emotion-first truthful take",
            "performedText": "I’m STILL worried about going to the Learning Circle.",
            "primary": true,
-           "takesCount": 1,
-           "elevenLabsText": "I’m STILL worried about going to the Learning Circle."
+           "takesCount": 2,
+           "elevenLabsText": "I’m STILL worried about going to the Learning Circle.",
+           "directorNote": "Small voice, slower than the countdown, with “STILL” carrying exposed worry rather than volume.",
+           "actingIntent": "Bo’s courage drops when the Learning Circle becomes real; the line is honest, not whiny."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -1865,16 +1875,16 @@
          "character": "Bo",
          "exactDialogue": "They all know each other.",
          "performedText": "They all know each other.",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 6.88s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Bo names the social fear plainly; he is shrinking inward, not complaining.",
+         "subtext": "They already belong together and I might not.",
+         "cadenceAndBreath": "Quiet, careful, almost to himself; let the sentence fall at the end.",
+         "timingAndBody": "Starts around 12.80s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Bo: I’m STILL worried about going to the Learning Circle.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo names the social fear plainly; he is shrinking inward, not complaining.",
+          "subtext": "They already belong together and I might not.",
+          "thoughtBefore": "They already belong together and I might not.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "they",
            "all",
@@ -1885,24 +1895,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: I’m STILL worried about going to the Learning Circle.",
-         "startsAtSec": 6.88,
-         "estimatedDurationSec": 1.48,
-         "pauseReasons": [],
+         "startsAtSec": 12.8,
+         "estimatedDurationSec": 1.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l5-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-they-know-each-other",
+           "label": "Emotion-first truthful take",
            "performedText": "They all know each other.",
            "primary": true,
-           "takesCount": 1,
-           "elevenLabsText": "They all know each other."
+           "takesCount": 2,
+           "elevenLabsText": "They all know each other.",
+           "directorNote": "Quiet, careful, almost to himself; let the sentence fall at the end.",
+           "actingIntent": "Bo names the social fear plainly; he is shrinking inward, not complaining."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -1927,16 +1941,16 @@
          "character": "Bo",
          "exactDialogue": "But I don’t know them, and they don’t know me.",
          "performedText": "But I don’t know them, and they don’t know me.",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 8.57s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Bo completes the fear in one vulnerable thought; no comic panic.",
+         "subtext": "If they do not know me, they might not want me there.",
+         "cadenceAndBreath": "Gentle breath before “But”; keep it childlike and sincere, not melodramatic.",
+         "timingAndBody": "Starts around 15.30s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Bo: They all know each other.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo completes the fear in one vulnerable thought; no comic panic.",
+          "subtext": "If they do not know me, they might not want me there.",
+          "thoughtBefore": "If they do not know me, they might not want me there.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "but",
            "i",
@@ -1948,24 +1962,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: They all know each other.",
-         "startsAtSec": 8.57,
-         "estimatedDurationSec": 2.42,
-         "pauseReasons": [],
+         "startsAtSec": 15.3,
+         "estimatedDurationSec": 2.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l6-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-i-dont-know-them",
+           "label": "Emotion-first truthful take",
            "performedText": "But I don’t know them, and they don’t know me.",
            "primary": true,
-           "takesCount": 1,
-           "elevenLabsText": "But I don’t know them, and they don’t know me."
+           "takesCount": 2,
+           "elevenLabsText": "But I don’t know them, and they don’t know me.",
+           "directorNote": "Gentle breath before “But”; keep it childlike and sincere, not melodramatic.",
+           "actingIntent": "Bo completes the fear in one vulnerable thought; no comic panic."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -1990,16 +2008,16 @@
          "character": "Keen",
          "exactDialogue": "It can be hard to meet new people, but it’s good to make new friends.",
          "performedText": "It can be hard to meet new people, but it’s good to make new friends.",
-         "dramaticIntention": "Support Bo without rushing him; keep the courage practical and friendly.",
-         "subtext": "I am beside you, and we can take the next step together.",
-         "cadenceAndBreath": "Even, gentle, encouraging; leave a small breath before short replies.",
-         "timingAndBody": "Starts around 11.20s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Keen offers the best reassurance he has without fixing Bo too quickly.",
+         "subtext": "I know it is hard, and I will sit beside you while you try.",
+         "cadenceAndBreath": "Warm, steady, slightly slower than normal; no lecture tone, no forced cheer.",
+         "timingAndBody": "Starts around 20.00s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Bo: But I don’t know them, and they don’t know me.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Keen offers the best reassurance he has without fixing Bo too quickly.",
+          "subtext": "I know it is hard, and I will sit beside you while you try.",
+          "thoughtBefore": "I know it is hard, and I will sit beside you while you try.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "it",
            "can",
@@ -2011,24 +2029,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: But I don’t know them, and they don’t know me.",
-         "startsAtSec": 11.2,
-         "estimatedDurationSec": 2.42,
-         "pauseReasons": [],
+         "startsAtSec": 20.0,
+         "estimatedDurationSec": 3.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l7-natural",
-           "label": "Natural truthful take",
+           "recipeId": "keen-new-friends",
+           "label": "Emotion-first truthful take",
            "performedText": "It can be hard to meet new people, but it’s good to make new friends.",
            "primary": true,
-           "takesCount": 1,
-           "elevenLabsText": "It can be hard to meet new people, but it’s good to make new friends."
+           "takesCount": 2,
+           "elevenLabsText": "It can be hard to meet new people, but it’s good to make new friends.",
+           "directorNote": "Warm, steady, slightly slower than normal; no lecture tone, no forced cheer.",
+           "actingIntent": "Keen offers the best reassurance he has without fixing Bo too quickly."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -2068,7 +2090,17 @@
         "at": "2026-09-02T09:23:09Z",
         "fromShotId": "S4.SH1",
         "providerCalled": false
-       }
+       },
+       "emotionalVoicePass": {
+        "at": "2026-09-02T10:05:00Z",
+        "providerCalled": false,
+        "reason": "Scene 4 was split because the combined performance was rushed; delivery notes and timing now protect the emotional beats.",
+        "shots": {
+         "S4.SH1": "Private shared countdown, then Bo’s vulnerable fear and Keen’s gentle reassurance.",
+         "S4.SH2": "Aida enters softly, validates effort, and lands bravery as going while scared."
+        }
+       },
+       "compiledTrackHash": "c0bcd00bacec645db848ada3e66e766745a02b5a87c30cb73cc4e28b02d9913a"
       },
       "outcome": "approved",
       "decisionAt": "2026-09-01T23:56:13",
@@ -2100,6 +2132,11 @@
         "TCRj5m2u9xhZHJ8h9pMv"
        ]
       },
+      "signatureCarryForward": {
+       "at": "2026-09-02T10:05:00Z",
+       "reason": "Emotion-first timing and acting pass after Scene 4 split. No provider call.",
+       "providerCalled": false
+      },
       "compiledTrack": {
        "compiler": "voice-director-v1",
        "shotId": "S4.SH1",
@@ -2130,10 +2167,10 @@
          "physicalSignature": "The named ensemble breathes and resolves as one group.",
          "exactDialogue": "3, 2, 1…",
          "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Opening silence: Bo and Keen are walking; Bo is working up courage.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo and Keen count together softly, like a private game; warm, small, not loud.",
+          "subtext": "We can make the scary tail thing safe by doing it together.",
+          "thoughtBefore": "We can make the scary tail thing safe by doing it together.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "3",
            "2",
@@ -2142,16 +2179,16 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Opening silence: Bo and Keen are walking; Bo is working up courage.",
-         "startsAtSec": 0.55,
-         "estimatedDurationSec": 1.05,
+         "startsAtSec": 0.8,
+         "estimatedDurationSec": 1.2,
          "pauseReasons": [
-          "The pause holds the courage beat and gives the visual tail-puff or reaction room."
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
          ],
          "tagPurposes": {},
          "archetype": {
@@ -2180,11 +2217,12 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l1-natural",
-           "label": "Natural truthful take",
+           "recipeId": "shared-countdown-1",
+           "label": "Emotion-first truthful take",
            "performedText": "3, 2, 1…",
            "primary": true,
            "takesCount": 2,
+           "elevenLabsText": "3, 2, 1…",
            "voiceTreatment": "group_chorus",
            "chorusMembers": [
             "Bo",
@@ -2194,7 +2232,9 @@
             "AAF2q3NCwTrLMMkEnRLB",
             "TCRj5m2u9xhZHJ8h9pMv"
            ],
-           "voiceId": "AAF2q3NCwTrLMMkEnRLB"
+           "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+           "directorNote": "Matched gentle voices, tiny smiles in the breath; leave air after one for the tail puff.",
+           "actingIntent": "Bo and Keen count together softly, like a private game; warm, small, not loud."
           }
          ],
          "postDirectionAudit": {
@@ -2226,34 +2266,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l1-natural",
+            "code": "script-fidelity:shared-countdown-1",
             "passed": true,
-            "message": "s4sh1-l1-natural preserves every locked script word."
+            "message": "shared-countdown-1 preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l1-natural",
+            "code": "complete-sentence:shared-countdown-1",
             "passed": true,
-            "message": "s4sh1-l1-natural ends as a complete spoken sentence."
+            "message": "shared-countdown-1 ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l1-natural",
+            "code": "tag-palette:shared-countdown-1",
             "passed": true,
-            "message": "s4sh1-l1-natural uses only the character and archetype tag palette."
+            "message": "shared-countdown-1 uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l1-natural",
+            "code": "tag-density:shared-countdown-1",
             "passed": true,
-            "message": "s4sh1-l1-natural uses no more than two tags per segment."
+            "message": "shared-countdown-1 uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l1-natural",
+            "code": "take-count:shared-countdown-1",
             "passed": true,
-            "message": "s4sh1-l1-natural has a positive takes count."
+            "message": "shared-countdown-1 has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l1-natural",
+            "code": "short-line-context:shared-countdown-1",
             "passed": true,
-            "message": "Short line s4sh1-l1-natural includes previous_text runway and at least two takes."
+            "message": "Short line shared-countdown-1 includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -2312,8 +2352,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "a694b5c2853ff1a965a0bc7e826994d150cc386603ec878d8888d499ea7bdd70",
-         "speaker": "Bo/Keen"
+         "compiledHash": "6087dd0e772ce33b14f92e7b9b1019916bc5a67fbe394d18e079cd33d07a160a"
         },
         {
          "schemaVersion": 1,
@@ -2341,10 +2380,10 @@
          "physicalSignature": "The named ensemble breathes and resolves as one group.",
          "exactDialogue": "3, 2, 1…",
          "performanceQuestions": {
-          "intention": "Count together as one small brave ritual before Bo’s tail puff lands visually.",
-          "subtext": "We are doing this together.",
-          "thoughtBefore": "Keen: 3, 2, 1…",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Second shared count has a little more confidence; still intimate, not shouted.",
+          "subtext": "It worked once, maybe it can work again.",
+          "thoughtBefore": "It worked once, maybe it can work again.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "3",
            "2",
@@ -2353,16 +2392,16 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "gathering courage together",
-          "exit": "released into the tail-puff beat"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo and Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo/Keen: 3, 2, 1…",
-         "startsAtSec": 1.81,
-         "estimatedDurationSec": 1.05,
+         "startsAtSec": 3.1,
+         "estimatedDurationSec": 1.2,
          "pauseReasons": [
-          "The pause holds the courage beat and gives the visual tail-puff or reaction room."
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
          ],
          "tagPurposes": {},
          "archetype": {
@@ -2391,11 +2430,12 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l2-natural",
-           "label": "Natural truthful take",
+           "recipeId": "shared-countdown-2",
+           "label": "Emotion-first truthful take",
            "performedText": "3, 2, 1…",
            "primary": true,
            "takesCount": 2,
+           "elevenLabsText": "3, 2, 1…",
            "voiceTreatment": "group_chorus",
            "chorusMembers": [
             "Bo",
@@ -2405,7 +2445,9 @@
             "AAF2q3NCwTrLMMkEnRLB",
             "TCRj5m2u9xhZHJ8h9pMv"
            ],
-           "voiceId": "AAF2q3NCwTrLMMkEnRLB"
+           "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+           "directorNote": "Synchronous and playful; the final one lands with a delighted held breath for the puff.",
+           "actingIntent": "Second shared count has a little more confidence; still intimate, not shouted."
           }
          ],
          "postDirectionAudit": {
@@ -2437,34 +2479,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l2-natural",
+            "code": "script-fidelity:shared-countdown-2",
             "passed": true,
-            "message": "s4sh1-l2-natural preserves every locked script word."
+            "message": "shared-countdown-2 preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l2-natural",
+            "code": "complete-sentence:shared-countdown-2",
             "passed": true,
-            "message": "s4sh1-l2-natural ends as a complete spoken sentence."
+            "message": "shared-countdown-2 ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l2-natural",
+            "code": "tag-palette:shared-countdown-2",
             "passed": true,
-            "message": "s4sh1-l2-natural uses only the character and archetype tag palette."
+            "message": "shared-countdown-2 uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l2-natural",
+            "code": "tag-density:shared-countdown-2",
             "passed": true,
-            "message": "s4sh1-l2-natural uses no more than two tags per segment."
+            "message": "shared-countdown-2 uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l2-natural",
+            "code": "take-count:shared-countdown-2",
             "passed": true,
-            "message": "s4sh1-l2-natural has a positive takes count."
+            "message": "shared-countdown-2 has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l2-natural",
+            "code": "short-line-context:shared-countdown-2",
             "passed": true,
-            "message": "Short line s4sh1-l2-natural includes previous_text runway and at least two takes."
+            "message": "Short line shared-countdown-2 includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -2523,8 +2565,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "a49fb266f735e988569768b39760ccc523ad720fde49a8cfaed7e2128c1f3d9f",
-         "speaker": "Bo/Keen"
+         "compiledHash": "d0af6b35aa127424bf29d1a7d02b2beeae43e91315b62c4d1163d756c0a8b3ce"
         },
         {
          "schemaVersion": 1,
@@ -2552,10 +2593,10 @@
          "physicalSignature": "The named ensemble breathes and resolves as one group.",
          "exactDialogue": "3, 2, 1…",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Bo/Keen: 3, 2, 1…",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Third shared count tips into giggly courage, then leaves room for Bo to notice the Learning Circle.",
+          "subtext": "I can do this while Keen is with me.",
+          "thoughtBefore": "I can do this while Keen is with me.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "3",
            "2",
@@ -2564,16 +2605,16 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo/Keen: 3, 2, 1…",
-         "startsAtSec": 3.08,
-         "estimatedDurationSec": 1.05,
+         "startsAtSec": 5.5,
+         "estimatedDurationSec": 1.2,
          "pauseReasons": [
-          "The pause holds the courage beat and gives the visual tail-puff or reaction room."
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
          ],
          "tagPurposes": {},
          "archetype": {
@@ -2602,11 +2643,12 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l3-natural",
-           "label": "Natural truthful take",
+           "recipeId": "shared-countdown-3",
+           "label": "Emotion-first truthful take",
            "performedText": "3, 2, 1…",
            "primary": true,
            "takesCount": 2,
+           "elevenLabsText": "3, 2, 1…",
            "voiceTreatment": "group_chorus",
            "chorusMembers": [
             "Bo",
@@ -2616,7 +2658,9 @@
             "AAF2q3NCwTrLMMkEnRLB",
             "TCRj5m2u9xhZHJ8h9pMv"
            ],
-           "voiceId": "AAF2q3NCwTrLMMkEnRLB"
+           "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+           "directorNote": "Light, smiling count together; do not rush into the worry turn.",
+           "actingIntent": "Third shared count tips into giggly courage, then leaves room for Bo to notice the Learning Circle."
           }
          ],
          "postDirectionAudit": {
@@ -2648,34 +2692,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l3-natural",
+            "code": "script-fidelity:shared-countdown-3",
             "passed": true,
-            "message": "s4sh1-l3-natural preserves every locked script word."
+            "message": "shared-countdown-3 preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l3-natural",
+            "code": "complete-sentence:shared-countdown-3",
             "passed": true,
-            "message": "s4sh1-l3-natural ends as a complete spoken sentence."
+            "message": "shared-countdown-3 ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l3-natural",
+            "code": "tag-palette:shared-countdown-3",
             "passed": true,
-            "message": "s4sh1-l3-natural uses only the character and archetype tag palette."
+            "message": "shared-countdown-3 uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l3-natural",
+            "code": "tag-density:shared-countdown-3",
             "passed": true,
-            "message": "s4sh1-l3-natural uses no more than two tags per segment."
+            "message": "shared-countdown-3 uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l3-natural",
+            "code": "take-count:shared-countdown-3",
             "passed": true,
-            "message": "s4sh1-l3-natural has a positive takes count."
+            "message": "shared-countdown-3 has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l3-natural",
+            "code": "short-line-context:shared-countdown-3",
             "passed": true,
-            "message": "Short line s4sh1-l3-natural includes previous_text runway and at least two takes."
+            "message": "Short line shared-countdown-3 includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -2734,8 +2778,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "6b339f9a7f59a4ec9e2a7f09ddbc4c11e605121effeabc1d50c401b1f3e65c37",
-         "speaker": "Bo/Keen"
+         "compiledHash": "6a76284f99f3a8648be643bd9f992ccc2e3a8c54a2699f7dc9843aa22a43b144"
         },
         {
          "schemaVersion": 1,
@@ -2759,10 +2802,10 @@
          "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits.",
          "exactDialogue": "I’m STILL worried about going to the Learning Circle.",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Bo: 3, 2, 1…",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo’s courage drops when the Learning Circle becomes real; the line is honest, not whiny.",
+          "subtext": "I was brave for a moment, but I am still scared of everyone seeing me.",
+          "thoughtBefore": "I was brave for a moment, but I am still scared of everyone seeing me.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "i’m",
            "still",
@@ -2774,15 +2817,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: 3, 2, 1…",
-         "startsAtSec": 4.34,
-         "estimatedDurationSec": 2.32,
-         "pauseReasons": [],
+         "startsAtSec": 9.2,
+         "estimatedDurationSec": 2.6,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -2810,11 +2855,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l4-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-worry-learning-circle",
+           "label": "Emotion-first truthful take",
            "performedText": "I’m STILL worried about going to the Learning Circle.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 2,
+           "elevenLabsText": "I’m STILL worried about going to the Learning Circle.",
+           "directorNote": "Small voice, slower than the countdown, with “STILL” carrying exposed worry rather than volume.",
+           "actingIntent": "Bo’s courage drops when the Learning Circle becomes real; the line is honest, not whiny."
           }
          ],
          "postDirectionAudit": {
@@ -2846,29 +2894,29 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l4-natural",
+            "code": "script-fidelity:bo-worry-learning-circle",
             "passed": true,
-            "message": "s4sh1-l4-natural preserves every locked script word."
+            "message": "bo-worry-learning-circle preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l4-natural",
+            "code": "complete-sentence:bo-worry-learning-circle",
             "passed": true,
-            "message": "s4sh1-l4-natural ends as a complete spoken sentence."
+            "message": "bo-worry-learning-circle ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l4-natural",
+            "code": "tag-palette:bo-worry-learning-circle",
             "passed": true,
-            "message": "s4sh1-l4-natural uses only the character and archetype tag palette."
+            "message": "bo-worry-learning-circle uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l4-natural",
+            "code": "tag-density:bo-worry-learning-circle",
             "passed": true,
-            "message": "s4sh1-l4-natural uses no more than two tags per segment."
+            "message": "bo-worry-learning-circle uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l4-natural",
+            "code": "take-count:bo-worry-learning-circle",
             "passed": true,
-            "message": "s4sh1-l4-natural has a positive takes count."
+            "message": "bo-worry-learning-circle has a positive takes count."
            },
            {
             "code": "tag-purposes",
@@ -2927,7 +2975,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "84d60b820b98a680a9992be689951cf5743423d4e1e1e4fa0135bfa041c6f9bc"
+         "compiledHash": "45f0454a6da7c473e9b817edf372c91c0f0586c91372ff80fbb5dae863de46c4"
         },
         {
          "schemaVersion": 1,
@@ -2951,10 +2999,10 @@
          "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits.",
          "exactDialogue": "They all know each other.",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Bo: I’m STILL worried about going to the Learning Circle.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo names the social fear plainly; he is shrinking inward, not complaining.",
+          "subtext": "They already belong together and I might not.",
+          "thoughtBefore": "They already belong together and I might not.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "they",
            "all",
@@ -2965,15 +3013,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: I’m STILL worried about going to the Learning Circle.",
-         "startsAtSec": 6.88,
-         "estimatedDurationSec": 1.48,
-         "pauseReasons": [],
+         "startsAtSec": 12.8,
+         "estimatedDurationSec": 1.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -3001,11 +3051,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l5-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-they-know-each-other",
+           "label": "Emotion-first truthful take",
            "performedText": "They all know each other.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 2,
+           "elevenLabsText": "They all know each other.",
+           "directorNote": "Quiet, careful, almost to himself; let the sentence fall at the end.",
+           "actingIntent": "Bo names the social fear plainly; he is shrinking inward, not complaining."
           }
          ],
          "postDirectionAudit": {
@@ -3037,29 +3090,29 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l5-natural",
+            "code": "script-fidelity:bo-they-know-each-other",
             "passed": true,
-            "message": "s4sh1-l5-natural preserves every locked script word."
+            "message": "bo-they-know-each-other preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l5-natural",
+            "code": "complete-sentence:bo-they-know-each-other",
             "passed": true,
-            "message": "s4sh1-l5-natural ends as a complete spoken sentence."
+            "message": "bo-they-know-each-other ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l5-natural",
+            "code": "tag-palette:bo-they-know-each-other",
             "passed": true,
-            "message": "s4sh1-l5-natural uses only the character and archetype tag palette."
+            "message": "bo-they-know-each-other uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l5-natural",
+            "code": "tag-density:bo-they-know-each-other",
             "passed": true,
-            "message": "s4sh1-l5-natural uses no more than two tags per segment."
+            "message": "bo-they-know-each-other uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l5-natural",
+            "code": "take-count:bo-they-know-each-other",
             "passed": true,
-            "message": "s4sh1-l5-natural has a positive takes count."
+            "message": "bo-they-know-each-other has a positive takes count."
            },
            {
             "code": "tag-purposes",
@@ -3118,7 +3171,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "6da72f064bfcda036d51fca0652ab2cfec0a678cd1361f892ea67956f2f3e899"
+         "compiledHash": "251b4cbf27e8c79cf7bccd971076ba3d2151b2725d2e8591594a571c7f794520"
         },
         {
          "schemaVersion": 1,
@@ -3142,10 +3195,10 @@
          "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits.",
          "exactDialogue": "But I don’t know them, and they don’t know me.",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Bo: They all know each other.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo completes the fear in one vulnerable thought; no comic panic.",
+          "subtext": "If they do not know me, they might not want me there.",
+          "thoughtBefore": "If they do not know me, they might not want me there.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "but",
            "i",
@@ -3157,15 +3210,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: They all know each other.",
-         "startsAtSec": 8.57,
-         "estimatedDurationSec": 2.42,
-         "pauseReasons": [],
+         "startsAtSec": 15.3,
+         "estimatedDurationSec": 2.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -3193,11 +3248,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l6-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-i-dont-know-them",
+           "label": "Emotion-first truthful take",
            "performedText": "But I don’t know them, and they don’t know me.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 2,
+           "elevenLabsText": "But I don’t know them, and they don’t know me.",
+           "directorNote": "Gentle breath before “But”; keep it childlike and sincere, not melodramatic.",
+           "actingIntent": "Bo completes the fear in one vulnerable thought; no comic panic."
           }
          ],
          "postDirectionAudit": {
@@ -3229,29 +3287,29 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l6-natural",
+            "code": "script-fidelity:bo-i-dont-know-them",
             "passed": true,
-            "message": "s4sh1-l6-natural preserves every locked script word."
+            "message": "bo-i-dont-know-them preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l6-natural",
+            "code": "complete-sentence:bo-i-dont-know-them",
             "passed": true,
-            "message": "s4sh1-l6-natural ends as a complete spoken sentence."
+            "message": "bo-i-dont-know-them ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l6-natural",
+            "code": "tag-palette:bo-i-dont-know-them",
             "passed": true,
-            "message": "s4sh1-l6-natural uses only the character and archetype tag palette."
+            "message": "bo-i-dont-know-them uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l6-natural",
+            "code": "tag-density:bo-i-dont-know-them",
             "passed": true,
-            "message": "s4sh1-l6-natural uses no more than two tags per segment."
+            "message": "bo-i-dont-know-them uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l6-natural",
+            "code": "take-count:bo-i-dont-know-them",
             "passed": true,
-            "message": "s4sh1-l6-natural has a positive takes count."
+            "message": "bo-i-dont-know-them has a positive takes count."
            },
            {
             "code": "tag-purposes",
@@ -3310,7 +3368,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "9e3ff7add21257eca9e2d728f6fc9984e901f5b944144261b0a09ccd4d30031c"
+         "compiledHash": "e0fca91f8e916752848c2deef715256d7c13eba2c3a2fb5a6908fd0eabf1afac"
         },
         {
          "schemaVersion": 1,
@@ -3334,10 +3392,10 @@
          "physicalSignature": "Breath catches before the body commits forward.",
          "exactDialogue": "It can be hard to meet new people, but it’s good to make new friends.",
          "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Bo: But I don’t know them, and they don’t know me.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Keen offers the best reassurance he has without fixing Bo too quickly.",
+          "subtext": "I know it is hard, and I will sit beside you while you try.",
+          "thoughtBefore": "I know it is hard, and I will sit beside you while you try.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "it",
            "can",
@@ -3349,15 +3407,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: But I don’t know them, and they don’t know me.",
-         "startsAtSec": 11.2,
-         "estimatedDurationSec": 2.42,
-         "pauseReasons": [],
+         "startsAtSec": 20.0,
+         "estimatedDurationSec": 3.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -3385,11 +3445,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l7-natural",
-           "label": "Natural truthful take",
+           "recipeId": "keen-new-friends",
+           "label": "Emotion-first truthful take",
            "performedText": "It can be hard to meet new people, but it’s good to make new friends.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 2,
+           "elevenLabsText": "It can be hard to meet new people, but it’s good to make new friends.",
+           "directorNote": "Warm, steady, slightly slower than normal; no lecture tone, no forced cheer.",
+           "actingIntent": "Keen offers the best reassurance he has without fixing Bo too quickly."
           }
          ],
          "postDirectionAudit": {
@@ -3421,29 +3484,29 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l7-natural",
+            "code": "script-fidelity:keen-new-friends",
             "passed": true,
-            "message": "s4sh1-l7-natural preserves every locked script word."
+            "message": "keen-new-friends preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l7-natural",
+            "code": "complete-sentence:keen-new-friends",
             "passed": true,
-            "message": "s4sh1-l7-natural ends as a complete spoken sentence."
+            "message": "keen-new-friends ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l7-natural",
+            "code": "tag-palette:keen-new-friends",
             "passed": true,
-            "message": "s4sh1-l7-natural uses only the character and archetype tag palette."
+            "message": "keen-new-friends uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l7-natural",
+            "code": "tag-density:keen-new-friends",
             "passed": true,
-            "message": "s4sh1-l7-natural uses no more than two tags per segment."
+            "message": "keen-new-friends uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l7-natural",
+            "code": "take-count:keen-new-friends",
             "passed": true,
-            "message": "s4sh1-l7-natural has a positive takes count."
+            "message": "keen-new-friends has a positive takes count."
            },
            {
             "code": "tag-purposes",
@@ -3502,15 +3565,10 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "33a6db530f1e5b3a5836ef173afb80a05c7aa2069ddb247683956b93a1c1c253"
+         "compiledHash": "dcde5961d0a9a54a8243c1a3a2c936f0b2c6ec53cc63839e447ba050c341e717"
         }
        ],
-       "compiledHash": "620908c968839bd8040184ad13acf22ba10ef3ed7a832562076887809ea54741"
-      },
-      "signatureCarryForward": {
-       "at": "2026-09-02T09:23:09Z",
-       "reason": "Scene 4 split into two shots; voice direction carried forward mechanically.",
-       "providerCalled": false
+       "compiledHash": "3d0412a0cb817860fd0a9381688d692e6915ecf02cbc56bc27664e815f89d181"
       }
      },
      "candidate": null,
@@ -3959,16 +4017,16 @@
          "character": "Aida",
          "exactDialogue": "Hi Keen, I see you have met a new friend.",
          "performedText": "Hi Keen, I see you have met a new friend.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 13.83s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Aida enters gently and keeps her volume low so Bo is not startled or put on display.",
+         "subtext": "I see Keen, and I am giving Bo a safe way to be included.",
+         "cadenceAndBreath": "Soft arrival, kind smile in the voice; statement, not announcement.",
+         "timingAndBody": "Starts around 3.00s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida enters gently and keeps her volume low so Bo is not startled or put on display.",
+          "subtext": "I see Keen, and I am giving Bo a safe way to be included.",
+          "thoughtBefore": "I see Keen, and I am giving Bo a safe way to be included.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "hi",
            "keen",
@@ -3980,24 +4038,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
-         "startsAtSec": 13.83,
-         "estimatedDurationSec": 2.35,
-         "pauseReasons": [],
+         "startsAtSec": 3.0,
+         "estimatedDurationSec": 2.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l8-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-soft-entrance",
+           "label": "Emotion-first truthful take",
            "performedText": "Hi Keen, I see you have met a new friend.",
            "primary": true,
-           "takesCount": 1,
-           "elevenLabsText": "Hi Keen, I see you have met a new friend."
+           "takesCount": 2,
+           "elevenLabsText": "Hi Keen, I see you have met a new friend.",
+           "directorNote": "Soft arrival, kind smile in the voice; statement, not announcement.",
+           "actingIntent": "Aida enters gently and keeps her volume low so Bo is not startled or put on display."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4022,40 +4084,44 @@
          "character": "Keen",
          "exactDialogue": "Yes.",
          "performedText": "Yes.",
-         "dramaticIntention": "Support Bo without rushing him; keep the courage practical and friendly.",
-         "subtext": "I am beside you, and we can take the next step together.",
-         "cadenceAndBreath": "Even, gentle, encouraging; leave a small breath before short replies.",
-         "timingAndBody": "Starts around 16.39s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Keen keeps the introduction small so Bo stays safe.",
+         "subtext": "Yes, and I am not pushing him.",
+         "cadenceAndBreath": "Very short, warm, low volume; leave space after it.",
+         "timingAndBody": "Starts around 6.60s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Aida: Hi Keen, I see you have met a new friend.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Keen keeps the introduction small so Bo stays safe.",
+          "subtext": "Yes, and I am not pushing him.",
+          "thoughtBefore": "Yes, and I am not pushing him.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "yes"
           ]
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Aida: Hi Keen, I see you have met a new friend.",
-         "startsAtSec": 16.39,
-         "estimatedDurationSec": 0.63,
-         "pauseReasons": [],
+         "startsAtSec": 6.6,
+         "estimatedDurationSec": 0.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l9-natural",
-           "label": "Natural truthful take",
+           "recipeId": "keen-simple-yes",
+           "label": "Emotion-first truthful take",
            "performedText": "Yes.",
            "primary": true,
            "takesCount": 2,
-           "elevenLabsText": "Yes."
+           "elevenLabsText": "Yes.",
+           "directorNote": "Very short, warm, low volume; leave space after it.",
+           "actingIntent": "Keen keeps the introduction small so Bo stays safe."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4080,16 +4146,16 @@
          "character": "Keen",
          "exactDialogue": "Bo, this is Aida.",
          "performedText": "Bo, this is Aida.",
-         "dramaticIntention": "Support Bo without rushing him; keep the courage practical and friendly.",
-         "subtext": "I am beside you, and we can take the next step together.",
-         "cadenceAndBreath": "Even, gentle, encouraging; leave a small breath before short replies.",
-         "timingAndBody": "Starts around 17.23s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Keen introduces Aida as reassurance, not ceremony.",
+         "subtext": "Bo, this person is safe.",
+         "cadenceAndBreath": "Gentle and clear; ElevenLabs text must pronounce the name as ada.",
+         "timingAndBody": "Starts around 7.80s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Keen: Yes.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Keen introduces Aida as reassurance, not ceremony.",
+          "subtext": "Bo, this person is safe.",
+          "thoughtBefore": "Bo, this person is safe.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "bo",
            "this",
@@ -4099,24 +4165,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Keen: Yes.",
-         "startsAtSec": 17.23,
-         "estimatedDurationSec": 1.26,
-         "pauseReasons": [],
+         "startsAtSec": 7.8,
+         "estimatedDurationSec": 1.6,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l10-natural",
-           "label": "Natural truthful take",
+           "recipeId": "keen-introduces-aida",
+           "label": "Emotion-first truthful take",
            "performedText": "Bo, this is Aida.",
            "primary": true,
            "takesCount": 2,
-           "elevenLabsText": "Bo, this is ada."
+           "elevenLabsText": "Bo, this is ada.",
+           "directorNote": "Gentle and clear; ElevenLabs text must pronounce the name as ada.",
+           "actingIntent": "Keen introduces Aida as reassurance, not ceremony."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4141,16 +4211,16 @@
          "character": "Aida",
          "exactDialogue": "You packed your bag.",
          "performedText": "You packed your bag.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 18.71s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Aida notices preparation as effort; it must not sound like a question or criticism.",
+         "subtext": "You tried hard before you even arrived.",
+         "cadenceAndBreath": "Soft downward statement with empathy; no upward question lift on “bag”.",
+         "timingAndBody": "Starts around 10.40s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Keen: Bo, this is Aida.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida notices preparation as effort; it must not sound like a question or criticism.",
+          "subtext": "You tried hard before you even arrived.",
+          "thoughtBefore": "You tried hard before you even arrived.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "you",
            "packed",
@@ -4160,24 +4230,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Keen: Bo, this is Aida.",
-         "startsAtSec": 18.71,
-         "estimatedDurationSec": 1.42,
-         "pauseReasons": [],
+         "startsAtSec": 10.4,
+         "estimatedDurationSec": 1.7,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l11-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-packed-bag",
+           "label": "Emotion-first truthful take",
            "performedText": "You packed your bag.",
            "primary": true,
            "takesCount": 2,
-           "elevenLabsText": "You packed your bag."
+           "elevenLabsText": "You packed your bag.",
+           "directorNote": "Soft downward statement with empathy; no upward question lift on “bag”.",
+           "actingIntent": "Aida notices preparation as effort; it must not sound like a question or criticism."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4202,16 +4276,16 @@
          "character": "Bo",
          "exactDialogue": "Four times.",
          "performedText": "Four times.",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 20.34s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Bo admits the number with embarrassment and trust.",
+         "subtext": "I tried to make myself ready.",
+         "cadenceAndBreath": "Small, almost apologetic, but not ashamed beyond repair.",
+         "timingAndBody": "Starts around 12.90s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Aida: You packed your bag.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo admits the number with embarrassment and trust.",
+          "subtext": "I tried to make myself ready.",
+          "thoughtBefore": "I tried to make myself ready.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "four",
            "times"
@@ -4219,24 +4293,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Aida: You packed your bag.",
-         "startsAtSec": 20.34,
-         "estimatedDurationSec": 0.84,
-         "pauseReasons": [],
+         "startsAtSec": 12.9,
+         "estimatedDurationSec": 1.1,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l12-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-four-times",
+           "label": "Emotion-first truthful take",
            "performedText": "Four times.",
            "primary": true,
            "takesCount": 2,
-           "elevenLabsText": "Four times."
+           "elevenLabsText": "Four times.",
+           "directorNote": "Small, almost apologetic, but not ashamed beyond repair.",
+           "actingIntent": "Bo admits the number with embarrassment and trust."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4261,16 +4339,16 @@
          "character": "Aida",
          "exactDialogue": "I would have done five.",
          "performedText": "I would have done five.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 21.39s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Aida uses gentle humour to put herself beside Bo, not above him.",
+         "subtext": "I get it so much I might have done even more.",
+         "cadenceAndBreath": "Warm half-smile, humble and reassuring; not competitive, not teasing.",
+         "timingAndBody": "Starts around 14.80s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Bo: Four times.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida uses gentle humour to put herself beside Bo, not above him.",
+          "subtext": "I get it so much I might have done even more.",
+          "thoughtBefore": "I get it so much I might have done even more.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "i",
            "would",
@@ -4281,24 +4359,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: Four times.",
-         "startsAtSec": 21.39,
-         "estimatedDurationSec": 1.63,
-         "pauseReasons": [],
+         "startsAtSec": 14.8,
+         "estimatedDurationSec": 1.9,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l13-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-five",
+           "label": "Emotion-first truthful take",
            "performedText": "I would have done five.",
            "primary": true,
-           "takesCount": 1,
-           "elevenLabsText": "I would have done five."
+           "takesCount": 2,
+           "elevenLabsText": "I would have done five.",
+           "directorNote": "Warm half-smile, humble and reassuring; not competitive, not teasing.",
+           "actingIntent": "Aida uses gentle humour to put herself beside Bo, not above him."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4323,16 +4405,16 @@
          "character": "Bo",
          "exactDialogue": "You get scared too?",
          "performedText": "You get scared too?",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 23.23s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Bo is surprised and relieved; the question is delicate.",
+         "subtext": "Someone older and kind can feel this too?",
+         "cadenceAndBreath": "Soft wonder, not interrogation; slight breath before “too”.",
+         "timingAndBody": "Starts around 17.70s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Aida: I would have done five.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo is surprised and relieved; the question is delicate.",
+          "subtext": "Someone older and kind can feel this too?",
+          "thoughtBefore": "Someone older and kind can feel this too?",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "you",
            "get",
@@ -4342,24 +4424,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Aida: I would have done five.",
-         "startsAtSec": 23.23,
-         "estimatedDurationSec": 1.26,
-         "pauseReasons": [],
+         "startsAtSec": 17.7,
+         "estimatedDurationSec": 1.6,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l14-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-scared-too",
+           "label": "Emotion-first truthful take",
            "performedText": "You get scared too?",
            "primary": true,
            "takesCount": 2,
-           "elevenLabsText": "You get scared too?"
+           "elevenLabsText": "You get scared too?",
+           "directorNote": "Soft wonder, not interrogation; slight breath before “too”.",
+           "actingIntent": "Bo is surprised and relieved; the question is delicate."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4384,16 +4470,16 @@
          "character": "Aida",
          "exactDialogue": "Every single time.",
          "performedText": "Every single time.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 24.70s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Aida answers with calm truth and no drama.",
+         "subtext": "Yes, fear comes with me too.",
+         "cadenceAndBreath": "Plain, grounded, emotionally honest; keep it quiet.",
+         "timingAndBody": "Starts around 20.10s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Bo: You get scared too?",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida answers with calm truth and no drama.",
+          "subtext": "Yes, fear comes with me too.",
+          "thoughtBefore": "Yes, fear comes with me too.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "every",
            "single",
@@ -4402,24 +4488,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: You get scared too?",
-         "startsAtSec": 24.7,
-         "estimatedDurationSec": 1.2,
-         "pauseReasons": [],
+         "startsAtSec": 20.1,
+         "estimatedDurationSec": 1.5,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l15-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-every-time-1",
+           "label": "Emotion-first truthful take",
            "performedText": "Every single time.",
            "primary": true,
            "takesCount": 2,
-           "elevenLabsText": "Every single time."
+           "elevenLabsText": "Every single time.",
+           "directorNote": "Plain, grounded, emotionally honest; keep it quiet.",
+           "actingIntent": "Aida answers with calm truth and no drama."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4444,16 +4534,16 @@
          "character": "Bo",
          "exactDialogue": "But you still go?",
          "performedText": "But you still go?",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 26.12s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Bo is checking if courage means moving with fear.",
+         "subtext": "Maybe I do not have to wait until fear disappears.",
+         "cadenceAndBreath": "Tender, cautious question; no challenge in the tone.",
+         "timingAndBody": "Starts around 22.70s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Aida: Every single time.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo is checking if courage means moving with fear.",
+          "subtext": "Maybe I do not have to wait until fear disappears.",
+          "thoughtBefore": "Maybe I do not have to wait until fear disappears.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "but",
            "you",
@@ -4463,24 +4553,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Aida: Every single time.",
-         "startsAtSec": 26.12,
-         "estimatedDurationSec": 1.26,
-         "pauseReasons": [],
+         "startsAtSec": 22.7,
+         "estimatedDurationSec": 1.6,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l16-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-still-go",
+           "label": "Emotion-first truthful take",
            "performedText": "But you still go?",
            "primary": true,
            "takesCount": 2,
-           "elevenLabsText": "But you still go?"
+           "elevenLabsText": "But you still go?",
+           "directorNote": "Tender, cautious question; no challenge in the tone.",
+           "actingIntent": "Bo is checking if courage means moving with fear."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4505,16 +4599,16 @@
          "character": "Aida",
          "exactDialogue": "Every single time.",
          "performedText": "Every single time.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 27.60s while the body action remains readable; do not rush the line into the next cue.",
+         "dramaticIntention": "Aida repeats the truth as the emotional landing of the shot.",
+         "subtext": "Every time, and you can too when you are ready.",
+         "cadenceAndBreath": "Even softer than the first; finality without pressure, then silence.",
+         "timingAndBody": "Starts around 25.20s; leave the authored emotional pause before the next line. The body stays small and readable; no rushed delivery.",
          "archetypeId": "held-heart",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Bo: But you still go?",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida repeats the truth as the emotional landing of the shot.",
+          "subtext": "Every time, and you can too when you are ready.",
+          "thoughtBefore": "Every time, and you can too when you are ready.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "every",
            "single",
@@ -4523,24 +4617,28 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: But you still go?",
-         "startsAtSec": 27.6,
-         "estimatedDurationSec": 1.2,
-         "pauseReasons": [],
+         "startsAtSec": 25.2,
+         "estimatedDurationSec": 1.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": [],
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l17-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-every-time-2",
+           "label": "Emotion-first truthful take",
            "performedText": "Every single time.",
            "primary": true,
            "takesCount": 2,
-           "elevenLabsText": "Every single time."
+           "elevenLabsText": "Every single time.",
+           "directorNote": "Even softer than the first; finality without pressure, then silence.",
+           "actingIntent": "Aida repeats the truth as the emotional landing of the shot."
           }
          ],
          "voiceTreatment": "single_voice",
@@ -4566,7 +4664,17 @@
         "at": "2026-09-02T09:23:09Z",
         "fromShotId": "S4.SH1",
         "providerCalled": false
-       }
+       },
+       "emotionalVoicePass": {
+        "at": "2026-09-02T10:05:00Z",
+        "providerCalled": false,
+        "reason": "Scene 4 was split because the combined performance was rushed; delivery notes and timing now protect the emotional beats.",
+        "shots": {
+         "S4.SH1": "Private shared countdown, then Bo’s vulnerable fear and Keen’s gentle reassurance.",
+         "S4.SH2": "Aida enters softly, validates effort, and lands bravery as going while scared."
+        }
+       },
+       "compiledTrackHash": "4d05365c530100d077d3da42515925009fadeeb752d5d78504288a9c4d28fddc"
       },
       "outcome": "approved",
       "decisionAt": "2026-09-01T23:56:13",
@@ -4598,6 +4706,11 @@
         "SHuZ9GyczU4QEDzU4QU4"
        ]
       },
+      "signatureCarryForward": {
+       "at": "2026-09-02T10:05:00Z",
+       "reason": "Emotion-first timing and acting pass after Scene 4 split. No provider call.",
+       "providerCalled": false
+      },
       "compiledTrack": {
        "compiler": "voice-director-v1",
        "shotId": "S4.SH2",
@@ -4624,10 +4737,10 @@
          "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly.",
          "exactDialogue": "Hi Keen, I see you have met a new friend.",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida enters gently and keeps her volume low so Bo is not startled or put on display.",
+          "subtext": "I see Keen, and I am giving Bo a safe way to be included.",
+          "thoughtBefore": "I see Keen, and I am giving Bo a safe way to be included.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "hi",
            "keen",
@@ -4639,15 +4752,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
-         "startsAtSec": 13.83,
-         "estimatedDurationSec": 2.35,
-         "pauseReasons": [],
+         "startsAtSec": 3.0,
+         "estimatedDurationSec": 2.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -4675,11 +4790,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l8-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-soft-entrance",
+           "label": "Emotion-first truthful take",
            "performedText": "Hi Keen, I see you have met a new friend.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 2,
+           "elevenLabsText": "Hi Keen, I see you have met a new friend.",
+           "directorNote": "Soft arrival, kind smile in the voice; statement, not announcement.",
+           "actingIntent": "Aida enters gently and keeps her volume low so Bo is not startled or put on display."
           }
          ],
          "postDirectionAudit": {
@@ -4711,29 +4829,29 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l8-natural",
+            "code": "script-fidelity:aida-soft-entrance",
             "passed": true,
-            "message": "s4sh1-l8-natural preserves every locked script word."
+            "message": "aida-soft-entrance preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l8-natural",
+            "code": "complete-sentence:aida-soft-entrance",
             "passed": true,
-            "message": "s4sh1-l8-natural ends as a complete spoken sentence."
+            "message": "aida-soft-entrance ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l8-natural",
+            "code": "tag-palette:aida-soft-entrance",
             "passed": true,
-            "message": "s4sh1-l8-natural uses only the character and archetype tag palette."
+            "message": "aida-soft-entrance uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l8-natural",
+            "code": "tag-density:aida-soft-entrance",
             "passed": true,
-            "message": "s4sh1-l8-natural uses no more than two tags per segment."
+            "message": "aida-soft-entrance uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l8-natural",
+            "code": "take-count:aida-soft-entrance",
             "passed": true,
-            "message": "s4sh1-l8-natural has a positive takes count."
+            "message": "aida-soft-entrance has a positive takes count."
            },
            {
             "code": "tag-purposes",
@@ -4792,7 +4910,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "c0e7541b68ffd9f94c71242b7bee4a0ff34377774afb6c767ab58de20254e4fc"
+         "compiledHash": "7096a461cf4d64f6c4a3c3f8821d57402884ecc7087efaf5a90c58ee01e8fe63"
         },
         {
          "schemaVersion": 1,
@@ -4816,25 +4934,27 @@
          "physicalSignature": "Breath catches before the body commits forward.",
          "exactDialogue": "Yes.",
          "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Aida: Hi Keen, I see you have met a new friend.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Keen keeps the introduction small so Bo stays safe.",
+          "subtext": "Yes, and I am not pushing him.",
+          "thoughtBefore": "Yes, and I am not pushing him.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "yes"
           ]
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Aida: Hi Keen, I see you have met a new friend.",
-         "startsAtSec": 16.39,
-         "estimatedDurationSec": 0.63,
-         "pauseReasons": [],
+         "startsAtSec": 6.6,
+         "estimatedDurationSec": 0.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -4862,11 +4982,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l9-natural",
-           "label": "Natural truthful take",
+           "recipeId": "keen-simple-yes",
+           "label": "Emotion-first truthful take",
            "performedText": "Yes.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Yes.",
+           "directorNote": "Very short, warm, low volume; leave space after it.",
+           "actingIntent": "Keen keeps the introduction small so Bo stays safe."
           }
          ],
          "postDirectionAudit": {
@@ -4898,34 +5021,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l9-natural",
+            "code": "script-fidelity:keen-simple-yes",
             "passed": true,
-            "message": "s4sh1-l9-natural preserves every locked script word."
+            "message": "keen-simple-yes preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l9-natural",
+            "code": "complete-sentence:keen-simple-yes",
             "passed": true,
-            "message": "s4sh1-l9-natural ends as a complete spoken sentence."
+            "message": "keen-simple-yes ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l9-natural",
+            "code": "tag-palette:keen-simple-yes",
             "passed": true,
-            "message": "s4sh1-l9-natural uses only the character and archetype tag palette."
+            "message": "keen-simple-yes uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l9-natural",
+            "code": "tag-density:keen-simple-yes",
             "passed": true,
-            "message": "s4sh1-l9-natural uses no more than two tags per segment."
+            "message": "keen-simple-yes uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l9-natural",
+            "code": "take-count:keen-simple-yes",
             "passed": true,
-            "message": "s4sh1-l9-natural has a positive takes count."
+            "message": "keen-simple-yes has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l9-natural",
+            "code": "short-line-context:keen-simple-yes",
             "passed": true,
-            "message": "Short line s4sh1-l9-natural includes previous_text runway and at least two takes."
+            "message": "Short line keen-simple-yes includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -4984,7 +5107,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "ff0460fe51c411685d355d90ade0df0ee101fa03eab4b3033a6310c7e47dc3c7"
+         "compiledHash": "87ad1ed5df9b5e942d4577b355052cb75294f2afe76f1aea2480a62803e6d679"
         },
         {
          "schemaVersion": 1,
@@ -5008,10 +5131,10 @@
          "physicalSignature": "Breath catches before the body commits forward.",
          "exactDialogue": "Bo, this is Aida.",
          "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Keen: Yes.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Keen introduces Aida as reassurance, not ceremony.",
+          "subtext": "Bo, this person is safe.",
+          "thoughtBefore": "Bo, this person is safe.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "bo",
            "this",
@@ -5021,15 +5144,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Keen: Yes.",
-         "startsAtSec": 17.23,
-         "estimatedDurationSec": 1.26,
-         "pauseReasons": [],
+         "startsAtSec": 7.8,
+         "estimatedDurationSec": 1.6,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -5057,11 +5182,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l10-natural",
-           "label": "Natural truthful take",
+           "recipeId": "keen-introduces-aida",
+           "label": "Emotion-first truthful take",
            "performedText": "Bo, this is Aida.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Bo, this is ada.",
+           "directorNote": "Gentle and clear; ElevenLabs text must pronounce the name as ada.",
+           "actingIntent": "Keen introduces Aida as reassurance, not ceremony."
           }
          ],
          "postDirectionAudit": {
@@ -5093,34 +5221,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l10-natural",
+            "code": "script-fidelity:keen-introduces-aida",
             "passed": true,
-            "message": "s4sh1-l10-natural preserves every locked script word."
+            "message": "keen-introduces-aida preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l10-natural",
+            "code": "complete-sentence:keen-introduces-aida",
             "passed": true,
-            "message": "s4sh1-l10-natural ends as a complete spoken sentence."
+            "message": "keen-introduces-aida ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l10-natural",
+            "code": "tag-palette:keen-introduces-aida",
             "passed": true,
-            "message": "s4sh1-l10-natural uses only the character and archetype tag palette."
+            "message": "keen-introduces-aida uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l10-natural",
+            "code": "tag-density:keen-introduces-aida",
             "passed": true,
-            "message": "s4sh1-l10-natural uses no more than two tags per segment."
+            "message": "keen-introduces-aida uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l10-natural",
+            "code": "take-count:keen-introduces-aida",
             "passed": true,
-            "message": "s4sh1-l10-natural has a positive takes count."
+            "message": "keen-introduces-aida has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l10-natural",
+            "code": "short-line-context:keen-introduces-aida",
             "passed": true,
-            "message": "Short line s4sh1-l10-natural includes previous_text runway and at least two takes."
+            "message": "Short line keen-introduces-aida includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -5179,7 +5307,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "dec972798f46ea2090845ba0da0a6edb8564823be66f02a0fcba21dbf244bc24"
+         "compiledHash": "5980031837f301f5441f4dbd76702f251d88f3d09749686da3ff29cd00cebc6a"
         },
         {
          "schemaVersion": 1,
@@ -5203,10 +5331,10 @@
          "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly.",
          "exactDialogue": "You packed your bag.",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Keen: Bo, this is Aida.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida notices preparation as effort; it must not sound like a question or criticism.",
+          "subtext": "You tried hard before you even arrived.",
+          "thoughtBefore": "You tried hard before you even arrived.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "you",
            "packed",
@@ -5216,15 +5344,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Keen: Bo, this is Aida.",
-         "startsAtSec": 18.71,
-         "estimatedDurationSec": 1.42,
-         "pauseReasons": [],
+         "startsAtSec": 10.4,
+         "estimatedDurationSec": 1.7,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -5252,11 +5382,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l11-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-packed-bag",
+           "label": "Emotion-first truthful take",
            "performedText": "You packed your bag.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "You packed your bag.",
+           "directorNote": "Soft downward statement with empathy; no upward question lift on “bag”.",
+           "actingIntent": "Aida notices preparation as effort; it must not sound like a question or criticism."
           }
          ],
          "postDirectionAudit": {
@@ -5288,34 +5421,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l11-natural",
+            "code": "script-fidelity:aida-packed-bag",
             "passed": true,
-            "message": "s4sh1-l11-natural preserves every locked script word."
+            "message": "aida-packed-bag preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l11-natural",
+            "code": "complete-sentence:aida-packed-bag",
             "passed": true,
-            "message": "s4sh1-l11-natural ends as a complete spoken sentence."
+            "message": "aida-packed-bag ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l11-natural",
+            "code": "tag-palette:aida-packed-bag",
             "passed": true,
-            "message": "s4sh1-l11-natural uses only the character and archetype tag palette."
+            "message": "aida-packed-bag uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l11-natural",
+            "code": "tag-density:aida-packed-bag",
             "passed": true,
-            "message": "s4sh1-l11-natural uses no more than two tags per segment."
+            "message": "aida-packed-bag uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l11-natural",
+            "code": "take-count:aida-packed-bag",
             "passed": true,
-            "message": "s4sh1-l11-natural has a positive takes count."
+            "message": "aida-packed-bag has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l11-natural",
+            "code": "short-line-context:aida-packed-bag",
             "passed": true,
-            "message": "Short line s4sh1-l11-natural includes previous_text runway and at least two takes."
+            "message": "Short line aida-packed-bag includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -5374,7 +5507,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "10572086430d3a1a75e09660cf7f10da6f15a89a07bc23bb640ba2308e1e4152"
+         "compiledHash": "f490c60a4da3b0ee516a272510c276e124fc33ecc5cdbe490feb537d430e9e01"
         },
         {
          "schemaVersion": 1,
@@ -5398,10 +5531,10 @@
          "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits.",
          "exactDialogue": "Four times.",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Aida: You packed your bag.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo admits the number with embarrassment and trust.",
+          "subtext": "I tried to make myself ready.",
+          "thoughtBefore": "I tried to make myself ready.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "four",
            "times"
@@ -5409,15 +5542,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Aida: You packed your bag.",
-         "startsAtSec": 20.34,
-         "estimatedDurationSec": 0.84,
-         "pauseReasons": [],
+         "startsAtSec": 12.9,
+         "estimatedDurationSec": 1.1,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -5445,11 +5580,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l12-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-four-times",
+           "label": "Emotion-first truthful take",
            "performedText": "Four times.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Four times.",
+           "directorNote": "Small, almost apologetic, but not ashamed beyond repair.",
+           "actingIntent": "Bo admits the number with embarrassment and trust."
           }
          ],
          "postDirectionAudit": {
@@ -5481,34 +5619,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l12-natural",
+            "code": "script-fidelity:bo-four-times",
             "passed": true,
-            "message": "s4sh1-l12-natural preserves every locked script word."
+            "message": "bo-four-times preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l12-natural",
+            "code": "complete-sentence:bo-four-times",
             "passed": true,
-            "message": "s4sh1-l12-natural ends as a complete spoken sentence."
+            "message": "bo-four-times ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l12-natural",
+            "code": "tag-palette:bo-four-times",
             "passed": true,
-            "message": "s4sh1-l12-natural uses only the character and archetype tag palette."
+            "message": "bo-four-times uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l12-natural",
+            "code": "tag-density:bo-four-times",
             "passed": true,
-            "message": "s4sh1-l12-natural uses no more than two tags per segment."
+            "message": "bo-four-times uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l12-natural",
+            "code": "take-count:bo-four-times",
             "passed": true,
-            "message": "s4sh1-l12-natural has a positive takes count."
+            "message": "bo-four-times has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l12-natural",
+            "code": "short-line-context:bo-four-times",
             "passed": true,
-            "message": "Short line s4sh1-l12-natural includes previous_text runway and at least two takes."
+            "message": "Short line bo-four-times includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -5567,7 +5705,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "375ebe51def65cdbc608022cb31446956ce626fb6f3f39134ed794f92cd51fb4"
+         "compiledHash": "f7f65711b760d48f61f2aedff8b9fca745667189e60bdd5e7c3c2a86d2b2e44a"
         },
         {
          "schemaVersion": 1,
@@ -5591,10 +5729,10 @@
          "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly.",
          "exactDialogue": "I would have done five.",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Bo: Four times.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida uses gentle humour to put herself beside Bo, not above him.",
+          "subtext": "I get it so much I might have done even more.",
+          "thoughtBefore": "I get it so much I might have done even more.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "i",
            "would",
@@ -5605,15 +5743,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: Four times.",
-         "startsAtSec": 21.39,
-         "estimatedDurationSec": 1.63,
-         "pauseReasons": [],
+         "startsAtSec": 14.8,
+         "estimatedDurationSec": 1.9,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -5641,11 +5781,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l13-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-five",
+           "label": "Emotion-first truthful take",
            "performedText": "I would have done five.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 2,
+           "elevenLabsText": "I would have done five.",
+           "directorNote": "Warm half-smile, humble and reassuring; not competitive, not teasing.",
+           "actingIntent": "Aida uses gentle humour to put herself beside Bo, not above him."
           }
          ],
          "postDirectionAudit": {
@@ -5677,29 +5820,29 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l13-natural",
+            "code": "script-fidelity:aida-five",
             "passed": true,
-            "message": "s4sh1-l13-natural preserves every locked script word."
+            "message": "aida-five preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l13-natural",
+            "code": "complete-sentence:aida-five",
             "passed": true,
-            "message": "s4sh1-l13-natural ends as a complete spoken sentence."
+            "message": "aida-five ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l13-natural",
+            "code": "tag-palette:aida-five",
             "passed": true,
-            "message": "s4sh1-l13-natural uses only the character and archetype tag palette."
+            "message": "aida-five uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l13-natural",
+            "code": "tag-density:aida-five",
             "passed": true,
-            "message": "s4sh1-l13-natural uses no more than two tags per segment."
+            "message": "aida-five uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l13-natural",
+            "code": "take-count:aida-five",
             "passed": true,
-            "message": "s4sh1-l13-natural has a positive takes count."
+            "message": "aida-five has a positive takes count."
            },
            {
             "code": "tag-purposes",
@@ -5758,7 +5901,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "516fb7d177254b3f03ebc3e54047877553b314c17dc4e3ece8dce8b03dc42f7a"
+         "compiledHash": "91f7cdc22f281fc95e0bda29428c562740b96329882e7e1eb8d5bdaeb71636ed"
         },
         {
          "schemaVersion": 1,
@@ -5782,10 +5925,10 @@
          "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits.",
          "exactDialogue": "You get scared too?",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Aida: I would have done five.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo is surprised and relieved; the question is delicate.",
+          "subtext": "Someone older and kind can feel this too?",
+          "thoughtBefore": "Someone older and kind can feel this too?",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "you",
            "get",
@@ -5795,15 +5938,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Aida: I would have done five.",
-         "startsAtSec": 23.23,
-         "estimatedDurationSec": 1.26,
-         "pauseReasons": [],
+         "startsAtSec": 17.7,
+         "estimatedDurationSec": 1.6,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -5831,11 +5976,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l14-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-scared-too",
+           "label": "Emotion-first truthful take",
            "performedText": "You get scared too?",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "You get scared too?",
+           "directorNote": "Soft wonder, not interrogation; slight breath before “too”.",
+           "actingIntent": "Bo is surprised and relieved; the question is delicate."
           }
          ],
          "postDirectionAudit": {
@@ -5867,34 +6015,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l14-natural",
+            "code": "script-fidelity:bo-scared-too",
             "passed": true,
-            "message": "s4sh1-l14-natural preserves every locked script word."
+            "message": "bo-scared-too preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l14-natural",
+            "code": "complete-sentence:bo-scared-too",
             "passed": true,
-            "message": "s4sh1-l14-natural ends as a complete spoken sentence."
+            "message": "bo-scared-too ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l14-natural",
+            "code": "tag-palette:bo-scared-too",
             "passed": true,
-            "message": "s4sh1-l14-natural uses only the character and archetype tag palette."
+            "message": "bo-scared-too uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l14-natural",
+            "code": "tag-density:bo-scared-too",
             "passed": true,
-            "message": "s4sh1-l14-natural uses no more than two tags per segment."
+            "message": "bo-scared-too uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l14-natural",
+            "code": "take-count:bo-scared-too",
             "passed": true,
-            "message": "s4sh1-l14-natural has a positive takes count."
+            "message": "bo-scared-too has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l14-natural",
+            "code": "short-line-context:bo-scared-too",
             "passed": true,
-            "message": "Short line s4sh1-l14-natural includes previous_text runway and at least two takes."
+            "message": "Short line bo-scared-too includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -5953,7 +6101,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "eaebee0bdf142d62f11e00df70a6d1e7f579d8534a406cacad3468e895c5760a"
+         "compiledHash": "24f3d67c1d44437e052a0e8a33e7772982e47eef8204bfe9f220d9504f34952b"
         },
         {
          "schemaVersion": 1,
@@ -5977,10 +6125,10 @@
          "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly.",
          "exactDialogue": "Every single time.",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Bo: You get scared too?",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida answers with calm truth and no drama.",
+          "subtext": "Yes, fear comes with me too.",
+          "thoughtBefore": "Yes, fear comes with me too.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "every",
            "single",
@@ -5989,15 +6137,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: You get scared too?",
-         "startsAtSec": 24.7,
-         "estimatedDurationSec": 1.2,
-         "pauseReasons": [],
+         "startsAtSec": 20.1,
+         "estimatedDurationSec": 1.5,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -6025,11 +6175,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l15-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-every-time-1",
+           "label": "Emotion-first truthful take",
            "performedText": "Every single time.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Every single time.",
+           "directorNote": "Plain, grounded, emotionally honest; keep it quiet.",
+           "actingIntent": "Aida answers with calm truth and no drama."
           }
          ],
          "postDirectionAudit": {
@@ -6061,34 +6214,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l15-natural",
+            "code": "script-fidelity:aida-every-time-1",
             "passed": true,
-            "message": "s4sh1-l15-natural preserves every locked script word."
+            "message": "aida-every-time-1 preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l15-natural",
+            "code": "complete-sentence:aida-every-time-1",
             "passed": true,
-            "message": "s4sh1-l15-natural ends as a complete spoken sentence."
+            "message": "aida-every-time-1 ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l15-natural",
+            "code": "tag-palette:aida-every-time-1",
             "passed": true,
-            "message": "s4sh1-l15-natural uses only the character and archetype tag palette."
+            "message": "aida-every-time-1 uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l15-natural",
+            "code": "tag-density:aida-every-time-1",
             "passed": true,
-            "message": "s4sh1-l15-natural uses no more than two tags per segment."
+            "message": "aida-every-time-1 uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l15-natural",
+            "code": "take-count:aida-every-time-1",
             "passed": true,
-            "message": "s4sh1-l15-natural has a positive takes count."
+            "message": "aida-every-time-1 has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l15-natural",
+            "code": "short-line-context:aida-every-time-1",
             "passed": true,
-            "message": "Short line s4sh1-l15-natural includes previous_text runway and at least two takes."
+            "message": "Short line aida-every-time-1 includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -6147,7 +6300,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "27860830d88e2cd36dcc029ee5628710ba3244f3f846f5dd541ea2cb6e2017d3"
+         "compiledHash": "2c1d5523c31e9aa46ca24557c9dc2f2e0d2139d883078efafe20a10cfc328834"
         },
         {
          "schemaVersion": 1,
@@ -6171,10 +6324,10 @@
          "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits.",
          "exactDialogue": "But you still go?",
          "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Aida: Every single time.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Bo is checking if courage means moving with fear.",
+          "subtext": "Maybe I do not have to wait until fear disappears.",
+          "thoughtBefore": "Maybe I do not have to wait until fear disappears.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "but",
            "you",
@@ -6184,15 +6337,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Aida: Every single time.",
-         "startsAtSec": 26.12,
-         "estimatedDurationSec": 1.26,
-         "pauseReasons": [],
+         "startsAtSec": 22.7,
+         "estimatedDurationSec": 1.6,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -6220,11 +6375,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l16-natural",
-           "label": "Natural truthful take",
+           "recipeId": "bo-still-go",
+           "label": "Emotion-first truthful take",
            "performedText": "But you still go?",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "But you still go?",
+           "directorNote": "Tender, cautious question; no challenge in the tone.",
+           "actingIntent": "Bo is checking if courage means moving with fear."
           }
          ],
          "postDirectionAudit": {
@@ -6256,34 +6414,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l16-natural",
+            "code": "script-fidelity:bo-still-go",
             "passed": true,
-            "message": "s4sh1-l16-natural preserves every locked script word."
+            "message": "bo-still-go preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l16-natural",
+            "code": "complete-sentence:bo-still-go",
             "passed": true,
-            "message": "s4sh1-l16-natural ends as a complete spoken sentence."
+            "message": "bo-still-go ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l16-natural",
+            "code": "tag-palette:bo-still-go",
             "passed": true,
-            "message": "s4sh1-l16-natural uses only the character and archetype tag palette."
+            "message": "bo-still-go uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l16-natural",
+            "code": "tag-density:bo-still-go",
             "passed": true,
-            "message": "s4sh1-l16-natural uses no more than two tags per segment."
+            "message": "bo-still-go uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l16-natural",
+            "code": "take-count:bo-still-go",
             "passed": true,
-            "message": "s4sh1-l16-natural has a positive takes count."
+            "message": "bo-still-go has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l16-natural",
+            "code": "short-line-context:bo-still-go",
             "passed": true,
-            "message": "Short line s4sh1-l16-natural includes previous_text runway and at least two takes."
+            "message": "Short line bo-still-go includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -6342,7 +6500,7 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "f5c3cb5f55dfc439bc5e56ffff706d903402467ddcc3e923459103a04078aeeb"
+         "compiledHash": "f3af74fc58817590c235ae029b307d4328b8bb75d9aee241999f083d1f94a69c"
         },
         {
          "schemaVersion": 1,
@@ -6366,10 +6524,10 @@
          "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly.",
          "exactDialogue": "Every single time.",
          "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Bo: But you still go?",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "intention": "Aida repeats the truth as the emotional landing of the shot.",
+          "subtext": "Every time, and you can too when you are ready.",
+          "thoughtBefore": "Every time, and you can too when you are ready.",
+          "changeDuring": "The line opens a little more trust without solving the fear too quickly.",
           "operativeWords": [
            "every",
            "single",
@@ -6378,15 +6536,17 @@
          },
          "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
          "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
+          "entry": "guarded but safe",
+          "exit": "slightly more connected"
          },
          "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "bodyVoiceRelationship": "Voice follows the body truth: low pressure, emotionally present, never pushed for speed.",
          "previousText": "Bo: But you still go?",
-         "startsAtSec": 27.6,
-         "estimatedDurationSec": 1.2,
-         "pauseReasons": [],
+         "startsAtSec": 25.2,
+         "estimatedDurationSec": 1.8,
+         "pauseReasons": [
+          "Protect the feeling after the line; do not crush the emotional beat to hit timing."
+         ],
          "tagPurposes": {},
          "archetype": {
           "archetypeId": "held-heart",
@@ -6414,11 +6574,14 @@
          },
          "takeRecipes": [
           {
-           "recipeId": "s4sh1-l17-natural",
-           "label": "Natural truthful take",
+           "recipeId": "aida-every-time-2",
+           "label": "Emotion-first truthful take",
            "performedText": "Every single time.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Every single time.",
+           "directorNote": "Even softer than the first; finality without pressure, then silence.",
+           "actingIntent": "Aida repeats the truth as the emotional landing of the shot."
           }
          ],
          "postDirectionAudit": {
@@ -6450,34 +6613,34 @@
             "message": "Each line has one to three take-direction recipes."
            },
            {
-            "code": "script-fidelity:s4sh1-l17-natural",
+            "code": "script-fidelity:aida-every-time-2",
             "passed": true,
-            "message": "s4sh1-l17-natural preserves every locked script word."
+            "message": "aida-every-time-2 preserves every locked script word."
            },
            {
-            "code": "complete-sentence:s4sh1-l17-natural",
+            "code": "complete-sentence:aida-every-time-2",
             "passed": true,
-            "message": "s4sh1-l17-natural ends as a complete spoken sentence."
+            "message": "aida-every-time-2 ends as a complete spoken sentence."
            },
            {
-            "code": "tag-palette:s4sh1-l17-natural",
+            "code": "tag-palette:aida-every-time-2",
             "passed": true,
-            "message": "s4sh1-l17-natural uses only the character and archetype tag palette."
+            "message": "aida-every-time-2 uses only the character and archetype tag palette."
            },
            {
-            "code": "tag-density:s4sh1-l17-natural",
+            "code": "tag-density:aida-every-time-2",
             "passed": true,
-            "message": "s4sh1-l17-natural uses no more than two tags per segment."
+            "message": "aida-every-time-2 uses no more than two tags per segment."
            },
            {
-            "code": "take-count:s4sh1-l17-natural",
+            "code": "take-count:aida-every-time-2",
             "passed": true,
-            "message": "s4sh1-l17-natural has a positive takes count."
+            "message": "aida-every-time-2 has a positive takes count."
            },
            {
-            "code": "short-line-context:s4sh1-l17-natural",
+            "code": "short-line-context:aida-every-time-2",
             "passed": true,
-            "message": "Short line s4sh1-l17-natural includes previous_text runway and at least two takes."
+            "message": "Short line aida-every-time-2 includes previous_text runway and at least two takes."
            },
            {
             "code": "tag-purposes",
@@ -6536,15 +6699,10 @@
           "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
           "Would a four-year-old feel the intended turn?"
          ],
-         "compiledHash": "038c8b55c46015a63d5203498431994ab17f585574ec7fdc41a9954131f2c3ee"
+         "compiledHash": "3b8e31f4bec91f9b50cf0ec03887ed4d59a7610ba3d2178b8f631d49e0db05ef"
         }
        ],
-       "compiledHash": "620908c968839bd8040184ad13acf22ba10ef3ed7a832562076887809ea54741"
-      },
-      "signatureCarryForward": {
-       "at": "2026-09-02T09:23:09Z",
-       "reason": "Scene 4 split into two shots; voice direction carried forward mechanically.",
-       "providerCalled": false
+       "compiledHash": "bf3bef5cd9be7e52683b59c08cdbdb82afef003f91b1a7c056b05c32589abba5"
       }
      },
      "candidate": null,

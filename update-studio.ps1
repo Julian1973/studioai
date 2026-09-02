@@ -259,6 +259,31 @@ if ($relocated) {
             }
         }
     }
+    # prove the copy landed - a OneDrive placeholder (cloud-only file) can defeat robocopy silently
+    $newProj = Join-Path $studioRoot "projects"
+    if (Test-Path -LiteralPath $newProj -PathType Container) {
+        foreach ($p in (Get-ChildItem -LiteralPath $newProj -Directory)) {
+            $assetDir = Join-Path $p.FullName "assets"
+            if (-not (Test-Path -LiteralPath $assetDir -PathType Container)) { continue }
+            $n = @(Get-ChildItem -LiteralPath $assetDir -File -Recurse | Where-Object { $_.Name -ne ".gitkeep" }).Count
+            if ($n -eq 0) {
+                foreach ($srcRoot in $sources) {
+                    $from = Join-Path (Join-Path (Join-Path $srcRoot "projects") $p.Name) "assets"
+                    if (Test-Path -LiteralPath $from -PathType Container) {
+                        Get-ChildItem -LiteralPath $from -File -Recurse | ForEach-Object {
+                            $rel = $_.FullName.Substring($from.Length).TrimStart("\")
+                            $dst = Join-Path $assetDir $rel
+                            $dstDir = Split-Path -Parent $dst
+                            if (-not (Test-Path -LiteralPath $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
+                            if (-not (Test-Path -LiteralPath $dst)) { try { Copy-Item -LiteralPath $_.FullName -Destination $dst -Force } catch { Warn ("could not copy " + $_.FullName + ": " + $_.Exception.Message) } }
+                        }
+                    }
+                }
+                $n = @(Get-ChildItem -LiteralPath $assetDir -File -Recurse | Where-Object { $_.Name -ne ".gitkeep" }).Count
+            }
+            if ($n -eq 0) { Warn ("projects\" + $p.Name + "\assets is EMPTY in the new studio - the source files could not be read (cloud-only OneDrive files?). Tell Claude.") } else { Say ("  projects\" + $p.Name + "\assets: " + $n + " file(s)") }
+        }
+    }
     # the credentials file lives beside the OneDrive copy; the launcher looks there too, but a copy next to
     # the studio makes the new location self-contained.
     $api = Join-Path (Split-Path -Parent $scriptRoot) "api.rtf"

@@ -676,6 +676,8 @@ def test_fire_is_acknowledged_in_watch_before_the_first_job_poll():
 def test_watch_routes_a_failed_opening_stage_back_to_see():
     assert 'pst.kf==="stageBlocked"' in APP
     assert 'Return to See and correct the keyframe' in APP
+    assert 'Create required SEE keyframe' in APP
+    assert 'label:"Open Cinematography",onclick:"openStageOutcome(\'keyframe\')"' not in APP
     assert 'Image blocked · audio is ready' in APP
     assert 'Seedance SFX only · no @Audio1 required' in APP
     assert 'Audio is not blocking this shot.' in APP

@@ -12,7 +12,7 @@ import cb_render as R
 def test_scene_director_uses_a_cross_process_serialisation_lock():
     source = pathlib.Path(C.__file__).read_text()
     assert "episode-scene-director.lock" in source
-    assert "fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)" in source
+    assert "filelock_compat.lock(lock_file)" in source   # cross-platform since 2026-09-02 (fcntl is POSIX-only)
     assert "@_serial_scene_director\ndef run_scene(" in source
 
 

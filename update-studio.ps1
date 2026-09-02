@@ -50,6 +50,12 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Fail "git is not ins
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-not (Test-Path -LiteralPath (Join-Path $scriptRoot ".git"))) { Fail "This folder is not a git checkout: $scriptRoot" }
 $bundle = Join-Path $scriptRoot "studio-update.bundle"
+# a bundle hand-delivered into the original OneDrive folder is honoured from the new location too
+if (-not (Test-Path -LiteralPath $bundle)) {
+    foreach ($alt in @((Join-Path $env:USERPROFILE "OneDrive\Desktop\Ai Studio\studio-update.bundle"), (Join-Path $env:USERPROFILE "Desktop\Ai Studio\studio-update.bundle"))) {
+        if (Test-Path -LiteralPath $alt) { $bundle = $alt; break }
+    }
+}
 $stamp = Get-Date -Format "yyyy-MM-dd_HHmm"
 
 # --- where does the studio live? -------------------------------------------------------------------

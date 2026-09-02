@@ -52,7 +52,7 @@ touches a spend token. Its only external calls are OpenAI text calls via cb_llm.
     python3 cb_creative.py migrate   [episode]
 """
 import datetime
-import fcntl
+import filelock_compat
 import hashlib
 import json
 import os
@@ -2554,12 +2554,12 @@ def _serial_scene_director(fn):
         lock_path.parent.mkdir(parents=True, exist_ok=True)
         with open(lock_path, "a+") as lock_file:
             log(f"SCENE {scene_num} — queued for the Director text pass")
-            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            filelock_compat.lock(lock_file)
             try:
                 log(f"SCENE {scene_num} — Director text pass started")
                 return fn(scene_num, episode, brief=brief, log=log)
             finally:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                filelock_compat.unlock(lock_file)
     return locked
 
 

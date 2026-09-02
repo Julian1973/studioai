@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import functools
-import fcntl
+import filelock_compat
 import json
 import mimetypes
 import os
@@ -78,11 +78,11 @@ def _locked_registry(func):
         REGISTRY_PATH.parent.mkdir(parents=True, exist_ok=True)
         lock_path = REGISTRY_PATH.with_suffix(".lock")
         with lock_path.open("a+", encoding="utf-8") as lock_file:
-            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            filelock_compat.lock(lock_file)
             try:
                 return func(*args, **kwargs)
             finally:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                filelock_compat.unlock(lock_file)
     return wrapped
 
 

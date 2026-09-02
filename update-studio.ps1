@@ -114,6 +114,22 @@ if (Test-Path -LiteralPath $bundle) {
         $source = "bundle/$Branch"
     }
 }
+# A file hand-delivered into this folder (this updater, a handover note) that the target branch also
+# tracks would make git refuse the checkout ("untracked working tree files would be overwritten").
+# Those copies are moved aside first - the checkout brings the branch's own copy of each.
+$targetFiles = @(git ls-tree -r --name-only $source)
+$blocking = @(git ls-files --others --exclude-standard | Where-Object { $_ -and ($targetFiles -contains $_) })
+if ($blocking.Count -gt 0) {
+    if (-not $aside) { $aside = Join-Path $studioRoot ("_local-work-" + $stamp) }
+    Say ("Moving " + $blocking.Count + " hand-delivered file(s) aside (the branch carries its own copy of each)")
+    foreach ($rel in $blocking) {
+        $src = Join-Path $studioRoot $rel
+        $dst = Join-Path (Join-Path $aside "_replaced-by-checkout") $rel
+        $dstDir = Split-Path -Parent $dst
+        if (-not (Test-Path -LiteralPath $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
+        try { Move-Item -LiteralPath $src -Destination $dst -Force } catch { Write-Host ("   could not move " + $rel + ": " + $_.Exception.Message) -ForegroundColor Yellow }
+    }
+}
 Say "Switching to $Branch (from $source)"
 if ((git branch --list $Branch).Trim()) {
     git checkout $Branch | Out-Host

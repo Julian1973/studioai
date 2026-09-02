@@ -16,7 +16,17 @@ param([string]$Branch = "t40/projects")
 # git and pip report progress on stderr; "Stop" would turn that into a crash. Exit codes are checked instead.
 $ErrorActionPreference = "Continue"
 $env:PYTHONUTF8 = "1"
-function Fail($msg) { Write-Host ("!! " + $msg) -ForegroundColor Red; exit 1 }
+function Fail($msg) { Write-Host ("!! " + $msg) -ForegroundColor Red; Read-Host "Press Enter to close"; exit 1 }
+
+# 0. run elevated - the studio relies on real symlinks and Windows only lets an administrator (or a
+#    Developer-Mode account after a fresh sign-in) create them. Windows asks once; click Yes.
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Host "== Re-launching as administrator (Windows will ask for permission: click Yes)" -ForegroundColor Cyan
+    $self = $MyInvocation.MyCommand.Path
+    Start-Process -FilePath "powershell.exe" -Verb RunAs -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ('"' + $self + '"'), $Branch
+    exit 0
+}
 
 $studioRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location -LiteralPath $studioRoot
@@ -41,7 +51,15 @@ if ($dirty -gt 0) {
     $label = "local-edits-before-update-$stamp"
     Say "Saving $dirty edited file(s) to git stash '$label' (nothing is deleted)"
     git stash push --message $label | Out-Host
-    if ($LASTEXITCODE -ne 0) { Fail "Could not save the local edits to a stash - stopping before anything is touched." }
+    if ($LASTEXITCODE -ne 0) {
+        $saved = (git stash list | Select-String -SimpleMatch $label)
+        if ($saved) {
+            Say "The stash entry is saved but git could not finish resetting the tree (symlink permission) - the saved copy is safe, resetting the tree now as administrator"
+            git reset --hard HEAD | Out-Host
+        } else {
+            Fail "Could not save the local edits to a stash - stopping before anything is touched."
+        }
+    }
     Say "Recover later with:  git stash list   /   git stash show -p stash@{0}   /   git checkout stash@{0} -- <path>"
 } else {
     Say "No edited tracked files to save"
@@ -150,4 +168,5 @@ $subject = (git log -1 --format=%s).Trim()
 Say ("Updated: " + $beforeBranch + " @ " + $before + "  ->  " + $Branch + " @ " + $after)
 Say $subject
 if ($dirty -gt 0) { Say "Your edited files are safe in git stash (git stash list)." }
+Read-Host "Done. Press Enter to close"
 if ($untracked.Count -gt 0) { Say ("Your new local files are in " + $aside) }

@@ -392,6 +392,7 @@ def lineage_status(pkg, scene, episode="Ep1"):
     current_script = None
     script_current = False
     script_error = None
+    previous_source_match = False   # read below even when the script store refuses
     try:
         current = SCRIPT_STORE.current(episode, required=True)
         current_script = current["scriptVersionId"]

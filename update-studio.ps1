@@ -203,7 +203,19 @@ if ($source -like "bundle/*") { Say "This update came from the bundle - publish 
 # tracked file is rewritten from the index so the line endings follow .gitattributes (LF), not an
 # earlier autocrlf setting
 git checkout -- . | Out-Host
-git checkout-index -a -f 2>$null | Out-Null
+$probe = Join-Path $studioRoot "projects\crystal-bears\episodes\scripts\Ep1_The_Adventure_Begins.txt"
+if (Test-Path -LiteralPath $probe) {
+    $bytes = [IO.File]::ReadAllBytes($probe)
+    if ($bytes -contains 13) {
+        Say "Line endings were converted on an earlier checkout - rewriting every tracked file from git (LF)"
+        git rm -r -q --cached . | Out-Null
+        git reset -q --hard HEAD | Out-Host
+        $bytes = [IO.File]::ReadAllBytes($probe)
+        if ($bytes -contains 13) { Warn "the checkout still carries CRLF line endings - tell Claude" } else { Say "Line endings are LF again" }
+    } else {
+        Say "Line endings OK (LF)"
+    }
+}
 
 # 2b. relocation - carry the assets, media and studio state across. robocopy /XC /XN /XO never overwrites
 #     a file that already exists in the new checkout, and nothing is ever removed from the OneDrive copy.

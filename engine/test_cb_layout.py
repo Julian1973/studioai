@@ -200,3 +200,37 @@ def test_local_geometry_screen_blocks_gross_size_drift(monkeypatch, tmp_path):
 
     assert failed["status"] == "fail"
     assert any(not item["passed"] for item in failed["matches"])
+
+
+def test_conform_plate_centre_crops_a_3_2_upload_and_refuses_the_uncroppable(tmp_path):
+    """2026-09-02 (The Box Monsters S2): ChatGPT plates are 2496x1664 (3:2); the production
+    frame is settled at intake, never at the keyframe step after approval."""
+    src = tmp_path / "chatgpt.png"
+    Image.new("RGB", (2496, 1664), (120, 90, 60)).save(src)
+    out = tmp_path / "candidate.png"
+    info = cb_layout.conform_plate_to_production_frame(src, out)
+    assert info["cropped"] and info["sourceSize"] == [2496, 1664]
+    with Image.open(out) as image:
+        assert image.size == (2496, 1404)
+        assert 1.70 <= image.width / image.height <= 1.85
+    assert Image.open(src).size == (2496, 1664)        # the original is untouched
+
+    # already a production frame: copied unchanged
+    wide = tmp_path / "wide.png"
+    Image.new("RGB", (1920, 1080), (1, 2, 3)).save(wide)
+    info = cb_layout.conform_plate_to_production_frame(wide, tmp_path / "wide_out.png")
+    assert not info["cropped"] and info["size"] == [1920, 1080]
+
+    # a 4:3 is the limit; a square or a portrait is refused by name
+    square = tmp_path / "square.png"
+    Image.new("RGB", (2000, 2000), (1, 2, 3)).save(square)
+    with pytest.raises(cb_layout.LayoutError, match="too far from the 16:9"):
+        cb_layout.conform_plate_to_production_frame(square, tmp_path / "sq_out.png")
+    small = tmp_path / "small.png"
+    Image.new("RGB", (900, 600), (1, 2, 3)).save(small)
+    with pytest.raises(cb_layout.LayoutError, match="production minimum"):
+        cb_layout.conform_plate_to_production_frame(small, tmp_path / "small_out.png")
+    # the conformed frame passes the composition proof's own guard
+    with Image.open(out) as image:
+        w, h = image.size
+    assert w >= 1280 and h >= 720 and 1.70 <= w / h <= 1.85

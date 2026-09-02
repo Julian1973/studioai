@@ -17,7 +17,9 @@
     "anchor": "projects/the-box-monsters/assets/nib_anchor.png",
     "refs": [
       "projects/the-box-monsters/assets/nib_anchor.png"
-    ]
+    ],
+    "heightIn": 6,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust"
   },
   "Rumble": {
     "key_features": "The biggest monster with the softest heart. Rumble is gentle, careful and protective. He is strong, but his real gift is making space feel safe.",
@@ -29,7 +31,9 @@
     "anchor": "projects/the-box-monsters/assets/rumble_anchor.png",
     "refs": [
       "projects/the-box-monsters/assets/rumble_anchor.png"
-    ]
+    ],
+    "heightIn": 14,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust"
   },
   "Tilly": {
     "key_features": "The organiser and inventor. Tilly loves systems, tools, labels and machines. She often tries to solve feelings like puzzles, then learns that some feelings need listening before fixing.",
@@ -41,7 +45,9 @@
     "anchor": "projects/the-box-monsters/assets/tilly_anchor.png",
     "refs": [
       "projects/the-box-monsters/assets/tilly_anchor.png"
-    ]
+    ],
+    "heightIn": 11,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust"
   },
   "Patch": {
     "key_features": "The brave first responder. Patch is quick, warm, impulsive and loyal. He jumps in before he has a full plan, then learns by staying with the feeling instead of rushing past it.",
@@ -53,7 +59,9 @@
     "anchor": "projects/the-box-monsters/assets/patch_anchor.png",
     "refs": [
       "projects/the-box-monsters/assets/patch_anchor.png"
-    ]
+    ],
+    "heightIn": 9,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust"
   },
   "Jenny": {
     "key_features": "A thoughtful, sensitive schoolgirl with a quiet sense of humor. In the pilot, one small mistake in class makes her feel tiny in front of everyone.",
@@ -70,7 +78,9 @@
     "tier": "guest",
     "size": "young girl",
     "sizeRef": "tilly",
-    "voiceId": "BUhaNjY74aXLexxM9qfh"
+    "voiceId": "BUhaNjY74aXLexxM9qfh",
+    "heightIn": 52,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust"
   },
   "Teacher": {
     "_status": "script role awaiting approved character reference",

@@ -174,9 +174,21 @@ def _require_storyboard_lineage(sb, episode):
             "sourceBeatId": source_beat["sourceBeatId"],
             "speaker": cut["speaker"],
             "exactText": cut["exactText"],
+            "voiceTreatment": cut.get("voiceTreatment") or "single_voice",
+            "chorusMembers": list(cut.get("chorusMembers") or []),
         } for cut in (source_beat.get("cuts") or [])
           if cut.get("sourceType") == "dialogue"]
-        if directed.get("dialogueOccurrences") != expected_occurrences:
+        # compare the locked fields only (2026-09-02): a storyboard written since the
+        # group-chorus fields were added carries voiceTreatment/chorusMembers on every
+        # occurrence; an older one does not. Neither is a change to the spoken record.
+        directed_occurrences = [{
+            key: (occ.get(key) if key not in ("voiceTreatment", "chorusMembers")
+                  else (occ.get("voiceTreatment") or "single_voice" if key == "voiceTreatment"
+                        else list(occ.get("chorusMembers") or [])))
+            for key in expected_occurrences[0].keys()
+        } for occ in (directed.get("dialogueOccurrences") or [])] if expected_occurrences else \
+            list(directed.get("dialogueOccurrences") or [])
+        if directed_occurrences != expected_occurrences:
             raise HandoverRefused(
                 f"REFUSED — storyboard beat {directed.get('beatId')} changed its exact "
                 "dialogue occurrences")
@@ -902,8 +914,16 @@ def _performance_assignment(contract, beat_ids, cast, shot_id):
         raise HandoverRefused(
             f"REFUSED - {shot_id}.performanceContract phases are duplicated or out of order")
     allowed = set(cast or []) | {"ENVIRONMENT"}
+    # A PHASE MAY BE SHARED (2026-09-02, The Box Monsters S3.SH05): when two monsters act in
+    # the same phase the performer reads "Patch and Nib" — the folded contract Gate 5 itself
+    # produces. Every part is checked against the shot's cast, exactly as Gate 5 checks it;
+    # the whole string was never a single name.
     for phase in phases:
-        if set(phase) != expected_phase_keys or phase.get("performer") not in allowed:
+        parts = [part.strip() for part in
+                 re.split(r"\s*(?:,|&|/|\band\b|\+)\s*", str(phase.get("performer") or ""))
+                 if part.strip()]
+        if (set(phase) != expected_phase_keys or not parts or
+                any(part not in allowed for part in parts)):
             raise HandoverRefused(
                 f"REFUSED - {shot_id}.performanceContract has an unknown performer or field")
     truths = contract.get("characterTruths")
@@ -923,7 +943,10 @@ def _performance_assignment(contract, beat_ids, cast, shot_id):
     if len(truth_names) != len(set(truth_names)):
         raise HandoverRefused(
             f"REFUSED - {shot_id}.performanceContract duplicates a character truth")
-    performers = {phase["performer"] for phase in phases if phase["performer"] != "ENVIRONMENT"}
+    performers = {part.strip()
+                  for phase in phases
+                  for part in re.split(r"\s*(?:,|&|/|\band\b|\+)\s*", str(phase["performer"]))
+                  if part.strip() and part.strip() != "ENVIRONMENT"}
     if performers - set(truth_names):
         raise HandoverRefused(
             f"REFUSED - {shot_id}.performanceContract is missing character-specific truth")

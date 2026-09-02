@@ -1,0 +1,126 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "4",
+ "builtAt": "2026-09-02T18:30:55",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "BRIGGLE ECHO": [
+   "anchor",
+   "bible",
+   "cadence"
+  ],
+  "Jenny": [
+   "cadence"
+  ],
+  "MACHINE": [
+   "anchor",
+   "bible",
+   "cadence"
+  ],
+  "Nib": [
+   "cadence"
+  ],
+  "Patch": [
+   "cadence"
+  ],
+  "Rumble": [
+   "cadence"
+  ],
+  "Tilly": [
+   "cadence"
+  ]
+ },
+ "completions": [
+  {
+   "character": "BRIGGLE ECHO",
+   "proposals": [
+    {
+     "field": "anchor",
+     "proposedText": "The echo anchors to Jenny’s embarrassment at the misread word, swelling whenever she tries to hide the mistake and loosening when someone treats it lightly.",
+     "groundedIn": "Jenny’s canon: \"A thoughtful, sensitive schoolgirl with a quiet sense of humour.\" Pilot canon: \"Jenny misreads a word in class and feels embarrassed.\" and \"Her journey is learning that getting something wrong does not make her small.\""
+    },
+    {
+     "field": "bible",
+     "proposedText": "A shame-echo made from the misread word itself: it grows into a bigger problem whenever Jenny tries to make the mistake disappear, but softens when the room makes space for trying again.",
+     "groundedIn": "Pilot canon: \"Jenny misreads a word in class and feels embarrassed.\" and \"A golden card appears: Wrong is not the same as small.\""
+    },
+    {
+     "field": "cadence",
+     "proposedText": "Short, repeating, self-amplifying beats; it keeps circling the mistake until the monsters interrupt the loop with humour or a gentler frame.",
+     "groundedIn": "Pilot canon: \"At first, Tilly tries to solve the problem with a Correct Answer Machine, but it only makes Jenny’s shame heavier.\" plus the emotional world description that shame becomes \"a cardboard classroom where one wrong word grows enormous.\""
+    }
+   ]
+  },
+  {
+   "character": "Jenny",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Measured and careful, with a quiet pause before she speaks; when she’s embarrassed, the words get smaller and more precise, but the humour still peeks through in the timing.",
+     "groundedIn": "Jenny’s canon: \"A thoughtful, sensitive schoolgirl with a quiet sense of humour.\" Pilot canon: \"Jenny misreads a word in class and feels embarrassed.\""
+    }
+   ]
+  },
+  {
+   "character": "MACHINE",
+   "proposals": [
+    {
+     "field": "anchor",
+     "proposedText": "Anchors to the job it was built for: finding a correct answer quickly, which makes it especially vulnerable to turning uncertainty into pressure.",
+     "groundedIn": "Pilot canon: \"Tilly tries to solve the problem with a Correct Answer Machine, but it only makes Jenny’s shame heavier.\""
+    },
+    {
+     "field": "bible",
+     "proposedText": "A practical box-world contraption that promises certainty, but reacts badly to feelings it cannot measure; it becomes part of the problem when used on shame.",
+     "groundedIn": "Pilot canon: \"Tilly tries to solve the problem with a Correct Answer Machine, but it only makes Jenny’s shame heavier.\""
+    },
+    {
+     "field": "cadence",
+     "proposedText": "Mechanical, brisk, and over-confident; it speaks as if a feeling can be fixed immediately, then stutters or overloads when the human part of the problem refuses to behave like a puzzle.",
+     "groundedIn": "Pilot canon: \"Tilly tries to solve the problem with a Correct Answer Machine\" and the show canon that \"some feelings need listening before fixing.\""
+    }
+   ]
+  },
+  {
+   "character": "Nib",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Quick, sideways, and unexpectedly plainspoken; Nib darts around the topic, then lands on the emotional truth in one small, odd-sounding line.",
+     "groundedIn": "Nib’s canon: \"Curious, funny and easily distracted; often says the emotional truth by accident.\""
+    }
+   ]
+  },
+  {
+   "character": "Patch",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Fast, warm, and immediate; Patch speaks like he’s already halfway into the problem, then catches himself and stays with it a beat longer.",
+     "groundedIn": "Patch’s canon: \"The brave, warm first responder who learns by staying with the feeling.\""
+    }
+   ]
+  },
+  {
+   "character": "Rumble",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Slow, calm, and reassuring; Rumble’s lines give the room time to breathe, often landing with gentle understatement rather than pushy advice.",
+     "groundedIn": "Rumble’s canon: \"The biggest monster with the softest heart; gentle, careful and protective.\""
+    }
+   ]
+  },
+  {
+   "character": "Tilly",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Tidy, precise, and slightly brisk; Tilly talks like she can label the problem if she says it clearly enough, then softens when the feeling doesn’t fit the plan.",
+     "groundedIn": "Tilly’s canon: \"The organiser and inventor who learns that feelings need listening before fixing.\""
+    }
+   ]
+  }
+ ]
+}

@@ -22,7 +22,7 @@ import os
 import pathlib
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -114,6 +114,26 @@ class EpisodeProfile(BaseModel):
     media: Optional[str] = None
 
 
+class FormatProfile(BaseModel):
+    """T71 (2026-09-02, Julian: "The Box Monsters will always be designed to be made up of 30
+    second shots and they will be 7 mins so 15 shots"): the project's fixed delivery format.
+    `shotSeconds` is the length of every production unit when the writer has already broken
+    the script into shots (the treatment format); `scriptStyle` says which script shape the
+    project writes in. A project that declares no format keeps the full Creative Room and the
+    engine's natural 4-30s unit packing — Crystal Bears is byte-identical."""
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    note: Optional[str] = Field(default=None, alias="_note")
+    shotSeconds: Optional[int] = Field(default=None, ge=4, le=30)
+    shotSecondsMax: Optional[int] = Field(default=None, ge=4, le=30)
+    aspect: Optional[str] = None
+    fps: Optional[int] = Field(default=None, ge=1, le=120)
+    audience: Optional[str] = None
+    scriptStyle: Optional[Literal["treatment", "screenplay"]] = None
+    episodeMinutes: Optional[float] = Field(default=None, gt=0)
+    shotsPerEpisode: Optional[int] = Field(default=None, ge=1)
+
+
 class ShowProfile(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
@@ -125,6 +145,7 @@ class ShowProfile(BaseModel):
     capabilities: Dict[str, bool] = Field(default_factory=dict)   # T55: what this project produces
     default: bool = False
     showrunner: Optional[str] = None    # the person who signs the gates — named in chair contracts (T52)
+    format: Optional[FormatProfile] = None   # T71: fixed shot length / script style, or none
     canon: CanonProfile
     laws: LawsProfile = Field(default_factory=LawsProfile)
     episodes: EpisodeProfile

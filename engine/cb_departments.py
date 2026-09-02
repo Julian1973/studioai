@@ -935,7 +935,7 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
     trusts this call's own reproduction of it. Deliberately does NOT use the shared _j()
     truncation helper for the script content: cutting the script short here would mean
     the Director never even sees, let alone preserves, everything past the cut."""
-    return cb_llm.structured(
+    return cb_llm.structured_with_repair(
         _system("director",
                 load_runtime_skill("story-architect") + "\n\n"
                 "You are breaking a LOCKED, already-approved script into its scenes and "
@@ -981,7 +981,7 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
 
 def prepare_look(context, *, log=print):
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
-    return cb_llm.structured(
+    return cb_llm.structured_with_repair(
         _system("cinematography",
                 "Own the scene-wide environment, palette, material, light and atmosphere. "
                 "Do not compose a shot or place a character.", standard_version),
@@ -992,7 +992,7 @@ def prepare_look(context, *, log=print):
 
 def prepare_cinematography(context, images, *, log=print):
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
-    result = cb_llm.structured(
+    result = cb_llm.structured_with_repair(
         _system("cinematography",
                 "Own this shot's performance-ready opening stage. Establish the world, "
                 "camera, light, cast identity, canon relative scale, loose starting "
@@ -1440,7 +1440,7 @@ def prepare_voice(context, locked_lines, *, log=print):
         }
         for key, value in registers.items()
     }
-    result = cb_llm.structured(
+    result = cb_llm.structured_with_repair(
         _system("voice",
                 "Direct the locked words as an ElevenLabs v3 performance reconciled with "
                 "the approved body action. Never add an ad-lib or rewrite a word."),
@@ -2526,7 +2526,7 @@ def prepare_animation(context, images, *, log=print):
 
     locked_visual_events = animation_locked_visual_events(shot)
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
-    result = cb_llm.structured(
+    result = cb_llm.structured_with_repair(
         _system("animation",
                 "Turn the approved dramatic beat into one playable Seedance generation unit. "
                 "The first attached image is the approved opening frame; remaining attachments "
@@ -2694,7 +2694,7 @@ def prepare_animation(context, images, *, log=print):
 def review_media(artifact_type, context, images, *, log=print):
     if artifact_type not in ("keyframe", "animation", "final"):
         raise ValueError("artifact_type must be keyframe|animation|final")
-    return cb_llm.structured(
+    return cb_llm.structured_with_repair(
         _system("post" if artifact_type == "final" else "review",
                 "Run dailies review on visible evidence. Findings are advice for Julian, "
                 "never an automatic approval, rewrite or generation instruction. Judge "

@@ -14,7 +14,8 @@
     "runtimeVoice": "studio/chairs/voice-director/SKILL.md",
     "runtimeAnimation": "studio/chairs/animation/SKILL.md",
     "runtimeContinuity": "studio/chairs/continuity/SKILL.md",
-    "runtimePost": "studio/chairs/post/SKILL.md"
+    "runtimePost": "studio/chairs/post/SKILL.md",
+    "identityPacks": "projects/the-box-monsters/canon/identity_packs.json"
   },
   "profiles": {
     "story": [
@@ -46,7 +47,8 @@
       "locations",
       "continuity",
       "styleLaw",
-      "runtimeCinematographer"
+      "runtimeCinematographer",
+      "identityPacks"
     ],
     "voice": [
       "showBible",
@@ -59,7 +61,8 @@
       "locations",
       "continuity",
       "styleLaw",
-      "runtimeAnimation"
+      "runtimeAnimation",
+      "identityPacks"
     ],
     "review": [
       "showBible",
@@ -67,7 +70,8 @@
       "locations",
       "continuity",
       "styleLaw",
-      "runtimeContinuity"
+      "runtimeContinuity",
+      "identityPacks"
     ],
     "post": [
       "showBible",

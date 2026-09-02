@@ -2212,3 +2212,54 @@ def test_animation_reads_missing_beat_contracts_only_from_exact_approved_storybo
 
     pkg["sourceStoryboard"]["md5"] = "stale"
     assert R._shot_creative_contract_view(pkg, shot, "1", "Ep1") is shot
+
+
+def test_a_department_worker_repairs_one_off_schema_reply_instead_of_failing_the_job(monkeypatch):
+    """2026-09-02 (The Box Monsters S2.SH03 on the scene model): the DP returned an
+    openingFrameLayout naming one character twice and the whole keyframe step died with a
+    raw Pydantic error. Every department worker now gets the one repair call cb_creative's
+    own passes have always had — the model is shown its own validation error and corrects it."""
+    good = D.CinematographyDirection(
+        shotId="S2.SH03",
+        audienceRead="Jenny hides the worksheet in the shoebox.",
+        composition="Floor-level wide with the bed softened behind.",
+        lensAndCameraRelationship="Gentle wide relationship lens, mostly still.",
+        lightingAndDepth="Dim evening lamp warmth with subtle depth separation.",
+        geography=["Jenny kneels frame-centre; the shoebox sits frame-right of her hands."],
+        openingFrameLayout={
+            "referenceCharacter": "Jenny", "referenceHeightFraction": 0.42,
+            "sameDepth": True,
+            "placements": [
+                {"character": "Jenny", "centerX": 0.45, "centerY": 0.62,
+                 "depthPlane": 0, "facing": "toward the box", "pose": "kneeling, folding"},
+            ],
+        },
+        negativeSpace=["Keep the floor frame-left empty for the box's later reveal."],
+        providerPrompt="A complete provider-facing floor-level opening-frame direction.",
+    )
+    try:   # a REAL Pydantic error of the exact shape the live failure produced
+        D.CinematographyDirection.model_validate({
+            **good.model_dump(),
+            "openingFrameLayout": {
+                **good.openingFrameLayout.model_dump(),
+                "placements": good.openingFrameLayout.model_dump()["placements"] * 2}})
+        raise AssertionError("the duplicate placement must fail validation")
+    except Exception as exc:                       # pydantic ValidationError
+        duplicate_error = exc
+    assert "duplicate character" in str(duplicate_error)
+
+    calls = []
+
+    def flaky(system, user, schema, **kwargs):
+        calls.append(user)
+        if len(calls) == 1:
+            raise duplicate_error
+        return good
+
+    monkeypatch.setattr(D.cb_llm, "structured", flaky)
+    result = D.prepare_cinematography(
+        {"shot": {"charactersInFrame": ["Jenny"]}}, [], log=lambda *a, **k: None)
+
+    assert len(calls) == 2, "exactly one repair call, never a silent third attempt"
+    assert "REPAIR" in calls[1] and "duplicate character" in calls[1]
+    assert [item.character for item in result.openingFrameLayout.placements] == ["Jenny"]

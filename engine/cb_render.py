@@ -115,6 +115,23 @@ import paths as P
 _PROJECT_MEDIA = pathlib.Path(P.MEDIA) if P.PROFILE.media_path else None   # T58: declared media home
 
 
+
+def _stored_rel(path):
+    """A ledger-stored path, relative to engine/ (the cwd every cb_render command runs in).
+
+    T58 (2026-09-02, found on The Box Monsters): a project that owns its media home keeps its
+    archives OUTSIDE engine/, and `Path.relative_to(HERE)` raised ValueError there — mid-move,
+    after the file had already been archived (reject_scenelook left the candidate record
+    pointing at a moved file). `os.path.relpath` gives '../projects/<id>/...' which resolves
+    from engine/ exactly as before; the first project's own paths are byte-identical. A path
+    on another drive (Windows) is stored absolute.
+    """
+    try:
+        return os.path.relpath(str(path), str(HERE))
+    except ValueError:
+        return str(path)
+
+
 def _media_root():
     """The active project's media home. A project that declares episodes.media owns its own; the
     first project (undeclared, for one release) keeps the engine's media/ — resolved from HERE at
@@ -556,7 +573,17 @@ def _resolve_char(name, characters_cfg):
 
 def _char_ref(name, characters_cfg):
     rel = (characters_cfg.get(_resolve_char(name, characters_cfg)) or {}).get("anchor")
-    path = (HERE / rel) if rel else None
+    # an anchor is declared engine-relative ("../cb-seed/…", the first show) OR repository-
+    # relative ("projects/<id>/assets/…", every project made since) — resolve both, the same
+    # way the canon lock does (2026-09-02: Jenny's keyframe was refused on the second form)
+    path = None
+    if rel:
+        for candidate in (HERE / rel, HERE.parent / rel):
+            if candidate.exists():
+                path = candidate
+                break
+        if path is None:
+            path = HERE / rel
     if not path or not path.exists():
         raise Refused(f"REFUSED — no resolvable identity reference for {name} "
                       f"(characters.json anchor: {rel}) — identity comes only from references")
@@ -1009,6 +1036,26 @@ def approved_look_prompt(scene, episode="Ep1"):
     return prompt if (prompt or "").strip() else None
 
 
+# THE PLATE IS ONE CLEAN FRAME (Julian, 2026-09-02, on The Box Monsters' first plate — "you
+# can't have an animation logo in the shot and we have to have continuity in the shot"): the
+# Look worker's prose is free to describe the world, but the image the provider paints is
+# always ONE single environment frame that a keyframe can continue from — never a reference
+# sheet with inset panels, swatches, captions, labels, logos or watermarks, which then leak
+# into every keyframe that attaches the plate. Enforced here, at submit time, for every show.
+_CLEAN_FRAME_CLAUSE = (
+    " One single continuous environment frame filling the whole 16:9 image, as the opening "
+    "frame of a film would be. No characters. No text, captions, labels, titles, logos, "
+    "watermarks, borders, frames, inset panels, split views, swatches or contact-sheet "
+    "layouts of any kind.")
+
+
+def _single_clean_frame(prompt):
+    text = str(prompt or "").strip()
+    if "contact-sheet" in text and "inset panels" in text:
+        return text
+    return text.rstrip() + _CLEAN_FRAME_CLAUSE
+
+
 def generate_scenelook_plate(scene, episode="Ep1", reference_path=None, log=print):
     """GENERATE SCENE {N} LOOK PLATE — ONE IMAGE. Generates exactly one working world anchor
     to its own unique path; any legacy approved plate remains untouched by this call, win or
@@ -1038,7 +1085,8 @@ def generate_scenelook_plate(scene, episode="Ep1", reference_path=None, log=prin
     (_media_root()).mkdir(parents=True, exist_ok=True)
     out = _media_root() / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}.png"
     refs = [str(reference_path)] if reference_path else []
-    cb_gen.generate_image(prompt, refs=refs, out=str(out), production_route="cb_render")
+    cb_gen.generate_image(_single_clean_frame(prompt), refs=refs, out=str(out),
+                          production_route="cb_render")
     # ONLY reached on a successful generation — the approved record above was never read for
     # mutation, so a failure here (an exception from generate_image) leaves the sidecar file
     # byte-for-byte as it was before this call, and the approved plate untouched on disk.
@@ -1071,7 +1119,7 @@ def approve_scenelook(scene, episode="Ep1", reviewed_by="Julian", log=print):
         shutil.move(old["path"], dest)
         rec.setdefault("history", []).append({**old, "outcome": "superseded",
                                                "supersededAt": _now(),
-                                               "archivedFile": str(dest.relative_to(HERE))})
+                                               "archivedFile": _stored_rel(dest)})
     rec["approved"] = {**cand, "approvedAt": _now(), "reviewedBy": reviewed_by}
     rec["candidate"] = None
     _save_scenelook_rec(rec, scene, episode)
@@ -1095,7 +1143,7 @@ def reject_scenelook(scene, note, episode="Ep1", reviewed_by="Julian", log=print
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(cand["path"])
         shutil.move(cand["path"], dest)
-        archived_rel = str(dest.relative_to(HERE))
+        archived_rel = _stored_rel(dest)
     rec.setdefault("history", []).append({**cand, "outcome": "rejected", "rejectedAt": _now(),
                                            "reviewedBy": reviewed_by, "rejectedNote": note.strip(),
                                            "rejectedArchivedFile": archived_rel})
@@ -1143,7 +1191,19 @@ def select_scenelook_source(scene, mode, episode="Ep1", upload_path=None, librar
     (_media_root()).mkdir(parents=True, exist_ok=True)
     ext = pathlib.Path(src_for_copy).suffix or ".png"
     out = _media_root() / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}{ext}"
-    shutil.copy2(src_for_copy, out)
+    # THE PRODUCTION FRAME IS SETTLED AT INTAKE (2026-09-02): the scene-owned candidate is a
+    # 16:9 frame — a supplied 3:2 image is centre-cropped here, once, so the approved plate,
+    # the provider's world reference and the composition proof are one image. The original
+    # upload/library file is never touched. A plate that cannot be cropped honestly refuses.
+    try:
+        conformed = cb_layout.conform_plate_to_production_frame(src_for_copy, out)
+    except cb_layout.LayoutError as exc:
+        raise Refused(f"REFUSED — {exc}") from exc
+    if conformed["cropped"]:
+        source_note["conformedFrom"] = conformed["sourceSize"]
+        log(f"SCENE LOOK — plate centre-cropped to the 16:9 production frame: "
+            f"{conformed['sourceSize'][0]}x{conformed['sourceSize'][1]} -> "
+            f"{conformed['size'][0]}x{conformed['size'][1]} (the original is preserved unchanged)")
     rec = _load_scenelook_rec(scene, episode)
     rec["candidate"] = {"path": str(out), "hash": _sha256_file(out),
                         "inputSignature": _scenelook_input_signature(scene, episode),
@@ -1330,7 +1390,7 @@ def _ensure_opening_composition_master(pkg, shot, scene, episode, characters_cfg
     cb_db.atomic_write_bytes(
         MEDIA.parent.parent.parent, image_path, image_bytes)
     try:
-        stored_path = str(image_path.relative_to(HERE))
+        stored_path = _stored_rel(image_path)
     except ValueError:
         stored_path = str(image_path.resolve())
     record = {
@@ -1578,7 +1638,7 @@ def _publish_pose_library_record(pkg, shot, character, source, machine_review):
         "contractHash": key,
         "signature": signature,
         "character": name,
-        "path": str(asset_path.relative_to(HERE)),
+        "path": _stored_rel(asset_path),
         "contentHash": _sha256_file(asset_path),
         "machineReview": machine_review,
         "qualifiedAt": _now(),
@@ -2013,7 +2073,7 @@ def reject_pose_reference(scene, shot_id, character, correction, episode="Ep1",
         "rejectedAt": _now(),
         "reviewedBy": reviewed_by,
         "reason": str(correction).strip(),
-        "rejectedFile": str(destination.relative_to(HERE)),
+        "rejectedFile": _stored_rel(destination),
     }
     state["candidate"] = None
     state.setdefault("history", []).append(rejection)
@@ -2113,7 +2173,7 @@ def _ensure_posed_integration_master(pkg, shot, scene, episode, characters_cfg):
         f"{contract['contractHash'][:12]}.png")
     cb_db.atomic_write_bytes(MEDIA.parent.parent.parent, image_path, image_bytes)
     try:
-        stored_path = str(image_path.relative_to(HERE))
+        stored_path = _stored_rel(image_path)
     except ValueError:
         stored_path = str(image_path.resolve())
     record = {
@@ -2393,7 +2453,7 @@ def _ensure_character_scale_control(shot, scene, episode, characters_cfg,
         f"{episode}_S{scene}_{shot['shotId']}_scale_{contract['contractHash'][:12]}.png")
     _write_character_scale_board(image_path, contract)
     try:
-        stored_path = str(image_path.relative_to(HERE))
+        stored_path = _stored_rel(image_path)
     except ValueError:
         stored_path = str(image_path.resolve())
     record = {
@@ -5275,7 +5335,7 @@ def voice_shot(pkg, path, shot_id, episode="Ep1", log=print):
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / out.name
         shutil.move(str(out), str(dest))
-        led["voicePrevious"] = {"path": str(dest.relative_to(HERE)),
+        led["voicePrevious"] = {"path": _stored_rel(dest),
                                  "generatedFrom": led.get("voGeneratedFrom"),
                                  "supersededAt": _now()}
     cb_gen.eleven_dialogue(turns, out=str(out), generation_kind=kind,
@@ -5381,7 +5441,7 @@ def reject_voice(scene, shot_id, correction, episode="Ep1", reviewed_by="Julian"
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(vo)
         shutil.move(vo, dest)
-        archived_rel = str(dest.relative_to(HERE))
+        archived_rel = _stored_rel(dest)
     rejection = {"outcome": "rejected", "rejectedAt": _now(), "reason": correction.strip(),
                  "reviewedBy": reviewed_by, "rejectedFile": archived_rel}
     led.setdefault("voiceRejections", []).append(rejection)
@@ -5428,7 +5488,7 @@ def restore_previous_voice_take(scene, shot_id, episode="Ep1", log=print):
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(cur_path)
         shutil.move(cur_path, str(dest))
-        archived_rel = str(dest.relative_to(HERE))
+        archived_rel = _stored_rel(dest)
     live_path = _vo_path(shot_id, episode)
     MEDIA.mkdir(parents=True, exist_ok=True)
     shutil.move(str(prev_abs), str(live_path))
@@ -6320,7 +6380,7 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
         shutil.move(old["path"], dest)
         led.setdefault("keyframeHistory", []).append({**old, "outcome": "superseded",
                                                         "supersededAt": _now(),
-                                                        "archivedFile": str(dest.relative_to(HERE))})
+                                                        "archivedFile": _stored_rel(dest)})
     ab_audit = []
     if ab_candidates:
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
@@ -6335,7 +6395,7 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
                 arch.mkdir(parents=True, exist_ok=True)
                 dest = arch / os.path.basename(source)
                 shutil.move(source, dest)
-                audit_item["archivedFile"] = str(dest.relative_to(HERE))
+                audit_item["archivedFile"] = _stored_rel(dest)
                 for suffix in (".review.json", ".gen.json"):
                     sidecar = pathlib.Path(source + suffix)
                     if sidecar.exists():
@@ -6395,7 +6455,7 @@ def reject_keyframe(scene, shot_id, correction, episode="Ep1", reviewed_by="Juli
         if src and os.path.exists(src):
             dest = arch / os.path.basename(src)
             shutil.move(src, dest)
-            item_archive = str(dest.relative_to(HERE))
+            item_archive = _stored_rel(dest)
             if item is cand or src == cand.get("path"):
                 archived_rel = item_archive
             for suffix in (".review.json", ".gen.json"):
@@ -6403,7 +6463,7 @@ def reject_keyframe(scene, shot_id, correction, episode="Ep1", reviewed_by="Juli
                 if sidecar.exists():
                     sidecar_dest = arch / sidecar.name
                     shutil.move(sidecar, sidecar_dest)
-                    archived_sidecars.append(str(sidecar_dest.relative_to(HERE)))
+                    archived_sidecars.append(_stored_rel(sidecar_dest))
         archived_candidates.append({
             "candidateId": item.get("candidateId"),
             "provider": item.get("provider"),

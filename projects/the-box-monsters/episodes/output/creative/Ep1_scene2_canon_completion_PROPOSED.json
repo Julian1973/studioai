@@ -1,0 +1,24 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "2",
+ "builtAt": "2026-09-02T14:42:20",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "Jenny": [
+   "cadence"
+  ]
+ },
+ "completions": [
+  {
+   "character": "Jenny",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Jenny speaks softly and thoughtfully, often taking a beat before answering. Her humour lands quietly rather than as a big joke, and when she is embarrassed her words get smaller or more careful instead of dramatic.",
+     "groundedIn": "Grounded in existing canon: “A thoughtful, sensitive schoolgirl with a quiet sense of humour.”"
+    }
+   ]
+  }
+ ]
+}

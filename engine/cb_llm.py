@@ -11,6 +11,7 @@ Configuration (env, with safe defaults):
     OPENAI_API_KEY          required — clean failure (SystemExit) if missing
     OPENAI_DIRECTOR_MODEL   default gpt-5.5        — the main Director model
     OPENAI_VALIDATOR_MODEL  default gpt-5.4-mini   — the validate / repair model
+    OPENAI_SCENE_MODEL      default gpt-5.4-mini   — every per-scene / per-shot pass (cost tier, 2026-09-02)
     DIRECTOR_GEMINI_MODEL   default gemini-3.1-pro-preview — the FALLBACK model id
     DIRECTOR_ENABLE_GEMINI_FALLBACK  default false — Gemini fallback OFF; an OpenAI failure STOPS with the exact error
 
@@ -29,16 +30,39 @@ import cb_gen   # importing cb_gen loads engine/.env into os.environ (keys never
 # models — environment first, defaults second (rule: read from env; never hardcode secrets)
 DIRECTOR_MODEL = os.environ.get("OPENAI_DIRECTOR_MODEL", "gpt-5.5")
 VALIDATOR_MODEL = os.environ.get("OPENAI_VALIDATOR_MODEL", "gpt-5.4-mini")
+# COST TIERS (2026-09-02, Julian: "can we also save on high api costs"): the Director model is
+# reserved for the passes where judgment sets the whole episode — Story & Direction
+# (department_story), the episode vision and the showrunner's own review. Every per-scene and
+# per-shot text pass (scene direction gates, production detail, the specialist departments'
+# keyframe/voice/animation preparation, canon-completion proposals) runs on the SCENE model —
+# gpt-5.4-mini by default, about a tenth of the price. Set OPENAI_SCENE_MODEL to the Director
+# model to restore the single-model behaviour; an explicit model= argument always wins.
+SCENE_MODEL = os.environ.get("OPENAI_SCENE_MODEL", "gpt-5.4-mini")
+_DIRECTOR_TIER_LABELS = ("department_story", "creative_vision", "gate6_review", "external",
+                         "studio-director-chat")
+
+
+def model_for_label(label):
+    """Which OpenAI model a call runs on when the caller passed none: the Director model for
+    the episode-level judgment passes, the cheaper SCENE model for everything per scene/shot."""
+    text = str(label or "")
+    if not text or text == "director" or any(text.startswith(t) for t in _DIRECTOR_TIER_LABELS):
+        return DIRECTOR_MODEL
+    return SCENE_MODEL
 GEMINI_MODEL = os.environ.get("DIRECTOR_GEMINI_MODEL", "gemini-3.1-pro-preview")   # FALLBACK only (kept, not used by default)
 # Gemini is currently the UNSTABLE Director path, so its fallback is OFF BY DEFAULT. When false, an OpenAI failure
 # STOPS with the EXACT OpenAI error instead of silently producing inconsistent Gemini results. Set =true to re-enable.
 ENABLE_GEMINI_FALLBACK = os.environ.get("DIRECTOR_ENABLE_GEMINI_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
 MAX_OUTPUT_TOKENS = 32000
+# 2026-09-02: a six-shot scene's shot conference (gpt-5.5, 32k-token structured output) took
+# longer than the old 180 s twice in a row on The Box Monsters' Scene 4 and the scene failed
+# with "Request timed out" - a real, complete answer that was simply still being written.
+# Ten minutes covers the largest typed call this studio makes; the two-attempt retry stays.
 try:
     PROVIDER_TIMEOUT_SECONDS = max(
-        10.0, float(os.environ.get("DIRECTOR_PROVIDER_TIMEOUT_SECONDS", "180")))
+        10.0, float(os.environ.get("DIRECTOR_PROVIDER_TIMEOUT_SECONDS", "600")))
 except (TypeError, ValueError):
-    PROVIDER_TIMEOUT_SECONDS = 180.0
+    PROVIDER_TIMEOUT_SECONDS = 600.0
 try:
     PROVIDER_ATTEMPTS = min(
         3, max(1, int(os.environ.get("DIRECTOR_PROVIDER_ATTEMPTS", "2"))))
@@ -224,7 +248,7 @@ def structured(system, user, schema, *, model=None, label="director", log=print,
     model (defaults to the Director model; pass VALIDATOR_MODEL for the validator). A Pydantic ValidationError is
     NOT a fallback case (the model answered, just off-schema) — it propagates so the caller can repair. Returns the
     validated Pydantic instance."""
-    model = model or DIRECTOR_MODEL
+    model = model or model_for_label(label)
     openai_error = None
     for attempt in range(1, PROVIDER_ATTEMPTS + 1):
         try:

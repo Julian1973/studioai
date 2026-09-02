@@ -1,0 +1,60 @@
+{
+ "episode": "Ep1",
+ "canonVersion": "1.0",
+ "builtAt": "2026-09-02T18:32:09",
+ "sources": {
+  "showBible": {
+   "path": "projects\\the-box-monsters\\canon\\LOCKED_CANON.md",
+   "sha256": "40e58c2acc5968fca097f43ba5d3a3ccdd6ed63d4fe76162d5c45d6aea7000ce"
+  },
+  "studioBible": {
+   "path": "projects\\the-box-monsters\\SHOW_BIBLE.md",
+   "sha256": "40e58c2acc5968fca097f43ba5d3a3ccdd6ed63d4fe76162d5c45d6aea7000ce"
+  },
+  "characters": {
+   "path": "projects\\the-box-monsters\\canon\\characters.json",
+   "sha256": "aa5e20199b11875f3cd9c1243f3a838d70c4073d0f494b69590f3fbc1438fc3d"
+  },
+  "locations": {
+   "path": "projects\\the-box-monsters\\canon\\locations.json",
+   "sha256": "a6be837bbaeef45748cdc45803e45af0cb82777684cda9b219b25fb1af3b0a9e"
+  },
+  "continuity": {
+   "path": "projects\\the-box-monsters\\canon\\continuity.json",
+   "sha256": "0dd1318d8d8239bf794bbdbfce4fa621e1775dfb2a3e835fe101db040cf4001d"
+  },
+  "styleLaw": {
+   "path": "projects\\the-box-monsters\\laws\\style.txt",
+   "sha256": "372ab0e4d90fb1787e756caaaa7ea4ee054f8fd729859823cf8e7ed9b04e2467"
+  },
+  "scriptPackage": {
+   "path": "projects\\the-box-monsters\\episodes\\output\\Ep1_The_Box_That_Felt_Small_beat_package.json",
+   "sha256": "aefddd4c7df809819cd8f9f59cbbcfa0e5048177d8c4fb4ba3832e5edb3b98c7"
+  }
+ },
+ "gaps": [
+  "showrunnerTaste: SHOWRUNNER_TASTE_CANON.md not present (optional context)",
+  "directorTaste: DIRECTOR_TASTE_CANON.md not present (optional context)",
+  "cinematographyTaste: CINEMATOGRAPHY_TASTE_CANON.md not present (optional context)",
+  "voiceTaste: VOICE_PERFORMANCE_CANON.md not present (optional context)",
+  "characterPerformance: CHARACTER_PERFORMANCE_CANON.json not present (optional context)",
+  "relationships: RELATIONSHIP_CANON.json not present (optional context)",
+  "exemplars: EXEMPLAR_LIBRARY.json not present (optional context)"
+ ],
+ "conflicts": [],
+ "canonLock": {
+  "manifestDigest": "6c7b73b07e1cb98dad81e5724c1127bb44d5f236446eac253420f747c679c881",
+  "profile": "storyboard",
+  "profileDigest": "f254212f569508baa4b377299a714ebb6d751d498cb141c383456e90f67bd5a5",
+  "sourceHashes": {
+   "showBible": "40e58c2acc5968fca097f43ba5d3a3ccdd6ed63d4fe76162d5c45d6aea7000ce",
+   "characters": "aa5e20199b11875f3cd9c1243f3a838d70c4073d0f494b69590f3fbc1438fc3d",
+   "locations": "a6be837bbaeef45748cdc45803e45af0cb82777684cda9b219b25fb1af3b0a9e",
+   "continuity": "0dd1318d8d8239bf794bbdbfce4fa621e1775dfb2a3e835fe101db040cf4001d",
+   "styleLaw": "372ab0e4d90fb1787e756caaaa7ea4ee054f8fd729859823cf8e7ed9b04e2467",
+   "runtimeDirector": "313d5f5f677a1c099322ffb7b8ff29ce0dcbb746abc29c6ef943ebff414bd841",
+   "runtimeCinematographer": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd",
+   "runtimeVoice": "1f3edb35b4d3702d0cbfedf202c9dd9ba7d88143c2d60321c5b1fb438f243cb1"
+  }
+ }
+}

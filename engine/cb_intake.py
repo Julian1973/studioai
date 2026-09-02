@@ -1153,6 +1153,31 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
         raise Refused(str(exc)) from exc
 
 
+def storyboards_behind_canon(episode="Ep1"):
+    """Scene numbers whose APPROVED storyboard was signed on an older storyboard-profile canon
+    digest than the current lock (the case rebase_canon_lock's ride-along repairs). Empty when
+    nothing is behind or the lock cannot be read."""
+    try:
+        lock = cb_canon.status(episode, root=ROOT)
+    except Exception:
+        return []
+    want = (lock.get("profileDigests") or {}).get("storyboard")
+    if not want:
+        return []
+    behind = []
+    for sb_path in sorted((OUT / "creative").glob(f"{episode}_scene*_storyboard.json")):
+        try:
+            sb = json.loads(sb_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        inputs = ((sb.get("inputSignature") or {}).get("inputs") or {})
+        if (sb.get("approvalState") == "approved" and
+                (sb.get("inputSignature") or {}).get("kind") == "scene-storyboard" and
+                inputs.get("canonProfileDigest") != want):
+            behind.append(str(sb.get("sceneNumber")))
+    return behind
+
+
 def rebase_canon_lock(episode="Ep1", reviewed_by="Julian", log=print):
     """Carry an unchanged, approved beat package onto a newly approved canon lock.
 
@@ -1162,7 +1187,8 @@ def rebase_canon_lock(episode="Ep1", reviewed_by="Julian", log=print):
     rewritten by this operation.
     """
     current = script_record_for(episode)
-    canon_lock = cb_canon.require_locked(episode, root=ROOT)
+    # text-only provenance: a scripted stub role is named, never a refusal (CLAUDE.md rule 87)
+    canon_lock = cb_canon.require_locked(episode, root=ROOT, allow_incomplete_cast=True, log=log)
     paths = canonical_package_glob(episode)
     if not paths:
         raise Refused(f"REFUSED — {episode} has no approved beat package to rebase")
@@ -1222,10 +1248,54 @@ def rebase_canon_lock(episode="Ep1", reviewed_by="Julian", log=print):
         cb_db.atomic_write_json(
             ROOT, vision_path, vision, expected_digest=vision_digest)
 
+    # THE SCENE STORYBOARDS RIDE ALONG (2026-09-02, The Box Monsters: canon was re-locked —
+    # identity packs, heights — after Scenes 1/2/3/5 were directed; the beat package and the
+    # vision were rebased, but every scene storyboard still carried the old storyboard-profile
+    # digest, so the studio reported STALE_PRODUCTION_GRAPH / storyboard-canon-lock-mismatch and
+    # asked for the whole scene direction again). A storyboard whose script version and beat
+    # package are the unchanged ones, and which is approved, is re-signed onto the new canon
+    # lock and the rebased vision — its creative content is never touched.
+    rebased_scenes = []
+    if vision is not None:
+        creative_dir = OUT / "creative"
+        for sb_path in sorted(creative_dir.glob(f"{episode}_scene*_storyboard.json")):
+            try:
+                sb, sb_digest = cb_db.read_json_document(ROOT, sb_path)
+            except Exception:
+                continue
+            sig = sb.get("inputSignature") or {}
+            inputs = dict(sig.get("inputs") or {})
+            if (sig.get("kind") != "scene-storyboard" or
+                    sb.get("approvalState") != "approved" or
+                    (sb.get("sourceScript") or {}).get("scriptVersionId") != current["scriptVersionId"] or
+                    inputs.get("beatPackageDigest") != content_signature["digest"] or
+                    not cb_lineage.signature_matches(sig, "scene-storyboard", inputs)):
+                continue
+            new_inputs = {**inputs,
+                          "episodeVisionDigest": vision["inputSignature"]["digest"],
+                          "canonProfileDigest": canon_lock["profileDigests"]["storyboard"]}
+            if new_inputs == inputs:
+                continue
+            cb_db.atomic_write_json(
+                ROOT, archive / f"{sb_path.stem}_{stamp}_{sb_digest[:12]}.json", sb)
+            sb["inputSignature"] = cb_lineage.dependency_signature("scene-storyboard", new_inputs)
+            sb["canonLock"] = {
+                "manifestDigest": canon_lock["manifestDigest"],
+                "profile": "storyboard",
+                "profileDigest": canon_lock["profileDigests"]["storyboard"],
+                "sourceHashes": cb_canon.source_hashes("storyboard", ROOT),
+            }
+            sb["provenanceRebase"] = {**pkg["provenanceRebase"], "previousStoryboardDigest": sb_digest}
+            cb_db.atomic_write_json(ROOT, sb_path, sb, expected_digest=sb_digest)
+            rebased_scenes.append(str(sb.get("sceneNumber")))
+    if rebased_scenes:
+        log(f"CANON REBASE — scene direction carried forward unchanged for scene(s) "
+            + ", ".join(rebased_scenes))
+
     log(f"CANON REBASE APPROVED — {episode} by {reviewed_by}; creative beat content unchanged")
     return {"outcome": "rebased", "canonicalPackage": str(pkg_path.relative_to(ROOT)),
             "backup": str(backup.relative_to(ROOT)),
-            "contentSignature": content_signature}
+            "contentSignature": content_signature, "rebasedScenes": rebased_scenes}
 
 
 def _backfill_source_occurrences(beats, events, script_version_id):

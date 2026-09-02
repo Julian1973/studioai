@@ -1,0 +1,85 @@
+{
+ "approved": {
+  "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S2_plate_candidate_a7eeeca5.png",
+  "hash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268",
+  "inputSignature": {
+   "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
+   "briefHash": "e24328f5d77578adc94cc02b1ab6211ff610b3ce1e73481c6990c112a786309b",
+   "referenceHashes": {},
+   "plateHash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-02T18:15:22",
+  "source": "uploaded",
+  "preservedOriginal": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\uploads\\Ep1_S2_scenelook_upload_a7fef67c.png",
+  "conformedFrom": [
+   2496,
+   1664
+  ],
+  "packageRevision": 2,
+  "approvedAt": "2026-09-02T18:15:33",
+  "reviewedBy": "Julian"
+ },
+ "candidate": null,
+ "history": [
+  {
+   "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S2_plate_candidate_d27552e6.png",
+   "hash": "f3bf1470e42c6ac385fb7fbfe0df26b1d2a9baf9adf4fce283ec29651223116a",
+   "inputSignature": {
+    "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
+    "briefHash": "e24328f5d77578adc94cc02b1ab6211ff610b3ce1e73481c6990c112a786309b",
+    "referenceHashes": {},
+    "plateHash": "f3bf1470e42c6ac385fb7fbfe0df26b1d2a9baf9adf4fce283ec29651223116a"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-09-02T16:07:46",
+   "packageRevision": 1,
+   "outcome": "rejected",
+   "rejectedAt": "2026-09-02T18:15:13",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Re-selected through the production-frame intake (3:2 to 16:9 centre crop)",
+   "rejectedArchivedFile": null
+  }
+ ],
+ "departmentWork": {
+  "look": {
+   "approved": null,
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "studio/chairs/cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-09-02T16:04:38",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "creativeDirectingStandardVersion": 4,
+    "sourceHash": "a25586fc6730375f55ead7a3b78d05e3409dc3fe7acab1f7827714492babaaf4",
+    "output": {
+     "creativeIntent": "Create an environment-only Scene Look plate for Jenny’s bedroom that carries the emotional arc of privacy, concealment, held breath, and a small answering warmth. The room should feel child-sized, trusted, and lived-in — not gloomy or spooky — with the shoebox area quietly capable of holding a hidden feeling.",
+     "storyOfPlace": "Jenny’s bedroom is a safe private nest within a tactile handmade cardboard world. It belongs to a child who keeps important little things close: a bed with soft handmade bedding, a low bedside surface or shelf, familiar floor space, paper crafts, repaired cardboard furniture, and a treasured shoebox that feels ordinary until its narrow golden seam suggests it has heard what was hidden. The room should still contain the emotional residue of an embarrassing school moment without showing the worksheet or Jenny as the subject of the plate.",
+     "paletteAndLighting": "Evening into later night. Use a gentle dusk-to-night bedroom palette: muted lavender-blue shadows, warm cream and honey practical lamp glow, softened peach and dusty rose accents, small touches of worn teal or faded yellow in personal objects. Lighting should be quiet and breathable: warm bedside practicals against cooler window ambient, soft falloff, rounded shadows, and a very restrained narrow golden line associated with the shoebox seam. The gold should feel like a tiny request from stillness, not a magical blast.",
+     "materialsAndAtmosphere": "Premium stylized 3D CGI with tactile handmade cardboard construction. Surfaces show visible paper fibres, pressed seams, folded edges, softened corrugation, gentle scuffs, tape repairs, stitched fabric patches, matte paint, and hand-cut imperfections. Bedding and rugs should feel soft but crafted, with subtle weave and paper-fabric texture. Atmosphere is hushed, warm, and private: dust motes in practical light, calm air, no threat, no melodrama. The bedroom itself should feel like it is holding its breath after something has been shut away.",
+     "continuityRules": [
+      "Environment-only plate: no Jenny, no characters, no hands, no faces, no silhouettes, no character staging.",
+      "Do not create a shot composition or dramatic camera blocking; this is a scene-wide look reference for palette, materials, lighting, and atmosphere.",
+      "The shoebox may be present as part of the environment, but it must remain an ordinary treasured bedroom object with only a narrow, subtle golden seam of light.",
+      "Keep the world tactile and handmade: visible cardboard fibres, folded construction, repaired edges, and warm practical lamp logic.",
+      "Avoid spooky, horror, sentimental, or over-magical treatment; the mood is private, tender, and quietly expectant."
+     ],
+     "providerPrompt": "Environment-only Scene Look plate for Jenny’s bedroom in a premium stylized 3D CGI tactile handmade cardboard world. A child’s private bedroom at evening into later night, built from warm cardboard, paper fibre surfaces, folded edges, corrugated seams, matte painted panels, tape repairs, stitched fabric patches, softened scuffs, and hand-cut imperfections. Include a cozy bed with handmade bedding, a low bedside surface or shelf, familiar floor space, small personal paper crafts, repaired cardboard furniture, soft rug texture, and a treasured shoebox integrated naturally into the room. Palette: muted lavender-blue night shadows, warm cream and honey practical lamp glow, dusty rose and peach accents, faded teal or soft yellow details. Lighting: gentle warm bedside practical against cool window ambient, soft falloff, rounded shadows, calm dust motes, a very restrained narrow golden line at the shoebox seam that feels like a tiny quiet call from stillness. Atmosphere: safe, hushed, private, child-sized, tender, the room holding its breath after a secret has been shut away. No characters, no Jenny, no hands, no faces, no silhouettes, no worksheet focus, no dramatic shot staging, no spooky mood, no overbright magic, no horror, no photorealism; maintain premium stylized 3D animation look with tactile handmade cardboard material detail."
+    },
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd"
+     },
+     "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
+     "sceneContextHash": "381c98dc16a52c80b77009158b9472b8f262f9021de6a1c958383c70cd5c64b4"
+    }
+   },
+   "history": []
+  }
+ }
+}

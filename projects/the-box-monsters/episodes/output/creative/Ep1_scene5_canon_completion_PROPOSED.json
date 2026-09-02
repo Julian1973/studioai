@@ -1,0 +1,72 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "5",
+ "builtAt": "2026-09-02T18:28:20",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "Jenny": [
+   "cadence"
+  ],
+  "Nib": [
+   "cadence"
+  ],
+  "Teacher": [
+   "anchor",
+   "bible",
+   "cadence"
+  ]
+ },
+ "completions": [
+  {
+   "character": "Jenny",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Quiet, measured, and a little careful; she often starts softly, then lets the joke land with a tiny, honest lift at the end.",
+     "groundedIn": "\"A thoughtful, sensitive schoolgirl with a quiet sense of humour.\""
+    },
+    {
+     "field": "cadence",
+     "proposedText": "Speaks in short, neatly shaped thoughts, with pauses where she’s checking herself; the humour comes out dry and understated, not showy.",
+     "groundedIn": "\"A thoughtful, sensitive schoolgirl with a quiet sense of humour.\""
+    }
+   ]
+  },
+  {
+   "character": "Nib",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Quick, zig-zaggy, and lightly distracted; he darts from idea to idea, then suddenly says the plain truth as if it arrived by accident.",
+     "groundedIn": "\"Curious, funny and easily distracted; often says the emotional truth by accident.\""
+    },
+    {
+     "field": "cadence",
+     "proposedText": "Bright and offbeat, with little leaps in rhythm and odd timing; the line often seems to wobble toward nonsense before snapping into something surprisingly true.",
+     "groundedIn": "\"Curious, funny and easily distracted; often says the emotional truth by accident.\""
+    }
+   ]
+  },
+  {
+   "character": "Teacher",
+   "proposals": [
+    {
+     "field": "anchor",
+     "proposedText": "A steady classroom authority who keeps the room moving and the children on task, even when the moment turns awkward.",
+     "groundedIn": "No explicit Teacher canon yet; grounded in the role implied by the cast label \"Teacher\" and the series’ school setting."
+    },
+    {
+     "field": "bible",
+     "proposedText": "An adult classroom presence defined by routine, attention, and patient correction; not a villain, not a gadget, just the human framework of the school scene.",
+     "groundedIn": "No explicit Teacher bible yet; grounded in the cast label \"Teacher\" and the pilot’s school context around Jenny’s misread word."
+    },
+    {
+     "field": "cadence",
+     "proposedText": "Clear, unhurried, and practical; the rhythm is classroom-steady, with mild firmness and small moments of reassurance.",
+     "groundedIn": "No explicit Teacher canon yet; grounded in the role implied by the cast label \"Teacher\" and the school context in the pilot."
+    }
+   ]
+  }
+ ]
+}

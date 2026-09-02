@@ -245,10 +245,18 @@ def _identity_assets(policy: dict, root: pathlib.Path) -> list[dict]:
         if not isinstance(raw, str) or not raw.strip() or not isinstance(views, dict) or not views:
             raise CanonLockError(
                 f"{character}'s provider identity pack needs a source and provider view")
-        if pack.get("coverage") != "360":
+        # TWO KINDS OF IDENTITY SOURCE (2026-09-02, The Box Monsters): "360" — a turnaround
+        # sheet with four declared views (the first show's standard); "single-anchor" — one
+        # approved single-subject image of the character, the whole source, no views. A show
+        # whose cast was designed as single anchors can lock and render; the render layer
+        # already attaches an anchor whole (cb_identity.materialize_provider_view uses no crop).
+        coverage = pack.get("coverage")
+        if coverage not in ("360", "single-anchor"):
             raise CanonLockError(
-                f"{character}'s provider identity pack must declare 360 coverage")
-        if not isinstance(turnaround_views, list) or len(turnaround_views) < 4:
+                f"{character}'s provider identity pack must declare 360 or single-anchor coverage")
+        if coverage == "single-anchor":
+            turnaround_views = turnaround_views or []
+        elif not isinstance(turnaround_views, list) or len(turnaround_views) < 4:
             raise CanonLockError(
                 f"{character}'s provider identity pack needs declared 360 turnaround "
                 "coverage")
@@ -748,7 +756,15 @@ def _status_uncached(episode: str | None = None, cast: Iterable[str] | None = No
         "characters": character_rows,
         "episode": episode,
         "episodeCast": cast_names,
-        "episodeReady": bool(episode and current and not episode_blockers),
+        # episodeReady is the TEXT stages' readiness (Story & Direction, scene direction):
+        # a scripted stub role (CAST_CANON_INCOMPLETE) is listed in episodeBlockers for the
+        # paid stages to refuse by name, but does not make the episode "not ready" for text
+        # (2026-09-02 — it used to flip the approved beat package to "not current" the moment
+        # the cast was known, sending the studio back to "Run Story & Direction").
+        "episodeReady": bool(episode and current and not [
+            b for b in episode_blockers if b.get("code") != "CAST_CANON_INCOMPLETE"]),
+        "episodeCastIncomplete": [b.get("character") for b in episode_blockers
+                                  if b.get("code") == "CAST_CANON_INCOMPLETE"],
         "episodeBlockers": episode_blockers,
         "scriptPath": script_path,
         "scriptCanon": script_canon,
@@ -815,8 +831,10 @@ def require_locked(episode: str | None = None, cast: Iterable[str] | None = None
 def profile_digest(profile: str, *, episode: str | None = None,
                    cast: Iterable[str] | None = None,
                    root: str | pathlib.Path | None = None,
-                   require_ready: bool = True) -> str:
-    result = require_locked(episode, cast, root) if require_ready else status(episode, cast, root)
+                   require_ready: bool = True,
+                   allow_incomplete_cast: bool = False) -> str:
+    result = (require_locked(episode, cast, root, allow_incomplete_cast=allow_incomplete_cast)
+              if require_ready else status(episode, cast, root))
     digest = (result.get("profileDigests") or {}).get(profile)
     if not digest:
         raise CanonLockError(f"unknown or unavailable canon profile: {profile}")

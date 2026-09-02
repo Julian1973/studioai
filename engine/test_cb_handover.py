@@ -1294,3 +1294,33 @@ def test_current_packing_contract_requires_showrunner_acceptance():
 if __name__ == "__main__":
     import subprocess
     raise SystemExit(subprocess.call([sys.executable, "-m", "pytest", __file__, "-q"]))
+
+
+def test_a_shared_phase_names_every_performer_and_still_needs_each_truth():
+    """2026-09-02 (The Box Monsters S3.SH05): when two characters act in the same phase the
+    folded contract Gate 5 produces reads "Fuzzby and Zenny". The handover checked the whole
+    string as one name and refused the scene; every part is a cast name, checked separately."""
+    shared = _sb_shot("S1.SH9", ["1.B1"], "PLANNED_CUT")
+    contract = shared["performanceContract"]
+    contract["phases"][1]["performer"] = "Fuzzby and Zenny"
+    contract["characterTruths"] = contract["characterTruths"] + [{
+        "character": "Zenny",
+        "canonTrait": "measured grace reads the room before it moves",
+        "playableWant": "let the evidence speak without saying so",
+        "pressureResponse": "holds still one beat longer than expected",
+        "observableSignature": "a slow blink lands before any word",
+        "substitutionTest": "Fuzzby would perform past the moment"}]
+    pd = _pd("S1.SH9", True)
+    assert H.distil_shot(shared, pd, ["Fuzzby", "Zenny"], [], None, {})
+
+    # a shared phase whose second performer has no truth is still refused
+    missing = _sb_shot("S1.SH9", ["1.B1"], "PLANNED_CUT")
+    missing["performanceContract"]["phases"][1]["performer"] = "Fuzzby and Zenny"
+    with pytest.raises(H.HandoverRefused, match="missing character-specific truth"):
+        H.distil_shot(missing, pd, ["Fuzzby", "Zenny"], [], None, {})
+
+    # a name that is not in the shot's cast at all is still refused
+    stranger = _sb_shot("S1.SH9", ["1.B1"], "PLANNED_CUT")
+    stranger["performanceContract"]["phases"][1]["performer"] = "Fuzzby and Briggle"
+    with pytest.raises(H.HandoverRefused, match="unknown performer or field"):
+        H.distil_shot(stranger, pd, ["Fuzzby", "Zenny"], [], None, {})

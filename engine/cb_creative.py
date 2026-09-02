@@ -75,6 +75,7 @@ import cb_engine
 import cb_lineage
 import cb_scripts
 import cb_unit_packing
+import cb_format
 
 CREATIVE = pathlib.Path(P.CREATIVE)                  # T44: from the project profile
 OUT = ROOT / P.OUTPUT_REL / "creative"
@@ -351,6 +352,35 @@ class ShotPerformanceContract(BaseModel):
     # compatibility mirror for Gate 5's beatOwner; handover compiles every BIG beat's exact
     # staging directly from the beat contract into its packed production unit.
     comedyStaging: SkipJsonSchema[Optional[PhysicalComedyStaging]] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def merge_repeated_phases(cls, data):
+        """A performance pass that lists the same phase twice (two performers each given their
+        own "action" phase — found live 2026-09-02 on The Box Monsters' Scene 4, the first
+        pass on the scene model) is folded, in order, into one phase per name: the performers
+        joined with "and", the observable actions joined with "; ". Nothing is dropped and the
+        phase order is untouched, so the unique-and-ordered contract below still holds."""
+        if not isinstance(data, dict) or not isinstance(data.get("phases"), list):
+            return data
+        merged, index = [], {}
+        for phase in data["phases"]:
+            if not isinstance(phase, dict):
+                merged.append(phase)
+                continue
+            name = phase.get("phase")
+            if name in index:
+                first = merged[index[name]]
+                performers = [str(first.get("performer") or ""), str(phase.get("performer") or "")]
+                performers = [x for x in dict.fromkeys(p.strip() for p in performers) if x]
+                first["performer"] = " and ".join(performers) or first.get("performer")
+                actions = [str(first.get("observableAction") or "").strip(),
+                           str(phase.get("observableAction") or "").strip()]
+                first["observableAction"] = "; ".join(a for a in actions if a)
+                continue
+            index[name] = len(merged)
+            merged.append(dict(phase))
+        return {**data, "phases": merged}
 
     @model_validator(mode="after")
     def phases_are_unique_and_ordered(self):
@@ -1133,7 +1163,7 @@ def episode_vision(episode="Ep1", log=print):
     canon_digest = cb_canon.profile_digest(
         "story", episode=episode,
         cast={name for beat in beats for name in beat.get("characters") or []},
-        root=ROOT)
+        root=ROOT, allow_incomplete_cast=True)
     vision_inputs = cb_lineage.episode_vision_inputs(
         script_version, beat_signature, canon_digest)
     pkg = {"episodeId": episode, "title": d.get("title", episode),
@@ -1363,6 +1393,8 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:4000]}\n\n"
         f"THE SCENE'S APPROVED SCRIPT (dialogue verbatim-locked):\n{script}\n\n"
         f"CHARACTER CANON:\n{_characters_for(ready['cast'])[:8000]}{notes}\n\n"
+        f"participatingCharacters names ONLY locked cast members — {', '.join(ready['cast'])} — "
+        f"never a crowd word or a description (extras are background, not participants). "
         f"Return the Scene record and EXACTLY one Beat per script beat, in the same order "
         f"(beatId = the script's own beatCode; sceneId = 'S{scene_num}'; sourceScript = "
         f"the storyBeat verbatim; exactDialogue = every locked display line, verbatim, in "
@@ -1412,17 +1444,94 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
             raise RuntimeError(
                 f"SUPERVISION CONTRACT MISSING - {beat.beatId} needs typed emotion and "
                 "comedy intent")
+        # PARTICIPANTS ARE ROSTER NAMES (found live 2026-09-02, The Box Monsters scene 4):
+        # the Director listed "Jenny's emotional echo" as a participant, and the handover's
+        # canon check then refused the whole scene with CAST_NOT_IN_LOCKED_ROSTER. A
+        # descriptive phrase that names exactly one roster character IS that character
+        # (the echo is Jenny's own projection); a name that matches nothing is refused.
+        roster = {_norm(name): name for name in ready["cast"] if name}
+        resolved, dropped = [], []
+        for raw in beat.participatingCharacters:
+            key = _norm(raw)
+            if key in roster:
+                name = roster[key]
+            else:
+                contained = [roster[k] for k in roster
+                             if k and re.search(r"\b" + re.escape(k) + r"\b", key)]
+                if len(contained) != 1:
+                    # "children" (Scene 5, 2026-09-02): a crowd/extras word, not a character —
+                    # background is never a performer with a contract; drop it and say so
+                    dropped.append(raw)
+                    continue
+                name = contained[0]
+            if name not in resolved:
+                resolved.append(name)
+        if dropped:
+            log(f"GATE 3 — {beat.beatId}: not in the locked cast, treated as background: "
+                + ", ".join(repr(d) for d in dropped))
+        if not resolved:
+            raise RuntimeError(
+                f"BEAT PARTICIPANT UNKNOWN - {beat.beatId} names {dropped}; the scene's "
+                f"locked cast is {', '.join(ready['cast'])}")
+        beat.participatingCharacters = resolved
         participant_names = {_norm(name) for name in beat.participatingCharacters}
         if str(beat.comedyContract.straightCharacter or "").strip().lower() in {
                 "null", "none", "n/a", "not applicable"}:
             beat.comedyContract.straightCharacter = None
         if _norm(beat.emotionContract.owner) not in participant_names:
-            raise RuntimeError(
-                f"EMOTION CONTRACT UNKNOWN OWNER - {beat.beatId} names "
-                f"{beat.emotionContract.owner}")
+            # "Jenny's echo" (found live 2026-09-02, The Box Monsters) names Jenny by a
+            # descriptive phrase; the owner is the one participant whose name the phrase
+            # contains — never a guess when none or several match
+            owner_norm = _norm(beat.emotionContract.owner)
+            contained = [n for n in beat.participatingCharacters
+                         if _norm(n) and re.search(r"\b" + re.escape(_norm(n)) + r"\b", owner_norm)]
+            if len(contained) == 1:
+                beat.emotionContract.owner = contained[0]
+            elif owner_norm in roster:
+                # THE OWNER IS IN THE BEAT BY DEFINITION (2026-09-02, The Box Monsters Scene
+                # 4: the Director gave the arrival beat to the monsters and named Jenny, the
+                # scene's own protagonist, as its emotional owner). A locked-cast character
+                # who owns the beat's emotional change is present in it — the participant
+                # list was simply short, and it is completed here rather than refused. A name
+                # outside the locked cast is still refused.
+                beat.emotionContract.owner = roster[owner_norm]
+                beat.participatingCharacters.append(roster[owner_norm])
+                participant_names.add(owner_norm)
+                log(f"GATE 3 — {beat.beatId}: {roster[owner_norm]} owns this beat's "
+                    f"emotional change and is added to its participants")
+            else:
+                raise RuntimeError(
+                    f"EMOTION CONTRACT UNKNOWN OWNER - {beat.beatId} names "
+                    f"{beat.emotionContract.owner}; the scene's locked cast is "
+                    f"{', '.join(ready['cast'])}")
         for field, name in (("comicOwner", beat.comedyContract.comicOwner),
                             ("straightCharacter", beat.comedyContract.straightCharacter)):
             if name and _norm(name) not in participant_names:
+                # AN ENSEMBLE OWNER (2026-09-02, The Box Monsters' four-monster cast): the
+                # Director may write "Patch and Nib" for a shared gag. The contract downstream
+                # is one owner per beat, so the FIRST named participant leads it.
+                parts = [n.strip() for n in re.split(r"\s*(?:,|&|/|\band\b|\+)\s*", name) if n.strip()]
+                known = [n for n in parts if _norm(n) in participant_names]
+                if len(parts) > 1 and known and len(known) == len(parts):
+                    setattr(beat.comedyContract, field, known[0])
+                    continue
+                # a descriptive phrase containing exactly one participant IS that participant
+                # ("Jenny's own card" -> Jenny), the same resolution the emotion owner uses
+                contained = [n for n in beat.participatingCharacters
+                             if _norm(n) and re.search(
+                                 r"\b" + re.escape(_norm(n)) + r"\b", _norm(name))]
+                if len(contained) == 1:
+                    setattr(beat.comedyContract, field, contained[0])
+                    continue
+                if field == "straightCharacter":
+                    # THE FOIL IS OPTIONAL (2026-09-02, Scene 5: "The card/message"): the
+                    # deadpan foil must be a person in the beat. A prop cannot play straight,
+                    # so the beat simply has no foil — the mechanism, setup, disruption and
+                    # button stand on their own. Never a refusal over an optional field.
+                    log(f"GATE 3 — {beat.beatId}: straightCharacter {name!r} is not a "
+                        f"character in this beat; the beat plays with no foil")
+                    beat.comedyContract.straightCharacter = None
+                    continue
                 raise RuntimeError(
                     f"COMEDY CONTRACT UNKNOWN {field} - {beat.beatId} names {name}")
         if beat.powerMoment:
@@ -1497,9 +1606,16 @@ def _validate_gate4_production_units(shots, beats):
 
 
 def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
-                          heart=None, review_notes="", ambition_brief="", log=print):
+                          heart=None, review_notes="", ambition_brief="", log=print,
+                          format_plan=None, format_seconds=None):
     notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (redesign the SEQUENCE — never patch "
              f"wording): {review_notes}" if review_notes else "")
+    # T71 (2026-09-02): on a project whose script already carries the shot breakdown, the
+    # writer's shots ARE the units at the project's fixed length — the contract is literal and
+    # the mechanical fields are enforced after the call (cb_format.enforce_units).
+    format_contract = (
+        "\n\n" + cb_format.format_contract_text(scene_num, format_plan, format_seconds)
+        if format_plan else "")
     sc = cb_llm.structured_with_repair(
         _mind("DIRECTOR AND CINEMATOGRAPHER, IN SHOT CONFERENCE",
               ["directorTaste", "cinematographyTaste"],
@@ -1596,9 +1712,30 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
            if ambition_brief else "")
         + f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
         f"THE BEATS:\n" + "\n".join(b.model_dump_json() for b in sd.beats)
-        + f"{notes}\n\nshotId = 'S{scene_num}.SH<n>' in sequence order.",
+        + f"{notes}{format_contract}\n\nshotId = 'S{scene_num}.SH<n>' in sequence order.",
         ShotConference, label=f"gate4_shots_s{scene_num}")
     shots = [CreativeShotCard(**shot.model_dump()) for shot in sc.shots]
+    if format_plan:
+        shots, problems = cb_format.enforce_units(shots, scene_num, format_plan, format_seconds)
+        if problems:
+            log("GATE 4 — the Director left the writer's units; one repair with the exact "
+                "contract error: " + "; ".join(problems))
+            sc = cb_llm.structured_with_repair(
+                _mind("DIRECTOR AND CINEMATOGRAPHER, IN SHOT CONFERENCE",
+                      ["directorTaste", "cinematographyTaste"],
+                      "Return the same shot conference corrected to the PROJECT FORMAT "
+                      "CONTRACT exactly. Keep every creative field you already authored; "
+                      "change only what the contract error names."),
+                "YOUR PREVIOUS SHOT CONFERENCE:\n"
+                + "\n".join(shot.model_dump_json() for shot in shots)
+                + "\n\nCONTRACT ERROR(S):\n" + "\n".join(problems)
+                + "\n\n" + cb_format.format_contract_text(scene_num, format_plan, format_seconds),
+                ShotConference, label=f"gate4_shots_s{scene_num}_format_repair")
+            shots = [CreativeShotCard(**shot.model_dump()) for shot in sc.shots]
+            shots, problems = cb_format.enforce_units(shots, scene_num, format_plan,
+                                                      format_seconds)
+            if problems:
+                raise RuntimeError("PROJECT FORMAT CONTRACT NOT MET - " + "; ".join(problems))
     packing = _validate_gate4_production_units(shots, sd.beats)
     for shot in shots:
         if not shot.cinematographyContract:
@@ -1678,7 +1815,10 @@ def gate5_performance(episode, scene_num, treatment, sd, shots,
               "the sequence design is settled. Never rewrite or copy physicalStaging. Handover "
               "compiles every Gate 3 BIG-comedy staging mechanically into its packed unit. If "
               "a BIG beat legitimately crosses a unit boundary, performanceContract.beatOwner "
-              "identifies the one unit carrying its physical payoff."),
+              "identifies the one unit carrying its physical payoff. phases lists AT MOST ONE "
+              "of each anticipation / action / reaction / settle, in that order — when two "
+              "characters act in the same phase, name both performers in that one phase, never "
+              "a second phase with the same name."),
         f"THE SELECTED TREATMENT:\n{treatment.model_dump_json()[:3000]}\n\n"
         f"THE BEAT EMOTION, COMEDY AND POWER CONTRACTS:\n"
         + "\n".join(b.model_dump_json() for b in sd.beats)
@@ -1711,70 +1851,113 @@ def gate5_performance(episode, scene_num, treatment, sd, shots,
         if beat.comedyContract and beat.comedyContract.mode == "BIG"
     }
     by_id = {s.shotId: s for s in shots}
+    # ONE REPAIR CARRIES EVERY PROBLEM (2026-09-02, The Box Monsters Scene 4): the checks
+    # below used to rerun the whole pass on the FIRST shot that failed, so a model that
+    # dropped one characterTruth per pass failed on S4.SH09, then S4.SH11, then the next —
+    # a new shot each time, never converging. Every shot is checked first and the single
+    # permitted rerun is told everything that was wrong, exactly as gate4's format contract
+    # already does. Only a clean shot's Gate-5 fields are written onto the card.
+    problems = []
     for s in pp.shots:
         d0 = by_id.get(s.shotId)
         if not d0 or not s.performanceContract:
-            raise RuntimeError(f"PERFORMANCE CONTRACT MISSING for {s.shotId}")
+            problems.append(f"PERFORMANCE CONTRACT MISSING for {s.shotId}")
+            continue
         if not (s.physicalPerformance or "").strip() or not (s.animationTiming or "").strip():
-            raise RuntimeError(f"PERFORMANCE REVIEW CONTEXT MISSING for {s.shotId}")
+            problems.append(f"PERFORMANCE REVIEW CONTEXT MISSING for {s.shotId}")
+            continue
         contract = s.performanceContract
         if contract.beatOwner not in d0.beatIds:
-            raise RuntimeError(
+            problems.append(
                 f"PERFORMANCE CONTRACT CROSSED BEATS - {s.shotId} names "
                 f"{contract.beatOwner}, expected one of {d0.beatIds}")
+            continue
         allowed = []
+        unknown_beat = None
         for beat_id in d0.beatIds:
             beat = beats_by_id.get(beat_id)
             if beat is None:
-                raise RuntimeError(
-                    f"PERFORMANCE CONTRACT UNKNOWN BEAT - {s.shotId} names {beat_id}")
+                unknown_beat = beat_id
+                break
             for character in beat.participatingCharacters:
                 if character not in allowed:
                     allowed.append(character)
+        if unknown_beat:
+            problems.append(
+                f"PERFORMANCE CONTRACT UNKNOWN BEAT - {s.shotId} names {unknown_beat}")
+            continue
         allowed_norm = {_norm(character) for character in allowed}
+        # ENVIRONMENT may perform a phase but has no canon truth to record; a model that
+        # dutifully writes one anyway (Scene 1, gpt-5.4-mini, 2026-09-02) is not refused —
+        # the entry is dropped and the named characters' truths are what get checked.
+        contract.characterTruths = [truth for truth in contract.characterTruths
+                                    if _norm(truth.character) != "environment"]
         truth_names = [truth.character for truth in contract.characterTruths]
+        shot_problems = []
         if len(truth_names) != len({_norm(name) for name in truth_names}):
-            raise RuntimeError(
+            shot_problems.append(
                 f"PERFORMANCE CONTRACT DUPLICATED CHARACTER TRUTH in {s.shotId}")
         for truth in contract.characterTruths:
             if _norm(truth.character) not in allowed_norm:
-                message = (
+                shot_problems.append(
                     f"PERFORMANCE CONTRACT UNKNOWN CHARACTER TRUTH - {s.shotId} names "
                     f"{truth.character}; every characterTruth and phase performer must be "
-                    f"one of {allowed} or ENVIRONMENT for this shot"
-                )
-                if not review_notes:
-                    log(f"  [director] gate5_perf_s{scene_num}: {message} - rerunning once",
-                        flush=True)
-                    return gate5_performance(
-                        episode, scene_num, treatment, sd, shots,
-                        review_notes=message, log=log)
-                raise RuntimeError(message)
+                    f"one of {allowed} or ENVIRONMENT for this shot")
+        # a phase performer may name two characters ("Patch and Nib" — the folded-phase
+        # contract, or the Director's own shared phase): each named character needs a truth
         performing_characters = {
-            _norm(phase.performer) for phase in contract.phases
-            if _norm(phase.performer) != "environment"
+            _norm(part) for phase in contract.phases
+            for part in re.split(r"\s*(?:,|&|/|\band\b|\+)\s*", str(phase.performer or ""))
+            if part.strip() and _norm(part) != "environment"
         }
-        if performing_characters - {_norm(name) for name in truth_names}:
-            raise RuntimeError(
-                f"PERFORMANCE CONTRACT MISSING CHARACTER TRUTH for {s.shotId}")
+        missing_truths = performing_characters - {_norm(name) for name in truth_names}
+        if missing_truths:
+            shot_problems.append(
+                f"PERFORMANCE CONTRACT MISSING CHARACTER TRUTH for {s.shotId} - every "
+                f"performer named in phases needs a characterTruths entry; missing "
+                f"{sorted(missing_truths)}")
         for phase in contract.phases:
-            if (_norm(phase.performer) not in allowed_norm and
-                    _norm(phase.performer) != "environment"):
-                raise RuntimeError(
+            # the same split as performing_characters above: a folded phase names
+            # "Patch and Rumble and Tilly and Nib", and every part must be a roster name
+            parts = [part for part in re.split(r"\s*(?:,|&|/|\band\b|\+)\s*",
+                                               str(phase.performer or "")) if part.strip()]
+            unknown = [part for part in parts
+                       if _norm(part) not in allowed_norm and _norm(part) != "environment"]
+            if not parts or unknown:
+                shot_problems.append(
                     f"PERFORMANCE CONTRACT UNKNOWN PERFORMER - {s.shotId} names "
                     f"{phase.performer}; allowed: {allowed} or ENVIRONMENT")
-        execution = cb_engine.compile_performance_contract(contract.model_dump())
         locked_dialogue = [occ.exactText for beat_id in d0.beatIds
                            for occ in beats_by_id[beat_id].dialogueOccurrences]
+        try:
+            execution = cb_engine.compile_performance_contract(contract.model_dump())
+        except ValueError as exc:
+            shot_problems.append(f"PERFORMANCE CONTRACT INVALID in {s.shotId}: {exc}")
+            execution = ""
         leaked = [line for line in locked_dialogue
                   if line.strip() and line.casefold() in execution.casefold()]
         if leaked:
-            raise RuntimeError(
-                f"PERFORMANCE CONTRACT QUOTED LOCKED DIALOGUE in {s.shotId}: {leaked[0]!r}")
+            shot_problems.append(
+                f"PERFORMANCE CONTRACT QUOTED LOCKED DIALOGUE in {s.shotId}: {leaked[0]!r} "
+                f"(the audio track alone carries dialogue — describe only the body)")
+        if shot_problems:
+            problems.extend(shot_problems)
+            continue
         # Only Gate-5-owned fields may change; every Gate-4 field remains on d0 untouched.
         d0.physicalPerformance = s.physicalPerformance
         d0.animationTiming = s.animationTiming
         d0.performanceContract = contract
+
+    if problems:
+        message = ("PERFORMANCE CONTRACT PROBLEMS (" + str(len(problems)) + "): "
+                   + " | ".join(problems))
+        if not review_notes:
+            log(f"  [director] gate5_perf_s{scene_num}: {message} - rerunning once with "
+                f"every problem named", flush=True)
+            return gate5_performance(
+                episode, scene_num, treatment, sd, shots,
+                review_notes=message, log=log)
+        raise RuntimeError(message)
 
     carriers_by_beat = {}
     for beat_id, staging in big_beats.items():
@@ -1844,9 +2027,16 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
             # repository-owned namespace. Restore the namespace mechanically; never ask
             # a creative model to author source identity.
             returned_occurrence = str(voice.dialogueOccurrenceId or "")
-            if (returned_occurrence and
-                    occurrence_id.rsplit(":", 1)[-1] ==
-                    returned_occurrence.rsplit(":", 1)[-1]):
+            expected_digest = occurrence_id.rsplit(":", 1)[-1]
+            returned_digest = returned_occurrence.rsplit(":", 1)[-1]
+            if (returned_occurrence and (
+                    expected_digest == returned_digest or
+                    # a model re-typing a 64-hex id sometimes runs on or truncates the tail
+                    # (found live 2026-09-02: "…aa4c" returned as "…aa4c2218d74aa4c"); the
+                    # first 32 hex characters identify the occurrence beyond doubt, and the
+                    # ORDER is still enforced below, so restore the locked id mechanically
+                    (len(returned_digest) >= 32 and len(expected_digest) >= 32 and
+                     returned_digest[:32] == expected_digest[:32]))):
                 voice.dialogueOccurrenceId = occurrence_id
             if voice.dialogueOccurrenceId != occurrence_id:
                 raise RuntimeError(
@@ -1877,8 +2067,14 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
 # GATE 6 — ADVERSARIAL SHOWRUNNER REVIEW
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
-                             heart=None, log=print):
+                             heart=None, log=print, structure_locked=False):
     packing = cb_unit_packing.audit_units(shots)
+    locked_note = (
+        "\n\nPROJECT FORMAT (T71): the unit structure — count, order, fixed duration and the "
+        "beats each unit carries — is the WRITER'S and the showrunner's, locked by the project "
+        "format. Judge the performance, staging, camera and voice INSIDE those units only; "
+        "packingPasses is true by definition, and returnTo may name only gate5 (performance/"
+        "voice) — never a merge, split or re-sequence." if structure_locked else "")
     review = cb_llm.structured(
         _mind("SHOWRUNNER", ["showrunnerTaste"],
               "ACTIVELY ATTEMPT TO REJECT this storyboard. Judge the COMPLETE scene, not "
@@ -1918,8 +2114,11 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
         + "\n\nSHOTS:\n" + "\n".join(s.model_dump_json()[:1800] for s in shots)
         + "\n\nDETERMINISTIC 30-SECOND PACKING AUDIT:\n"
         + json.dumps(packing, ensure_ascii=False, indent=1)
-        + "\n\nVOICE:\n" + "\n".join(v.model_dump_json()[:1100] for v in voices),
+        + "\n\nVOICE:\n" + "\n".join(v.model_dump_json()[:1100] for v in voices)
+        + locked_note,
         ShowrunnerReview, label="gate6_review")
+    if structure_locked:
+        review.packingPasses = True
     if not review.packingPasses:
         review.passes = False
         review.returnTo = "gate4"
@@ -1927,6 +2126,27 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
             review.issues.append(ReviewIssue(
                 role="director", target="unit-packing", issue=review.packingJudgement))
     return review
+
+
+def _normalize_occurrence_id(occurrence_id, expected, owner_by_id):
+    """Map a model-written occurrence reference onto the one immutable ID it can only mean.
+
+    A known ID is returned as-is. Otherwise the reference must match exactly one expected
+    ID by suffix (a bare 'sha256:…' or bare digest) or by a 32+ char digest whose head and
+    tail agree; anything ambiguous or unknown is returned unchanged for the caller to refuse.
+    """
+    occurrence_id = str(occurrence_id or "")
+    if occurrence_id in owner_by_id:
+        return occurrence_id
+    matches = [expected_id for expected_id in expected
+               if occurrence_id and expected_id.endswith(occurrence_id)]
+    if not matches:
+        candidate_digest = occurrence_id.rsplit(":", 1)[-1]
+        matches = [expected_id for expected_id in expected
+                   if len(candidate_digest) >= 32 and
+                   expected_id.rsplit(":", 1)[-1].startswith(candidate_digest[:16]) and
+                   expected_id.rsplit(":", 1)[-1].endswith(candidate_digest[-16:])]
+    return matches[0] if len(matches) == 1 else occurrence_id
 
 
 def _assign_dialogue_occurrences(shots, voices, details):
@@ -1978,20 +2198,18 @@ def _assign_dialogue_occurrences(shots, voices, details):
                     for occurrence_id, expected_id in
                     zip(detail.dialogueOccurrenceIds, eligible_expected))):
             detail.dialogueOccurrenceIds = list(eligible_expected)
-        normalized_ids = []
-        for occurrence_id in detail.dialogueOccurrenceIds:
-            matches = [expected_id for expected_id in expected
-                       if expected_id.endswith(occurrence_id)]
-            if occurrence_id not in owner_by_id and not matches:
-                candidate_digest = occurrence_id.rsplit(":", 1)[-1]
-                matches = [expected_id for expected_id in expected
-                           if len(candidate_digest) >= 32 and
-                           expected_id.rsplit(":", 1)[-1].startswith(candidate_digest[:16]) and
-                           expected_id.rsplit(":", 1)[-1].endswith(candidate_digest[-16:])]
-            if occurrence_id not in owner_by_id and len(matches) == 1:
-                occurrence_id = matches[0]
-            normalized_ids.append(occurrence_id)
-        detail.dialogueOccurrenceIds = normalized_ids
+        detail.dialogueOccurrenceIds = [
+            _normalize_occurrence_id(occurrence_id, expected, owner_by_id)
+            for occurrence_id in detail.dialogueOccurrenceIds]
+        normalized_ids = detail.dialogueOccurrenceIds
+        # The timing windows name the same occurrences; a model that writes the bare
+        # "sha256:…" digest there (Scene 5, gpt-5.4-mini, 2026-09-02) while the assignment
+        # carries the full "dialogue-occurrence:sha256:…" ID is normalized the same way,
+        # never refused for the prefix alone. A genuinely unknown or mismatched window
+        # still refuses in _validate_typed_production_contract.
+        for window in detail.dialogueTimings:
+            window.dialogueOccurrenceId = _normalize_occurrence_id(
+                window.dialogueOccurrenceId, expected, owner_by_id)
         for occurrence_id in normalized_ids:
             if occurrence_id not in owner_by_id:
                 raise RuntimeError(
@@ -2578,7 +2796,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
     beat_signature = cb_lineage.beat_package_signature(source_pkg)
     script_version = (source_pkg.get("sourceScript") or {}).get("scriptVersionId")
     story_canon_digest = cb_canon.profile_digest(
-        "story", episode=episode, cast=ready["cast"], root=ROOT)
+        "story", episode=episode, cast=ready["cast"], root=ROOT, allow_incomplete_cast=True)
     vision_inputs = cb_lineage.episode_vision_inputs(
         script_version, beat_signature, story_canon_digest)
     if not cb_lineage.signature_matches(vision.get("inputSignature"),
@@ -2595,23 +2813,50 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
             "Accept the episode direction again before directing this scene.")
 
     heart = emotional_story_contract(episode, scene_num, vision, ready, log=log)
-    treatments = gate1_treatments(episode, scene_num, vision, ready, heart=heart, log=log)
-    selection = gate2_select(vision, treatments, ready, heart=heart, log=log)
+
+    # T71 FAST PATH (2026-09-02, Julian: "should it really be this long as it's a short script
+    # that is already broken down" / "30 second shots ... 7 mins so 15 shots"): when the project
+    # declares a fixed shot length AND the writer's script already carries the shot breakdown,
+    # the writer's shots are the production units. The three whole-scene treatments and the
+    # showrunner's selection are skipped (the writer's breakdown is the treatment); the shot
+    # conference is held to the format contract; the review runs once and cannot restructure.
+    format_seconds = cb_format.shot_seconds()
+    format_plan = (cb_format.writer_shot_plan(source_pkg, scene_num)
+                   if format_seconds else None)
+    if format_plan:
+        for item in format_plan:
+            for note in item["notes"]:
+                log(f"FORMAT — Shot {item['shotNumber']:02d}: {note}")
+        log(f"FORMAT — fast path: {len(format_plan)} writer shot(s) x {format_seconds}s = "
+            + ", ".join(f"{cb_format.unit_shot_id(scene_num, i['shotNumber'])} "
+                        f"\"{i['title']}\"" for i in format_plan)
+            + " (treatments and showrunner selection skipped)")
+        treatment_row = cb_format.writer_treatment(source_pkg, scene_num, format_plan,
+                                                   format_seconds)
+        treatments = [SceneTreatment(**treatment_row)]
+        selection = TreatmentSelection(**cb_format.writer_selection(treatment_row, format_plan))
+        max_revisions = 0
+    else:
+        treatments = gate1_treatments(episode, scene_num, vision, ready, heart=heart, log=log)
+        selection = gate2_select(vision, treatments, ready, heart=heart, log=log)
+        max_revisions = MAX_INTERNAL_REVISIONS
     treatment = _selected_treatment(treatments, selection)
 
     sd = gate3_beats(episode, scene_num, vision, selection, treatment, ready,
                      heart=heart, log=log)
     shots = gate4_shot_conference(episode, scene_num, selection, treatment, sd,
-                                  heart=heart, ambition_brief=ready["brief"], log=log)
+                                  heart=heart, ambition_brief=ready["brief"], log=log,
+                                  format_plan=format_plan, format_seconds=format_seconds)
     shots = gate5_performance(episode, scene_num, treatment, sd, shots, log=log)
     voices = gate5_voice(episode, scene_num, sd, shots, log=log)
 
     review, revisions = None, []
-    for attempt in range(MAX_INTERNAL_REVISIONS + 1):
+    for attempt in range(max_revisions + 1):
         review = gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
-                                           heart=heart, log=log)
+                                           heart=heart, log=log,
+                                           structure_locked=bool(format_plan))
         log(f"GATE 6 — {'accepts' if review.passes else 'REJECTS'}: {review.judgement[:140]}")
-        if review.passes or attempt == MAX_INTERNAL_REVISIONS:
+        if review.passes or attempt == max_revisions:
             break
         notes = "; ".join(f"[{i.role}->{i.target}] {i.issue}" for i in review.issues[:4]) \
                 or review.judgement[:400]
@@ -2669,6 +2914,9 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
            "directedOnEstablishedCanonOnly": True,
            "treatments": [t.model_dump() for t in treatments],
            "treatmentSelection": selection.model_dump(),
+           "projectFormat": ({"shotSeconds": format_seconds,
+                              "writerShotPlan": format_plan, "fastPath": True}
+                             if format_plan else None),
            "scene": sd.scene.model_dump(),
            "beats": [b.model_dump() for b in sd.beats],
            "shots": [s.model_dump() for s in shots],
@@ -2769,7 +3017,22 @@ if __name__ == "__main__":
             brief = sys.argv[sys.argv.index("--brief") + 1]
         ep = next((a for a in sys.argv[3:] if not a.startswith("--")
                     and a != brief), "Ep1")
-        run_scene(sys.argv[2], ep, brief=brief)
+        try:
+            run_scene(sys.argv[2], ep, brief=brief)
+        except (RuntimeError, ValueError) as exc:
+            # THE CHEAP TIER FALLS BACK, IT NEVER STOPS THE PRODUCTION (2026-09-02): every
+            # per-scene pass runs on OPENAI_SCENE_MODEL to save spend (rule 88). A scene the
+            # smaller model cannot get through — a contract it keeps breaking, a creative
+            # judgment it cannot hold — is directed ONCE MORE on the Director model rather
+            # than left refused. Failing twice costs more than the tier ever saves. A second
+            # failure raises exactly as before; nothing is retried a third time.
+            if cb_llm.SCENE_MODEL == cb_llm.DIRECTOR_MODEL:
+                raise
+            print(f"\nSCENE {sys.argv[2]} — refused on the scene model "
+                  f"({cb_llm.SCENE_MODEL}): {exc}\nSCENE {sys.argv[2]} — directing once "
+                  f"more on the Director model ({cb_llm.DIRECTOR_MODEL})", flush=True)
+            cb_llm.SCENE_MODEL = cb_llm.DIRECTOR_MODEL
+            run_scene(sys.argv[2], ep, brief=brief)
     elif cmd == "migrate":
         migrate(sys.argv[2] if len(sys.argv) > 2 else "Ep1")
     else:

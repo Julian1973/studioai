@@ -1,17 +1,21 @@
 {
   "schemaVersion": 1,
   "showId": "the-box-monsters",
-  "lockedAt": "2026-09-01T23:23:49+00:00",
-  "lockedBy": "Julian — 2026-09-01T16:29 lock, re-based to the projects/ layout by T57",
-  "policySha256": "afabff806f03907b3cecb1567c14f25d6c0d555ebb6c63c797acca61ed93e6a9",
+  "lockedAt": "2026-09-02T15:23:56+00:00",
+  "lockedBy": "Julian (via Claude, heights)",
+  "policySha256": "ce9a8eb9490322a38ba12e7eec25199e85a53cdfce4b6f77625e824c77c5a8e8",
   "sources": {
     "characters": {
       "path": "projects/the-box-monsters/canon/characters.json",
-      "sha256": "0571eaa436dab559e444fd9e5edda17b1fd4b27ff41bc110db9436a8fd6e4568"
+      "sha256": "aa5e20199b11875f3cd9c1243f3a838d70c4073d0f494b69590f3fbc1438fc3d"
     },
     "continuity": {
       "path": "projects/the-box-monsters/canon/continuity.json",
       "sha256": "0dd1318d8d8239bf794bbdbfce4fa621e1775dfb2a3e835fe101db040cf4001d"
+    },
+    "identityPacks": {
+      "path": "projects/the-box-monsters/canon/identity_packs.json",
+      "sha256": "43c467807610c93e779fbdf20d111adf2f2bdc2965fee591ee5fed9f757c925d"
     },
     "locationAssetManifest": {
       "path": "projects/the-box-monsters/canon/location_assets.json",
@@ -164,6 +168,42 @@
     }
   },
   "locationAssets": [],
-  "identityAssets": [],
-  "manifestDigest": "4d7deb416513ecc0b60c3fed00973762d211708365679b504af58b371209a91e"
+  "identityAssets": [
+    {
+      "path": "projects/the-box-monsters/assets/jenny_turn4.png",
+      "roles": [
+        "Jenny.source"
+      ],
+      "sha256": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7"
+    },
+    {
+      "path": "projects/the-box-monsters/assets/nib_anchor.png",
+      "roles": [
+        "Nib.source"
+      ],
+      "sha256": "8ea37f36b867ed21de1a2e60d895bd26a315266cb663c72d20614a9411e82e3d"
+    },
+    {
+      "path": "projects/the-box-monsters/assets/patch_anchor.png",
+      "roles": [
+        "Patch.source"
+      ],
+      "sha256": "e8116107c08bbd207014b2f62304be712c4a356b20186d221bc33492325df1bd"
+    },
+    {
+      "path": "projects/the-box-monsters/assets/rumble_anchor.png",
+      "roles": [
+        "Rumble.source"
+      ],
+      "sha256": "820e48e7327bfba91a91529d50e06ea32f6a3daeb2455d9041ddada91df2d210"
+    },
+    {
+      "path": "projects/the-box-monsters/assets/tilly_anchor.png",
+      "roles": [
+        "Tilly.source"
+      ],
+      "sha256": "33ede2563287e6b885a984e77bc14baf97d6f9080f26eef6f11a1e3138f8f564"
+    }
+  ],
+  "manifestDigest": "6c7b73b07e1cb98dad81e5724c1127bb44d5f236446eac253420f747c679c881"
 }

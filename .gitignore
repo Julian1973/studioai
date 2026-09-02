@@ -52,6 +52,12 @@ _*.log
 _archive/
 _archive_*/
 
+# The Windows updater's own dated safety copies (update-studio.ps1): the virtualenv it replaced and
+# the working tree it set aside before a checkout. Local recovery copies of things this repo either
+# regenerates or already tracks - never source, never a git object.
+.venv-old-*/
+_local-work-*/
+
 # OS junk
 .DS_Store
 

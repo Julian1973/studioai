@@ -5389,14 +5389,27 @@ function currentProductionDirection(stage,shotId){
   // the derived preflight cache refreshes; that cache lag must not start preparation again.
   const led=shotId?shLedger(shotId):null;
   const work=led&&led.departmentWork&&led.departmentWork[stage];
-  const records=work?[work.candidate,work.approved].filter(Boolean):[];
+  // The server's own verdict wins when we hold one (/api/department-run answered
+  // "existing" with a status whose candidateCurrent/approvalCurrent were computed against
+  // the real direct-input signature). 2026-09-02: a storyboard re-handover bumps the
+  // package revision without changing a shot; cb_safety.department_input_signature
+  // deliberately EXCLUDES packageRevision ("a revision can carry an unchanged approval
+  // forward"), but this client used to reject the record on that very revision — the
+  // server said "existing", the client said "not current", and Build keyframe looped on
+  // "continuing to cost review" forever. Never judge currency by packageRevision here.
+  const cached=shotId?SH_DEPT_CACHE[deptKey(stage,shotId)]:null;
+  const serverRecords=(cached&&!cached.loading)?[
+    cached.candidateCurrent?cached.candidate:null,
+    cached.approvalCurrent?cached.approved:null].filter(Boolean):[];
+  const records=serverRecords.length?serverRecords:(work?[work.candidate,work.approved].filter(Boolean):[]);
   for(const record of records){
     const output=record.output;
-    if(stage==="cinematography"){
+    if(stage==="cinematography"&&!serverRecords.length){
       const signature=record.inputSignature||{};
-      const currentRevision=SH_PKG&&SH_PKG.revision;
-      const currentPlateHash=SH_SCENELOOK&&SH_SCENELOOK.active&&SH_SCENELOOK.active.hash;
-      if(currentRevision!=null&&record.packageRevision!=null&&Number(record.packageRevision)!==Number(currentRevision))continue;
+      // /api/scenelook carries plateHash (+ approved/candidate), never `active` — the old
+      // `SH_SCENELOOK.active.hash` read was always undefined, so a re-selected plate was
+      // never detected here (2026-09-02, S2: the archived plate rode into the cost review).
+      const currentPlateHash=SH_SCENELOOK&&(SH_SCENELOOK.plateHash||(SH_SCENELOOK.active&&SH_SCENELOOK.active.hash)||(SH_SCENELOOK.approved&&SH_SCENELOOK.approved.hash));
       if(currentPlateHash&&signature.sceneLookHash&&signature.sceneLookHash!==currentPlateHash)continue;
     }
     if(stage==="cinematography"&&output&&(output.providerPrompt||output.keyframePrompt))return output;
@@ -5427,8 +5440,20 @@ function showKeyframeScenePlateHold(){
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn ghost" onclick="closeM()">Close</button><button class="btn" onclick="closeM();openStageOutcome('scenelook')">Review Scene Plate</button></div>`;
   document.getElementById("modal").classList.add("show");
 }
+function serverVerifiedDirection(stage,shotId){
+  // Only a verdict the server itself computed against the real direct-input signature
+  // short-circuits preparation. The ledger view in currentProductionDirection is for
+  // DISPLAY: it cannot see a plate that changed since the record was signed when
+  // SH_SCENELOOK has not loaded yet (2026-09-02: a stale DP brief opened the cost review
+  // with the archived plate as @图2). /api/department-run answers "existing" instantly when
+  // the record is current, so asking costs nothing and never starts a paid step.
+  const cached=shotId?SH_DEPT_CACHE[deptKey(stage,shotId)]:null;
+  // verifiedAt is set only by /api/department-run's own answer; a department-panel read
+  // never short-circuits, and a verdict older than 90s is asked again (a plate may change).
+  return !!(cached&&!cached.loading&&cached.verifiedAt&&(Date.now()-cached.verifiedAt)<90000&&(cached.candidateCurrent||cached.approvalCurrent)&&currentProductionDirection(stage,shotId));
+}
 async function prepareDirectionThen(stage,shotId,resume){
-  if(currentProductionDirection(stage,shotId)){await resume();return;}
+  if(shotId?serverVerifiedDirection(stage,shotId):currentProductionDirection(stage,shotId)){await resume();return;}
   if(SH_JOB){alert("The Studio is already working. Let that finish, then start this outcome again.");return;}
   const scene=String(SH_SC),episode=String(SH_EP),label=directionLabel(stage);
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
@@ -5441,9 +5466,16 @@ async function prepareDirectionThen(stage,shotId,resume){
       body:JSON.stringify({scene,episode,stage,shotId:shotId||null})});
     const j=await r.json();
     if(!r.ok||!j.ok){directionPrepFailure(stage,j.error||"The specialist could not start.");return;}
-    const key=deptKey(stage,shotId);SH_DEPT_CACHE[key]={loading:true};
+    const key=deptKey(stage,shotId);
     if(j.existing&&j.department){
-      SH_DEPT_CACHE[key]=j.department;
+      SH_DEPT_CACHE[key]={...j.department,verifiedAt:Date.now()};
+      // Loop guard: the server says this direction is current. If, with that record in
+      // hand, the client STILL cannot see a usable brief, stop and say so rather than
+      // re-entering prepare → existing → resume → prepare for ever.
+      if(!currentProductionDirection(stage,shotId)){
+        directionPrepFailure(stage,"The Studio holds current "+label+" direction for this shot, but it carries no usable brief. Open the specialist panel, re-prepare the "+label+" there, then try again. No media was generated.");
+        return;
+      }
       // Existing specialist work is still only the free preparation step. Refresh the
       // authoritative package so the production input becomes visible, then continue the
       // user's original action. Previously this branch stopped here, leaving WATCH saying
@@ -5459,6 +5491,7 @@ async function prepareDirectionThen(stage,shotId,resume){
       await resume();
       return;
     }
+    SH_DEPT_CACHE[key]={loading:true};
     SH_JOB=j.jobId;shRememberJob(j.jobId);SH_LAST_JOB=null;SH_POLL_MISSES=0;
     SH_AFTER_JOB=async job=>{
       SH_DEPT_CACHE[key]=null;
@@ -5481,7 +5514,9 @@ async function openDisclosureModal(kind,ctx){
     if(!cached||cached.loading||cached.error)await shLoadVoiceWork(ctx.shotId);
   }
   const directionStage={keyframe:"cinematography",pose:"cinematography",voice:"voice","voice-regen":"voice",scenelook:"look"}[kind];
-  if(directionStage&&!currentProductionDirection(directionStage,ctx.shotId)){
+  // A paid step opens only behind the server's own fresh verdict on the specialist
+  // direction (serverVerifiedDirection); the ledger view alone never gates money.
+  if(directionStage&&!(ctx.shotId?serverVerifiedDirection(directionStage,ctx.shotId):currentProductionDirection(directionStage,ctx.shotId))){
     await prepareDirectionThen(directionStage,ctx.shotId,()=>openDisclosureModal(kind,ctx));return;
   }
   let title,rows,confirm,confirmLabel="Fire",extra="";

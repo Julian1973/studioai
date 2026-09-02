@@ -4874,8 +4874,30 @@ class H(http.server.SimpleHTTPRequestHandler):
                         _CBC.write_lock(ROOT, locked_by="Julian via Start Episode Production")
                         _CBI.rebase_canon_lock(ep, reviewed_by="Julian")
                         status = _CBI.intake_status(ep)
+                    elif (status.get("hasCanonicalPackage") and status.get("canonLockCurrent")
+                            and status.get("canonEpisodeReady")
+                            and not {c for c in codes if c != "CAST_CANON_INCOMPLETE"}):
+                        # THE APPROVED PACKAGE ON A RE-LOCKED CANON (2026-09-02): the showrunner
+                        # re-locked canon (a new identity pack, a height, a chair edit) and the
+                        # script, source events and creative content are unchanged — that is
+                        # exactly rebase_canon_lock's own contract (it refuses anything else),
+                        # so carry the approved package forward instead of sending the studio
+                        # back to "Run Story & Direction".
+                        try:
+                            _CBI.rebase_canon_lock(ep, reviewed_by="Julian")
+                        except _CBI.Refused:
+                            pass
+                        status = _CBI.intake_status(ep)
                     if not status.get("canonicalCurrent"):
                         self._json(409, {"error": "The episode has a real script or canon change that needs review before production can start", "blockers": status.get("canonBlockers") or []}); return
+                # THE SCENE DIRECTIONS RIDE ALONG (2026-09-02): the package may already be current
+                # on a re-locked canon while an approved scene storyboard still carries the old
+                # digest — carry it forward too, never re-direct a scene whose content is unchanged.
+                try:
+                    if status.get("canonicalCurrent") and _CBI.storyboards_behind_canon(ep):
+                        _CBI.rebase_canon_lock(ep, reviewed_by="Julian")
+                except _CBI.Refused:
+                    pass
                 jobs = _queue_episode_storyboards(ep)
                 self._json(200, {"ok": True, "sceneStoryboardJobs": jobs,
                                  "sceneStoryboardCount": len(jobs),
@@ -5552,6 +5574,36 @@ class H(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
+def _install_requirements_if_changed():
+    """SELF-HEALING DEPENDENCIES (2026-09-02): the first Windows keyframe build died on
+    `ModuleNotFoundError: rembg` because a fix delivered straight to the PC (not through the
+    updater's git pull) changed requirements.txt without anyone running pip. The studio now
+    does it itself, once per requirements.txt content, on every start: when the file's digest
+    differs from the one recorded at the last install, `python -m pip install -r requirements.txt`
+    runs in the studio's own interpreter before anything is served. A failed install is printed
+    and the studio still starts — a missing package then refuses exactly the one job that needs
+    it, never the whole studio."""
+    req = ROOT / "requirements.txt"
+    if not req.exists():
+        return
+    stamp = ROOT / "cb-studio" / "data" / "requirements.installed"
+    digest = hashlib.sha256(req.read_bytes()).hexdigest()
+    try:
+        if stamp.exists() and stamp.read_text(encoding="utf-8").strip() == digest:
+            return
+    except OSError:
+        pass
+    print("REQUIREMENTS CHANGED — installing into the studio's Python (one-off, may take a few minutes)…")
+    rc = subprocess.call([sys.executable, "-m", "pip", "install", "-r", str(req)])
+    if rc == 0:
+        stamp.parent.mkdir(parents=True, exist_ok=True)
+        stamp.write_text(digest, encoding="utf-8")
+        print("REQUIREMENTS INSTALLED")
+    else:
+        print(f"REQUIREMENTS INSTALL FAILED (pip exit {rc}) — the studio starts anyway; the job that "
+              "needs the missing package will name it")
+
+
 def main():
     # WINDOWS UTF-8 (2026-09-02): the engine reads and writes its JSON, canon and prompts as UTF-8
     # and prints "—"/"✓" in its logs; a Windows Python outside UTF-8 mode defaults every open()
@@ -5565,6 +5617,7 @@ def main():
             if rc != RESTART_EXIT_CODE:
                 sys.exit(rc)
     os.chdir(ROOT)
+    _install_requirements_if_changed()
     # T43 (2026-09-01): refuse to serve from a checkout whose compatibility links are not
     # real links (a Windows clone without symlink support turns each into a text file).
     sys.path.insert(0, str(ROOT / "tools"))

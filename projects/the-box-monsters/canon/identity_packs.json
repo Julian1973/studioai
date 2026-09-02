@@ -1,4 +1,157 @@
 {
-  "schemaVersion": 1,
-  "characters": {}
+ "schemaVersion": 1,
+ "characters": {
+  "Jenny": {
+   "schemaVersion": 1,
+   "source": "projects/the-box-monsters/assets/jenny_turn4.png",
+   "coverage": "360",
+   "providerViews": {
+    "default": {
+     "view": "front",
+     "crop": [
+      0.0,
+      0.0,
+      0.25,
+      1.0
+     ]
+    }
+   },
+   "turnaroundViews": [
+    {
+     "view": "front",
+     "crop": [
+      0.0,
+      0.0,
+      0.25,
+      1.0
+     ]
+    },
+    {
+     "view": "three-quarter",
+     "crop": [
+      0.25,
+      0.0,
+      0.5,
+      1.0
+     ]
+    },
+    {
+     "view": "side",
+     "crop": [
+      0.5,
+      0.0,
+      0.75,
+      1.0
+     ]
+    },
+    {
+     "view": "rear",
+     "crop": [
+      0.75,
+      0.0,
+      1.0,
+      1.0
+     ]
+    }
+   ],
+   "distinguishingFeatures": [
+    "A thoughtful, sensitive schoolgirl with a quiet sense of humor. In the pilot, one small mistake in class makes her feel tiny in front of everyone."
+   ],
+   "mustNotBorrow": [
+    "another character's hair, clothing or size"
+   ]
+  },
+  "Patch": {
+   "schemaVersion": 1,
+   "source": "projects/the-box-monsters/assets/patch_anchor.png",
+   "coverage": "single-anchor",
+   "providerViews": {
+    "default": {
+     "view": "single-subject-anchor",
+     "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+     ]
+    }
+   },
+   "turnaroundViews": [],
+   "distinguishingFeatures": [
+    "The brave first responder. Patch is quick, warm, impulsive and loyal. He jumps in before he has a full plan, then learns by staying with the feeling instead of rushing past it."
+   ],
+   "mustNotBorrow": [
+    "another monster's colour, shape, box markings or size"
+   ]
+  },
+  "Rumble": {
+   "schemaVersion": 1,
+   "source": "projects/the-box-monsters/assets/rumble_anchor.png",
+   "coverage": "single-anchor",
+   "providerViews": {
+    "default": {
+     "view": "single-subject-anchor",
+     "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+     ]
+    }
+   },
+   "turnaroundViews": [],
+   "distinguishingFeatures": [
+    "The biggest monster with the softest heart. Rumble is gentle, careful and protective. He is strong, but his real gift is making space feel safe."
+   ],
+   "mustNotBorrow": [
+    "another monster's colour, shape, box markings or size"
+   ]
+  },
+  "Tilly": {
+   "schemaVersion": 1,
+   "source": "projects/the-box-monsters/assets/tilly_anchor.png",
+   "coverage": "single-anchor",
+   "providerViews": {
+    "default": {
+     "view": "single-subject-anchor",
+     "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+     ]
+    }
+   },
+   "turnaroundViews": [],
+   "distinguishingFeatures": [
+    "The organiser and inventor. Tilly loves systems, tools, labels and machines. She often tries to solve feelings like puzzles, then learns that some feelings need listening before fixing."
+   ],
+   "mustNotBorrow": [
+    "another monster's colour, shape, box markings or size"
+   ]
+  },
+  "Nib": {
+   "schemaVersion": 1,
+   "source": "projects/the-box-monsters/assets/nib_anchor.png",
+   "coverage": "single-anchor",
+   "providerViews": {
+    "default": {
+     "view": "single-subject-anchor",
+     "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+     ]
+    }
+   },
+   "turnaroundViews": [],
+   "distinguishingFeatures": [
+    "The smallest, fastest and strangest. Nib is curious, funny and easily distracted, but often says the emotional truth by accident."
+   ],
+   "mustNotBorrow": [
+    "another monster's colour, shape, box markings or size"
+   ]
+  }
+ }
 }

@@ -12,6 +12,17 @@
   },
   "default": false,
   "showrunner": "Julian",
+  "format": {
+    "_note": "T71 (Julian, 2026-09-02): every Box Monsters shot is 30 seconds; an episode is 7 minutes = 15 shots. The script is written as a treatment (SCENE 01 / Shot 01 / Clean Plate / Character Keyframe / Final Frame), so the writer's shots ARE the production units.",
+    "shotSeconds": 30,
+    "shotSecondsMax": 30,
+    "aspect": "16:9",
+    "fps": 24,
+    "audience": "8-12",
+    "scriptStyle": "treatment",
+    "episodeMinutes": 7,
+    "shotsPerEpisode": 15
+  },
   "canon": {
     "lockedCanon": "canon/LOCKED_CANON.md",
     "characters": "canon/characters.json",

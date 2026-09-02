@@ -1,0 +1,74 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "1",
+ "builtAt": "2026-09-02T18:11:49",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "Classmate": [
+   "anchor",
+   "bible",
+   "cadence"
+  ],
+  "Jenny": [
+   "cadence"
+  ],
+  "Teacher": [
+   "anchor",
+   "bible",
+   "cadence"
+  ]
+ },
+ "completions": [
+  {
+   "character": "Classmate",
+   "proposals": [
+    {
+     "field": "anchor",
+     "proposedText": "Grounded in the scene role of a peer who is in the classroom with Jenny and Teacher: Classmate should anchor the moment in ordinary school-life reactions first — noticing, waiting, and reacting in a way that keeps the scene socially real rather than theatrical.",
+     "groundedIn": "No direct bible is established for Classmate; this proposal is grounded in the cast placement 'Classmate' and the series rule that child-world scenes stay emotionally true and simple enough for a classroom-scale moment."
+    },
+    {
+     "field": "bible",
+     "proposedText": "A normal schoolmate presence whose main job is to make the classroom feel shared and lived-in. Classmate is not a narrator or fixer; they react, witness, and occasionally add pressure or relief through simple peer behaviour.",
+     "groundedIn": "Grounded in the absence of an existing bible for Classmate and the show canon's classroom/emotional-world logic, where supporting characters function through observable behaviour rather than big psychology."
+    },
+    {
+     "field": "cadence",
+     "proposedText": "Short, practical, peer-like lines; quick responses that sound like a real child in class. Cadence should be plainspoken and immediate, with small pauses for confusion, curiosity, or copied bravado.",
+     "groundedIn": "Grounded in the role of a school classmate and the series tone: warm, dry, slightly wonky, never babyish or over-explained."
+    }
+   ]
+  },
+  {
+   "character": "Jenny",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Careful, thoughtful, and slightly self-conscious; Jenny speaks as someone who thinks before she speaks, with a quiet little stop-start when she feels exposed. Her humour comes out as soft, accidental, or under her breath rather than performative.",
+     "groundedIn": "Directly grounded in the existing bible: 'A thoughtful, sensitive schoolgirl with a quiet sense of humour.' This extends that into spoken rhythm without inventing new psychology."
+    }
+   ]
+  },
+  {
+   "character": "Teacher",
+   "proposals": [
+    {
+     "field": "anchor",
+     "proposedText": "The stable adult in the room: Teacher anchors the classroom by keeping the situation readable, fair, and moving. When things wobble, Teacher should sound like the person who can hold the room without making a fuss.",
+     "groundedIn": "Grounded in the school setting and the show’s emotional rule that adults and spaces help a child carry the feeling; no Teacher bible exists yet, so this stays within functional classroom behaviour."
+    },
+    {
+     "field": "bible",
+     "proposedText": "An everyday classroom authority who is calm, observant, and not theatrical about mistakes. Teacher notices the atmosphere, gives simple instructions, and corrects gently so the room stays safe for trying again.",
+     "groundedIn": "Grounded in the character slot 'Teacher' and the series canon emphasis on repair, safety, and allowing mistakes without shame."
+    },
+    {
+     "field": "cadence",
+     "proposedText": "Clear, unhurried, and practical. Teacher speaks in full, simple sentences that steady the room; when concerned, the pace tightens a little, but the voice stays even and human.",
+     "groundedIn": "Grounded in the classroom role and the series tone: emotionally intelligent, warm, not overcomplicated, with humour coming from behaviour rather than forced lines."
+    }
+   ]
+  }
+ ]
+}

@@ -55,6 +55,7 @@ PROJECT_ID = PROFILE.profile.showId
 SHOW_ID = PROJECT_ID                        # alias, one release
 PROJECT_NAME = PROFILE.profile.name
 SHOWRUNNER = PROFILE.profile.showrunner or "the showrunner"   # who signs the gates (T52 chair contracts)
+FORMAT = PROFILE.profile.format             # T71: the project's fixed delivery format, or None
 ENGINE_ADAPTER = PROFILE.profile.engineAdapter          # historical label (T55) — never a gate
 CAPABILITIES = {**project_profile.DEFAULT_CAPABILITIES, **(PROFILE.profile.capabilities or {})}
 PROJECT = str(PROFILE.project_root)

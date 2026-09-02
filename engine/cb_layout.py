@@ -22,6 +22,67 @@ class LayoutError(RuntimeError):
     pass
 
 
+PRODUCTION_FRAME_RATIO = 16 / 9
+PRODUCTION_FRAME_MIN = (1280, 720)
+# The widest crop the studio will make on a supplied plate without a human re-framing it:
+# a 3:2 image (ChatGPT/Midjourney's default) loses 15% of its height to a 16:9 frame and is
+# accepted; a 4:3 loses 25% and is the limit; anything squarer or a portrait is refused.
+PLATE_CROP_RATIO_RANGE = (4 / 3, 2.4)
+
+
+def conform_plate_to_production_frame(source_path, out_path=None):
+    """Make a supplied scene plate a production frame (2026-09-02, The Box Monsters S2).
+
+    Julian's plates come from ChatGPT at 2496x1664 (3:2); `render_composition_master`
+    refused them ("scene plate must be a widescreen production frame") at the keyframe step,
+    after the plate had been approved. The frame is settled ONCE, at intake, so the
+    approved plate, the provider's world reference and the composition proof are all the
+    same 16:9 image: a centre crop to 16:9, never a stretch, never a letterbox. A plate that
+    already is a production frame is copied unchanged. Refuses a plate whose crop would lose
+    more than a quarter of its height (squarer than 4:3), a portrait, or one smaller than
+    1280x720 after the crop — that needs a human to re-frame, not a silent crop.
+
+    Returns {"path", "cropped", "sourceSize", "size"}.
+    """
+    source_path = pathlib.Path(source_path)
+    out_path = pathlib.Path(out_path) if out_path else source_path
+    with Image.open(source_path) as source:
+        width, height = source.size
+        ratio = width / max(height, 1)
+        if 1.70 <= ratio <= 1.85:
+            if out_path != source_path:
+                out_path.write_bytes(source_path.read_bytes())
+            return {"path": str(out_path), "cropped": False,
+                    "sourceSize": [width, height], "size": [width, height]}
+        low, high = PLATE_CROP_RATIO_RANGE
+        if not low <= ratio <= high:
+            raise LayoutError(
+                f"scene plate is {width}x{height} ({ratio:.2f}:1) — too far from the 16:9 "
+                f"production frame to crop; supply a landscape image between 4:3 and 2.4:1")
+        if ratio > PRODUCTION_FRAME_RATIO:
+            crop_width = int(round(height * PRODUCTION_FRAME_RATIO))
+            offset = (width - crop_width) // 2
+            box = (offset, 0, offset + crop_width, height)
+        else:
+            crop_height = int(round(width / PRODUCTION_FRAME_RATIO))
+            offset = (height - crop_height) // 2
+            box = (0, offset, width, offset + crop_height)
+        frame = source.crop(box)
+        if frame.width < PRODUCTION_FRAME_MIN[0] or frame.height < PRODUCTION_FRAME_MIN[1]:
+            raise LayoutError(
+                f"scene plate is {width}x{height}; its 16:9 crop {frame.width}x{frame.height} "
+                f"is below the {PRODUCTION_FRAME_MIN[0]}x{PRODUCTION_FRAME_MIN[1]} production minimum")
+        if source.mode not in ("RGB", "RGBA"):
+            frame = frame.convert("RGB")
+        suffix = out_path.suffix.lower()
+        fmt = {"jpg": "JPEG", "jpeg": "JPEG", "webp": "WEBP"}.get(suffix.lstrip("."), "PNG")
+        if fmt == "JPEG" and frame.mode == "RGBA":
+            frame = frame.convert("RGB")
+        frame.save(out_path, format=fmt, **({"quality": 95} if fmt == "JPEG" else {}))
+        return {"path": str(out_path), "cropped": True,
+                "sourceSize": [width, height], "size": [frame.width, frame.height]}
+
+
 def _front_view_crop(image: Image.Image) -> Image.Image:
     """Take the first full-body view from the canonical four-view turnaround sheet."""
     width, height = image.size

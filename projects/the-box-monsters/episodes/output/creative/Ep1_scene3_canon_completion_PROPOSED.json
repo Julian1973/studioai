@@ -1,0 +1,63 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "3",
+ "builtAt": "2026-09-02T18:32:16",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "Nib": [
+   "cadence"
+  ],
+  "Patch": [
+   "cadence"
+  ],
+  "Rumble": [
+   "cadence"
+  ],
+  "Tilly": [
+   "cadence"
+  ]
+ },
+ "completions": [
+  {
+   "character": "Nib",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Quick, sideways, and a bit bouncy — like thoughts arriving before the rest of the sentence does; often lands on the honest bit by accident.",
+     "groundedIn": "Based on Nib’s bible: 'Curious, funny and easily distracted; often says the emotional truth by accident.' The cadence extends that into observable delivery without adding new psychology."
+    }
+   ]
+  },
+  {
+   "character": "Patch",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Fast and forward-leaning, with warm bursts of certainty that can trip over themselves; he sounds like he’s already halfway into the rescue, then stays to work it out.",
+     "groundedIn": "Based on Patch’s bible: 'The brave, warm first responder who learns by staying with the feeling.' The cadence reflects quick entry, warmth, and the habit of learning in place."
+    }
+   ]
+  },
+  {
+   "character": "Rumble",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Slow, steady, and spacious, with unhurried phrases that make room for others; even when he’s saying something simple, it feels held and safe.",
+     "groundedIn": "Based on Rumble’s bible: 'The biggest monster with the softest heart; gentle, careful and protective.' The cadence translates gentle protection into pace and verbal space."
+    }
+   ]
+  },
+  {
+   "character": "Tilly",
+   "proposals": [
+    {
+     "field": "cadence",
+     "proposedText": "Tight, neat, and efficient, with a clipped little organising rhythm that can speed up when a plan is working and go extra precise when it isn’t.",
+     "groundedIn": "Based on Tilly’s bible: 'The organiser and inventor who learns that feelings need listening before fixing.' The cadence keeps the organising instinct and the tension around problem-solving."
+    }
+   ]
+  }
+ ]
+}

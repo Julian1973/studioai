@@ -5,4 +5,7 @@ fal-client>=0.5,<1
 pillow>=10,<13
 numpy>=2.0,<3
 scipy>=1.14,<2
+# cb_layout's opening-frame blocking removes turnaround backgrounds locally (never a provider call).
+# Found missing on the first Windows keyframe build, 2026-09-02: the Mac had it installed by hand.
+rembg[cpu]>=2.0,<3
 pytest>=8,<10

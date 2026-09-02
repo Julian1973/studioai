@@ -482,9 +482,15 @@ def test_performance_contract_rejects_duplicate_or_reordered_phases():
     reordered = {**base, "phases": list(reversed(base["phases"]))}
     with pytest.raises(Exception, match="must follow"):
         C.ShotPerformanceContract(**reordered)
-    duplicated = {**base, "phases": [base["phases"][0], base["phases"][0]]}
-    with pytest.raises(Exception, match="must be unique"):
-        C.ShotPerformanceContract(**duplicated)
+    # 2026-09-02: a repeated phase is FOLDED into one (performers joined, actions joined), never
+    # refused — the scene model's first Box Monsters pass listed two "action" phases for two
+    # performers. Order is still enforced; nothing is dropped.
+    twin = {**base["phases"][0], "performer": "Other", "observableAction": "does the other half."}
+    duplicated = {**base, "phases": [base["phases"][0], twin] + base["phases"][1:]}
+    folded = C.ShotPerformanceContract(**duplicated)
+    assert [p.phase for p in folded.phases] == [p["phase"] for p in base["phases"]]
+    assert folded.phases[0].performer.endswith(" and Other")
+    assert folded.phases[0].observableAction.endswith("; does the other half.")
 
 
 def test_gate5_mechanically_attaches_big_comedy_staging_inside_a_packed_unit(monkeypatch):
@@ -519,6 +525,159 @@ def test_gate5_mechanically_attaches_big_comedy_staging_inside_a_packed_unit(mon
         C.SceneDirection(scene=_scene(), beats=[earlier_beat, beat]),
         [card], log=lambda *args, **kwargs: None)
     assert result[0].performanceContract.comedyStaging.model_dump() == staging.model_dump()
+
+
+def test_an_unresolvable_straight_character_leaves_the_beat_with_no_foil(monkeypatch):
+    """2026-09-02 (The Box Monsters Scene 5): the Director named "The card/message" as the
+    comedy foil and the whole scene refused. A prop cannot play straight — the beat plays
+    with no foil. The comic owner is required, so an unresolvable one is still refused."""
+    src = {"beatCode": "1.B1", "sourceBeatId": "source-beat:test:1",
+           "sourceEventIds": ["source-event:test:1"],
+           "sourceEventRange": {"firstEventIndex": 0, "lastEventIndex": 1},
+           "sourceEventSignature": {"digest": "d" * 64},
+           "storyBeat": "Jenny reads the card and folds the worksheet away.",
+           "location": "BEDROOM", "time": "evening", "cuts": []}
+    ready = {"beats": [src], "cast": ["Jenny", "Patch"]}
+    logged = []
+
+    def run(straight, owner="Jenny"):
+        beat = _beat().model_copy(deep=True)
+        beat.participatingCharacters = ["Jenny"]
+        beat.emotionContract.owner = "Jenny"
+        beat.comedyContract.comicOwner = owner
+        beat.comedyContract.straightCharacter = straight
+        monkeypatch.setattr(cb_llm, "structured",
+                            lambda *a, **k: C.SceneDirection(scene=_scene(), beats=[beat]))
+        return C.gate3_beats("Ep1", 1, {"episodeVision": "v"}, _selection(), _treatment("A"),
+                             ready, log=lambda m, **k: logged.append(str(m)))
+
+    played = run("The card/message")
+    assert played.beats[0].comedyContract.straightCharacter is None
+    assert any("plays with no foil" in line for line in logged)
+
+    # a phrase naming exactly one participant IS that participant, foil or owner alike
+    assert run("Jenny's own quiet reaction").beats[0].comedyContract.straightCharacter == "Jenny"
+    assert run(None, owner="Jenny's own bravery").beats[0].comedyContract.comicOwner == "Jenny"
+
+    # the comic owner is required: a prop can never own the gag
+    with pytest.raises(RuntimeError, match="COMEDY CONTRACT UNKNOWN comicOwner"):
+        run(None, owner="The shoebox")
+
+
+def test_gate5_accepts_folded_multi_performer_phases_and_drops_environment_truths(monkeypatch):
+    """2026-09-02 (Box Monsters on the scene model): a folded phase names 'Patch and Nib'
+    — every part is checked against the roster, the whole string is not one name; and a
+    characterTruth written for ENVIRONMENT is dropped, never a refusal."""
+    beat = _beat().model_copy(deep=True)
+    beat.participatingCharacters = ["Fuzzby", "Zenny"]
+    contract = _performance_contract().model_copy(deep=True)
+    contract.phases[1].performer = "Fuzzby and Zenny"
+    contract.phases[2].performer = "ENVIRONMENT"
+    contract.characterTruths = contract.characterTruths + [
+        contract.characterTruths[0].model_copy(update={"character": "Zenny"}),
+        contract.characterTruths[0].model_copy(update={"character": "ENVIRONMENT"})]
+    calls = []
+
+    def fake(system, user, schema, label="", **kwargs):
+        calls.append(user)
+        return C.PerformancePass(shots=[C.PerformanceCard(
+            shotId="S1.SH1", physicalPerformance="Both bodies settle visibly.",
+            animationTiming="One anticipation, a shared action, the room settles.",
+            performanceContract=contract)])
+
+    monkeypatch.setattr(cb_llm, "structured", fake)
+    result = C.gate5_performance(
+        "Ep1", 1, _treatment("A"), C.SceneDirection(scene=_scene(), beats=[beat]),
+        [_card()], log=lambda *a, **k: None)
+    assert len(calls) == 1
+    truths = [t.character for t in result[0].performanceContract.characterTruths]
+    assert truths == ["Fuzzby", "Zenny"]
+
+    bad = contract.model_copy(deep=True)
+    bad.phases[1].performer = "Fuzzby and Briggle"
+    monkeypatch.setattr(cb_llm, "structured", lambda *a, **k: C.PerformancePass(shots=[
+        C.PerformanceCard(shotId="S1.SH1", physicalPerformance="x", animationTiming="y",
+                          performanceContract=bad)]))
+    with pytest.raises(RuntimeError, match="MISSING CHARACTER TRUTH|UNKNOWN PERFORMER"):
+        C.gate5_performance(
+            "Ep1", 1, _treatment("A"), C.SceneDirection(scene=_scene(), beats=[beat]),
+            [_card()], log=lambda *a, **k: None)
+
+
+def test_production_detail_normalizes_bare_digest_timing_window_ids():
+    """2026-09-02: the scene model wrote the timing window as the bare 'sha256:…' while the
+    assignment carried 'dialogue-occurrence:sha256:…' — the same occurrence, normalized the
+    same way; an unknown or ambiguous reference stays as written for the caller to refuse."""
+    expected = ["dialogue-occurrence:sha256:" + "a" * 64,
+                "dialogue-occurrence:sha256:" + "b" * 64]
+    owner = {oid: "1.B1" for oid in expected}
+    assert C._normalize_occurrence_id("sha256:" + "a" * 64, expected, owner) == expected[0]
+    assert C._normalize_occurrence_id("b" * 64, expected, owner) == expected[1]
+    assert C._normalize_occurrence_id(expected[0], expected, owner) == expected[0]
+    assert C._normalize_occurrence_id("sha256:" + "c" * 64, expected, owner) == "sha256:" + "c" * 64
+    assert C._normalize_occurrence_id("", expected, owner) == ""
+
+    voice = C.VoicePerformance(
+        dialogueOccurrenceId=expected[0], sourceEventId="source-event:test:1",
+        sourceEventIndex=0, beatId="1.B1", sourceBeatId="source-beat:test:1",
+        speaker="Fuzzby", exactDialogue="Again.", dramaticIntention="x", subtext="x",
+        relationshipTarget="x", emotionalEntry="x", emotionalExit="x",
+        operativeWords=[], pace="x", rhythm="x", pauses="x", breaths="x",
+        nonVerbalActions="x", elevenLabsV3Direction="x",
+        physicalActionRelationship="x", expectedTiming="x")
+    detail = _detail("S1.SH1", occurrence_ids=[expected[0]])
+    detail.dialogueTimings[0].dialogueOccurrenceId = "sha256:" + "a" * 64
+    out = C._assign_dialogue_occurrences([_card()], [voice], [detail])
+    assert out[0].dialogueTimings[0].dialogueOccurrenceId == expected[0]
+
+
+def test_gate5_repairs_every_shot_problem_in_one_rerun(monkeypatch):
+    """2026-09-02 (The Box Monsters Scene 4): the checks reran on the FIRST failing shot, so a
+    model dropping one truth per pass failed on SH09, then SH11, then the next — never
+    converging. Every shot is checked first; the one permitted rerun names them all."""
+    beat = _beat().model_copy(deep=True)
+    beat.participatingCharacters = ["Fuzzby", "Zenny"]
+    shots = [_card("S1.SH1"), _card("S1.SH2")]
+
+    def _contract(missing):
+        contract = _performance_contract().model_copy(deep=True)
+        contract.phases[1].performer = "Fuzzby and Zenny"
+        if not missing:
+            contract.characterTruths = contract.characterTruths + [
+                contract.characterTruths[0].model_copy(update={"character": "Zenny"})]
+        return contract
+
+    calls = []
+
+    def fake(system, user, schema, label="", **kwargs):
+        calls.append(user)
+        first = len(calls) == 1
+        return C.PerformancePass(shots=[C.PerformanceCard(
+            shotId=shot_id, physicalPerformance="The body settles visibly.",
+            animationTiming="One anticipation, a shared action, a landing.",
+            performanceContract=_contract(missing=first)) for shot_id in
+            ("S1.SH1", "S1.SH2")])
+
+    monkeypatch.setattr(cb_llm, "structured", fake)
+    result = C.gate5_performance(
+        "Ep1", 1, _treatment("A"), C.SceneDirection(scene=_scene(), beats=[beat]),
+        shots, log=lambda *a, **k: None)
+
+    assert len(calls) == 2, "one rerun, never one per failing shot"
+    repair = calls[1]
+    assert "S1.SH1" in repair and "S1.SH2" in repair, "both shots named in the same rerun"
+    assert "PERFORMANCE CONTRACT PROBLEMS (2)" in repair
+    assert all(shot.performanceContract for shot in result)
+
+    # a second failure refuses, naming every outstanding problem at once
+    monkeypatch.setattr(cb_llm, "structured", lambda *a, **k: C.PerformancePass(shots=[
+        C.PerformanceCard(shotId=shot_id, physicalPerformance="x", animationTiming="y",
+                          performanceContract=_contract(missing=True))
+        for shot_id in ("S1.SH1", "S1.SH2")]))
+    with pytest.raises(RuntimeError, match=r"PERFORMANCE CONTRACT PROBLEMS \(2\)"):
+        C.gate5_performance(
+            "Ep1", 1, _treatment("A"), C.SceneDirection(scene=_scene(), beats=[beat]),
+            shots, log=lambda *a, **k: None)
 
 
 def test_gate5_retries_once_when_performance_pass_drops_a_shot(monkeypatch):
@@ -987,3 +1146,36 @@ def test_no_fixed_lane_or_mandatory_coverage_language_in_contract():
 if __name__ == "__main__":
     import subprocess
     raise SystemExit(subprocess.call([sys.executable, "-m", "pytest", __file__, "-q"]))
+
+
+def test_the_emotion_owner_is_added_to_a_short_participant_list(monkeypatch):
+    """2026-09-02 (The Box Monsters Scene 4): the Director gave the arrival beat to the
+    monsters and named Jenny — the scene's own protagonist and a locked-cast member — as its
+    emotional owner. The owner is in the beat by definition; the list was short, not wrong."""
+    src = {"beatCode": "1.B1", "sourceBeatId": "source-beat:test:1",
+           "sourceEventIds": ["source-event:test:1"],
+           "sourceEventRange": {"firstEventIndex": 0, "lastEventIndex": 1},
+           "sourceEventSignature": {"digest": "d" * 64},
+           "storyBeat": "The monsters land and Jenny sees the mistake.",
+           "location": "SHOEBOX", "time": "night", "cuts": []}
+    ready = {"beats": [src], "cast": ["Jenny", "Patch"]}
+    logged = []
+
+    def run(owner):
+        beat = _beat().model_copy(deep=True)
+        beat.participatingCharacters = ["Patch"]
+        beat.emotionContract.owner = owner
+        beat.comedyContract.comicOwner = "Patch"
+        beat.comedyContract.straightCharacter = None
+        monkeypatch.setattr(cb_llm, "structured",
+                            lambda *a, **k: C.SceneDirection(scene=_scene(), beats=[beat]))
+        return C.gate3_beats("Ep1", 1, {"episodeVision": "v"}, _selection(), _treatment("A"),
+                             ready, log=lambda m, **k: logged.append(str(m)))
+
+    out = run("Jenny")
+    assert out.beats[0].emotionContract.owner == "Jenny"
+    assert out.beats[0].participatingCharacters == ["Patch", "Jenny"]
+    assert any("owns this beat's emotional change" in line for line in logged)
+
+    with pytest.raises(RuntimeError, match="EMOTION CONTRACT UNKNOWN OWNER"):
+        run("The shoebox itself")

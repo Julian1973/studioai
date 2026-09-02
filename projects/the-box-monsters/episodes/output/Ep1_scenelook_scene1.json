@@ -1,0 +1,58 @@
+{
+ "approved": null,
+ "candidate": {
+  "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S1_plate_candidate_2be13efd.png",
+  "hash": "0d0975f0281965f59594119cdac19d54fae696aee66cbee8402241fc22274b5c",
+  "inputSignature": {
+   "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
+   "briefHash": "23913eeedd85e0890ef67528e98e227b554c6b362aa7182b859fb8155f49f933",
+   "referenceHashes": {},
+   "plateHash": "0d0975f0281965f59594119cdac19d54fae696aee66cbee8402241fc22274b5c"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-02T15:53:08",
+  "packageRevision": 1
+ },
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": null,
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "studio/chairs/cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-09-02T15:50:08",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "creativeDirectingStandardVersion": 4,
+    "sourceHash": "48f772a3f5c67d6f7fb13dc52fc17e8aa08e845a1f7542f32b16860802e70930",
+    "output": {
+     "creativeIntent": "Establish the classroom as ordinary, public, and emotionally pressurized without becoming cruel or dramatic. The room should feel like it has just gone too quiet after a small reading mistake: calm surfaces, gentle school order, and a subtle weight around paper, desks, and silence.",
+     "storyOfPlace": "Jenny’s classroom is a familiar handmade schoolroom where learning materials are cared for but worn by daily use. It is not magical yet; it belongs to ordinary reality before the hidden emotional world opens later. The environment should suggest a room that can move on with routine while one worksheet quietly becomes heavy with shame.",
+     "paletteAndLighting": "Warm-muted school daylight mixed with soft practical warmth. Palette: faded cream cardboard walls, honeyed tan desks, muted blue-green board, pale yellow paper, dusty peach and soft grey shadows. Lighting should be gentle and believable, with an understated hush rather than high contrast or spectacle.",
+     "materialsAndAtmosphere": "Premium stylized 3D CGI with tactile handmade cardboard construction: visible paper fibres, layered corrugated edges, folded seams, tiny dents, glue marks, stitched repairs, scuffed desk corners, soft felt or paper erasers, matte chalk dust, and slightly curled worksheets. Atmosphere is still, clean, and quiet, with a faint suspended-paper softness in the air.",
+     "continuityRules": [
+      "Environment-only Scene Look plate: no characters, no hands, no silhouettes, no creatures, no faces.",
+      "Keep the classroom plain, public, and realistic within the handmade cardboard style; do not introduce fantasy, magic, monsters, portals, or hidden-world elements.",
+      "Prioritize the scene-wide look: palette, materials, classroom dressing, and emotional atmosphere; do not create dramatic action or character staging.",
+      "Include ordinary classroom elements: student desks, teacher area, front board, cubbies or shelves, paper learning materials, pencils, and worksheets, all made from tactile paper/cardboard materials.",
+      "Board and worksheet markings may appear as simple non-legible strokes or abstract classroom marks; avoid readable text or exact words in the generated image."
+     ],
+     "providerPrompt": "Environment-only Scene Look plate for an empty elementary classroom in premium stylized 3D CGI, tactile handmade cardboard world. Ordinary schoolroom during soft daytime: faded cream cardboard walls, honey-tan cardboard desks, muted blue-green front board with non-legible chalk-like marks, teacher area, cubbies and shelves, pencils, paper worksheets, curled corners, scuffed desk edges, visible paper fibres, corrugated layers, folded seams, glue marks, small stitched repairs, matte chalk dust. Mood: a normal classroom holding its breath after a small mistake, calm but too quiet, routine school order with subtle emotional weight around the paper objects. Warm-muted daylight with gentle practical warmth, soft grey shadows, dusty peach highlights, no melodrama, no fantasy elements. Premium cinematic handmade animation look, tactile surfaces, real material weight, expressive but restrained atmosphere. No characters, no hands, no silhouettes, no faces, no creatures, no readable text, no logos."
+    },
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd"
+     },
+     "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
+     "sceneContextHash": "95db141fb2a56ce187e4f2a9943b6d28298d40f772cc93898da65ed722b9e10c"
+    }
+   },
+   "history": []
+  }
+ }
+}

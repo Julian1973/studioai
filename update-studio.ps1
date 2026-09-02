@@ -94,6 +94,9 @@ git config core.symlinks true
 git config gc.auto 0
 git config gc.autoDetach false
 git config fetch.prune false
+# never convert line endings on this checkout - the script store verifies every screenplay by SHA-256,
+# and a CRLF checkout changed the bytes (.gitattributes pins LF for every text file as well)
+git config core.autocrlf false
 
 $before = "-"
 $beforeBranch = "-"
@@ -196,8 +199,11 @@ if ($haveLocal) {
     if ($source -eq "origin/$Branch") { git branch --set-upstream-to "origin/$Branch" $Branch | Out-Null }
 }
 if ($source -like "bundle/*") { Say "This update came from the bundle - publish it with:  git push -u origin $Branch" }
-# symlinks written as text files by an older checkout become real links on re-checkout
+# symlinks written as text files by an older checkout become real links on re-checkout, and every
+# tracked file is rewritten from the index so the line endings follow .gitattributes (LF), not an
+# earlier autocrlf setting
 git checkout -- . | Out-Host
+git checkout-index -a -f 2>$null | Out-Null
 
 # 2b. relocation - carry the assets, media and studio state across. robocopy /XC /XN /XO never overwrites
 #     a file that already exists in the new checkout, and nothing is ever removed from the OneDrive copy.

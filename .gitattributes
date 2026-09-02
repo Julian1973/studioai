@@ -1,0 +1,17 @@
+# Line endings: every text file is stored and checked out with LF on every platform. The immutable
+# script store (engine/cb_scripts.py) verifies each script by SHA-256; a CRLF checkout on Windows
+# changed the bytes and failed every script (found 2026-09-02, the first Windows start).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.mp3 binary
+*.mp4 binary
+*.wav binary
+*.bundle binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.cmd text eol=crlf
+*.bat text eol=crlf

@@ -877,6 +877,7 @@ def intake_status(episode="Ep1"):
         out["directorSkillLoaded"] = bool(cb_departments.load_runtime_skill("director"))
     except Exception:
         out["directorSkillLoaded"] = False
+    current = None   # stays None when the script store refuses (missing or failed verification)
     try:
         current = script_record_for(episode)
         spath = ROOT / current["contentPath"]
@@ -921,7 +922,7 @@ def intake_status(episode="Ep1"):
         # reopen an approved episode or send the reviewer back through Story &
         # Direction; creative script changes continue through the normal hashes.
         format_only_cleanup = (
-            (current.get("changeScope") or {}).get("kind") ==
+            ((current or {}).get("changeScope") or {}).get("kind") ==
             "dialogue-format-cleanup"
         )
         pkg = json.loads(pkgs[-1].read_text())

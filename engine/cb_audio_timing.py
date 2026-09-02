@@ -26,6 +26,7 @@ CHANNELS = 2
 # small overruns should be logged as natural extension, not treated as a dead-end.
 WINDOW_TOLERANCE_SEC = 0.75
 EDGE_FADE_SEC = 0.012
+LINE_HANDLE_SEC = 0.08
 # ElevenLabs dialogue-with-timestamps returns one continuous acted conversation. Its
 # segment ranges already contain the actor's pauses, so adding another gap at every
 # boundary duplicates silence and can push an otherwise valid performance over budget.
@@ -83,7 +84,8 @@ def minimum_master_duration(raw_audio_path, timing_path, dialogue_lines):
         authored.append((index, target_start, source_range[1] - source_range[0]))
     for position, (index, target_start, source_duration) in enumerate(authored[:-1]):
         next_start = authored[position + 1][1]
-        if source_duration > next_start - target_start + WINDOW_TOLERANCE_SEC:
+        tolerance = 0.0 if timing.get("separatedDialogueAssembly") else WINDOW_TOLERANCE_SEC
+        if source_duration > next_start - target_start + tolerance:
             raise AudioTimingError(
                 f"dialogue line {index + 1} overlaps the next approved start; "
                 "shot extension cannot resolve an internal timing conflict")
@@ -107,7 +109,7 @@ def cascade_retime_for_natural_performance(raw_audio_path, timing_path, dialogue
         raise AudioTimingError("dialogue timing metadata does not match the raw audio bytes")
     ranges = _source_ranges(timing, len(dialogue_lines))
     if timing.get("separatedDialogueAssembly") and minimum_gap_sec <= 0:
-        minimum_gap_sec = 0.15
+        minimum_gap_sec = 0.25
     if _needs_continuous_assembly(raw_audio_path, timing, ranges):
         if not dialogue_lines:
             return {"lines": [], "requiredDurationSec": 0.0,
@@ -461,18 +463,21 @@ def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
     mixed_labels = ["[silence]"]
     for index, placement in enumerate(placements):
         delay_ms = int(round(placement["targetStartSec"] * 1000))
-        line_duration = placement["sourceEndSec"] - placement["sourceStartSec"]
+        source_start = max(0.0, placement["sourceStartSec"] - LINE_HANDLE_SEC)
+        source_end = placement["sourceEndSec"] + LINE_HANDLE_SEC
+        line_duration = source_end - source_start
         fade = min(EDGE_FADE_SEC, line_duration / 4)
         fade_out_start = max(0.0, line_duration - fade)
         filters.append(
-            f"[src{index}]atrim=start={placement['sourceStartSec']:.6f}:"
-            f"end={placement['sourceEndSec']:.6f},asetpts=PTS-STARTPTS,"
+            f"[src{index}]atrim=start={source_start:.6f}:"
+            f"end={source_end:.6f},asetpts=PTS-STARTPTS,"
             f"aformat=sample_rates={SAMPLE_RATE}:channel_layouts=stereo,"
             f"afade=t=in:st=0:d={fade:.6f},"
             f"afade=t=out:st={fade_out_start:.6f}:d={fade:.6f},"
             f"adelay={delay_ms}|{delay_ms}[line{index}]"
         )
         placement["edgeFadeSec"] = fade
+        placement["sourceHandleSec"] = LINE_HANDLE_SEC
         mixed_labels.append(f"[line{index}]")
     filters.append(
         "".join(mixed_labels) +

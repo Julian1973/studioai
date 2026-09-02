@@ -1549,7 +1549,7 @@
        ]
       },
       "durationCarryForward": {
-       "at": "2026-09-02T12:03:30",
+       "at": "2026-09-02T12:19:51",
        "fromSec": 30.0,
        "newDurationSec": 30.0,
        "reason": "Approved direction carried across timing-only retime"
@@ -3577,7 +3577,7 @@
        "compiledHash": "3d0412a0cb817860fd0a9381688d692e6915ecf02cbc56bc27664e815f89d181"
       },
       "durationCarryForward": {
-       "at": "2026-09-02T12:03:30",
+       "at": "2026-09-02T12:19:51",
        "fromSec": 30.0,
        "newDurationSec": 30.0,
        "reason": "Approved direction carried across timing-only retime"
@@ -3592,7 +3592,7 @@
    "keyframeCandidates": [],
    "selectedKeyframeCandidateId": null,
    "voicePlacementFailure": null,
-   "voPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_66ed4cf9.wav",
+   "voPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav",
    "voGeneratedFrom": [
     {
      "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
@@ -3754,9 +3754,9 @@
      ]
     }
    ],
-   "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_66ed4cf9_chorus.mp3",
-   "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_66ed4cf9_chorus.mp3.dialogue.json",
-   "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_66ed4cf9.wav.timing.json",
+   "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_623e9729.mp3",
+   "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_623e9729.mp3.dialogue.json",
+   "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav.timing.json",
    "voInputSignature": {
     "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
     "dialogueHash": "673b502100e31b55b8a0d0269272c31524ebddee9bb73690241fc0887746ce75",
@@ -3784,10 +3784,10 @@
    },
    "voPackageRevision": 2,
    "voicePrevious": {
-    "path": "media/shots/Ep2_S4.SH1_vo_candidate_d2b4008e.wav",
-    "rawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_d2b4008e_chorus.mp3",
-    "timingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_d2b4008e_chorus.mp3.dialogue.json",
-    "placementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_d2b4008e.wav.timing.json",
+    "path": "media/shots/Ep2_S4.SH1_vo_candidate_66ed4cf9.wav",
+    "rawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_66ed4cf9_chorus.mp3",
+    "timingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_66ed4cf9_chorus.mp3.dialogue.json",
+    "placementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_66ed4cf9.wav.timing.json",
     "generatedFrom": [
      {
       "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
@@ -3949,7 +3949,7 @@
       ]
      }
     ],
-    "supersededAt": "2026-09-02T12:03:30"
+    "supersededAt": "2026-09-02T12:15:00Z"
    },
    "voiceCorrections": [
     {
@@ -3988,6 +3988,28 @@
        "fromSec": 12.8,
        "toSec": 13.989021,
        "shiftSec": 1.1890209999999986
+      }
+     ]
+    },
+    {
+     "at": "2026-09-02T12:19:51",
+     "fromSec": 30.0,
+     "toSec": 30.0,
+     "reason": "Preserve isolated ElevenLabs lines with clean gaps and source handles; no word clipping.",
+     "source": "ElevenLabs-isolated-line-performance",
+     "providerCalled": false,
+     "dialogueStartChanges": [
+      {
+       "dialogueIndex": 1,
+       "fromSec": 3.1,
+       "toSec": 3.45,
+       "shiftSec": 0.3500000000000001
+      },
+      {
+       "dialogueIndex": 2,
+       "fromSec": 5.5,
+       "toSec": 6.26,
+       "shiftSec": 0.7599999999999998
       }
      ]
     }

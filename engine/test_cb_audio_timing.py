@@ -354,7 +354,7 @@ def test_separated_dialogue_assembly_refuses_overlapping_line_anchors(tmp_path):
         raw, timing,
         [{"startSec": 0.8, "endSec": 2.0}, {"startSec": 2.5, "endSec": 4.0}])
 
-    assert cascade["lines"][1]["startSec"] == pytest.approx(3.45)
+    assert cascade["lines"][1]["startSec"] == pytest.approx(3.55)
 
 
 def test_final_line_tolerance_never_clips_audio_past_the_master(tmp_path):

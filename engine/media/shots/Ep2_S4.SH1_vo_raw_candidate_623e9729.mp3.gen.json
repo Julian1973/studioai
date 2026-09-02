@@ -1,0 +1,10 @@
+{
+  "ts": 1788347991.540938,
+  "recorded_at": "2026-09-02T12:19:51",
+  "op": "elevenlabs_isolated_dialogue",
+  "model": "eleven_v3",
+  "chars": 217,
+  "voices": 7,
+  "timestampEndpoint": false,
+  "dialogueTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_623e9729.mp3.dialogue.json"
+}

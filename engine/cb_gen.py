@@ -819,22 +819,23 @@ def _concat_audio_parts(parts, outp):
     if len(parts) == 1:
         outp.write_bytes(pathlib.Path(parts[0]).read_bytes())
         return
-    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
-        concat_file = pathlib.Path(f.name)
-        for part in parts:
-            safe = str(pathlib.Path(part).resolve()).replace("'", "'\\''")
-            f.write(f"file '{safe}'\n")
-    try:
-        subprocess.run(
-            ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-             "-f", "concat", "-safe", "0", "-i", str(concat_file),
-             "-c", "copy", str(outp)],
-            check=True, capture_output=True)
-    finally:
-        try:
-            concat_file.unlink()
-        except OSError:
-            pass
+    command = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
+    for part in parts:
+        command.extend(["-i", str(pathlib.Path(part))])
+    filters, labels = [], []
+    for index in range(len(parts)):
+        label = f"a{index}"
+        filters.append(
+            f"[{index}:a]aformat=sample_rates=48000:channel_layouts=stereo[{label}]")
+        labels.append(f"[{label}]")
+    filters.append("".join(labels) + f"concat=n={len(parts)}:v=0:a=1[out]")
+    codec = (["-codec:a", "libmp3lame", "-q:a", "2"]
+             if pathlib.Path(outp).suffix.lower() == ".mp3"
+             else ["-c:a", "pcm_s16le"])
+    subprocess.run(
+        command + ["-filter_complex", ";".join(filters), "-map", "[out]",
+                   "-ar", "48000", "-ac", "2", *codec, str(outp)],
+        check=True, capture_output=True)
 
 
 def replace_group_chorus_segments(raw_audio, timing_path, performances,
@@ -955,6 +956,118 @@ def replace_group_chorus_segments(raw_audio, timing_path, performances,
     rebuilt_timing.write_text(
         json.dumps(timing, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return str(rebuilt_audio), str(rebuilt_timing)
+
+
+def eleven_isolated_dialogue(performances, out="vo.mp3", *, production_route=None):
+    """Generate each approved line as an isolated ElevenLabs TTS part.
+
+    Use this for repeated chorus/countdown shots where Text-to-Dialogue can carry
+    phrase bleed from one identical turn into the next. The returned timing file
+    deliberately marks the audio as separated so downstream placement never
+    preserves it as one continuous provider conversation.
+    """
+    _require_production_route(production_route, "eleven_isolated_dialogue")
+    _need_eleven_key()
+    with tempfile.TemporaryDirectory(prefix="cb-isolated-dialogue-") as tmp:
+        tmp_path = pathlib.Path(tmp)
+        parts = []
+        segments = []
+        cursor = 0.0
+        total_chars = 0
+        for index, performance in enumerate(performances or []):
+            text = str(performance.get("text") or "").strip()
+            if not text:
+                raise RuntimeError("isolated dialogue requires text for every line")
+            total_chars += len(_eleven_voice_text(text))
+            voice_ids = list(performance.get("voiceIds") or [])
+            if performance.get("voiceTreatment") == "group_chorus" and voice_ids:
+                voices = []
+                for member_index, voice_id in enumerate(voice_ids):
+                    voice = tmp_path / f"line_{index:02d}_chorus_{member_index:02d}.mp3"
+                    eleven_tts(
+                        text, voice_id, model_id=performance.get("modelId", "eleven_v3"),
+                        out=str(voice), stability=float(
+                            performance.get("voiceSettings", {}).get("stability", 0.4)),
+                        similarity_boost=float(performance.get(
+                            "voiceSettings", {}).get("similarity_boost", 0.9)),
+                        style=float(performance.get("voiceSettings", {}).get("style", 0.15)),
+                        production_route=production_route)
+                    voices.append(voice)
+                durations = [_ffprobe_duration(path) for path in voices]
+                target = max(durations)
+                if target <= 0:
+                    raise RuntimeError("isolated chorus voices returned no playable audio")
+                part = tmp_path / f"line_{index:02d}.wav"
+                command = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
+                for voice in voices:
+                    command.extend(["-i", str(voice)])
+                filters = []
+                labels = []
+                for member_index, duration in enumerate(durations):
+                    tempo = max(0.5, min(2.0, duration / target))
+                    label = f"v{member_index}"
+                    filters.append(
+                        f"[{member_index}:a]atempo={tempo:.6f},"
+                        f"apad,atrim=0:{target:.6f}[{label}]")
+                    labels.append(f"[{label}]")
+                filters.append(
+                    "".join(labels) + f"amix=inputs={len(labels)}:normalize=1,"
+                    "alimiter=limit=0.92[out]")
+                command.extend([
+                    "-filter_complex", ";".join(filters), "-map", "[out]",
+                    "-ar", "48000", "-ac", "2", str(part),
+                ])
+                subprocess.run(command, check=True)
+                voice_id = "GROUP_CHORUS"
+            else:
+                voice_id = performance.get("voiceId") or (voice_ids[0] if voice_ids else None)
+                if not voice_id:
+                    raise RuntimeError("isolated dialogue requires a voiceId for every line")
+                part = tmp_path / f"line_{index:02d}.mp3"
+                eleven_tts(
+                    text, voice_id, model_id=performance.get("modelId", "eleven_v3"),
+                    out=str(part), stability=float(
+                        performance.get("voiceSettings", {}).get("stability", 0.4)),
+                    similarity_boost=float(performance.get(
+                        "voiceSettings", {}).get("similarity_boost", 0.9)),
+                    style=float(performance.get("voiceSettings", {}).get("style", 0.15)),
+                    production_route=production_route)
+            duration = _ffprobe_duration(part)
+            parts.append(part)
+            segments.append({
+                "voiceId": voice_id,
+                "dialogueInputIndex": index,
+                "startTimeSec": cursor,
+                "endTimeSec": cursor + duration,
+                "characterStartIndex": 0,
+                "characterEndIndex": len(text),
+                "voiceIds": voice_ids or [voice_id],
+            })
+            cursor += duration
+        outp = MEDIA / out
+        outp.parent.mkdir(parents=True, exist_ok=True)
+        _concat_audio_parts(parts, outp)
+    timing_path = pathlib.Path(str(outp) + ".dialogue.json")
+    timing_path.write_text(
+        json.dumps({
+            "schemaVersion": 1,
+            "provider": "elevenlabs",
+            "endpoint": "/v1/text-to-speech isolated-dialogue",
+            "model": "eleven_v3",
+            "audioPath": str(outp.resolve()),
+            "audioSha256": __import__("hashlib").sha256(outp.read_bytes()).hexdigest(),
+            "inputCount": len(performances or []),
+            "pronunciationOverrides": ELEVEN_PRONUNCIATION_OVERRIDES,
+            "voiceSegments": segments,
+            "isolatedDialogueAssembly": True,
+            "separatedDialogueAssembly": True,
+        }, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8")
+    cb_costs.write_gen_sidecar(
+        outp, op="elevenlabs_isolated_dialogue", model="eleven_v3",
+        chars=total_chars, voices=len(performances or []), timestampEndpoint=False,
+        dialogueTimingPath=str(timing_path))
+    return str(outp)
 
 
 def _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, error_text):

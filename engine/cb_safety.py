@@ -1081,9 +1081,22 @@ def install(m):
         reuse_failed_take = bool(
             failed.get("generatedFrom") == lines and reusable_raw.is_file() and
             reusable_timing.is_file())
+        repeated_chorus = any(
+            sum(1 for line in lines
+                if line.get("voiceTreatment") == "group_chorus" and
+                str(line.get("text") or "").strip() == str(candidate.get("text") or "").strip()
+            ) > 1
+            for candidate in lines
+            if candidate.get("voiceTreatment") == "group_chorus"
+        )
         if reuse_failed_take:
             raw_out, timing_path = reusable_raw, reusable_timing
             log(f"VOICE — {shot_id}: recovering the existing paid take; no provider call")
+        elif repeated_chorus:
+            m.cb_gen.eleven_isolated_dialogue(
+                lines, out=str(raw_out), production_route="cb_render")
+            timing_path = cb_audio_timing.dialogue_timing_path(raw_out)
+            raw_out, timing_path = pathlib.Path(raw_out), pathlib.Path(timing_path)
         else:
             stability = min(float(item.get("voiceSettings", {}).get("stability", 0.3))
                             for item in lines)
@@ -1135,14 +1148,24 @@ def install(m):
                 if cascade:
                     timed_dialogue_lines = cascade["lines"]
                 shot["durationSec"] = retimed_duration
+                isolated_timing = False
+                try:
+                    isolated_timing = bool(
+                        json.loads(pathlib.Path(timing_path).read_text(encoding="utf-8"))
+                        .get("isolatedDialogueAssembly"))
+                except (OSError, ValueError, TypeError):
+                    isolated_timing = False
                 ledger.setdefault("durationRetimes", []).append({
                     "at": m._now(),
                     "fromSec": current_duration,
                     "toSec": retimed_duration,
                     "reason": (
+                        "Preserve isolated ElevenLabs lines with clean gaps and source handles; "
+                        "no word clipping.") if isolated_timing else (
                         "Preserve the approved final dialogue take without clipping or "
                         "time compression, using the available landing room."),
-                    "source": "ElevenLabs-v3-natural-performance",
+                    "source": ("ElevenLabs-isolated-line-performance" if isolated_timing
+                               else "ElevenLabs-v3-natural-performance"),
                     "providerCalled": False,
                     "dialogueStartChanges": (cascade or {}).get("changes", []),
                 })

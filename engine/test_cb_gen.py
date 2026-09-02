@@ -5,11 +5,34 @@ Every provider mutation is scoped through pytest's monkeypatch fixture. Running
 provider checks at import time used to leak stubs into unrelated production tests.
 """
 import json
+import subprocess
 
 import pytest
 
 import cb_costs
 import cb_gen
+
+
+def test_concat_audio_parts_decodes_mixed_formats_without_truncation(tmp_path):
+    first = tmp_path / "first.wav"
+    second = tmp_path / "second.mp3"
+    out = tmp_path / "joined.mp3"
+    subprocess.run([
+        "ffmpeg", "-y", "-f", "lavfi", "-i", "sine=frequency=440:r=48000",
+        "-t", "0.5", "-c:a", "pcm_s16le", str(first),
+    ], check=True, capture_output=True)
+    subprocess.run([
+        "ffmpeg", "-y", "-f", "lavfi", "-i", "sine=frequency=880:r=48000",
+        "-t", "0.5", "-codec:a", "libmp3lame", str(second),
+    ], check=True, capture_output=True)
+
+    cb_gen._concat_audio_parts([first, second], out)
+
+    result = subprocess.run([
+        "ffprobe", "-v", "error", "-show_entries", "format=duration",
+        "-of", "default=nk=1:nw=1", str(out),
+    ], check=True, text=True, capture_output=True)
+    assert float(result.stdout.strip()) == pytest.approx(1.0, abs=0.08)
 
 
 def test_default_image_route_is_seedream(monkeypatch):

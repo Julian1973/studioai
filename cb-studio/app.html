@@ -2136,8 +2136,22 @@ function sceneMilestonePathHTML(active){
   return `<nav class="scene-path" aria-label="Scene creation path"><div class="scene-path-title">Scene path</div><ol class="scene-path-list">${rows}</ol></nav>`;
 }
 
-let RATES=null;
-async function fetchRates(){if(RATES)return RATES;try{RATES=(await (await fetch(BASE+"/api/rates")).json()).rates||{};}catch(e){RATES={};}return RATES;}
+let RATES=null,OPENAI_POLICY=null;
+async function fetchRates(){
+  if(RATES)return RATES;
+  try{
+    const payload=await (await fetch(BASE+"/api/rates")).json();
+    RATES=payload.rates||{};OPENAI_POLICY=payload.openai||null;
+  }catch(e){RATES={};OPENAI_POLICY=null;}
+  return RATES;
+}
+function textDirectionCostCopy(tier){
+  const p=OPENAI_POLICY&&OPENAI_POLICY[tier];
+  if(!p)return tier==="premium"?"Premium text direction; no image, voice or video generation.":"Low-cost text direction; no image, voice or video generation.";
+  const daily=Number(OPENAI_POLICY.dailyLimitUsd||0).toFixed(2);
+  const call=Number(OPENAI_POLICY.perCallLimitUsd||0).toFixed(2);
+  return `${p.model} · ${tier==="premium"?"premium episode direction":"low-cost specialist direction"} · hard limits $${call} per call / $${daily} per day`;
+}
 function estCost(op,opts){
   opts=opts||{}; const r=(RATES||{})[op]; if(!r)return null;
   // 2026-07-17 correction: r.usd for seedream5pro_image (0.144) is ALREADY the flat, ref-inclusive
@@ -2846,7 +2860,7 @@ function storyIntakePanelHTML(d){
     ?`<div class="live" style="color:var(--warn);margin:10px 0">The older beat package is preserved, but it does not match this immutable script and exact canon lock.</div>`:"";
   if(!d.hasCandidate){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
-      ${outcomePanelHTML({tone:job?"working":"ready",title:job?"The Director is working":"Run Story & Direction",body:job?"Stop the current run or wait for its visible candidate.":"Read the active script and propose the episode without generating image, voice or video.",actions:job?[{label:"Stop",onclick:`stopFiring('${job.jobId}')`,kind:"secondary"}]:[{label:"Run Story & Direction",onclick:"storyIntakeRun()"},{label:"Open script",onclick:"go('script')",kind:"secondary"}]})}
+      ${outcomePanelHTML({tone:job?"working":"ready",title:job?"The Director is working":"Run Story & Direction",body:(job?"Stop the current run or wait for its visible candidate. ":"Read the active script and propose the episode without generating image, voice or video. ")+textDirectionCostCopy("premium"),actions:job?[{label:"Stop",onclick:`stopFiring('${job.jobId}')`,kind:"secondary"}]:[{label:"Run Story & Direction",onclick:"storyIntakeRun()"},{label:"Open script",onclick:"go('script')",kind:"secondary"}]})}
       ${visibleJobProgress}
       ${carriedReferences}
       ${productionChecks(stalePackage)}
@@ -4227,7 +4241,7 @@ function departmentPanelHTML(stage,shotId,d){
         </details>
         <div class="ccactions" style="margin-top:12px"><button class="btn" onclick="deptDecide('${_esc(stage)}','${_esc(shotId||"")}','approved')">Approve direction</button>
           <button class="btn ghost" onclick="deptDecide('${_esc(stage)}','${_esc(shotId||"")}','rejected')">Reject / discuss</button></div>
-        <div class="deptmeta">Signed against the current canon, references and production inputs. Approval prepares the next visible decision; it does not spend media credits. Its proof is the next rendered outcome.</div></div>`;
+        <div class="deptmeta">${_esc(textDirectionCostCopy("standard"))}. Approval prepares the next visible decision; it does not spend media credits. Its proof is the next rendered outcome.</div></div>`;
     }
     return `<div class="deptpanel">${person}<div class="cchead">Specialist candidate · awaiting you</div>${editor}
       <div class="ccactions"><button class="btn" onclick="deptDecide('${_esc(stage)}','${_esc(shotId||"")}','approved')">Acknowledge review</button>
@@ -4257,11 +4271,11 @@ function departmentPanelHTML(stage,shotId,d){
     return `<div class="deptpanel">${person}<div class="cchead">Render analysis not run yet</div>
       <div class="ccref">Analyse the visible result for story, acting, camera, physics, identity and continuity.</div>
       <button class="btn ghost" style="margin-top:10px" onclick="deptRun('${_esc(stage)}','${_esc(shotId||"")}')">Analyse visible result</button>
-      <div class="deptmeta">Thinking call only. It cannot generate media, spend media credits or accept the result for you.</div></div>`;
+      <div class="deptmeta">${_esc(textDirectionCostCopy("standard"))}. It cannot generate media, spend media credits or accept the result for you.</div></div>`;
   }
   return `<div class="deptpanel">${person}<div class="cchead">Direction prepares when you build</div>
     <div class="ccref">The Studio will quietly build and sign the specialist brief before it shows the media cost.</div>
-    <div class="deptmeta">No separate approval is required. Your next creative decision is on the rendered result.</div></div>`;
+    <div class="deptmeta">${_esc(textDirectionCostCopy("standard"))}. No separate approval is required. Your next creative decision is on the rendered result.</div></div>`;
 }
 async function attachDepartmentPanel(host,stage,shotId){
   if(!host)return; const key=deptKey(stage,shotId), id="dept_"+key.replace(/[^A-Za-z0-9]/g,"_");
@@ -4277,7 +4291,7 @@ async function attachDepartmentPanel(host,stage,shotId){
 }
 async function deptRun(stage,shotId){
   const key=deptKey(stage,shotId);SH_DEPT_CACHE[key]={loading:true};
-  showStageWorking("Creative direction is working","This is a no-spend preparation step. The result will appear here.");
+  showStageWorking("Creative direction is working","No media is being generated. The low-cost text call is protected by the Studio cost limits, and the result will appear here.");
   try{const r=await fetch(BASE+"/api/department-run",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,stage,shotId:shotId||null})});const j=await r.json();
     if(!r.ok||!j.ok){SH_DEPT_CACHE[key]={error:j.error||"Worker could not start"};renderWorkspaceBody();return;}

@@ -93,7 +93,7 @@ def log_spend(op, cost_usd, out=None, meta=None):
         row = {
             "ts": time.time(),
             "op": op,
-            "cost_usd": round(cost_usd, 4),
+            "cost_usd": round(cost_usd, 6),
             "episode": episode,
             "code": code,
             "out": os.path.basename(str(out)) if out else None,

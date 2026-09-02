@@ -937,7 +937,7 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
         + json.dumps(cast_by_scene, ensure_ascii=False, indent=1) +
         "\n\nReturn the episode vision, a suggested title/logline/leadBear, and the "
         "ordered beat split with creative content for every beat, across every scene.",
-        StoryIntakeDirection, label="department_story", log=log)
+        StoryIntakeDirection, tier="premium", label="department_story", log=log)
 
 
 def prepare_look(context, *, log=print):

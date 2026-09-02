@@ -32,6 +32,15 @@ def test_primary_dashboard_cards_expose_explicit_actions():
     assert 'Continue Production' not in APP
 
 
+def test_text_direction_cost_policy_is_visible_and_served_from_backend():
+    assert 'let RATES=null,OPENAI_POLICY=null;' in APP
+    assert 'gpt-5.4-mini' not in APP
+    assert 'hard limits $${call} per call / $${daily} per day' in APP
+    assert 'textDirectionCostCopy("premium")' in APP
+    assert 'textDirectionCostCopy("standard")' in APP
+    assert '"openai": cb_llm.cost_policy()' in SERVER
+
+
 def test_scene_board_is_a_visual_director_queue_not_a_department_matrix():
     assert 'aria-label="Episode production triage"' in APP
     assert 'Your decisions' in APP

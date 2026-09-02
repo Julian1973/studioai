@@ -65,6 +65,8 @@ _archive_*/
 /Archive.zip
 /_audit_unpack/
 engine/_prompt_read_cache/
+engine/_llm_response_cache/
+engine/.openai_cost_guard.lock
 
 # Archived episode media from resets (723 mp4s, ~420MB, 2026-07-31) — generated output, same
 # category as engine/media/ above. Backed up on disk, never a git object.

@@ -1112,7 +1112,7 @@ def episode_vision(episode="Ep1", log=print):
               "music and environment; and a sequence blueprint covering the supplied scenes "
               "in story order. The climax must require transformed action, not only spectacle."),
         f"THE COMPLETE APPROVED SCRIPT (dialogue verbatim-locked):\n{script[:24000]}",
-        EpisodeVision, label="creative_vision")
+        EpisodeVision, tier="premium", label="creative_vision")
     if v.storyArchitecture is None:
         raise RuntimeError(
             "EPISODE STORY ARCHITECTURE MISSING — newly authored Story & Direction must "

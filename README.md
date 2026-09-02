@@ -23,7 +23,7 @@ Run the zero-spend verification suite:
 python3 -m pytest -q
 ```
 
-Expected canonical result: **153 passed, 4 skipped**. The skips name unavailable historical
+Expected canonical result: **969 passed, 4 skipped**. The skips name unavailable historical
 revision-6 media fixtures; the current production route is covered and passes.
 
 ## The production path
@@ -82,3 +82,12 @@ original 8th Hour folder. They are not part of this animation production path.
 Provider credentials and real media are intentionally not included in a source handover.
 Preserve the production `.env`, approved media and billing profile when installing this
 build. Never paste credentials into source files.
+
+OpenAI text direction is cost-routed and guarded by default:
+
+- `gpt-5.5` is used only for episode Story & Direction.
+- `gpt-5.4-mini` is used for scene, shot, keyframe, voice, animation and review direction.
+- Identical signed inputs reuse the local structured response instead of calling the API again.
+- One provider attempt is made; exhausted credit and other non-retryable errors stop immediately.
+- `OPENAI_MAX_CALL_USD=1.00` and `OPENAI_DAILY_BUDGET_USD=5.00` refuse work before an API call.
+- Actual input, cached-input and output token usage is recorded in the gitignored cost ledger.

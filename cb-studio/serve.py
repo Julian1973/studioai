@@ -2774,10 +2774,11 @@ class H(http.server.SimpleHTTPRequestHandler):
             # second, hand-typed copy in JS that could silently drift. Never mutates anything; not a pricing
             # decision surface — billing_profile.json remains the actual confirmed-plan source for spend.
             try:
-                import cb_costs
+                import cb_costs, cb_llm
                 self._json(200, {"rates": {k: {"usd": v[0], "unit": v[1], "confidence": v[2]}
                                             for k, v in cb_costs.RATES.items()},
-                                  "updated": cb_costs.RATES_UPDATED})
+                                  "updated": cb_costs.RATES_UPDATED,
+                                  "openai": cb_llm.cost_policy()})
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return

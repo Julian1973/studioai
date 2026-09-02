@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "assemblyMode": "continuous-dialogue-performance",
+  "rawAudioPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8e0bdcab_chorus.mp3",
+  "rawAudioSha256": "15eaec2882173b596107f0715a572c51d8bf42b9689af38dbb9305365fb6ef8b",
+  "dialogueTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8e0bdcab_chorus.mp3.dialogue.json",
+  "dialogueTimingSha256": "11a43f2e11bdf9c0837a9668b424426bf6b6c5c9ddd6fe7183fb74bbe2b6dff6",
+  "durationSec": 30.0,
+  "authoredPerformanceTargetStartSec": 0.55,
+  "performanceTargetStartSec": 0.55,
+  "performanceTargetEndSec": 29.9,
+  "performanceStartShiftSec": 0.0,
+  "tempoAdjusted": true,
+  "tempoFactor": 1.2523360477001704,
+  "providerCalledForTimingRecovery": false,
+  "placements": [
+    {
+      "dialogueIndex": 0,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
+      "sourceStartSec": 0.0,
+      "sourceEndSec": 2.572,
+      "targetStartSec": 0.55,
+      "targetEndSec": 2.6037618514801215,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 1,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
+      "sourceStartSec": 2.572,
+      "sourceEndSec": 4.824,
+      "targetStartSec": 2.6037618514801215,
+      "targetEndSec": 4.402001233102686,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 2,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
+      "sourceStartSec": 4.824,
+      "sourceEndSec": 7.795999999999999,
+      "targetStartSec": 4.402001233102686,
+      "targetEndSec": 6.775166171904754,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 3,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
+      "sourceStartSec": 7.795999999999999,
+      "sourceEndSec": 11.395999999999999,
+      "targetStartSec": 6.775166171904754,
+      "targetEndSec": 9.64979395780228,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 4,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
+      "sourceStartSec": 11.395999999999999,
+      "sourceEndSec": 12.915021,
+      "targetStartSec": 9.64979395780228,
+      "targetEndSec": 10.862743950569461,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 5,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
+      "sourceStartSec": 12.915021,
+      "sourceEndSec": 15.316021,
+      "targetStartSec": 10.862743950569461,
+      "targetEndSec": 12.77996098221945,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 6,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
+      "sourceStartSec": 15.316021,
+      "sourceEndSec": 19.795042,
+      "targetStartSec": 12.77996098221945,
+      "targetEndSec": 16.35649382116904,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 7,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
+      "sourceStartSec": 19.795042,
+      "sourceEndSec": 22.756041999999997,
+      "targetStartSec": 16.35649382116904,
+      "targetEndSec": 18.720875175069754,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 8,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
+      "sourceStartSec": 22.756041999999997,
+      "sourceEndSec": 23.716041999999998,
+      "targetStartSec": 18.720875175069754,
+      "targetEndSec": 19.48744258464243,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 9,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
+      "sourceStartSec": 23.716041999999998,
+      "sourceEndSec": 25.396041999999998,
+      "targetStartSec": 19.48744258464243,
+      "targetEndSec": 20.828935551394608,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 10,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
+      "sourceStartSec": 25.396041999999998,
+      "sourceEndSec": 27.236041999999998,
+      "targetStartSec": 20.828935551394608,
+      "targetEndSec": 22.298189753075565,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 11,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
+      "sourceStartSec": 27.236041999999998,
+      "sourceEndSec": 28.516042,
+      "targetStartSec": 22.298189753075565,
+      "targetEndSec": 23.320279632505798,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 12,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
+      "sourceStartSec": 28.516042,
+      "sourceEndSec": 30.276042,
+      "targetStartSec": 23.320279632505798,
+      "targetEndSec": 24.725653216722367,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 13,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
+      "sourceStartSec": 30.276042,
+      "sourceEndSec": 31.876042,
+      "targetStartSec": 24.725653216722367,
+      "targetEndSec": 26.00326556601016,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 14,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
+      "sourceStartSec": 31.876042,
+      "sourceEndSec": 33.875063000000004,
+      "targetStartSec": 26.00326556601016,
+      "targetEndSec": 27.59949926356368,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 15,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
+      "sourceStartSec": 33.875063000000004,
+      "sourceEndSec": 34.756063000000005,
+      "targetStartSec": 27.59949926356368,
+      "targetEndSec": 28.302984563390268,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    },
+    {
+      "dialogueIndex": 16,
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
+      "sourceStartSec": 34.756063000000005,
+      "sourceEndSec": 36.756063000000005,
+      "targetStartSec": 28.302984563390268,
+      "targetEndSec": 29.900000000000006,
+      "continuousPerformance": true,
+      "tempoFactor": 1.2523360477001704
+    }
+  ],
+  "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_732fdefb.wav",
+  "outputSha256": "fe9f2967558aa332fbf4895135846cc2856c24b617fd7030e0a24f7250d0f3a2"
+}

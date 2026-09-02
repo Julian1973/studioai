@@ -199,6 +199,17 @@ def install(m):
                         include_technical_controls=False)}
         if stage == "voice":
             characters = m._characters_cfg()
+            voice_ids = []
+            for line in (shot.get("dialogueLines") or []):
+                if (str(line.get("voiceTreatment") or "").casefold() == "group_chorus" and
+                        line.get("chorusMembers")):
+                    voice_ids.extend(
+                        (characters.get(member) or {}).get("voiceId")
+                        for member in line.get("chorusMembers") or [])
+                else:
+                    voice_ids.append(
+                        (characters.get(m._resolve_char(line["speaker"], characters)) or {})
+                        .get("voiceId"))
             return {**common,
                     "dialogueHash": json_sha256(shot.get("dialogueLines") or []),
                     "workingPerformanceHash": json_sha256(ledger.get("workingVoice")),
@@ -206,11 +217,7 @@ def install(m):
                     "voiceRegistersHash": file_sha256(m.cb_voice_director.REGISTERS_PATH),
                     "voiceRulebookHash": file_sha256(m.cb_voice_director.RULEBOOK_PATH),
                     "voiceCompilerVersion": m.cb_voice_director.COMPILER_VERSION,
-                    "voiceIds": [
-                        (characters.get(m._resolve_char(line["speaker"], characters)) or {})
-                        .get("voiceId")
-                        for line in (shot.get("dialogueLines") or [])
-                    ]}
+                    "voiceIds": voice_ids}
         if stage == "animation":
             return {**common, **animation_input_signature(
                 pkg, shot, scene, episode), **runtime, "stage": stage}

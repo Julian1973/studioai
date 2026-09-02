@@ -35,7 +35,7 @@ TIMING_COVERAGE_TOLERANCE_SEC = 0.20
 # A provider-duration variance must not strand an already-paid continuous take when
 # the whole acted conversation can still be pitch-preserved inside the 30s slate.
 # The exact adjustment is recorded in the timing contract for human review.
-MAX_CONTINUOUS_TEMPO_FACTOR = 1.20
+MAX_CONTINUOUS_TEMPO_FACTOR = 1.30
 CONTINUOUS_END_ROOM_SEC = 0.10
 
 

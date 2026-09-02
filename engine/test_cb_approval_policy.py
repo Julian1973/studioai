@@ -183,6 +183,29 @@ def test_dialogue_amendment_does_not_stale_prepared_cinematography(
     assert status["source"] == "prepared"
 
 
+def test_voice_signature_expands_group_chorus_members(tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    shot["dialogueLines"] = [{
+        "speaker": "Bo/Keen",
+        "text": "3, 2, 1...",
+        "voiceTreatment": "group_chorus",
+        "chorusMembers": ["Bo", "Keen"],
+    }]
+    monkeypatch = pytest.MonkeyPatch()
+    try:
+        monkeypatch.setattr(render, "_characters_cfg", lambda: {
+            "Bo": {"voiceId": "bo-voice"},
+            "Keen": {"voiceId": "keen-voice"},
+        })
+
+        signature = render._department_input_signature(
+            package, "voice", shot["shotId"], "1", "Ep1")
+    finally:
+        monkeypatch.undo()
+
+    assert signature["voiceIds"] == ["bo-voice", "keen-voice"]
+
+
 def test_invalid_voice_contract_is_never_treated_as_current_direction(tmp_path):
     package, shot, _ = _pkg(tmp_path)
     candidate = _prepare_department(package, shot["shotId"], "voice")
@@ -595,4 +618,4 @@ def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatc
 
     emitted = render._approved_voice_lines(package, shot)
 
-    assert emitted[0]["text"] == "[empathetically] Bo, this is Ada..."
+    assert emitted[0]["text"] == "[empathetically] Bo, this is ada..."

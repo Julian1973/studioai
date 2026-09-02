@@ -3349,10 +3349,13 @@ function completedSceneAudioHTML(){
   const revision=shotRevision("voice",ledger);
   const policy=shotPipelineState(shots,PSHOT_I),approved=!!(policy.current&&policy.current.voice);
   const state=approved?"Approved":"Ready for review";
+  const action=approved
+    ?{label:"Continue to WATCH",onclick:"continueCurrentShotToWatch()"}
+    :{label:"Review HEAR",onclick:"openStageOutcome('voice')"};
   return `<section class="scene-audio-strip" aria-label="Completed voice performance for ${_esc(shot.shotId)}">
     <div class="scene-audio-strip-copy"><b>${_esc(shot.shotId)} · Voice revision ${revision}</b><span><span class="scene-audio-strip-state">${_esc(state)}</span> · ElevenLabs v3 dialogue and mouth timing</span></div>
     <audio controls preload="metadata" onloadedmetadata="mediaDurationLoaded(this)" src="${BASE}${_esc(media.vo)}?v=${MEDIA_V}"></audio>
-    <button type="button" class="btn ghost" onclick="openStageOutcome('voice')">Review HEAR</button>
+    ${actionButtonHTML(action)}
   </section>`;
 }
 
@@ -5432,7 +5435,9 @@ async function prepareDirectionThen(stage,shotId,resume){
       }
       // The job completion is authoritative for this scoped shot. Downstream readiness is
       // recalculated from the new specialist record when the workspace refreshes.
-      closeM();await resume();
+      await shFetchPkg();
+      if(scene!==String(SH_SC)||episode!==String(SH_EP))return;
+      closeM();renderWorkspaceBody();await resume();
     };
     shPollStart();renderJobBanner();
   }catch(e){directionPrepFailure(stage,"The Studio server could not be reached. No media was generated.");}

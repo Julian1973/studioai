@@ -109,6 +109,15 @@ def test_animation_direction_requires_declared_creative_latitude():
     assert direction.directionDensity == "open"
     assert direction.precisionReasons == []
 
+    string_geography = AnimationDirection.model_validate({
+        **base,
+        "performanceFreedom": "Seedance may invent micro-reactions, overlap and recovery rhythm.",
+        "geography": "The forest path carries Bo and Keen toward the Learning Circle."
+    })
+    assert string_geography.geography == [
+        "The forest path carries Bo and Keen toward the Learning Circle."
+    ]
+
     try:
         AnimationDirection.model_validate(base)
     except ValidationError:

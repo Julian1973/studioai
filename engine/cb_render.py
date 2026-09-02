@@ -117,6 +117,15 @@ ROOT = HERE.parent
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 
 
+def _as_text_list(value):
+    if value is None:
+        return []
+    if isinstance(value, str):
+        text = value.strip()
+        return [text] if text else []
+    return [str(item).strip() for item in value if str(item).strip()]
+
+
 def _submit_seedance_provider(prompt, image_inputs, **kwargs):
     """The sole production gateway into Seedance for generation, extension and editing."""
     return cb_gen.generate_video_seedance_ref(prompt, image_inputs, **kwargs)
@@ -3929,11 +3938,11 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
             cinematography = _approved_department_output(pkg, shot_id, "cinematography") or {}
             opening_contract = (((led.get("keyframeApproval") or {}).get("promptContract") or {})
                                 .get("directionContract") or {})
-            opening_geography = list(opening_contract.get("geography") or [])
+            opening_geography = _as_text_list(opening_contract.get("geography"))
             if opening_geography:
                 context["sceneGeographyLedger"] = opening_geography
             elif cinematography.get("geography"):
-                context["sceneGeographyLedger"] = list(cinematography.get("geography") or [])
+                context["sceneGeographyLedger"] = _as_text_list(cinematography.get("geography"))
             context["approvedVoiceAsset"] = led.get("voPath")
             director_feedback = str(
                 (led.get("watchDirectorFeedback") or {}).get("text") or "").strip()
@@ -4195,8 +4204,8 @@ def recompile_animation_candidate(scene, shot_id, episode="Ep1", log=print):
         pkg, shot_id, "cinematography") or {}
     opening_contract = (((ledger.get("keyframeApproval") or {}).get("promptContract") or {})
                         .get("directionContract") or {})
-    approved_geography = (list(opening_contract.get("geography") or []) or
-                          list(cinematography.get("geography") or []))
+    approved_geography = (_as_text_list(opening_contract.get("geography")) or
+                          _as_text_list(cinematography.get("geography")))
     if approved_geography and source.get("geography") != approved_geography:
         source["geography"] = approved_geography
         changes.append("render geography rebound to approved SEE geography")

@@ -48,6 +48,15 @@ _PROMPT_SECTION_RE = re.compile(
     r"(?ms)^\[([^\]\n]+)\]\s*\n(.*?)(?=^\[[^\]\n]+\]\s*$|\Z)")
 
 
+def _coerce_text_list(value):
+    if value is None:
+        return value
+    if isinstance(value, str):
+        text = value.strip()
+        return [text] if text else []
+    return value
+
+
 def prompt_sections(prompt):
     """Return named prompt sections and reject headers that have no body."""
     sections = {}
@@ -526,6 +535,17 @@ class AnimationDirection(BaseModel):
     blockoutKind: Literal["coarse", "fine"] = "coarse"
     blockoutMappings: List[str] = Field(default_factory=list, max_length=20)
     providerPrompt: str = Field(min_length=40)
+
+    @field_validator(
+        "precisionReasons", "witnessStagingSides", "geography",
+        "attributeOwnership", "environmentContract", "actionOwnership",
+        "consistencyContract", "surgicalSafeguards", "contentToPreserve",
+        "blockoutMappings",
+        mode="before",
+    )
+    @classmethod
+    def coerce_provider_text_lists(cls, value):
+        return _coerce_text_list(value)
 
     @model_validator(mode="before")
     @classmethod

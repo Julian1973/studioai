@@ -3976,6 +3976,26 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
+        if self.path == "/api/canon-lock":
+            # The showrunner's explicit re-lock (CLAUDE.md rule 6: canon drift is cleared only by the
+            # showrunner's own action in the studio). Rebuilds the active project's CANON_LOCK.json from
+            # the sources its lock_policy names; refused while a job is running. Before 2026-09-02 this
+            # existed only as a command line (engine/cb_canon.py lock), which Julian cannot run.
+            try:
+                d = self._body()
+                by = str(d.get("reviewedBy") or d.get("lockedBy") or "Julian").strip() or "Julian"
+                if PROCS:
+                    self._json(409, {"error": "a job is still running - lock canon when it has finished"})
+                    return
+                import cb_canon
+                record = cb_canon.write_lock(root=ROOT, locked_by=by)
+                status = cb_canon.status("Ep1", root=ROOT)
+                self._json(200, {"ok": True, "manifestDigest": record.get("manifestDigest"),
+                                 "lockedBy": by, "current": status.get("current"),
+                                 "episodeReady": status.get("episodeReady")})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
         if self.path == "/api/project/activate":
             # T59: switch the studio to another production. The engine reads its project ONCE at
             # import (paths.py), so a real switch means reloading the process with the setting

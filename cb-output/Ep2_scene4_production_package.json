@@ -1430,7 +1430,42 @@
      "reasonAtDecision": "Registered from an existing generated image as a library/source candidate after the OpenAI advisory checker was unavailable; human Director approval still required."
     }
    },
-   "voiceApproval": null,
+   "voiceApproval": {
+    "approved": true,
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav",
+    "at": "2026-09-02T12:25:23",
+    "reviewedBy": "Julian",
+    "packageRevision": 2,
+    "inputSignature": {
+     "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+     "dialogueHash": "673b502100e31b55b8a0d0269272c31524ebddee9bb73690241fc0887746ce75",
+     "performanceHash": "9518721fdd507f75cc1177438091102bd8e8843d02365c1618b0ceda2b832ad3",
+     "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+     "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+     "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+     "voiceCompilerVersion": "voice-director-v1",
+     "pronunciationOverrides": {
+      "Aida": "ada",
+      "Ada": "ada"
+     },
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB",
+      "TCRj5m2u9xhZHJ8h9pMv",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "TCRj5m2u9xhZHJ8h9pMv",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "TCRj5m2u9xhZHJ8h9pMv",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "AAF2q3NCwTrLMMkEnRLB",
+      "TCRj5m2u9xhZHJ8h9pMv"
+     ]
+    },
+    "contentHash": "57f98b045665f309c8618ae75549295d00f51b609254045552e14c26f1b55d74",
+    "rawContentHash": "bd181aabd4b49c7824247959c51c51bf2fd6a2e63d5477dc6079571667847498",
+    "timingContentHash": "523ac6241998171de850f44d9a157306d41abdcd3b69708d1e530fc977f67af5",
+    "placementContentHash": "56e78f6da1bd06e461244543adc3273c6c8432fc0cfa8e8c96ef55a895be637c"
+   },
    "approvedTake": null,
    "harvestFrame": null,
    "candidatePaths": [],

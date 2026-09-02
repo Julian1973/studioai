@@ -3290,7 +3290,9 @@ function corridorPhaseState(phase,stages){
     if(pending.voice)return "awaiting";
   }
   if(phase.id==="watch"){
-    if(policy.needsKeyframe&&!current.keyframe)return "locked";
+    // WATCH remains inspectable while it waits for SEE. The per-shot fire gate still
+    // blocks rendering, but reviewers must be able to open every production screen.
+    if(policy.needsKeyframe&&!current.keyframe)return "ready";
     if(current.animation)return "approved";
     if(pending.animation||policy.animState==="candidates-pending")return "awaiting";
     if(activeWatchJob(shot.shotId)||durableWatchJob(shLedger(shot.shotId)))return "generating";

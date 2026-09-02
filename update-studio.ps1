@@ -251,8 +251,29 @@ if (Test-Path -LiteralPath "requirements.txt") { $requirementsAfter = (Get-FileH
 if (-not (Test-Path -LiteralPath $python) -or ($requirementsBefore -ne $requirementsAfter)) {
     Say "Building .venv (this takes a few minutes the first time)"
     if (Test-Path -LiteralPath ".venv") { Rename-Item -LiteralPath ".venv" -NewName (".venv-old-" + $stamp) -Force }
-    $py = Get-Command py -ErrorAction SilentlyContinue
-    if ($py) { py -3 -m venv .venv | Out-Host } else { python -m venv .venv | Out-Host }
+    # find a real Python 3: the one the old .venv was built from (pyvenv.cfg 'home = ...'), the py
+    # launcher, python on PATH (not the Microsoft Store stub), or the usual install folders.
+    $basePy = $null
+    foreach ($cfg in @((Join-Path $scriptRoot ".venv\pyvenv.cfg"), (Join-Path $studioRoot ".venv-old-$stamp\pyvenv.cfg"))) {
+        if (-not $basePy -and (Test-Path -LiteralPath $cfg)) {
+            $home_ = (Get-Content -LiteralPath $cfg | Where-Object { $_ -match '^\s*home\s*=' } | ForEach-Object { ($_ -split '=', 2)[1].Trim() } | Select-Object -First 1)
+            if ($home_ -and (Test-Path -LiteralPath (Join-Path $home_ "python.exe"))) { $basePy = Join-Path $home_ "python.exe" }
+        }
+    }
+    if (-not $basePy) {
+        $cands = @()
+        $cands += Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA "Programs\Python") -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "python.exe" }
+        $cands += Get-ChildItem -Path "C:\" -Directory -Filter "Python3*" -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "python.exe" }
+        $cands += Get-ChildItem -Path "C:\Program Files" -Directory -Filter "Python3*" -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "python.exe" }
+        foreach ($c in $cands) { if (-not $basePy -and (Test-Path -LiteralPath $c)) { $basePy = $c } }
+    }
+    if ($basePy) {
+        Say "Using Python at $basePy"
+        & $basePy -m venv .venv | Out-Host
+    } else {
+        $py = Get-Command py -ErrorAction SilentlyContinue
+        if ($py) { py -3 -m venv .venv | Out-Host } else { python -m venv .venv | Out-Host }
+    }
     if (-not (Test-Path -LiteralPath $python)) { Fail "Python could not create .venv - is Python 3 installed? (https://www.python.org/downloads/ - tick 'Add python.exe to PATH')" }
     & $python -m pip install --upgrade pip | Out-Host
     & $python -m pip install -r requirements.txt | Out-Host

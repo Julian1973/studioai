@@ -252,6 +252,36 @@ def scene_roster(episode="Ep1"):
 
 # ── mechanical script parser — scene order, dialogue and cast are LOCKED evidence ───────
 _SCENE_RE = re.compile(r"^\s*(INT\.?\s*/\s*EXT\.?|INT\.?|EXT\.?)\s+(.+?)\s+(\d+)\s*$")
+# THE TREATMENT FORMAT (2026-09-02, The Box Monsters' first Gate-1 fire): a second project's
+# script is not a Hollywood screenplay — its scenes are headed "SCENE 01: CLASSROOM MISTAKE",
+# its shots "Shot 01: Reading Goes Wrong", and each scene opens with production lines the
+# writer already decided (Runtime, Shots, Clean Plate, Character Keyframe) and closes each
+# shot on "Final Frame: …". The studio accepts BOTH formats — a project's script is the sole
+# story source in whatever form its writer authored it. A "SCENE n" heading's title becomes
+# the location; the production lines are kept on the scene record as `meta` (never a story
+# event the Director must "cover"); shot titles and final-frame lines stay ordered action
+# text, so the writer's shot structure reaches the Director verbatim and in order.
+_TREATMENT_SCENE_RE = re.compile(r"^\s*SCENE\s+(\d+)\s*(?:[:.\-–—]\s*(.+?))?\s*$", re.IGNORECASE)
+_TREATMENT_META_RE = re.compile(
+    r"^\s*(Runtime|Shots|Clean Plate|Character Keyframe|Plate|Keyframe|Duration|Aspect)\s*:\s*(.+?)\s*$",
+    re.IGNORECASE)
+
+
+def _scene_heading(line):
+    """Return (sceneNumber, location, time, headerRaw) for either heading style, else None."""
+    raw = line.rstrip()
+    m = _SCENE_RE.match(raw)
+    if m:
+        loc_time = re.sub(r"\s+", " ", m.group(2)).strip()
+        parts = re.split(r"\s*[–—-]\s*", loc_time)
+        location = parts[0].strip() if parts else loc_time
+        time_of_day = parts[-1].strip() if len(parts) > 1 else ""
+        return int(m.group(3)), location, time_of_day, raw.strip()
+    t = _TREATMENT_SCENE_RE.match(raw)
+    if t:
+        title = re.sub(r"\s+", " ", (t.group(2) or "")).strip()
+        return int(t.group(1)), title or f"Scene {int(t.group(1))}", "", raw.strip()
+    return None
 _TRANSITION_RE = re.compile(
     r"^\s*(FADE IN|FADE OUT|CUT TO|DISSOLVE TO|SMASH CUT TO|MATCH CUT TO)\.?:?\s*$",
     re.IGNORECASE)
@@ -382,16 +412,20 @@ def parse_script(text, roster=None, log=print):
             flush_action()
             li += 1
             continue
-        m = _SCENE_RE.match(raw.rstrip())
-        if m:
+        heading = _scene_heading(raw)
+        if heading:
             flush_action()
-            cur_scene = int(m.group(3))
-            loc_time = re.sub(r"\s+", " ", m.group(2)).strip()
-            parts = re.split(r"\s*[–—-]\s*", loc_time)
-            location = parts[0].strip() if parts else loc_time
-            time_of_day = parts[-1].strip() if len(parts) > 1 else ""
-            scenes.append({"sceneNumber": cur_scene, "headerRaw": stripped,
+            cur_scene, location, time_of_day, header_raw = heading
+            scenes.append({"sceneNumber": cur_scene, "headerRaw": header_raw,
                            "location": location, "time": time_of_day})
+            li += 1
+            continue
+        meta = _TREATMENT_META_RE.match(stripped) if cur_scene is not None else None
+        if meta and scenes and not action_buf and not any(
+                e["scene"] == cur_scene for e in events):
+            # a production line at the top of a treatment-format scene, before its first
+            # story event — recorded on the scene, never a story event
+            scenes[-1].setdefault("meta", {})[meta.group(1).strip().lower()] = meta.group(2).strip()
             li += 1
             continue
         if _TRANSITION_RE.match(stripped):
@@ -407,7 +441,7 @@ def parse_script(text, roster=None, log=print):
                 li += 1   # a delivery-only parenthetical — never dialogue text
             text_lines = []
             while (li < n and lines[li].strip()
-                   and not _SCENE_RE.match(lines[li].rstrip())
+                   and not _scene_heading(lines[li])
                    and not cue_record(lines[li])):
                 if _PAREN_ONLY_RE.match(lines[li].strip()):
                     li += 1
@@ -451,7 +485,7 @@ def parse_script(text, roster=None, log=print):
     dialogue_count = sum(1 for e in events if e["type"] == "dialogue")
     if not scenes:
         raise Refused("mechanical script parse found no scene headers (expects "
-                      "'INT./EXT. LOCATION - TIME  <number>') — nothing generated")
+                      "'INT./EXT. LOCATION - TIME  <number>' or 'SCENE 01: TITLE') — nothing generated")
     if dialogue_count == 0:
         raise Refused("mechanical script parse found no dialogue cues against the canon "
                       "character roster — check the script's format before proceeding")

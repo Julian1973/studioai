@@ -65,7 +65,7 @@ $requirementsBefore = ""
 if (Test-Path -LiteralPath "requirements.txt") { $requirementsBefore = (Get-FileHash requirements.txt).Hash }
 
 Say "Fetching origin"
-git fetch --prune origin | Out-Host
+git fetch origin | Out-Host
 # A bundle beside this script (studio-update.bundle) carries commits that have not reached GitHub
 # yet - a hand-delivered update. It is fetched too, and wins when it is ahead of origin.
 $bundle = Join-Path $studioRoot "studio-update.bundle"

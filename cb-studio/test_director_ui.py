@@ -957,7 +957,7 @@ def test_director_entry_is_authenticated_and_static_allowlisted():
     assert '"/cb-studio/director.html"' in SERVER
     assert 'parsed.path not in (' in SERVER
     assert '"/cb-studio/director.html", "/cb-studio/app.html"' in SERVER
-    assert '"Location", "/cb-studio/director.html"' in SERVER
+    assert '"Location", "/cb-studio/app.html"' in SERVER   # the root opens the Productions index (2026-09-02)
     assert "/cb-studio/director.html?launchToken=" in SERVER
 
 

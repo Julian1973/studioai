@@ -2788,8 +2788,12 @@ class H(http.server.SimpleHTTPRequestHandler):
         if _legacy_gone(self):
             return
         if self.path == "/" or self.path == "":
+            # The studio's front door is the Productions index (app.html): every project, then its
+            # episodes, bible, characters, scenes, locations and props. director.html is the per-shot
+            # Animation surface reached from inside a production (Julian, 2026-09-02: "there has to be a
+            # top page which has projects and then you click down into them").
             self.send_response(302)
-            self.send_header("Location", "/cb-studio/director.html")
+            self.send_header("Location", "/cb-studio/app.html")
             self.end_headers()
             return
         if self.path == "/api/show-profile":

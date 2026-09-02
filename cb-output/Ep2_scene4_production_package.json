@@ -4,7 +4,7 @@
  "sceneNumber": 4,
  "sceneTitle": "FOREST PATH",
  "status": "designed",
- "revision": 1,
+ "revision": 2,
  "generatedAt": "2026-09-01T22:53:25Z",
  "source": "locked episode beat package",
  "sourceBeatPackage": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_Bo_and_the_Brave_Step_beat_package.json",
@@ -625,29 +625,25 @@
    "beatCodes": [
     "4.B1",
     "4.B2",
-    "4.B3",
-    "4.B4",
-    "4.B5",
-    "4.B6"
+    "4.B3"
    ],
-   "title": "On the path, Bo and Keen turn the tail into a game; what was panic in private becomes play",
+   "title": "Forest path countdown and Keen reassurance",
    "durationSec": 30,
-   "purpose": "On the path, Bo and Keen turn the tail into a game; what was panic in private becomes playful performance in friendship. / The sound of the Learning Circle collapses Bo’s borrowed confidence; the real fear was never the tail, but the social moment waiting at the end of the path. / Keen tries to steady Bo with simple kindness, but the answer that really matters is about to walk in from the path. / Aida arrives and joins them at Bo’s level, noticing the packed bag instead of interrogating the fear; she meets effort before emotion. / Bo asks the core question, and Aida’s repeated truth — that she gets scared and still goes — gives him a new definition of bravery. / The held beat in the trees lets Aida’s words settle; nothing is solved by speech alone, but Bo has room now to choose.",
-   "visualPayoff": "They made the poofy tail into a counting game. / He got nervous again when he heard everybody. / Keen says making new friends is good. / Aida noticed he packed his bag lots of times. / Even Aida gets scared sometimes. / A quiet thinking moment.",
+   "purpose": "Bo and Keen turn the tail puff into a shared countdown game, then Bo’s confidence falters when the Learning Circle becomes real. Keen gives the simple reassurance that meeting new people can still be good.",
+   "visualPayoff": "Bo’s tail puffs on the shared countdown, his smile drops at the Learning Circle sound, and Keen steadies him without forcing the next step.",
    "sourceType": "opener",
    "sourceShotId": null,
    "location": "FOREST PATH",
    "time": "DAY",
    "charactersInFrame": [
-    "Aida",
     "Bo",
     "Keen"
    ],
-   "storyBeat": "On the path, Bo and Keen turn the tail into a game; what was panic in private becomes playful performance in friendship. / The sound of the Learning Circle collapses Bo’s borrowed confidence; the real fear was never the tail, but the social moment waiting at the end of the path. / Keen tries to steady Bo with simple kindness, but the answer that really matters is about to walk in from the path. / Aida arrives and joins them at Bo’s level, noticing the packed bag instead of interrogating the fear; she meets effort before emotion. / Bo asks the core question, and Aida’s repeated truth — that she gets scared and still goes — gives him a new definition of bravery. / The held beat in the trees lets Aida’s words settle; nothing is solved by speech alone, but Bo has room now to choose.",
-   "emotionalIntent": "Sunny, liberating play with forward motion. / A soft drop from play into exposed vulnerability. / Tender effort with an unfinished feeling. / Safety, dignity, and soft humor. / Quiet truth that lands like a hand on the shoulder. / Held stillness and inward gathering.",
-   "kidRead": "They made the poofy tail into a counting game. / He got nervous again when he heard everybody. / Keen says making new friends is good. / Aida noticed he packed his bag lots of times. / Even Aida gets scared sometimes. / A quiet thinking moment.",
-   "adultRead": "Play as rehearsal — children mastering embarrassment by repeating it until it loses its sting. / Progress is fragile when the imagined audience suddenly becomes real. / A child offering the best advice he has, even if he can’t fully unlock the moment alone. / A wise caregiver praising the attempt, not demanding confidence. / The healing force of a grown-up refusing to pretend they were ever fearless. / The kind pause after the right truth, where nobody ruins it by talking too much.",
-   "action": "A winding path through the Whispering Woods. Sunlight flickers through the leaves. Bo walks beside Keen. Step. Step. BO Walks with a newfound confidence, no longer concerned about his tail doing 'THE THING'. Keen and Bo walk along doing a countdown, each time they get to 1, BO’s tail does 'THE THING' on command. The tails POOFS UP and then shrinks back to normal before POOFING UP again each time they count. Bo’s tail does THE THING on command. POOF! BO SPINS and twirls. POOF! The tail does THE THING again. POOF! Bo giggles. They continue walking. Bo lightly kicks leaves as he moves. BO hears the bears chatter from the Learning Circle nearby. Bo suddenly stops. He grips his satchel tightly. His smile fades. He slowly sits on a nearby fallen log. Keen gently sits on a fallen log beside him. He gives Bo space. Beat. Bo stares down the path toward the Learning Circle. AIDA walks down the path towards BO and Keen. Bo glances up, curious. Keen smiles and places his paw around BO’s shoulder. Aida sits beside Bo, leaving space between them. She notices his satchel. Bo looks at her. He softens. Beat. Wind moves gently through the trees.",
+   "storyBeat": "Bo and Keen rehearse bravery through play on the forest path; the fear returns when the destination feels close, and Keen offers a calm bridge toward meeting new friends.",
+   "emotionalIntent": "Playful courage becomes exposed worry, then settles into gentle support.",
+   "kidRead": "Bo and Keen make the poofy tail a game, then Bo gets worried again and Keen helps him.",
+   "adultRead": "A child uses play to manage embarrassment, then needs a friend to hold the feeling when the social moment becomes real.",
+   "action": "A winding path through the Whispering Woods. Sunlight flickers through the leaves. Bo walks beside Keen with careful new confidence. Keen and Bo count down together three times; each time they reach one, Bo’s tail puffs up, then settles back down. The third puff makes Bo giggle, but the sound of the Learning Circle nearby stops him. He grips his satchel and sits on a fallen log. Keen sits beside him, gives him space, and gently says it can be hard to meet new people but good to make new friends.",
    "dialogueLines": [
     {
      "speaker": "Bo/Keen",
@@ -739,96 +735,6 @@
      "dialogueOccurrenceId": "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
      "sourceEventId": "script-event:sha256:3c7ee893f53d80a390325b76a6d70542375749e6568087dc2e92fb70c3f19e43",
      "sourceEventIndex": 78,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Aida",
-     "text": "Hi Keen, I see you have met a new friend.",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
-     "sourceEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
-     "sourceEventIndex": 80,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Keen",
-     "text": "Yes.",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
-     "sourceEventId": "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
-     "sourceEventIndex": 82,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Keen",
-     "text": "Bo, this is Aida.",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
-     "sourceEventId": "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
-     "sourceEventIndex": 84,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Aida",
-     "text": "You packed your bag.",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
-     "sourceEventId": "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
-     "sourceEventIndex": 86,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Bo",
-     "text": "Four times.",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
-     "sourceEventId": "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
-     "sourceEventIndex": 87,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Aida",
-     "text": "I would have done five.",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
-     "sourceEventId": "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
-     "sourceEventIndex": 88,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Bo",
-     "text": "You get scared too?",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
-     "sourceEventId": "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
-     "sourceEventIndex": 90,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Aida",
-     "text": "Every single time.",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
-     "sourceEventId": "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
-     "sourceEventIndex": 91,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Bo",
-     "text": "But you still go?",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
-     "sourceEventId": "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
-     "sourceEventIndex": 92,
-     "voiceTreatment": "single_voice",
-     "chorusMembers": []
-    },
-    {
-     "speaker": "Aida",
-     "text": "Every single time.",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
-     "sourceEventId": "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
-     "sourceEventIndex": 93,
      "voiceTreatment": "single_voice",
      "chorusMembers": []
     }
@@ -1060,17 +966,14 @@
    "sourceBeatIds": [
     "source-beat:sha256:09180799b5c3fcb150d54f9d88b906131cff6e221efef47bd8795015a2dad192",
     "source-beat:sha256:dea32848f892820f28d18fcfdbb78b0003889d28dae04aad3527382e46906c71",
-    "source-beat:sha256:d0352be891e5c95f78c752d78656453f2477f3387a7ffa22c6b85eb57d654aeb",
-    "source-beat:sha256:3095fc3c8cf46f6086f21e0e27dbcf55c82619c8a5898dd05459e0eb9f8c4efb",
-    "source-beat:sha256:a5b014fb9e2036b626e39d97b2942527f88ffac24ad72bfc33af0cf27b53820c",
-    "source-beat:sha256:fc15ee7532a4a8083e27ec8d75f3d2a307ba0d1b75ebbe34cafddd9424428e72"
+    "source-beat:sha256:d0352be891e5c95f78c752d78656453f2477f3387a7ffa22c6b85eb57d654aeb"
    ],
    "sourceEventRange": {
     "firstEventIndex": 66,
-    "lastEventIndex": 95,
+    "lastEventIndex": 79,
     "firstEventId": "script-event:sha256:c25b75ba16a6d4556edd27caec4223fdaa2f25fa777b4311b2c0704f12595c5d",
-    "lastEventId": "script-event:sha256:646de5871266ef1a22d3610eda7ed943685a88d1bd670a0d28d8fa461346d7be",
-    "eventCount": 30
+    "lastEventId": "script-event:sha256:6c81bee76c25a64a3748b09bf5e17d04b560e6098a52f2df73860b9868b81cdd",
+    "eventCount": 14
    },
    "sourceEventIds": [
     "script-event:sha256:c25b75ba16a6d4556edd27caec4223fdaa2f25fa777b4311b2c0704f12595c5d",
@@ -1086,7 +989,375 @@
     "script-event:sha256:af585985bc9e3c10be4e72f9866aa5643c535bb2708eab779eaf870b744d4ee1",
     "script-event:sha256:6b05ff9daa7d6497719f1bfc9c94e0dd7103a3724c21bd1ba701ce8a0fdfc448",
     "script-event:sha256:3c7ee893f53d80a390325b76a6d70542375749e6568087dc2e92fb70c3f19e43",
-    "script-event:sha256:6c81bee76c25a64a3748b09bf5e17d04b560e6098a52f2df73860b9868b81cdd",
+    "script-event:sha256:6c81bee76c25a64a3748b09bf5e17d04b560e6098a52f2df73860b9868b81cdd"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
+    "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
+    "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
+    "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
+    "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
+    "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
+    "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06"
+   ]
+  },
+  {
+   "shotId": "S4.SH2",
+   "sceneNumber": 4,
+   "beatCode": "4.B4",
+   "beatCodes": [
+    "4.B4",
+    "4.B5",
+    "4.B6"
+   ],
+   "title": "Aida enters and names Bo’s effort",
+   "durationSec": 30,
+   "purpose": "Aida enters softly, notices Bo’s preparation instead of interrogating his fear, and gives him a kinder definition of bravery: she gets scared and still goes.",
+   "visualPayoff": "Aida joins Bo at his level on the forest path; the exchange lands as empathy, not a lecture, and Bo has room to choose the next step.",
+   "sourceType": "relay",
+   "sourceShotId": "S4.SH1",
+   "location": "FOREST PATH",
+   "time": "DAY",
+   "charactersInFrame": [
+    "Aida",
+    "Bo",
+    "Keen"
+   ],
+   "storyBeat": "Aida arrives after Bo has paused on the path, meets his effort first, and helps him understand that courage can include fear.",
+   "emotionalIntent": "Gentle arrival, warm recognition, shared honesty, and quiet settling.",
+   "kidRead": "Aida comes over, notices Bo tried hard, and tells him she gets scared too but still goes.",
+   "adultRead": "A trusted older bear validates preparation before emotion, turning bravery from performance into honest continuation.",
+   "action": "Continue on the same forest path after Bo has sat on the fallen log with Keen beside him. Aida walks in from down the path, calm and unhurried. Keen introduces Bo. Aida sits beside Bo with space between them and notices his packed satchel. She speaks with empathy, making the packed bag feel like effort rather than failure. Bo asks whether she gets scared too. Aida answers plainly that she does, every single time, and still goes. The trees hold a quiet beat around them.",
+   "dialogueLines": [
+    {
+     "speaker": "Aida",
+     "text": "Hi Keen, I see you have met a new friend.",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
+     "sourceEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
+     "sourceEventIndex": 80,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Keen",
+     "text": "Yes.",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
+     "sourceEventId": "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
+     "sourceEventIndex": 82,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Keen",
+     "text": "Bo, this is Aida.",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
+     "sourceEventId": "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
+     "sourceEventIndex": 84,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Aida",
+     "text": "You packed your bag.",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
+     "sourceEventId": "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
+     "sourceEventIndex": 86,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Bo",
+     "text": "Four times.",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
+     "sourceEventId": "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
+     "sourceEventIndex": 87,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Aida",
+     "text": "I would have done five.",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
+     "sourceEventId": "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
+     "sourceEventIndex": 88,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Bo",
+     "text": "You get scared too?",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
+     "sourceEventId": "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
+     "sourceEventIndex": 90,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Aida",
+     "text": "Every single time.",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
+     "sourceEventId": "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
+     "sourceEventIndex": 91,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Bo",
+     "text": "But you still go?",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
+     "sourceEventId": "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
+     "sourceEventIndex": 92,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    },
+    {
+     "speaker": "Aida",
+     "text": "Every single time.",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
+     "sourceEventId": "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
+     "sourceEventIndex": 93,
+     "voiceTreatment": "single_voice",
+     "chorusMembers": []
+    }
+   ],
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "Aida",
+    "@图3": "Bo",
+    "@图4": "Keen",
+    "@图5": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "keyframeReferenceSlots": {
+    "@图1": "Aida",
+    "@图2": "Bo",
+    "@图3": "Keen",
+    "@图4": "scene plate"
+   },
+   "openingCharactersInFrame": [
+    "Bo",
+    "Keen"
+   ],
+   "continuityConstraints": [
+    {
+     "label": "Keen wristband state",
+     "value": "Keen starts this scene with bare wrists. No wristbands, bands, bracelets, cuffs, crystals or straps appear on either wrist.",
+     "severity": "critical"
+    }
+   ],
+   "directorRecord": {
+    "storyBeat": "On the path, Bo and Keen turn the tail into a game; what was panic in private becomes playful performance in friendship. / The sound of the Learning Circle collapses Bo’s borrowed confidence; the real fear was never the tail, but the social moment waiting at the end of the path. / Keen tries to steady Bo with simple kindness, but the answer that really matters is about to walk in from the path. / Aida arrives and joins them at Bo’s level, noticing the packed bag instead of interrogating the fear; she meets effort before emotion. / Bo asks the core question, and Aida’s repeated truth — that she gets scared and still goes — gives him a new definition of bravery. / The held beat in the trees lets Aida’s words settle; nothing is solved by speech alone, but Bo has room now to choose.",
+    "emotionalIntent": "Sunny, liberating play with forward motion. / A soft drop from play into exposed vulnerability. / Tender effort with an unfinished feeling. / Safety, dignity, and soft humor. / Quiet truth that lands like a hand on the shoulder. / Held stillness and inward gathering.",
+    "kidRead": "They made the poofy tail into a counting game. / He got nervous again when he heard everybody. / Keen says making new friends is good. / Aida noticed he packed his bag lots of times. / Even Aida gets scared sometimes. / A quiet thinking moment.",
+    "adultRead": "Play as rehearsal — children mastering embarrassment by repeating it until it loses its sting. / Progress is fragile when the imagined audience suddenly becomes real. / A child offering the best advice he has, even if he can’t fully unlock the moment alone. / A wise caregiver praising the attempt, not demanding confidence. / The healing force of a grown-up refusing to pretend they were ever fearless. / The kind pause after the right truth, where nobody ruins it by talking too much.",
+    "action": "A winding path through the Whispering Woods. Sunlight flickers through the leaves. Bo walks beside Keen. Step. Step. BO Walks with a newfound confidence, no longer concerned about his tail doing 'THE THING'. Keen and Bo walk along doing a countdown, each time they get to 1, BO’s tail does 'THE THING' on command. The tails POOFS UP and then shrinks back to normal before POOFING UP again each time they count. Bo’s tail does THE THING on command. POOF! BO SPINS and twirls. POOF! The tail does THE THING again. POOF! Bo giggles. They continue walking. Bo lightly kicks leaves as he moves. BO hears the bears chatter from the Learning Circle nearby. Bo suddenly stops. He grips his satchel tightly. His smile fades. He slowly sits on a nearby fallen log. Keen gently sits on a fallen log beside him. He gives Bo space. Beat. Bo stares down the path toward the Learning Circle. AIDA walks down the path towards BO and Keen. Bo glances up, curious. Keen smiles and places his paw around BO’s shoulder. Aida sits beside Bo, leaving space between them. She notices his satchel. Bo looks at her. He softens. Beat. Wind moves gently through the trees.",
+    "dialogueLines": [
+     {
+      "speaker": "Bo/Keen",
+      "text": "3, 2, 1…",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
+      "sourceEventId": "script-event:sha256:7f85f6bcc4e7c2aafc70175cacd5c6fdee412154dc03d016200835992058953c",
+      "sourceEventIndex": 67,
+      "voiceTreatment": "group_chorus",
+      "chorusMembers": [
+       "Bo",
+       "Keen"
+      ],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB",
+       "TCRj5m2u9xhZHJ8h9pMv"
+      ],
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "cadenceSignature": "Synchronous ensemble built from each named canon voice.",
+      "physicalSignature": "The named ensemble breathes and resolves as one group."
+     },
+     {
+      "speaker": "Bo/Keen",
+      "text": "3, 2, 1…",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
+      "sourceEventId": "script-event:sha256:1402b19e4ef3d73d5a5c0b113adaeb19b2b5fc8da7322387f27855102ee83c14",
+      "sourceEventIndex": 69,
+      "voiceTreatment": "group_chorus",
+      "chorusMembers": [
+       "Bo",
+       "Keen"
+      ],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB",
+       "TCRj5m2u9xhZHJ8h9pMv"
+      ],
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "cadenceSignature": "Synchronous ensemble built from each named canon voice.",
+      "physicalSignature": "The named ensemble breathes and resolves as one group."
+     },
+     {
+      "speaker": "Bo/Keen",
+      "text": "3, 2, 1…",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
+      "sourceEventId": "script-event:sha256:557e9735ec2b44746ae48f26d3bf8b190c03ede80654f42e3c20b6acd1451a97",
+      "sourceEventIndex": 71,
+      "voiceTreatment": "group_chorus",
+      "chorusMembers": [
+       "Bo",
+       "Keen"
+      ],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB",
+       "TCRj5m2u9xhZHJ8h9pMv"
+      ],
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "cadenceSignature": "Synchronous ensemble built from each named canon voice.",
+      "physicalSignature": "The named ensemble breathes and resolves as one group."
+     },
+     {
+      "speaker": "Bo",
+      "text": "I’m STILL worried about going to the Learning Circle.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
+      "sourceEventId": "script-event:sha256:1adc1d5f8027a7f6407b9f8d3f3e912d31a95e5671f2e7a75cd684123eaffc40",
+      "sourceEventIndex": 73,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Bo",
+      "text": "They all know each other.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
+      "sourceEventId": "script-event:sha256:1fde90a5212c908bace6ae111f5ca9cfee8c4ac81e6959cb1447f5a0ef752018",
+      "sourceEventIndex": 75,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Bo",
+      "text": "But I don’t know them, and they don’t know me.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
+      "sourceEventId": "script-event:sha256:6b05ff9daa7d6497719f1bfc9c94e0dd7103a3724c21bd1ba701ce8a0fdfc448",
+      "sourceEventIndex": 77,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Keen",
+      "text": "It can be hard to meet new people, but it’s good to make new friends.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
+      "sourceEventId": "script-event:sha256:3c7ee893f53d80a390325b76a6d70542375749e6568087dc2e92fb70c3f19e43",
+      "sourceEventIndex": 78,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Aida",
+      "text": "Hi Keen, I see you have met a new friend.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
+      "sourceEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
+      "sourceEventIndex": 80,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Keen",
+      "text": "Yes.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
+      "sourceEventId": "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
+      "sourceEventIndex": 82,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Keen",
+      "text": "Bo, this is Aida.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
+      "sourceEventId": "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
+      "sourceEventIndex": 84,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Aida",
+      "text": "You packed your bag.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
+      "sourceEventId": "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
+      "sourceEventIndex": 86,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Bo",
+      "text": "Four times.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
+      "sourceEventId": "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
+      "sourceEventIndex": 87,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Aida",
+      "text": "I would have done five.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
+      "sourceEventId": "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
+      "sourceEventIndex": 88,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Bo",
+      "text": "You get scared too?",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
+      "sourceEventId": "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
+      "sourceEventIndex": 90,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Aida",
+      "text": "Every single time.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
+      "sourceEventId": "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
+      "sourceEventIndex": 91,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Bo",
+      "text": "But you still go?",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
+      "sourceEventId": "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
+      "sourceEventIndex": 92,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     },
+     {
+      "speaker": "Aida",
+      "text": "Every single time.",
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
+      "sourceEventId": "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
+      "sourceEventIndex": 93,
+      "voiceTreatment": "single_voice",
+      "chorusMembers": []
+     }
+    ],
+    "continuityConstraints": [
+     {
+      "label": "Keen wristband state",
+      "value": "Keen starts this scene with bare wrists. No wristbands, bands, bracelets, cuffs, crystals or straps appear on either wrist.",
+      "severity": "critical"
+     }
+    ]
+   },
+   "sourceBeatId": "source-beat:sha256:09180799b5c3fcb150d54f9d88b906131cff6e221efef47bd8795015a2dad192",
+   "sourceBeatIds": [
+    "source-beat:sha256:3095fc3c8cf46f6086f21e0e27dbcf55c82619c8a5898dd05459e0eb9f8c4efb",
+    "source-beat:sha256:a5b014fb9e2036b626e39d97b2942527f88ffac24ad72bfc33af0cf27b53820c",
+    "source-beat:sha256:fc15ee7532a4a8083e27ec8d75f3d2a307ba0d1b75ebbe34cafddd9424428e72"
+   ],
+   "sourceEventRange": {
+    "firstEventIndex": 80,
+    "lastEventIndex": 95,
+    "firstEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
+    "lastEventId": "script-event:sha256:646de5871266ef1a22d3610eda7ed943685a88d1bd670a0d28d8fa461346d7be",
+    "eventCount": 16
+   },
+   "sourceEventIds": [
     "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
     "script-event:sha256:a1727562f9ce49e9e2f91c2d9fe5f31937a499c7df5175292e73b67b0318a2ff",
     "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
@@ -1105,13 +1376,6 @@
     "script-event:sha256:646de5871266ef1a22d3610eda7ed943685a88d1bd670a0d28d8fa461346d7be"
    ],
    "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
-    "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
-    "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
-    "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
-    "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
-    "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
-    "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
     "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
     "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
     "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
@@ -1133,10 +1397,7 @@
    "sourceBeatIds": [
     "source-beat:sha256:09180799b5c3fcb150d54f9d88b906131cff6e221efef47bd8795015a2dad192",
     "source-beat:sha256:dea32848f892820f28d18fcfdbb78b0003889d28dae04aad3527382e46906c71",
-    "source-beat:sha256:d0352be891e5c95f78c752d78656453f2477f3387a7ffa22c6b85eb57d654aeb",
-    "source-beat:sha256:3095fc3c8cf46f6086f21e0e27dbcf55c82619c8a5898dd05459e0eb9f8c4efb",
-    "source-beat:sha256:a5b014fb9e2036b626e39d97b2942527f88ffac24ad72bfc33af0cf27b53820c",
-    "source-beat:sha256:fc15ee7532a4a8083e27ec8d75f3d2a307ba0d1b75ebbe34cafddd9424428e72"
+    "source-beat:sha256:d0352be891e5c95f78c752d78656453f2477f3387a7ffa22c6b85eb57d654aeb"
    ],
    "sourceType": "opener",
    "sourceShotId": null,
@@ -1172,7 +1433,7 @@
    "voiceApproval": null,
    "approvedTake": null,
    "harvestFrame": null,
-   "candidatePaths": null,
+   "candidatePaths": [],
    "departmentWork": {
     "cinematography": {
      "approved": {
@@ -1187,15 +1448,11 @@
       "sourceHash": "fd8d5144949965d994190c2b2e5f24023d0a84687fc310ce17533fa027b41d11",
       "output": {
        "shotId": "S4.SH1",
-       "audienceRead": "Bo and Keen brace themselves on the forest path; Bo is anxious but trying, and Keen gives him steady space before Aida enters later.",
+       "audienceRead": "Bo and Keen make the poofy tail a game, then Bo gets worried again and Keen helps him.",
        "composition": "Wide 16:9 opening frame on the Crystal Woods path. Bo and Keen are mid-ground, full bodies visible, walking frame-right with room ahead of them and no third character yet in frame.",
        "lensAndCameraRelationship": "Gentle child-height camera, medium-wide lens, no compression that crops tails, feet, or ears. The path leads into depth and keeps both bears readable against the approved scene plate.",
        "lightingAndDepth": "Warm dappled woods light from the approved plate, soft foreground crystals and deep forest layers. Character silhouettes remain clear and not swallowed by foliage.",
-       "geography": [
-        "Scene 4 starts on the forest path in the Crystal Woods, before the Learning Circle is reached.",
-        "Bo and Keen move together along the path; Aida is not in the opening frame and enters later in the same shot.",
-        "The approved S4 scene plate is the environmental anchor for trees, crystals, path direction, light and depth."
-       ],
+       "geography": "A winding path through the Whispering Woods. Sunlight flickers through the leaves. Bo walks beside Keen with careful new confidence. Keen and Bo count down together three times; each time they reach one, Bo’s tail puffs up, then settles back down. The third puff makes Bo giggle, but the sound of the Learning Circle nearby stops him. He grips his satchel and sits on a fallen log. Keen sits beside him, gives him space, and gently says it can be hard to meet new people but good to make new friends.",
        "charactersInFrame": [
         "Bo",
         "Keen"
@@ -1244,7 +1501,12 @@
         "Do not crop Keen vertically or crop Bo’s tail during the countdown setup.",
         "Bo’s tail begins small; the puff is an animated action on the count, not the opening resting state."
        ],
-       "providerPrompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nBo and Keen brace themselves on the forest path; Bo is anxious but trying, and Keen gives him steady space before Aida enters later.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ middle-centre area; small cautious walking pose; tail starts small and settled; full body visible; facing three-quarter frame-right toward the path.\n- Keen @ middle-centre area; calm supportive walking pose, watching Bo without crowding him; full body visible; facing three-quarter frame-right beside Bo.\n- Same depth: Bo 30 inches; Keen 57 inches; preserve relative-size truth only.\n\n[Geography]\nScene 4 starts on the forest path in the Crystal Woods, before the Learning Circle is reached.\nBo and Keen move together along the path; Aida is not in the opening frame and enters later in the same shot.\nThe approved S4 scene plate is the environmental anchor for trees, crystals, path direction, light and depth.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nKeep a clear entrance lane on the right side of the path for Aida later in the shot.\nLeave overhead and tail clearance so Bo’s tail can puff on the countdown without cropping.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nGentle child-height camera, medium-wide lens, no compression that crops tails, feet, or ears. The path leads into depth and keeps both bears readable against the approved scene plate.\n\n[Light]\nWarm dappled woods light from the approved plate, soft foreground crystals and deep forest layers. Character silhouettes remain clear and not swallowed by foliage.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nKeep Bo and Keen at the same distance from the camera; Keen appears about 90% taller than Bo.\nDo not place Aida in the opening keyframe.\nDo not crop Keen vertically or crop Bo’s tail during the countdown setup.\nBo’s tail begins small; the puff is an animated action on the count, not the opening resting state.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look."
+       "providerPrompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nBo and Keen brace themselves on the forest path; Bo is anxious but trying, and Keen gives him steady space before Aida enters later.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ middle-centre area; small cautious walking pose; tail starts small and settled; full body visible; facing three-quarter frame-right toward the path.\n- Keen @ middle-centre area; calm supportive walking pose, watching Bo without crowding him; full body visible; facing three-quarter frame-right beside Bo.\n- Same depth: Bo 30 inches; Keen 57 inches; preserve relative-size truth only.\n\n[Geography]\nScene 4 starts on the forest path in the Crystal Woods, before the Learning Circle is reached.\nBo and Keen move together along the path; Aida is not in the opening frame and enters later in the same shot.\nThe approved S4 scene plate is the environmental anchor for trees, crystals, path direction, light and depth.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nKeep a clear entrance lane on the right side of the path for Aida later in the shot.\nLeave overhead and tail clearance so Bo’s tail can puff on the countdown without cropping.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nGentle child-height camera, medium-wide lens, no compression that crops tails, feet, or ears. The path leads into depth and keeps both bears readable against the approved scene plate.\n\n[Light]\nWarm dappled woods light from the approved plate, soft foreground crystals and deep forest layers. Character silhouettes remain clear and not swallowed by foliage.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nKeep Bo and Keen at the same distance from the camera; Keen appears about 90% taller than Bo.\nDo not place Aida in the opening keyframe.\nDo not crop Keen vertically or crop Bo’s tail during the countdown setup.\nBo’s tail begins small; the puff is an animated action on the count, not the opening resting state.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
+       "splitCarryForward": {
+        "at": "2026-09-02T09:23:09Z",
+        "fromShotId": "S4.SH1",
+        "providerCalled": false
+       }
       },
       "outcome": "approved",
       "decisionAt": "2026-09-01T23:56:13",
@@ -1257,7 +1519,7 @@
         "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
        },
        "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
-       "shotContractHash": "30a632b7b66fcaa4f1ae516bf98f2ada689ec50409e9df8c0fc1464bcad014a6",
+       "shotContractHash": "b9f0891fdf4d98bb1c7ca4c31e935c373ed03dc38d0efb22df7efc87809601f8",
        "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
        "references": [
         {
@@ -1783,618 +2045,11 @@
          },
          "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
          "physicalSignature": "Breath catches before the body commits forward."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
-         "sourceEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
-         "speaker": "Aida",
-         "character": "Aida",
-         "exactDialogue": "Hi Keen, I see you have met a new friend.",
-         "performedText": "Hi Keen, I see you have met a new friend.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 13.83s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "hi",
-           "keen",
-           "i",
-           "see",
-           "you",
-           "have"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
-         },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
-         "startsAtSec": 13.83,
-         "estimatedDurationSec": 2.35,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l8-natural",
-           "label": "Natural truthful take",
-           "performedText": "Hi Keen, I see you have met a new friend.",
-           "primary": true,
-           "takesCount": 1,
-           "elevenLabsText": "Hi Keen, I see you have met a new friend."
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "SHuZ9GyczU4QEDzU4QU4"
-         ],
-         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.45,
-          "similarity_boost": 0.9,
-          "style": 0.15
-         },
-         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
-         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
-         "sourceEventId": "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
-         "speaker": "Keen",
-         "character": "Keen",
-         "exactDialogue": "Yes.",
-         "performedText": "Yes.",
-         "dramaticIntention": "Support Bo without rushing him; keep the courage practical and friendly.",
-         "subtext": "I am beside you, and we can take the next step together.",
-         "cadenceAndBreath": "Even, gentle, encouraging; leave a small breath before short replies.",
-         "timingAndBody": "Starts around 16.39s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Aida: Hi Keen, I see you have met a new friend.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "yes"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
-         },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Aida: Hi Keen, I see you have met a new friend.",
-         "startsAtSec": 16.39,
-         "estimatedDurationSec": 0.63,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l9-natural",
-           "label": "Natural truthful take",
-           "performedText": "Yes.",
-           "primary": true,
-           "takesCount": 2,
-           "elevenLabsText": "Yes."
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "TCRj5m2u9xhZHJ8h9pMv"
-         ],
-         "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.4,
-          "similarity_boost": 0.9,
-          "style": 0.2
-         },
-         "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
-         "physicalSignature": "Breath catches before the body commits forward."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
-         "sourceEventId": "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
-         "speaker": "Keen",
-         "character": "Keen",
-         "exactDialogue": "Bo, this is Aida.",
-         "performedText": "Bo, this is Aida.",
-         "dramaticIntention": "Support Bo without rushing him; keep the courage practical and friendly.",
-         "subtext": "I am beside you, and we can take the next step together.",
-         "cadenceAndBreath": "Even, gentle, encouraging; leave a small breath before short replies.",
-         "timingAndBody": "Starts around 17.23s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
-          "subtext": "I am beside you, and we can take the next step together.",
-          "thoughtBefore": "Keen: Yes.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "bo",
-           "this",
-           "is",
-           "aida"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "steady and caring",
-          "exit": "still calm, making space for Bo"
-         },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Keen: Yes.",
-         "startsAtSec": 17.23,
-         "estimatedDurationSec": 1.26,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l10-natural",
-           "label": "Natural truthful take",
-           "performedText": "Bo, this is Aida.",
-           "primary": true,
-           "takesCount": 2,
-           "elevenLabsText": "Bo, this is ada."
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "TCRj5m2u9xhZHJ8h9pMv"
-         ],
-         "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.4,
-          "similarity_boost": 0.9,
-          "style": 0.2
-         },
-         "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
-         "physicalSignature": "Breath catches before the body commits forward."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
-         "sourceEventId": "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
-         "speaker": "Aida",
-         "character": "Aida",
-         "exactDialogue": "You packed your bag.",
-         "performedText": "You packed your bag.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 18.71s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Keen: Bo, this is Aida.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "you",
-           "packed",
-           "your",
-           "bag"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
-         },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Keen: Bo, this is Aida.",
-         "startsAtSec": 18.71,
-         "estimatedDurationSec": 1.42,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l11-natural",
-           "label": "Natural truthful take",
-           "performedText": "You packed your bag.",
-           "primary": true,
-           "takesCount": 2,
-           "elevenLabsText": "You packed your bag."
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "SHuZ9GyczU4QEDzU4QU4"
-         ],
-         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.45,
-          "similarity_boost": 0.9,
-          "style": 0.15
-         },
-         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
-         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
-         "sourceEventId": "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
-         "speaker": "Bo",
-         "character": "Bo",
-         "exactDialogue": "Four times.",
-         "performedText": "Four times.",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 20.34s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Aida: You packed your bag.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "four",
-           "times"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
-         },
-         "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Aida: You packed your bag.",
-         "startsAtSec": 20.34,
-         "estimatedDurationSec": 0.84,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l12-natural",
-           "label": "Natural truthful take",
-           "performedText": "Four times.",
-           "primary": true,
-           "takesCount": 2,
-           "elevenLabsText": "Four times."
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "AAF2q3NCwTrLMMkEnRLB"
-         ],
-         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.4,
-          "similarity_boost": 0.9,
-          "style": 0.2
-         },
-         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
-         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
-         "sourceEventId": "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
-         "speaker": "Aida",
-         "character": "Aida",
-         "exactDialogue": "I would have done five.",
-         "performedText": "I would have done five.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 21.39s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Bo: Four times.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "i",
-           "would",
-           "have",
-           "done",
-           "five"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
-         },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Bo: Four times.",
-         "startsAtSec": 21.39,
-         "estimatedDurationSec": 1.63,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l13-natural",
-           "label": "Natural truthful take",
-           "performedText": "I would have done five.",
-           "primary": true,
-           "takesCount": 1,
-           "elevenLabsText": "I would have done five."
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "SHuZ9GyczU4QEDzU4QU4"
-         ],
-         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.45,
-          "similarity_boost": 0.9,
-          "style": 0.15
-         },
-         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
-         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
-         "sourceEventId": "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
-         "speaker": "Bo",
-         "character": "Bo",
-         "exactDialogue": "You get scared too?",
-         "performedText": "You get scared too?",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 23.23s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Aida: I would have done five.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "you",
-           "get",
-           "scared",
-           "too"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
-         },
-         "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Aida: I would have done five.",
-         "startsAtSec": 23.23,
-         "estimatedDurationSec": 1.26,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l14-natural",
-           "label": "Natural truthful take",
-           "performedText": "You get scared too?",
-           "primary": true,
-           "takesCount": 2,
-           "elevenLabsText": "You get scared too?"
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "AAF2q3NCwTrLMMkEnRLB"
-         ],
-         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.4,
-          "similarity_boost": 0.9,
-          "style": 0.2
-         },
-         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
-         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
-         "sourceEventId": "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
-         "speaker": "Aida",
-         "character": "Aida",
-         "exactDialogue": "Every single time.",
-         "performedText": "Every single time.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 24.70s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Bo: You get scared too?",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "every",
-           "single",
-           "time"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
-         },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Bo: You get scared too?",
-         "startsAtSec": 24.7,
-         "estimatedDurationSec": 1.2,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l15-natural",
-           "label": "Natural truthful take",
-           "performedText": "Every single time.",
-           "primary": true,
-           "takesCount": 2,
-           "elevenLabsText": "Every single time."
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "SHuZ9GyczU4QEDzU4QU4"
-         ],
-         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.45,
-          "similarity_boost": 0.9,
-          "style": 0.15
-         },
-         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
-         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
-         "sourceEventId": "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
-         "speaker": "Bo",
-         "character": "Bo",
-         "exactDialogue": "But you still go?",
-         "performedText": "But you still go?",
-         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
-         "subtext": "I want to be brave, but this still feels big.",
-         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
-         "timingAndBody": "Starts around 26.12s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Let Bo be honest about fear while still trying to move forward.",
-          "subtext": "I want to be brave, but this still feels big.",
-          "thoughtBefore": "Aida: Every single time.",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "but",
-           "you",
-           "still",
-           "go"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "worried and tentative",
-          "exit": "a little more understood"
-         },
-         "listener": "Keen",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Aida: Every single time.",
-         "startsAtSec": 26.12,
-         "estimatedDurationSec": 1.26,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l16-natural",
-           "label": "Natural truthful take",
-           "performedText": "But you still go?",
-           "primary": true,
-           "takesCount": 2,
-           "elevenLabsText": "But you still go?"
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "AAF2q3NCwTrLMMkEnRLB"
-         ],
-         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.4,
-          "similarity_boost": 0.9,
-          "style": 0.2
-         },
-         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
-         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
-        },
-        {
-         "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
-         "sourceEventId": "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
-         "speaker": "Aida",
-         "character": "Aida",
-         "exactDialogue": "Every single time.",
-         "performedText": "Every single time.",
-         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-         "subtext": "I understand fear too, and you are not alone in it.",
-         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
-         "timingAndBody": "Starts around 27.60s while the body action remains readable; do not rush the line into the next cue.",
-         "archetypeId": "held-heart",
-         "performanceQuestions": {
-          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
-          "subtext": "I understand fear too, and you are not alone in it.",
-          "thoughtBefore": "Bo: But you still go?",
-          "changeDuring": "The line moves the moment from private worry toward shared courage.",
-          "operativeWords": [
-           "every",
-           "single",
-           "time"
-          ]
-         },
-         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
-         "emotionalState": {
-          "entry": "quietly attentive and kind",
-          "exit": "reassuring, equal, brave-with-Bo"
-         },
-         "listener": "Bo",
-         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
-         "previousText": "Bo: But you still go?",
-         "startsAtSec": 27.6,
-         "estimatedDurationSec": 1.2,
-         "pauseReasons": [],
-         "tagPurposes": [],
-         "takeRecipes": [
-          {
-           "recipeId": "s4sh1-l17-natural",
-           "label": "Natural truthful take",
-           "performedText": "Every single time.",
-           "primary": true,
-           "takesCount": 2,
-           "elevenLabsText": "Every single time."
-          }
-         ],
-         "voiceTreatment": "single_voice",
-         "chorusMembers": [],
-         "voiceIds": [
-          "SHuZ9GyczU4QEDzU4QU4"
-         ],
-         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-         "modelId": "eleven_v3",
-         "voiceSettings": {
-          "stability": 0.45,
-          "similarity_boost": 0.9,
-          "style": 0.15
-         },
-         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
-         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
         }
        ],
        "elevenLabsProviderPronunciations": {
         "Aida": "ada"
        },
-       "compiledTrackHash": "620908c968839bd8040184ad13acf22ba10ef3ed7a832562076887809ea54741",
        "countdownVoiceLock": {
         "shotId": "S4.SH1",
         "text": "3, 2, 1…",
@@ -2408,6 +2063,11 @@
          "TCRj5m2u9xhZHJ8h9pMv"
         ],
         "reason": "Julian correction: Bo and Keen say every countdown together."
+       },
+       "splitCarryForward": {
+        "at": "2026-09-02T09:23:09Z",
+        "fromShotId": "S4.SH1",
+        "providerCalled": false
        }
       },
       "outcome": "approved",
@@ -2420,8 +2080,8 @@
         "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
        },
        "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
-       "shotContractHash": "e4de24124676e029a292f71aaeffe052ffd621d9de30c359dc0b9419ee65869d",
-       "dialogueHash": "6f1b893cf933d16757a9a6995329b72ba58e25fbfc7b97d182258b62c8b55b10",
+       "shotContractHash": "b9f0891fdf4d98bb1c7ca4c31e935c373ed03dc38d0efb22df7efc87809601f8",
+       "dialogueHash": "23475a38db90862fdb6721e60db84add22fb16edf8d19504589a40c96f04b647",
        "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
        "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
        "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
@@ -2437,17 +2097,7 @@
         "AAF2q3NCwTrLMMkEnRLB",
         "AAF2q3NCwTrLMMkEnRLB",
         "AAF2q3NCwTrLMMkEnRLB",
-        "TCRj5m2u9xhZHJ8h9pMv",
-        "SHuZ9GyczU4QEDzU4QU4",
-        "TCRj5m2u9xhZHJ8h9pMv",
-        "TCRj5m2u9xhZHJ8h9pMv",
-        "SHuZ9GyczU4QEDzU4QU4",
-        "AAF2q3NCwTrLMMkEnRLB",
-        "SHuZ9GyczU4QEDzU4QU4",
-        "AAF2q3NCwTrLMMkEnRLB",
-        "SHuZ9GyczU4QEDzU4QU4",
-        "AAF2q3NCwTrLMMkEnRLB",
-        "SHuZ9GyczU4QEDzU4QU4"
+        "TCRj5m2u9xhZHJ8h9pMv"
        ]
       },
       "compiledTrack": {
@@ -3853,7 +3503,1105 @@
           "Would a four-year-old feel the intended turn?"
          ],
          "compiledHash": "33a6db530f1e5b3a5836ef173afb80a05c7aa2069ddb247683956b93a1c1c253"
+        }
+       ],
+       "compiledHash": "620908c968839bd8040184ad13acf22ba10ef3ed7a832562076887809ea54741"
+      },
+      "signatureCarryForward": {
+       "at": "2026-09-02T09:23:09Z",
+       "reason": "Scene 4 split into two shots; voice direction carried forward mechanically.",
+       "providerCalled": false
+      }
+     },
+     "candidate": null,
+     "history": []
+    }
+   },
+   "keyframeCandidate": null,
+   "keyframePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png",
+   "keyframeCandidates": [],
+   "selectedKeyframeCandidateId": null,
+   "voicePlacementFailure": null,
+   "voPath": null,
+   "voGeneratedFrom": null,
+   "voRawPath": null,
+   "voTimingPath": null,
+   "voPlacementPath": null,
+   "voInputSignature": null,
+   "voPackageRevision": null,
+   "voicePrevious": {
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_732fdefb.wav",
+    "rawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8e0bdcab_chorus.mp3",
+    "timingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8e0bdcab_chorus.mp3.dialogue.json",
+    "placementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_732fdefb.wav.timing.json",
+    "generatedFrom": [
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
+      "sourceEventId": "script-event:sha256:7f85f6bcc4e7c2aafc70175cacd5c6fdee412154dc03d016200835992058953c",
+      "speaker": "Bo/Keen",
+      "text": "3, 2, 1…",
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "Opening silence: Bo and Keen are walking; Bo is working up courage.",
+      "compiledHash": "cb469f6b55044bc1e9611ef4ce385e9342af328955523c63573c1cf2bac2eea8",
+      "recipeId": "s4sh1-l1-natural",
+      "voiceTreatment": "group_chorus",
+      "chorusMembers": [
+       "Bo",
+       "Keen"
+      ],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB",
+       "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
+      "sourceEventId": "script-event:sha256:1402b19e4ef3d73d5a5c0b113adaeb19b2b5fc8da7322387f27855102ee83c14",
+      "speaker": "Bo/Keen",
+      "text": "3, 2, 1…",
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "Bo/Keen: 3, 2, 1…",
+      "compiledHash": "0ecc3332645b9ebf8f44150ba51c81ab4cdf1f384f0a0e23e60d9f46414ab33c",
+      "recipeId": "s4sh1-l2-natural",
+      "voiceTreatment": "group_chorus",
+      "chorusMembers": [
+       "Bo",
+       "Keen"
+      ],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB",
+       "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
+      "sourceEventId": "script-event:sha256:557e9735ec2b44746ae48f26d3bf8b190c03ede80654f42e3c20b6acd1451a97",
+      "speaker": "Bo/Keen",
+      "text": "3, 2, 1…",
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "Bo/Keen: 3, 2, 1…",
+      "compiledHash": "9ab6d0da78980db90828ce996feb7fa227f47a35248bb50d39157ee1b309f227",
+      "recipeId": "s4sh1-l3-natural",
+      "voiceTreatment": "group_chorus",
+      "chorusMembers": [
+       "Bo",
+       "Keen"
+      ],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB",
+       "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
+      "sourceEventId": "script-event:sha256:1adc1d5f8027a7f6407b9f8d3f3e912d31a95e5671f2e7a75cd684123eaffc40",
+      "speaker": "Bo",
+      "text": "I’m STILL worried about going to the Learning Circle.",
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "Bo: 3, 2, 1…",
+      "compiledHash": "085550c3f5b56050b37bd791e377df54ce568322c0bacede1d3d2fc2843fdb06",
+      "recipeId": "s4sh1-l4-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
+      "sourceEventId": "script-event:sha256:1fde90a5212c908bace6ae111f5ca9cfee8c4ac81e6959cb1447f5a0ef752018",
+      "speaker": "Bo",
+      "text": "They all know each other.",
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "Bo: I’m STILL worried about going to the Learning Circle.",
+      "compiledHash": "b2e50fadafed3263f428619b34321399f4aae5ac17ab2e19c8d7cd2b4957a8a1",
+      "recipeId": "s4sh1-l5-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
+      "sourceEventId": "script-event:sha256:6b05ff9daa7d6497719f1bfc9c94e0dd7103a3724c21bd1ba701ce8a0fdfc448",
+      "speaker": "Bo",
+      "text": "But I don’t know them, and they don’t know me.",
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "Bo: They all know each other.",
+      "compiledHash": "4905f99e5e351338380f289854785975222017033ab1e3224a815aa01fd83109",
+      "recipeId": "s4sh1-l6-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
+      "sourceEventId": "script-event:sha256:3c7ee893f53d80a390325b76a6d70542375749e6568087dc2e92fb70c3f19e43",
+      "speaker": "Keen",
+      "text": "It can be hard to meet new people, but it’s good to make new friends.",
+      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "Bo: But I don’t know them, and they don’t know me.",
+      "compiledHash": "834405b3ff96d62ff4d0159c169f73674cddfc05c123972e918312d45e17e6c3",
+      "recipeId": "s4sh1-l7-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
+      "sourceEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
+      "speaker": "Aida",
+      "text": "Hi Keen, I see you have met a new friend.",
+      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.45,
+       "similarity_boost": 0.9,
+       "style": 0.15
+      },
+      "previousText": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
+      "compiledHash": "a70af2f6e77f3f3f9d0bff0a3d7eb282a210ddf4227797ead53f8e9cf43f2678",
+      "recipeId": "s4sh1-l8-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "SHuZ9GyczU4QEDzU4QU4"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
+      "sourceEventId": "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
+      "speaker": "Keen",
+      "text": "Yes.",
+      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "ada: Hi Keen, I see you have met a new friend.",
+      "compiledHash": "60904374149e236ef3079ab67a76f11495c6c6a86bf2b8b331057f7a218eefb5",
+      "recipeId": "s4sh1-l9-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
+      "sourceEventId": "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
+      "speaker": "Keen",
+      "text": "Bo, this is ada.",
+      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "Keen: Yes.",
+      "compiledHash": "726883a48a60f1de5a49b2c47fc14b5b39e98876558a4c5a01ce17238c349a76",
+      "recipeId": "s4sh1-l10-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "TCRj5m2u9xhZHJ8h9pMv"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
+      "sourceEventId": "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
+      "speaker": "Aida",
+      "text": "You packed your bag.",
+      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.45,
+       "similarity_boost": 0.9,
+       "style": 0.15
+      },
+      "previousText": "Keen: Bo, this is ada.",
+      "compiledHash": "7fc49217cb983def1cd3a8cfcd42e26f37d3b4441ab49ca657e9a91597b979cf",
+      "recipeId": "s4sh1-l11-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "SHuZ9GyczU4QEDzU4QU4"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
+      "sourceEventId": "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
+      "speaker": "Bo",
+      "text": "Four times.",
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "ada: You packed your bag.",
+      "compiledHash": "9404119bd89218e3f95b5bc732452727a87fa330a637346142d3ebb23125783c",
+      "recipeId": "s4sh1-l12-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
+      "sourceEventId": "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
+      "speaker": "Aida",
+      "text": "I would have done five.",
+      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.45,
+       "similarity_boost": 0.9,
+       "style": 0.15
+      },
+      "previousText": "Bo: Four times.",
+      "compiledHash": "4d57986d81827f65fc1f93d95d541a092a897ab1b996b3517650b7e86d85e6dd",
+      "recipeId": "s4sh1-l13-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "SHuZ9GyczU4QEDzU4QU4"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
+      "sourceEventId": "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
+      "speaker": "Bo",
+      "text": "You get scared too?",
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "ada: I would have done five.",
+      "compiledHash": "daeb0ca5d9d0b8e3cb6772838b56ded5a998fb80244a7a7decb9af2b9108235e",
+      "recipeId": "s4sh1-l14-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
+      "sourceEventId": "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
+      "speaker": "Aida",
+      "text": "Every single time.",
+      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.45,
+       "similarity_boost": 0.9,
+       "style": 0.15
+      },
+      "previousText": "Bo: You get scared too?",
+      "compiledHash": "6866a2104ebdd9e40d755fcd4207b9858b0eebdfcd813c7a2115ed017461df0c",
+      "recipeId": "s4sh1-l15-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "SHuZ9GyczU4QEDzU4QU4"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
+      "sourceEventId": "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
+      "speaker": "Bo",
+      "text": "But you still go?",
+      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.4,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "ada: Every single time.",
+      "compiledHash": "19fb171d32a178ef750cd9770e73e5db76833ca19df8dac89b277bb87ca69736",
+      "recipeId": "s4sh1-l16-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "AAF2q3NCwTrLMMkEnRLB"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
+      "sourceEventId": "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
+      "speaker": "Aida",
+      "text": "Every single time.",
+      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.45,
+       "similarity_boost": 0.9,
+       "style": 0.15
+      },
+      "previousText": "Bo: But you still go?",
+      "compiledHash": "c75bfac678bb339d4836500d597b36bd43d4db9a822a7b7ee986c92b64ef1531",
+      "recipeId": "s4sh1-l17-natural",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "SHuZ9GyczU4QEDzU4QU4"
+      ]
+     }
+    ],
+    "supersededAt": "2026-09-02T09:23:09Z",
+    "reason": "Scene 4 split; old voice candidate covered both new shots and was too rushed."
+   },
+   "voiceCorrections": [
+    {
+     "at": "2026-09-02T09:20:00Z",
+     "reviewedBy": "Julian",
+     "change": "All three S4.SH1 countdown lines are locked to Bo/Keen group_chorus.",
+     "providerCalled": false
+    }
+   ],
+   "voiceAuditions": null,
+   "voiceAuditionSelections": {},
+   "voiceAuditionSelectionsByHash": []
+  },
+  {
+   "shotId": "S4.SH2",
+   "status": "designed",
+   "sourceBeatId": "source-beat:sha256:3095fc3c8cf46f6086f21e0e27dbcf55c82619c8a5898dd05459e0eb9f8c4efb",
+   "sourceBeatIds": [
+    "source-beat:sha256:3095fc3c8cf46f6086f21e0e27dbcf55c82619c8a5898dd05459e0eb9f8c4efb",
+    "source-beat:sha256:a5b014fb9e2036b626e39d97b2942527f88ffac24ad72bfc33af0cf27b53820c",
+    "source-beat:sha256:fc15ee7532a4a8083e27ec8d75f3d2a307ba0d1b75ebbe34cafddd9424428e72"
+   ],
+   "sourceType": "relay",
+   "sourceShotId": "S4.SH1",
+   "keyframeApproval": null,
+   "voiceApproval": null,
+   "approvedTake": null,
+   "harvestFrame": null,
+   "candidatePaths": [],
+   "departmentWork": {
+    "voice": {
+     "approved": {
+      "department": "Voice",
+      "worker": "Voice Director",
+      "skill": "skills/crystal-bears-voice-director/SKILL.md",
+      "model": "gpt-5.4",
+      "preparedAt": "2026-09-01T23:56:13",
+      "editedAt": null,
+      "preparedBy": "deterministic-snapshot-fallback",
+      "creativeDirectingStandardVersion": 0,
+      "sourceHash": "fd8d5144949965d994190c2b2e5f24023d0a84687fc310ce17533fa027b41d11",
+      "output": {
+       "shotId": "S4.SH2",
+       "sceneIntention": "Bo tries to make the brave first step through the Crystal Woods with Keen and Aida helping him feel less alone.",
+       "lines": [
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
+         "sourceEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "Hi Keen, I see you have met a new friend.",
+         "performedText": "Hi Keen, I see you have met a new friend.",
+         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+         "subtext": "I understand fear too, and you are not alone in it.",
+         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
+         "timingAndBody": "Starts around 13.83s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+          "subtext": "I understand fear too, and you are not alone in it.",
+          "thoughtBefore": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "hi",
+           "keen",
+           "i",
+           "see",
+           "you",
+           "have"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "quietly attentive and kind",
+          "exit": "reassuring, equal, brave-with-Bo"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
+         "startsAtSec": 13.83,
+         "estimatedDurationSec": 2.35,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l8-natural",
+           "label": "Natural truthful take",
+           "performedText": "Hi Keen, I see you have met a new friend.",
+           "primary": true,
+           "takesCount": 1,
+           "elevenLabsText": "Hi Keen, I see you have met a new friend."
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
         },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
+         "sourceEventId": "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
+         "speaker": "Keen",
+         "character": "Keen",
+         "exactDialogue": "Yes.",
+         "performedText": "Yes.",
+         "dramaticIntention": "Support Bo without rushing him; keep the courage practical and friendly.",
+         "subtext": "I am beside you, and we can take the next step together.",
+         "cadenceAndBreath": "Even, gentle, encouraging; leave a small breath before short replies.",
+         "timingAndBody": "Starts around 16.39s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
+          "subtext": "I am beside you, and we can take the next step together.",
+          "thoughtBefore": "Aida: Hi Keen, I see you have met a new friend.",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "yes"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "steady and caring",
+          "exit": "still calm, making space for Bo"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Aida: Hi Keen, I see you have met a new friend.",
+         "startsAtSec": 16.39,
+         "estimatedDurationSec": 0.63,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l9-natural",
+           "label": "Natural truthful take",
+           "performedText": "Yes.",
+           "primary": true,
+           "takesCount": 2,
+           "elevenLabsText": "Yes."
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "TCRj5m2u9xhZHJ8h9pMv"
+         ],
+         "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
+         "physicalSignature": "Breath catches before the body commits forward."
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
+         "sourceEventId": "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
+         "speaker": "Keen",
+         "character": "Keen",
+         "exactDialogue": "Bo, this is Aida.",
+         "performedText": "Bo, this is Aida.",
+         "dramaticIntention": "Support Bo without rushing him; keep the courage practical and friendly.",
+         "subtext": "I am beside you, and we can take the next step together.",
+         "cadenceAndBreath": "Even, gentle, encouraging; leave a small breath before short replies.",
+         "timingAndBody": "Starts around 17.23s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Support Bo without rushing him; keep the courage practical and friendly.",
+          "subtext": "I am beside you, and we can take the next step together.",
+          "thoughtBefore": "Keen: Yes.",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "bo",
+           "this",
+           "is",
+           "aida"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "steady and caring",
+          "exit": "still calm, making space for Bo"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Keen: Yes.",
+         "startsAtSec": 17.23,
+         "estimatedDurationSec": 1.26,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l10-natural",
+           "label": "Natural truthful take",
+           "performedText": "Bo, this is Aida.",
+           "primary": true,
+           "takesCount": 2,
+           "elevenLabsText": "Bo, this is ada."
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "TCRj5m2u9xhZHJ8h9pMv"
+         ],
+         "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
+         "physicalSignature": "Breath catches before the body commits forward."
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
+         "sourceEventId": "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "You packed your bag.",
+         "performedText": "You packed your bag.",
+         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+         "subtext": "I understand fear too, and you are not alone in it.",
+         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
+         "timingAndBody": "Starts around 18.71s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+          "subtext": "I understand fear too, and you are not alone in it.",
+          "thoughtBefore": "Keen: Bo, this is Aida.",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "you",
+           "packed",
+           "your",
+           "bag"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "quietly attentive and kind",
+          "exit": "reassuring, equal, brave-with-Bo"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Keen: Bo, this is Aida.",
+         "startsAtSec": 18.71,
+         "estimatedDurationSec": 1.42,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l11-natural",
+           "label": "Natural truthful take",
+           "performedText": "You packed your bag.",
+           "primary": true,
+           "takesCount": 2,
+           "elevenLabsText": "You packed your bag."
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
+         "sourceEventId": "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "Four times.",
+         "performedText": "Four times.",
+         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
+         "subtext": "I want to be brave, but this still feels big.",
+         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
+         "timingAndBody": "Starts around 20.34s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Let Bo be honest about fear while still trying to move forward.",
+          "subtext": "I want to be brave, but this still feels big.",
+          "thoughtBefore": "Aida: You packed your bag.",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "four",
+           "times"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "worried and tentative",
+          "exit": "a little more understood"
+         },
+         "listener": "Keen",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Aida: You packed your bag.",
+         "startsAtSec": 20.34,
+         "estimatedDurationSec": 0.84,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l12-natural",
+           "label": "Natural truthful take",
+           "performedText": "Four times.",
+           "primary": true,
+           "takesCount": 2,
+           "elevenLabsText": "Four times."
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
+         "sourceEventId": "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "I would have done five.",
+         "performedText": "I would have done five.",
+         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+         "subtext": "I understand fear too, and you are not alone in it.",
+         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
+         "timingAndBody": "Starts around 21.39s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+          "subtext": "I understand fear too, and you are not alone in it.",
+          "thoughtBefore": "Bo: Four times.",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "i",
+           "would",
+           "have",
+           "done",
+           "five"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "quietly attentive and kind",
+          "exit": "reassuring, equal, brave-with-Bo"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Bo: Four times.",
+         "startsAtSec": 21.39,
+         "estimatedDurationSec": 1.63,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l13-natural",
+           "label": "Natural truthful take",
+           "performedText": "I would have done five.",
+           "primary": true,
+           "takesCount": 1,
+           "elevenLabsText": "I would have done five."
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
+         "sourceEventId": "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "You get scared too?",
+         "performedText": "You get scared too?",
+         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
+         "subtext": "I want to be brave, but this still feels big.",
+         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
+         "timingAndBody": "Starts around 23.23s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Let Bo be honest about fear while still trying to move forward.",
+          "subtext": "I want to be brave, but this still feels big.",
+          "thoughtBefore": "Aida: I would have done five.",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "you",
+           "get",
+           "scared",
+           "too"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "worried and tentative",
+          "exit": "a little more understood"
+         },
+         "listener": "Keen",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Aida: I would have done five.",
+         "startsAtSec": 23.23,
+         "estimatedDurationSec": 1.26,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l14-natural",
+           "label": "Natural truthful take",
+           "performedText": "You get scared too?",
+           "primary": true,
+           "takesCount": 2,
+           "elevenLabsText": "You get scared too?"
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
+         "sourceEventId": "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "Every single time.",
+         "performedText": "Every single time.",
+         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+         "subtext": "I understand fear too, and you are not alone in it.",
+         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
+         "timingAndBody": "Starts around 24.70s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+          "subtext": "I understand fear too, and you are not alone in it.",
+          "thoughtBefore": "Bo: You get scared too?",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "every",
+           "single",
+           "time"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "quietly attentive and kind",
+          "exit": "reassuring, equal, brave-with-Bo"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Bo: You get scared too?",
+         "startsAtSec": 24.7,
+         "estimatedDurationSec": 1.2,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l15-natural",
+           "label": "Natural truthful take",
+           "performedText": "Every single time.",
+           "primary": true,
+           "takesCount": 2,
+           "elevenLabsText": "Every single time."
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
+         "sourceEventId": "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
+         "speaker": "Bo",
+         "character": "Bo",
+         "exactDialogue": "But you still go?",
+         "performedText": "But you still go?",
+         "dramaticIntention": "Let Bo be honest about fear while still trying to move forward.",
+         "subtext": "I want to be brave, but this still feels big.",
+         "cadenceAndBreath": "Small, sincere, vulnerable; questions are genuine not comic, with short breaths between thoughts.",
+         "timingAndBody": "Starts around 26.12s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Let Bo be honest about fear while still trying to move forward.",
+          "subtext": "I want to be brave, but this still feels big.",
+          "thoughtBefore": "Aida: Every single time.",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "but",
+           "you",
+           "still",
+           "go"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "worried and tentative",
+          "exit": "a little more understood"
+         },
+         "listener": "Keen",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Aida: Every single time.",
+         "startsAtSec": 26.12,
+         "estimatedDurationSec": 1.26,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l16-natural",
+           "label": "Natural truthful take",
+           "performedText": "But you still go?",
+           "primary": true,
+           "takesCount": 2,
+           "elevenLabsText": "But you still go?"
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
+         "sourceEventId": "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
+         "speaker": "Aida",
+         "character": "Aida",
+         "exactDialogue": "Every single time.",
+         "performedText": "Every single time.",
+         "dramaticIntention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+         "subtext": "I understand fear too, and you are not alone in it.",
+         "cadenceAndBreath": "Soft, grounded, low-pressure cadence; gentle warmth, no loud entrance, no sing-song.",
+         "timingAndBody": "Starts around 27.60s while the body action remains readable; do not rush the line into the next cue.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "Offer warm empathy without making Bo smaller; never tease, never make the line a question unless the script has one.",
+          "subtext": "I understand fear too, and you are not alone in it.",
+          "thoughtBefore": "Bo: But you still go?",
+          "changeDuring": "The line moves the moment from private worry toward shared courage.",
+          "operativeWords": [
+           "every",
+           "single",
+           "time"
+          ]
+         },
+         "physicalState": "Walking or settling on the Crystal Woods path, body small and readable, no frantic performance.",
+         "emotionalState": {
+          "entry": "quietly attentive and kind",
+          "exit": "reassuring, equal, brave-with-Bo"
+         },
+         "listener": "Bo",
+         "bodyVoiceRelationship": "Voice follows the body truth: small courage, visible breath, no oversized performance.",
+         "previousText": "Bo: But you still go?",
+         "startsAtSec": 27.6,
+         "estimatedDurationSec": 1.2,
+         "pauseReasons": [],
+         "tagPurposes": [],
+         "takeRecipes": [
+          {
+           "recipeId": "s4sh1-l17-natural",
+           "label": "Natural truthful take",
+           "performedText": "Every single time.",
+           "primary": true,
+           "takesCount": 2,
+           "elevenLabsText": "Every single time."
+          }
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
+        }
+       ],
+       "elevenLabsProviderPronunciations": {
+        "Aida": "ada"
+       },
+       "splitCarryForward": {
+        "at": "2026-09-02T09:23:09Z",
+        "fromShotId": "S4.SH1",
+        "providerCalled": false
+       }
+      },
+      "outcome": "approved",
+      "decisionAt": "2026-09-01T23:56:13",
+      "reviewedBy": "StudioAI",
+      "inputSignature": {
+       "stage": "voice",
+       "model": "gpt-5.4",
+       "skillHashes": {
+        "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
+       },
+       "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+       "shotContractHash": "96e1ea23be39880fddb91fe9480043f079a4184bd9bdabf673186bffb802fe89",
+       "dialogueHash": "fbd70cec3b2987bfae6cc57fd955eda9f4c51e26f5530a8c4d7a923fba1a0d38",
+       "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+       "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+       "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+       "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+       "voiceCompilerVersion": "voice-director-v1",
+       "voiceIds": [
+        "SHuZ9GyczU4QEDzU4QU4",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "SHuZ9GyczU4QEDzU4QU4"
+       ]
+      },
+      "compiledTrack": {
+       "compiler": "voice-director-v1",
+       "shotId": "S4.SH2",
+       "lines": [
         {
          "schemaVersion": 1,
          "compiler": "voice-director-v1",
@@ -5794,8 +6542,8 @@
        "compiledHash": "620908c968839bd8040184ad13acf22ba10ef3ed7a832562076887809ea54741"
       },
       "signatureCarryForward": {
-       "at": "2026-09-02T09:36:00Z",
-       "reason": "Manual chorus correction refreshed without provider call after OpenAI quota blocked Voice Director prepare.",
+       "at": "2026-09-02T09:23:09Z",
+       "reason": "Scene 4 split into two shots; voice direction carried forward mechanically.",
        "providerCalled": false
       }
      },
@@ -5804,807 +6552,34 @@
     }
    },
    "keyframeCandidate": null,
-   "keyframePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png",
+   "keyframePath": null,
    "keyframeCandidates": [],
    "selectedKeyframeCandidateId": null,
    "voicePlacementFailure": null,
-   "voPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_732fdefb.wav",
-   "voGeneratedFrom": [
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
-     "sourceEventId": "script-event:sha256:7f85f6bcc4e7c2aafc70175cacd5c6fdee412154dc03d016200835992058953c",
-     "speaker": "Bo/Keen",
-     "text": "3, 2, 1…",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Opening silence: Bo and Keen are walking; Bo is working up courage.",
-     "compiledHash": "cb469f6b55044bc1e9611ef4ce385e9342af328955523c63573c1cf2bac2eea8",
-     "recipeId": "s4sh1-l1-natural",
-     "voiceTreatment": "group_chorus",
-     "chorusMembers": [
-      "Bo",
-      "Keen"
-     ],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB",
-      "TCRj5m2u9xhZHJ8h9pMv"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
-     "sourceEventId": "script-event:sha256:1402b19e4ef3d73d5a5c0b113adaeb19b2b5fc8da7322387f27855102ee83c14",
-     "speaker": "Bo/Keen",
-     "text": "3, 2, 1…",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Bo/Keen: 3, 2, 1…",
-     "compiledHash": "0ecc3332645b9ebf8f44150ba51c81ab4cdf1f384f0a0e23e60d9f46414ab33c",
-     "recipeId": "s4sh1-l2-natural",
-     "voiceTreatment": "group_chorus",
-     "chorusMembers": [
-      "Bo",
-      "Keen"
-     ],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB",
-      "TCRj5m2u9xhZHJ8h9pMv"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
-     "sourceEventId": "script-event:sha256:557e9735ec2b44746ae48f26d3bf8b190c03ede80654f42e3c20b6acd1451a97",
-     "speaker": "Bo/Keen",
-     "text": "3, 2, 1…",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Bo/Keen: 3, 2, 1…",
-     "compiledHash": "9ab6d0da78980db90828ce996feb7fa227f47a35248bb50d39157ee1b309f227",
-     "recipeId": "s4sh1-l3-natural",
-     "voiceTreatment": "group_chorus",
-     "chorusMembers": [
-      "Bo",
-      "Keen"
-     ],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB",
-      "TCRj5m2u9xhZHJ8h9pMv"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
-     "sourceEventId": "script-event:sha256:1adc1d5f8027a7f6407b9f8d3f3e912d31a95e5671f2e7a75cd684123eaffc40",
-     "speaker": "Bo",
-     "text": "I’m STILL worried about going to the Learning Circle.",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Bo: 3, 2, 1…",
-     "compiledHash": "085550c3f5b56050b37bd791e377df54ce568322c0bacede1d3d2fc2843fdb06",
-     "recipeId": "s4sh1-l4-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
-     "sourceEventId": "script-event:sha256:1fde90a5212c908bace6ae111f5ca9cfee8c4ac81e6959cb1447f5a0ef752018",
-     "speaker": "Bo",
-     "text": "They all know each other.",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Bo: I’m STILL worried about going to the Learning Circle.",
-     "compiledHash": "b2e50fadafed3263f428619b34321399f4aae5ac17ab2e19c8d7cd2b4957a8a1",
-     "recipeId": "s4sh1-l5-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
-     "sourceEventId": "script-event:sha256:6b05ff9daa7d6497719f1bfc9c94e0dd7103a3724c21bd1ba701ce8a0fdfc448",
-     "speaker": "Bo",
-     "text": "But I don’t know them, and they don’t know me.",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Bo: They all know each other.",
-     "compiledHash": "4905f99e5e351338380f289854785975222017033ab1e3224a815aa01fd83109",
-     "recipeId": "s4sh1-l6-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
-     "sourceEventId": "script-event:sha256:3c7ee893f53d80a390325b76a6d70542375749e6568087dc2e92fb70c3f19e43",
-     "speaker": "Keen",
-     "text": "It can be hard to meet new people, but it’s good to make new friends.",
-     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Bo: But I don’t know them, and they don’t know me.",
-     "compiledHash": "834405b3ff96d62ff4d0159c169f73674cddfc05c123972e918312d45e17e6c3",
-     "recipeId": "s4sh1-l7-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "TCRj5m2u9xhZHJ8h9pMv"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
-     "sourceEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
-     "speaker": "Aida",
-     "text": "Hi Keen, I see you have met a new friend.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
-     "compiledHash": "a70af2f6e77f3f3f9d0bff0a3d7eb282a210ddf4227797ead53f8e9cf43f2678",
-     "recipeId": "s4sh1-l8-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
-     "sourceEventId": "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
-     "speaker": "Keen",
-     "text": "Yes.",
-     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "ada: Hi Keen, I see you have met a new friend.",
-     "compiledHash": "60904374149e236ef3079ab67a76f11495c6c6a86bf2b8b331057f7a218eefb5",
-     "recipeId": "s4sh1-l9-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "TCRj5m2u9xhZHJ8h9pMv"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
-     "sourceEventId": "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
-     "speaker": "Keen",
-     "text": "Bo, this is ada.",
-     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "Keen: Yes.",
-     "compiledHash": "726883a48a60f1de5a49b2c47fc14b5b39e98876558a4c5a01ce17238c349a76",
-     "recipeId": "s4sh1-l10-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "TCRj5m2u9xhZHJ8h9pMv"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
-     "sourceEventId": "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
-     "speaker": "Aida",
-     "text": "You packed your bag.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "Keen: Bo, this is ada.",
-     "compiledHash": "7fc49217cb983def1cd3a8cfcd42e26f37d3b4441ab49ca657e9a91597b979cf",
-     "recipeId": "s4sh1-l11-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
-     "sourceEventId": "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
-     "speaker": "Bo",
-     "text": "Four times.",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "ada: You packed your bag.",
-     "compiledHash": "9404119bd89218e3f95b5bc732452727a87fa330a637346142d3ebb23125783c",
-     "recipeId": "s4sh1-l12-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
-     "sourceEventId": "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
-     "speaker": "Aida",
-     "text": "I would have done five.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "Bo: Four times.",
-     "compiledHash": "4d57986d81827f65fc1f93d95d541a092a897ab1b996b3517650b7e86d85e6dd",
-     "recipeId": "s4sh1-l13-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
-     "sourceEventId": "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
-     "speaker": "Bo",
-     "text": "You get scared too?",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "ada: I would have done five.",
-     "compiledHash": "daeb0ca5d9d0b8e3cb6772838b56ded5a998fb80244a7a7decb9af2b9108235e",
-     "recipeId": "s4sh1-l14-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
-     "sourceEventId": "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
-     "speaker": "Aida",
-     "text": "Every single time.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "Bo: You get scared too?",
-     "compiledHash": "6866a2104ebdd9e40d755fcd4207b9858b0eebdfcd813c7a2115ed017461df0c",
-     "recipeId": "s4sh1-l15-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
-     "sourceEventId": "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
-     "speaker": "Bo",
-     "text": "But you still go?",
-     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.4,
-      "similarity_boost": 0.9,
-      "style": 0.2
-     },
-     "previousText": "ada: Every single time.",
-     "compiledHash": "19fb171d32a178ef750cd9770e73e5db76833ca19df8dac89b277bb87ca69736",
-     "recipeId": "s4sh1-l16-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "AAF2q3NCwTrLMMkEnRLB"
-     ]
-    },
-    {
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
-     "sourceEventId": "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
-     "speaker": "Aida",
-     "text": "Every single time.",
-     "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-     "modelId": "eleven_v3",
-     "voiceSettings": {
-      "stability": 0.45,
-      "similarity_boost": 0.9,
-      "style": 0.15
-     },
-     "previousText": "Bo: But you still go?",
-     "compiledHash": "c75bfac678bb339d4836500d597b36bd43d4db9a822a7b7ee986c92b64ef1531",
-     "recipeId": "s4sh1-l17-natural",
-     "voiceTreatment": "single_voice",
-     "chorusMembers": [],
-     "voiceIds": [
-      "SHuZ9GyczU4QEDzU4QU4"
-     ]
-    }
-   ],
-   "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8e0bdcab_chorus.mp3",
-   "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8e0bdcab_chorus.mp3.dialogue.json",
-   "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_732fdefb.wav.timing.json",
-   "voInputSignature": {
-    "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
-    "dialogueHash": "3c8d63a2cb9633c5d2faae349250b55aff2f074232663e51db99960f1b98d857",
-    "performanceHash": "2d833a3358c109cd7c3440f7ea2300ae853bf0683d6be9044d3dbfed922ced2d",
-    "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
-    "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
-    "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
-    "voiceCompilerVersion": "voice-director-v1",
-    "pronunciationOverrides": {
-     "Aida": "ada",
-     "Ada": "ada"
-    },
-    "voiceIds": [
-     "AAF2q3NCwTrLMMkEnRLB",
-     "TCRj5m2u9xhZHJ8h9pMv",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "TCRj5m2u9xhZHJ8h9pMv",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "TCRj5m2u9xhZHJ8h9pMv",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "TCRj5m2u9xhZHJ8h9pMv",
-     "SHuZ9GyczU4QEDzU4QU4",
-     "TCRj5m2u9xhZHJ8h9pMv",
-     "TCRj5m2u9xhZHJ8h9pMv",
-     "SHuZ9GyczU4QEDzU4QU4",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "SHuZ9GyczU4QEDzU4QU4",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "SHuZ9GyczU4QEDzU4QU4",
-     "AAF2q3NCwTrLMMkEnRLB",
-     "SHuZ9GyczU4QEDzU4QU4"
-    ]
-   },
-   "voPackageRevision": 1,
-   "voicePrevious": {
-    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_51c19aaa.wav",
-    "rawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_57eea03e_chorus.mp3",
-    "timingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_57eea03e_chorus.mp3.dialogue.json",
-    "placementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_51c19aaa.wav.timing.json",
-    "generatedFrom": [
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
-      "sourceEventId": "script-event:sha256:7f85f6bcc4e7c2aafc70175cacd5c6fdee412154dc03d016200835992058953c",
-      "speaker": "Keen",
-      "text": "3, 2, 1…",
-      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Opening silence: Bo and Keen are walking; Bo is working up courage.",
-      "compiledHash": "1ae5f4bc65a575c48a783a97d7155662d91eaed04cc8a4203c0c27d4af1b7e9c",
-      "recipeId": "s4sh1-l1-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "TCRj5m2u9xhZHJ8h9pMv"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
-      "sourceEventId": "script-event:sha256:1402b19e4ef3d73d5a5c0b113adaeb19b2b5fc8da7322387f27855102ee83c14",
-      "speaker": "Bo/Keen",
-      "text": "3, 2, 1…",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Keen: 3, 2, 1…",
-      "compiledHash": "1a1766247b3fcde30ed6a9dd47f89d20fa29c7ae1ea33db3ffd5973552a7af8c",
-      "recipeId": "s4sh1-l2-natural",
-      "voiceTreatment": "group_chorus",
-      "chorusMembers": [
-       "Bo",
-       "Keen"
-      ],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB",
-       "TCRj5m2u9xhZHJ8h9pMv"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
-      "sourceEventId": "script-event:sha256:557e9735ec2b44746ae48f26d3bf8b190c03ede80654f42e3c20b6acd1451a97",
-      "speaker": "Bo",
-      "text": "3, 2, 1…",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Bo/Keen: 3, 2, 1…",
-      "compiledHash": "4712106b87e87d43f49f3e44beb2fa2253744dd5a106099e0f135184154ac276",
-      "recipeId": "s4sh1-l3-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
-      "sourceEventId": "script-event:sha256:1adc1d5f8027a7f6407b9f8d3f3e912d31a95e5671f2e7a75cd684123eaffc40",
-      "speaker": "Bo",
-      "text": "I’m STILL worried about going to the Learning Circle.",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Bo: 3, 2, 1…",
-      "compiledHash": "085550c3f5b56050b37bd791e377df54ce568322c0bacede1d3d2fc2843fdb06",
-      "recipeId": "s4sh1-l4-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
-      "sourceEventId": "script-event:sha256:1fde90a5212c908bace6ae111f5ca9cfee8c4ac81e6959cb1447f5a0ef752018",
-      "speaker": "Bo",
-      "text": "They all know each other.",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Bo: I’m STILL worried about going to the Learning Circle.",
-      "compiledHash": "b2e50fadafed3263f428619b34321399f4aae5ac17ab2e19c8d7cd2b4957a8a1",
-      "recipeId": "s4sh1-l5-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
-      "sourceEventId": "script-event:sha256:6b05ff9daa7d6497719f1bfc9c94e0dd7103a3724c21bd1ba701ce8a0fdfc448",
-      "speaker": "Bo",
-      "text": "But I don’t know them, and they don’t know me.",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Bo: They all know each other.",
-      "compiledHash": "4905f99e5e351338380f289854785975222017033ab1e3224a815aa01fd83109",
-      "recipeId": "s4sh1-l6-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
-      "sourceEventId": "script-event:sha256:3c7ee893f53d80a390325b76a6d70542375749e6568087dc2e92fb70c3f19e43",
-      "speaker": "Keen",
-      "text": "It can be hard to meet new people, but it’s good to make new friends.",
-      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Bo: But I don’t know them, and they don’t know me.",
-      "compiledHash": "834405b3ff96d62ff4d0159c169f73674cddfc05c123972e918312d45e17e6c3",
-      "recipeId": "s4sh1-l7-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "TCRj5m2u9xhZHJ8h9pMv"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
-      "sourceEventId": "script-event:sha256:6d0d9d7775b03c453122d059d30706ce77bd766f59b0af098d88a21eb85911c8",
-      "speaker": "Aida",
-      "text": "Hi Keen, I see you have met a new friend.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Keen: It can be hard to meet new people, but it’s good to make new friends.",
-      "compiledHash": "a70af2f6e77f3f3f9d0bff0a3d7eb282a210ddf4227797ead53f8e9cf43f2678",
-      "recipeId": "s4sh1-l8-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
-      "sourceEventId": "script-event:sha256:9a3ab2c0d0a7d2038329dfbb827f39e181e9036cca9e2d4bacd295296cf6c138",
-      "speaker": "Keen",
-      "text": "Yes.",
-      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Ada: Hi Keen, I see you have met a new friend.",
-      "compiledHash": "60904374149e236ef3079ab67a76f11495c6c6a86bf2b8b331057f7a218eefb5",
-      "recipeId": "s4sh1-l9-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "TCRj5m2u9xhZHJ8h9pMv"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
-      "sourceEventId": "script-event:sha256:05f864abb1bfd11026a8c8cb5b3b6b7e72bdf5f0b01ee1d88042c13ea4633f5c",
-      "speaker": "Keen",
-      "text": "Bo, this is Ada.",
-      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Keen: Yes.",
-      "compiledHash": "726883a48a60f1de5a49b2c47fc14b5b39e98876558a4c5a01ce17238c349a76",
-      "recipeId": "s4sh1-l10-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "TCRj5m2u9xhZHJ8h9pMv"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
-      "sourceEventId": "script-event:sha256:5f0b3fb7518d3fdaff67e838806b94474a30699768f20ccd20a6fcdc0195a308",
-      "speaker": "Aida",
-      "text": "You packed your bag.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Keen: Bo, this is Ada.",
-      "compiledHash": "7fc49217cb983def1cd3a8cfcd42e26f37d3b4441ab49ca657e9a91597b979cf",
-      "recipeId": "s4sh1-l11-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
-      "sourceEventId": "script-event:sha256:57aa88536d6ff35d593d1178f0920a0d346d9b195a7a45c1ccc0462b0cfa89b8",
-      "speaker": "Bo",
-      "text": "Four times.",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Ada: You packed your bag.",
-      "compiledHash": "9404119bd89218e3f95b5bc732452727a87fa330a637346142d3ebb23125783c",
-      "recipeId": "s4sh1-l12-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
-      "sourceEventId": "script-event:sha256:6abd2458d03517cc89ebad25d737cb2e915b675867113c97b8304bdc0f5a6fef",
-      "speaker": "Aida",
-      "text": "I would have done five.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Bo: Four times.",
-      "compiledHash": "4d57986d81827f65fc1f93d95d541a092a897ab1b996b3517650b7e86d85e6dd",
-      "recipeId": "s4sh1-l13-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
-      "sourceEventId": "script-event:sha256:a5b63497f19c59a2b19a78cbd3059ead3bc75b281d48128102f6f22ebd643df2",
-      "speaker": "Bo",
-      "text": "You get scared too?",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Ada: I would have done five.",
-      "compiledHash": "daeb0ca5d9d0b8e3cb6772838b56ded5a998fb80244a7a7decb9af2b9108235e",
-      "recipeId": "s4sh1-l14-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
-      "sourceEventId": "script-event:sha256:d297958f6729352ebc2e0416dbf12fe4ef870ffc16141492ca7d2d0c327572d7",
-      "speaker": "Aida",
-      "text": "Every single time.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Bo: You get scared too?",
-      "compiledHash": "6866a2104ebdd9e40d755fcd4207b9858b0eebdfcd813c7a2115ed017461df0c",
-      "recipeId": "s4sh1-l15-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
-      "sourceEventId": "script-event:sha256:85959f8e0579025b9d2229e991704d6b23994a8577d0d87428d24e93d8dab959",
-      "speaker": "Bo",
-      "text": "But you still go?",
-      "voiceId": "AAF2q3NCwTrLMMkEnRLB",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.4,
-       "similarity_boost": 0.9,
-       "style": 0.2
-      },
-      "previousText": "Ada: Every single time.",
-      "compiledHash": "19fb171d32a178ef750cd9770e73e5db76833ca19df8dac89b277bb87ca69736",
-      "recipeId": "s4sh1-l16-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "AAF2q3NCwTrLMMkEnRLB"
-      ]
-     },
-     {
-      "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
-      "sourceEventId": "script-event:sha256:7e18e1da76d3d1ee63a1031e4b1b72b00e724e31b96b99d15dc2fc8b4decb1ad",
-      "speaker": "Aida",
-      "text": "Every single time.",
-      "voiceId": "SHuZ9GyczU4QEDzU4QU4",
-      "modelId": "eleven_v3",
-      "voiceSettings": {
-       "stability": 0.45,
-       "similarity_boost": 0.9,
-       "style": 0.15
-      },
-      "previousText": "Bo: But you still go?",
-      "compiledHash": "c75bfac678bb339d4836500d597b36bd43d4db9a822a7b7ee986c92b64ef1531",
-      "recipeId": "s4sh1-l17-natural",
-      "voiceTreatment": "single_voice",
-      "chorusMembers": [],
-      "voiceIds": [
-       "SHuZ9GyczU4QEDzU4QU4"
-      ]
-     }
-    ],
-    "supersededAt": "2026-09-02T09:20:00Z",
-    "reason": "Superseded because all S4.SH1 countdown beats must be Bo/Keen together."
-   },
-   "voiceCorrections": [
-    {
-     "at": "2026-09-02T09:20:00Z",
-     "reviewedBy": "Julian",
-     "change": "All three S4.SH1 countdown lines are locked to Bo/Keen group_chorus.",
-     "providerCalled": false
-    }
-   ],
-   "voiceAuditions": null,
-   "voiceAuditionSelections": {},
-   "voiceAuditionSelectionsByHash": []
+   "voPath": null,
+   "voGeneratedFrom": null,
+   "voRawPath": null,
+   "voTimingPath": null,
+   "voPlacementPath": null,
+   "voInputSignature": null,
+   "voPackageRevision": null,
+   "splitFrom": {
+    "shotId": "S4.SH1",
+    "at": "2026-09-02T09:23:09Z",
+    "reason": "Aida entrance and empathy exchange need their own shot."
+   }
   }
  ],
  "validation": {
   "passed": true,
   "errors": []
- }
+ },
+ "totalSec": 60,
+ "revisionNotes": [
+  {
+   "at": "2026-09-02T09:23:09Z",
+   "reviewedBy": "Julian",
+   "change": "Split Ep2 Scene 4 into S4.SH1 countdown/Keen reassurance and S4.SH2 Aida entrance/empathy exchange."
+  }
+ ]
 }

@@ -5193,6 +5193,7 @@ function renderShotStage(mode){
         resultFirst=true;
         decVersion=`Voice revision ${voiceRevision} · Approved`;
         decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
+          `<button class="btn" onclick="continueCurrentShotToWatch()">Continue to WATCH</button>`,
           `<button class="btn ghost" style="margin-top:8px" onclick="directorStartRejection('voice','${_esc(s.shotId)}','')">Discuss / change voice revision ${voiceRevision}</button>`];
       } else {
         resultFirst=true;

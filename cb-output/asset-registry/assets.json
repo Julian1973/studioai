@@ -11631,21 +11631,21 @@
       "url": "/engine/media/Ep2_S8_plate_candidate_e2be237e.jpeg"
     },
     {
-      "assetId": "0d8efdda229b837dc31fa3cb",
+      "assetId": "b3fcf4ca3124a23212bb9fbf",
       "bindingKey": "Ep2|4|S4.SH1|voice|voice_track",
       "displayType": "audio",
       "episode": "Ep2",
       "kind": "voice",
       "label": "S4.SH1 voice_track",
       "metadata": {},
-      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_636e3e63.wav",
-      "registeredAt": "2026-09-02T10:25:11Z",
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav",
+      "registeredAt": "2026-09-02T11:31:35Z",
       "role": "voice_track",
       "scene": "4",
       "shotId": "S4.SH1",
       "source": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_scene4_production_package.json",
-      "status": "candidate",
-      "url": "/engine/media/shots/Ep2_S4.SH1_vo_candidate_636e3e63.wav"
+      "status": "approved",
+      "url": "/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav"
     }
   ],
   "deletedBindingKeys": [

@@ -849,3 +849,17 @@ def test_working_prompt_keeps_current_animation_candidate_valid():
     restore_end = RENDER.index("def save_watch_director_feedback", restore_start)
     restore = RENDER[restore_start:restore_end]
     assert 'direction_record.pop("manualCurrentOverride", None)' in restore
+
+
+def test_director_board_binds_the_render_module_it_projects_with():
+    """The board's own projection loop asks cb_render whether a shot has spoken dialogue.
+
+    The name was used but never bound in _director_board, so /api/director-board answered
+    `name '_CBR' is not defined` for every episode whose first scene already had a package —
+    which is the whole board, the moment any production is under way (found 2026-09-02).
+    """
+    start = SERVER.index("def _director_board(")
+    board = SERVER[start:SERVER.index("\ndef ", start + 1)]
+    assert "_CBR.cb_audio_authority.spoken_dialogue_lines" in board
+    assert "_CBR = _canonical_cb_render()" in board
+    assert board.index("_CBR = _canonical_cb_render()") < board.index("_CBR.cb_audio_authority")

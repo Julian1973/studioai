@@ -2129,6 +2129,10 @@ def _director_board(episode="Ep1"):
     """Return the cross-scene decision queue without mutating production state."""
     import cb_intake
 
+    # The projection loop below asks cb_render whether a shot has spoken dialogue; the name was
+    # used but never bound here, so the board answered `name '_CBR' is not defined` for every
+    # episode whose first scene already had a package (found on the PC, 2026-09-02).
+    _CBR = _canonical_cb_render()
     roster = cb_intake.scene_roster(episode)
     scenes = []
     queue = []

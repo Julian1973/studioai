@@ -113,7 +113,7 @@ DoD: `find . -type l` empty (except the project canon symlink CLAUDE.md rule 6 p
 Cosmetic. 23 files reference `cb-studio`; 44 modules carry `cb_`. Rename only if Julian wants the naming to match the product; otherwise record that `cb_` is history, not meaning.
 DoD: Julian's ruling recorded either way.
 
-**T64 · The test suite writes into real project data** ⏳ OPEN (found by T43)
+**T64 · The test suite writes into real project data** ✅ DONE (2026-09-02 evening — `conftest.py`'s existing autouse `isolate_mutable_production_state` fixture now redirects `cb_asset_registry.REGISTRY_DIR`/`REGISTRY_PATH` and `cb_prompt_bank.DEFAULT_BANK_PATH` into each test's own tmp tree, the same way it already redirected the state database and the learning store. Both are plain module constants read at call time, so the redirection is total and a test that wants the real files still patches them itself, as `test_cb_asset_registry.py` already did. Verified: a full 978-test run leaves `git status` clean, with zero new failures)
 projects/crystal-bears/episodes/output/{prompt-bank/prompt_bank.jsonl, asset-registry/assets.json}. A full pytest run appends test prompts to the real prompt bank and re-registers real assets with test-machine paths — the committed prompt_bank.jsonl already carries pytest tmp paths from the Mac. Every writer in the suite must be pointed at a scratch project (the template from T56 is the natural fixture).
 DoD: `python3 -m pytest -q` leaves `git status` clean. Verified.
 

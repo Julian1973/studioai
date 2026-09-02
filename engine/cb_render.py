@@ -2656,13 +2656,13 @@ def _reference_slot_policy():
     return policy if isinstance(policy, dict) else {}
 
 
-def _stable_reference_role_key(role, usage, characters_cfg):
+def _stable_reference_role_key(role, usage, characters_cfg, relay=False):
     """Return the project-level semantic attachment order for one logical role."""
     policy = _reference_slot_policy()
     role = str(role or "").strip()
     order = list(policy.get(
         "animationRoleOrder" if usage == "animation" else "keyframeRoleOrder") or [])
-    if usage == "keyframe" and "previous shot final frame" in order:
+    if usage == "keyframe" and relay and "previous shot final frame" in order:
         if role == "previous shot final frame":
             return (order.index("previous shot final frame"), -1, role.casefold())
         character_rank = (
@@ -2702,8 +2702,13 @@ def _expanded_reference_blueprint(shot, slots_key, characters_cfg, scene=None,
     slots = dict(shot.get(slots_key) or {})
     expanded = []
     source_slots = [key for key in slots if key.startswith("@图")]
+    relay_keyframe = bool(
+        usage == "keyframe" and
+        shot.get("sourceType") in {"relay", "continuation", "split"} and
+        shot.get("sourceShotId"))
     source_slots.sort(key=lambda key: (
-        _stable_reference_role_key(slots[key], usage, characters_cfg), int(key[2:])))
+        _stable_reference_role_key(
+            slots[key], usage, characters_cfg, relay=relay_keyframe), int(key[2:])))
     for source_slot in source_slots:
         role = slots[source_slot]
         identities = ([None] if _is_non_identity_image_role(role) else

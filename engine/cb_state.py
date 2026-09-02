@@ -209,13 +209,28 @@ def _storyboard_status(scene, episode, intake):
         through_scene = int("".join(ch for ch in str(scope.get("throughScene")) if ch.isdigit()) or "0")
     except (TypeError, ValueError):
         scene_number = changed_scene = from_scene = through_scene = 0
+    scene_source_unchanged = False
+    source = storyboard.get("sourceScript") or {}
+    try:
+        source_path = (cb_render.ROOT / str(source.get("contentPath") or "")).resolve()
+        current_path = cb_render.SCRIPT_STORE.content_path(episode).resolve()
+        source_path.relative_to(cb_render.ROOT.resolve())
+        current_path.relative_to(cb_render.ROOT.resolve())
+        old_scene_digest = cb_intake.scene_source_digests(
+            source_path.read_text(encoding="utf-8")).get(str(scene_number))
+        new_scene_digest = cb_intake.scene_source_digests(
+            current_path.read_text(encoding="utf-8")).get(str(scene_number))
+        scene_source_unchanged = bool(
+            old_scene_digest and old_scene_digest == new_scene_digest)
+    except (OSError, TypeError, ValueError, cb_intake.Refused):
+        scene_source_unchanged = False
     outside_replaced_scene_range = bool(
         scope.get("kind") == "scene-range-replacement" and scene_number and
         ((from_scene and scene_number < from_scene) or
          (through_scene and scene_number > through_scene))
     )
     scoped_previous = bool(
-        (outside_replaced_scene_range or
+        (scene_source_unchanged or outside_replaced_scene_range or
          (scope.get("kind") == "dialogue-format-cleanup") or
          (scope.get("kind") == "dialogue-correction" and scene_number and
           changed_scene and scene_number < changed_scene)) and
@@ -412,6 +427,14 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
              "generate, listen and choose Accept or Iterate"),
             "ready",
         )
+    elif animation_state == "approved" and not continuity_current:
+        label, sub, badge = (
+            "Animation accepted",
+            "Director Review still needs a current sign-off",
+            "ready",
+        )
+    elif animation_state == "approved":
+        label, sub, badge = "Complete", None, "approved"
     elif not animation_direction["current"]:
         label, sub, badge = (
             "Ready to fire animation",

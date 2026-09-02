@@ -128,6 +128,85 @@ def install(m):
             value, sort_keys=True, ensure_ascii=False, separators=(",", ":")
         ).encode()).hexdigest()
 
+    def stage_shot_contract(shot, stage):
+        """Return only the shot fields that can alter one department's work.
+
+        The production package is intentionally rich: a single shot carries script,
+        performance, staging, reference and delivery data. Hashing that whole object for
+        every department recreates episode-wide invalidation at shot scale. A dialogue
+        correction must not stale SEE, and a reference/keyframe change must not stale an
+        already prepared HEAR performance.
+        """
+        if stage in {"cinematography", "review-keyframe"}:
+            excluded = {
+                "dialogueLines", "dialogueOccurrenceIds", "sourceEventIds",
+                "voiceDirectorBrief", "audioBrief", "workingVoice",
+            }
+            return {key: value for key, value in shot.items() if key not in excluded}
+        if stage == "voice":
+            voice_fields = (
+                "shotId", "durationSec", "dialogueLines", "dialogueOccurrenceIds",
+                "voiceDirectorBrief", "audioBrief", "storyBeat", "emotionalIntent",
+                "performanceAssignment", "performanceContractApproved",
+                "continuityConstraints",
+            )
+            return {key: shot.get(key) for key in voice_fields if key in shot}
+        return shot
+
+    def scoped_shot_signature(shot, stage):
+        scope = (
+            "visual-v1" if stage in {"cinematography", "review-keyframe"}
+            else "voice-v1" if stage == "voice"
+            else "full-v1"
+        )
+        return {
+            "shotContractScope": scope,
+            "shotContractHash": json_sha256(stage_shot_contract(shot, stage)),
+        }
+
+    def legacy_department_signature(expected, shot):
+        """Rebuild the pre-scoped signature so current Episode 2 work carries forward."""
+        legacy = dict(expected)
+        legacy.pop("shotContractScope", None)
+        legacy["shotContractHash"] = json_sha256(shot)
+        return legacy
+
+    def normalized_reference_evidence(rows):
+        return sorted(
+            json.dumps({
+                "role": item.get("role"),
+                "view": item.get("view"),
+                "sameCharacterGroup": item.get("sameCharacterGroup"),
+                "hash": item.get("hash"),
+            }, sort_keys=True, ensure_ascii=False)
+            for item in rows or [])
+
+    def legacy_scoped_inputs_match(recorded, expected, stage):
+        """Migrate a legacy whole-shot signature when its stage inputs still match."""
+        if not isinstance(recorded, dict) or recorded.get("shotContractScope"):
+            return False
+        stored = dict(recorded)
+        current = dict(expected)
+        for item in (stored, current):
+            item.pop("shotContractHash", None)
+            item.pop("shotContractScope", None)
+        if stage in {"cinematography", "review-keyframe"}:
+            stored_refs = normalized_reference_evidence(stored.pop("references", []))
+            current_refs = normalized_reference_evidence(current.pop("references", []))
+            if stored_refs != current_refs:
+                return False
+        if stage == "animation":
+            def animation_refs(signature):
+                bindings = signature.pop("referenceBindings", [])
+                hashes = signature.pop("referenceHashes", [])
+                return normalized_reference_evidence([
+                    {**binding, "hash": hashes[index] if index < len(hashes) else None}
+                    for index, binding in enumerate(bindings)
+                ])
+            if animation_refs(stored) != animation_refs(current):
+                return False
+        return stored == current
+
     def stage_runtime_signature(stage):
         keys = {
             "look": ("cinematography",),
@@ -188,7 +267,7 @@ def install(m):
         shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
         common = {"stage": stage, **runtime, "canonProfileDigest": canon_digest,
-                  "shotContractHash": json_sha256(shot)}
+                  **scoped_shot_signature(shot, stage)}
         if stage == "cinematography":
             look = scene_status(scene, episode)
             return {**common,
@@ -273,11 +352,27 @@ def install(m):
         ])
         existing = [(source, record) for source, record in sources
                     if record and record.get("output")]
+        shot = m._shot(pkg, shot_id) if shot_id else None
+        legacy_expected = (
+            legacy_department_signature(expected, shot) if shot is not None else None)
         current_source, current_record = next(
             ((source, record) for source, record in existing
-             if record.get("inputSignature") == expected),
+             if record.get("inputSignature") == expected or
+             (legacy_expected is not None and
+              record.get("inputSignature") == legacy_expected) or
+             legacy_scoped_inputs_match(
+                 record.get("inputSignature"), expected, stage)),
             (None, None),
         )
+        if not current_record and stage == "look":
+            # A Director model upgrade does not alter an already prepared visual brief.
+            # Canon, scene context and the Look skill must still match exactly.
+            current_source, current_record = next(
+                ((source, record) for source, record in existing
+                 if set(m._signature_diff(
+                     record.get("inputSignature"), expected)) <= {"model"}),
+                (None, None),
+            )
         if not current_record and stage == "cinematography" and shot_id:
             # Dialogue and voice-performance amendments explicitly preserve SEE.  The
             # shot contract hash includes dialogue, so an otherwise identical DP record
@@ -290,8 +385,14 @@ def install(m):
             if amendment:
                 current_source, current_record = next(
                     ((source, record) for source, record in existing
-                     if set(m._signature_diff(record.get("inputSignature"), expected)) <=
-                     {"shotContractHash"}),
+                     if (
+                         set(m._signature_diff(
+                             record.get("inputSignature"), expected)) <=
+                         {"shotContractHash"}
+                         or (legacy_expected is not None and set(m._signature_diff(
+                             record.get("inputSignature"), legacy_expected)) <=
+                             {"shotContractHash"})
+                     )),
                     (None, None),
                 )
         contract_error = None
@@ -924,25 +1025,64 @@ def install(m):
         fast = bool((recorded or {}).get("tier") == "fast")
         comparison_model_id = (recorded or {}).get("comparisonModelId")
         comparison_run_id = (recorded or {}).get("comparisonRunId")
+        take = ledger.get("approvedTake")
+        harvest = ledger.get("harvestFrame")
+
+        def approved_direct_inputs_current():
+            """Keep accepted picture current across compiler-only implementation changes."""
+            if not isinstance(recorded, dict):
+                return False
+            try:
+                anchor = m._anchor_for(pkg, shot)
+                current_shot = m._with_effective_reference_slots(
+                    pkg, shot, "referenceSlots", scene, episode)
+                current_refs = ordered_slot_signature(
+                    current_shot, "referenceSlots", anchor, scene, episode)
+                has_dialogue = bool(cb_audio_authority.spoken_dialogue_lines(shot))
+                voice = voice_approval_status(pkg, shot, scene, episode)
+                if has_dialogue and not voice["current"]:
+                    return False
+                return bool(
+                    recorded.get("canonProfileDigest") ==
+                    require_canon(pkg, episode, "animation") and
+                    recorded.get("shotContractHash") == json_sha256(current_shot) and
+                    recorded.get("openingFrameHash") == file_sha256(anchor) and
+                    recorded.get("durationSec") == shot.get("durationSec") and
+                    recorded.get("audioHash") == (
+                        file_sha256(ledger.get("voPath")) if has_dialogue else None) and
+                    normalized_reference_evidence(recorded.get("references")) ==
+                    normalized_reference_evidence(current_refs)
+                )
+            except (m.Refused, OSError, TypeError, ValueError):
+                return False
+
+        media_current = bool(
+            ledger.get("status") == "approved" and approval.get("approved") and
+            take and harvest and os.path.exists(take) and os.path.exists(harvest) and
+            approval.get("contentHash") == file_sha256(take) and
+            approval.get("harvestHash") == file_sha256(harvest))
         try:
             expected = animation_generation_signature(
                 pkg, shot, scene, episode, fast=fast,
                 comparison_model_id=comparison_model_id,
                 comparison_run_id=comparison_run_id)
         except (m.Refused, OSError, ValueError) as exc:
+            if media_current and approved_direct_inputs_current():
+                return {"approved": True, "current": True, "reason": None,
+                        "record": approval, "expectedInputSignature": recorded,
+                        "carriedForward": "approved-media-direct-inputs-current"}
             return {"approved": bool(approval.get("approved")), "current": False,
                     "reason": str(exc), "record": approval,
                     "expectedInputSignature": None}
-        take = ledger.get("approvedTake")
-        harvest = ledger.get("harvestFrame")
         current = bool(
-            ledger.get("status") == "approved" and approval.get("approved") and
-            take and harvest and os.path.exists(take) and os.path.exists(harvest) and
-            recorded == expected and approval.get("contentHash") == file_sha256(take) and
-            approval.get("harvestHash") == file_sha256(harvest))
+            media_current and
+            (recorded == expected or approved_direct_inputs_current()))
         return {"approved": bool(approval.get("approved")), "current": current,
                 "reason": None if current else "animation-approval-input-or-content-mismatch",
-                "record": approval, "expectedInputSignature": expected}
+                "record": approval, "expectedInputSignature": expected,
+                "carriedForward": (
+                    "approved-media-direct-inputs-current"
+                    if current and recorded != expected else None)}
 
     def external_import_input_signature(pkg, shot, scene, episode, source_hash, provenance):
         """Current graph for a human-accepted finished clip imported from another surface.

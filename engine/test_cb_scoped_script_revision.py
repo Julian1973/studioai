@@ -130,6 +130,53 @@ def test_scoped_correction_keeps_earlier_approved_storyboard_current(tmp_path, m
     assert reason is None
 
 
+def test_new_script_upload_keeps_unchanged_scene_storyboard_current_without_scope(
+        tmp_path, monkeypatch):
+    old_text = (
+        "INT. COVE - DAY 1\n\nKEEN\nOne.\n\n"
+        "EXT. PATH - DAY 2\n\nBO\nTwo.\n")
+    new_text = old_text.replace("Two.", "Two changed.")
+    old_source = tmp_path / "old-script.txt"
+    new_source = tmp_path / "new-script.txt"
+    old_source.write_text(old_text, encoding="utf-8")
+    new_source.write_text(new_text, encoding="utf-8")
+    old_id = "sha256:" + cb_lineage.sha256_file(old_source)
+    new_id = "sha256:" + cb_lineage.sha256_file(new_source)
+    storyboard = {
+        "sceneNumber": "1", "approvalState": "approved",
+        "sourceScript": {
+            "scriptVersionId": old_id,
+            "contentPath": old_source.name,
+        },
+        "beats": [], "shots": [],
+        "inputSignature": cb_lineage.dependency_signature(
+            "scene-storyboard-snapshot", {
+                "scriptVersionId": old_id, "beatPackageDigest": "old-beats",
+                "sceneNumber": "1", "sourceBeatIds": [], "shotIds": [],
+            }),
+    }
+    path = tmp_path / "storyboard.json"
+    path.write_text(json.dumps(storyboard), encoding="utf-8")
+    monkeypatch.setattr(cb_render, "ROOT", tmp_path)
+    monkeypatch.setattr(cb_render, "_storyboard_path", lambda *args: path)
+    monkeypatch.setattr(
+        cb_render, "SCRIPT_STORE", type("Store", (), {
+            "content_path": lambda self, episode: new_source,
+        })())
+    intake = {
+        "canonicalCurrent": True,
+        "scriptVersionId": new_id,
+        "previousScriptVersionId": old_id,
+        "canonicalBeatPackageDigest": "new-beats",
+        "canonProfileDigests": {"storyboard": None},
+    }
+
+    _storyboard, current, reason = cb_state._storyboard_status("1", "Ep2", intake)
+
+    assert current is True
+    assert reason is None
+
+
 def test_scoped_correction_does_not_carry_the_changed_scene(tmp_path, monkeypatch):
     path = tmp_path / "storyboard.json"
     storyboard = {

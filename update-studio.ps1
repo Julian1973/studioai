@@ -30,17 +30,33 @@ $before = (git rev-parse --short HEAD).Trim()
 $beforeBranch = (git rev-parse --abbrev-ref HEAD).Trim()
 Say "Studio at $studioRoot - currently $beforeBranch @ $before"
 
-# 1. keep local work - stash everything uncommitted (tracked edits AND untracked files), named + dated
-$dirty = (git status --porcelain --untracked-files=all | Measure-Object -Line).Lines
+# 1. keep local work - EDITED tracked files go to a named git stash; NEW files (a project folder built
+#    here, notes, anything untracked) are MOVED into a dated side folder, never deleted. (git stash -u
+#    tried to delete thousands of files inside .venv and OneDrive refused every one - so nothing is
+#    deleted any more; .venv, caches and OneDrive's own files are simply left where they are.)
+$stamp = Get-Date -Format "yyyy-MM-dd_HHmm"
+$edited = @(git status --porcelain --untracked-files=no | Where-Object { $_ })
+$dirty = $edited.Count
 if ($dirty -gt 0) {
-    $stamp = Get-Date -Format "yyyy-MM-dd_HHmm"
-    $label = "local-work-before-update-$stamp"
-    Say "Saving $dirty uncommitted change(s) to git stash '$label' (nothing is deleted)"
-    git stash push --include-untracked --message $label | Out-Host
-    if ($LASTEXITCODE -ne 0) { Fail "Could not save the local work to a stash - stopping before anything is touched." }
+    $label = "local-edits-before-update-$stamp"
+    Say "Saving $dirty edited file(s) to git stash '$label' (nothing is deleted)"
+    git stash push --message $label | Out-Host
+    if ($LASTEXITCODE -ne 0) { Fail "Could not save the local edits to a stash - stopping before anything is touched." }
     Say "Recover later with:  git stash list   /   git stash show -p stash@{0}   /   git checkout stash@{0} -- <path>"
 } else {
-    Say "No uncommitted local work to save"
+    Say "No edited tracked files to save"
+}
+$untracked = @(git ls-files --others --exclude-standard | Where-Object { $_ -and -not ($_ -like ".venv/*") -and -not ($_ -like ".pytest_cache/*") -and -not ($_ -like "*__pycache__*") -and -not ($_ -like "studio-update.bundle") -and -not ($_ -like "update-studio.*") -and -not ($_ -like "HANDOVER_*") })
+if ($untracked.Count -gt 0) {
+    $aside = Join-Path $studioRoot ("_local-work-" + $stamp)
+    Say ("Moving " + $untracked.Count + " new local file(s) aside into " + $aside + " (nothing is deleted)")
+    foreach ($rel in $untracked) {
+        $src = Join-Path $studioRoot $rel
+        $dst = Join-Path $aside $rel
+        $dstDir = Split-Path -Parent $dst
+        if (-not (Test-Path -LiteralPath $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
+        try { Move-Item -LiteralPath $src -Destination $dst -Force } catch { Write-Host ("   could not move " + $rel + ": " + $_.Exception.Message) -ForegroundColor Yellow }
+    }
 }
 
 # 2. real symlinks - the studio refuses to start without them (tools/check_links.py)
@@ -87,7 +103,7 @@ $requirementsAfter = ""
 if (Test-Path -LiteralPath "requirements.txt") { $requirementsAfter = (Get-FileHash requirements.txt).Hash }
 if (-not (Test-Path -LiteralPath $python) -or ($requirementsBefore -ne $requirementsAfter)) {
     Say "Rebuilding .venv (requirements changed or environment missing)"
-    if (Test-Path -LiteralPath ".venv") { Remove-Item -LiteralPath ".venv" -Recurse -Force }
+    if (Test-Path -LiteralPath ".venv") { Rename-Item -LiteralPath ".venv" -NewName (".venv-old-" + $stamp) -Force }
     py -3 -m venv .venv
     & $python -m pip install --upgrade pip | Out-Host
     & $python -m pip install -r requirements.txt | Out-Host
@@ -117,7 +133,9 @@ if ($LASTEXITCODE -ne 0) {
                "skills\crystal-bears-post\SKILL.md", "skills\seedance-production-director\SKILL.md")
     foreach ($l in $links) {
         if ((Test-Path -LiteralPath $l) -and -not ((Get-Item -LiteralPath $l -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
-            if (Test-Path -LiteralPath $l -PathType Container) { Remove-Item -LiteralPath $l -Recurse -Force } else { Remove-Item -LiteralPath $l -Force }
+            try {
+                if (Test-Path -LiteralPath $l -PathType Container) { Remove-Item -LiteralPath $l -Recurse -Force } else { Remove-Item -LiteralPath $l -Force }
+            } catch { Write-Host ("   could not replace " + $l + ": " + $_.Exception.Message) -ForegroundColor Yellow }
         }
     }
     git checkout -- . | Out-Host
@@ -131,4 +149,5 @@ $after = (git rev-parse --short HEAD).Trim()
 $subject = (git log -1 --format=%s).Trim()
 Say ("Updated: " + $beforeBranch + " @ " + $before + "  ->  " + $Branch + " @ " + $after)
 Say $subject
-if ($dirty -gt 0) { Say "Your local work is safe in git stash (git stash list)." }
+if ($dirty -gt 0) { Say "Your edited files are safe in git stash (git stash list)." }
+if ($untracked.Count -gt 0) { Say ("Your new local files are in " + $aside) }

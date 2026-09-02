@@ -5356,6 +5356,25 @@
      "candidate": null,
      "history": []
     }
+   },
+   "keyframeCandidate": {
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png",
+    "generatedAt": "2026-09-02T08:10:06",
+    "source": "library",
+    "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_f5e9b67b.png",
+    "contentHash": "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32",
+    "inputSignature": {
+     "cardHash": "46fbc15ab97a038d843c9063bd95387b1224dd12566690a73906c1af8311ad6c",
+     "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+     "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+     "selectedAssetHash": "b1113265a2f36bfe0682b7f1bb1b9efa",
+     "source": "library"
+    },
+    "conformanceScreening": {
+     "status": "not-required",
+     "reason": "Registered from an existing generated image as a library/source candidate after the OpenAI advisory checker was unavailable; human Director approval still required.",
+     "mediaProviderCalled": false
+    }
    }
   }
  ],

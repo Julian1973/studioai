@@ -271,8 +271,17 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
         stage_contract = cb_render._keyframe_stage_contract_report(keyframe_approval)
         candidate_current = _keyframe_candidate_current(
             pkg, shot, keyframe_candidate, scene, episode)
+        non_generated_candidate = keyframe_candidate.get("source") in {
+            "uploaded", "library", "previousFinalFrame", "ab-import",
+        }
         if keyframe_candidate:
-            if candidate_current and keyframe_screening.get("status") == "pass":
+            if (
+                candidate_current and
+                (
+                    keyframe_screening.get("status") == "pass" or
+                    (non_generated_candidate and keyframe_screening.get("status") != "fail")
+                )
+            ):
                 kf = "awaiting"
             elif candidate_current:
                 kf = "screening"

@@ -104,8 +104,10 @@ def install(m):
 
     def require_canon(pkg, episode, profile=None):
         try:
+            # whole-scene cast: a stub role elsewhere in the scene never blocks a shot
+            # that does not use it; the shot's own identity/voice checks refuse by name
             lock = cb_canon.require_locked(
-                episode, package_cast(pkg), root=m.ROOT)
+                episode, package_cast(pkg), root=m.ROOT, allow_incomplete_cast=True)
         except cb_canon.CanonLockError as exc:
             raise m.Refused(str(exc)) from exc
         if profile:

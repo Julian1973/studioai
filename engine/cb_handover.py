@@ -134,7 +134,10 @@ def _require_storyboard_lineage(sb, episode):
                   {name for beat in sb.get("beats") or []
                    for name in beat.get("participatingCharacters") or [] if name})
     try:
-        lock = cb_canon.require_locked(episode, cast, root=ROOT)
+        # the handover is still text: a scripted stub role is named here, and refused only
+        # by the shot that puts it on screen or gives it a voice (cb_render / cb_safety)
+        lock = cb_canon.require_locked(episode, cast, root=ROOT,
+                                       allow_incomplete_cast=True, log=print)
     except cb_canon.CanonLockError as exc:
         raise HandoverRefused(str(exc)) from exc
     story_inputs = {

@@ -3,10 +3,10 @@
   "policyVersion": "1.0.0",
   "project": "crystal-bears",
   "characterOrder": [
-    "Zenny", "Fuzzby", "Aida", "Sunny", "Luna", "Misty", "Amie",
-    "Howey", "Keen", "Keen's Mum", "Squeaky", "Bo"
+    "Zenny", "Fuzzby", "Aida", "Bo", "Keen", "Sunny", "Luna", "Misty", "Amie",
+    "Howey", "Keen's Mum", "Squeaky"
   ],
-  "keyframeRoleOrder": ["character_identity", "scene plate"],
+  "keyframeRoleOrder": ["previous shot final frame", "scene plate", "character_identity"],
   "animationRoleOrder": [
     "opening keyframe", "previous shot final frame", "character_identity", "scene plate"
   ],

@@ -2463,34 +2463,55 @@ def _stored_approved_department_output(pkg, shot_id, stage):
     return (((led.get("departmentWork") or {}).get(stage) or {}).get("approved") or {}).get("output")
 
 
+def _is_relay_or_split_shot(shot):
+    if shot.get("sourceType") == "relay" or shot.get("sourceShotId"):
+        return True
+    split_from = shot.get("splitFrom")
+    return isinstance(split_from, dict) and bool(split_from.get("shotId"))
+
+
+def _continuation_reference_slots(shot, include_audio=False):
+    # Continuation shots need both the exact carried state and the wider approved
+    # scene geography. Character references remain explicit identity authority.
+    slots = {"@图1": "previous shot final frame", "@图2": "scene plate"}
+    next_slot = 3
+    for character in shot.get("charactersInFrame") or []:
+        name = str(character or "").strip()
+        if not name or name in slots.values():
+            continue
+        slots[f"@图{next_slot}"] = name
+        next_slot += 1
+    if include_audio and cb_audio_authority.spoken_dialogue_lines(shot):
+        slots["@Audio1"] = "voice track"
+    return slots
+
+
+def _slots_need_continuation_rebuild(slots):
+    roles = {
+        str(role or "").strip().casefold()
+        for role in (slots or {}).values()
+    }
+    return (
+        not slots
+        or "previous shot final frame" not in roles
+        or "opening keyframe" in roles
+    )
+
+
 def _effective_reference_slots(pkg, shot, slots_key, scene, episode):
     slots = dict(shot.get(slots_key) or {})
-    if slots_key != "referenceSlots":
-        return slots
     if not cb_audio_authority.spoken_dialogue_lines(shot):
         slots = {
             slot: role for slot, role in slots.items()
             if not str(slot).startswith("@Audio")
         }
-    if not slots:
+    if slots_key == "referenceSlots" and not slots:
         slots = dict(shot.get("animationReferenceSlots") or {})
-    if not slots and (shot.get("sourceType") == "relay" or shot.get("sourceShotId")):
-        # Relay animation must inherit the approved final frame, but that frame is only
-        # the opening-state authority. It never replaces the full visual contract.
-        # Scene plate + all in-frame character references still travel with the render.
-        # Otherwise the provider has no stable geography, prop, or identity source and
-        # continuity fails at the exact point the relay is meant to protect.
-        relay_slots = {"@图1": "previous shot final frame", "@图2": "scene plate"}
-        next_slot = 3
-        for character in shot.get("charactersInFrame") or []:
-            name = str(character or "").strip()
-            if not name:
-                continue
-            if name in relay_slots.values():
-                continue
-            relay_slots[f"@图{next_slot}"] = name
-            next_slot += 1
-        slots = relay_slots
+    if _is_relay_or_split_shot(shot) and _slots_need_continuation_rebuild(slots):
+        slots = _continuation_reference_slots(
+            shot, include_audio=(slots_key == "referenceSlots"))
+    if slots_key != "referenceSlots":
+        return slots
     if not slots:
         approved = _stored_approved_department_output(
             pkg, shot.get("shotId"), "animation") or {}
@@ -2639,6 +2660,25 @@ def _stable_reference_role_key(role, usage, characters_cfg):
     """Return the project-level semantic attachment order for one logical role."""
     policy = _reference_slot_policy()
     role = str(role or "").strip()
+    order = list(policy.get(
+        "animationRoleOrder" if usage == "animation" else "keyframeRoleOrder") or [])
+    if usage == "keyframe" and "previous shot final frame" in order:
+        if role == "previous shot final frame":
+            return (order.index("previous shot final frame"), -1, role.casefold())
+        character_rank = (
+            order.index("character_identity")
+            if "character_identity" in order else 0
+        )
+        non_identity_rank = order.index(role) if role in order else len(order)
+        if not _is_non_identity_image_role(role):
+            canonical = _resolve_char(role, characters_cfg)
+            character_order = list(policy.get("characterOrder") or [])
+            rank = (
+                character_order.index(canonical)
+                if canonical in character_order else len(character_order)
+            )
+            return (character_rank, rank, canonical.casefold())
+        return (non_identity_rank, -1, role.casefold())
     if role.startswith("prop:"):
         # Dedicated prop authority follows character identity and precedes the scene plate.
         # This keeps compiler tags and sealed provider upload positions identical without
@@ -2651,8 +2691,6 @@ def _stable_reference_role_key(role, usage, characters_cfg):
             return (2 if usage == "animation" else 0, 0, "")
         rank = order.index(canonical) if canonical in order else len(order)
         return (2 if usage == "animation" else 0, rank, canonical.casefold())
-    order = list(policy.get(
-        "animationRoleOrder" if usage == "animation" else "keyframeRoleOrder") or [])
     rank = order.index(role) if role in order else len(order)
     return (rank if usage == "animation" else 1 + rank, -1, role.casefold())
 
@@ -2716,6 +2754,14 @@ def _provider_attachment_plan(shot, slots_key, anchor_path, scene, episode,
 
 def _slot_path_for_role(role, anchor_path, scene, episode, characters_cfg, shot=None,
                         usage="keyframe"):
+    if role == "previous shot final frame" and not anchor_path and shot:
+        source_id = str(shot.get("sourceShotId") or "").strip()
+        if source_id:
+            source_pkg, _ = load_pkg(scene, episode)
+            source = _ledger(source_pkg, source_id)
+            source_frame = source.get("harvestFrame")
+            if source.get("status") == "approved" and source_frame and os.path.exists(source_frame):
+                anchor_path = source_frame
     if role in ("opening keyframe", "previous shot final frame"):
         path = anchor_path
         if not path:

@@ -1121,22 +1121,24 @@
     }
    ],
    "referenceSlots": {
-    "@图1": "opening keyframe",
-    "@图2": "Aida",
-    "@图3": "Bo",
-    "@图4": "Keen",
-    "@图5": "scene plate",
+    "@图1": "previous shot final frame",
+    "@图2": "scene plate",
+    "@图3": "Aida",
+    "@图4": "Bo",
+    "@图5": "Keen",
     "@Audio1": "voice track"
    },
    "keyframeReferenceSlots": {
-    "@图1": "Aida",
-    "@图2": "Bo",
-    "@图3": "Keen",
-    "@图4": "scene plate"
+    "@图1": "previous shot final frame",
+    "@图2": "scene plate",
+    "@图3": "Aida",
+    "@图4": "Bo",
+    "@图5": "Keen"
    },
    "openingCharactersInFrame": [
     "Bo",
-    "Keen"
+    "Keen",
+    "Aida"
    ],
    "continuityConstraints": [
     {
@@ -1386,13 +1388,14 @@
     "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
     "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
     "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948"
-   ]
+   ],
+   "continuityIn": "Continue from the approved S4.SH1 final frame: Bo and Keen remain seated on the same forest-path fallen log after the countdown game; Bo keeps his satchel, his tail is normal, and Aida is visible entering calmly from down the wider Crystal Woods path. The S4 scene plate remains the geography authority for her entrance corridor."
   }
  ],
  "continuityLedger": [
   {
    "shotId": "S4.SH1",
-   "status": "designed",
+   "status": "approved",
    "sourceBeatId": "source-beat:sha256:09180799b5c3fcb150d54f9d88b906131cff6e221efef47bd8795015a2dad192",
    "sourceBeatIds": [
     "source-beat:sha256:09180799b5c3fcb150d54f9d88b906131cff6e221efef47bd8795015a2dad192",
@@ -1466,9 +1469,11 @@
     "timingContentHash": "523ac6241998171de850f44d9a157306d41abdcd3b69708d1e530fc977f67af5",
     "placementContentHash": "56e78f6da1bd06e461244543adc3273c6c8432fc0cfa8e8c96ef55a895be637c"
    },
-   "approvedTake": null,
-   "harvestFrame": null,
-   "candidatePaths": [],
+   "approvedTake": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+   "harvestFrame": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_final_frame.png",
+   "candidatePaths": [
+    "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4"
+   ],
    "departmentWork": {
     "cinematography": {
      "approved": {
@@ -4534,12 +4539,14 @@
     "rulesVersion": "engine-rules-v4",
     "costVersion": "beat-costs-v3",
     "costSignature": "4d700d3f2baaf41080c133838f60f06140f484985ec17ce3fb1a86c46d6448ae",
-    "costedAt": "2026-09-02T13:04:11.100964+00:00",
+    "costedAt": "2026-09-02T13:08:13.271485+00:00",
     "unitDurationSec": 30.0,
     "recommendedDurationSec": 16,
     "ready": true
    },
-   "pendingSpendAuth": {
+   "pendingSpendAuth": null,
+   "lastPromptVersion": "39596dba",
+   "batch": {
     "token": "6f90125a85424dfcaef67c2d6b492320",
     "bindingHash": "f1edd053fb2ffd1b796a00a96032a7c5",
     "envelope": {
@@ -4938,6 +4945,12 @@
      "comparisonRunId": null
     },
     "envelopeHash": "e7737e8a5b40c1f55b49bfeab4555bb36307ceca78c3951c7a008e55ee16f140",
+    "batchId": "S4.SH1-b1-20260902T140813-dc094d74",
+    "expected": 1,
+    "done": [
+     1
+    ],
+    "failed": [],
     "disclosure": {
      "shotId": "S4.SH1",
      "candidateCount": 1,
@@ -5000,8 +5013,619 @@
      ],
      "tier": "standard"
     },
-    "issuedAt": "2026-09-02T14:04:11"
-   }
+    "status": "complete",
+    "audioProvenance": {
+     "policyVersion": "dialogue-post-lane-v1",
+     "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav",
+     "approvedMasterSha256": "57f98b045665f309c8618ae75549295d00f51b609254045552e14c26f1b55d74",
+     "providerUse": "performance-conditioning",
+     "passthroughGuaranteed": false,
+     "providerOutputRole": "guide-track-only",
+     "finalFilmDialogue": "approved-master-restored-in-post",
+     "guideCandidates": [
+      {
+       "candidate": 1,
+       "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+       "sha256": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+       "exactApprovedWaveformPassthrough": false
+      }
+     ],
+     "reviewCandidates": [
+      {
+       "candidate": 1,
+       "providerGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+       "providerGuideSha256": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+       "reviewPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+       "reviewSha256": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+       "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav",
+       "approvedMasterSha256": "57f98b045665f309c8618ae75549295d00f51b609254045552e14c26f1b55d74",
+       "providerGuideRemoved": false,
+       "approvedHearRestored": false,
+       "providerFinalMixPreserved": true
+      }
+     ]
+    },
+    "transportCandidates": {
+     "1": {
+      "segments": [
+       {
+        "segmentIndex": 1,
+        "durationSec": 30.0,
+        "stageNumbers": [],
+        "promptHash": "a62c5c5f19dac6dc84446dd0b10400d907936de8ab56153524878f9ca21c4560",
+        "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+        "outputHash": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+        "audioHash": "8f325298f19fba1d0e53bf3278c58831",
+        "openingRelayPath": null,
+        "openingRelayHash": null
+       }
+      ],
+      "status": "joined",
+      "activeSegment": 1,
+      "lastProviderEvent": {
+       "event": "downloaded",
+       "at": "2026-09-02T14:10:31",
+       "segmentIndex": 1,
+       "taskId": "cgt-20260902210820-n6njd",
+       "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+       "outputBytes": 14618041
+      },
+      "providerEvents": [
+       {
+        "event": "submitting",
+        "at": "2026-09-02T14:08:13",
+        "segmentIndex": 1,
+        "requestBytes": 26654443,
+        "imageRefs": 5,
+        "audioRefs": 1,
+        "duration": 30
+       },
+       {
+        "event": "submitted",
+        "at": "2026-09-02T14:08:26",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:08:27",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:08:38",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:08:49",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:08:59",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:09:10",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:09:21",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:09:32",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:09:43",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:09:53",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:10:04",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:10:15",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "running"
+       },
+       {
+        "event": "poll",
+        "at": "2026-09-02T14:10:26",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "status": "succeeded"
+       },
+       {
+        "event": "downloading",
+        "at": "2026-09-02T14:10:26",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd"
+       },
+       {
+        "event": "downloaded",
+        "at": "2026-09-02T14:10:31",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260902210820-n6njd",
+        "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+        "outputBytes": 14618041
+       }
+      ],
+      "providerTaskId": "cgt-20260902210820-n6njd",
+      "providerGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "providerGuideHash": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+      "approvedHearReviewPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "approvedHearReviewHash": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+      "candidatePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "candidateHash": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b"
+     }
+    },
+    "inputSignature": {
+     "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+     "shotContractHash": "02db73f56cbe07aa0e1cfb21fb26625861e47f7ece28ce0bd7c6d95812df80a2",
+     "animationDirectionSignature": {
+      "stage": "animation",
+      "model": "gpt-5.4",
+      "skillHashes": {
+       "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
+      },
+      "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+      "shotContractHash": "02db73f56cbe07aa0e1cfb21fb26625861e47f7ece28ce0bd7c6d95812df80a2",
+      "shotHash": "e81b68a00f2372781fbaa4365d80d5e88de75c76f0e77f28d72388c32ab45e05",
+      "openingFrameHash": "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32",
+      "openingStageContractHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+      "referenceOrder": [
+       "@图1",
+       "@图2",
+       "@图3",
+       "@图4",
+       "@图5"
+      ],
+      "referenceBindings": [
+       {
+        "slot": "@图1",
+        "sourceSlot": "@图1",
+        "role": "opening keyframe",
+        "view": null,
+        "sameCharacterGroup": null
+       },
+       {
+        "slot": "@图2",
+        "sourceSlot": "@图2",
+        "role": "Aida",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1"
+       },
+       {
+        "slot": "@图3",
+        "sourceSlot": "@图4",
+        "role": "Keen",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0"
+       },
+       {
+        "slot": "@图4",
+        "sourceSlot": "@图3",
+        "role": "Bo",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2"
+       },
+       {
+        "slot": "@图5",
+        "sourceSlot": "@图5",
+        "role": "scene plate",
+        "view": null,
+        "sameCharacterGroup": null
+       }
+      ],
+      "referenceHashes": [
+       "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32",
+       "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+       "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+       "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+       "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+      ],
+      "voiceHash": "57f98b045665f309c8618ae75549295d00f51b609254045552e14c26f1b55d74",
+      "voiceApprovalSignature": {
+       "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+       "dialogueHash": "673b502100e31b55b8a0d0269272c31524ebddee9bb73690241fc0887746ce75",
+       "performanceHash": "9518721fdd507f75cc1177438091102bd8e8843d02365c1618b0ceda2b832ad3",
+       "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+       "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+       "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+       "voiceCompilerVersion": "voice-director-v1",
+       "pronunciationOverrides": {
+        "Aida": "ada",
+        "Ada": "ada"
+       },
+       "voiceIds": [
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv"
+       ]
+      },
+      "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
+     },
+     "promptHash": "180c9951af9bf582eefce43e9ed0b2854d95514ca65ffa83ea245c1d2aff9b07",
+     "audioReferencePolicy": "guide",
+     "openingFrameHash": "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32",
+     "references": [
+      {
+       "slot": "@图1",
+       "sourceSlot": "@图1",
+       "role": "opening keyframe",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32"
+      },
+      {
+       "slot": "@图2",
+       "sourceSlot": "@图2",
+       "role": "Aida",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
+       "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+      },
+      {
+       "slot": "@图3",
+       "sourceSlot": "@图4",
+       "role": "Keen",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+       "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+      },
+      {
+       "slot": "@图4",
+       "sourceSlot": "@图3",
+       "role": "Bo",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2",
+       "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+      },
+      {
+       "slot": "@图5",
+       "sourceSlot": "@图5",
+       "role": "scene plate",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+      }
+     ],
+     "audioHash": "57f98b045665f309c8618ae75549295d00f51b609254045552e14c26f1b55d74",
+     "durationSec": 30.0,
+     "comparisonModelId": null,
+     "comparisonRunId": null,
+     "executionPlanHash": "45416553b0dc8565277ab9e6ec6dcf23adcb28bc1f12d8859b73850d325ee175",
+     "provider": "byteplus",
+     "providerModelId": "dreamina-seedance-2-5-260628",
+     "modelVersion": "2.5-260628",
+     "transport": "byteplus-async",
+     "endpoint": "/api/v3/contents/generations/tasks",
+     "resolution": "480p",
+     "capabilityVerifiedAt": "2026-08-16",
+     "tier": "standard"
+    },
+    "candidateHashes": [
+     {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "sha256": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b"
+     }
+    ]
+   },
+   "batchId": "S4.SH1-b1-20260902T140813-dc094d74",
+   "candidatesGenerated": 1,
+   "disclosure": {
+    "shotId": "S4.SH1",
+    "candidateCount": 1,
+    "costPerCandidateUsd": 3.123,
+    "maxBatchCostUsd": 3.123,
+    "promptVersion": "39596dba",
+    "bindingHash": "f1edd053fb2ffd1b796a00a96032a7c5",
+    "envelopeHash": "e7737e8a5b40c1f55b49bfeab4555bb36307ceca78c3951c7a008e55ee16f140",
+    "packageHash": "2b43f12ca0b78a32",
+    "rerollOfUnchangedPackage": false,
+    "packageRevision": 2,
+    "referenceSlots": {
+     "@图1": "opening keyframe",
+     "@图2": "Aida · complete-turnaround turnaround view",
+     "@图3": "Keen · complete-turnaround turnaround view",
+     "@图4": "Bo · complete-turnaround turnaround view",
+     "@图5": "scene plate"
+    },
+    "logicalReferenceSlots": {
+     "@图1": "opening keyframe",
+     "@图2": "Aida",
+     "@图3": "Bo",
+     "@图4": "Keen",
+     "@图5": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "openingAnchor": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png",
+    "audioAsset": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav",
+    "shotDurationSec": 30.0,
+    "provider": "byteplus",
+    "providerModelId": "dreamina-seedance-2-5-260628",
+    "modelVersion": "2.5-260628",
+    "resolution": "480p",
+    "promptScores": {
+     "contractCompleteness": {
+      "score": 18,
+      "maximum": 20,
+      "threshold": 17,
+      "ready": true,
+      "criticalFailures": []
+     },
+     "creative": {
+      "score": 18,
+      "maximum": 20,
+      "threshold": 17,
+      "ready": true,
+      "criticalFailures": []
+     },
+     "authoringScore10": 10.0,
+     "authoringMaximum": 10,
+     "firingFloor10": 9.5
+    },
+    "comparisonRunId": null,
+    "internalProviderCalls": [
+     {
+      "segmentIndex": 1,
+      "durationSec": 30.0,
+      "stageNumbers": []
+     }
+    ],
+    "tier": "standard"
+   },
+   "lastBatchBinding": "f1edd053fb2ffd1b796a00a96032a7c5",
+   "firedAt": "2026-09-02T14:10:31",
+   "renderHistory": [],
+   "approvedCandidate": 1,
+   "approval": {
+    "approved": true,
+    "candidate": 1,
+    "reviewed_by": "Julian",
+    "at": "2026-09-02T14:18:36",
+    "packageRevision": 2,
+    "inputSignature": {
+     "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+     "shotContractHash": "02db73f56cbe07aa0e1cfb21fb26625861e47f7ece28ce0bd7c6d95812df80a2",
+     "animationDirectionSignature": {
+      "stage": "animation",
+      "model": "gpt-5.4",
+      "skillHashes": {
+       "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
+      },
+      "canonProfileDigest": "511366477812f07083dba23722ffc59c87f1d2a2861358398a8872bf66be0cb0",
+      "shotContractHash": "02db73f56cbe07aa0e1cfb21fb26625861e47f7ece28ce0bd7c6d95812df80a2",
+      "shotHash": "e81b68a00f2372781fbaa4365d80d5e88de75c76f0e77f28d72388c32ab45e05",
+      "openingFrameHash": "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32",
+      "openingStageContractHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+      "referenceOrder": [
+       "@图1",
+       "@图2",
+       "@图3",
+       "@图4",
+       "@图5"
+      ],
+      "referenceBindings": [
+       {
+        "slot": "@图1",
+        "sourceSlot": "@图1",
+        "role": "opening keyframe",
+        "view": null,
+        "sameCharacterGroup": null
+       },
+       {
+        "slot": "@图2",
+        "sourceSlot": "@图2",
+        "role": "Aida",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1"
+       },
+       {
+        "slot": "@图3",
+        "sourceSlot": "@图4",
+        "role": "Keen",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0"
+       },
+       {
+        "slot": "@图4",
+        "sourceSlot": "@图3",
+        "role": "Bo",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2"
+       },
+       {
+        "slot": "@图5",
+        "sourceSlot": "@图5",
+        "role": "scene plate",
+        "view": null,
+        "sameCharacterGroup": null
+       }
+      ],
+      "referenceHashes": [
+       "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32",
+       "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+       "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781",
+       "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58",
+       "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+      ],
+      "voiceHash": "57f98b045665f309c8618ae75549295d00f51b609254045552e14c26f1b55d74",
+      "voiceApprovalSignature": {
+       "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+       "dialogueHash": "673b502100e31b55b8a0d0269272c31524ebddee9bb73690241fc0887746ce75",
+       "performanceHash": "9518721fdd507f75cc1177438091102bd8e8843d02365c1618b0ceda2b832ad3",
+       "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+       "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+       "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+       "voiceCompilerVersion": "voice-director-v1",
+       "pronunciationOverrides": {
+        "Aida": "ada",
+        "Ada": "ada"
+       },
+       "voiceIds": [
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "AAF2q3NCwTrLMMkEnRLB",
+        "TCRj5m2u9xhZHJ8h9pMv"
+       ]
+      },
+      "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
+     },
+     "promptHash": "180c9951af9bf582eefce43e9ed0b2854d95514ca65ffa83ea245c1d2aff9b07",
+     "audioReferencePolicy": "guide",
+     "openingFrameHash": "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32",
+     "references": [
+      {
+       "slot": "@图1",
+       "sourceSlot": "@图1",
+       "role": "opening keyframe",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32"
+      },
+      {
+       "slot": "@图2",
+       "sourceSlot": "@图2",
+       "role": "Aida",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "7901e5e793fd2221e484b4b85d2e1d0b4185600139c23873b76bc9938f3acad1",
+       "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+      },
+      {
+       "slot": "@图3",
+       "sourceSlot": "@图4",
+       "role": "Keen",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+       "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+      },
+      {
+       "slot": "@图4",
+       "sourceSlot": "@图3",
+       "role": "Bo",
+       "view": "complete-turnaround",
+       "sameCharacterGroup": "b60ee9d650cdb0d4f4a22e36c52444ead8dd8bddcaec97da5b7ec98d29178df2",
+       "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+      },
+      {
+       "slot": "@图5",
+       "sourceSlot": "@图5",
+       "role": "scene plate",
+       "view": null,
+       "sameCharacterGroup": null,
+       "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+      }
+     ],
+     "audioHash": "57f98b045665f309c8618ae75549295d00f51b609254045552e14c26f1b55d74",
+     "durationSec": 30.0,
+     "comparisonModelId": null,
+     "comparisonRunId": null,
+     "executionPlanHash": "45416553b0dc8565277ab9e6ec6dcf23adcb28bc1f12d8859b73850d325ee175",
+     "provider": "byteplus",
+     "providerModelId": "dreamina-seedance-2-5-260628",
+     "modelVersion": "2.5-260628",
+     "transport": "byteplus-async",
+     "endpoint": "/api/v3/contents/generations/tasks",
+     "resolution": "480p",
+     "capabilityVerifiedAt": "2026-08-16",
+     "tier": "standard"
+    },
+    "contentHash": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+    "harvestHash": "baf16762cc15fa2a77eaec8dea9ad70e259e3b55953baf3acde369fb71dbecd4",
+    "batchId": "S4.SH1-b1-20260902T140813-dc094d74"
+   },
+   "audioProvenance": {
+    "policyVersion": "dialogue-post-lane-v1",
+    "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav",
+    "approvedMasterSha256": "57f98b045665f309c8618ae75549295d00f51b609254045552e14c26f1b55d74",
+    "providerUse": "performance-conditioning",
+    "passthroughGuaranteed": false,
+    "providerOutputRole": "guide-track-only",
+    "finalFilmDialogue": "approved-master-restored-in-post",
+    "guideCandidates": [
+     {
+      "candidate": 1,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "sha256": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+      "exactApprovedWaveformPassthrough": false
+     }
+    ],
+    "reviewCandidates": [
+     {
+      "candidate": 1,
+      "providerGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "providerGuideSha256": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+      "reviewPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+      "reviewSha256": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+      "approvedMasterPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_623e9729.wav",
+      "approvedMasterSha256": "57f98b045665f309c8618ae75549295d00f51b609254045552e14c26f1b55d74",
+      "providerGuideRemoved": false,
+      "approvedHearRestored": false,
+      "providerFinalMixPreserved": true
+     }
+    ],
+    "selectedGuidePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_c1.mp4",
+    "selectedGuideSha256": "86f11881263a461c724455755fe50f8e64c0d174b902b570ecbe135d61472a5b",
+    "postLaneStatus": "required"
+   },
+   "promptBankRecords": [
+    {
+     "recordId": "83e547cbd97b1182bcb8188d",
+     "outcome": "approved",
+     "bankedAt": "2026-09-02T13:18:36Z"
+    }
+   ]
   },
   {
    "shotId": "S4.SH2",
@@ -7732,6 +8356,595 @@
      },
      "candidate": null,
      "history": []
+    },
+    "cinematography": {
+     "approved": null,
+     "candidate": {
+      "department": "Cinematography",
+      "worker": "Cinematographer / DP",
+      "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+      "model": "gpt-5.4",
+      "preparedAt": "2026-09-02T14:39:31",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 0,
+      "sourceHash": "6a615159d787ab97e747667e0e1bbb8945024c1d771145908dfba41b2e8d8cbb",
+      "output": {
+       "shotId": "S4.SH2",
+       "audienceRead": "Aida arrives as a calm, welcome presence on the same path, with Bo and Keen already settled on the fallen log; the frame makes room for her gentle approach so the moment begins with safety and recognition, not pressure.",
+       "composition": "Wide three-character staging on the forest path, anchored by Bo and Keen seated on the fallen log in the lower-left to center-left band while Aida enters from deeper frame-right along the path. Keep the frame open and breathable, with the log as the emotional base and the sunlit path as an inviting corridor that carries Aida toward them.",
+       "lensAndCameraRelationship": "Moderately wide story lens, around 32mm full-frame equivalent, from a child-height seated eye level just above the log line. Enough width to preserve environment and approach space without caricaturing scale; camera remains observational and gently inclusive, holding all three characters readable in one opening frame.",
+       "lightingAndDepth": "Use the scene plate’s warm dappled daylight with soft shafts through the canopy. Bo and Keen sit in gentle mottled light with readable faces; Aida catches a slightly brighter rim and path glow as she enters from the sunward side, giving her arrival a quiet natural emphasis. Maintain layered forest depth with soft atmospheric falloff and crystal accents, but keep the performance plane clear and uncluttered.",
+       "geography": [
+        "Bo and Keen are seated on the same fallen log in the left half of frame, with Bo slightly screen-right of Keen.",
+        "Aida is on the forest path deeper in frame-right, walking toward the log from background-right toward center-left.",
+        "The path curves behind and to the right of the log, creating a clear travel corridor for Aida’s entrance.",
+        "Bo and Keen face generally toward frame-right and down the path where Aida appears.",
+        "The wider clearing and tree trunks remain visible beyond the path, with no foreground obstruction between Aida and the seated pair."
+       ],
+       "charactersInFrame": [
+        "Bo",
+        "Keen",
+        "Aida"
+       ],
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "openingFrameLayout": {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Keen",
+        "referenceHeightFraction": 0.34,
+        "sameDepth": false,
+        "placements": [
+         {
+          "character": "Bo",
+          "centerX": 0.36,
+          "centerY": 0.69,
+          "apparentScale": 0.78,
+          "depthPlane": 1,
+          "bodyAngleDegrees": -15.0,
+          "facing": "screen-right toward Aida",
+          "pose": "seated on fallen log with satchel, small attentive stillness"
+         },
+         {
+          "character": "Keen",
+          "centerX": 0.22,
+          "centerY": 0.66,
+          "apparentScale": 1.0,
+          "depthPlane": 1,
+          "bodyAngleDegrees": 20.0,
+          "facing": "screen-right toward Aida and slightly toward Bo",
+          "pose": "seated on fallen log, relaxed anticipatory stillness"
+         },
+         {
+          "character": "Aida",
+          "centerX": 0.73,
+          "centerY": 0.6,
+          "apparentScale": 1.02,
+          "depthPlane": 2,
+          "bodyAngleDegrees": -25.0,
+          "facing": "screen-left toward Bo and Keen",
+          "pose": "gentle walking entrance on path, calm pre-settle approach"
+         }
+        ]
+       },
+       "negativeSpace": [
+        "Hold open path space in center-right for Aida's approach and slowing arrival.",
+        "Keep breathable empty air above the log grouping for the quiet forest canopy and light shafts.",
+        "Reserve a small clear gap on the log between Bo and the incoming side of frame for Aida later sitting beside him."
+       ],
+       "referenceUse": [
+        "@图1 for continuity from the previous shot final frame: Bo and Keen already seated on the same fallen log, Bo holding his satchel, Bo's tail normal, Aida entering from down the path.",
+        "@图2 for forest-path geography, path curvature, tree placement, crystal distribution, palette and daylight behavior.",
+        "@图3 for Aida's exact approved identity, costume, hair mass and relative canon height.",
+        "@图4 for Bo's exact approved identity, satchel continuity and relative canon scale.",
+        "@图5 for Keen's exact approved identity and relative canon scale, with continuity override that both wrists must be bare."
+       ],
+       "continuityProtections": [
+        "Continue the same forest path and fallen log orientation from S4.SH1, with Bo and Keen remaining seated as the shot opens.",
+        "Bo keeps his satchel visible in frame and his tail remains in a normal un-poofed state.",
+        "Aida must already be visible entering from down the path in the opening frame, not yet seated.",
+        "Keen has bare wrists only: no wristbands, bands, bracelets, cuffs, crystals or straps on either wrist despite any conflicting reference imagery."
+       ],
+       "providerPrompt": "16:9 cinematic storybook CG opening frame for Crystal Bears, continuing from @图1 and using @图2 as the forest-path geography authority. On the same Whispering Woods fallen log, Bo and Keen are already seated in the left half of frame, with Bo slightly to the right of Keen, both oriented toward the path at frame-right. Bo keeps his satchel visible and his tail is in a normal relaxed state. Aida is already visible entering calmly from deeper frame-right along the wider path, approaching them with an unhurried gentle presence. Compose a moderately wide child-height shot, around 32mm full-frame equivalent, observational and inclusive, with the log anchoring the lower-left foreground and a clear open approach corridor on center-right. Preserve lush moss, winding path, tree trunks, pink and clear crystals, and warm dappled daylight from @图2. Give Aida a subtle sun-kissed rim and path glow so her arrival reads welcoming, not grand. Keep all three characters fully readable with correct canon relative scale from the supplied turnarounds: @图3 Aida, @图4 Bo, @图5 Keen. Preserve exact approved character identities only from those references. Keen continuity is critical: bare wrists only, with no wristbands, bands, bracelets, cuffs, crystals or straps on either wrist. Keep expressions and poses in a playable opening anticipation state rather than a frozen acted beat: Keen relaxed and attentive while seated, Bo seated with small watchful stillness and satchel, Aida in a soft walking entrance before she sits. Maintain gentle cinematic depth, soft atmospheric falloff, unobstructed sightline between Aida and the seated pair, and open negative space on the path for her arrival."
+      },
+      "packageRevision": 2,
+      "inputSignature": {
+       "stage": "cinematography",
+       "model": "gpt-5.4",
+       "skillHashes": {
+        "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+        "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+       },
+       "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+       "shotContractHash": "2e1f1d83600379ea5c08330ed1add6967094957691f0f3857c55134d43848914",
+       "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+       "references": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "previous shot final frame",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "baf16762cc15fa2a77eaec8dea9ad70e259e3b55953baf3acde369fb71dbecd4"
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图2",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+        },
+        {
+         "slot": "@图3",
+         "sourceSlot": "@图3",
+         "role": "Aida",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "604c38221823234148f458c625509ae3127b535eb4750076d0ed65825cbb6566",
+         "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+        },
+        {
+         "slot": "@图4",
+         "sourceSlot": "@图4",
+         "role": "Bo",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "1c5e0e06b97b361f0c64bcbb8a0a3400193d993098800e002cc2b9a33171268d",
+         "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+        },
+        {
+         "slot": "@图5",
+         "sourceSlot": "@图5",
+         "role": "Keen",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "26151202911f2d373133dc0cc7c6e6d693c5bb77f6f4a67b1de7637fd9a1e166",
+         "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+        }
+       ]
+      }
+     },
+     "history": [
+      {
+       "department": "Cinematography",
+       "worker": "Cinematographer / DP",
+       "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+       "model": "gpt-5.4",
+       "preparedAt": "2026-09-02T14:32:49",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 0,
+       "sourceHash": "3ca1787c88751277df03200b84e5cb29e1c3c1aa7007ed83e277600bf93202c0",
+       "output": {
+        "shotId": "S4.SH2",
+        "audienceRead": "Aida arrives as safety, not pressure: Bo and Keen stay grounded on the fallen log while she enters gently from the path, already part of their space but not crowding it.",
+        "composition": "Warm medium-wide three-character composition holding Bo and Keen seated on the fallen log in the left and center of frame, with Aida entering from frame-right along the path and remaining fully readable in the opening image. The frame should preserve the log as the emotional anchor, keep Bo's satchel visible, and leave clear conversational air between Bo and Aida so her approach feels respectful rather than corrective.",
+        "lensAndCameraRelationship": "Use a moderately wide story lens, around 35mm full-frame equivalent, at seated eye height with a very slight downward bias from adult standing level toward the children’s plane. Camera is close enough for expression read and satchel detail, but far enough to include Aida’s entrance and the surrounding forest path geometry without distortion. Maintain gentle perspective continuity from the previous shot while widening just enough to admit Aida into the shared space.",
+        "lightingAndDepth": "Day forest light with soft golden shafts filtering through the canopy, dappled highlights on path and log, and gentle wrap on faces. Keep Bo and Keen in the primary light pocket, with Aida entering through the same warm corridor so she feels invited by the world. Background trees and crystals fall off in soft atmospheric depth, but the path behind Aida remains legible as her approach route. Preserve a calm, breathable depth stack rather than dramatic contrast.",
+        "geography": [
+         "Fallen log runs across the lower-left to center foreground beside the forest path.",
+         "Bo sits on the log just right of Keen, with his satchel on and visible to camera.",
+         "Keen sits frame-left on the same log, angled toward Bo; both of Keen's wrists are bare.",
+         "Aida is already in frame entering from frame-right on the path behind and slightly to the right of Bo and Keen.",
+         "The path curves from frame-right background through center and continues behind the log into the woods.",
+         "Bo and Keen look generally toward Aida's approach side, keeping an open corridor between Aida and the log."
+        ],
+        "charactersInFrame": [
+         "Bo",
+         "Keen",
+         "Aida"
+        ],
+        "canonicalStyleVersion": "v1.0.0",
+        "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+        "openingFrameLayout": {
+         "aspectRatio": "16:9",
+         "referenceCharacter": "Keen",
+         "referenceHeightFraction": 0.42,
+         "sameDepth": false,
+         "placements": [
+          {
+           "character": "Bo",
+           "centerX": 0.39,
+           "centerY": 0.73,
+           "apparentScale": 0.82,
+           "depthPlane": 1,
+           "bodyAngleDegrees": 30.0,
+           "facing": "frame-right toward Aida",
+           "pose": "seated on the fallen log with satchel on, small attentive anticipation"
+          },
+          {
+           "character": "Keen",
+           "centerX": 0.22,
+           "centerY": 0.69,
+           "apparentScale": 1.0,
+           "depthPlane": 1,
+           "bodyAngleDegrees": 20.0,
+           "facing": "frame-right toward Bo and Aida's approach",
+           "pose": "seated on the fallen log, calm open anticipation"
+          },
+          {
+           "character": "Aida",
+           "centerX": 0.76,
+           "centerY": 0.56,
+           "apparentScale": 0.98,
+           "depthPlane": 2,
+           "bodyAngleDegrees": -25.0,
+           "facing": "frame-left toward Bo and Keen",
+           "pose": "gentle walking entry on the path, unhurried arrival anticipation"
+          }
+         ]
+        },
+        "negativeSpace": [
+         "Hold open space center-right between the log and Aida for her continued approach to the seated pair.",
+         "Keep upper-center path background uncluttered so the travel line behind Aida reads clearly.",
+         "Preserve a small cushion of empty space between Bo and Aida for the later sit-beside-him beat."
+        ],
+        "referenceUse": [
+         "@图1 for continuity from the previous shot's final frame: Bo and Keen seated on the same fallen log, Aida entering already visible.",
+         "@图2 for forest path geography, palette, crystal placement, canopy density, and daylight behavior.",
+         "@图3 for Aida's exact identity, scale, costume, hair, and silhouette.",
+         "@图4 for Bo's exact identity, satchel, tail at normal state, and proportions.",
+         "@图5 for Keen's exact identity and proportions, but remove all wrist adornments to satisfy continuity: bare wrists only."
+        ],
+        "continuityProtections": [
+         "Continue directly from S4.SH1 with Bo and Keen still seated on the same fallen log on the same path.",
+         "Bo keeps his satchel visible in the opening frame.",
+         "Bo's tail is in its normal non-poofed state.",
+         "Aida must already be visible entering calmly from down the path in frame one, not appearing from nowhere later in the shot sequence imagery context phraseology preserved by staging intent only, not as extra action beats here set up for animation to continue naturally afterward without frozen acting extremes on contact pose specifics overdefined or limb choreography prescribed. Keen has bare wrists: no wristbands, bracelets, cuffs, crystals, straps, or any adornment on either wrist under any circumstance."
+        ],
+        "providerPrompt": "Create a single 16:9 cinematic opening keyframe for Crystal Bears Ep2 Scene 4 Shot S4.SH2. Continue directly from @图1: Bo and Keen remain seated on the same fallen log on the forest path, and Aida is already visible entering calmly from down the path. Use @图2 as the exact scene-look authority for the Whispering Woods / Crystal Woods forest path: mossy ground, winding path, thick sunlit trees, scattered pink and clear crystals, warm daytime shafts through leaves, soft magical naturalism. Use @图3, @图4, and @图5 as the exact identity references for Aida, Bo, and Keen. Important continuity correction: Keen must have completely bare wrists, with no wristbands, bands, bracelets, cuffs, crystals, or straps on either wrist. Compose a warm medium-wide shot at seated eye height with a moderately wide lens feel, keeping the fallen log across lower-left to center foreground. Keen sits frame-left on the log, angled toward Bo with calm supportive anticipation. Bo sits beside him near center, slightly smaller, wearing his satchel so the bag reads clearly; his tail is normal, not poofed. Aida is fully visible frame-right, slightly deeper on the path, entering gently toward them with unhurried warmth. Leave respectful open space between Bo and Aida so her arrival feels safe and non-intrusive. Keep all three characters fully readable inside frame with clean silhouettes and lead room. Light the shot with soft golden dappled forest daylight, gentle wrap on faces, and atmospheric depth in the trees. Emotional tone: gentle arrival, warm recognition, empathy before instruction, quiet settling. High-end animated feature look, painterly fantasy naturalism, soft plush character rendering, subtle depth of field, no extreme pose exaggeration, no props or costume changes beyond references and stated continuity."
+       },
+       "packageRevision": 2,
+       "inputSignature": {
+        "stage": "cinematography",
+        "model": "gpt-5.4",
+        "skillHashes": {
+         "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+         "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+        },
+        "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+        "shotContractHash": "2e1f1d83600379ea5c08330ed1add6967094957691f0f3857c55134d43848914",
+        "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图3",
+          "role": "Aida",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "604c38221823234148f458c625509ae3127b535eb4750076d0ed65825cbb6566",
+          "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图5",
+          "role": "Keen",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "26151202911f2d373133dc0cc7c6e6d693c5bb77f6f4a67b1de7637fd9a1e166",
+          "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图4",
+          "role": "Bo",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "1c5e0e06b97b361f0c64bcbb8a0a3400193d993098800e002cc2b9a33171268d",
+          "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+         },
+         {
+          "slot": "@图4",
+          "sourceSlot": "@图2",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+         },
+         {
+          "slot": "@图5",
+          "sourceSlot": "@图1",
+          "role": "previous shot final frame",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "baf16762cc15fa2a77eaec8dea9ad70e259e3b55953baf3acde369fb71dbecd4"
+         }
+        ]
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-02T14:35:25",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      },
+      {
+       "department": "Cinematography",
+       "worker": "Cinematographer / DP",
+       "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+       "model": "gpt-5.4",
+       "preparedAt": "2026-09-02T14:35:53",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 0,
+       "sourceHash": "4beb8d24ac95d3913f9b3136be5cab8f5de1c4c506767bcfa96aae60ffeba329",
+       "output": {
+        "shotId": "S4.SH2",
+        "audienceRead": "Aida arrives as safety rather than authority; the frame lets Bo and Keen remain grounded on the log while her calm entrance carries gentle promise, so the audience feels that help is joining them without pressure.",
+        "composition": "Wide three-character forest-path opening that preserves continuity from the prior log setup while introducing Aida already visible on approach. Bo and Keen hold the left half seated on the fallen log in a settled two-shot cluster; Aida is midground on the path at frame-right, walking into their space with clear lead room toward them. Keep the composition breathable and asymmetrical, with the empty path between Aida and the seated pair functioning as the emotional corridor she is about to cross.",
+        "lensAndCameraRelationship": "Moderately wide storybook lens, around 32mm full-frame equivalent, from a low child-eye camera height just above the seated eyeline of Bo on the log. Gentle perspective separation keeps Aida readable as arriving from the same path without exaggeration. Static or near-static opening frame, composed for a soft entrance rather than a reveal. Deep enough staging to hold all three characters legibly while keeping the distant woods slightly softened.",
+        "lightingAndDepth": "Warm late-morning forest light filtered through canopy, with mottled sun patches on the path and soft rim accents along fur, hair and robe edges. Bo and Keen sit in welcoming open shade with shaped highlights on faces; Aida catches a slightly brighter shaft as she enters, giving her arrival a natural visual invitation rather than a spotlight effect. Foreground log and crystal accents anchor depth; midground path stays clear as the main performance lane; background trees recede into airy green-gold atmosphere.",
+        "geography": [
+         "Bo and Keen sit on the same fallen log at frame-left, facing generally toward frame-right and down the path.",
+         "Aida begins visible at frame-right midground on the wider forest path, traveling leftward toward Bo and Keen.",
+         "The path runs diagonally from frame-right background toward the seated pair on the left, forming a clear approach corridor.",
+         "Bo remains closest to camera on the log cluster, with Keen seated just behind and slightly farther frame-left.",
+         "Aida and the seated pair share the same path geography with unobstructed sightlines between them.",
+         "Open woods and crystal growths border both sides of the path, but no foliage blocks the space where Aida will join them."
+        ],
+        "charactersInFrame": [
+         "Bo",
+         "Keen",
+         "Aida"
+        ],
+        "canonicalStyleVersion": "v1.0.0",
+        "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+        "openingFrameLayout": {
+         "aspectRatio": "16:9",
+         "referenceCharacter": "Bo",
+         "referenceHeightFraction": 0.25,
+         "sameDepth": false,
+         "placements": [
+          {
+           "character": "Bo",
+           "centerX": 0.24,
+           "centerY": 0.69,
+           "apparentScale": 1.0,
+           "depthPlane": 1,
+           "bodyAngleDegrees": 18.0,
+           "facing": "frame-right toward Aida's approach",
+           "pose": "seated on fallen log, settled and attentive, satchel on body, tail normal"
+          },
+          {
+           "character": "Keen",
+           "centerX": 0.2014,
+           "centerY": 0.6189,
+           "apparentScale": 1.2,
+           "depthPlane": 1,
+           "bodyAngleDegrees": 22.0,
+           "facing": "frame-right toward Aida's approach",
+           "pose": "seated on same fallen log slightly behind Bo, calm and open, bare wrists clearly visible"
+          },
+          {
+           "character": "Aida",
+           "centerX": 0.72,
+           "centerY": 0.6,
+           "apparentScale": 0.92,
+           "depthPlane": 2,
+           "bodyAngleDegrees": -30.0,
+           "facing": "frame-left toward Bo and Keen",
+           "pose": "gentle walking arrival on the path, unhurried, robe flowing naturally, readable anticipation before joining them"
+          }
+         ]
+        },
+        "negativeSpace": [
+         "Hold open path space in the center-right corridor between Aida and the log for her continued approach.",
+         "Keep breathable empty space just frame-right of Aida so her entrance does not feel cramped by the border.",
+         "Preserve a small pocket of open space on the log to Bo's frame-right side for Aida eventually sitting beside him."
+        ],
+        "referenceUse": [
+         "@图1 for continuity from the previous shot final frame: Bo and Keen already seated on the fallen log, Aida entering visible on the path.",
+         "@图2 for the forest-path scene plate, path direction, crystal placement, canopy light, and environmental palette.",
+         "@图3 for Aida's exact character design, costume, proportions, hair volume, and robe silhouette.",
+         "@图4 for Bo's exact character design, satchel, proportions, and normal tail state.",
+         "@图5 for Keen's exact character design and proportion reference, while removing all wrist accessories per continuity constraint."
+        ],
+        "continuityProtections": [
+         "Continue the same fallen-log setup and path orientation from S4.SH1 with no geography flip.",
+         "Bo remains seated with satchel present and tail in its normal unpoofed state at frame one.",
+         "Keen starts with bare wrists only: no wristbands, bands, bracelets, cuffs, crystals, straps, or similar items on either wrist.",
+         "Aida is already visible entering calmly from down the path, not appearing from nowhere or from a new angle that breaks continuity-in instructions."
+        ],
+        "providerPrompt": "16:9 cinematic animated storybook frame for shot S4.SH2 in the approved Crystal Bears visual style. Use @图1 as continuity reference for the prior final-frame staging, @图2 as the authoritative scene plate and environment look, @图3 for Aida’s exact design, @图4 for Bo’s exact design, and @图5 for Keen’s exact design. On the same forest-path fallen log setup, place Bo and Keen seated together at frame-left, with Bo closest to camera and Keen slightly behind him on the same log. Bo is a small child squirrel with his satchel still on him and his tail in a normal unpoofed state. Keen is a blue bear seated calmly beside him, wrists completely bare with no wristbands, bands, bracelets, cuffs, crystals, straps, or any accessory on either wrist. Aida is already visible entering from frame-right midground on the wider path, walking leftward toward them at an unhurried pace. Compose a warm, gentle wide shot with a clear diagonal path corridor between Aida and the seated pair, preserving open space where she will soon join Bo at his level. Camera is low child-eye height, slightly above Bo’s seated eyeline, with a moderately wide 32mm full-frame equivalent feel: intimate environment, readable depth, no distortion. Light is filtered daytime forest sunlight through leaves, green-gold and soft, with Bo and Keen in open shade and Aida touched by a slightly brighter patch of sun so her arrival feels inviting, not theatrical. Keep all three characters fully readable inside frame with accurate relative scale from their references, forest crystals and mossy log integrated from the scene plate, background woods atmospheric and slightly softer, and no foliage blocking sightlines. The emotional read is safety, dignity, and soft humor: Aida arrives as calm companionship rather than authority, Bo and Keen remain settled, and the path feels like a quiet space for empathy to enter."
+       },
+       "packageRevision": 2,
+       "inputSignature": {
+        "stage": "cinematography",
+        "model": "gpt-5.4",
+        "skillHashes": {
+         "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+         "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+        },
+        "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+        "shotContractHash": "2e1f1d83600379ea5c08330ed1add6967094957691f0f3857c55134d43848914",
+        "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "previous shot final frame",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "baf16762cc15fa2a77eaec8dea9ad70e259e3b55953baf3acde369fb71dbecd4"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图3",
+          "role": "Aida",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "604c38221823234148f458c625509ae3127b535eb4750076d0ed65825cbb6566",
+          "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图5",
+          "role": "Keen",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "26151202911f2d373133dc0cc7c6e6d693c5bb77f6f4a67b1de7637fd9a1e166",
+          "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+         },
+         {
+          "slot": "@图4",
+          "sourceSlot": "@图4",
+          "role": "Bo",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "1c5e0e06b97b361f0c64bcbb8a0a3400193d993098800e002cc2b9a33171268d",
+          "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+         },
+         {
+          "slot": "@图5",
+          "sourceSlot": "@图2",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+         }
+        ]
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-02T14:37:07",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      },
+      {
+       "department": "Cinematography",
+       "worker": "Cinematographer / DP",
+       "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+       "model": "gpt-5.4",
+       "preparedAt": "2026-09-02T14:37:35",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 0,
+       "sourceHash": "3a49de972e846d770237a4ab04f9375115f179ade9ca636d2f13d4ebf532dc4f",
+       "output": {
+        "shotId": "S4.SH2",
+        "audienceRead": "Aida’s arrival feels gentle and non-threatening: Bo and Keen are already settled on the fallen log, and the frame leaves a clear path for Aida to enter softly into their quiet space rather than dominate it.",
+        "composition": "Wide-medium three-character staging on the same forest-path log and adjoining path, with Bo and Keen anchored low in the foreground-left/midframe and Aida entering from deeper frame-right background along the path. Keep the composition open and breathable, prioritizing relational space over symmetry so Aida’s approach reads as calm permission, not confrontation.",
+        "lensAndCameraRelationship": "Moderately wide story lens, roughly 32mm full-frame equivalent, at seated eye height just above Bo and Keen’s level. Camera is locked and slightly offset toward the log, preserving continuity from the prior shot while widening enough to admit Aida’s entrance and the surrounding woods. Perspective should feel natural and intimate, with enough depth separation for Aida’s approach but no aggressive distortion.",
+        "lightingAndDepth": "Warm dappled day exterior from high frame-right/back-right through the canopy, with soft amber shafts touching the path where Aida enters and gentler bounced fill on Bo and Keen at the log. Preserve cool green forest depth behind them and subtle atmospheric falloff between foreground log and mid-background path, so Aida emerges from a brighter corridor into their shaded pocket. Crystals and moss may catch soft highlights but must not steal focus from faces and satchel.",
+        "geography": [
+         "Fallen log runs across the lower foreground, slightly rising from frame-left toward center-right.",
+         "Bo sits on the log just right of Keen, both facing generally toward frame-right where the path continues.",
+         "Keen sits frame-left of Bo on the same log, turned slightly toward Bo and the approaching path; Keen has bare wrists with no bands or cuffs.",
+         "The wider forest path enters from mid-right background and bends toward the seated pair at center-left foreground.",
+         "Aida begins in the mid-background on that path, screen-right of Bo and Keen, walking toward them on a diagonal right-to-left approach.",
+         "The Learning Circle direction remains farther down the path beyond Aida’s approach corridor, not visible as a separate group in frame."
+        ],
+        "charactersInFrame": [
+         "Bo",
+         "Keen",
+         "Aida"
+        ],
+        "canonicalStyleVersion": "v1.0.0",
+        "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+        "openingFrameLayout": {
+         "aspectRatio": "16:9",
+         "referenceCharacter": "Keen",
+         "referenceHeightFraction": 0.34,
+         "sameDepth": false,
+         "placements": [
+          {
+           "character": "Bo",
+           "centerX": 0.39,
+           "centerY": 0.69,
+           "apparentScale": 1.0,
+           "depthPlane": 1,
+           "bodyAngleDegrees": 15.0,
+           "facing": "screen-right toward Aida’s approach",
+           "pose": "seated on the fallen log with satchel held close, quiet and tentative but readable"
+          },
+          {
+           "character": "Keen",
+           "centerX": 0.24,
+           "centerY": 0.67,
+           "apparentScale": 1.0,
+           "depthPlane": 1,
+           "bodyAngleDegrees": 20.0,
+           "facing": "screen-right toward Bo and the path",
+           "pose": "seated on the fallen log in an easy attentive rest, open and welcoming"
+          },
+          {
+           "character": "Aida",
+           "centerX": 0.71,
+           "centerY": 0.54,
+           "apparentScale": 0.92,
+           "depthPlane": 2,
+           "bodyAngleDegrees": -30.0,
+           "facing": "screen-left toward Bo and Keen",
+           "pose": "gentle walking entrance on the path, calm and unhurried, arriving into their space"
+          }
+         ]
+        },
+        "negativeSpace": [
+         "Hold open path space at frame-right around Aida’s travel corridor so her entrance reads cleanly.",
+         "Keep a breathable gap between Bo and Aida for her later sit-down beside him.",
+         "Preserve soft upper-midframe background air through the trees so the forest can hold the quiet beat."
+        ],
+        "referenceUse": [
+         "@图1 for continuity of Bo and Keen already seated on the same fallen log and Aida already present entering from the path.",
+         "@图2 for exact forest-path geography, path bend, tree placement, crystal distribution, palette and daylight behavior.",
+         "@图3 for Aida’s locked design, costume, silhouette and canon scale.",
+         "@图4 for Bo’s locked design, satchel, tail at normal state and canon scale.",
+         "@图5 for Keen’s locked design and canon scale, but enforce script continuity override: bare wrists with no wristbands, bracelets, cuffs, crystals or straps."
+        ],
+        "continuityProtections": [
+         "Continue directly after S4.SH1: Bo and Keen remain seated on the same log, with Bo still carrying his satchel and his tail in a normal non-poofed state.",
+         "Do not restage the scene into a new clearing; preserve the established path-log relationship from the previous shot and scene plate.",
+         "Aida must be visible entering calmly from down the path in the opening frame, not already seated.",
+         "Keep all three characters fully readable inside frame with unobstructed sightlines between Bo and Aida’s approach corridor as well as between Bo and Keen on the log."
+        ],
+        "providerPrompt": "Using @图1 as continuity for the previous shot’s final frame, create a 16:9 opening keyframe for S4.SH2 in the Crystal Woods. Preserve the exact forest-path geography, lighting palette, foliage, moss, blossoms and crystal placement behavior from @图2. Stage Bo and Keen already seated on the same fallen log in the foreground-left to midframe, with Bo just right of Keen, Bo holding his packed satchel close and his tail in a normal un-poofed state. Keen sits slightly turned toward Bo and the path, gentle and supportive, and must have bare wrists with no wristbands, bands, bracelets, cuffs, crystals or straps on either wrist. Aida, matching @图3 exactly, is visible in the mid-background on the wider path at frame-right, entering calmly toward them on a soft diagonal, not yet seated. Match Bo exactly to @图4 and Keen exactly to @图5 except for the critical bare-wrists continuity correction. Use a moderately wide intimate camera, around 32mm full-frame equivalent, at seated eye height just above Bo and Keen, locked off. Compose for tenderness and open relational space rather than symmetry: Bo and Keen settled in a shaded pocket, Aida emerging through warmer dappled sunlight on the path. Keep clear negative space in Aida’s approach corridor and a breathable gap beside Bo where she can later sit. Warm back-right sunlight through canopy, soft bounce fill on faces, gentle atmospheric depth, subtle crystal glints only, no distracting spectacle. Emotional tone: gentle arrival, warm recognition, quiet safety, empathy before words."
+       },
+       "packageRevision": 2,
+       "inputSignature": {
+        "stage": "cinematography",
+        "model": "gpt-5.4",
+        "skillHashes": {
+         "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+         "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+        },
+        "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+        "shotContractHash": "2e1f1d83600379ea5c08330ed1add6967094957691f0f3857c55134d43848914",
+        "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "previous shot final frame",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "baf16762cc15fa2a77eaec8dea9ad70e259e3b55953baf3acde369fb71dbecd4"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图2",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图3",
+          "role": "Aida",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "604c38221823234148f458c625509ae3127b535eb4750076d0ed65825cbb6566",
+          "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+         },
+         {
+          "slot": "@图4",
+          "sourceSlot": "@图5",
+          "role": "Keen",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "26151202911f2d373133dc0cc7c6e6d693c5bb77f6f4a67b1de7637fd9a1e166",
+          "hash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+         },
+         {
+          "slot": "@图5",
+          "sourceSlot": "@图4",
+          "role": "Bo",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "1c5e0e06b97b361f0c64bcbb8a0a3400193d993098800e002cc2b9a33171268d",
+          "hash": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+         }
+        ]
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-02T14:39:07",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      }
+     ]
     }
    },
    "keyframeCandidate": null,
@@ -7750,7 +8963,12 @@
     "shotId": "S4.SH1",
     "at": "2026-09-02T09:23:09Z",
     "reason": "Aida entrance and empathy exchange need their own shot."
-   }
+   },
+   "openingCharactersInFrame": [
+    "Bo",
+    "Keen",
+    "Aida"
+   ]
   }
  ],
  "validation": {

@@ -1225,6 +1225,86 @@ def test_relay_animation_gets_previous_final_frame_reference_by_default():
     }
 
 
+def test_relay_keyframe_replaces_stale_opener_slots_with_previous_final_frame():
+    shot = {
+        "shotId": "S4.SH2",
+        "sourceType": "relay",
+        "sourceShotId": "S4.SH1",
+        "charactersInFrame": ["Aida", "Bo", "Keen"],
+        "keyframeReferenceSlots": {
+            "@图1": "Aida",
+            "@图2": "Bo",
+            "@图3": "Keen",
+            "@图4": "scene plate",
+        },
+    }
+
+    slots = R._effective_reference_slots({}, shot, "keyframeReferenceSlots", "4", "Ep2")
+
+    assert slots == {
+        "@图1": "previous shot final frame",
+        "@图2": "scene plate",
+        "@图3": "Aida",
+        "@图4": "Bo",
+        "@图5": "Keen",
+    }
+
+
+def test_relay_animation_replaces_stale_opening_keyframe_with_handoff_bundle():
+    shot = {
+        "shotId": "S4.SH2",
+        "sourceType": "relay",
+        "sourceShotId": "S4.SH1",
+        "charactersInFrame": ["Aida", "Bo", "Keen"],
+        "dialogueLines": [{"speaker": "Aida", "text": "Hi Keen."}],
+        "referenceSlots": {
+            "@图1": "opening keyframe",
+            "@图2": "Aida",
+            "@图3": "Bo",
+            "@图4": "Keen",
+            "@图5": "scene plate",
+            "@Audio1": "voice track",
+        },
+    }
+
+    slots = R._effective_reference_slots({}, shot, "referenceSlots", "4", "Ep2")
+
+    assert slots == {
+        "@图1": "previous shot final frame",
+        "@图2": "scene plate",
+        "@图3": "Aida",
+        "@图4": "Bo",
+        "@图5": "Keen",
+        "@Audio1": "voice track",
+    }
+
+
+def test_previous_final_frame_role_resolves_from_approved_source_shot(monkeypatch, tmp_path):
+    harvest = tmp_path / "S4.SH1_final_frame.png"
+    harvest.write_bytes(b"png")
+    pkg = {
+        "continuityLedger": [{
+            "shotId": "S4.SH1",
+            "status": "approved",
+            "harvestFrame": str(harvest),
+        }]
+    }
+
+    monkeypatch.setattr(R, "load_pkg", lambda scene, episode: (pkg, tmp_path / "pkg.json"))
+    monkeypatch.setattr(R, "_reference_path_is_approved", lambda path: True)
+
+    path = R._slot_path_for_role(
+        "previous shot final frame",
+        None,
+        "4",
+        "Ep2",
+        {},
+        shot={"shotId": "S4.SH2", "sourceType": "relay", "sourceShotId": "S4.SH1"},
+    )
+
+    assert path == str(harvest)
+
+
 def test_animation_slots_append_all_required_continuity_props(monkeypatch):
     shot = {
         "shotId": "6.B3.S1",

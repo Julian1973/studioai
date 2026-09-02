@@ -22,7 +22,7 @@ DEMOLITION = {"cb_segprompt", "cb_beats", "cb_replicator", "cb_seedance",
 
 
 def _imports_of(pyfile):
-    tree = ast.parse(pathlib.Path(pyfile).read_text())
+    tree = ast.parse(pathlib.Path(pyfile).read_text(encoding="utf-8"))
     names = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -121,7 +121,7 @@ def test_deferred_item_8_no_duration_literal_dependency():
     import cb_costs
     rate, _, _ = cb_costs.RATES["seedance_standard_per_sec"]
     assert abs(cb_costs.estimate_video_cost("seedance_standard_per_sec", 6) - rate * 6) < 1e-9
-    src = (HERE / "cb_render.py").read_text()
+    src = (HERE / "cb_render.py").read_text(encoding="utf-8")
     assert '"duration": f"{int(round(segment[\'durationSec\']))}"' in src
     assert '"auto"' not in src
 

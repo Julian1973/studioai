@@ -166,7 +166,7 @@ def test_comparison_contract_remains_narrow(kwargs, match):
     ({"duration": 6, "image_count": 1, "video_count": 1}, "video"),
 ])
 def test_request_contract_enforces_verified_limits(kwargs, match, monkeypatch):
-    raw = json.loads(cb_providers.REGISTRY_PATH.read_text())
+    raw = json.loads(cb_providers.REGISTRY_PATH.read_text(encoding="utf-8"))
     raw["defaultVideoModelId"] = "fal-seedance-2.0"
     legacy = next(model for model in raw["models"]
                   if model["modelId"] == "fal-seedance-2.0")
@@ -296,7 +296,7 @@ def test_byteplus_local_video_can_use_hash_bound_sidecar_host(tmp_path):
     sidecar.write_text(json.dumps({
         "hostedUrl": "https://media.example.test/approved.mp4",
         "hostedContentHash": digest,
-    }))
+    }), encoding="utf-8")
 
     assert cb_gen._byteplus_asset_url(str(video), "video") == (
         "https://media.example.test/approved.mp4")
@@ -309,7 +309,7 @@ def test_byteplus_rejects_stale_hash_bound_sidecar_host(tmp_path):
     sidecar.write_text(json.dumps({
         "hostedUrl": "https://media.example.test/approved.mp4",
         "hostedContentHash": "0" * 64,
-    }))
+    }), encoding="utf-8")
 
     with pytest.raises(ValueError, match="hash does not match"):
         cb_gen._byteplus_asset_url(str(video), "video")
@@ -382,7 +382,7 @@ def test_byteplus_25_adapter_builds_and_polls_the_official_async_contract(
     pathlib.Path(str(video) + ".gen.json").write_text(json.dumps({
         "endpoint": "/api/v3/contents/generations/tasks",
         "providerTaskId": "cgt-prev-25",
-    }))
+    }), encoding="utf-8")
     monkeypatch.setattr(cb_gen, "BYTEPLUS_ARK_KEY", "test-key")
 
     requested = {}
@@ -477,7 +477,7 @@ def test_byteplus_25_video_editing_uses_provider_duration_sentinel(
     pathlib.Path(str(video) + ".gen.json").write_text(json.dumps({
         "endpoint": "/api/v3/contents/generations/tasks",
         "providerTaskId": "cgt-prev-25",
-    }))
+    }), encoding="utf-8")
     monkeypatch.setattr(cb_gen, "BYTEPLUS_ARK_KEY", "test-key")
 
     def contract(**kwargs):

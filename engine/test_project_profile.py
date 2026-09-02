@@ -31,7 +31,7 @@ def _profile(root, show_id="moon-lanterns", *, adapter="moon-lanterns-v1",
         },
         "creativeRoot": "creative",
     }
-    (show / "profile.json").write_text(json.dumps(payload))
+    (show / "profile.json").write_text(json.dumps(payload), encoding="utf-8")
     return show
 
 
@@ -54,10 +54,10 @@ def test_profile_resolves_only_inside_selected_tenant(tmp_path):
 
 def test_profile_loads_without_an_engine_adapter(tmp_path):
     show = _profile(tmp_path)
-    payload = json.loads((show / "profile.json").read_text())
+    payload = json.loads((show / "profile.json").read_text(encoding="utf-8"))
     del payload["engineAdapter"]
     payload["capabilities"] = {"music": False}
-    (show / "profile.json").write_text(json.dumps(payload))
+    (show / "profile.json").write_text(json.dumps(payload), encoding="utf-8")
     loaded = studio_profile.load_show_profile(tmp_path, "moon-lanterns")
     report = studio_profile.capability_report(loaded)
     assert loaded.profile.engineAdapter is None
@@ -98,11 +98,11 @@ def test_script_pointer_cannot_escape_the_active_show(tmp_path):
     store = cb_scripts.ScriptStore(tmp_path, script_root=script_root)
     current = store.store("Ep1", "A safe script.", "Safe")
     pointer = script_root / "_current" / "Ep1.json"
-    record = json.loads(pointer.read_text())
+    record = json.loads(pointer.read_text(encoding="utf-8"))
     outside = tmp_path / "outside.txt"
-    outside.write_text("tampered")
+    outside.write_text("tampered", encoding="utf-8")
     record["contentPath"] = str(outside.relative_to(tmp_path))
-    pointer.write_text(json.dumps(record))
+    pointer.write_text(json.dumps(record), encoding="utf-8")
 
     with pytest.raises(cb_scripts.ScriptStoreError, match="escapes"):
         store.current("Ep1")

@@ -750,7 +750,7 @@ def test_source_storyboard_record_carries_dependency_signature(tmp_path):
     path = tmp_path / "storyboard.json"
     signature = {"kind": "scene-storyboard-snapshot", "digest": "signed-storyboard"}
     path.write_text(json.dumps({"approvalState": "generated-pending-human-review",
-                                "inputSignature": signature}))
+                                "inputSignature": signature}), encoding="utf-8")
 
     record = E._source_storyboard_record(path)
 

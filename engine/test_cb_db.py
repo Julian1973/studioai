@@ -27,7 +27,7 @@ def _auth(token="a" * 32):
 def test_atomic_json_compare_and_swap_blocks_lost_update(tmp_path):
     path = tmp_path / P.OUTPUT_REL / "EpT_scene1_production_package.json"
     path.parent.mkdir(parents=True)
-    path.write_text(json.dumps({"value": 0}))
+    path.write_text(json.dumps({"value": 0}), encoding="utf-8")
 
     first, first_digest = cb_db.read_json_document(tmp_path, path)
     second, second_digest = cb_db.read_json_document(tmp_path, path)
@@ -37,14 +37,14 @@ def test_atomic_json_compare_and_swap_blocks_lost_update(tmp_path):
     second["value"] = 2
     with pytest.raises(cb_db.StateConflict, match="CONCURRENT STATE CHANGE"):
         cb_db.atomic_write_json(tmp_path, path, second, second_digest)
-    assert json.loads(path.read_text()) == {"value": 1}
+    assert json.loads(path.read_text(encoding="utf-8")) == {"value": 1}
 
 
 def test_atomic_remove_refuses_a_changed_document(tmp_path):
     path = tmp_path / "candidate.json"
-    path.write_text(json.dumps({"version": 1}))
+    path.write_text(json.dumps({"version": 1}), encoding="utf-8")
     _, digest = cb_db.read_json_document(tmp_path, path)
-    path.write_text(json.dumps({"version": 2}))
+    path.write_text(json.dumps({"version": 2}), encoding="utf-8")
 
     with pytest.raises(cb_db.StateConflict, match="changed before removal"):
         cb_db.atomic_remove(tmp_path, path, expected_digest=digest)

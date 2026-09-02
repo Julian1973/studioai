@@ -491,7 +491,7 @@ def test_identity_screening_keeps_the_keyframe_visible_for_review():
 
 
 def test_human_keyframe_approval_is_the_single_visible_stage_decision():
-    safety = (Path(__file__).parent.parent / "engine" / "cb_safety.py").read_text()
+    safety = (Path(__file__).parent.parent / "engine" / "cb_safety.py").read_text(encoding="utf-8")
     assert 'advisory = record.get("conformanceAdvisoryDecision") or {}' in safety
     assert 'if advisory.get("acceptedBy"):' in safety
     assert "Requiring a second hidden override" in safety
@@ -774,8 +774,18 @@ def test_keyframe_build_explains_pending_scene_plate_and_rebuilds_stale_directio
     assert 'The selected image is not current against this scene.' in APP
     assert '>Review Scene Plate</button>' in APP
     assert 'signature.sceneLookHash!==currentPlateHash' in APP
-    assert 'SH_SCENELOOK.active&&SH_SCENELOOK.active.hash' in APP
-    assert 'record.packageRevision' in APP
+    # /api/scenelook carries plateHash (and approved/candidate), never `active` — reading
+    # only SH_SCENELOOK.active.hash was always undefined, so a re-selected plate went
+    # undetected and the archived one rode into the cost review (2026-09-02, S2).
+    assert 'SH_SCENELOOK.plateHash||(SH_SCENELOOK.active&&SH_SCENELOOK.active.hash)' in APP
+    # Currency is the server's verdict plus the plate hash — never the package revision.
+    # cb_safety.department_input_signature deliberately excludes packageRevision (a revision
+    # can carry an unchanged approval forward); judging currency by it here made the server
+    # answer "existing" while the client said "not current", and Build keyframe looped on
+    # "continuing to cost review" for ever (2026-09-02).
+    assert 'record.packageRevision' not in APP
+    assert 'function serverVerifiedDirection(stage,shotId)' in APP
+    assert 'cached.candidateCurrent||cached.approvalCurrent' in APP
     assert 'The current plate stays protected until you approve its replacement.' in APP
 
 

@@ -167,13 +167,32 @@ def test_provider_identity_packs_are_locked_without_invalidating_story(tmp_path)
 
 
 def test_stub_blocks_only_an_episode_that_casts_it(tmp_path):
+    """A stub role is named for the episode that casts it, and only for that one.
+
+    2026-09-02 (CLAUDE.md rule 87): a scripted stub no longer flips episodeReady off — that
+    flag is the TEXT stages' readiness, and treating a known-incomplete cast as "not ready"
+    sent the studio back to "Run Story & Direction" the moment a scene's cast was read. The
+    stub is still named, in episodeBlockers and episodeCastIncomplete, and every stage that
+    puts the character on screen or gives it a voice is still refused by name.
+    """
     _workspace(tmp_path)
     cb_canon.write_lock(tmp_path, "Tester")
 
-    assert cb_canon.status("Ep1", ["Keen", "Squeaky"], tmp_path)["episodeReady"] is True
-    blocked = cb_canon.status("Ep1", ["Bo"], tmp_path)
-    assert blocked["episodeReady"] is False
-    assert blocked["episodeBlockers"][0]["code"] == "CAST_CANON_INCOMPLETE"
+    clean = cb_canon.status("Ep1", ["Keen", "Squeaky"], tmp_path)
+    assert clean["episodeReady"] is True
+    assert clean["episodeCastIncomplete"] == []
+
+    stub = cb_canon.status("Ep1", ["Bo"], tmp_path)
+    assert stub["episodeReady"] is True                      # text may proceed
+    assert stub["episodeCastIncomplete"] == ["Bo"]
+    assert stub["episodeBlockers"][0]["code"] == "CAST_CANON_INCOMPLETE"
+
+    # The paid stages keep the strict rule; the text-only passes opt out by name.
+    with pytest.raises(cb_canon.CanonLockError):
+        cb_canon.require_locked("Ep1", ["Bo"], tmp_path)
+    allowed = cb_canon.require_locked(
+        "Ep1", ["Bo"], tmp_path, allow_incomplete_cast=True)
+    assert allowed["episodeCastIncomplete"] == ["Bo"]
 
 
 def test_script_semantics_are_checked_against_locked_contracts(tmp_path):

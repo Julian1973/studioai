@@ -103,7 +103,7 @@ def test_human_feedback_shows_everything_and_promotes_nothing(isolated):
 
 # ── prompts stay immutable; no provider access ───────────────────────────────────────────
 def test_learning_never_touches_prompts_or_providers():
-    src = (HERE / "cb_learning.py").read_text()
+    src = (HERE / "cb_learning.py").read_text(encoding="utf-8")
     assert "import cb_gen" not in src and "import cb_render" not in src
     assert "import cb_engine" not in src
     assert "seedancePrompt" not in src                   # never appends to a compiled prompt
@@ -149,7 +149,7 @@ def test_learning_store_text_never_enters_role_prompts(isolated):
         mind = C._mind(role, ["directorTaste"], "charge")
         for marker in ("ZZ-EVIDENCE-MARKER-ZZ", "ZZ-PATTERN-MARKER-ZZ"):
             assert marker not in mind, (role, marker)
-    assert "import cb_learning" not in (HERE / "cb_creative.py").read_text()
+    assert "import cb_learning" not in (HERE / "cb_creative.py").read_text(encoding="utf-8")
 
 
 def test_raw_exemplar_dump_does_not_return():
@@ -180,7 +180,7 @@ def test_ex005_remains_linked_to_7d5762e():
 def test_creative_room_2_execution_order_unchanged():
     import cb_creative as C
     assert C.ENGINE_VERSION.startswith("creative-room-2.2")
-    body = (HERE / "cb_creative.py").read_text().split("def run_scene", 1)[1]
+    body = (HERE / "cb_creative.py").read_text(encoding="utf-8").split("def run_scene", 1)[1]
     order = [body.index(s) for s in ("gate0_readiness(", "gate1_treatments(",
                                        "gate2_select(", "gate3_beats(",
                                        "gate4_shot_conference(", "gate5_performance(",

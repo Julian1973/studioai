@@ -418,7 +418,7 @@ def reindex_episodes():
         _mt = lambda p: p.stat().st_mtime
         for p in sorted(OUT.glob("*_beat_package.json"), key=_mt) + sorted(OUT.glob("*_shot_package.json"), key=_mt):
             try:
-                d = json.loads(p.read_text())
+                d = json.loads(p.read_text(encoding="utf-8"))
                 n = d.get("episode")
                 if n is None:
                     continue
@@ -445,7 +445,7 @@ def reindex_episodes():
             ep = f"Ep{n}"
             if SCRIPT_STORE.current(ep, required=False) is None:
                 title_path = SCRIPTS / f"{ep}.title"
-                legacy_title = (title_path.read_text().strip() if title_path.exists()
+                legacy_title = (title_path.read_text(encoding="utf-8").strip() if title_path.exists()
                                 else e.get("title") or ep)
                 SCRIPT_STORE.migrate_legacy(ep, p, legacy_title)
         except Exception as exc:
@@ -467,7 +467,7 @@ def reindex_episodes():
         _tf = SCRIPTS / f"Ep{n}.title"                 # the EXACT user-typed title (preserves apostrophes/case) — authoritative
         if _tf.exists():
             try:
-                _t = _tf.read_text().strip()
+                _t = _tf.read_text(encoding="utf-8").strip()
                 if _t:
                     e["title"] = _t
             except Exception:
@@ -666,7 +666,7 @@ def _empty_workbench_state():
 def _load_workbench_state():
     try:
         if WORKBENCH_STATE_FILE.exists():
-            payload = json.loads(WORKBENCH_STATE_FILE.read_text())
+            payload = json.loads(WORKBENCH_STATE_FILE.read_text(encoding="utf-8"))
             if isinstance(payload, dict):
                 payload.setdefault("projects", {})
                 return payload
@@ -830,7 +830,7 @@ def _scene_beats_fingerprint(episode, scene):
     if not cands:
         return None
     pkg = max(cands, key=lambda p: p.stat().st_mtime)
-    d = json.loads(pkg.read_text())
+    d = json.loads(pkg.read_text(encoding="utf-8"))
     beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
     # FIXED 2026-07-12 (full-codebase audit continued): a plain lexicographic sort misorders any scene with
     # 10+ beats ("1.B10" sorts before "1.B2") — cb_pipeline.py's own copy of this exact function was already
@@ -912,7 +912,7 @@ def _relock_chain_stale_scenes(d):
                           or list(OUT.glob(f"{episode}_*shot_package.json")))
                 if not cands:
                     continue
-                pkg = json.loads(max(cands, key=lambda p: p.stat().st_mtime).read_text())
+                pkg = json.loads(max(cands, key=lambda p: p.stat().st_mtime).read_text(encoding="utf-8"))
             except Exception:
                 continue
             scene_beats = [b for b in (pkg.get("beats") or pkg.get("shots") or [])
@@ -951,7 +951,7 @@ def _relock_chain_stale_scenes(d):
 def locked_state():
     f = CBGEN / "locked.json"
     try:
-        d = json.loads(f.read_text()) if f.exists() else {}
+        d = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
     except Exception:
         return {}
     try:
@@ -961,14 +961,14 @@ def locked_state():
         if _relock_chain_stale_scenes(d):
             changed = True
         if changed:
-            f.write_text(json.dumps(d, indent=1))
+            f.write_text(json.dumps(d, indent=1), encoding="utf-8")
     except Exception:
         pass   # fail-open: a relock error must never brick gate-status reads
     return d
 
 def notes_state():
     f = CBGEN / "notes.json"
-    try: return json.loads(f.read_text()) if f.exists() else {}
+    try: return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
     except Exception: return {}
 
 def relay_state_all():
@@ -980,7 +980,7 @@ def relay_state_all():
     when one ran, the raw harvest otherwise); the UI reads "anchor", never assumes "remint" is the only shape."""
     f = CBGEN / "relay_state.json"
     try:
-        return json.loads(f.read_text()) if f.exists() else {}
+        return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
     except Exception:
         return {}
 
@@ -990,7 +990,7 @@ def visions_state():
     engine's own cb_prompts.vision_for does server-side — a vision never chains and is never chained through."""
     f = pathlib.Path(_paths().CONTINUITY)   # T44: from the project profile
     try:
-        d = json.loads(f.read_text()) if f.exists() else {}
+        d = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
     except Exception:
         return {}
     out = {}
@@ -1488,7 +1488,7 @@ def write_script(seed, episode="Ep1"):
     """GATE 0 — the Writers' Room: turn a seed into a finished, scored, LOCKED screenplay (cb_writer)."""
     SCRIPTS.mkdir(parents=True, exist_ok=True)
     seedpath = SCRIPTS / f"_seed_{episode}.json"
-    seedpath.write_text(json.dumps(seed, ensure_ascii=False))
+    seedpath.write_text(json.dumps(seed, ensure_ascii=False), encoding="utf-8")
     return _start(_jid(f"write{episode}"), "write", "0",
                   ["cb_writer.py", str(seedpath), str(episode)])
 
@@ -1861,9 +1861,9 @@ def _scenelook_input_signature_server(scene, episode="Ep1"):
     import hashlib
     loc_path = ACTIVE_SHOW.canon_paths["locations"]
     style_path = ACTIVE_SHOW.resolve(ACTIVE_SHOW.profile.laws["style"], "laws.style")
-    locs = json.loads(loc_path.read_text()) if loc_path.exists() else {}
+    locs = json.loads(loc_path.read_text(encoding="utf-8")) if loc_path.exists() else {}
     entry = (locs.get(episode) or {}).get(str(scene)) or {}
-    style = style_path.read_text().strip() if style_path.exists() else ""
+    style = style_path.read_text(encoding="utf-8").strip() if style_path.exists() else ""
     parts = [style] if style else []
     for key in ("look", "lighting", "weather", "colorTemperature", "definingFeature"):
         v = (entry.get(key) or "").strip()
@@ -1882,7 +1882,7 @@ def _scenelook_load_rec_server(scene, episode="Ep1"):
     sc_path = _scenelook_path(scene, episode)
     if not sc_path.exists():
         return {"approved": None, "candidate": None, "history": []}
-    rec = json.loads(sc_path.read_text())
+    rec = json.loads(sc_path.read_text(encoding="utf-8"))
     if "approved" in rec or "candidate" in rec:
         return rec
     approved = None
@@ -1938,7 +1938,7 @@ def _load_director_package(scene, episode="Ep1"):
     path = _shot_pkg_path(scene, episode)
     if not path.exists():
         raise FileNotFoundError(f"no production package for {episode} scene {scene}")
-    return json.loads(path.read_text()), path
+    return json.loads(path.read_text(encoding="utf-8")), path
 
 
 def _director_session(scene, episode="Ep1", requested_shot_id=None):
@@ -2560,7 +2560,7 @@ def _project_registry():
     try:
         pf = DATA / "projects.json"
         if pf.exists():
-            d = json.loads(pf.read_text())
+            d = json.loads(pf.read_text(encoding="utf-8"))
             for p in (d.get("projects", []) if isinstance(d, dict) else []):
                 if p.get("id"):
                     presentation[p["id"]] = p
@@ -2977,14 +2977,14 @@ class H(http.server.SimpleHTTPRequestHandler):
             mf = ASSETS / "locations" / "_manifest.json"
             try:
                 if mf.exists():
-                    manifest = json.loads(mf.read_text())
+                    manifest = json.loads(mf.read_text(encoding="utf-8"))
             except Exception:
                 manifest = {}
             reuse = {}
             lf = CANON_CONFIG / "locations.json"
             try:
                 if lf.exists():
-                    locs = json.loads(lf.read_text())
+                    locs = json.loads(lf.read_text(encoding="utf-8"))
                     block = locs.get("Ep1", {}) if isinstance(locs, dict) else {}
                     scene_loc = {}
                     if isinstance(block, dict):
@@ -3008,7 +3008,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             # EVERY episode scene + its scene-shot plate (so the studio shows all scenes, not just approved ones)
             scenes = []
             try:
-                locs2 = json.loads(lf.read_text()) if lf.exists() else {}
+                locs2 = json.loads(lf.read_text(encoding="utf-8")) if lf.exists() else {}
                 block2 = locs2.get("Ep1", {}) if isinstance(locs2, dict) else {}
                 if isinstance(block2, dict):
                     for scn, sc in sorted(block2.items(), key=lambda kv: int(kv[0]) if str(kv[0]).isdigit() else 999):
@@ -3051,7 +3051,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             houses = []
             try:
                 cf = CANON_CONFIG / "characters.json"
-                cfg = json.loads(cf.read_text()) if cf.exists() else {}
+                cfg = json.loads(cf.read_text(encoding="utf-8")) if cf.exists() else {}
                 for char, v in cfg.items():
                     if not isinstance(v, dict):
                         continue
@@ -3074,12 +3074,12 @@ class H(http.server.SimpleHTTPRequestHandler):
                     cfgbase = p.get("configBase") or ("projects/" + pid)
                     epfile = p.get("episodesFile") or ("projects/" + pid + "/episodes.json")
                     try:
-                        epf = ROOT / epfile; ed = json.loads(epf.read_text()) if epf.exists() else []
+                        epf = ROOT / epfile; ed = json.loads(epf.read_text(encoding="utf-8")) if epf.exists() else []
                         p["episodeCount"] = len(ed) if isinstance(ed, list) else len(ed.get("episodes", []))
                     except Exception:
                         p["episodeCount"] = 0
                     try:
-                        cf = ROOT / cfgbase / "characters.json"; cd = json.loads(cf.read_text()) if cf.exists() else {}
+                        cf = ROOT / cfgbase / "characters.json"; cd = json.loads(cf.read_text(encoding="utf-8")) if cf.exists() else {}
                         p["characterCount"] = len([k for k, v in cd.items()
                                                    if isinstance(v, dict) and not str(k).startswith("_")
                                                    and k != "sizeClasses"])
@@ -3311,7 +3311,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             try:
                 manifest = _CBR.shot_reference_manifest(scene, sid, ep)
                 try:
-                    pkg = json.loads(_shot_pkg_path(scene, ep).read_text())
+                    pkg = json.loads(_shot_pkg_path(scene, ep).read_text(encoding="utf-8"))
                     shot = next((item for item in (pkg.get("shots") or [])
                                  if item.get("shotId") == sid), {})
                 except Exception:
@@ -3436,7 +3436,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(404, {"error": f"no production package for {ep} scene {scene} "
                                                  f"({p.name}) — approve the storyboard to hand it to production"})
             try:
-                pkg = json.loads(p.read_text())
+                pkg = json.loads(p.read_text(encoding="utf-8"))
             except Exception as e:
                 return self._json(400, {"error": f"package unreadable: {e}"})
             try:
@@ -3525,7 +3525,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             if not p.exists():
                 return self._json(200, {"shots": {}})
             try:
-                pkg = json.loads(p.read_text())
+                pkg = json.loads(p.read_text(encoding="utf-8"))
             except Exception as e:
                 return self._json(400, {"error": f"package unreadable: {e}"})
             if str(CBGEN) not in sys.path:
@@ -3932,8 +3932,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 # update the "title" field of any package + rename its file to match
                 for pk in list(OUT.glob(f"Ep{num}_*_beat_package.json")) + list(OUT.glob(f"Ep{num}_*_shot_package.json")):
                     try:
-                        pd = json.loads(pk.read_text()); pd["title"] = title
-                        pk.write_text(json.dumps(pd, indent=1, ensure_ascii=False))
+                        pd = json.loads(pk.read_text(encoding="utf-8")); pd["title"] = title
+                        pk.write_text(json.dumps(pd, indent=1, ensure_ascii=False), encoding="utf-8")
                         kind = "_beat_package.json" if pk.name.endswith("_beat_package.json") else "_shot_package.json"
                         newpk = OUT / f"Ep{num}_{newslug}{kind}"
                         if pk.name != newpk.name and not newpk.exists():
@@ -3986,7 +3986,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 pf = ROOT / OUTPUT_REL / pkg
                 if not pf.exists():
                     raise ValueError("package not found: " + pkg)
-                data = json.loads(pf.read_text())
+                data = json.loads(pf.read_text(encoding="utf-8"))
                 beats = data.get("beats") or data.get("shots") or []
                 target = next((b for b in beats if str(b.get("beatCode") or b.get("shotCode")) == code), None)
                 if target is None:
@@ -4006,10 +4006,10 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if isinstance(d.get("cuts"), list):
                     target["cuts"] = d["cuts"]
                 try:
-                    (ROOT / OUTPUT_REL / (pkg + ".bak")).write_text(pf.read_text())  # one-step undo backup
+                    (ROOT / OUTPUT_REL / (pkg + ".bak")).write_text(pf.read_text(encoding="utf-8"), encoding="utf-8")  # one-step undo backup
                 except Exception:
                     pass
-                pf.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+                pf.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
                 self._json(200, {"ok": True, "beatCode": code})
             except Exception as e:
                 self._json(400, {"error": str(e)})
@@ -4030,7 +4030,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 pf = ROOT / OUTPUT_REL / pkg
                 if not pf.exists():
                     raise ValueError("package not found: " + pkg)
-                data = json.loads(pf.read_text())
+                data = json.loads(pf.read_text(encoding="utf-8"))
                 scenes = data.get("scenes") or []
                 target = next((s for s in scenes if str(s.get("sceneNumber")) == sn), None)
                 if target is None:
@@ -4044,10 +4044,10 @@ class H(http.server.SimpleHTTPRequestHandler):
                     elif v is not None:
                         target[k] = v
                 try:
-                    (ROOT / OUTPUT_REL / (pkg + ".bak")).write_text(pf.read_text())  # one-step undo backup
+                    (ROOT / OUTPUT_REL / (pkg + ".bak")).write_text(pf.read_text(encoding="utf-8"), encoding="utf-8")  # one-step undo backup
                 except Exception:
                     pass
-                pf.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+                pf.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
                 self._json(200, {"ok": True, "sceneNumber": sn})
             except Exception as e:
                 self._json(400, {"error": str(e)})
@@ -4161,11 +4161,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                                      + "\n\n## Notes from the wizard\n\n" + show_bible + "\n",
                                      encoding="utf-8")
                 pf = ROOT / "cb-studio" / "data" / "projects.json"
-                pdata = json.loads(pf.read_text()) if pf.exists() else {"projects": []}
+                pdata = json.loads(pf.read_text(encoding="utf-8")) if pf.exists() else {"projects": []}
                 if not isinstance(pdata, dict):
                     pdata = {"projects": []}
                 pdata.setdefault("projects", []).append(meta)
-                pf.write_text(json.dumps(pdata, indent=2, ensure_ascii=False))
+                pf.write_text(json.dumps(pdata, indent=2, ensure_ascii=False), encoding="utf-8")
                 entry = next((item for item in _project_registry() if item.get("id") == pid), meta)
                 self._json(200, {"ok": True, "id": pid, "project": entry,
                                  "written": created["written"]})
@@ -4201,7 +4201,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if not name:
                     raise ValueError("name required")
                 cpath = CANON_CONFIG / "characters.json"
-                C = json.loads(cpath.read_text())
+                C = json.loads(cpath.read_text(encoding="utf-8"))
                 entry = C.get(name) if isinstance(C.get(name), dict) else {}
                 if d.get("anchorData"):
                     raw = d["anchorData"]
@@ -4263,7 +4263,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if str(d.get("sizeRank", "")).strip().isdigit():
                     entry["sizeRank"] = int(d["sizeRank"])
                 C[name] = entry
-                cpath.write_text(json.dumps(C, indent=2, ensure_ascii=False))
+                cpath.write_text(json.dumps(C, indent=2, ensure_ascii=False), encoding="utf-8")
                 sync = subprocess.run(
                     [sys.executable, str(ROOT / "tools" / "sync_canon.py")],
                     cwd=str(ROOT), capture_output=True, text=True, timeout=30,

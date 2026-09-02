@@ -24,7 +24,7 @@ No music.
         outcome="rejected", diagnosis="moustache did not read",
         category="action-timing", bank_path=bank)
 
-    rows = [json.loads(line) for line in bank.read_text().splitlines()]
+    rows = [json.loads(line) for line in bank.read_text(encoding="utf-8").splitlines()]
     assert [row["schemaVersion"] for row in rows] == [1, 1]
     assert approved["parsed"]["sectionOrder"] == [
         "References", "Reference", "Shot Sequence", "Shot", "Audio"]

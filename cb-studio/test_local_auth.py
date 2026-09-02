@@ -73,7 +73,7 @@ def test_canonical_engine_module_reloads_changed_source(monkeypatch, tmp_path):
     module = _load_server_module("cb_studio_live_module_test")
     module_name = "studio_live_engine_fixture"
     source = tmp_path / f"{module_name}.py"
-    source.write_text("VALUE = 'first'\n")
+    source.write_text("VALUE = 'first'\n", encoding="utf-8")
     monkeypatch.setattr(module, "CBGEN", tmp_path)
     sys.modules.pop(module_name, None)
     try:
@@ -81,7 +81,7 @@ def test_canonical_engine_module_reloads_changed_source(monkeypatch, tmp_path):
         assert first.VALUE == "first"
 
         time.sleep(0.01)
-        source.write_text("VALUE = 'second-version'\n")
+        source.write_text("VALUE = 'second-version'\n", encoding="utf-8")
         second = module._canonical_engine_module(module_name)
 
         assert second is first
@@ -186,7 +186,7 @@ def test_episode_retry_skips_completed_scene_direction_packages(monkeypatch, tmp
     monkeypatch.setattr(module, "ROOT", tmp_path)
     complete = tmp_path / f"{P.OUTPUT_REL}/creative/Ep2_scene2_storyboard.json"
     complete.parent.mkdir(parents=True)
-    complete.write_text("{}")
+    complete.write_text("{}", encoding="utf-8")
     monkeypatch.setattr(cb_intake, "scene_roster", lambda episode: {
         "scenes": [{"sceneNumber": number} for number in range(1, 4)]})
     calls = []
@@ -206,7 +206,7 @@ def test_episode_retry_rebuilds_and_archives_storyboard_from_stale_script(monkey
     stale.parent.mkdir(parents=True)
     stale.write_text(json.dumps({
         "sourceScript": {"scriptVersionId": "sha256:old"},
-    }))
+    }), encoding="utf-8")
     monkeypatch.setattr(module.cb_scripts, "ScriptStore", lambda *_args, **_kwargs: type(
         "Store", (), {"current": lambda self, *_args, **_kwargs: {
             "scriptVersionId": "sha256:new1234567890",
@@ -223,7 +223,7 @@ def test_episode_retry_rebuilds_and_archives_storyboard_from_stale_script(monkey
     archived = (stale.parent / "archive/script-new123456789" /
                 "Ep2_scene1_storyboard.json")
     assert archived.exists()
-    assert json.loads(archived.read_text())["sourceScript"]["scriptVersionId"] == "sha256:old"
+    assert json.loads(archived.read_text(encoding="utf-8"))["sourceScript"]["scriptVersionId"] == "sha256:old"
 
 
 def test_uncached_director_builds_are_serialized_across_different_shots(monkeypatch):
@@ -276,7 +276,7 @@ def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatc
         "approvalState": "generated-pending-human-review",
         "humanNote": "",
         "inputSignature": signature,
-    }))
+    }), encoding="utf-8")
     original_storyboard_sha = cb_lineage.sha256_file(storyboard_path)
     package_inputs = {
         "scriptVersionId": "sha256:" + "a" * 64,
@@ -300,7 +300,7 @@ def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatc
             "production-package", package_inputs),
         "validation": {"passed": True},
         "shots": [{"shotId": "3.B1.S1"}, {"shotId": "3.B2.S1"}],
-    }))
+    }), encoding="utf-8")
 
     result = module._storyboard_approval({
         "episode": "Ep1",
@@ -313,8 +313,8 @@ def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatc
 
     assert result["ok"] is True
     assert result["handover"]["reset"] == ["3.B1.S1", "3.B2.S1"]
-    assert json.loads(storyboard_path.read_text())["approvalState"] == "approved"
-    written = json.loads(package_path.read_text())
+    assert json.loads(storyboard_path.read_text(encoding="utf-8"))["approvalState"] == "approved"
+    written = json.loads(package_path.read_text(encoding="utf-8"))
     approved_storyboard_bytes = storyboard_path.read_bytes()
     approved_storyboard_sha = cb_lineage.sha256_file(storyboard_path)
     assert written["sourceStoryboard"]["approvalState"] == "approved"
@@ -327,14 +327,14 @@ def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatc
         "production-package",
         {**package_inputs, "storyboardSha256": approved_storyboard_sha},
     )
-    approved_record = json.loads(storyboard_path.read_text())
+    approved_record = json.loads(storyboard_path.read_text(encoding="utf-8"))
     approval_log = list(approved_record.get("approvalLog") or [])
 
     repaired = module._ensure_storyboard_handover({"episode": "Ep1", "scene": "3"})
 
     assert repaired["ok"] is True
     assert repaired["approvalPreserved"] is True
-    assert json.loads(storyboard_path.read_text()).get("approvalLog") == approval_log
+    assert json.loads(storyboard_path.read_text(encoding="utf-8")).get("approvalLog") == approval_log
 
 
 def test_approved_scene_handover_preserves_exact_unchanged_shots(monkeypatch, tmp_path):
@@ -363,9 +363,9 @@ def test_approved_scene_handover_preserves_exact_unchanged_shots(monkeypatch, tm
         "approvalLog": [{"state": "approved", "by": "Julian"}],
         "inputSignature": storyboard_signature,
         "shots": shots,
-    }))
+    }), encoding="utf-8")
     card_hashes = module._storyboard_creative_card_hashes(
-        json.loads(storyboard_path.read_text()))
+        json.loads(storyboard_path.read_text(encoding="utf-8")))
     old_storyboard_sha = "1" * 64
     package_inputs = {
         "scriptVersionId": "sha256:" + "a" * 64,
@@ -389,14 +389,14 @@ def test_approved_scene_handover_preserves_exact_unchanged_shots(monkeypatch, tm
         "validation": {"passed": True},
         "shots": [{"shotId": shot["shotId"]} for shot in shots],
         "continuityLedger": [{"shotId": "S3.SH1", "keyframeApproval": {"state": "approved"}}],
-    }))
+    }), encoding="utf-8")
 
     result = module._ensure_storyboard_handover({"episode": "Ep1", "scene": "3"})
 
     assert result["approvalPreserved"] is True
     assert result["handover"]["carriedForward"] == ["S3.SH1", "S3.SH2"]
     assert result["handover"]["reset"] == []
-    written = json.loads(package_path.read_text())
+    written = json.loads(package_path.read_text(encoding="utf-8"))
     assert written["continuityLedger"] == [
         {"shotId": "S3.SH1", "keyframeApproval": {"state": "approved"}}]
     assert written["handover"]["resetChangedShots"] == []
@@ -416,7 +416,7 @@ def test_approved_scene_handover_rebuilds_when_one_shot_changed(monkeypatch, tmp
         "approvalState": "approved",
         "inputSignature": {"digest": "same-direction"},
         "shots": [{"shotId": "S3.SH1", "purpose": "changed"}],
-    }))
+    }), encoding="utf-8")
     package_path = module.OUT / "Ep1_scene3_production_package.json"
     package_path.write_text(json.dumps({
         "revision": 1,
@@ -426,7 +426,7 @@ def test_approved_scene_handover_rebuilds_when_one_shot_changed(monkeypatch, tmp
             "creativeCardHashes": {"S3.SH1": "old-card-hash"},
         },
         "shots": [{"shotId": "S3.SH1"}],
-    }))
+    }), encoding="utf-8")
     monkeypatch.setattr(
         module, "_promote_approved_storyboard",
         lambda path, ep, sc, package: {"revision": 2, "reset": ["S3.SH1"]})
@@ -434,7 +434,7 @@ def test_approved_scene_handover_rebuilds_when_one_shot_changed(monkeypatch, tmp
     result = module._ensure_storyboard_handover({"episode": "Ep1", "scene": "3"})
 
     assert result["handover"]["reset"] == ["S3.SH1"]
-    assert json.loads(package_path.read_text())["revision"] == 1
+    assert json.loads(package_path.read_text(encoding="utf-8"))["revision"] == 1
 
 
 def test_launch_token_establishes_http_only_session_and_cleans_url(studio):
@@ -640,7 +640,7 @@ def test_explicit_https_origin_supports_secure_remote_access(monkeypatch):
 
 
 def test_frontend_uses_its_authenticated_origin_and_no_remote_script():
-    html = (HERE / "app.html").read_text()
+    html = (HERE / "app.html").read_text(encoding="utf-8")
     assert "const BASE=window.location.origin" in html
     assert "cdnjs.cloudflare.com" not in html
     assert '<script src="http' not in html

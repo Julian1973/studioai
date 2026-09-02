@@ -485,8 +485,8 @@ def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_pa
     assert manifest["qc"]["humanCreativeApprovalRequired"] is True
     assert manifest["deliveryProfile"]["programAudioSampleRateHz"] == 48000
     assert manifest["captionWindows"][0]["dialogueOccurrenceId"] == "occ:first"
-    assert (final_dir / "captions.srt").read_text().count("Again.") == 1
-    assert json.loads((final_dir / "post_manifest.json").read_text()) == manifest
+    assert (final_dir / "captions.srt").read_text(encoding="utf-8").count("Again.") == 1
+    assert json.loads((final_dir / "post_manifest.json").read_text(encoding="utf-8")) == manifest
     for asset in manifest["outputs"].values():
         assert pathlib.Path(asset["path"]).exists()
         assert asset["sha256"] == cb_post._sha256(asset["path"])

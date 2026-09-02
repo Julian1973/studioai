@@ -37,7 +37,7 @@ MEDIA.mkdir(exist_ok=True)
 def _load_env():
     env = HERE / ".env"
     if env.exists():
-        for line in env.read_text().splitlines():
+        for line in env.read_text(encoding="utf-8").splitlines():
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:
                 k, v = line.split("=", 1)
@@ -190,7 +190,7 @@ def _byteplus_asset_url(value, kind):
         sidecar = pathlib.Path(str(path) + ".gen.json")
         if sidecar.is_file():
             try:
-                meta = json.loads(sidecar.read_text())
+                meta = json.loads(sidecar.read_text(encoding="utf-8"))
             except Exception:
                 meta = {}
             hosted_url = str(meta.get("hostedUrl") or "").strip()

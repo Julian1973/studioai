@@ -24,7 +24,7 @@ def test_workspace_projects_only_browser_served_media_and_hash_bound_verdict(tmp
         "durationSec": 12.5,
         "outputs": {"master": str(master), "pictureOriginal": str(original), "musicStem": str(stem)},
         "finalQc": {"passed": True, "pictureLocked": True},
-    }))
+    }), encoding="utf-8")
     monkeypatch.setattr(post, "MEDIA_ROOT", media)
     monkeypatch.setattr(post, "POST_ROOT", media / "post95")
     monkeypatch.setattr(post, "STATE_ROOT", state)
@@ -38,7 +38,7 @@ def test_workspace_projects_only_browser_served_media_and_hash_bound_verdict(tmp
     approved = post.record_verdict("Ep1", "approved")
     assert approved["verdict"]["reviewer"] == "Julian"
     assert approved["verdict"]["stage"] == "assembly-review-human-signoff-required"
-    history = (state / "Ep1_post_review_history.jsonl").read_text().splitlines()
+    history = (state / "Ep1_post_review_history.jsonl").read_text(encoding="utf-8").splitlines()
     assert len(history) == 1
     assert json.loads(history[0])["masterSha256"] == _hash(master)
     master.write_bytes(b"changed")
@@ -58,7 +58,7 @@ def test_rejection_requires_a_note(tmp_path, monkeypatch):
     master.write_bytes(b"master")
     (folder / "review_manifest.json").write_text(json.dumps({
         "masterSha256": _hash(master), "outputs": {"master": str(master)}
-    }))
+    }), encoding="utf-8")
     monkeypatch.setattr(post, "MEDIA_ROOT", media)
     monkeypatch.setattr(post, "POST_ROOT", media / "post95")
     monkeypatch.setattr(post, "STATE_ROOT", tmp_path / "state")

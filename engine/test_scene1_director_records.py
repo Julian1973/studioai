@@ -27,11 +27,11 @@ def _shot_block(prompt, number):
 
 
 def test_scene1_director_records_recompile_deterministically_and_pass():
-    package = json.loads(PACKAGE.read_text())
+    package = json.loads(PACKAGE.read_text(encoding="utf-8"))
     shots = {item["shotId"]: item for item in package["shots"]}
     for shot_id, archetype in CASES.items():
         direction = cb_departments.AnimationDirection.model_validate(
-            json.loads((RECORDS / f"{shot_id}.json").read_text()))
+            json.loads((RECORDS / f"{shot_id}.json").read_text(encoding="utf-8")))
         creative_shot = cb_render._shot_creative_contract_view(
             package, shots[shot_id], 1, "Ep1")
         compiled = cb_departments.compile_animation_provider_prompt(
@@ -54,14 +54,14 @@ def test_scene1_director_records_recompile_deterministically_and_pass():
 
 def test_s1s4_corrected_emission_fixture_and_regressions():
     direction = cb_departments.AnimationDirection.model_validate(
-        json.loads((RECORDS / "S1.SH2.json").read_text()))
-    package = json.loads(PACKAGE.read_text())
+        json.loads((RECORDS / "S1.SH2.json").read_text(encoding="utf-8")))
+    package = json.loads(PACKAGE.read_text(encoding="utf-8"))
     shot = next(item for item in package["shots"] if item["shotId"] == "S1.SH2")
     prompt = cb_departments.compile_animation_provider_prompt(
         cb_render._shot_creative_contract_view(package, shot, 1, "Ep1"), direction)
     golden = (ROOT / "engine" / "grammar" / "golden-fixtures" /
-              "scene1-v1" / "beat_4_storm.txt").read_text().rstrip("\n")
-    target = (RECORDS / "S1.SH2_user_prompt_target_20260811.txt").read_text().rstrip("\n")
+              "scene1-v1" / "beat_4_storm.txt").read_text(encoding="utf-8").rstrip("\n")
+    target = (RECORDS / "S1.SH2_user_prompt_target_20260811.txt").read_text(encoding="utf-8").rstrip("\n")
 
     assert golden == target
     assert "A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses" not in prompt

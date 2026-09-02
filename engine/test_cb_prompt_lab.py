@@ -527,8 +527,8 @@ def test_prompt_lab_status_uses_the_sealed_animation_prompt_without_provider_cal
 
 def test_studio_exposes_prompt_lab_without_replacing_approval_controls():
     root = pathlib.Path(__file__).resolve().parents[1]
-    server = (root / "cb-studio" / "serve.py").read_text()
-    app = (root / "cb-studio" / "app.html").read_text()
+    server = (root / "cb-studio" / "serve.py").read_text(encoding="utf-8")
+    app = (root / "cb-studio" / "app.html").read_text(encoding="utf-8")
 
     assert 'urlsplit(self.path).path == "/api/prompt-lab"' in server
     assert 'self.path == "/api/prompt-lab-rate"' in server

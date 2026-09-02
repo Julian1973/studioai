@@ -43,15 +43,15 @@ def test_scaffold_creates_a_valid_project_with_its_cast(scratch):
     assert prof.profile.engineAdapter is None                    # T55: no adapter
     report = project_profile.capability_report(prof)
     assert report["productionReady"] is True and report["missingRequiredContent"] == []
-    chars = json.loads((out["root"] / "canon" / "characters.json").read_text())
+    chars = json.loads((out["root"] / "canon" / "characters.json").read_text(encoding="utf-8"))
     assert chars["Crumple"]["species"] == "box monster" and chars["Tape"]["sizeRank"] == 2
-    vocab = json.loads((out["root"] / "laws" / "cast_vocabulary.json").read_text())
+    vocab = json.loads((out["root"] / "laws" / "cast_vocabulary.json").read_text(encoding="utf-8"))
     assert vocab["names"] == ["Crumple", "Tape"] and vocab["species"] == {"Crumple": "box monster"}
-    roster = json.loads((out["root"] / "creative" / "design_roster.json").read_text())
+    roster = json.loads((out["root"] / "creative" / "design_roster.json").read_text(encoding="utf-8"))
     assert [c["name"] for c in roster["characters"]] == ["Crumple", "Tape"]
-    style = (out["root"] / "laws" / "style.txt").read_text()
+    style = (out["root"] / "laws" / "style.txt").read_text(encoding="utf-8")
     assert style.startswith("Stylized 3D CGI, Kids 4-8:") and "{{" not in style
-    bible = (out["root"] / "SHOW_BIBLE.md").read_text()
+    bible = (out["root"] / "SHOW_BIBLE.md").read_text(encoding="utf-8")
     assert "Monsters who live in boxes" in bible and "{{" not in bible
     # the project is registered by its own profile — the engine lists it
     assert "box-monsters" in project_profile.list_project_ids(scratch)

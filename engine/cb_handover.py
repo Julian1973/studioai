@@ -119,7 +119,7 @@ def _require_storyboard_lineage(sb, episode):
     beat_path = ROOT / str(beat_source.get("path") or "")
     if not beat_path.is_file():
         raise HandoverRefused("REFUSED — storyboard's signed source beat package is missing")
-    beat_pkg = json.loads(beat_path.read_text())
+    beat_pkg = json.loads(beat_path.read_text(encoding="utf-8"))
     expected_beat = cb_lineage.beat_package_signature(beat_pkg)
     if beat_record != expected_beat or beat_pkg.get("contentSignature") != expected_beat:
         raise HandoverRefused("REFUSED — storyboard's source beat package changed after direction")

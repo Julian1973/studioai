@@ -92,12 +92,12 @@ def test_default_project_comes_from_the_registry(tmp_path, monkeypatch):
     (tmp_path / "projects").mkdir()
     with pytest.raises(project_profile.ShowProfileError, match="no projects"):
         project_profile.default_project_id(tmp_path)
-    a = tmp_path / "projects" / "aaa"; a.mkdir(); (a / "profile.json").write_text('{"showId":"aaa"}')
+    a = tmp_path / "projects" / "aaa"; a.mkdir(); (a / "profile.json").write_text('{"showId":"aaa"}', encoding="utf-8")
     assert project_profile.default_project_id(tmp_path) == "aaa"          # the only project
-    b = tmp_path / "projects" / "bbb"; b.mkdir(); (b / "profile.json").write_text('{"showId":"bbb"}')
+    b = tmp_path / "projects" / "bbb"; b.mkdir(); (b / "profile.json").write_text('{"showId":"bbb"}', encoding="utf-8")
     with pytest.raises(project_profile.ShowProfileError, match="none declares"):
         project_profile.default_project_id(tmp_path)                          # two, no default
-    (b / "profile.json").write_text('{"showId":"bbb","default":true}')
+    (b / "profile.json").write_text('{"showId":"bbb","default":true}', encoding="utf-8")
     assert project_profile.default_project_id(tmp_path) == "bbb"          # the declared default
     monkeypatch.setenv("STUDIO_PROJECT", "aaa")
     assert project_profile.default_project_id(tmp_path) == "aaa"          # env wins

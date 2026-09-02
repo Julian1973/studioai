@@ -862,7 +862,7 @@ def _script_package(episode, cast_scope=None, validate_canon=True):
     if not cands:
         raise RuntimeError(f"no approved script/beat package for {episode} in {P.rel(P.OUTPUT)}/")
     path = cands[-1]
-    pkg = json.loads(path.read_text())
+    pkg = json.loads(path.read_text(encoding="utf-8"))
     try:
         current = SCRIPT_STORE.current(episode, required=True)
     except cb_scripts.ScriptStoreError as exc:
@@ -910,7 +910,7 @@ def load_canon_envelope(episode="Ep1", cast_scope=None, log=print):
         else:
             env["gaps"].append(f"{key}: {path.name} not present (optional context)")
     spath = _script_package(episode, cast_scope=cast_scope)
-    pkg = json.loads(spath.read_text())
+    pkg = json.loads(spath.read_text(encoding="utf-8"))
     cast = sorted(cast_scope) if cast_scope is not None else sorted({
         name for beat in pkg.get("beats") or []
         for name in beat.get("characters") or [] if name})
@@ -940,7 +940,7 @@ def load_canon_envelope(episode="Ep1", cast_scope=None, log=print):
 
 def _canon_text(key, limit=9000):
     p = _CANON_SOURCES.get(key)
-    return p.read_text()[:limit] if p and p.exists() else ""
+    return p.read_text(encoding="utf-8")[:limit] if p and p.exists() else ""
 
 
 def _canonical_exemplars(limit=6):

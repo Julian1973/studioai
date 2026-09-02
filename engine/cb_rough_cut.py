@@ -57,7 +57,7 @@ def _read_draft(episode, out=None):
     if not path.exists():
         return {"schemaVersion": 2, "episode": episode, "updatedAt": None,
                 "sequence": [], "sceneCuts": {}}
-    data = json.loads(path.read_text())
+    data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("episode") != episode or not isinstance(data.get("sequence"), list):
         raise ValueError("rough-cut draft is malformed")
     if not isinstance(data.get("sceneCuts", {}), dict):
@@ -89,7 +89,7 @@ def _approved_shots(episode, out=None):
     approved = {}
     for path in _output_root(out).glob(f"{episode}_scene*_production_package.json"):
         try:
-            package = json.loads(path.read_text())
+            package = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
         if str(package.get("episode") or episode) != episode:
@@ -120,7 +120,7 @@ def _scene_shot_ids(episode, scene, out=None):
     retired = {"superseded", "archived", "inactive"}
     for path in _output_root(out).glob(f"{episode}_scene*_production_package.json"):
         try:
-            package = json.loads(path.read_text())
+            package = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
         if (str(package.get("episode") or episode) != episode or

@@ -1519,7 +1519,7 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
                 "shotIds": [s["shotId"] for s in shots_out],
             },
         )
-        storyboard_path.write_text(json.dumps(storyboard, indent=1, ensure_ascii=False))
+        storyboard_path.write_text(json.dumps(storyboard, indent=1, ensure_ascii=False), encoding="utf-8")
     source_storyboard = _source_storyboard_record(storyboard_path)
     production_inputs = {
         "scriptVersionId": source_script["scriptVersionId"],
@@ -1591,7 +1591,7 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
             md.append(f"**Keyframe prompt:**\n```\n{s['keyframePrompt']}\n```")
         md.append("")
     out_md = HERE.parent / P.OUTPUT_REL / f"{episode}_scene{scene_num}_production_package.md"
-    out_md.write_text("\n".join(md))
+    out_md.write_text("\n".join(md), encoding="utf-8")
     log(f"ENGINE — wrote {out_json.name} + {out_md.name}: {len(design.shots)} shots, "
         f"~{round(total_sec)}s, validation "
         f"{'PASSED' if report['passed'] else 'FAILED'}", flush=True)
@@ -1605,7 +1605,7 @@ def repair_package(scene_num, episode="Ep1", log=print):
     full repair log, refreshes every stored seedancePrompt (the fire path ships the STORED
     prompt), revalidates deterministically and bumps the package revision. Zero media spend."""
     pkg_file = canonical_package_path(scene_num, episode)
-    pkg = json.loads(pkg_file.read_text())
+    pkg = json.loads(pkg_file.read_text(encoding="utf-8"))
     d, _ = _load_pkg(episode)
     beats = _scene_beats(d, scene_num)
     try:
@@ -1650,7 +1650,7 @@ def repair_package(scene_num, episode="Ep1", log=print):
                           "issues": final["issues"], "validatedAt": "2026-07-16",
                           "revision": int(pkg.get("revision", 1)) + 1}
     pkg["revision"] = int(pkg.get("revision", 1)) + 1
-    pkg_file.write_text(json.dumps(pkg, indent=1, ensure_ascii=False))
+    pkg_file.write_text(json.dumps(pkg, indent=1, ensure_ascii=False), encoding="utf-8")
     log(f"REPAIR — {len([e for e in repair_log if 'PASSED' in e['validationResult']])} field(s) "
         f"repaired, {len(escalations)} escalated; validation passed={final['passed']}; "
         f"revision {pkg['revision']}", flush=True)

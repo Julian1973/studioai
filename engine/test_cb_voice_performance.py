@@ -57,7 +57,7 @@ def test_voice_status_uses_compiled_track_instead_of_stale_working_prompt(monkey
     take = tmp_path / "take.wav"
     take.write_bytes(b"audio")
     placement = tmp_path / "take.wav.timing.json"
-    placement.write_text('{"placements":[{"dialogueIndex":0}]}')
+    placement.write_text('{"placements":[{"dialogueIndex":0}]}', encoding="utf-8")
     compiled = [{
         "dialogueOccurrenceId": occurrence,
         "sourceEventId": "script-event:test",
@@ -113,7 +113,7 @@ def test_voice_status_exposes_local_tempo_recovery(monkeypatch, tmp_path):
         "performanceTargetEndSec": 29.9,
         "providerCalledForTimingRecovery": False,
         "placements": [],
-    }))
+    }), encoding="utf-8")
     package = {
         "shots": [{"shotId": "S4.SH1", "durationSec": 30, "dialogueLines": []}],
         "continuityLedger": [{

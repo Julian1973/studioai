@@ -16,7 +16,7 @@ def _package(root, take):
             "approvedTake": str(take),
         }],
     }
-    (root / "Ep1_scene1_production_package.json").write_text(json.dumps(package))
+    (root / "Ep1_scene1_production_package.json").write_text(json.dumps(package), encoding="utf-8")
 
 
 def test_rough_cut_add_is_persistent_and_hash_pinned(tmp_path, monkeypatch):
@@ -70,7 +70,7 @@ def test_scene_cut_auto_populates_and_saves_reorder_and_trim(tmp_path, monkeypat
             {"shotId": "S1.SH2", "status": "approved", "approvedTake": str(second)},
         ],
     }
-    (tmp_path / "Ep1_scene1_production_package.json").write_text(json.dumps(package))
+    (tmp_path / "Ep1_scene1_production_package.json").write_text(json.dumps(package), encoding="utf-8")
 
     seeded = rough.scene_status("Ep1", "1")
     assert [entry["shotId"] for entry in seeded["sequence"]] == ["S1.SH1", "S1.SH2"]
@@ -107,7 +107,7 @@ def test_scene_cut_refuses_a_trim_that_clips_approved_dialogue(tmp_path, monkeyp
             "shotId": "S1.SH1", "status": "approved", "approvedTake": str(take),
         }],
     }
-    (tmp_path / "Ep1_scene1_production_package.json").write_text(json.dumps(package))
+    (tmp_path / "Ep1_scene1_production_package.json").write_text(json.dumps(package), encoding="utf-8")
 
     with pytest.raises(ValueError, match="trim would cut line-1"):
         rough.save_scene_cut("Ep1", "1", [{
@@ -130,7 +130,7 @@ def test_scene_cut_opens_with_partial_approvals_but_cannot_lock(tmp_path, monkey
             {"shotId": "S1.SH2", "status": "ready"},
         ],
     }
-    (tmp_path / "Ep1_scene1_production_package.json").write_text(json.dumps(package))
+    (tmp_path / "Ep1_scene1_production_package.json").write_text(json.dumps(package), encoding="utf-8")
 
     state = rough.scene_status("Ep1", "1")
     assert state["approvedCount"] == 1

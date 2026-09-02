@@ -144,6 +144,21 @@ ROOT = HERE.parent
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 
 
+def _state_root():
+    """The repository root cb_db resolves its OUTPUT_REL against — resolved from HERE, like
+    every other cb_db call in this module (they all pass HERE.parent).
+
+    The reference-control writers used to pass MEDIA's third parent instead. That was the
+    repository root only while every project shared engine/media/shots. Since T58 a project owns
+    its own media (projects/<id>/episodes/media/shots), so those three parents land on the
+    PROJECT root, and cb_db then joins the project's own output path onto it a second time —
+    which is how projects/the-box-monsters/projects/the-box-monsters/episodes/output/state/
+    studio.sqlite3 appeared on 2026-09-02, a second state database no reader ever opens. The
+    files themselves were written to their real absolute paths; only the revision/digest
+    bookkeeping went to the stray database, so those writes had no conflict detection at all."""
+    return HERE.parent
+
+
 def _submit_seedance_provider(prompt, image_inputs, **kwargs):
     """The sole production gateway into Seedance for generation, extension and editing."""
     return cb_gen.generate_video_seedance_ref(prompt, image_inputs, **kwargs)
@@ -631,7 +646,7 @@ def _required_prop_reference_roles(shot, scene, episode):
     }
     try:
         continuity = json.loads(
-            pathlib.Path(P.CONTINUITY).read_text())
+            pathlib.Path(P.CONTINUITY).read_text(encoding="utf-8"))
     except (OSError, ValueError, TypeError):
         continuity = {}
     records = ((continuity.get(str(episode)) or {}).get(
@@ -721,7 +736,7 @@ def _episode_character_state(character, shot, scene, episode):
     # markers that reveal a state come from the project's continuity_rules.json (stateMarkers).
     text = _shot_continuity_text(shot or {})
     try:
-        continuity = json.loads(pathlib.Path(P.CONTINUITY).read_text())
+        continuity = json.loads(pathlib.Path(P.CONTINUITY).read_text(encoding="utf-8"))
     except (OSError, ValueError, TypeError):
         continuity = {}
     records = (((continuity.get(str(episode)) or {}).get("characterStates") or {})
@@ -992,7 +1007,7 @@ def _compile_scenelook_prompt(scene, episode="Ep1"):
     style_path = pathlib.Path(P.STYLE_LAW) if P.STYLE_LAW else pathlib.Path("/nonexistent")
     locs = json.load(open(loc_path)) if loc_path.exists() else {}
     entry = (locs.get(episode) or {}).get(str(scene)) or {}
-    style = style_path.read_text().strip() if style_path.exists() else ""
+    style = style_path.read_text(encoding="utf-8").strip() if style_path.exists() else ""
     parts = [style] if style else []
     for key in ("look", "lighting", "weather", "colorTemperature", "definingFeature"):
         v = (entry.get(key) or "").strip()
@@ -1352,7 +1367,7 @@ def _load_opening_composition_master(shot, scene, episode, characters_cfg):
         if not expected:
             return None
         core, _, _ = expected
-        record = json.loads(record_path.read_text())
+        record = json.loads(record_path.read_text(encoding="utf-8"))
         image_path = _resolved_reference_path(record.get("path"))
         if (record.get("contractHash") != core.get("contractHash") or
                 not image_path or not image_path.exists() or
@@ -1388,7 +1403,7 @@ def _ensure_opening_composition_master(pkg, shot, scene, episode, characters_cfg
         f"{episode}_S{scene}_{shot['shotId']}_composition_"
         f"{contract['contractHash'][:12]}.png")
     cb_db.atomic_write_bytes(
-        MEDIA.parent.parent.parent, image_path, image_bytes)
+        _state_root(), image_path, image_bytes)
     try:
         stored_path = _stored_rel(image_path)
     except ValueError:
@@ -1404,7 +1419,7 @@ def _ensure_opening_composition_master(pkg, shot, scene, episode, characters_cfg
         "providerCalled": False,
     }
     cb_db.atomic_write_json(
-        MEDIA.parent.parent.parent,
+        _state_root(),
         _composition_master_record_path(scene, shot["shotId"], episode),
         record)
     return {**record, "path": str(image_path.resolve())}
@@ -1607,7 +1622,7 @@ def _load_pose_library_record(pkg, shot, character):
     if not record_path.exists():
         return None
     try:
-        record = json.loads(record_path.read_text())
+        record = json.loads(record_path.read_text(encoding="utf-8"))
         asset = _resolved_reference_path(record.get("path"))
         review = record.get("machineReview") or {}
         if (record.get("contractHash") != key or
@@ -2135,7 +2150,7 @@ def _load_posed_integration_master(shot, scene, episode, characters_cfg):
         if not expected:
             return None
         core, _, _, _, _ = expected
-        record = json.loads(record_path.read_text())
+        record = json.loads(record_path.read_text(encoding="utf-8"))
         image_path = _resolved_reference_path(record.get("path"))
         if (record.get("contractHash") != core.get("contractHash") or
                 not image_path or not image_path.exists() or
@@ -2171,7 +2186,7 @@ def _ensure_posed_integration_master(pkg, shot, scene, episode, characters_cfg):
     image_path = controls / (
         f"{episode}_S{scene}_{shot['shotId']}_posed_integration_"
         f"{contract['contractHash'][:12]}.png")
-    cb_db.atomic_write_bytes(MEDIA.parent.parent.parent, image_path, image_bytes)
+    cb_db.atomic_write_bytes(_state_root(), image_path, image_bytes)
     try:
         stored_path = _stored_rel(image_path)
     except ValueError:
@@ -2189,7 +2204,7 @@ def _ensure_posed_integration_master(pkg, shot, scene, episode, characters_cfg):
         "technicalControl": False,
     }
     cb_db.atomic_write_json(
-        MEDIA.parent.parent.parent,
+        _state_root(),
         _posed_integration_record_path(scene, shot["shotId"], episode), record)
     return {**record, "path": str(image_path.resolve())}
 
@@ -2416,7 +2431,7 @@ def _write_character_scale_board(path, contract):
     encoded = io.BytesIO()
     image.save(encoded, format="PNG")
     cb_db.atomic_write_bytes(
-        MEDIA.parent.parent.parent, path, encoded.getvalue())
+        _state_root(), path, encoded.getvalue())
 
 
 def _load_character_scale_control(shot, scene, episode, characters_cfg):
@@ -2425,7 +2440,7 @@ def _load_character_scale_control(shot, scene, episode, characters_cfg):
     if not record_path.exists():
         return None
     try:
-        record = json.loads(record_path.read_text())
+        record = json.loads(record_path.read_text(encoding="utf-8"))
         expected = _character_scale_contract(
             shot, characters_cfg, same_depth=bool(record.get("sameDepth")))
         image_path = _resolved_reference_path(record.get("path"))
@@ -2467,7 +2482,7 @@ def _ensure_character_scale_control(shot, scene, episode, characters_cfg,
     }
     record_path = _scale_control_record_path(scene, shot["shotId"], episode)
     cb_db.atomic_write_json(
-        MEDIA.parent.parent.parent, record_path, record)
+        _state_root(), record_path, record)
     return {**record, "path": str(image_path.resolve())}
 
 
@@ -2708,7 +2723,7 @@ def _is_non_identity_image_role(role):
 def _reference_slot_policy():
     path = pathlib.Path(P.REFERENCE_SLOT_POLICY) if P.REFERENCE_SLOT_POLICY else ROOT / "nonexistent"
     try:
-        policy = json.loads(path.read_text())
+        policy = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError, TypeError):
         return {}
     return policy if isinstance(policy, dict) else {}
@@ -3157,7 +3172,7 @@ def _scene_context(pkg, scene, episode):
             "approvedStoryboardScene": sb.get("scene"),
             "selectedTreatment": sb.get("treatmentSelection"),
             "locationCanon": (locs.get(episode) or {}).get(str(scene)),
-            "styleLaw": style_path.read_text().strip() if style_path.exists() else ""}
+            "styleLaw": style_path.read_text(encoding="utf-8").strip() if style_path.exists() else ""}
 
 
 def _voice_director_lines(led):
@@ -5546,7 +5561,7 @@ def timing_slate_status(scene, episode="Ep1"):
                 "reason": "not built from a recorded input contract"}
     try:
         pkg, _ = load_pkg(scene, episode)
-        record = json.loads(sidecar.read_text())
+        record = json.loads(sidecar.read_text(encoding="utf-8"))
         signature = _timing_slate_input_signature(pkg)
         current = record.get("inputSignature") == signature
         review = pkg.get("timingSlateReview") or {}
@@ -5590,7 +5605,7 @@ def animatic_scene(scene, episode="Ep1", log=print):
         "generatedAt": _now(), "inputSignature": input_signature,
         "approvesOnly": ["dialogue accuracy", "voice assignment", "shot duration",
                          "scene length", "dialogue position"],
-    }, indent=1, ensure_ascii=False))
+    }, indent=1, ensure_ascii=False), encoding="utf-8")
     if int(pkg.get("creativeDirectingStandardVersion") or 0) >= 3:
         review = pkg.setdefault("timingSlateReview", {"candidate": None, "approved": None,
                                                        "history": []})
@@ -10312,7 +10327,7 @@ def reopen_approved_shot(scene, shot_id, correction, category="other", episode="
             "archivedAssets": archived_assets,
             "promptContract": _animation_prompt_contract(led),
         }
-        (arch / "REOPENED.json").write_text(json.dumps(event, indent=1, ensure_ascii=False))
+        (arch / "REOPENED.json").write_text(json.dumps(event, indent=1, ensure_ascii=False), encoding="utf-8")
         led.setdefault("renderHistory", []).append(event)
         led.setdefault("rejections", []).append(event)
         if led.get("batch"):
@@ -10433,7 +10448,7 @@ def import_approved_take(scene, shot_id, source_path, episode="Ep1",
             "provenance": provenance or {},
         }
         pathlib.Path(str(destination) + ".import.json").write_text(json.dumps(
-            import_record, indent=1, ensure_ascii=False))
+            import_record, indent=1, ensure_ascii=False), encoding="utf-8")
         led.setdefault("renderHistory", []).append(import_record)
         led.update({
             "status": "approved",
@@ -10839,7 +10854,7 @@ def evidence_pack(scene, episode="Ep1", log=print):
         f"`{os.path.basename(conformed['path'])}`" if conformed.get("path") else "MISSING"))
     md.append("Final 16:9 master: " + (
         f"`{os.path.basename(final_master['path'])}`" if final_master.get("path") else "MISSING"))
-    (out_dir / "index.md").write_text("\n".join(md))
+    (out_dir / "index.md").write_text("\n".join(md), encoding="utf-8")
     log(f"EVIDENCE — {out_dir.name}/evidence.json + index.md ({len(cases)} shots)")
     return str(out_dir)
 

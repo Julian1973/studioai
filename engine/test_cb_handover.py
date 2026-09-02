@@ -601,7 +601,7 @@ def test_dry_run_writes_nothing_and_module_has_no_provider_access():
     pkg = H.promote(sb_p, pkg_p, dry_run=True, log=lambda *a, **k: None)
     assert not pkg_p.exists()                                    # dry run stored NOTHING
     assert pkg["revision"] == 1
-    src = (HERE / "cb_handover.py").read_text()
+    src = (HERE / "cb_handover.py").read_text(encoding="utf-8")
     # 2026-07-17 (Julian's layer-boundary correction, item 2): the invariant is RESTORED in
     # full — neither cb_gen (the provider-calling module) nor cb_render (the renderer entry
     # point) may be imported here, no exception. promote_to_canonical no longer needs to

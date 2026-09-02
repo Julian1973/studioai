@@ -10,7 +10,7 @@ import cb_render as R
 
 
 def test_scene_director_uses_a_cross_process_serialisation_lock():
-    source = pathlib.Path(C.__file__).read_text()
+    source = pathlib.Path(C.__file__).read_text(encoding="utf-8")
     assert "episode-scene-director.lock" in source
     assert "filelock_compat.lock(lock_file)" in source   # cross-platform since 2026-09-02 (fcntl is POSIX-only)
     assert "@_serial_scene_director\ndef run_scene(" in source
@@ -124,7 +124,7 @@ def test_timing_slate_requires_and_records_human_rhythm_approval(tmp_path, monke
     slate.write_bytes(b"voice-timed-slate")
     signature = {"shots": [{"shotId": "3.B1.S1", "durationSec": 30}]}
     pathlib.Path(str(slate) + ".contract.json").write_text(json.dumps({
-        "generatedAt": "now", "inputSignature": signature}))
+        "generatedAt": "now", "inputSignature": signature}), encoding="utf-8")
     candidate = {"path": str(slate), "contentHash": hashlib.sha256(slate.read_bytes()).hexdigest(),
                  "inputSignature": signature, "preparedAt": "now"}
     pkg = {"creativeDirectingStandardVersion": 4,
@@ -140,7 +140,7 @@ def test_timing_slate_requires_and_records_human_rhythm_approval(tmp_path, monke
 
 
 def test_watch_uses_hear_approval_without_a_duplicate_rhythm_gate():
-    source = pathlib.Path(R.__file__).read_text()
+    source = pathlib.Path(R.__file__).read_text(encoding="utf-8")
     fire_source = source[source.index("def fire_shot("):source.index("def next_shot(")]
     assert "_performance_budget_report(" in fire_source
     assert "voice-timed performance budget is overloaded" in fire_source
@@ -148,14 +148,14 @@ def test_watch_uses_hear_approval_without_a_duplicate_rhythm_gate():
 
 
 def test_fresh_validation_keeps_full_script_occurrences_for_mixed_sfx_dialogue():
-    source = pathlib.Path(R.__file__).read_text()
+    source = pathlib.Path(R.__file__).read_text(encoding="utf-8")
     validation = source[source.index("def _fresh_validation("):source.index("def _prompt_version(")]
     assert 'target_lines = list(target_rec.get("dialogueLines") or [])' in validation
     assert "target_lines = cb_audio_authority.spoken_dialogue_lines(target_rec)" not in validation
 
 
 def test_voice_direction_save_is_scoped_to_spoken_dialogue():
-    source = pathlib.Path(R.__file__).read_text()
+    source = pathlib.Path(R.__file__).read_text(encoding="utf-8")
     scoped_validation = (
         'cb_departments.validate_voice_direction(\n'
         '            model, cb_audio_authority.spoken_dialogue_lines(shot))'
@@ -184,7 +184,7 @@ def test_forward_department_work_requires_signed_v3_director_card(tmp_path, monk
                       "transformation": {"x": "y"}, "tapestry": {"x": "y"}},
                   "shots": [card]}
     path = tmp_path / "storyboard.json"
-    path.write_text(json.dumps(storyboard))
+    path.write_text(json.dumps(storyboard), encoding="utf-8")
     card_hash = hashlib.sha256(json.dumps(
         card, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     pkg = {"creativeDirectingStandardVersion": 4,
@@ -221,7 +221,7 @@ def test_v3_source_contract_remains_valid_without_v4_heart_fields(tmp_path, monk
     storyboard = {"approvalState": "approved", "creativeDirectingStandardVersion": 3,
                   "shots": [card]}
     path = tmp_path / "v3-storyboard.json"
-    path.write_text(json.dumps(storyboard))
+    path.write_text(json.dumps(storyboard), encoding="utf-8")
     card_hash = hashlib.sha256(json.dumps(
         card, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     pkg = {"creativeDirectingStandardVersion": 3,

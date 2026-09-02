@@ -75,7 +75,7 @@ def _md5_text(s):
 def _episode_record(episode):
     if not EPISODES_JSON.exists():
         raise Refused(f"no episodes registered — {EPISODES_JSON} not found")
-    eps = json.loads(EPISODES_JSON.read_text())
+    eps = json.loads(EPISODES_JSON.read_text(encoding="utf-8"))
     num = int(re.sub(r"\D", "", str(episode)) or "0")
     for e in eps:
         if int(e.get("number", -1)) == num:
@@ -229,7 +229,7 @@ def scene_roster(episode="Ep1"):
     status = intake_status(episode)
     if not status.get("canonicalCurrent"):
         pkg_path = pkgs[-1]
-        pkg = json.loads(pkg_path.read_text())
+        pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
         source_report = cb_lineage.validate_beat_package_source_contract(pkg)
         signed_scenes = []
         if (source_report["ok"] and
@@ -240,7 +240,7 @@ def scene_roster(episode="Ep1"):
                 "reason": "canonical-beat-package-stale",
                 "canonicalCurrent": False}
     pkg_path = pkgs[-1]
-    pkg = json.loads(pkg_path.read_text())
+    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
     scenes = _package_scene_roster(pkg)
     for scene in scenes:
         scene.pop("carried", None)
@@ -301,7 +301,7 @@ def _norm_apos(s):
 
 
 def _load_roster():
-    chars = json.loads(CHARACTERS_JSON.read_text())
+    chars = json.loads(CHARACTERS_JSON.read_text(encoding="utf-8"))
     return [k for k, v in chars.items()
             if isinstance(v, dict) and not k.startswith("_") and k != "sizeClasses"]
 
@@ -699,7 +699,7 @@ def _prepare_intake(episode="Ep1", log=print):
             raise Refused(f"REFUSED — {episode} already has a story-intake candidate "
                           "for this exact script and canon lock awaiting a decision")
     for existing_path in canonical_package_glob(episode):
-        existing = json.loads(existing_path.read_text())
+        existing = json.loads(existing_path.read_text(encoding="utf-8"))
         if cb_lineage.signature_matches(
                 existing.get("inputSignature"), "beat-package-input", story_inputs):
             raise Refused(f"REFUSED — {episode} already has a canonical beat package for "
@@ -943,7 +943,7 @@ def intake_status(episode="Ep1"):
     cpath = candidate_path(episode)
     if cpath.exists():
         out["hasCandidate"] = True
-        out["candidate"] = json.loads(cpath.read_text())
+        out["candidate"] = json.loads(cpath.read_text(encoding="utf-8"))
         out["productionPolicy"] = out["candidate"].get("productionPolicy")
         out["productionPlan"] = out["candidate"].get("productionPlan") or []
         out["candidateCurrent"] = bool(
@@ -959,7 +959,7 @@ def intake_status(episode="Ep1"):
             ((current or {}).get("changeScope") or {}).get("kind") ==
             "dialogue-format-cleanup"
         )
-        pkg = json.loads(pkgs[-1].read_text())
+        pkg = json.loads(pkgs[-1].read_text(encoding="utf-8"))
         if not out["productionPolicy"]:
             out["productionPolicy"] = pkg.get("productionPolicy")
         if not out["productionPlan"]:
@@ -1369,7 +1369,7 @@ def migrate_source_occurrence_contract(episode="Ep1", reviewed_by="Julian",
     changed, skipped = [], []
     cpath = candidate_path(episode)
     if cpath.exists():
-        candidate = json.loads(cpath.read_text())
+        candidate = json.loads(cpath.read_text(encoding="utf-8"))
         try:
             if (candidate.get("approvalState") != "approved" or
                     candidate.get("scriptMd5") != _md5_text(script_text)):
@@ -1390,7 +1390,7 @@ def migrate_source_occurrence_contract(episode="Ep1", reviewed_by="Julian",
             # cannot authorize or constrain the corrected canonical package.
             skipped.append({"path": str(cpath.relative_to(ROOT)), "reason": str(exc)})
     for pkg_path in canonical_package_glob(episode):
-        pkg = json.loads(pkg_path.read_text())
+        pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
         if _package_script_version(pkg) != current["scriptVersionId"]:
             raise Refused(f"REFUSED — {pkg_path.name} belongs to another script version")
         pkg_new = json.loads(json.dumps(pkg))
@@ -1418,7 +1418,7 @@ def migrate_source_occurrence_contract(episode="Ep1", reviewed_by="Julian",
     for path, value in changed:
         shutil.copy2(path, backup_dir / path.name)
         temp_path = path.with_suffix(path.suffix + ".source-contract.tmp")
-        temp_path.write_text(json.dumps(value, indent=1, ensure_ascii=False) + "\n")
+        temp_path.write_text(json.dumps(value, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
         temp_path.replace(path)
     log(f"SOURCE CONTRACT MIGRATION — {episode}: exact event identities added; originals -> "
         f"{backup_dir.relative_to(ROOT)}")

@@ -1009,7 +1009,7 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
         manifest["manifestDigest"] = hashlib.sha256(json.dumps(
             manifest, sort_keys=True, ensure_ascii=False,
             separators=(",", ":")).encode()).hexdigest()
-        temp["manifest"].write_text(json.dumps(manifest, indent=1, ensure_ascii=False))
+        temp["manifest"].write_text(json.dumps(manifest, indent=1, ensure_ascii=False), encoding="utf-8")
         os.replace(temp_dir, final_dir)
         return manifest
     except Exception:

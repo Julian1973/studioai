@@ -11,11 +11,11 @@ def test_quarantine_preserves_test_records_outside_live_library(tmp_path):
             {"evidenceId": "real", "capturedBy": "Julian", "outcome": "approved"},
             {"evidenceId": "test", "capturedBy": "TestReviewer", "outcome": "approved"},
         ],
-    }))
+    }), encoding="utf-8")
 
     result = quarantine(library, tmp_path / "quarantine")
-    cleaned = json.loads(library.read_text())
-    archived = json.loads(next((tmp_path / "quarantine").glob("*.json")).read_text())
+    cleaned = json.loads(library.read_text(encoding="utf-8"))
+    archived = json.loads(next((tmp_path / "quarantine").glob("*.json")).read_text(encoding="utf-8"))
 
     assert result["removed"] == 1
     assert [record["evidenceId"] for record in cleaned["records"]] == ["real"]

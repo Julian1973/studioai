@@ -371,7 +371,7 @@ def _set_source(monkeypatch, source_beats, source_pkg):
     C.OUT.mkdir(parents=True, exist_ok=True)
     source_path = C.OUT.parent / "Ep1_fixture_beat_package.json"
     source_path.parent.mkdir(parents=True, exist_ok=True)
-    source_path.write_text(json.dumps(source_pkg, indent=1))
+    source_path.write_text(json.dumps(source_pkg, indent=1), encoding="utf-8")
     monkeypatch.setattr(C, "_script_package", lambda *a, **k: source_path)
     monkeypatch.setattr(C, "episode_vision", lambda *a, **k: _vision_for(source_pkg))
 
@@ -847,15 +847,15 @@ def test_regenerate_production_detail_proves_creative_cards_unchanged(monkeypatc
     src.write_text(json.dumps({"episodeId": "Ep1", "sceneNumber": "1",
         "shots": [card], "beats": [_beat().model_dump()], "voicePerformances": [],
         "scene": {**_scene().model_dump(), "sourceApprovalState": "draft"},
-        "approvalState": "approved"}))
+        "approvalState": "approved"}), encoding="utf-8")
     out = tmp_path / "out.json"
     result = C.regenerate_production_detail(str(src), str(out), log=lambda *a, **k: None)
     assert result["creativeCardHashCheck"]["unchanged"] is True
     assert result["creativeCardHashCheck"]["before"] == result["creativeCardHashCheck"]["after"]
-    assert result["shots"] == json.loads(src.read_text())["shots"]   # byte-identical cards
+    assert result["shots"] == json.loads(src.read_text(encoding="utf-8"))["shots"]   # byte-identical cards
     assert result["productionDetail"][0]["intendedDurationRange"] == "7-7s"
     assert result["durationValidation"]["sceneTotal"]["formatted"]
-    assert json.loads(out.read_text())["shots"] == [card]   # written file matches too
+    assert json.loads(out.read_text(encoding="utf-8"))["shots"] == [card]   # written file matches too
 
 
 def test_regenerate_refuses_if_creative_cards_would_change(monkeypatch, tmp_path):
@@ -870,10 +870,10 @@ def test_regenerate_refuses_if_creative_cards_would_change(monkeypatch, tmp_path
     card = _card().model_dump()
     src.write_text(json.dumps({"episodeId": "Ep1", "sceneNumber": "1", "shots": [card],
         "beats": [_beat().model_dump(),], "voicePerformances": [],
-        "scene": _scene().model_dump(), "approvalState": "approved"}))
+        "scene": _scene().model_dump(), "approvalState": "approved"}), encoding="utf-8")
     out = tmp_path / "out.json"
     result = C.regenerate_production_detail(str(src), str(out), log=lambda *a, **k: None)
-    assert C._shots_hash(result) == C._shots_hash(json.loads(src.read_text()))
+    assert C._shots_hash(result) == C._shots_hash(json.loads(src.read_text(encoding="utf-8")))
     assert not any(s == "ShotConference" or s == "SceneDirection" or s == "TreatmentSet"
                    for _, s, _ in record)               # Gates 0-4 never ran
 
@@ -895,13 +895,13 @@ def test_top_level_approvalState_is_sole_gate_a_authority(monkeypatch, tmp_path)
     pkg = tmp_path / "pkg.json"
     pkg.write_text(json.dumps({"episode": "Ep1", "sceneNumber": "1", "revision": 1,
                                 "shots": [{"shotId": "S1.SH1", "durationSec": 6.0,
-                                            "seedancePrompt": "x", "referenceSlots": {}}]}))
+                                            "seedancePrompt": "x", "referenceSlots": {}}]}), encoding="utf-8")
 
     approved_top_draft_nested = tmp_path / "a.json"
     approved_top_draft_nested.write_text(json.dumps({
         "episodeId": "Ep1", "sceneNumber": 1, "approvalState": "approved",
         "scene": {"sceneId": "S1", "location": "x", "sourceApprovalState": "draft"},
-        "beats": [], "shots": [], "voicePerformances": []}))
+        "beats": [], "shots": [], "voicePerformances": []}), encoding="utf-8")
     H.promote(str(approved_top_draft_nested), str(pkg), dry_run=True)   # must NOT refuse
 
     draft_top_approved_nested = tmp_path / "b.json"
@@ -909,7 +909,7 @@ def test_top_level_approvalState_is_sole_gate_a_authority(monkeypatch, tmp_path)
         "episodeId": "Ep1", "sceneNumber": 1,
         "approvalState": "awaiting-human-storyboard-approval",
         "scene": {"sceneId": "S1", "location": "x", "sourceApprovalState": "approved"},
-        "beats": [], "shots": [], "voicePerformances": []}))
+        "beats": [], "shots": [], "voicePerformances": []}), encoding="utf-8")
     with pytest.raises(H.HandoverRefused, match="not 'approved'"):
         H.promote(str(draft_top_approved_nested), str(pkg), dry_run=True)
 
@@ -1091,7 +1091,7 @@ def test_rejected_exemplar_reaches_role_minds_and_no_provider_access():
     mind = C._mind("DIRECTOR", ["directorTaste"], "charge")
     assert "EX-005" in mind and "REJECTED" in mind          # the process-v1 verdict is live
     assert "do not reverse-engineer a 'desired shot'" in mind
-    src = (HERE / "cb_creative.py").read_text()
+    src = (HERE / "cb_creative.py").read_text(encoding="utf-8")
     assert "import cb_gen" not in src and "import cb_render" not in src
     assert "generate_video" not in src and "_fal_" not in src
 

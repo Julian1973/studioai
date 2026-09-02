@@ -43,7 +43,7 @@ def _scratch():
 def _write_storyboard(root, scene, episode, shot_id="S1.SH1", marker="v1"):
     p = root / P.OUTPUT_REL / "creative" / f"{episode}_scene{scene}_storyboard.json"
     sb = {"marker": marker, "shots": [{"shotId": shot_id, "marker": marker}]}
-    p.write_text(json.dumps(sb, sort_keys=True))
+    p.write_text(json.dumps(sb, sort_keys=True), encoding="utf-8")
     return hashlib.md5(p.read_bytes()).hexdigest()
 
 
@@ -65,7 +65,7 @@ def _write_package(root, scene, episode, storyboard_md5, revision=1, extra_ledge
                                    **(extra_ledger or {}))],
     }
     p = root / P.OUTPUT_REL / f"{episode}_scene{scene}_production_package.json"
-    p.write_text(json.dumps(pkg, indent=1))
+    p.write_text(json.dumps(pkg, indent=1), encoding="utf-8")
     return pkg, p
 
 

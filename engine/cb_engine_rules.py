@@ -27,7 +27,7 @@ def _line_text(line):
 
 
 def load_beat_costs(path=BEAT_COST_PATH):
-    data = json.loads(pathlib.Path(path).read_text())
+    data = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
     if not data.get("version") or not data.get("costsSec"):
         raise ValueError("beat-cost data is missing version or costsSec")
     return data

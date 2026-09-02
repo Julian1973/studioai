@@ -60,7 +60,7 @@ def test_scene_library_returns_opening_plate_without_package(monkeypatch, tmp_pa
 
     assert [item["assetId"] for item in items] == [rec["assetId"]]
     assert items[0]["url"] == "/engine/media/scene3_pier.png"
-    stored = json.loads((tmp_path / "registry" / "assets.json").read_text())
+    stored = json.loads((tmp_path / "registry" / "assets.json").read_text(encoding="utf-8"))
     assert stored["assets"][0]["bindingKey"] == "Ep1|3||opening_plate|scene_opening_plate"
 
 
@@ -79,7 +79,7 @@ def test_reregistering_existing_binding_preserves_registry_order(monkeypatch, tm
         episode="Ep1", scene="1", kind="scene_plate", role="first", path=first,
         label="First refreshed")
 
-    stored = json.loads((tmp_path / "registry" / "assets.json").read_text())
+    stored = json.loads((tmp_path / "registry" / "assets.json").read_text(encoding="utf-8"))
     assert [item["role"] for item in stored["assets"]] == ["first", "second"]
     assert stored["assets"][0]["label"] == "First refreshed"
 
@@ -103,7 +103,7 @@ def test_remove_asset_unbinds_registry_record_without_deleting_file(monkeypatch,
 
     assert result["assetCount"] == 0
     assert plate.exists()
-    stored = json.loads((tmp_path / "registry" / "assets.json").read_text())
+    stored = json.loads((tmp_path / "registry" / "assets.json").read_text(encoding="utf-8"))
     assert stored["assets"] == []
     assert stored["deletedBindingKeys"] == ["Ep1|3||reference_image|uploaded_props_wristband"]
 
@@ -235,7 +235,7 @@ def test_migration_does_not_mark_unreviewed_voice_take_approved(monkeypatch, tmp
             {"shotId": "S4.SH2", "voPath": str(approved),
              "voiceApproval": {"approved": True}},
         ],
-    }))
+    }), encoding="utf-8")
 
     A.migrate_existing("EpT")
 

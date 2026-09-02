@@ -123,7 +123,7 @@ def test_studio_endpoint_builds_the_exact_fire_argv():
     function is extracted from the real source via ast and executed with a captured _start —
     identical code under test, no socket."""
     import ast
-    src = (HERE.parent / "cb-studio" / "serve.py").read_text()
+    src = (HERE.parent / "cb-studio" / "serve.py").read_text(encoding="utf-8")
     tree = ast.parse(src)
     fn = next(n for n in ast.walk(tree)
               if isinstance(n, ast.FunctionDef) and n.name == "shot_run_job")
@@ -270,7 +270,7 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
         "sceneNumber": "1",
         "approvalState": "approved",
         "shots": scratch_pkg.get("shots") or [],
-    }, indent=1, ensure_ascii=False))
+    }, indent=1, ensure_ascii=False), encoding="utf-8")
     storyboard_md5 = hashlib.md5(scratch_storyboard.read_bytes()).hexdigest()
     storyboard_sha256 = cb_lineage.sha256_file(scratch_storyboard)
     beat_pkg = json.load(open(HERE.parent / P.OUTPUT_REL /

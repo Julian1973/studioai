@@ -33,7 +33,7 @@ def _workspace(tmp_path, monkeypatch, text=SCRIPT_ONE):
         "title": "Pilot",
         "script": current["displayFile"],
         "scriptVersionId": current["scriptVersionId"],
-    }]))
+    }]), encoding="utf-8")
     out = tmp_path / P.OUTPUT_REL
     creative = out / "creative"
     creative.mkdir(parents=True)
@@ -91,14 +91,14 @@ def _candidate(current, text=SCRIPT_ONE):
 
 def test_intake_approval_refuses_candidate_from_previous_script(tmp_path, monkeypatch):
     store, first, episodes = _workspace(tmp_path, monkeypatch)
-    cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(first)))
+    cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(first)), encoding="utf-8")
 
     second = store.store("Ep1", SCRIPT_TWO, "Pilot",
                          activated_at="2026-01-02T00:00:00+00:00")
-    registry = json.loads(episodes.read_text())
+    registry = json.loads(episodes.read_text(encoding="utf-8"))
     registry[0].update({"script": second["displayFile"],
                         "scriptVersionId": second["scriptVersionId"]})
-    episodes.write_text(json.dumps(registry))
+    episodes.write_text(json.dumps(registry), encoding="utf-8")
 
     with pytest.raises(cb_intake.Refused, match="run Story & Direction again"):
         cb_intake.decide_intake("Ep1", "approve", log=lambda *_: None)
@@ -110,14 +110,14 @@ def test_failed_replacement_keeps_the_previous_candidate(tmp_path, monkeypatch):
     store, first, episodes = _workspace(tmp_path, monkeypatch)
     candidate_path = cb_intake.candidate_path("Ep1")
     previous = _candidate(first)
-    candidate_path.write_text(json.dumps(previous))
+    candidate_path.write_text(json.dumps(previous), encoding="utf-8")
 
     second = store.store("Ep1", SCRIPT_TWO, "Pilot",
                          activated_at="2026-01-02T00:00:00+00:00")
-    registry = json.loads(episodes.read_text())
+    registry = json.loads(episodes.read_text(encoding="utf-8"))
     registry[0].update({"script": second["displayFile"],
                         "scriptVersionId": second["scriptVersionId"]})
-    episodes.write_text(json.dumps(registry))
+    episodes.write_text(json.dumps(registry), encoding="utf-8")
     monkeypatch.setattr(
         cb_intake.cb_canon, "story_context",
         lambda cast, episode, root=None: {"sourceHashes": {"showBible": "a" * 64}},
@@ -131,18 +131,18 @@ def test_failed_replacement_keeps_the_previous_candidate(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match="Director unavailable"):
         cb_intake.prepare_intake("Ep1", log=lambda *_: None)
 
-    assert json.loads(candidate_path.read_text()) == previous
+    assert json.loads(candidate_path.read_text(encoding="utf-8")) == previous
     superseded = tmp_path / P.OUTPUT_REL / "archive" / "story_intake_superseded"
     assert not superseded.exists()
 
 
 def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkeypatch):
     _, current, _ = _workspace(tmp_path, monkeypatch)
-    cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(current)))
+    cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(current)), encoding="utf-8")
 
     result = cb_intake.decide_intake("Ep1", "approve", log=lambda *_: None)
-    pkg = json.loads((tmp_path / result["canonicalPackage"]).read_text())
-    vision = json.loads((tmp_path / result["episodeVision"]).read_text())
+    pkg = json.loads((tmp_path / result["canonicalPackage"]).read_text(encoding="utf-8"))
+    vision = json.loads((tmp_path / result["episodeVision"]).read_text(encoding="utf-8"))
 
     assert pkg["sourceScript"]["scriptVersionId"] == current["scriptVersionId"]
     assert pkg["contentSignature"] == cb_lineage.beat_package_signature(pkg)
@@ -242,30 +242,30 @@ def test_new_script_approval_archives_previous_canonical_package(tmp_path, monke
     store, first, episodes = _workspace(tmp_path, monkeypatch)
     old = tmp_path / P.OUTPUT_REL / "Ep1_Old_beat_package.json"
     old.write_text(json.dumps({"episode": 1, "title": "Old", "beats": [],
-                               "sourceScript": cb_intake._script_ref(first)}))
+                               "sourceScript": cb_intake._script_ref(first)}), encoding="utf-8")
 
     second = store.store("Ep1", SCRIPT_TWO, "Pilot",
                          activated_at="2026-01-02T00:00:00+00:00")
-    registry = json.loads(episodes.read_text())
+    registry = json.loads(episodes.read_text(encoding="utf-8"))
     registry[0].update({"script": second["displayFile"],
                         "scriptVersionId": second["scriptVersionId"]})
-    episodes.write_text(json.dumps(registry))
-    cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(second, SCRIPT_TWO)))
+    episodes.write_text(json.dumps(registry), encoding="utf-8")
+    cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(second, SCRIPT_TWO)), encoding="utf-8")
 
     cb_intake.decide_intake("Ep1", "approve", log=lambda *_: None)
 
     assert not old.exists()
     archived = list((tmp_path / P.OUTPUT_REL / "archive" / "script_versions").glob("*.json"))
     assert len(archived) == 1
-    assert json.loads(archived[0].read_text())["sourceScript"]["scriptVersionId"] == first["scriptVersionId"]
+    assert json.loads(archived[0].read_text(encoding="utf-8"))["sourceScript"]["scriptVersionId"] == first["scriptVersionId"]
 
 
 def test_canon_rebase_preserves_approved_creative_content(tmp_path, monkeypatch):
     _, current, _ = _workspace(tmp_path, monkeypatch)
-    cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(current)))
+    cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(current)), encoding="utf-8")
     approved = cb_intake.decide_intake("Ep1", "approve", log=lambda *_: None)
     package_path = tmp_path / approved["canonicalPackage"]
-    before = json.loads(package_path.read_text())
+    before = json.loads(package_path.read_text(encoding="utf-8"))
 
     new_digest = "n" * 64
     monkeypatch.setattr(cb_intake.cb_canon, "status", lambda *args, **kwargs: {
@@ -276,7 +276,7 @@ def test_canon_rebase_preserves_approved_creative_content(tmp_path, monkeypatch)
                         lambda profile, root=None: {"showBible": "b" * 64})
 
     result = cb_intake.rebase_canon_lock("Ep1", reviewed_by="Julian", log=lambda *_: None)
-    after = json.loads(package_path.read_text())
+    after = json.loads(package_path.read_text(encoding="utf-8"))
 
     assert result["outcome"] == "rebased"
     assert after["beats"] == before["beats"]
@@ -294,7 +294,7 @@ def test_scene_roster_ignores_a_stale_legacy_package(tmp_path, monkeypatch):
         "title": "Legacy",
         "sourceScript": cb_intake._script_ref(current),
         "beats": [{"sceneNumber": 1, "beatCode": "1.B1", "cuts": []}],
-    }))
+    }), encoding="utf-8")
 
     roster = cb_intake.scene_roster("Ep1")
 

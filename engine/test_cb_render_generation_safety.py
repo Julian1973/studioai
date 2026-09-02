@@ -59,11 +59,11 @@ def _write_locations(root, scene="1", episode="Ep1", look="a warm meadow"):
     p = root / "projects" / "crystal-bears" / "canon" / "locations.json"
     p.write_text(json.dumps({episode: {scene: {"look": look, "lighting": "golden",
                                                 "weather": "clear", "colorTemperature": "warm",
-                                                "definingFeature": "flowers"}}}))
+                                                "definingFeature": "flowers"}}}), encoding="utf-8")
 
 
 def _write_style(root, text="Pixar-caliber 3D CGI."):
-    (root / "projects" / "crystal-bears" / "laws" / "style.txt").write_text(text)
+    (root / "projects" / "crystal-bears" / "laws" / "style.txt").write_text(text, encoding="utf-8")
 
 
 def _write_storyboard(root, scene, episode, sh1_marker="v1", sh6_marker="v1"):
@@ -72,7 +72,7 @@ def _write_storyboard(root, scene, episode, sh1_marker="v1", sh6_marker="v1"):
         {"shotId": "S1.SH1", "openingImage": sh1_marker},
         {"shotId": "S1.SH6", "cameraRelationship": sh6_marker},
     ]}
-    p.write_text(json.dumps(sb, sort_keys=True))
+    p.write_text(json.dumps(sb, sort_keys=True), encoding="utf-8")
     return p
 
 
@@ -91,7 +91,7 @@ def _write_package(root, scene, episode, shot_ids=("S1.SH1", "S1.SH6"), revision
                                 "creativeCardHashes": card_hashes},
            "shots": shots, "continuityLedger": ledger}
     p = root / P.OUTPUT_REL / f"{episode}_scene{scene}_production_package.json"
-    p.write_text(json.dumps(pkg, indent=1))
+    p.write_text(json.dumps(pkg, indent=1), encoding="utf-8")
     return pkg, p
 
 

@@ -14,10 +14,10 @@ def _sha256(path):
 
 
 def test_sd25_skill_is_a_pinned_checker_not_a_prompt_writer():
-    audit = json.loads(AUDIT_PATH.read_text())
+    audit = json.loads(AUDIT_PATH.read_text(encoding="utf-8"))
     vendor = audit["vendor"]
     snapshot = ROOT / vendor["snapshotPath"]
-    source = snapshot.read_text()
+    source = snapshot.read_text(encoding="utf-8")
 
     assert audit["architectureRuling"] == "director-source-deterministic-compilers-only"
     assert audit["role"] == "checker-and-rule-source-only"
@@ -28,8 +28,8 @@ def test_sd25_skill_is_a_pinned_checker_not_a_prompt_writer():
 
 
 def test_sd25_audit_must_be_redone_for_grammar_or_vendor_change():
-    audit = json.loads(AUDIT_PATH.read_text())
-    grammar = json.loads(GRAMMAR_PATH.read_text())
+    audit = json.loads(AUDIT_PATH.read_text(encoding="utf-8"))
+    grammar = json.loads(GRAMMAR_PATH.read_text(encoding="utf-8"))
 
     assert audit["auditedGrammarPackVersion"] == grammar["version"]
     assert set(audit["rerunTriggers"]) == {
@@ -57,5 +57,5 @@ def test_production_emitters_do_not_load_or_execute_sd25_skill():
         "engine/cb_voice_director.py",
     )
     for relative in production_emitters:
-        source = (ROOT / relative).read_text()
+        source = (ROOT / relative).read_text(encoding="utf-8")
         assert not any(token in source for token in forbidden), relative

@@ -39,7 +39,7 @@ def test_recover_approved_shot_requires_matching_registry_review_and_prompt_bank
         "at": "2026-08-31T08:00:06",
         "note": "human review only - the machine never approves creative quality",
     }
-    pathlib.Path(str(take) + ".review.json").write_text(json.dumps(review))
+    pathlib.Path(str(take) + ".review.json").write_text(json.dumps(review), encoding="utf-8")
     package = {
         "shots": [{"shotId": "S2.SH1"}],
         "continuityLedger": [{
@@ -1250,7 +1250,7 @@ def test_reopen_accepted_take_archives_evidence_and_invalidates_post(tmp_path, m
     harvest = tmp_path / "final.png"
     take.write_bytes(b"accepted-take")
     harvest.write_bytes(b"final-frame")
-    (tmp_path / "accepted.mp4.review.json").write_text("{}")
+    (tmp_path / "accepted.mp4.review.json").write_text("{}", encoding="utf-8")
     package = {
         "shots": [{"shotId": SHOT_ID}],
         "continuityLedger": [{

@@ -100,7 +100,7 @@ def _scoped_shot_amendment(intake, scene, pkg):
 
 def _read_json(path):
     try:
-        return json.loads(pathlib.Path(path).read_text())
+        return json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
     except (OSError, ValueError, TypeError):
         return None
 

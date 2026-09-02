@@ -17,7 +17,7 @@ CASES = {
 
 def test_golden_fixtures_score_at_least_nine_and_pass_manifests():
     for name, archetype in CASES.items():
-        prompt = (FIXTURES / name).read_text()
+        prompt = (FIXTURES / name).read_text(encoding="utf-8")
         flight = standard.preflight(prompt)
         manifest = standard.manifest_checks(archetype, prompt)
         assert flight["score"] >= standard.EMISSION_FIRING_FLOOR, (name, flight)
@@ -35,13 +35,13 @@ def test_emission_firing_floor_is_nine_point_five():
 
 
 def test_duplicate_story_lock_is_a_mechanical_regression():
-    prompt = (FIXTURES / "beat_1_chase.txt").read_text() + "\nStory lock: repeat it."
+    prompt = (FIXTURES / "beat_1_chase.txt").read_text(encoding="utf-8") + "\nStory lock: repeat it."
     flight = standard.preflight(prompt)
     assert any(item["rule"] == "R18" for item in flight["findings"])
 
 
 def test_specialist_missing_hold_is_polish_until_typed_emitter_runs():
-    prompt = (FIXTURES / "beat_1_chase.txt").read_text().replace(
+    prompt = (FIXTURES / "beat_1_chase.txt").read_text(encoding="utf-8").replace(
         "The pose holds for a full beat after the line ends.", "")
     flight = standard.preflight(prompt)
     hold = [item for item in flight["findings"] if item["rule"] == "button-hold"]
@@ -70,7 +70,7 @@ No music."""
 
 
 def test_accepted_chase_prompt_and_local_render_match_recorded_provenance():
-    provenance = json.loads((FIXTURES / "ACCEPTED_RENDER_PROVENANCE.json").read_text())
+    provenance = json.loads((FIXTURES / "ACCEPTED_RENDER_PROVENANCE.json").read_text(encoding="utf-8"))
     prompt = FIXTURES / provenance["fixture"]
     assert hashlib.sha256(prompt.read_bytes()).hexdigest() == provenance["prompt"]["sha256"]
 
@@ -80,7 +80,7 @@ def test_accepted_chase_prompt_and_local_render_match_recorded_provenance():
 
 
 def test_render_path_uses_the_same_checker_and_timing_inputs():
-    prompt = (FIXTURES / "beat_1_chase.txt").read_text()
+    prompt = (FIXTURES / "beat_1_chase.txt").read_text(encoding="utf-8")
     shot = {"durationSec": 16}
     specialist = {"timingBeats": [{"type": "travel", "count": 1}]}
     assert cb_render._emission_conformance_report(shot, specialist, prompt) == (

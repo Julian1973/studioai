@@ -1145,7 +1145,7 @@ def test_switching_productions_reloads_the_engine_onto_the_chosen_project():
         root = _pl.Path(tmp)
         for pid in ("aaa", "bbb"):
             (root / "projects" / pid).mkdir(parents=True)
-            (root / "projects" / pid / "profile.json").write_text(json.dumps({"showId": pid, "default": pid == "aaa"}))
+            (root / "projects" / pid / "profile.json").write_text(json.dumps({"showId": pid, "default": pid == "aaa"}), encoding="utf-8")
         assert pp.default_project_id(root) == "aaa"                 # the declared default
         assert pp.set_active_project("bbb", root) == "bbb"
         assert pp.default_project_id(root) == "bbb"                 # the switch wins over the default

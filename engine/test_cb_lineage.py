@@ -21,8 +21,8 @@ def test_script_store_preserves_old_versions_and_moves_only_pointer(tmp_path):
     second = store.store("Ep1", "INT. ROOM 1\nSecond draft\n", "Pilot", activated_at="2026-01-02T00:00:00+00:00")
 
     assert first["scriptVersionId"] != second["scriptVersionId"]
-    assert (tmp_path / first["contentPath"]).read_text() == "INT. ROOM 1\nFirst draft\n"
-    assert (tmp_path / second["contentPath"]).read_text() == "INT. ROOM 1\nSecond draft\n"
+    assert (tmp_path / first["contentPath"]).read_text(encoding="utf-8") == "INT. ROOM 1\nFirst draft\n"
+    assert (tmp_path / second["contentPath"]).read_text(encoding="utf-8") == "INT. ROOM 1\nSecond draft\n"
     assert store.current("Ep1")["scriptVersionId"] == second["scriptVersionId"]
     assert second["previousScriptVersionId"] == first["scriptVersionId"]
     assert len(list((store.events_root / "Ep1").glob("*.json"))) == 2
@@ -55,8 +55,8 @@ def test_script_store_records_a_scoped_dialogue_correction(tmp_path):
     assert second["previousScriptVersionId"] == first["scriptVersionId"]
     assert second["changeScope"] == scope
     events = sorted((store.events_root / "Ep2").glob("*.json"))
-    correction = next(json.loads(path.read_text()) for path in events
-                      if json.loads(path.read_text())["kind"] == "script-dialogue-corrected")
+    correction = next(json.loads(path.read_text(encoding="utf-8")) for path in events
+                      if json.loads(path.read_text(encoding="utf-8"))["kind"] == "script-dialogue-corrected")
     assert correction["changeScope"] == scope
 
 
@@ -64,7 +64,7 @@ def test_script_store_detects_content_tampering(tmp_path):
     store = ScriptStore(
         tmp_path, script_root=tmp_path / "projects/crystal-bears/episodes/scripts")
     current = store.store("Ep3", "locked\n", "Locked", activated_at="2026-01-01T00:00:00+00:00")
-    (tmp_path / current["contentPath"]).write_text("tampered\n")
+    (tmp_path / current["contentPath"]).write_text("tampered\n", encoding="utf-8")
 
     try:
         store.current("Ep3")

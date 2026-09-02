@@ -204,12 +204,12 @@ def test_current_path_reaches_an_approved_master_without_provider_spend(
         "status": "pass", "reason": None,
         "review": {"verdict": "pass", "summary": "Test fixture passes."},
     })
-    pkg = json.loads(pkg_path.read_text())
+    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
     _approve_specialist_inputs(pkg)
-    pkg_path.write_text(json.dumps(pkg, indent=1))
+    pkg_path.write_text(json.dumps(pkg, indent=1), encoding="utf-8")
     _approve_scene_look(tmp, pkg)
     _sign_specialist_inputs(pkg)
-    pkg_path.write_text(json.dumps(pkg, indent=1))
+    pkg_path.write_text(json.dumps(pkg, indent=1), encoding="utf-8")
 
     # Voice is generated shot-by-shot from approved Voice direction, then heard/approved.
     for shot in pkg["shots"]:

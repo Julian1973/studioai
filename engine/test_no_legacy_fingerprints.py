@@ -55,7 +55,7 @@ def _executable_sources():
 def test_no_legacy_fingerprint_in_executable_source():
     hits = []
     for f in _executable_sources():
-        text = f.read_text(errors="replace")
+        text = f.read_text(errors="replace", encoding="utf-8")
         for fp in FINGERPRINTS:
             found = (fp.search(text) if hasattr(fp, "search") else (fp in text))
             if found:
@@ -92,7 +92,7 @@ def test_legacy_modules_cannot_execute():
 def test_legacy_studio_routes_are_gone_never_redirected():
     """§6: every old route returns 410 GONE via the single gate — serve.py contains no
     legacy handler and no redirect to another generator."""
-    src = (ROOT / "cb-studio" / "serve.py").read_text()
+    src = (ROOT / "cb-studio" / "serve.py").read_text(encoding="utf-8")
     assert "LEGACY_GONE_ROUTES" in src and '"error": "GONE' in src
     for route in ("/api/fire", "/api/regen", "/api/render-beat", "/api/gen-keyframe",
                    "/api/beat-prompt", "/api/relay-approve", "/api/director-eye"):
@@ -111,13 +111,13 @@ def test_single_seedance_call_graph():
     for f in _executable_sources():
         if f.suffix != ".py" or f.name == "cb_gen.py":
             continue
-        for i, line in enumerate(f.read_text().splitlines(), 1):
+        for i, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
             code = line.split("#")[0]
             if "cb_gen.generate_video_seedance" in code:      # a real adapter CALL, not prose
                 callers.append(f"{f.name}:{i}")
     assert len(callers) == 1 and callers[0].startswith("cb_render.py"), (
         f"the Seedance adapter must have exactly ONE production caller (cb_render): {callers}")
-    gen = (HERE / "cb_gen.py").read_text()
+    gen = (HERE / "cb_gen.py").read_text(encoding="utf-8")
     assert "_require_production_route" in gen and '_AUTHORIZED_PRODUCTION_ROUTE = "cb_render"' in gen
 
 

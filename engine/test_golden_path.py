@@ -488,7 +488,7 @@ class Providers:
             manifest["manifestDigest"] = hashlib.sha256(json.dumps(
                 manifest, sort_keys=True, ensure_ascii=False,
                 separators=(",", ":")).encode()).hexdigest()
-            manifest_path.write_text(json.dumps(manifest, indent=1, ensure_ascii=False))
+            manifest_path.write_text(json.dumps(manifest, indent=1, ensure_ascii=False), encoding="utf-8")
             return manifest
         monkeypatch.setattr(R.cb_post, "build_scene_post", build_scene_post)
         monkeypatch.setattr(R.cb_post, "_dur", lambda p: 6.0)
@@ -1004,7 +1004,7 @@ def test_golden_path_package_to_approved_scene_master(world):
     # per-candidate review sheets: human criteria all null — machine never approves quality
     led1 = _led()["1.B1.S1"]
     assert len(led1["candidatePaths"]) == 3
-    rev = json.loads(pathlib.Path(led1["candidatePaths"][1] + ".review.json").read_text())
+    rev = json.loads(pathlib.Path(led1["candidatePaths"][1] + ".review.json").read_text(encoding="utf-8"))
     assert set(rev["criteria"]) == set(R.REVIEW_CRITERIA)
     assert all(v is None for v in rev["criteria"].values())
 
@@ -1071,7 +1071,7 @@ def test_golden_path_package_to_approved_scene_master(world):
     # the evidence pack records the whole run: every shot approved, every asset present,
     # the stitched output named — nothing invented, nothing silently missing
     out = R.evidence_pack("9", "EpT", log=lambda *a, **k: None)
-    pack = json.loads((pathlib.Path(out) / "evidence.json").read_text())
+    pack = json.loads((pathlib.Path(out) / "evidence.json").read_text(encoding="utf-8"))
     assert len(pack["shots"]) == 3 and pack["stitchedOutput"]["exists"]
     assert pack["finalMaster"]["exists"]
     assert pack["postManifest"]["qc"]["passed"] is True
@@ -1081,7 +1081,7 @@ def test_golden_path_package_to_approved_scene_master(world):
         assert c["state"]["disclosure"]["promptVersion"]          # the spend record persists
         if c["input"]["dialogueLines"]:
             assert c["assets"]["voice"]["exists"]
-    idx = (pathlib.Path(out) / "index.md").read_text()
+    idx = (pathlib.Path(out) / "index.md").read_text(encoding="utf-8")
     for sid in ("1.B1.S1", "1.B1.S2", "1.B1.S3"):
         assert sid in idx
     assert idx.count("status: **approved**") == 3
@@ -1429,7 +1429,7 @@ def test_same_process_comparison_returns_one_candidate_from_approved_stage_relay
     final_ledger = _led()[shot["shotId"]]
     assert final_ledger["status"] == "candidates-pending"
     assert final_ledger["batch"]["transportCandidates"]["1"]["status"] == "joined"
-    review = json.loads(pathlib.Path(paths[0] + ".review.json").read_text())
+    review = json.loads(pathlib.Path(paths[0] + ".review.json").read_text(encoding="utf-8"))
     assert all(value is None for value in review["criteria"].values())
 
 
@@ -1459,13 +1459,13 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
 
     characters_path = tmp_path / "projects" / "crystal-bears" / "canon" / "characters.json"
     characters_path.parent.mkdir(parents=True, exist_ok=True)
-    characters_path.write_text(json.dumps(CFG, indent=1))
+    characters_path.write_text(json.dumps(CFG, indent=1), encoding="utf-8")
     episodes = tmp_path / P.EPISODES_INDEX_REL
     episodes.parent.mkdir(parents=True, exist_ok=True)
     episodes.write_text(json.dumps([{
         "number": 1, "title": "Script To Master", "script": current["displayFile"],
         "scriptVersionId": current["scriptVersionId"],
-    }]))
+    }]), encoding="utf-8")
     output = tmp_path / P.OUTPUT_REL
     creative = output / "creative"
     creative.mkdir(parents=True)
@@ -1549,7 +1549,7 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
     intake_result = cb_intake.decide_intake(
         "Ep1", "approve", reviewed_by="TestReviewer", log=lambda *a, **k: None)
     beat_path = tmp_path / intake_result["canonicalPackage"]
-    beat_package = json.loads(beat_path.read_text())
+    beat_package = json.loads(beat_path.read_text(encoding="utf-8"))
     source_beat = beat_package["beats"][0]
     source_occurrence = next(
         cut for cut in source_beat["cuts"] if cut["sourceType"] == "dialogue")
@@ -1603,7 +1603,7 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
     }
     _refresh_dialogue_contract(storyboard)
     storyboard_path = creative / "Ep1_scene1_storyboard.json"
-    storyboard_path.write_text(json.dumps(storyboard, indent=1, ensure_ascii=False))
+    storyboard_path.write_text(json.dumps(storyboard, indent=1, ensure_ascii=False), encoding="utf-8")
 
     engine = tmp_path / "engine"
     package_path = output / "Ep1_scene1_production_package.json"
@@ -1661,7 +1661,7 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
         "look": "Crystal Cove meadow at bee scale.", "lighting": "Warm daylight.",
         "weather": "Clear.", "colorTemperature": "Warm.",
         "definingFeature": "A springy leaf beside Zenny's petal.",
-    }}}))
+    }}}), encoding="utf-8")
 
     pkg, pkg_path = R.load_pkg("1", "Ep1")
     _install_scene_look(pkg, engine, "1", "Ep1")
@@ -1692,7 +1692,7 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
     assert manifest["orderedShots"][0]["shotId"] == "S1.SH1"
     assert manifest["captionWindows"][0]["dialogueOccurrenceId"] == \
         occurrence["dialogueOccurrenceId"]
-    captions = pathlib.Path(manifest["outputs"]["captionsSrt"]["path"]).read_text()
+    captions = pathlib.Path(manifest["outputs"]["captionsSrt"]["path"]).read_text(encoding="utf-8")
     assert captions.count("Nailed it.") == 1
     assert pathlib.Path(master).read_bytes().count(b"S1.SH1_c1.mp4") == 1
     assert store.current("Ep1")["scriptVersionId"] == current["scriptVersionId"]

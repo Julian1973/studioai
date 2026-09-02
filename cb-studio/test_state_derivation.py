@@ -20,7 +20,7 @@ def check(name, cond, detail=""):
 
 
 def _extract_script():
-    html = APP_HTML.read_text()
+    html = APP_HTML.read_text(encoding="utf-8")
     m = re.search(r"<script>(.*)</script>", html, re.S)
     if not m:
         raise RuntimeError("could not find <script> block in app.html")

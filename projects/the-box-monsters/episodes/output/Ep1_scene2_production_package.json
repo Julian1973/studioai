@@ -1367,7 +1367,7 @@
     "packageRevision": 2,
     "contentHash": "cdf614baee96416ff24183cd6dc36a488d126086eb5e1f768fef8d4497be2d86"
    },
-   "selectedKeyframeCandidateId": null,
+   "selectedKeyframeCandidateId": "A",
    "keyframeABTest": {
     "createdAt": "2026-09-02T18:36:20",
     "promptHash": "0d72d8305122c9ffe6bcd32bd6b6af070aac3a37f7561e813d31f6b72896d921",

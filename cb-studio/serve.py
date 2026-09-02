@@ -5574,14 +5574,24 @@ class H(http.server.SimpleHTTPRequestHandler):
                         self._json(400, {"error": "category must be one of: " + ", ".join(REJECT_CATEGORIES)}); return
                 candidate = d.get("candidate")
                 if candidate is not None:
-                    if cmd != "approve":
+                    if cmd == "approve-keyframe":
+                        # Already validated as A/B and applied above: approving the visible SEE
+                        # image IS the A/B selection, and select_keyframe_candidate has recorded
+                        # it. cb_render.approve_keyframe takes no candidate of its own, so nothing
+                        # travels on to the job. This generic check used to refuse the field
+                        # outright — AFTER the selection had already been written — so every
+                        # Accept on a shot with an A/B pair answered "candidate applies to approve
+                        # only" and the run never started (2026-09-02, S2.SH03).
+                        candidate = None
+                    elif cmd != "approve":
                         self._json(400, {"error": "candidate applies to approve only"}); return
-                    try:
-                        candidate = int(candidate)
-                    except (TypeError, ValueError):
-                        candidate = -1
-                    if not (1 <= candidate <= 4):
-                        self._json(400, {"error": "candidate must be an integer 1-4"}); return
+                    else:
+                        try:
+                            candidate = int(candidate)
+                        except (TypeError, ValueError):
+                            candidate = -1
+                        if not (1 <= candidate <= 4):
+                            self._json(400, {"error": "candidate must be an integer 1-4"}); return
                 self._json(200, {"ok": True, "jobId": shot_run_job(cmd, scene, episode, shot_id, correction,
                                                                     candidates=candidates,
                                                                     spend_token=spend_token,

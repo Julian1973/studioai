@@ -863,3 +863,24 @@ def test_director_board_binds_the_render_module_it_projects_with():
     assert "_CBR.cb_audio_authority.spoken_dialogue_lines" in board
     assert "_CBR = _canonical_cb_render()" in board
     assert board.index("_CBR = _canonical_cb_render()") < board.index("_CBR.cb_audio_authority")
+
+
+def test_approve_keyframe_candidate_survives_the_generic_candidate_check():
+    """Accepting the visible SEE image is also its A/B selection, and must not then be refused.
+
+    serve.py handles approve-keyframe's candidate specifically — "A" or "B", applied through
+    select_keyframe_candidate — and a generic check further down refuses `candidate` for any
+    command but `approve`. That generic check used to fire for approve-keyframe too, AFTER the
+    selection had already been written, so every Accept on a shot with an A/B pair answered
+    "candidate applies to approve only" and the run never started (2026-09-02, S2.SH03). The
+    specific branch must still come first, and the generic one must let it through.
+    """
+    specific = SERVER.index('if cmd == "approve-keyframe" and d.get("candidate") not in (None, ""):')
+    generic = SERVER.index('candidate = d.get("candidate")\n                if candidate is not None:')
+    assert specific < generic
+    branch = SERVER[generic:generic + 1600]
+    assert 'if cmd == "approve-keyframe":' in branch
+    assert "candidate = None" in branch
+    assert 'elif cmd != "approve":' in branch
+    # cb_render.approve_keyframe takes no candidate argument, so nothing travels on to the job.
+    assert 'if cmd == "approve" and candidate is not None:' in SERVER

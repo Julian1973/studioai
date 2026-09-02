@@ -167,6 +167,31 @@ def test_group_chorus_binds_every_named_canon_voice():
         cards[name]["voiceId"] for name in ("Aida", "Amie", "Howey")]
 
 
+def test_provider_request_pronounces_aida_as_ada_without_renaming_character():
+    locked = {
+        **LOCKED,
+        "speaker": "Keen",
+        "exactText": "Bo, this is Aida.",
+    }
+    item = copy.deepcopy(direction())
+    item.update({
+        "character": "Keen",
+        "exactDialogue": "Bo, this is Aida.",
+        "takeRecipes": [{
+            "recipeId": "intro",
+            "label": "Intro",
+            "performedText": "Bo, this is Aida.",
+            "primary": True,
+            "takesCount": 2,
+        }],
+    })
+    compiled = V.compile_line(item, locked)
+    request = V.emit_v3_requests(compiled)[0]
+    assert compiled["exactDialogue"] == "Bo, this is Aida."
+    assert compiled["character"] == "Keen"
+    assert request["body"]["text"] == "Bo, this is ada."
+
+
 def test_bo_has_canon_voice_card_matching_character_registry():
     card = V.voice_cards()["characters"]["Bo"]
     character = json.loads(

@@ -301,8 +301,9 @@ def emit_v3_requests(compiled, *, max_requests=None):
     requests = []
     for recipe in compiled["takeRecipes"]:
         for take_number in range(1, int(recipe["takesCount"]) + 1):
+            provider_text = _provider_pronunciation_text(recipe["performedText"])
             body = {
-                "text": recipe["performedText"],
+                "text": provider_text,
                 "model_id": compiled["modelId"],
                 "voice_settings": deepcopy(compiled["voiceSettings"]),
             }
@@ -324,6 +325,17 @@ def emit_v3_requests(compiled, *, max_requests=None):
             if max_requests is not None and len(requests) >= int(max_requests):
                 return requests
     return requests
+
+
+def _provider_pronunciation_text(text):
+    """Apply ElevenLabs-only pronunciation spellings without changing script metadata."""
+    replacements = {
+        "Aida": "ada",
+    }
+    provider = str(text or "")
+    for source, spoken in replacements.items():
+        provider = re.sub(rf"\b{re.escape(source)}\b", spoken, provider)
+    return provider
 
 
 def compile_track(direction, locked_lines):

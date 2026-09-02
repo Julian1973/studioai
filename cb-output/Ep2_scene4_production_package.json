@@ -1086,7 +1086,35 @@
    ],
    "sourceType": "opener",
    "sourceShotId": null,
-   "keyframeApproval": null,
+   "keyframeApproval": {
+    "approved": true,
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png",
+    "at": "2026-09-02T08:19:05",
+    "reviewedBy": "Julian",
+    "source": "library",
+    "inputSignature": {
+     "cardHash": "46fbc15ab97a038d843c9063bd95387b1224dd12566690a73906c1af8311ad6c",
+     "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
+     "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
+     "selectedAssetHash": "b1113265a2f36bfe0682b7f1bb1b9efa",
+     "source": "library"
+    },
+    "promptContract": null,
+    "abTest": null,
+    "packageRevision": 1,
+    "contentHash": "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32",
+    "conformanceScreening": {
+     "status": "not-required",
+     "reason": "Registered from an existing generated image as a library/source candidate after the OpenAI advisory checker was unavailable; human Director approval still required.",
+     "mediaProviderCalled": false
+    },
+    "conformanceAdvisoryDecision": {
+     "acceptedBy": "Julian",
+     "acceptedAt": "2026-09-02T08:19:05",
+     "statusAtDecision": "not-required",
+     "reasonAtDecision": "Registered from an existing generated image as a library/source candidate after the OpenAI advisory checker was unavailable; human Director approval still required."
+    }
+   },
    "voiceApproval": null,
    "approvedTake": null,
    "harvestFrame": null,
@@ -1266,9 +1294,24 @@
            "label": "Natural truthful take",
            "performedText": "3, 2, 1…",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "3, 2, 1…"
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "TCRj5m2u9xhZHJ8h9pMv"
+         ],
+         "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
+         "physicalSignature": "Breath catches before the body commits forward."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
@@ -1313,9 +1356,28 @@
            "label": "Natural truthful take",
            "performedText": "3, 2, 1…",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "3, 2, 1…"
           }
-         ]
+         ],
+         "voiceTreatment": "group_chorus",
+         "chorusMembers": [
+          "Bo",
+          "Keen"
+         ],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB",
+          "TCRj5m2u9xhZHJ8h9pMv"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Synchronous ensemble built from each named canon voice.",
+         "physicalSignature": "The named ensemble breathes and resolves as one group."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
@@ -1360,9 +1422,24 @@
            "label": "Natural truthful take",
            "performedText": "3, 2, 1…",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "3, 2, 1…"
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
@@ -1408,9 +1485,24 @@
            "label": "Natural truthful take",
            "performedText": "I’m STILL worried about going to the Learning Circle.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 1,
+           "elevenLabsText": "I’m STILL worried about going to the Learning Circle."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
@@ -1455,9 +1547,24 @@
            "label": "Natural truthful take",
            "performedText": "They all know each other.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 1,
+           "elevenLabsText": "They all know each other."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
@@ -1503,9 +1610,24 @@
            "label": "Natural truthful take",
            "performedText": "But I don’t know them, and they don’t know me.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 1,
+           "elevenLabsText": "But I don’t know them, and they don’t know me."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
@@ -1551,9 +1673,24 @@
            "label": "Natural truthful take",
            "performedText": "It can be hard to meet new people, but it’s good to make new friends.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 1,
+           "elevenLabsText": "It can be hard to meet new people, but it’s good to make new friends."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "TCRj5m2u9xhZHJ8h9pMv"
+         ],
+         "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
+         "physicalSignature": "Breath catches before the body commits forward."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:1b3e544702c737d7909066356fc2211fed499cf0482407623c19ebf5401da8cb",
@@ -1599,9 +1736,24 @@
            "label": "Natural truthful take",
            "performedText": "Hi Keen, I see you have met a new friend.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 1,
+           "elevenLabsText": "Hi Keen, I see you have met a new friend."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:514c2cfdef9f9f1ab7b4434a81c4db55ac49b5f2f26af642866d00fd8c8e05b6",
@@ -1642,9 +1794,24 @@
            "label": "Natural truthful take",
            "performedText": "Yes.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Yes."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "TCRj5m2u9xhZHJ8h9pMv"
+         ],
+         "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
+         "physicalSignature": "Breath catches before the body commits forward."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:35a36f2d98ac2355cd4da55fa47e60535438486a7e52d6f3cae42fe522177877",
@@ -1688,9 +1855,24 @@
            "label": "Natural truthful take",
            "performedText": "Bo, this is Aida.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Bo, this is ada."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "TCRj5m2u9xhZHJ8h9pMv"
+         ],
+         "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Breathless curiosity; courage arrives with an audible gulp and first step.",
+         "physicalSignature": "Breath catches before the body commits forward."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:597128cdd2ca32dc3b26b908d2e8dfa204670cc0a381508f8ca436c300dda784",
@@ -1734,9 +1916,24 @@
            "label": "Natural truthful take",
            "performedText": "You packed your bag.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "You packed your bag."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:28e32fe2a6e5cfa3669f31971e66ec831ede0ddea63aca56fdd89c31108cd9de",
@@ -1778,9 +1975,24 @@
            "label": "Natural truthful take",
            "performedText": "Four times.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Four times."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:dac3ec3a82550489a5ba09fafafc04e58903abc53febd31c63eec30ffe17ed43",
@@ -1825,9 +2037,24 @@
            "label": "Natural truthful take",
            "performedText": "I would have done five.",
            "primary": true,
-           "takesCount": 1
+           "takesCount": 1,
+           "elevenLabsText": "I would have done five."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:1d0622525f4293f5ed90de76d083aea571067dea96cdf69292dbcffab9250093",
@@ -1871,9 +2098,24 @@
            "label": "Natural truthful take",
            "performedText": "You get scared too?",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "You get scared too?"
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:2b2d0f9cab12964cb70d5c6c44f391bd4cb1de80e6401d59e50e33041affa01b",
@@ -1916,9 +2158,24 @@
            "label": "Natural truthful take",
            "performedText": "Every single time.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Every single time."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:2f6fcb91453d722f46d88aaa289814698ee78f9b8d136b325aa8f53ebd70dfb5",
@@ -1962,9 +2219,24 @@
            "label": "Natural truthful take",
            "performedText": "But you still go?",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "But you still go?"
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "AAF2q3NCwTrLMMkEnRLB"
+         ],
+         "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.4,
+          "similarity_boost": 0.9,
+          "style": 0.2
+         },
+         "cadenceSignature": "Young, warm and nimble; quick sincere bursts soften into tiny pauses when worry catches up.",
+         "physicalSignature": "Small breaths, close paws and tail tension reveal hesitation before his body commits."
         },
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:2102c941cfeda7ee812ccf26af2f96d0ebe0b4732b11e2f233a4063d153b5948",
@@ -2007,11 +2279,30 @@
            "label": "Natural truthful take",
            "performedText": "Every single time.",
            "primary": true,
-           "takesCount": 2
+           "takesCount": 2,
+           "elevenLabsText": "Every single time."
           }
-         ]
+         ],
+         "voiceTreatment": "single_voice",
+         "chorusMembers": [],
+         "voiceIds": [
+          "SHuZ9GyczU4QEDzU4QU4"
+         ],
+         "voiceId": "SHuZ9GyczU4QEDzU4QU4",
+         "modelId": "eleven_v3",
+         "voiceSettings": {
+          "stability": 0.45,
+          "similarity_boost": 0.9,
+          "style": 0.15
+         },
+         "cadenceSignature": "Warm, measured quiet authority; she gets quieter and slower when moved.",
+         "physicalSignature": "Stillness leads; breath releases weight and the body opens slowly."
         }
-       ]
+       ],
+       "elevenLabsProviderPronunciations": {
+        "Aida": "ada"
+       },
+       "compiledTrackHash": "620908c968839bd8040184ad13acf22ba10ef3ed7a832562076887809ea54741"
       },
       "outcome": "approved",
       "decisionAt": "2026-09-01T23:56:13",
@@ -5357,25 +5648,10 @@
      "history": []
     }
    },
-   "keyframeCandidate": {
-    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png",
-    "generatedAt": "2026-09-02T08:10:06",
-    "source": "library",
-    "libraryOriginal": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_f5e9b67b.png",
-    "contentHash": "06441efcab4a6f58f4f3477d50befb77fc65136bfd4b1be045a66f962399ae32",
-    "inputSignature": {
-     "cardHash": "46fbc15ab97a038d843c9063bd95387b1224dd12566690a73906c1af8311ad6c",
-     "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
-     "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
-     "selectedAssetHash": "b1113265a2f36bfe0682b7f1bb1b9efa",
-     "source": "library"
-    },
-    "conformanceScreening": {
-     "status": "not-required",
-     "reason": "Registered from an existing generated image as a library/source candidate after the OpenAI advisory checker was unavailable; human Director approval still required.",
-     "mediaProviderCalled": false
-    }
-   }
+   "keyframeCandidate": null,
+   "keyframePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png",
+   "keyframeCandidates": [],
+   "selectedKeyframeCandidateId": null
   }
  ],
  "validation": {

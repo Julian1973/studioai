@@ -11461,21 +11461,21 @@
       "url": "/cb-seed/assets/CB_Crystal_Woods_Willow_Arch_Path_plate.png"
     },
     {
-      "assetId": "a5352bc0a0fca1e0ebd2bbda",
+      "assetId": "76228a8572b5ee91da5b4739",
       "bindingKey": "Ep2|4|S4.SH1|keyframe_candidate|keyframe_candidate",
       "displayType": "image",
       "episode": "Ep2",
       "kind": "keyframe_candidate",
       "label": "S4.SH1 keyframe_candidate",
       "metadata": {},
-      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
-      "registeredAt": "2026-09-01T15:23:08Z",
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png",
+      "registeredAt": "2026-09-02T07:18:58Z",
       "role": "keyframe_candidate",
       "scene": "4",
       "shotId": "S4.SH1",
       "source": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_scene4_production_package.json",
       "status": "candidate",
-      "url": "/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png"
+      "url": "/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png"
     },
     {
       "assetId": "84f845384fe65605b0e8b418",
@@ -11495,21 +11495,21 @@
       "url": "/engine/media/shots/Ep2_S4.SH1_vo_candidate_4bd85a6b.wav"
     },
     {
-      "assetId": "f74a7ed827f0fe038f3d394e",
+      "assetId": "97cfc1e5415c2c6318e87782",
       "bindingKey": "Ep2|4|S4.SH1|keyframe|approved_keyframe",
       "displayType": "image",
       "episode": "Ep2",
       "kind": "keyframe",
       "label": "S4.SH1 approved_keyframe",
       "metadata": {},
-      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png",
-      "registeredAt": "2026-09-01T20:43:59Z",
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png",
+      "registeredAt": "2026-09-02T07:19:05Z",
       "role": "approved_keyframe",
       "scene": "4",
       "shotId": "S4.SH1",
       "source": "/Users/julianjenkins/Desktop/Ai Studio/cb-output/Ep2_scene4_production_package.json",
       "status": "approved",
-      "url": "/engine/media/shots/Ep2_S4.SH1_keyframe_A_2bf3bc9e.png"
+      "url": "/engine/media/shots/Ep2_S4.SH1_keyframe_candidate_bb92a0de.png"
     },
     {
       "assetId": "5e243ee11c4ed3e0e3fba6b2",

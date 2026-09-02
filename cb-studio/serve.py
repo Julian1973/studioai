@@ -1096,12 +1096,22 @@ def _stream(jobId, args):
             if job.get("stopped"):
                 job["status"] = "stopped"; job["step"] = "Stopped by user."
             else:
-                job["status"] = "done" if p.returncode == 0 else "failed"
+                # The first WATCH fire intentionally seals a request and stops before
+                # provider spend. That is a human decision outcome, not a failed job.
+                spend_decision = bool(
+                    p.returncode != 0 and
+                    str(job.get("gate") or "").startswith(("shot:fire", "shot:edit")) and
+                    any("SPEND NOT APPROVED" in line for line in lines)
+                )
+                job["status"] = "decision" if spend_decision else ("done" if p.returncode == 0 else "failed")
                 if p.returncode == 0:
                     # Publish success only after indexes and the Director cache have
                     # been refreshed. The browser reloads as soon as it sees "done".
                     job["status"] = "finalizing"
                     job["step"] = "Refreshing Studio state..."
+                    job["error"] = None
+                elif spend_decision:
+                    job["step"] = "Cost ready for approval"
                     job["error"] = None
                 else:
                     detail = next((line for line in reversed(lines)

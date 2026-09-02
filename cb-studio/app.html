@@ -6692,18 +6692,18 @@ function shDismissLastJob(){
   SH_LAST_JOB=null;renderJobBanner();
 }
 function shJobHTML(j){
-  // Two refusals are EXPECTED, informative behaviour, never a malfunction: the no-token spend DISCLOSURE
-  // (the designed step 1) and the unconfirmed-billing-profile hard block — both render amber, not red.
+  // A sealed spend disclosure is a decision, not an error. Keep the raw engine audit in
+  // durable job history while the main workflow shows only the human-readable next step.
   const raw=j.log||"";
   const billing=/billing_profile/i.test(raw);
-  const disclosure=/SPEND DISCLOSURE|SPEND NOT APPROVED|spend token/i.test(raw)&&j.status!="running"&&j.status!="done";
+  const disclosure=j.status==="decision"||(/SPEND DISCLOSURE|SPEND NOT APPROVED|spend token/i.test(raw)&&j.status!="running"&&j.status!="done");
   const informative=billing||disclosure;
   const col=j.status=="running"?"var(--info)":(j.status=="done"?"var(--ok)":(informative?"var(--warn)":"var(--danger)"));
-  const log=_esc(raw.split("\n").slice(-14).join("\n"));
+  const log=disclosure?"":_esc(raw.split("\n").slice(-14).join("\n"));
   return `<div style="border:1px solid var(--line);border-left:3px solid ${col};border-radius:8px;padding:9px 11px;margin:0 0 12px">
-    <div style="font-size:12px;font-weight:600;color:${col}">${j.status=="running"?"⟳":(j.status=="done"?"✓":(informative?"ℹ":"✗"))} ${_esc(String(j.gate))} — ${_esc(j.step||j.status||"")}</div>
+    <div style="font-size:12px;font-weight:600;color:${col}">${j.status=="running"?"⟳":(j.status=="done"?"✓":(informative?"ℹ":"✗"))} ${disclosure?"WATCH cost review":_esc(String(j.gate))} — ${_esc(disclosure?"Ready for your approval":(j.step||j.status||""))}</div>
     ${log?`<pre style="font-size:10px;line-height:1.45;color:var(--hint);white-space:pre-wrap;margin:6px 0 0;max-height:150px;overflow:auto">${log}</pre>`:""}
-    ${disclosure&&!billing?`<div style="font-size:11px;color:var(--warn);margin-top:6px">ℹ This REFUSED run is the designed disclosure step — the spend token is now stored on the shot; review the numbers above, then “💳 Approve spend &amp; fire”.</div>`:""}
+    ${disclosure&&!billing?`<div style="font-size:11px;color:var(--warn);margin-top:6px">No provider was called and nothing was charged. Review the sealed cost, then choose Approve spend &amp; fire.</div>`:""}
     ${billing?`<div style="font-size:11px;color:var(--warn);margin-top:6px">ℹ Billing profile not confirmed — every paid generation (voice / keyframe / fire) is hard-blocked by design until Julian confirms the plan in billing_profile.json. This refusal is expected protective behaviour, not a malfunction.</div>`:""}
   </div>`;
 }

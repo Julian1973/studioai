@@ -682,6 +682,15 @@ def test_fire_is_acknowledged_in_watch_before_the_first_job_poll():
     assert 'Rendering candidate batch…' in APP
 
 
+def test_spend_disclosure_is_a_decision_not_a_failed_job():
+    assert 'job["status"] = "decision" if spend_decision' in SERVER
+    assert 'job["step"] = "Cost ready for approval"' in SERVER
+    assert 'const disclosure=j.status==="decision"' in APP
+    assert '${disclosure?"WATCH cost review":_esc(String(j.gate))}' in APP
+    assert 'No provider was called and nothing was charged.' in APP
+    assert 'This REFUSED run is the designed disclosure step' not in APP
+
+
 def test_watch_routes_a_failed_opening_stage_back_to_see():
     assert 'pst.kf==="stageBlocked"' in APP
     assert 'Return to See and correct the keyframe' in APP

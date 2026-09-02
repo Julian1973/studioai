@@ -40,6 +40,19 @@ import os
 import re
 import project_profile
 
+# Every engine entry point imports this module, so this is where the machine's own certificate
+# roots are made visible to httpx and requests — see ssl_trust for why (Norton's HTTPS scanning
+# re-issues every provider certificate under a root Windows trusts and certifi has never heard
+# of, which reached the Director as "APIConnectionError: Connection error"). A no-op on a machine
+# with no interception, and it never fails an import: a studio that cannot write the bundle still
+# starts, and the provider call reports the real TLS error as before.
+try:
+    import ssl_trust
+
+    ssl_trust.apply()
+except Exception:  # pragma: no cover - trust repair is best-effort, never a boot failure
+    pass
+
 # FIXED 2026-07-11 (full-codebase audit, duplication finding): this exact pattern used to be hand-duplicated as
 # cb_director_schemas._PAUSEHOLD_RE and cb_preflight._HOLD_RE (a beat's pauseHold field must state a concrete
 # "N second(s)" duration, rule 47) — extracted once so the two checks (authoring-time repair-trigger vs the

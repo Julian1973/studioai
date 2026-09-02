@@ -633,8 +633,8 @@ def test_watch_has_two_screen_progress_and_prompt_revision_history():
     assert 'Why it was rejected' in APP
     assert 'Prompt used by rejected take' in APP
     assert 'Corrected prompt prepared for the next fire' in APP
-    assert 'function durableWatchJob(led)' in APP
-    assert 'const liveJob=activeWatchJob(shot.shotId),durableJob=durableWatchJob(led);' in APP
+    assert 'function durableWatchJob(led,shotId)' in APP
+    assert 'const liveJob=activeWatchJob(shot.shotId),durableJob=durableWatchJob(led,shot.shotId);' in APP
     assert 'liveJob&&durableJob?{...liveJob,...durableJob' in APP
     assert 'Provider task ${job.providerTaskId}' in APP
 
@@ -646,7 +646,7 @@ def test_watch_discovers_server_jobs_after_reload_or_cross_tab_fire():
     assert 'function _watchServerPollTick()' in APP
     assert 'await fetchJobsNow();' in APP
     assert 'const serverJob=shot?activeWatchJob(shot):null;' in APP
-    assert 'const durableJob=shot?durableWatchJob(shLedger(shot)):null;' in APP
+    assert 'const durableJob=shot?durableWatchJob(shLedger(shot),shot):null;' in APP
     assert 'const active=serverJob&&durableJob?{...serverJob,...durableJob' in APP
     assert 'SH_WATCH_POLL=setInterval(_watchServerPollTick,2500);' in APP
     assert 'startWatchServerPoll();' in APP
@@ -654,6 +654,14 @@ def test_watch_discovers_server_jobs_after_reload_or_cross_tab_fire():
     assert 'hasResult?`<div class="watch-live-results">${resultHTML}</div>`' in APP
     assert 'watchLiveProgressHTML(job,hasResult)' in APP
     assert 'if(existing){existing.outerHTML=watchLiveProgressHTML' in APP
+
+
+def test_interrupted_watch_batch_is_not_shown_as_still_rendering():
+    assert "function interruptedWatchBatch(shotId,led)" in APP
+    assert "if(shotId&&interruptedWatchBatch(shotId,led))return null" in APP
+    assert "Render interrupted safely" in APP
+    assert "Resume missing candidates" in APP
+    assert "Interrupted · ready to resume" in APP
 
 
 def test_top_corridor_keeps_completed_current_shot_phases_green():
@@ -683,12 +691,33 @@ def test_fire_is_acknowledged_in_watch_before_the_first_job_poll():
 
 
 def test_spend_disclosure_is_a_decision_not_a_failed_job():
-    assert 'job["status"] = "decision" if spend_decision' in SERVER
+    assert 'job["status"] = "done" if (p.returncode == 0 or spend_decision) else "failed"' in SERVER
     assert 'job["step"] = "Cost ready for approval"' in SERVER
-    assert 'const disclosure=j.status==="decision"' in APP
-    assert '${disclosure?"WATCH cost review":_esc(String(j.gate))}' in APP
+    assert 'const disclosure=j.step==="Cost ready for approval"' in APP
+    assert '${disclosure?"WATCH cost review":failureCopy?_esc(failureCopy.title):_esc(String(j.gate))}' in APP
     assert 'No provider was called and nothing was charged.' in APP
     assert 'This REFUSED run is the designed disclosure step' not in APP
+
+
+def test_watch_readiness_repairs_stale_direction_before_fire():
+    assert '"recompile-animation",' in SERVER
+    assert '"repairAction": "recompile-animation"' in SERVER
+    assert '"code": "animation-direction-repair"' in SERVER
+    assert 'elif cmd == "recompile-animation":' in RENDER
+    assert 'recompile_animation_candidate(pos[0], pos[1], ep(2))' in RENDER
+    assert 'if(readiness.repairAction==="recompile-animation"&&!options.repairAttempt)' in APP
+    assert 'shRun("recompile-animation",shotId' in APP
+    assert 'Rebinding the current approved SEE, HEAR, geography and references locally.' in APP
+
+
+def test_failed_jobs_show_plain_language_with_collapsed_technical_details():
+    assert 'function shFailureCopy(j)' in APP
+    assert 'title:"OpenAI direction credits unavailable"' in APP
+    assert 'title:"HEAR timing needs attention"' in APP
+    assert 'title:"Direction needs refreshing"' in APP
+    assert 'title:"Specialist direction needs local repair"' in APP
+    assert '>Technical details</summary>' in APP
+    assert 'const log=disclosure||failed?""' in APP
 
 
 def test_watch_routes_a_failed_opening_stage_back_to_see():
@@ -702,7 +731,7 @@ def test_watch_routes_a_failed_opening_stage_back_to_see():
 
 
 def test_normal_watch_fire_never_selects_legacy_comparison_transport():
-    fire_start = APP.index("function shRender(shotId)")
+    fire_start = APP.index("function shRender(shotId,options)")
     fire_end = APP.index("function shApproveSpendFire", fire_start)
     production_fire = APP[fire_start:fire_end]
     assert "comparisonModelId" not in production_fire

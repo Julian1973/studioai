@@ -90,6 +90,52 @@ def _tag_purpose_map(value):
     return result
 
 
+def normalize_generated_performance_tags(line, allowed_tags):
+    """Remove unsupported generated V3 tags without touching spoken words.
+
+    Specialist output is advisory. An invented tag such as ``[laughs]`` must not
+    force a user back through Direction when the deterministic compiler already
+    knows the character's allowed palette. Human-authored performance overrides are
+    handled by the caller and are never passed through this repair.
+    """
+    allowed = {str(tag).strip().casefold() for tag in allowed_tags if str(tag).strip()}
+    removed = set()
+
+    def clean(text):
+        def replace(match):
+            tag = match.group(1).strip().casefold()
+            if tag in allowed:
+                return match.group(0)
+            removed.add(tag)
+            return ""
+        cleaned = _TAG_RE.sub(replace, str(text or ""))
+        return re.sub(r"[ \t]{2,}", " ", cleaned).strip()
+
+    is_model = hasattr(line, "model_dump")
+    get = (lambda key, default=None: getattr(line, key, default)) if is_model else line.get
+    set_value = (lambda key, value: setattr(line, key, value)) if is_model else line.__setitem__
+    set_value("performedText", clean(get("performedText", "")))
+    for recipe in get("takeRecipes", []) or []:
+        if hasattr(recipe, "model_dump"):
+            recipe.performedText = clean(recipe.performedText)
+        else:
+            recipe["performedText"] = clean(recipe.get("performedText", ""))
+    purposes = get("tagPurposes", []) or []
+    if isinstance(purposes, dict):
+        set_value("tagPurposes", {
+            tag: purpose for tag, purpose in purposes.items()
+            if str(tag).strip().casefold() in allowed
+        })
+    else:
+        kept = []
+        for item in purposes:
+            tag = getattr(item, "tag", None) if hasattr(item, "model_dump") else item.get("tag")
+            if str(tag or "").strip().casefold() in allowed:
+                kept.append(item)
+        set_value("tagPurposes", kept)
+    return sorted(removed)
+
+
 def _digest(value):
     return hashlib.sha256(json.dumps(
         value, sort_keys=True, ensure_ascii=False, separators=(",", ":")

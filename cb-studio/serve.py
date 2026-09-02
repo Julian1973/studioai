@@ -1103,7 +1103,7 @@ def _stream(jobId, args):
                     str(job.get("gate") or "").startswith(("shot:fire", "shot:edit")) and
                     any("SPEND NOT APPROVED" in line for line in lines)
                 )
-                job["status"] = "decision" if spend_decision else ("done" if p.returncode == 0 else "failed")
+                job["status"] = "done" if (p.returncode == 0 or spend_decision) else "failed"
                 if p.returncode == 0:
                     # Publish success only after indexes and the Director cache have
                     # been refreshed. The browser reloads as soon as it sees "done".
@@ -1457,6 +1457,7 @@ def relay_approve_beat(scene, winner_code, episode="Ep1", fast=False):
 SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "approve-timing-slate", "reject-timing-slate", "scenelook", "approve-scenelook", "reject-scenelook",
              "pose", "approve-pose", "reject-pose", "select-pose-upload",
              "build-keyframe", "keyframe", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+             "recompile-animation",
              "select-upload", "select-library", "select-previous",
              "select-render-upload",
              "select-scenelook-upload", "select-scenelook-library",
@@ -2168,12 +2169,12 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
       reject  -> cb_render.py reject <scene> <shotId> <correction> [--category X] [episode]
       others  -> cb_render.py <cmd> <scene> [episode]
     WITHOUT --spend-token, fire/next run fresh validation, print the SPEND DISCLOSURE, store the single-use
-    token on the shot's ledger (pendingSpendAuth) and exit 1 REFUSED — the job reports "failed" with the
-    disclosure in its log; that IS the designed step 1, not a malfunction. Re-posting with a mid-batch
+    token on the shot's ledger (pendingSpendAuth) and exit 1 REFUSED — the runner normalizes that expected
+    stop to a completed "Cost ready for approval" decision. Re-posting with a mid-batch
     token resumes: only the missing candidates generate (ledger batch.status == "generating").
     Every value travels as its own argv element — never a shell string."""
     args = ["cb_render.py", cmd, str(scene)]
-    if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+    if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe", "recompile-animation",
                "pose", "approve-pose", "reject-pose", "select-pose-upload",
                "select-upload", "select-library", "select-previous", "select-render-upload",
                "approve-voice", "reject-voice", "regen-voice",
@@ -3284,21 +3285,50 @@ class H(http.server.SimpleHTTPRequestHandler):
                 ledger = _CBR._ledger(pkg, shot_id)
                 _CBR._require_valid(pkg)
                 _CBR._require_current_lineage(pkg, scene, ep)
-                _CBR._fresh_validation(pkg, ep, shot_id)
                 budget = _CBR._performance_budget_report(
                     _CBR._shot_creative_contract_view(pkg, shot, scene, ep), ledger)
                 if not budget.get("ready"):
-                    raise _CBR.Refused("The approved performance does not fit this shot's timing budget.")
+                    return self._json(200, {
+                        "ready": False, "zeroSpend": True,
+                        "code": "voice-timing-overloaded", "targetStage": "voice",
+                        "nextAction": "Review HEAR timing",
+                        "message": "The approved performance needs a timing adjustment before WATCH.",
+                    })
                 if _CBR.cb_audio_authority.spoken_dialogue_lines(shot):
                     voice = _CBR._voice_approval_status(pkg, shot)
                     if not voice.get("current"):
-                        raise _CBR.Refused("Approve the current HEAR performance before rendering.")
+                        return self._json(200, {
+                            "ready": False, "zeroSpend": True,
+                            "code": "voice-approval-required", "targetStage": "voice",
+                            "nextAction": "Review HEAR",
+                            "message": "Approve the current HEAR performance before WATCH.",
+                        })
+                direction = _CBR._department_record_status(pkg, shot_id, "animation")
+                if not direction.get("current"):
+                    return self._json(200, {
+                        "ready": False, "zeroSpend": True,
+                        "code": "animation-direction-repair", "repairAction": "recompile-animation",
+                        "nextAction": "Refresh WATCH direction automatically",
+                        "message": "The shot inputs changed. StudioAI can recompile WATCH direction locally from the current approved SEE and HEAR inputs.",
+                    })
+                _CBR._fresh_validation(pkg, ep, shot_id)
                 return self._json(200, {"ready": True, "zeroSpend": True,
                                         "nextAction": "Review cost and Fire"})
             except _CBR.Refused as exc:
+                message = str(exc)
+                if any(term in message.casefold() for term in (
+                        "animation direction is stale", "animation-compiler-contract-failed",
+                        "keyframe and render geography", "animation provider prompt is not production-ready")):
+                    return self._json(200, {
+                        "ready": False, "zeroSpend": True,
+                        "code": "animation-direction-repair", "repairAction": "recompile-animation",
+                        "nextAction": "Refresh WATCH direction automatically",
+                        "message": "WATCH direction no longer matches the approved shot inputs. StudioAI can repair it locally before Fire.",
+                    })
                 return self._json(200, {"ready": False, "zeroSpend": True,
+                                        "code": "production-input-hold",
                                         "nextAction": "Resolve the current production input",
-                                        "message": str(exc)})
+                                        "message": message.removeprefix("REFUSED — ").removeprefix("REFUSED - ")})
             except Exception:
                 return self._json(200, {"ready": False, "zeroSpend": True,
                                         "nextAction": "Refresh the scene package",

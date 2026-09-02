@@ -549,7 +549,7 @@ def test_studio_exposes_prompt_lab_without_replacing_approval_controls():
     assert 'if(asset.state==="rejected")' in app
     assert 'asset.state==="rejected"?"Build replacement"' in app
     assert "Build replacement keyframe" in app
-    assert "function shRender(shotId)" in app
+    assert "function shRender(shotId,options)" in app
     assert '<button class="btn render-primary" onclick="shRender(' in app
     assert '<summary>Studio details</summary>' in app
     assert 'class="praildetails"' in app

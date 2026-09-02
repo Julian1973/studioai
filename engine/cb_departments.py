@@ -1417,6 +1417,42 @@ def prepare_voice(context, locked_lines, *, log=print):
         "never restore an older delivery description.\n" +
         "\n\nLOCKED LINES (same count/order/speaker/words must be returned):\n" + _j(locked_lines),
         VoiceDirection, label="department_voice", log=log)
+    cards = cb_voice_director.voice_cards().get("characters") or {}
+    cards_casefold = {str(name).casefold(): card for name, card in cards.items()}
+    for directed, locked in zip(result.lines, locked_lines):
+        # Keep explicit human performance markup literal. Generated markup is a
+        # suggestion and can be reduced deterministically to the registered palette.
+        if str(locked.get("performanceOverride") or "").strip():
+            continue
+        register = registers.get(directed.archetypeId) or {}
+        chorus = list(locked.get("chorusMembers") or [])
+        member_cards = [cards_casefold[str(name).casefold()] for name in chorus
+                        if str(name).casefold() in cards_casefold]
+        if member_cards:
+            default_tags = {
+                tag for card in member_cards for tag in card.get("defaultTags", [])
+            }
+            banned_sets = [
+                {str(tag).casefold() for tag in card.get("bannedTags", [])}
+                for card in member_cards
+            ]
+            banned = set.intersection(*banned_sets) if banned_sets else set()
+        else:
+            card = cards_casefold.get(
+                str(locked.get("speaker") or directed.character).casefold()) or {}
+            default_tags = set(card.get("defaultTags", []))
+            banned = {str(tag).casefold() for tag in card.get("bannedTags", [])}
+        allowed = {
+            str(tag).casefold()
+            for tag in default_tags.union(register.get("allowedTags") or [])
+        } - banned
+        removed = cb_voice_director.normalize_generated_performance_tags(directed, allowed)
+        if removed:
+            log(
+                f"VOICE DIRECTOR - {context.get('shotId') or result.shotId}: removed "
+                f"unsupported generated tag(s) on {directed.dialogueOccurrenceId}: "
+                + ", ".join(removed)
+            )
     return validate_voice_direction(result, locked_lines)
 
 

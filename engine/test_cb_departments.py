@@ -279,6 +279,23 @@ def test_prepare_voice_loads_the_skill_and_stops_at_structured_candidate(monkeyp
     assert "every bracketed audio tag" in seen["user"]
 
 
+def test_prepare_voice_repairs_generated_off_palette_tag_without_changing_words(monkeypatch):
+    def fake(system, user, schema, **kwargs):
+        line = _voice_line(performedText="[angry][nervous] Nailed it.")
+        line.takeRecipes[0].performedText = "[angry][nervous] Nailed it."
+        line.tagPurposes.append(D.VoiceTagPurpose(tag="angry", purpose="Invent anger."))
+        return schema(shotId="S1.SH1", sceneIntention="cover the wobble", lines=[line])
+
+    logs = []
+    monkeypatch.setattr(D.cb_llm, "structured", fake)
+    out = D.prepare_voice({"shotId": "S1.SH1"}, _locked(), log=logs.append)
+
+    assert out.lines[0].performedText == "[nervous] Nailed it."
+    assert out.lines[0].takeRecipes[0].performedText == "[nervous] Nailed it."
+    assert [item.tag for item in out.lines[0].tagPurposes] == ["nervous"]
+    assert any("removed unsupported generated tag(s)" in item for item in logs)
+
+
 def test_animation_provider_shell_enforces_audio_lock_and_continuity_contract():
     shot = {
         "dialogueLines": [

@@ -3295,7 +3295,7 @@ function corridorPhaseState(phase,stages){
     if(policy.needsKeyframe&&!current.keyframe)return "ready";
     if(current.animation)return "approved";
     if(pending.animation||policy.animState==="candidates-pending")return "awaiting";
-    if(activeWatchJob(shot.shotId)||durableWatchJob(shLedger(shot.shotId)))return "generating";
+    if(activeWatchJob(shot.shotId)||durableWatchJob(shLedger(shot.shotId),shot.shotId))return "generating";
   }
   return aggregate;
 }
@@ -4861,8 +4861,18 @@ function activeWatchJob(tok){
     String(job.scene)==String(SH_SC)&&Array.isArray(job.args)&&job.args.includes(String(tok))&&
     (String(job.gate||"").includes("fire")||String(job.step||"").toLowerCase().includes("render")))||null;
 }
-function durableWatchJob(led){
+function interruptedWatchBatch(shotId,led){
   const batch=(led&&led.batch)||{};
+  if(String(batch.status||"").toLowerCase()!=="generating"||!batch.token)return null;
+  const jobs=Object.values(PJOBS||{}).filter(job=>job&&String(job.gate||"")===`shot:fire:${shotId}`)
+    .sort((a,b)=>Number(b.started||0)-Number(a.started||0));
+  const latest=jobs[0];
+  if(!latest||String(latest.status||"").toLowerCase()!=="interrupted")return null;
+  return {token:batch.token,shotId,step:latest.step||"Studio restarted before this render completed."};
+}
+function durableWatchJob(led,shotId){
+  const batch=(led&&led.batch)||{};
+  if(shotId&&interruptedWatchBatch(shotId,led))return null;
   if(!["generating","submitting","submitted","polling","downloading","finalizing"].includes(String(batch.status||"").toLowerCase()))return null;
   const transportMap=batch.transportCandidates||{},transports=Object.values(transportMap);
   const active=transports.find(row=>row&&row.status==="running")||transports[0]||{};
@@ -4905,7 +4915,8 @@ function watchRevisionHistoryHTML(led,currentPrompt){
   }).join("")}</div></details>`;
 }
 function watchProductionSurfaceHTML(shot,led,media,resultHTML,currentPrompt){
-  const liveJob=activeWatchJob(shot.shotId),durableJob=durableWatchJob(led);
+  const recovery=interruptedWatchBatch(shot.shotId,led);
+  const liveJob=activeWatchJob(shot.shotId),durableJob=durableWatchJob(led,shot.shotId);
   const job=liveJob&&durableJob?{...liveJob,...durableJob,step:liveJob.step||durableJob.step}:(liveJob||durableJob);
   const hasResult=!!((media.candidates||[]).length||media.clip||media.finalFrame);
   const openingUrl=media.openingFrame||media.keyframe;
@@ -4919,10 +4930,11 @@ function watchProductionSurfaceHTML(shot,led,media,resultHTML,currentPrompt){
   const opening=openingUrl
     ?`<img src="${BASE}${_esc(openingUrl)}?v=${MEDIA_V}" alt="${_esc(openingLabel)} for ${_esc(shot.shotId)}">${candidateReview}`
     :`<div class="watch-waiting"><b>Opening keyframe unavailable</b><small>WATCH remains protected until the approved opening state is present.</small></div>`;
+  const recoveryPanel=recovery?`<div class="watch-waiting"><b>Render interrupted safely</b><small>The Studio stopped before every candidate returned. Completed work is preserved. Resume with the same approved token to generate only missing candidates.</small><button class="btn" onclick="shResumeBatch('${_esc(recovery.token)}','${_esc(shot.shotId)}')">Resume missing candidates</button></div>`:"";
   const result=job
     ?`${hasResult?`<div class="watch-live-results">${resultHTML}</div>`:""}${watchLiveProgressHTML(job,hasResult)}`
-    :resultHTML;
-  return `<div class="watch-stage"><section class="watch-screen watch-opening"><div class="watch-screen-head"><span>${openingState}</span><span>${_esc(openingLabel)}</span></div><div class="watch-screen-media">${opening}</div></section><section class="watch-screen watch-result" id="watchResultScreen"><div class="watch-screen-head"><span>2 · WATCH RESULT</span><span id="watchResultState">${job?"Rendering":hasResult?"Current take":"Awaiting render"}</span></div><div class="watch-screen-media ${job&&hasResult?'has-live-result':''}" id="watchResultMedia">${result}</div></section></div>${watchRevisionHistoryHTML(led,currentPrompt)}`;
+    :recovery?`${hasResult?resultHTML:""}${recoveryPanel}`:resultHTML;
+  return `<div class="watch-stage"><section class="watch-screen watch-opening"><div class="watch-screen-head"><span>${openingState}</span><span>${_esc(openingLabel)}</span></div><div class="watch-screen-media">${opening}</div></section><section class="watch-screen watch-result" id="watchResultScreen"><div class="watch-screen-head"><span>2 · WATCH RESULT</span><span id="watchResultState">${job?"Rendering":recovery?"Interrupted · ready to resume":hasResult?"Current take":"Awaiting render"}</span></div><div class="watch-screen-media ${job&&hasResult?'has-live-result':''}" id="watchResultMedia">${result}</div></section></div>${watchRevisionHistoryHTML(led,currentPrompt)}`;
 }
 function shotDialogueWindow(shot){
   const routed=routeShotAudio(shot),lines=routed.spokenDialogue;
@@ -5312,9 +5324,10 @@ function renderShotStage(mode){
       } else {
         body=`<div class="artefact-empty"><div style="color:var(--muted)">No candidates fired yet for ${_esc(s.shotId)}.</div></div>`;
         const nextLed=shNextLedger(), auth=(nextLed&&nextLed.pendingSpendAuth)||null;
-        const renderWorking=!!durableWatchJob(led);
+        const interrupted=interruptedWatchBatch(tok,led);
+        const renderWorking=!!durableWatchJob(led,tok);
         decVersion=renderWorking?"Seedance 2.5 is rendering":"Ready to generate";
-        decActions=renderWorking?[`<button class="btn render-primary" disabled>Rendering candidate batch…</button>`,
+        decActions=interrupted?[`<button class="btn render-primary" onclick="shResumeBatch('${_esc(interrupted.token)}','${_esc(tok)}')">Resume missing candidates</button>`]:renderWorking?[`<button class="btn render-primary" disabled>Rendering candidate batch…</button>`,
           `<div class="dec-caption">StudioAI is polling Seedance. This panel will update automatically when the render returns.</div>`]:[`<button class="btn render-primary" onclick="shRender('${tok}')">Fire Seedance 2.5</button>`,
           `<button class="btn ghost" onclick="document.getElementById('renderUpload_${_esc(tok)}').click()">Upload render · no generation cost</button><input type="file" id="renderUpload_${_esc(tok)}" accept="video/mp4,video/webm" style="display:none" onchange="shRenderUpload('${_esc(tok)}',this)">`,
           `<div class="dec-caption">${auth&&auth.token?"The exact Seedance 2.5 request and cost are ready for your confirmation.":"Fire is the separate paid decision. Longer units relay internally, then return as one candidate for review."}</div>`];
@@ -6483,13 +6496,18 @@ function shDiscCount(auth){   // the candidate count the token is BOUND to (null
 }
 function showFireReadinessHold(shotId,data){
   const sheet=document.getElementById("sheet");if(!sheet)return;
+  const target=data.targetStage;
+  const action=target==="voice"
+    ?`<button class="btn" onclick="closeM();openShotOutcome('voice',PSHOT_I)">${_esc(data.nextAction||"Review HEAR")}</button>`
+    :`<button class="btn" onclick="closeM();openDirectorAgent({stage:'animation',shotId:'${_esc(shotId)}',seed:${_attr(JSON.stringify(data.message||"Help me resolve the current WATCH blocker."))}})">Ask Director</button>`;
   sheet.innerHTML=`<button class="x" onclick="closeM()">×</button><h3>WATCH needs one correction</h3>
     <p class="dec-caption">${_esc(data.message||"StudioAI could not verify the current production package.")}</p>
     <div class="disc-rows"><div class="disc-row"><span class="disc-k">Spend</span><span class="disc-v">$0 · no provider contacted</span></div><div class="disc-row"><span class="disc-k">Next action</span><span class="disc-v">${_esc(data.nextAction||"Resolve the current production input")}</span></div></div>
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn ghost" onclick="closeM()">Close</button><button class="btn" onclick="closeM();openDirectorAgent({stage:'animation',shotId:'${_esc(shotId)}',seed:${_attr(JSON.stringify(data.message||"Help me resolve the current WATCH blocker."))}})">Ask Director</button></div>`;
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn ghost" onclick="closeM()">Close</button>${action}</div>`;
   document.getElementById("modal").classList.add("show");
 }
-async function shRender(shotId){
+async function shRender(shotId,options){
+  options=options||{};
   if(!currentProductionDirection("animation",shotId)){
     prepareDirectionThen("animation",shotId,()=>shRender(shotId));return;
   }
@@ -6499,7 +6517,18 @@ async function shRender(shotId){
   try{
     const url=BASE+"/api/shot-fire-readiness?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP)+"&shotId="+encodeURIComponent(shotId);
     const readiness=await (await fetch(url,{cache:"no-store"})).json();
-    if(!readiness.ready){clearInlineSourceProgress();showFireReadinessHold(shotId,readiness);return;}
+    if(!readiness.ready){
+      clearInlineSourceProgress();
+      if(readiness.repairAction==="recompile-animation"&&!options.repairAttempt){
+        showStageWorking("Refreshing WATCH direction","Rebinding the current approved SEE, HEAR, geography and references locally. No media provider is contacted.");
+        shRun("recompile-animation",shotId,{afterJob:job=>{
+          if(job&&job.status==="done")shRender(shotId,{repairAttempt:true});
+          else showFireReadinessHold(shotId,{message:"The local WATCH repair did not complete.",nextAction:"Ask Director"});
+        }});
+        return;
+      }
+      showFireReadinessHold(shotId,readiness);return;
+    }
   }catch(e){clearInlineSourceProgress();showFireReadinessHold(shotId,{message:"StudioAI could not verify the current WATCH package.",nextAction:"Reload the scene and try again"});return;}
   shRun('fire',shotId,{candidates:SH_CANDS,
     afterJob:()=>{
@@ -6659,7 +6688,7 @@ async function _watchServerPollTick(){
   await fetchJobsNow();
   const shot=(pShots()[PSHOT_I]||{}).shotId;
   const serverJob=shot?activeWatchJob(shot):null;
-  const durableJob=shot?durableWatchJob(shLedger(shot)):null;
+  const durableJob=shot?durableWatchJob(shLedger(shot),shot):null;
   const active=serverJob&&durableJob?{...serverJob,...durableJob,step:serverJob.step||durableJob.step}:(serverJob||durableJob);
   renderJobBanner();
   if(active){
@@ -6691,18 +6720,51 @@ function shDismissLastJob(){
   try{if(id)localStorage.setItem("cb_dismissed_job:"+id,"1");}catch(e){}
   SH_LAST_JOB=null;renderJobBanner();
 }
+function shFailureCopy(j){
+  const raw=String((j&&j.log)||""),low=raw.toLowerCase();
+  if(/credit_balance_exhausted|insufficient_quota|no credits remaining/.test(low))return {
+    title:"OpenAI direction credits unavailable",
+    detail:"The specialist text step could not run. No image, voice or video provider was charged. Recheck OpenAI billing, then retry this step."
+  };
+  if(/approved voice performance could not fit|voice-timed performance budget is overloaded/.test(low))return {
+    title:"HEAR timing needs attention",
+    detail:"The approved performance cannot be placed without clipping. Open HEAR to retime it or let the lossless timing repair extend the shot."
+  };
+  if(/direction is stale|direct-input-signature-mismatch/.test(low))return {
+    title:"Direction needs refreshing",
+    detail:"An approved input changed. StudioAI will rebuild only this shot's affected specialist direction before the next Fire."
+  };
+  if(/pydantic|validation error|compiler-contract-failed|geography are not verbatim-identical/.test(low))return {
+    title:"Specialist direction needs local repair",
+    detail:"The generated direction did not match the typed production contract. StudioAI will normalize and recompile it before the next Fire."
+  };
+  if(/approved see keyframe|keyframe.*required|opening-frame approval/.test(low))return {
+    title:"SEE approval required",
+    detail:"Open SEE, choose or create the opening keyframe, and approve it before WATCH."
+  };
+  if(/provider error|transport failure|timed out|connection/.test(low))return {
+    title:"Provider connection failed",
+    detail:"The provider did not complete this request. Existing approved work is unchanged; retry when the connection is available."
+  };
+  return {title:"Studio could not complete this step",detail:"Existing approved work is unchanged. Open technical details only if the same step fails again."};
+}
 function shJobHTML(j){
   // A sealed spend disclosure is a decision, not an error. Keep the raw engine audit in
   // durable job history while the main workflow shows only the human-readable next step.
   const raw=j.log||"";
   const billing=/billing_profile/i.test(raw);
-  const disclosure=j.status==="decision"||(/SPEND DISCLOSURE|SPEND NOT APPROVED|spend token/i.test(raw)&&j.status!="running"&&j.status!="done");
+  const disclosure=j.step==="Cost ready for approval"||(/SPEND DISCLOSURE|SPEND NOT APPROVED|spend token/i.test(raw)&&j.status!=="running");
   const informative=billing||disclosure;
   const col=j.status=="running"?"var(--info)":(j.status=="done"?"var(--ok)":(informative?"var(--warn)":"var(--danger)"));
-  const log=disclosure?"":_esc(raw.split("\n").slice(-14).join("\n"));
+  const failed=!informative&&!['running','done'].includes(j.status);
+  const failureCopy=failed?shFailureCopy(j):null;
+  const log=disclosure||failed?"":_esc(raw.split("\n").slice(-14).join("\n"));
+  const technical=failed&&raw?`<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;color:var(--hint)">Technical details</summary><pre style="font-size:10px;line-height:1.45;color:var(--hint);white-space:pre-wrap;margin:6px 0 0;max-height:150px;overflow:auto">${_esc(raw.split("\n").slice(-18).join("\n"))}</pre></details>`:"";
   return `<div style="border:1px solid var(--line);border-left:3px solid ${col};border-radius:8px;padding:9px 11px;margin:0 0 12px">
-    <div style="font-size:12px;font-weight:600;color:${col}">${j.status=="running"?"⟳":(j.status=="done"?"✓":(informative?"ℹ":"✗"))} ${disclosure?"WATCH cost review":_esc(String(j.gate))} — ${_esc(disclosure?"Ready for your approval":(j.step||j.status||""))}</div>
+    <div style="font-size:12px;font-weight:600;color:${col}">${j.status=="running"?"⟳":(j.status=="done"?"✓":(informative?"ℹ":"✗"))} ${disclosure?"WATCH cost review":failureCopy?_esc(failureCopy.title):_esc(String(j.gate))} — ${_esc(disclosure?"Ready for your approval":failureCopy?"Stopped safely":(j.step||j.status||""))}</div>
+    ${failureCopy?`<div style="font-size:11px;color:var(--muted);margin-top:6px">${_esc(failureCopy.detail)}</div>`:""}
     ${log?`<pre style="font-size:10px;line-height:1.45;color:var(--hint);white-space:pre-wrap;margin:6px 0 0;max-height:150px;overflow:auto">${log}</pre>`:""}
+    ${technical}
     ${disclosure&&!billing?`<div style="font-size:11px;color:var(--warn);margin-top:6px">No provider was called and nothing was charged. Review the sealed cost, then choose Approve spend &amp; fire.</div>`:""}
     ${billing?`<div style="font-size:11px;color:var(--warn);margin-top:6px">ℹ Billing profile not confirmed — every paid generation (voice / keyframe / fire) is hard-blocked by design until Julian confirms the plan in billing_profile.json. This refusal is expected protective behaviour, not a malfunction.</div>`:""}
   </div>`;

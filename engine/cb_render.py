@@ -10900,6 +10900,8 @@ if __name__ == "__main__":
         elif cmd == "select-render-upload":
             print(json.dumps(
                 import_animation_candidate(pos[0], pos[1], pos[2], ep(3)), indent=1))
+        elif cmd == "recompile-animation":
+            recompile_animation_candidate(pos[0], pos[1], ep(2))
         elif cmd == "voice-status":
             print(json.dumps(voice_performance_status(pos[0], pos[1], ep(2)), indent=1))
         elif cmd == "save-voice":

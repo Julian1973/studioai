@@ -87,6 +87,23 @@ def test_post_direction_audit_hard_blocks_rulebook_failures(mutation, match):
         V.compile_line(item, LOCKED)
 
 
+def test_generated_tag_normalization_removes_only_off_palette_tags_and_keeps_words():
+    item = copy.deepcopy(direction())
+    item["performedText"] = "[laughs][confident] Nailed it."
+    item["takeRecipes"][0]["performedText"] = "[laughs][confident] Nailed it."
+    item["tagPurposes"]["laughs"] = "An invented laugh."
+
+    removed = V.normalize_generated_performance_tags(
+        item, {"exhales", "confident", "breathes", "proud", "casual"})
+
+    assert removed == ["laughs"]
+    assert item["performedText"] == "[confident] Nailed it."
+    assert item["takeRecipes"][0]["performedText"] == "[confident] Nailed it."
+    assert "laughs" not in item["tagPurposes"]
+    assert V._words(item["performedText"]) == V._words(LOCKED["exactText"])
+    V.compile_line(item, LOCKED)
+
+
 def test_track_refuses_an_uncovered_locked_line():
     with pytest.raises(V.VoiceContractError, match="script locks 2"):
         V.compile_track({"shotId": "S1.SH1A", "lines": [direction()]},

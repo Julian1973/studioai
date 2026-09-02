@@ -32,10 +32,10 @@ EDGE_FADE_SEC = 0.012
 MIN_DIALOGUE_GAP_SEC = 0.0
 MIN_LANDING_ROOM_SEC = 0.35
 TIMING_COVERAGE_TOLERANCE_SEC = 0.20
-# A small provider-duration variance must not strand an already-paid continuous take.
-# Keep pitch unchanged with ffmpeg atempo, preserve the authored first cue, and expose
-# the exact adjustment in the timing contract for human review.
-MAX_CONTINUOUS_TEMPO_FACTOR = 1.10
+# A provider-duration variance must not strand an already-paid continuous take when
+# the whole acted conversation can still be pitch-preserved inside the 30s slate.
+# The exact adjustment is recorded in the timing contract for human review.
+MAX_CONTINUOUS_TEMPO_FACTOR = 1.20
 CONTINUOUS_END_ROOM_SEC = 0.10
 
 

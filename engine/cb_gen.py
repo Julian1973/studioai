@@ -65,8 +65,8 @@ BYTEPLUS_ARK_KEY = os.environ.get("BYTEPLUS_ARK_API_KEY", "")
 BYTEPLUS_ARK = "https://ark.ap-southeast.bytepluses.com"
 
 # Canon keeps the character name "Aida". ElevenLabs pronounces that spelling
-# incorrectly, so only the provider-facing voice text uses the phonetic "Ada".
-ELEVEN_PRONUNCIATION_OVERRIDES = {"Aida": "Ada"}
+# incorrectly, so only the provider-facing voice text uses the phonetic "ada".
+ELEVEN_PRONUNCIATION_OVERRIDES = {"Aida": "ada", "Ada": "ada"}
 
 
 def _eleven_voice_text(text):

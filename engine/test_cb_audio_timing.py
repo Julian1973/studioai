@@ -248,6 +248,32 @@ def test_small_continuous_overrun_is_tempo_fitted_without_clipping_or_provider(t
     assert result["providerCalledForTimingRecovery"] is False
 
 
+def test_s4_length_continuous_dialogue_recovery_fits_paid_take_without_provider(tmp_path):
+    raw = tmp_path / "s4-dialogue.mp3"
+    _silent_audio(raw, 34.56)
+    timing = cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({
+        "audioSha256": cb_audio_timing.file_sha256(raw),
+        "endpoint": "/v1/text-to-dialogue/with-timestamps",
+        "voiceSegments": [
+            {"dialogueInputIndex": 0, "startTimeSec": 0, "endTimeSec": 1.05},
+            {"dialogueInputIndex": 1, "startTimeSec": 1.05, "endTimeSec": 34.56},
+        ],
+    }), encoding="utf-8")
+
+    result = cb_audio_timing.render_timed_dialogue_master(
+        raw, timing,
+        [{"startSec": 0.55, "endSec": 1.6}, {"startSec": 1.81, "endSec": 3.0}],
+        30, tmp_path / "master.wav")
+
+    assert result["assemblyMode"] == "continuous-dialogue-performance"
+    assert result["performanceTargetStartSec"] == pytest.approx(0.55)
+    assert result["tempoAdjusted"] is True
+    assert result["tempoFactor"] == pytest.approx(1.177, abs=.002)
+    assert result["performanceTargetEndSec"] == pytest.approx(29.9, abs=.02)
+    assert result["providerCalledForTimingRecovery"] is False
+
+
 def test_group_chorus_uses_rebuilt_segments_not_stale_character_alignment(tmp_path):
     raw = tmp_path / "chorus.mp3"
     _silent_audio(raw, 4)

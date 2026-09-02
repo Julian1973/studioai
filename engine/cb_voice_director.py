@@ -331,6 +331,7 @@ def _provider_pronunciation_text(text):
     """Apply ElevenLabs-only pronunciation spellings without changing script metadata."""
     replacements = {
         "Aida": "ada",
+        "Ada": "ada",
     }
     provider = str(text or "")
     for source, spoken in replacements.items():

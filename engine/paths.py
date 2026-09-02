@@ -102,11 +102,33 @@ def _creative(key, default_rel):
     return _s(declared) if declared else os.path.join(CREATIVE, default_rel)
 
 
+def _chair_craft(key, default_rel, role, craft_name):
+    """A chair's CRAFT file: the project's own when it has one, else the studio's (rule 2/87).
+
+    The chair's craft — the Voice Director's method, its register vocabulary — belongs to the
+    STUDIO and names no show; a project that wants its own overrides it by writing the same file
+    under its creative/ folder, which is TASTE and is read in preference. The modules that load
+    these two raise rather than degrade, so a project without them cannot run the voice stage at
+    all: The Box Monsters hit exactly that on its first HEAR pass, "Voice Director data is
+    unavailable: VOICE_ARCHETYPE_REGISTERS.json" (2026-09-02). Crystal Bears has its own copies
+    of both and is unaffected — its files still win, byte for byte.
+    """
+    declared = PROFILE.creative_path(key)
+    if declared:
+        return _s(declared)
+    own = os.path.join(CREATIVE, default_rel)
+    if os.path.exists(own):
+        return own
+    return os.path.join(ROOT, "studio", "chairs", role, craft_name)
+
+
 LEARNING = _creative("learning", "learning")
 EXEMPLARS = _creative("exemplars", "EXEMPLAR_LIBRARY.json")
 DAILIES_LIBRARY = _creative("dailiesLibrary", os.path.join("learning", "DAILIES_LIBRARY.jsonl"))
-VOICE_REGISTERS = _creative("voiceRegisters", "VOICE_ARCHETYPE_REGISTERS.json")
-VOICE_RULEBOOK = _creative("voiceRulebook", "VOICE_DIRECTOR_RULEBOOK.json")
+VOICE_REGISTERS = _chair_craft("voiceRegisters", "VOICE_ARCHETYPE_REGISTERS.json",
+                               "voice-director", "VOICE_ARCHETYPE_REGISTERS.json")
+VOICE_RULEBOOK = _chair_craft("voiceRulebook", "VOICE_DIRECTOR_RULEBOOK.json",
+                              "voice-director", "VOICE_DIRECTOR_RULEBOOK.json")
 VOICE_PLAYBOOK = _creative("voicePlaybook", os.path.join("learning", "VOICE_PLAYBOOK.json"))
 
 ASSETS = _s(PROFILE.assets_root)

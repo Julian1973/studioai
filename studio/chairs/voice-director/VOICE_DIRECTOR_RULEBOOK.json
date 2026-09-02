@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "source": "studio/chairs/voice-director/SKILL.md",
+  "fivePerformanceQuestions": [
+    "intention",
+    "subtext",
+    "thoughtBefore",
+    "changeDuring",
+    "operativeWords"
+  ],
+  "mechanicalRules": {
+    "lockedScriptWords": true,
+    "maxTagsPerSegment": 2,
+    "shortLineMaxWords": 4,
+    "shortLineMinimumTakes": 2,
+    "maxLineDurationSec": 15,
+    "requirePreviousTextRunwayForShortLines": true,
+    "requirePauseReasonWhenPauseNotationAppears": true,
+    "requirePurposeForEveryTag": true,
+    "requireEntryAndExitState": true,
+    "requireListener": true,
+    "requireBodyVoiceRelationship": true,
+    "forbidFrameOneDialogue": true
+  },
+  "knownGoodTags": [
+    "laughs",
+    "sighs",
+    "gasps",
+    "whispers",
+    "quietly",
+    "gulps",
+    "exhales",
+    "pause",
+    "long pause",
+    "nervous",
+    "excited",
+    "breathes",
+    "cries"
+  ],
+  "humanVerdictQuestions": [
+    "Does the subtext colour the read rather than replace the locked words?",
+    "Does stress land only on the operative word or words?",
+    "Does every pause have its named dramatic reason?",
+    "Would the delivery become wrong if aimed at a different listener?",
+    "Does each tag add colour the words alone cannot supply?",
+    "Is the chosen support or contradiction between voice and body visible?",
+    "Does the line avoid uniform pace, announcer energy, generic emotion labels and melodrama?",
+    "Would this show's own audience feel the intended turn?"
+  ],
+  "principleMapping": {
+    "1-intention": "performanceQuestions.intention + listener check",
+    "2-subtext": "performanceQuestions.subtext + human HEAR verdict",
+    "3-thought-before": "performanceQuestions.thoughtBefore + previousText + startsAtSec check",
+    "4-change-during": "performanceQuestions.changeDuring + entry/exit check",
+    "5-operative-words": "performanceQuestions.operativeWords + human stress verdict",
+    "6-breath-pause-hesitation": "pauseReasons + tagPurposes checks",
+    "7-entry-exit-emotion": "emotionalState entry/exit check",
+    "8-relationship-delivery": "character canon + listener + archetype register checks",
+    "9-voice-body-coordination": "bodyVoiceRelationship check",
+    "10-no-frame-one-dialogue": "startsAtSec greater than zero check",
+    "tag-discipline": "palette, purpose and max-tags-per-segment checks",
+    "anti-patterns": "humanVerdictQuestions stored with each HEAR review"
+  },
+  "_note": "The Voice Director's method, the studio's and not any show's: a project overrides it by writing this file under its own creative/ folder."
+}

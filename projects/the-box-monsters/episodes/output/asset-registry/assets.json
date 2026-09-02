@@ -186,6 +186,23 @@
       "source": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\output\\Ep1_scene2_production_package.json",
       "status": "candidate",
       "url": "/projects/the-box-monsters/episodes/media/shots/Ep1_S2.SH03_keyframe_A_6123a89b.png"
+    },
+    {
+      "assetId": "3bce0b4d44e67260f3756c3c",
+      "bindingKey": "Ep1|2|S2.SH03|keyframe|approved_keyframe",
+      "displayType": "image",
+      "episode": "Ep1",
+      "kind": "keyframe",
+      "label": "S2.SH03 approved_keyframe",
+      "metadata": {},
+      "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_keyframe_A_6123a89b.png",
+      "registeredAt": "2026-09-02T21:22:23Z",
+      "role": "approved_keyframe",
+      "scene": "2",
+      "shotId": "S2.SH03",
+      "source": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\output\\Ep1_scene2_production_package.json",
+      "status": "approved",
+      "url": "/projects/the-box-monsters/episodes/media/shots/Ep1_S2.SH03_keyframe_A_6123a89b.png"
     }
   ],
   "deletedBindingKeys": [],

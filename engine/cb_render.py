@@ -3287,9 +3287,22 @@ def _shot_context(pkg, shot, led, scene, episode):
     character_state_locks = {}
     characters_cfg = _characters_cfg()
     for name in effective_shot.get("charactersInFrame") or []:
-        identity = _provider_identity_record(
-            name, characters_cfg, "animation", shot=effective_shot,
-            scene=scene, episode=episode)
+        try:
+            identity = _provider_identity_record(
+                name, characters_cfg, "animation", shot=effective_shot,
+                scene=scene, episode=episode)
+        except Refused as exc:
+            # A scripted stub role has no locked reference yet (CLAUDE.md rule 87). The identity
+            # record is read HERE only to derive a wearable-state lock for the text brief, so a
+            # missing one costs that one note and nothing else — never the whole preparation.
+            # The strict rule stays exactly where rule 87 puts it: on the paid stages that put a
+            # character on screen or give it a voice, where _provider_attachment_plan and the
+            # render path still refuse the shot by name. Before this, one stub in the frame
+            # refused SEE, HEAR and WATCH direction outright, all three zero-spend text passes,
+            # for a reference none of them would have used (2026-09-02, Teacher in S1.SH01).
+            print(f"CAST CANON INCOMPLETE — {name} has no locked identity pack; the text brief "
+                  f"continues without its wearable-state lock ({exc})", flush=True)
+            continue
         wearable_features = [
             str(feature).strip()
             for feature in identity.get("distinguishingFeatures") or []

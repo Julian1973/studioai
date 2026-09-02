@@ -127,3 +127,46 @@ print("\\n@@JSON@@" + json.dumps({
     assert out["activeRow"]["configBase"].startswith(f"projects/{SECOND}/")
     assert out["rosterNames"] == ["Patch", "Rumble", "Tilly", "Nib", "Jenny"]
     assert out["titles"] == {"Ep1": "Episode 1: The Box That Felt Small"}
+
+
+def test_a_project_without_its_own_voice_craft_still_runs_the_voice_stage(second_project_exists):
+    """The Voice Director's craft is the studio's; a project only overrides it.
+
+    cb_voice_director loads its registers and rulebook with a raise, never a degrade, and the
+    project template ships neither — so the second project's first HEAR pass died on "Voice
+    Director data is unavailable: VOICE_ARCHETYPE_REGISTERS.json" with nothing wrong with the
+    project at all (2026-09-02). paths now falls back to studio/chairs/voice-director/ for both.
+    """
+    out = _run("""
+import json, pathlib
+import paths as P
+import cb_voice_director as V
+registers = V.archetype_registers()
+rulebook = V.rulebook()
+print("\\n@@JSON@@" + json.dumps({
+    "registersPath": str(P.VOICE_REGISTERS),
+    "rulebookPath": str(P.VOICE_RULEBOOK),
+    "registerIds": sorted((registers.get("registers") or {}).keys()),
+    "mechanicalRules": sorted((rulebook.get("mechanicalRules") or {}).keys()),
+}))
+""")
+    studio = str(ROOT / "studio" / "chairs" / "voice-director")
+    assert out["registersPath"].startswith(studio)
+    assert out["rulebookPath"].startswith(studio)
+    assert out["registerIds"], "the studio's own register vocabulary must be readable"
+    assert "lockedScriptWords" in out["mechanicalRules"]
+    for word in FIRST_WORDS:
+        assert word not in json.dumps(out), f"{word} reached the second project's voice craft"
+
+
+def test_the_first_project_keeps_its_own_voice_craft(second_project_exists):
+    """The fallback is a floor, never an override: a project's own files still win."""
+    out = _run("""
+import json
+import paths as P
+print("\\n@@JSON@@" + json.dumps({"registers": str(P.VOICE_REGISTERS),
+                                  "rulebook": str(P.VOICE_RULEBOOK)}))
+""", project="crystal-bears")
+    own = str(ROOT / "projects" / "crystal-bears" / "creative")
+    assert out["registers"].startswith(own)
+    assert out["rulebook"].startswith(own)

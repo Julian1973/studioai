@@ -287,8 +287,8 @@ def _old_pkg():
 def _tmp(sb_state="approved"):
     d = pathlib.Path(tempfile.mkdtemp())
     sb_p, pkg_p = d / "sb.json", d / "pkg.json"
-    json.dump(_storyboard(sb_state), open(sb_p, "w"))
-    json.dump(_old_pkg(), open(pkg_p, "w"))
+    json.dump(_storyboard(sb_state), open(sb_p, "w", encoding="utf-8"))
+    json.dump(_old_pkg(), open(pkg_p, "w", encoding="utf-8"))
     return sb_p, pkg_p
 
 
@@ -312,7 +312,7 @@ def test_real_awaiting_storyboard_refused_against_package_copy():
     real_sb = live if live.exists() else archived
     if not real_sb.exists():
         pytest.skip("no live or archived Ep1 storyboard is present in this checkout")
-    sb = json.load(open(real_sb))
+    sb = json.load(open(real_sb, encoding="utf-8"))
     if sb.get("approvalState") == "approved":
         pytest.skip("real storyboard is approved this run — covered by other refusal tests")
     _, pkg_p = _tmp()
@@ -547,18 +547,18 @@ def test_distils_only_the_categories_and_shot_structure():
 
 def test_protections_capped_at_three():
     sb_p, pkg_p = _tmp()
-    sb = json.load(open(sb_p))
+    sb = json.load(open(sb_p, encoding="utf-8"))
     sb["productionDetail"][0]["essentialProviderProtections"] = ["one", "two", "three", "four"]
-    json.dump(sb, open(sb_p, "w"))
+    json.dump(sb, open(sb_p, "w", encoding="utf-8"))
     pkg = H.promote(sb_p, pkg_p, log=lambda *a, **k: None)
     assert pkg["shots"][0]["prohibited"] == ["one", "two", "three"]
 
 
 def test_no_production_detail_refuses():
     sb_p, pkg_p = _tmp()
-    sb = json.load(open(sb_p))
+    sb = json.load(open(sb_p, encoding="utf-8"))
     sb["productionDetail"] = []
-    json.dump(sb, open(sb_p, "w"))
+    json.dump(sb, open(sb_p, "w", encoding="utf-8"))
     with pytest.raises(H.HandoverRefused, match="no Production Detail"):
         H.promote(sb_p, pkg_p, log=lambda *a, **k: None)
 
@@ -581,7 +581,7 @@ def test_internals_never_enter_package_or_brief():
 # ── req 5: new revision; every earlier authorisation stale ────────────────────────────
 def test_promotion_bumps_revision_and_stales_prior_authorisations():
     sb_p, pkg_p = _tmp()
-    old = json.load(open(pkg_p))
+    old = json.load(open(pkg_p, encoding="utf-8"))
     pkg = H.promote(sb_p, pkg_p, dry_run=False, log=lambda *a, **k: None)
     assert pkg["revision"] == old["revision"] + 1                # versioned, never in place
     assert pkg["voidedTokens"] == ["db660b33"]                   # void history carries forward
@@ -596,7 +596,7 @@ def test_promotion_bumps_revision_and_stales_prior_authorisations():
 def test_dry_run_writes_nothing_and_module_has_no_provider_access():
     d = pathlib.Path(tempfile.mkdtemp())
     sb_p = d / "sb.json"
-    json.dump(_storyboard(), open(sb_p, "w"))
+    json.dump(_storyboard(), open(sb_p, "w", encoding="utf-8"))
     pkg_p = d / "brand_new_pkg.json"                             # does not exist yet
     pkg = H.promote(sb_p, pkg_p, dry_run=True, log=lambda *a, **k: None)
     assert not pkg_p.exists()                                    # dry run stored NOTHING
@@ -781,7 +781,7 @@ def test_real_s1sh1_maps_cleanly_into_the_canonical_engine_compiler():
         "Ep1_scene1_storyboard.json"
     if not real_sb_path.exists():
         pytest.skip("real storyboard not present in this environment")
-    sb = json.load(open(real_sb_path))
+    sb = json.load(open(real_sb_path, encoding="utf-8"))
     if sb.get("approvalState") != H.APPROVED_STATE:
         pytest.skip("real storyboard not currently approved")
     s1 = next((s for s in sb["shots"] if s["shotId"] == "S1.SH1"), None)
@@ -791,7 +791,7 @@ def test_real_s1sh1_maps_cleanly_into_the_canonical_engine_compiler():
     if (not s1.get("performanceContract") or "continuityOutState" not in pd1 or
             "dialogueTimings" not in pd1):
         pytest.skip("real storyboard predates the typed execution contract and must be regenerated")
-    chars_cfg = json.load(open(H.CHARS)) if H.CHARS.exists() else {}
+    chars_cfg = json.load(open(H.CHARS, encoding="utf-8")) if H.CHARS.exists() else {}
     voice_by_occurrence = {
         voice["dialogueOccurrenceId"]: voice
         for voice in sb.get("voicePerformances", [])
@@ -838,7 +838,7 @@ def test_promote_shot_scoped_to_one_shot_only():
 
 def test_promote_shot_write_preserves_existing_sibling_units():
     sb_p, pkg_p = _tmp()
-    old = json.load(open(pkg_p))
+    old = json.load(open(pkg_p, encoding="utf-8"))
     old["shots"].append({
         "shotId": "S1.SH2", "durationSec": 7.0,
         "seedancePrompt": "APPROVED SIBLING PROMPT",
@@ -847,7 +847,7 @@ def test_promote_shot_write_preserves_existing_sibling_units():
         "shotId": "S1.SH2", "status": "approved",
         "approval": {"approved": True, "candidate": 1},
     }]
-    json.dump(old, open(pkg_p, "w"))
+    json.dump(old, open(pkg_p, "w", encoding="utf-8"))
 
     pkg = H.promote_shot(
         sb_p, "S1.SH1", pkg_p, dry_run=False, log=lambda *a, **k: None)
@@ -856,7 +856,7 @@ def test_promote_shot_write_preserves_existing_sibling_units():
     assert shots["S1.SH1"]["dialogueLines"][0]["exactText"] == "Nailed it."
     assert shots["S1.SH2"]["seedancePrompt"] == "APPROVED SIBLING PROMPT"
     assert pkg["continuityLedger"][0]["status"] == "approved"
-    assert json.load(open(pkg_p)) == pkg
+    assert json.load(open(pkg_p, encoding="utf-8")) == pkg
 
 
 def test_place_voices_for_beat_splits_by_line_content_not_bare_speaker_name():
@@ -893,9 +893,9 @@ def test_promote_shot_refuses_missing_shot_or_production_detail():
     sb_p, pkg_p = _tmp()
     with pytest.raises(H.HandoverRefused, match="not found"):
         H.promote_shot(sb_p, "S1.SH9", pkg_p, log=lambda *a, **k: None)
-    sb = json.load(open(sb_p))
+    sb = json.load(open(sb_p, encoding="utf-8"))
     sb["productionDetail"] = [p for p in sb["productionDetail"] if p["shotId"] != "S1.SH1"]
-    json.dump(sb, open(sb_p, "w"))
+    json.dump(sb, open(sb_p, "w", encoding="utf-8"))
     with pytest.raises(H.HandoverRefused, match="no Production Detail"):
         H.promote_shot(sb_p, "S1.SH1", pkg_p, log=lambda *a, **k: None)
 
@@ -998,7 +998,7 @@ def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
     beat_pkg["contentSignature"] = cb_lineage.beat_package_signature(beat_pkg)
     beat_path = tmp_path / "source" / "Ep1_Fixture_beat_package.json"
     beat_path.parent.mkdir(parents=True)
-    json.dump(beat_pkg, open(beat_path, "w"))
+    json.dump(beat_pkg, open(beat_path, "w", encoding="utf-8"))
     sb = _storyboard(sb_state)
     sb["sourceScript"] = source_ref
     directed_beat = sb["beats"][0]
@@ -1037,7 +1037,7 @@ def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
         "profileDigest": TEST_CANON_DIGESTS["storyboard"],
     }
     sb_p = tmp_path / "sb.json"
-    json.dump(sb, open(sb_p, "w"))
+    json.dump(sb, open(sb_p, "w", encoding="utf-8"))
     pkg_dir = tmp_path / P.OUTPUT_REL
     pkg_dir.mkdir()
     monkeypatch.setattr(H, "ROOT", tmp_path)
@@ -1052,7 +1052,7 @@ def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
 
 
 def _convert_to_snapshot_storyboard(sb_p):
-    sb = json.load(open(sb_p))
+    sb = json.load(open(sb_p, encoding="utf-8"))
     source_beat_ids = [beat.get("sourceBeatId") for beat in sb.get("beats", [])]
     shot_ids = [shot.get("shotId") for shot in sb.get("shots", [])]
     inputs = {
@@ -1065,7 +1065,7 @@ def _convert_to_snapshot_storyboard(sb_p):
     sb["inputSignature"] = cb_lineage.dependency_signature(
         "scene-storyboard-snapshot", inputs)
     sb.pop("canonLock", None)
-    json.dump(sb, open(sb_p, "w"))
+    json.dump(sb, open(sb_p, "w", encoding="utf-8"))
     return sb
 
 
@@ -1096,7 +1096,7 @@ def test_promote_to_canonical_refuses_stale_storyboard_snapshot_signature(tmp_pa
     sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
     sb = _convert_to_snapshot_storyboard(sb_p)
     sb["inputSignature"]["inputs"]["shotIds"] = ["S1.STALE"]
-    json.dump(sb, open(sb_p, "w"))
+    json.dump(sb, open(sb_p, "w", encoding="utf-8"))
 
     with pytest.raises(H.HandoverRefused, match="storyboard dependency signature is missing or stale"):
         H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
@@ -1112,7 +1112,7 @@ def test_promote_to_canonical_writes_canonical_shape_and_archives_the_old_packag
     old = {"episode": "Ep1", "sceneNumber": "1", "revision": 6,
            "shots": [{"shotId": "1.B1.S1", "performanceAssignment": "OLD-MARKER"}],
            "continuityLedger": [], "validation": {"passed": True}}
-    json.dump(old, open(old_path, "w"))
+    json.dump(old, open(old_path, "w", encoding="utf-8"))
     old_md5 = _md5(old_path)
 
     new_pkg, archived = H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
@@ -1122,7 +1122,7 @@ def test_promote_to_canonical_writes_canonical_shape_and_archives_the_old_packag
     # the canonical shape cb_render.py actually reads — every key it touches, present
     for key in ("episode", "sceneNumber", "shots", "continuityLedger", "validation", "revision"):
         assert key in new_pkg
-    written = json.load(open(old_path))                           # same path, new content
+    written = json.load(open(old_path, encoding="utf-8"))                           # same path, new content
     assert written["revision"] == 7
     assert [s["shotId"] for s in written["shots"]] == ["S1.SH1"]   # sole creative source
     assert "1.B1.S1" not in json.dumps(written["shots"])           # legacy shot gone, not merged
@@ -1143,7 +1143,7 @@ def test_scoped_canonical_promotion_preserves_unselected_sibling_and_approval(
     sibling_ledger["status"] = "approved"
     sibling_ledger["approval"] = {
         "approved": True, "candidate": 2, "path": "/kept/sibling.mp4"}
-    json.dump(first, open(package_path, "w"))
+    json.dump(first, open(package_path, "w", encoding="utf-8"))
 
     promoted, _ = H.promote_to_canonical(
         sb_p, "1", ["S1.SH1"], episode="Ep1",
@@ -1173,7 +1173,7 @@ def test_unchanged_selected_shot_preserves_approval_but_refreshes_ledger_structu
         "sourceType": "relay",
         "sourceShotId": "S1.SH1",
     })
-    json.dump(first, open(package_path, "w"))
+    json.dump(first, open(package_path, "w", encoding="utf-8"))
 
     promoted, _ = H.promote_to_canonical(
         sb_p, "1", ["S1.SH1"], episode="Ep1",
@@ -1195,18 +1195,18 @@ def test_promote_to_canonical_refuses_missing_typed_continuity_before_candidate(
     old = {"episode": "Ep1", "sceneNumber": "1", "revision": 6,
            "shots": [{"shotId": "1.B1.S1", "performanceAssignment": "STILL-THE-VALID-ONE"}],
            "continuityLedger": [], "validation": {"passed": True}}
-    json.dump(old, open(old_path, "w"))
+    json.dump(old, open(old_path, "w", encoding="utf-8"))
     old_md5 = _md5(old_path)
 
-    sb = json.load(open(sb_p))
+    sb = json.load(open(sb_p, encoding="utf-8"))
     sb["productionDetail"][0]["continuityOutState"]["characters"] = []
-    json.dump(sb, open(sb_p, "w"))
+    json.dump(sb, open(sb_p, "w", encoding="utf-8"))
 
     with pytest.raises(H.HandoverRefused, match="cast must be exactly"):
         H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
                                dry_run=False, log=lambda *a, **k: None)
     assert _md5(old_path) == old_md5
-    assert json.load(open(old_path))["shots"][0]["performanceAssignment"] == "STILL-THE-VALID-ONE"
+    assert json.load(open(old_path, encoding="utf-8"))["shots"][0]["performanceAssignment"] == "STILL-THE-VALID-ONE"
     assert not list(pkg_dir.rglob("*REJECTED*"))
 
 
@@ -1217,12 +1217,12 @@ def test_promote_to_canonical_dry_run_refusal_writes_absolutely_nothing(tmp_path
     old = {"episode": "Ep1", "sceneNumber": "1", "revision": 6, "shots": [],
            "continuityLedger": [], "validation": {"passed": True}}
     old_path = pkg_dir / "Ep1_scene1_production_package.json"
-    json.dump(old, open(old_path, "w"))
+    json.dump(old, open(old_path, "w", encoding="utf-8"))
     old_md5 = _md5(old_path)
 
-    sb = json.load(open(sb_p))
+    sb = json.load(open(sb_p, encoding="utf-8"))
     sb["productionDetail"][0]["continuityOutState"]["characters"] = []
-    json.dump(sb, open(sb_p, "w"))
+    json.dump(sb, open(sb_p, "w", encoding="utf-8"))
 
     with pytest.raises(H.HandoverRefused, match="cast must be exactly"):
         H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",

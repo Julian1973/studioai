@@ -114,6 +114,32 @@ SERVER_KEY = f"{BIND_HOST}:{PORT}|{PUBLIC_ORIGIN or 'loopback'}"
 LAUNCH_TOKEN = secrets.token_urlsafe(32)
 
 
+def _restrict_to_owner(path):
+    """Make the session secret readable by the account running the studio, and nobody else.
+
+    chmod(0o600) is the POSIX half, and on Windows it does nothing at all: the file simply
+    inherits its directory's ACL, which on this machine hands a whole group Modify rights.
+    icacls closes that — inheritance off, one grant, to the current account. Fail-soft on both
+    halves: a secret that cannot be locked down is still better than a studio that refuses to
+    start (2026-09-02).
+    """
+    try:
+        path.chmod(0o600)
+    except OSError:
+        pass
+    if os.name != "nt":
+        return
+    account = os.environ.get("USERNAME")
+    if not account:
+        return
+    try:
+        subprocess.run(
+            ["icacls", str(path), "/inheritance:r", "/grant:r", f"{account}:(R,W)"],
+            capture_output=True, timeout=15, check=False)
+    except (OSError, subprocess.SubprocessError):
+        pass
+
+
 def _load_or_create_session_token():
     """Return the durable local session secret used by browser cookies.
 
@@ -131,10 +157,7 @@ def _load_or_create_session_token():
     try:
         token = path.read_text(encoding="utf-8").strip()
         if len(token) >= 32:
-            try:
-                path.chmod(0o600)
-            except OSError:
-                pass
+            _restrict_to_owner(path)
             return token
     except OSError:
         pass
@@ -147,7 +170,7 @@ def _load_or_create_session_token():
     if len(legacy) >= 32:
         try:
             path.write_text(legacy + "\n", encoding="utf-8")
-            path.chmod(0o600)
+            _restrict_to_owner(path)
         except OSError:
             pass
         return legacy
@@ -160,7 +183,7 @@ def _load_or_create_session_token():
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, path)
-        path.chmod(0o600)
+        _restrict_to_owner(path)
     finally:
         try:
             temporary.unlink()
@@ -2935,12 +2958,12 @@ class H(http.server.SimpleHTTPRequestHandler):
                 f = base / f"{ep}_scene{sc}_storyboard.json"
                 if not f.exists():
                     self._json(404, {"error": f"no storyboard for scene {sc} yet"}); return
-                self._json(200, json.load(open(f))); return
+                self._json(200, json.load(open(f, encoding="utf-8"))); return
             vision = base / f"{ep}_episode_vision.json"
             scenes = sorted(x.name.split("_scene")[1].split("_")[0]
                              for x in base.glob(f"{ep}_scene*_storyboard.json"))
             self._json(200, {"episode": ep,
-                              "vision": json.load(open(vision)) if vision.exists() else None,
+                              "vision": json.load(open(vision, encoding="utf-8")) if vision.exists() else None,
                               "scenes": scenes}); return
         if self.path == "/api/jobs":
             # THE SHOT PIPELINE's own job feed (2026-07-16 cutover): the legacy /api/pipeline

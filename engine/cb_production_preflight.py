@@ -102,7 +102,7 @@ def _legacy_production_preflight(scene, episode="Ep1"):
         block("STALE_PACKAGE", "storyboard", "Package and live storyboard do not match.",
               "Rebuild the package from the current approved storyboard.")
     try:
-        storyboard_state = json.load(open(cb_render._storyboard_path(scene, episode))).get("approvalState")
+        storyboard_state = json.load(open(cb_render._storyboard_path(scene, episode), encoding="utf-8")).get("approvalState")
     except Exception:
         storyboard_state = None
     if storyboard_state != "approved":

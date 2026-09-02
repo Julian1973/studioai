@@ -151,7 +151,7 @@ def main():
         pkg, path = _write_package(scratch, scene, episode)
         plate_before = R._sha256_file(cand)
         R.keyframe_shot(scene, "S1.SH1", episode)
-        pkg2 = json.load(open(path))
+        pkg2 = json.load(open(path, encoding="utf-8"))
         led_sh1 = next(e for e in pkg2["continuityLedger"] if e["shotId"] == "S1.SH1")
         led_sh6 = next(e for e in pkg2["continuityLedger"] if e["shotId"] == "S1.SH6")
         check("exactly one generation call fired", len(GEN_CALLS) == 1, GEN_CALLS)
@@ -167,9 +167,9 @@ def main():
         # start clean: reject the SH1 candidate from step 2 so this step's own plate
         # generation is the only thing under test
         R.reject_keyframe(scene, "S1.SH1", "clearing for the next test", episode)
-        led_before = json.load(open(path))["continuityLedger"]
+        led_before = json.load(open(path, encoding="utf-8"))["continuityLedger"]
         R.generate_scenelook_plate(scene, episode)
-        led_after = json.load(open(path))["continuityLedger"]
+        led_after = json.load(open(path, encoding="utf-8"))["continuityLedger"]
         check("exactly one generation call fired for the plate", len(GEN_CALLS) == 1, GEN_CALLS)
         check("the production package's ledger is completely untouched by a plate generation",
               led_before == led_after)

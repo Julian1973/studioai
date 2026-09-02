@@ -8,6 +8,7 @@ import os
 import pathlib
 import re
 import tempfile
+import time
 import uuid
 from typing import Any
 
@@ -30,16 +31,34 @@ def _slug(value: str) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", value).strip("_") or "Untitled"
 
 
+def _replace_waiting_for_windows(tmp: pathlib.Path, path: pathlib.Path) -> None:
+    """os.replace, waiting out a transient Windows lock rather than failing on it.
+
+    Windows refuses to replace a file another handle still holds — a reader that has not been
+    collected yet, a virus scanner or the search indexer opening what we just created — and
+    raises PermissionError (WinError 32). POSIX has no such rule, so this only ever waits here.
+    Bounded: roughly a second in total, then the real error is raised, never swallowed.
+    """
+    for attempt in range(10):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if os.name != "nt" or attempt == 9:
+                raise
+            time.sleep(0.05 * (attempt + 1))
+
+
 def _atomic_write(path: pathlib.Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=str(path.parent))
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name[:40]}.", dir=str(path.parent))
     tmp = pathlib.Path(tmp_name)
     try:
         with os.fdopen(fd, "wb") as stream:
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(tmp, path)
+        _replace_waiting_for_windows(tmp, path)
     finally:
         if tmp.exists():
             tmp.unlink()

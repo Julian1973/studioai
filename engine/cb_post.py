@@ -96,7 +96,7 @@ def _load_sfx_library():
     fail-on-missing-key convention — an asset-availability question, not a content-correctness one). Missing
     manifest or malformed JSON both degrade to an empty library, never raise."""
     try:
-        d = json.load(open(SFX_LIBRARY_PATH))
+        d = json.load(open(SFX_LIBRARY_PATH, encoding="utf-8"))
         return {k: v for k, v in d.items() if not k.startswith("_")}
     except Exception:
         return {}
@@ -108,7 +108,7 @@ def _dur(p):
     except: return 0.0
 
 def _clips(pkg, episode, scene_num):
-    d = json.load(open(pkg)); out = []
+    d = json.load(open(pkg, encoding="utf-8")); out = []
     for s in (d.get("beats") or d.get("shots") or []):
         if str(s.get("sceneNumber")) != scene_num: continue
         s.setdefault("shotCode", s.get("beatCode"))

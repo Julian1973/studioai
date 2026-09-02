@@ -40,8 +40,8 @@ def test_three_stores_are_separate_files(isolated):
     L.propose_pattern("x", supportingEvidence=["ev-1"], proposedSource="director canon")
     assert L.EVIDENCE_P.exists() and L.PATTERNS_P.exists()
     assert not L.ACTIVE_P.exists()                       # nothing active until a human acts
-    assert "IMMUTABLE" in json.load(open(L.EVIDENCE_P))["note"]
-    assert "Proposals only" in json.load(open(L.PATTERNS_P))["note"]
+    assert "IMMUTABLE" in json.load(open(L.EVIDENCE_P, encoding="utf-8"))["note"]
+    assert "Proposals only" in json.load(open(L.PATTERNS_P, encoding="utf-8"))["note"]
 
 
 def test_evidence_preserves_asset_decision_context_and_exact_words(isolated):
@@ -167,12 +167,12 @@ def test_ex005_remains_linked_to_7d5762e():
     """The REAL registry (not a fixture): the active EX-005 principle points at the
     verified structural change."""
     real = json.load(open(L.ROOT / "projects/crystal-bears/creative/learning/"
-                                    "ACTIVE_CREATIVE_MEMORY.json"))
+                                    "ACTIVE_CREATIVE_MEMORY.json", encoding="utf-8"))
     rec = next(r for r in real["principles"] if r["principleId"] == "acm-213b111d")
     assert rec["appliedSourceRef"] == "7d5762e"
     assert rec["destinationSource"] == "creative-room workflow"
     pats = json.load(open(L.ROOT / "projects/crystal-bears/creative/learning/"
-                                     "PATTERN_LIBRARY.json"))["patterns"]
+                                     "PATTERN_LIBRARY.json", encoding="utf-8"))["patterns"]
     for pid in ("pat-6ee4b7fd", "pat-c63c3a1f"):         # stay inactive
         assert next(p for p in pats if p["patternId"] == pid)["maturity"] != "approved-principle"
 

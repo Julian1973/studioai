@@ -963,7 +963,7 @@ def test_canon_completion_is_proposed_never_used(monkeypatch):
     pkg = C.run_scene(1, "Ep1", log=lambda *a, **k: None)
     prop_files = list(out.glob("*canon_completion_PROPOSED.json"))
     assert prop_files, "proposal file must exist for human approval"
-    doc = json.load(open(prop_files[0]))
+    doc = json.load(open(prop_files[0], encoding="utf-8"))
     assert doc["approvalState"] == "proposed-awaiting-human-approval"
     assert pkg["directedOnEstablishedCanonOnly"] is True
     # the proposal text never reaches any directing prompt — psychology is never invisible

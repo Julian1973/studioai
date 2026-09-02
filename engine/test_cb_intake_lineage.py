@@ -1,5 +1,6 @@
 import hashlib
 import json
+import pathlib
 
 import pytest
 
@@ -162,8 +163,10 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
     assert status["candidateCurrent"] is True
     assert status["canonicalCurrent"] is True
     assert status["candidate"]["approvalState"] == "approved"
+    # pathlib, not rsplit("/"): the recorded path uses the platform separator, so on Windows
+    # the forward-slash split returned the whole path and never the file name.
     assert status["candidate"]["approval"]["canonicalPackage"] == (
-        result["canonicalPackage"].rsplit("/", 1)[-1]
+        pathlib.PurePath(result["canonicalPackage"]).name
     )
 
 

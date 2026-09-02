@@ -99,7 +99,7 @@ def log_spend(op, cost_usd, out=None, meta=None):
             "out": os.path.basename(str(out)) if out else None,
             "meta": meta or {},
         }
-        with open(LEDGER_PATH, "a") as f:
+        with open(LEDGER_PATH, "a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
     except Exception as e:
         print(f"  (cost_ledger: skipped logging {op} — {str(e)[:120]})", flush=True)
@@ -119,7 +119,7 @@ def write_gen_sidecar(out, **params):
         sidecar = base + ext + ".gen.json"  # e.g. media/Ep1_1.B1_slug.mp4.gen.json
         row = {"ts": time.time(), "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
         row.update({k: v for k, v in params.items() if v is not None})
-        with open(sidecar, "w") as f:
+        with open(sidecar, "w", encoding="utf-8") as f:
             json.dump(row, f, ensure_ascii=False, indent=2)
     except Exception as e:
         print(f"  (gen_sidecar: skipped writing for {out} — {str(e)[:120]})", flush=True)
@@ -149,7 +149,7 @@ def load_billing_profile(provider=None):
     a missing/unreadable profile returns None and callers fall back to RATES, loudly
     labelled as the fallback."""
     try:
-        prof = json.load(open(BILLING_PROFILE_PATH))
+        prof = json.load(open(BILLING_PROFILE_PATH, encoding="utf-8"))
         return prof.get(provider) if provider else prof
     except Exception:
         return None
@@ -234,7 +234,7 @@ def report(episode=None):
         print("No spend logged yet (cost_ledger.jsonl doesn't exist).")
         return
     rows = []
-    with open(LEDGER_PATH) as f:
+    with open(LEDGER_PATH, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -306,7 +306,7 @@ def report(episode=None):
                     if f.startswith(f"{ep}_{code}_") and f.endswith(".approval.json")]
             for a in appr:
                 try:
-                    data = json.load(open(os.path.join(media_dir, a)))
+                    data = json.load(open(os.path.join(media_dir, a), encoding="utf-8"))
                     if data.get("approved"):
                         seen_codes.add((ep, code))
                 except Exception:

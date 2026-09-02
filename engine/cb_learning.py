@@ -63,12 +63,12 @@ def _now():
 
 
 def _load(p, default):
-    return json.load(open(p)) if p.exists() else default
+    return json.load(open(p, encoding="utf-8")) if p.exists() else default
 
 
 def _save(p, data):
     LEARNING.mkdir(parents=True, exist_ok=True)
-    json.dump(data, open(p, "w"), indent=1, ensure_ascii=False)
+    json.dump(data, open(p, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────

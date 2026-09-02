@@ -1,11 +1,20 @@
 """Repository-wide protection against tests mutating live production state."""
 from __future__ import annotations
 
+import os
 import pathlib
 import sys
 
 import pytest
 
+
+# The suite's own fixtures and golden data are the first project's. paths.* resolves the active
+# project at IMPORT time, so this has to be set here, before collection imports anything — with
+# the studio switched to another production (cb-studio/data/active-project.json, T59) the whole
+# suite otherwise ran against that project and ~90 tests failed on a cast and package names that
+# were never theirs. An explicit STUDIO_PROJECT still wins; the second-project isolation test
+# passes its own to a subprocess and is unaffected.
+os.environ.setdefault("STUDIO_PROJECT", "crystal-bears")
 
 ROOT = pathlib.Path(__file__).resolve().parent
 ENGINE = ROOT / "engine"

@@ -323,7 +323,7 @@ def _load_pkg(episode):
                    key=lambda p: p.stat().st_mtime)
     if not cands:
         raise FileNotFoundError(f"no beat package for {episode} in {P.rel(P.OUTPUT)}/")
-    return json.load(open(cands[-1])), cands[-1]
+    return json.load(open(cands[-1], encoding="utf-8")), cands[-1]
 
 
 def _beat_sort_key(code):
@@ -439,7 +439,7 @@ def design_scene(episode, scene_num, log=print):
         raise ValueError(f"no beats for scene {scene_num}")
     scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(scene_num)), {})
     try:
-        characters_cfg = json.load(open(P.CHARS))
+        characters_cfg = json.load(open(P.CHARS, encoding="utf-8"))
     except Exception:
         characters_cfg = {}
 
@@ -1432,7 +1432,7 @@ def _ledger_entry(shot):
 
 def _source_storyboard_record(storyboard_path):
     """Bind the production package to the storyboard's signed dependency graph."""
-    storyboard = json.load(open(storyboard_path))
+    storyboard = json.load(open(storyboard_path, encoding="utf-8"))
     return {
         "path": str(storyboard_path),
         "md5": _md5_file(storyboard_path),
@@ -1448,7 +1448,7 @@ def _source_storyboard_record(storyboard_path):
 def compile_scene_package(scene_num, episode="Ep1", log=print):
     design, report, beats, scene, d, pkg_path = design_scene(episode, scene_num, log=log)
     try:
-        characters_cfg = json.load(open(P.CHARS))
+        characters_cfg = json.load(open(P.CHARS, encoding="utf-8"))
     except Exception:
         characters_cfg = {}
 
@@ -1549,7 +1549,7 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
         "sourceBeatPackage": str(pkg_path.name),
     }
     out_json = canonical_package_path(scene_num, episode)
-    json.dump(pkg, open(out_json, "w"), indent=1, ensure_ascii=False)
+    json.dump(pkg, open(out_json, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
 
     # the human review document — the exact words ARE shown here (a human doc, not a render prompt)
     st = design.statement
@@ -1609,7 +1609,7 @@ def repair_package(scene_num, episode="Ep1", log=print):
     d, _ = _load_pkg(episode)
     beats = _scene_beats(d, scene_num)
     try:
-        characters_cfg = json.load(open(P.CHARS))
+        characters_cfg = json.load(open(P.CHARS, encoding="utf-8"))
     except Exception:
         characters_cfg = {}
     fields = set(Shot.model_fields)

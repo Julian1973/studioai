@@ -1147,7 +1147,7 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
     """The whole-scene handover. Refuses (no writes, current package untouched) unless the
     storyboard's top-level approvalState is human-approved — the SOLE Gate A authority
     (2026-07-17: never a nested field, this checked and swept clean)."""
-    sb = json.load(open(storyboard_path))
+    sb = json.load(open(storyboard_path, encoding="utf-8"))
     if sb.get("approvalState") != APPROVED_STATE:
         raise HandoverRefused(
             f"REFUSED — storyboard {pathlib.Path(storyboard_path).name} is "
@@ -1166,9 +1166,9 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
     _validate_unit_packing_contract(sb)
 
     pkg_path = pathlib.Path(pkg_path)
-    old = json.load(open(pkg_path)) if pkg_path.exists() else {}
+    old = json.load(open(pkg_path, encoding="utf-8")) if pkg_path.exists() else {}
     try:
-        characters_cfg = json.load(open(CHARS))
+        characters_cfg = json.load(open(CHARS, encoding="utf-8"))
     except Exception:
         characters_cfg = {}
     scene = {"sceneName": sb.get("scene", {}).get("location") or old.get("sceneName", "")}
@@ -1271,7 +1271,7 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
     the same beat are consulted ONLY to resolve which shot a given line belongs to
     (place_voices_for_beat's own mechanism, needed so a beat's OTHER shot's line is never
     mis-assigned here) — their own creative content is never read or exposed."""
-    sb = json.load(open(storyboard_path))
+    sb = json.load(open(storyboard_path, encoding="utf-8"))
     if sb.get("approvalState") != APPROVED_STATE:
         raise HandoverRefused(
             f"REFUSED — storyboard {pathlib.Path(storyboard_path).name} is "
@@ -1288,9 +1288,9 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
     _validate_unit_packing_contract(sb)
 
     pkg_path = pathlib.Path(pkg_path)
-    old = json.load(open(pkg_path)) if pkg_path.exists() else {}
+    old = json.load(open(pkg_path, encoding="utf-8")) if pkg_path.exists() else {}
     try:
-        characters_cfg = json.load(open(CHARS))
+        characters_cfg = json.load(open(CHARS, encoding="utf-8"))
     except Exception:
         characters_cfg = {}
     scene = {"sceneName": sb.get("scene", {}).get("location") or old.get("sceneName", "")}
@@ -1471,7 +1471,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     and writes NOTHING — the second element is the path the write WOULD land at (archive,
     on a passing dry run) or None (no prior package to archive; or any failing dry run,
     which never computes a rejected-evidence path either since it never writes one)."""
-    sb = json.load(open(storyboard_path))
+    sb = json.load(open(storyboard_path, encoding="utf-8"))
     if sb.get("approvalState") != APPROVED_STATE:
         raise HandoverRefused(
             f"REFUSED — storyboard {pathlib.Path(storyboard_path).name} is "
@@ -1484,7 +1484,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     _validate_unit_packing_contract(sb)
 
     try:
-        characters_cfg = json.load(open(CHARS))
+        characters_cfg = json.load(open(CHARS, encoding="utf-8"))
     except Exception:
         characters_cfg = {}
     scene = {"sceneName": sb.get("scene", {}).get("location", "")}
@@ -1573,7 +1573,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     old_digest = None
     if old_pkg_exists:
         if dry_run:
-            old_pkg = json.load(open(pkg_path))
+            old_pkg = json.load(open(pkg_path, encoding="utf-8"))
         else:
             old_pkg, old_digest = cb_db.read_json_document(ROOT, pkg_path)
         old_rev = int(old_pkg.get("revision") or 0)

@@ -16,6 +16,17 @@ import paths as P  # the project profile is the only path authority (T44/T45)
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_BANK_PATH = ROOT / P.OUTPUT_REL / "prompt-bank" / "prompt_bank.jsonl"
+
+
+def _resolve_bank_path(bank_path=None) -> pathlib.Path:
+    """The bank a call writes to, read at CALL time, never bound as a default argument.
+
+    A default argument is evaluated once, when the function is defined, so `bank_path=DEFAULT_
+    BANK_PATH` froze the module constant into every signature and no caller — the test suite's
+    own isolation fixture included — could redirect it afterwards. That is how a full pytest run
+    kept appending test prompts to the real project's prompt bank (T64).
+    """
+    return pathlib.Path(bank_path) if bank_path else pathlib.Path(DEFAULT_BANK_PATH)
 SCHEMA_VERSION = 1
 
 
@@ -162,7 +173,7 @@ def bank_prompt(*, prompt: str, episode: str, scene: str, shot_id: str,
                 diagnosis: str | None = None, category: str | None = None,
                 metadata: dict[str, Any] | None = None,
                 conformance: dict[str, Any] | None = None,
-                bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> dict[str, Any]:
+                bank_path: pathlib.Path | str | None = None) -> dict[str, Any]:
     if outcome not in {"approved", "rejected"}:
         raise ValueError("prompt bank outcome must be approved or rejected")
     parsed = parse_prompt_structure(prompt)
@@ -195,15 +206,15 @@ def bank_prompt(*, prompt: str, episode: str, scene: str, shot_id: str,
         "metadata": metadata or {},
     }
     record["recordId"] = _record_id(record)
-    path = pathlib.Path(bank_path)
+    path = _resolve_bank_path(bank_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
     return record
 
 
-def load_records(bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> list[dict[str, Any]]:
-    path = pathlib.Path(bank_path)
+def load_records(bank_path: pathlib.Path | str | None = None) -> list[dict[str, Any]]:
+    path = _resolve_bank_path(bank_path)
     if not path.exists():
         return []
     records = []
@@ -213,7 +224,8 @@ def load_records(bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> list[dict
     return records
 
 
-def report(bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> dict[str, Any]:
+def report(bank_path: pathlib.Path | str | None = None) -> dict[str, Any]:
+    bank_path = _resolve_bank_path(bank_path)
     raw_records = load_records(bank_path)
     records_by_hash = {}
     duplicate_counts = collections.Counter()
@@ -250,7 +262,7 @@ def report(bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> dict[str, Any]:
     }
     return {
         "schemaVersion": SCHEMA_VERSION,
-        "bankPath": str(pathlib.Path(bank_path)),
+        "bankPath": str(bank_path),
         "records": len(records),
         "rawRecords": len(raw_records),
         "dedupedBy": "promptHash",

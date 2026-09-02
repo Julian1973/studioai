@@ -35,7 +35,14 @@ def test_premium_system_keeps_visual_rules_explicit():
     assert "background:#211f23" in APP
     assert "--brand:#745477" in APP
     assert "html *{letter-spacing:0!important}" in APP
-    assert "linear-gradient(" not in APP
+    # Flat surfaces: no decorative gradient anywhere. The single exception is the striped
+    # progress bar on a live Story & Direction run (2026-09-02) — that stripe is the motion
+    # itself, the one signal that the Director is still working, not decoration. Pinned to
+    # exactly one use so ornament cannot creep back in behind it.
+    assert "radial-gradient(" not in APP
+    assert APP.count("linear-gradient(") == 1
+    assert APP.count("repeating-linear-gradient(") == 1
+    assert "animation:sbstripe" in APP
     assert ":focus-visible" in APP
     assert "@media (prefers-reduced-motion:reduce)" in APP
 

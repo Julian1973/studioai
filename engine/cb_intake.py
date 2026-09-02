@@ -1082,9 +1082,15 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
         stamp = _now().replace(":", "").replace("-", "")
         for old_path, old, old_digest in existing_records:
             old_version = str(_package_script_version(old) or "legacy").replace(":", "_")
+            # The version id is a full content hash. Its first characters are plenty to tell
+            # two archived versions apart in a directory listing, and the whole id is recorded
+            # inside the archived package itself — nothing reads it back off the name. In full
+            # it pushed this path past Windows' 260-character limit and the archive write
+            # failed outright (found on the PC, 2026-09-02). Older archived files keep the
+            # names they were written with; only new ones are shorter.
             cb_db.atomic_write_json(
                 ROOT,
-                archive / f"{old_path.stem}_{old_version}_{stamp}_{old_digest[:12]}.json",
+                archive / f"{old_path.stem}_{old_version[:23]}_{stamp}_{old_digest[:12]}.json",
                 old)
     pkg_digest = next((digest for path, _old, digest in existing_records
                        if path.resolve() == pkg_path.resolve()), None)

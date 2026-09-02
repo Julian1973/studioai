@@ -39,11 +39,11 @@ def _episodes():
 def main():
     check = "--check" in sys.argv
     P = _load_cb_prompts()
-    locations = json.load(open(LOCATIONS_PATH)) if os.path.exists(LOCATIONS_PATH) else {}
+    locations = json.load(open(LOCATIONS_PATH, encoding="utf-8")) if os.path.exists(LOCATIONS_PATH) else {}
     drift = []
     synced = 0
     for ep, pkg_path in _episodes():
-        d = json.load(open(pkg_path))
+        d = json.load(open(pkg_path, encoding="utf-8"))
         scenes = d.get("scenes") or []
         if not scenes:
             continue
@@ -74,7 +74,7 @@ def main():
         print(f"scene cache in sync — every scene's canon/locations.json entry matches its beat package")
         return
     if drift:
-        json.dump(locations, open(LOCATIONS_PATH, "w"), indent=1, ensure_ascii=False)
+        json.dump(locations, open(LOCATIONS_PATH, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
         print(f"scene cache resynced: {synced} scene(s) updated — " + "; ".join(drift))
     else:
         print("scene cache already in sync — nothing to do")

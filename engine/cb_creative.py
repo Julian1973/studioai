@@ -929,7 +929,7 @@ def load_canon_envelope(episode="Ep1", cast_scope=None, log=print):
     }
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{episode}_canon_envelope.json"
-    json.dump(env, open(out, "w"), indent=1, ensure_ascii=False)
+    json.dump(env, open(out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     log(f"CANON ENVELOPE — {len(env['sources'])} sources versioned, "
         f"{len(env['gaps'])} gap(s), {len(env['conflicts'])} genuine conflict(s) -> {out.name}")
     if env["conflicts"]:
@@ -952,7 +952,7 @@ def _canonical_exemplars(limit=6):
     p = _CANON_SOURCES["exemplars"]
     if not p.exists():
         return ""
-    lib = json.load(open(p))
+    lib = json.load(open(p, encoding="utf-8"))
     lines = [f"• [{e['id']} · {e['outcome'].upper()}] {e['principle']}"
              for e in lib.get("exemplars", [])
              if e.get("reusable") and e.get("principle")][:limit]
@@ -960,7 +960,7 @@ def _canonical_exemplars(limit=6):
 
 
 def _script_beats(episode, scene_num=None):
-    d = json.load(open(_script_package(episode, validate_canon=False)))
+    d = json.load(open(_script_package(episode, validate_canon=False), encoding="utf-8"))
     # Readers may order or scope their own view, but must never mutate the loaded canonical
     # package: its signed content identity cannot depend on which helper happened to read it.
     beats = list(d.get("beats") or [])
@@ -1031,7 +1031,7 @@ def _scene_dialogue_contract(beats, voices, details):
 
 def _characters_for(names):
     try:
-        chars = json.load(open(_CANON_SOURCES["characters"]))
+        chars = json.load(open(_CANON_SOURCES["characters"], encoding="utf-8"))
     except Exception:
         return "{}"
     picked = {}
@@ -1044,12 +1044,12 @@ def _characters_for(names):
     perf = {}
     p = _CANON_SOURCES["characterPerformance"]
     if p.exists():
-        allp = json.load(open(p)).get("characters", {})
+        allp = json.load(open(p, encoding="utf-8")).get("characters", {})
         perf = {k: v for k, v in allp.items() if any(_norm(k) == _norm(n) for n in names)}
     rel = {}
     r = _CANON_SOURCES["relationships"]
     if r.exists():
-        for pair in json.load(open(r)).get("pairs", []):
+        for pair in json.load(open(r, encoding="utf-8")).get("pairs", []):
             if all(any(_norm(x) == _norm(n) for n in names) for x in pair.get("pair", [])):
                 rel[" & ".join(pair["pair"])] = pair
     return json.dumps({"bibles": picked, "performanceCanon": perf, "relationships": rel},
@@ -1066,7 +1066,7 @@ def _unresolved_fields_for(names):
     p = _CANON_SOURCES["characters"]
     if not p.exists():
         return {}
-    allp = json.load(open(p))
+    allp = json.load(open(p, encoding="utf-8"))
     out = {}
     for n in names:
         for k, v in allp.items():
@@ -1176,7 +1176,7 @@ def episode_vision(episode="Ep1", log=print):
            "showrunnerJudgement": "", "approvalState": "draft",
            "provenance": PROV("showrunner")}
     OUT.mkdir(parents=True, exist_ok=True)
-    json.dump(pkg, open(OUT / f"{episode}_episode_vision.json", "w"), indent=1,
+    json.dump(pkg, open(OUT / f"{episode}_episode_vision.json", "w", encoding="utf-8"), indent=1,
               ensure_ascii=False)
     log(f"EPISODE VISION — theme: {v.theme[:90]}")
     return pkg
@@ -1223,7 +1223,7 @@ def gate0_readiness(episode, scene_num, brief, log=print):
                "unresolvedFields": unresolved,
                "completions": [c.model_dump() for c in prop.completions]}
         proposal_path = OUT / f"{episode}_scene{scene_num}_canon_completion_PROPOSED.json"
-        json.dump(doc, open(proposal_path, "w"), indent=1, ensure_ascii=False)
+        json.dump(doc, open(proposal_path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
         log(f"GATE 0 — canon-completion PROPOSAL for {', '.join(unresolved)} -> "
             f"{proposal_path.name} (awaiting human approval; run uses established canon only)")
     return {"envelope": env, "cast": cast, "beats": beats,
@@ -2497,7 +2497,7 @@ def regenerate_production_detail(storyboard_path, out_path, log=print, only_shot
     Used for a scoped, single-shot correction (Julian's directive: "Regenerate only
     S1.SH1's Production Detail from its unchanged approved Creative Card") without
     re-authoring the rest of the scene's production layer as a side effect."""
-    src = json.load(open(storyboard_path))
+    src = json.load(open(storyboard_path, encoding="utf-8"))
     before_hash = _shots_hash(src)
     episode, scene_num = src["episodeId"], src["sceneNumber"]
     all_shots = [CreativeShotCard(**s) for s in src["shots"]]
@@ -2561,7 +2561,7 @@ def regenerate_production_detail(storyboard_path, out_path, log=print, only_shot
                                           "siblingsUnchanged": [d.shotId for d in existing
                                                                  if d.shotId != only_shot_id]}
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
-    json.dump(out, open(out_path, "w"), indent=1, ensure_ascii=False)
+    json.dump(out, open(out_path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     log(f"PRODUCTION DETAIL REGENERATED — {out_path}"
         + (f" (single shot: {only_shot_id})" if only_shot_id else "")
         + f"; creative-card hash unchanged ({before_hash[:12]}…); "
@@ -2776,7 +2776,7 @@ def _serial_scene_director(fn):
     def locked(scene_num, episode="Ep1", brief=None, log=print):
         lock_path = ROOT / P.OUTPUT_REL / "state" / "episode-scene-director.lock"
         lock_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(lock_path, "a+") as lock_file:
+        with open(lock_path, "a+", encoding="utf-8") as lock_file:
             log(f"SCENE {scene_num} — queued for the Director text pass")
             filelock_compat.lock(lock_file)
             try:
@@ -2792,7 +2792,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
     ready = gate0_readiness(episode, scene_num, brief, log=log)
     source_pkg = ready["scriptPackage"]
     vpath = OUT / f"{episode}_episode_vision.json"
-    vision = (json.load(open(vpath)) if vpath.exists() else episode_vision(episode, log=log))
+    vision = (json.load(open(vpath, encoding="utf-8")) if vpath.exists() else episode_vision(episode, log=log))
     beat_signature = cb_lineage.beat_package_signature(source_pkg)
     script_version = (source_pkg.get("sourceScript") or {}).get("scriptVersionId")
     story_canon_digest = cb_canon.profile_digest(
@@ -2939,7 +2939,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
            "approvalState": "awaiting-human-storyboard-approval"}
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{episode}_scene{scene_num}_storyboard.json"
-    json.dump(pkg, open(out, "w"), indent=1, ensure_ascii=False)
+    json.dump(pkg, open(out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     log(f"STORYBOARD v2 — scene {scene_num}: {len(sd.beats)} beat(s), "
         f"{len(shots)} Seedance unit(s), "
         f"{len(packing_audit['fullThirtySecondUnitIds'])} full 30s, "
@@ -2968,7 +2968,7 @@ _BIBLE_MAP = {
 
 
 def migrate(episode="Ep1", log=print):
-    chars = json.load(open(_CANON_SOURCES["characters"]))
+    chars = json.load(open(_CANON_SOURCES["characters"], encoding="utf-8"))
     perf, gaps = {}, []
     for name, rec in chars.items():
         if not isinstance(rec, dict) or not rec.get("bible"):
@@ -2990,7 +2990,7 @@ def migrate(episode="Ep1", log=print):
         json.dump({"version": CANON_VERSION, "note": "Migrated mechanically from the "
                     "character bibles; null fields are AUTHORING GAPS for the user or an "
                     "approved derivation pass — never silently invented.",
-                    "characters": perf}, open(ppath, "w"), indent=1, ensure_ascii=False)
+                    "characters": perf}, open(ppath, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     report = {"builtAt": _now(), "assets": [], "gaps": sorted(gaps)[:400]}
     for key, path in {**_CANON_SOURCES, "script": _script_package(episode)}.items():
         p = pathlib.Path(path)
@@ -2998,7 +2998,7 @@ def migrate(episode="Ep1", log=print):
                                    "status": "referenced" if p.exists() else "MISSING",
                                    "md5": _md5(p) if p.exists() else None})
     OUT.mkdir(parents=True, exist_ok=True)
-    json.dump(report, open(OUT / "migration_report.json", "w"), indent=1, ensure_ascii=False)
+    json.dump(report, open(OUT / "migration_report.json", "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     log(f"MIGRATION — {sum(1 for a in report['assets'] if a['status'] == 'referenced')} assets "
         f"referenced, {len(gaps)} character-performance authoring gap(s) recorded")
     return report

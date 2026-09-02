@@ -536,7 +536,7 @@ def _require_current_lineage(pkg, scene, episode):
 # ── reference resolution — identity/plate refusals are keeper law (never fire blind) ────
 def _characters_cfg():
     try:
-        return json.load(open(P.CHARS))
+        return json.load(open(P.CHARS, encoding="utf-8"))
     except Exception:
         return {}
 
@@ -938,7 +938,7 @@ def _load_scenelook_rec(scene, episode="Ep1"):
     sc_path = _scenelook_path(scene, episode)
     if not sc_path.exists():
         return {"approved": None, "candidate": None, "history": []}
-    rec = json.load(open(sc_path))
+    rec = json.load(open(sc_path, encoding="utf-8"))
     if "approved" in rec or "candidate" in rec:
         return rec   # already the current shape
     # legacy flat shape migration
@@ -954,7 +954,7 @@ def _load_scenelook_rec(scene, episode="Ep1"):
 def _save_scenelook_rec(rec, scene, episode="Ep1"):
     sc_path = _scenelook_path(scene, episode)
     sc_path.parent.mkdir(parents=True, exist_ok=True)
-    json.dump(rec, open(sc_path, "w"), indent=1, ensure_ascii=False)
+    json.dump(rec, open(sc_path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
 
 
 def scenelook_status(scene, episode="Ep1"):
@@ -1005,7 +1005,7 @@ def _compile_scenelook_prompt(scene, episode="Ep1"):
     characters, no homes, no extra props")."""
     loc_path = pathlib.Path(P.LOCATIONS)
     style_path = pathlib.Path(P.STYLE_LAW) if P.STYLE_LAW else pathlib.Path("/nonexistent")
-    locs = json.load(open(loc_path)) if loc_path.exists() else {}
+    locs = json.load(open(loc_path, encoding="utf-8")) if loc_path.exists() else {}
     entry = (locs.get(episode) or {}).get(str(scene)) or {}
     style = style_path.read_text(encoding="utf-8").strip() if style_path.exists() else ""
     parts = [style] if style else []
@@ -1031,7 +1031,7 @@ def _resolve_scenelook_prompt(scene, episode="Ep1"):
     if not path.exists():
         return base
     try:
-        rec = json.load(open(path))
+        rec = json.load(open(path, encoding="utf-8"))
         output = (((rec.get("departmentWork") or {}).get("look") or {})
                   .get("approved") or {}).get("output") or {}
         return output.get("providerPrompt") or base
@@ -3163,9 +3163,9 @@ def department_status(scene, shot_id=None, episode="Ep1", stage=None):
 def _scene_context(pkg, scene, episode):
     loc_path = pathlib.Path(P.LOCATIONS)
     style_path = pathlib.Path(P.STYLE_LAW) if P.STYLE_LAW else pathlib.Path("/nonexistent")
-    locs = json.load(open(loc_path)) if loc_path.exists() else {}
+    locs = json.load(open(loc_path, encoding="utf-8")) if loc_path.exists() else {}
     sb_path = _declared_storyboard_path(pkg, scene, episode)
-    sb = json.load(open(sb_path)) if sb_path.exists() else {}
+    sb = json.load(open(sb_path, encoding="utf-8")) if sb_path.exists() else {}
     return {"episode": episode, "scene": str(scene), "sceneName": pkg.get("sceneName"),
             "creativeDirectingStandardVersion": int(
                 pkg.get("creativeDirectingStandardVersion") or 0),
@@ -3347,7 +3347,7 @@ def _shot_creative_contract_view(pkg, shot, scene, episode):
     path = _declared_storyboard_path(pkg, scene, episode)
     if not path.exists() or hashlib.md5(path.read_bytes()).hexdigest() != source.get("md5"):
         return shot
-    storyboard = json.load(open(path))
+    storyboard = json.load(open(path, encoding="utf-8"))
     if storyboard.get("approvalState") != "approved":
         return shot
     storyboard_shot = next(
@@ -3409,7 +3409,7 @@ def _require_forward_directing_source(pkg, shot, scene, episode):
         raise Refused(
             f"REFUSED — {shot['shotId']} needs a human-approved Director storyboard before "
             "new forward-standard department work")
-    storyboard = json.load(open(path))
+    storyboard = json.load(open(path, encoding="utf-8"))
     if storyboard.get("approvalState") != "approved":
         raise Refused(
             f"REFUSED — {shot['shotId']}'s Director storyboard is no longer approved")
@@ -5722,7 +5722,7 @@ def _live_card_hash(shot_id, scene, episode="Ep1"):
     p = _storyboard_path(scene, episode)
     if not p.exists():
         return None
-    sb = json.load(open(p))
+    sb = json.load(open(p, encoding="utf-8"))
     sb_shot = next((s for s in sb.get("shots", []) if s.get("shotId") == shot_id), None)
     if sb_shot is None:
         return None
@@ -9604,7 +9604,7 @@ def _candidate_review(shot, clip, batch_id, index):
               "criteria": {c: None for c in REVIEW_CRITERIA},
               "note": "human review only — the machine never approves creative quality",
               "machineNotes": notes}
-    with open(clip + ".review.json", "w") as f:
+    with open(clip + ".review.json", "w", encoding="utf-8") as f:
         json.dump(review, f, indent=1)
     return review
 
@@ -10196,7 +10196,7 @@ def reject_shot(scene, shot_id, correction, category="other", episode="Ep1",
                  "promptHash": hashlib.sha256(prompt_text.encode()).hexdigest(),
                  "promptSource": prompt_source,
                  "scoreInferred": False}
-    with open(arch / "REJECTED.json", "w") as f:
+    with open(arch / "REJECTED.json", "w", encoding="utf-8") as f:
         json.dump(rejection, f, indent=1)
     bank_record = _bank_animation_prompt(
         pkg, shot_id, led, outcome="rejected", diagnosis=correction,
@@ -10499,7 +10499,7 @@ def metrics(scene, episode="Ep1", log=print):
     costs = {}
     lf = HERE / "cost_ledger.jsonl"
     if lf.exists():
-        for line in open(lf):
+        for line in open(lf, encoding="utf-8"):
             try:
                 rec = json.loads(line)
             except Exception:
@@ -10544,7 +10544,7 @@ def metrics(scene, episode="Ep1", log=print):
            "identityFailures": cats.get("identity", 0),
            "continuityFailures": cats.get("geography", 0)}
     dest = HERE.parent / P.OUTPUT_REL / f"{episode}_scene{scene}_metrics.json"
-    json.dump(out, open(dest, "w"), indent=1)
+    json.dump(out, open(dest, "w", encoding="utf-8"), indent=1)
     log(json.dumps(out, indent=1))
     return out
 
@@ -10611,7 +10611,7 @@ def _post_manifest_current(manifest, expected_signature):
     if not manifest_path or not os.path.exists(manifest_path):
         return False, "post-manifest-file-missing"
     try:
-        on_disk = json.load(open(manifest_path))
+        on_disk = json.load(open(manifest_path, encoding="utf-8"))
     except (OSError, ValueError):
         return False, "post-manifest-file-unreadable"
     if on_disk != manifest:
@@ -10750,7 +10750,7 @@ def evidence_pack(scene, episode="Ep1", log=print):
     costs = {}
     ledger_file = HERE / "cost_ledger.jsonl"
     if ledger_file.exists():
-        for line in open(ledger_file):
+        for line in open(ledger_file, encoding="utf-8"):
             try:
                 rec = json.loads(line)
             except Exception:
@@ -10768,7 +10768,7 @@ def evidence_pack(scene, episode="Ep1", log=print):
         side = p + ".gen.json"
         if os.path.exists(side):
             try:
-                entry["providerRequest"] = json.load(open(side))
+                entry["providerRequest"] = json.load(open(side, encoding="utf-8"))
             except Exception:
                 entry["providerRequest"] = "unreadable sidecar"
         entry["costEntries"] = costs.get(os.path.basename(p), [])
@@ -10780,7 +10780,7 @@ def evidence_pack(scene, episode="Ep1", log=print):
         take = led.get("approvedTake") or (led.get("candidatePaths") or [None])[0]
         review = None
         if take and os.path.exists(str(take) + ".review.json"):
-            review = json.load(open(str(take) + ".review.json"))
+            review = json.load(open(str(take) + ".review.json", encoding="utf-8"))
         cases.append({
             "shotId": s["shotId"], "sourceType": s["sourceType"],
             "sourceShotId": s.get("sourceShotId"),
@@ -10824,7 +10824,7 @@ def evidence_pack(scene, episode="Ep1", log=print):
             "stitchedOutput": _asset(conformed.get("path")) if conformed.get("path") else None,
             "finalMaster": _asset(final_master.get("path")) if final_master.get("path") else None,
             "postManifest": post_manifest}
-    json.dump(pack, open(out_dir / "evidence.json", "w"), indent=1, ensure_ascii=False)
+    json.dump(pack, open(out_dir / "evidence.json", "w", encoding="utf-8"), indent=1, ensure_ascii=False)
 
     md = [f"# Evidence pack — {episode} scene {scene} ({_now()})",
           f"Design validation: {'PASSED' if (pkg.get('validation') or {}).get('passed') else 'FAILED'}\n"]

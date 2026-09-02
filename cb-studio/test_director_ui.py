@@ -1130,7 +1130,7 @@ def test_story_direction_exposes_episode_architecture_and_audience_information()
         assert phrase in JS
 
 
-def test_switching_productions_reloads_the_engine_onto_the_chosen_project():
+def test_switching_productions_reloads_the_engine_onto_the_chosen_project(monkeypatch):
     """T59: entering another engine-ready production records the choice (cb-studio/data/active-project.json,
     honoured by project_profile.default_project_id) and reloads the server; the page comes back on ?p=<id>."""
     APP_HTML = (HERE / "app.html").read_text(encoding="utf-8")
@@ -1141,6 +1141,11 @@ def test_switching_productions_reloads_the_engine_onto_the_chosen_project():
     import importlib, sys, tempfile, json, pathlib as _pl
     sys.path.insert(0, str(HERE.parent / "engine"))
     pp = importlib.import_module("project_profile")
+    # This test is about the resolution ORDER, and STUDIO_PROJECT sits above everything it
+    # checks — so an ambient one (a documented, supported way to run the suite) legitimately
+    # won and the test read the outer project instead of its own fixture's.
+    monkeypatch.delenv("STUDIO_PROJECT", raising=False)
+    monkeypatch.delenv("STUDIO_SHOW", raising=False)
     with tempfile.TemporaryDirectory() as tmp:
         root = _pl.Path(tmp)
         for pid in ("aaa", "bbb"):

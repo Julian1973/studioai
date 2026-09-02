@@ -3,7 +3,9 @@ import base64
 import hashlib
 import importlib.util
 import json
+import os
 import pathlib
+import subprocess
 import sys
 import threading
 import time
@@ -480,7 +482,18 @@ def test_authenticated_browser_session_survives_server_restart(monkeypatch, tmp_
 
     second = _load_server_module("cb_studio_serve_restart_second")
     assert second.SESSION_TOKEN == first.SESSION_TOKEN
-    assert secret_path.stat().st_mode & 0o777 == 0o600
+    # The secret must be readable by its owner and nobody else. POSIX says that in mode bits;
+    # Windows has none — the file inherits the directory's ACL, which on a real machine can
+    # hand a whole group Modify rights, so serve.py locks it down with icacls and that is what
+    # gets checked here (2026-09-02).
+    if os.name == "nt":
+        listing = subprocess.run(["icacls", str(secret_path)],
+                                 capture_output=True, text=True, timeout=15).stdout
+        assert (os.environ.get("USERNAME") or "").lower() in listing.lower()
+        for broad in ("Everyone", "BUILTIN\\Users", "Authenticated Users"):
+            assert broad not in listing
+    else:
+        assert secret_path.stat().st_mode & 0o777 == 0o600
     restarted = second.http.server.ThreadingHTTPServer(("127.0.0.1", 0), second.H)
     restarted_thread = threading.Thread(target=restarted.serve_forever, daemon=True)
     restarted_thread.start()

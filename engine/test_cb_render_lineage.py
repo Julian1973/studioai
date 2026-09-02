@@ -150,7 +150,7 @@ def main():
         print("== approve_keyframe() (direct-input signature, not storyboard md5) ==")
         try:
             path_out = R.approve_keyframe(scene, "S1.SH1", episode, reviewed_by="TestReviewer")
-            pkg2 = json.load(open(path))
+            pkg2 = json.load(open(path, encoding="utf-8"))
             led2 = pkg2["continuityLedger"][0]
             check("approve records approved=True", led2["keyframeApproval"]["approved"] is True)
             check("approve records reviewedBy", led2["keyframeApproval"]["reviewedBy"] == "TestReviewer")
@@ -190,7 +190,7 @@ def main():
                                         "keyframePath": str(approved_file)})
         archived_rel = R.reject_keyframe(scene, "S1.SH1", "the geometry drifted to a wide vista", episode,
                                           reviewed_by="TestReviewer")
-        pkg4 = json.load(open(path))
+        pkg4 = json.load(open(path, encoding="utf-8"))
         led4 = pkg4["continuityLedger"][0]
         archived_abs = R.HERE / archived_rel
         check("rejection clears the live-path duplicate", not cand_file2.exists())
@@ -217,7 +217,7 @@ def main():
                                     revision=10, extra_ledger={})
         R.reject_keyframe(scene, "S1.SH1", "add Zenny in the established seated position",
                           episode, reviewed_by="TestReviewer")
-        queued = json.load(open(path))["continuityLedger"][0]
+        queued = json.load(open(path, encoding="utf-8"))["continuityLedger"][0]
         check("pre-generation correction is recorded without a fake rejection",
               queued["pendingKeyframeCorrection"]["reason"] ==
               "add Zenny in the established seated position" and

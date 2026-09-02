@@ -84,11 +84,15 @@ def _voice_direction_output(shot):
             "lines": lines}
 
 
-def _test_canon_status(episode=None, cast=None, root=None):
+def _test_canon_status(episode=None, cast=None, root=None,
+                       allow_incomplete_cast=False, log=None):
+    # This one stub stands in for both cb_canon.status and cb_canon.require_locked, so it has to
+    # accept require_locked's own signature too — allow_incomplete_cast/log arrived 2026-09-02
+    # with the scripted-stub rule (CLAUDE.md rule 87).
     return {
         "current": True, "episodeReady": bool(episode),
         "manifestDigest": "m" * 64, "profileDigests": TEST_CANON_DIGESTS,
-        "blockers": [], "episodeBlockers": [], "warnings": [],
+        "blockers": [], "episodeBlockers": [], "episodeCastIncomplete": [], "warnings": [],
     }
 
 
@@ -353,7 +357,7 @@ def _build_package(tmp, valid=True):
         }
     out = tmp / P.OUTPUT_REL / "EpT_scene9_production_package.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    json.dump(pkg, open(out, "w"), indent=1)
+    json.dump(pkg, open(out, "w", encoding="utf-8"), indent=1)
     return out
 
 
@@ -528,7 +532,7 @@ def world(monkeypatch, tmp_path):
         "weather": "Clear.",
         "colorTemperature": "Warm.",
         "definingFeature": "A single tall test flower.",
-    }}}, open(canon_dir / "locations.json", "w"))
+    }}}, open(canon_dir / "locations.json", "w", encoding="utf-8"))
     monkeypatch.setattr(R, "_characters_cfg", lambda: CFG)
     # confirmed billing profiles — the unconfirmed hard-block has its own dedicated test
     import cb_costs
@@ -542,7 +546,7 @@ def world(monkeypatch, tmp_path):
                "scenes": [{"sceneNumber": "9", "name": "test"}]}
     (tmp_path / P.OUTPUT_REL / "EpT_test_beat_package.json").parent.mkdir(
         parents=True, exist_ok=True)
-    json.dump(beatpkg, open(tmp_path / P.OUTPUT_REL / "EpT_test_beat_package.json", "w"))
+    json.dump(beatpkg, open(tmp_path / P.OUTPUT_REL / "EpT_test_beat_package.json", "w", encoding="utf-8"))
     import cb_engine as E2
     monkeypatch.setattr(E2, "HERE", tmp_path / "engine")
     pkg_path = _build_package(tmp_path)

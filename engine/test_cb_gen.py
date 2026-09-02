@@ -169,9 +169,9 @@ def test_dialogue_cost_reaches_the_ledger_correctly(monkeypatch, tmp_path):
         assert field in m, f"ledger meta missing {field}"
     assert m["charactersSubmitted"] == 18 and m["generationKind"] == "generation"
     import json
-    side = json.load(open(tmp_path / "proof_vo.mp3.gen.json"))
+    side = json.load(open(tmp_path / "proof_vo.mp3.gen.json", encoding="utf-8"))
     assert side["chars"] == 18 and side["billing"]["creditsConsumed"] == 18
-    timing = json.load(open(tmp_path / "proof_vo.mp3.dialogue.json"))
+    timing = json.load(open(tmp_path / "proof_vo.mp3.dialogue.json", encoding="utf-8"))
     assert timing["inputCount"] == 1
     assert timing["voiceSegments"][0]["dialogueInputIndex"] == 0
     assert timing["alignment"]["characters"][:5] == list("Bizzy")

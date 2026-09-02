@@ -277,6 +277,25 @@ def read_json_document(root, path):
     return json.loads(raw), digest
 
 
+def _fs(path) -> str:
+    """The string to hand the filesystem for an already-resolved absolute path.
+
+    Windows still refuses a path of 260 characters or more unless it carries the
+    extended-length prefix. An archived script version — a name holding a 64-character digest,
+    a timestamp and a uuid, under a project's own deep output tree — reaches that on its own,
+    and the failure arrives as a bare "The system cannot find the path specified" from
+    os.replace, long after the directory was created (found on the PC, 2026-09-02). Only
+    filesystem calls take this form: what the document table records stays the plain path, so a
+    row written here still matches a row written anywhere else.
+    """
+    text = str(path)
+    if os.name == "nt" and not text.startswith("\\\\?\\") and len(text) > 200:
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text[2:]
+        return "\\\\?\\" + text
+    return text
+
+
 def atomic_write_bytes(root, path, raw, expected_digest=None):
     """Atomically replace an artifact if its on-disk revision is still expected."""
     path = pathlib.Path(path).resolve()
@@ -290,15 +309,21 @@ def atomic_write_bytes(root, path, raw, expected_digest=None):
                 f"CONCURRENT STATE CHANGE - {path.name} changed after this operation read it"
             )
 
-        fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+        # The prefix carries only the first 40 characters of the name. In full it doubled a
+        # name that already holds a 64-character digest and a timestamp — an archived script
+        # version under a deep output tree then pushed the temporary file past Windows'
+        # 260-character path limit, and mkstemp failed with a bare "No such file or directory"
+        # long after the directory itself had been created (found on the PC, 2026-09-02).
+        fd, tmp_name = tempfile.mkstemp(
+            prefix=f".{path.name[:40]}.", suffix=".tmp", dir=_fs(path.parent))
         try:
             with os.fdopen(fd, "wb") as handle:
                 handle.write(raw)
                 handle.flush()
                 os.fsync(handle.fileno())
-            os.replace(tmp_name, path)
+            os.replace(tmp_name, _fs(path))
             try:
-                dir_fd = os.open(path.parent, os.O_RDONLY)
+                dir_fd = os.open(_fs(path.parent), os.O_RDONLY)
                 try:
                     os.fsync(dir_fd)
                 finally:

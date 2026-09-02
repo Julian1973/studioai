@@ -64,7 +64,7 @@ def test_no_legacy_fingerprint_in_executable_source():
 
 
 def test_no_legacy_fingerprint_in_active_shot_prompts():
-    pkg = json.load(open(ROOT / P.OUTPUT_REL / "Ep1_scene1_production_package.json"))
+    pkg = json.load(open(ROOT / P.OUTPUT_REL / "Ep1_scene1_production_package.json", encoding="utf-8"))
     hits = []
     for s in pkg["shots"]:
         for field in ("seedancePrompt", "keyframePrompt"):

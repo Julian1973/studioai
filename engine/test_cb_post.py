@@ -114,7 +114,7 @@ def _fake_ffmpeg_ffprobe_run(cmd, capture_output=True, text=True):
             "input_i": "-20.0", "input_tp": "-4.0", "input_lra": "3.0",
             "input_thresh": "-30.0", "target_offset": "0.0",
         }))
-    open(cmd[-1], "w").write("x")
+    open(cmd[-1], "w", encoding="utf-8").write("x")
     return _FakeCompleted(returncode=0)
 
 
@@ -122,7 +122,7 @@ def test_mix_uses_correct_loudness_target_per_platform():
     """LOUDNESS_TARGETS (2026-07-14): each named platform must actually reach the ffmpeg loudnorm filter with
     ITS OWN I/TP/LRA values — not a single hardcoded number regardless of what platform was asked for."""
     def _run():
-        open("picture.mp4", "w").write("x")
+        open("picture.mp4", "w", encoding="utf-8").write("x")
         orig = cb_post.subprocess.run
         cmds = {}
         try:
@@ -158,7 +158,7 @@ def test_mix_unrecognized_platform_falls_back_to_default():
     """An unrecognized/typo'd platform name must degrade to DEFAULT_PLATFORM's target, never raise — this is
     a mastering CHOICE, not a hard gate."""
     def _run():
-        open("picture.mp4", "w").write("x")
+        open("picture.mp4", "w", encoding="utf-8").write("x")
         orig = cb_post.subprocess.run
         captured = []
         def capturing(cmd, capture_output=True, text=True):
@@ -202,10 +202,10 @@ def test_build_platform_masters_calls_mix_once_per_platform():
     platform kwarg and the RIGHT output filename."""
     calls = []
     def fake_mix(picture, music, amb, out, platform=cb_post.DEFAULT_PLATFORM, sfx_layers=None):
-        calls.append((platform, out)); open(out, "w").write("x"); return out
+        calls.append((platform, out)); open(out, "w", encoding="utf-8").write("x"); return out
     def _run():
         os.makedirs("media", exist_ok=True)
-        open("media/Ep1_Scene1_picture.mp4", "w").write("x")
+        open("media/Ep1_Scene1_picture.mp4", "w", encoding="utf-8").write("x")
         restore = _patch({"mix": fake_mix})
         try:
             return cb_post.build_platform_masters("pkg.json", "1", "Ep1", platforms=("youtube", "netflix"))
@@ -240,7 +240,7 @@ def test_build_vertical_derivative_builds_centre_crop_and_scale():
     centred x-offset) followed by a scale to the target resolution — the actual 'centre-safe 9:16' math."""
     def _run():
         os.makedirs("media", exist_ok=True)
-        open("media/complete.mp4", "w").write("x")
+        open("media/complete.mp4", "w", encoding="utf-8").write("x")
         orig = cb_post.subprocess.run
         captured = []
         def capturing(cmd, capture_output=True, text=True):
@@ -297,7 +297,7 @@ def test_load_sfx_library_loads_real_manifest_excluding_underscore_keys():
     def _run():
         os.makedirs("config", exist_ok=True)
         json.dump({"_note": "docs, not a cue", "FWIP": {"file": "sfx/fwip.mp3"}},
-                   open("config/sfx_library.json", "w"))
+                   open("config/sfx_library.json", "w", encoding="utf-8"))
         return cb_post._load_sfx_library()
     result = _scratch(_run)
     fails = []
@@ -318,8 +318,8 @@ def test_mix_sfx_layers_reaches_ffmpeg_filter_with_adelay_and_atrim():
     clause bounding it to the picture's own duration — the actual overshoot guard, not just 'it ran'."""
     def _run():
         os.makedirs("media", exist_ok=True)
-        open("picture.mp4", "w").write("x")
-        sfx = "media/fwip.mp3"; open(sfx, "w").write("x")
+        open("picture.mp4", "w", encoding="utf-8").write("x")
+        sfx = "media/fwip.mp3"; open(sfx, "w", encoding="utf-8").write("x")
         orig = cb_post.subprocess.run
         captured = []
         def capturing(cmd, capture_output=True, text=True):
@@ -359,7 +359,7 @@ def test_mix_sfx_layers_missing_file_silently_skipped():
     succeeds, and the missing file never reaches ffmpeg's own -i input list."""
     def _run():
         os.makedirs("media", exist_ok=True)
-        open("picture.mp4", "w").write("x")
+        open("picture.mp4", "w", encoding="utf-8").write("x")
         orig = cb_post.subprocess.run
         captured = []
         def capturing(cmd, capture_output=True, text=True):

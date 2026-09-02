@@ -156,21 +156,21 @@ def legacy_scratch_pkg(monkeypatch, tmp_path):
         pytest.skip("legacy revision-6 production fixture was not included in the source handover")
     scratch = tmp_path / "Ep1_scene1_production_package.json"
     shutil.copy(real, scratch)
-    live = json.load(open(scratch))
+    live = json.load(open(scratch, encoding="utf-8"))
     first = live["shots"][0]
     first_ledger = live["continuityLedger"][0]
     first_ledger.setdefault("departmentWork", {})["cinematography"] = {"approved": {
         "packageRevision": live.get("revision"),
         "output": {"providerPrompt": first.get("keyframePrompt") or
                    "Hold the approved opening frame exactly."}}}
-    json.dump(live, open(scratch, "w"), indent=1, ensure_ascii=False)
+    json.dump(live, open(scratch, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     # THE SIMPLIFICATION (2026-07-17): the real archived rev-6 file predates typed-absence
     # continuityIn — its own on-disk shape stays byte-identical, untouched, forever (this
     # copy is the only thing ever mutated). Patch ONLY the scratch copy so fresh validation
     # doesn't refuse it on a schema convention that didn't exist yet when this snapshot was
     # taken — this fixture's own job is proving sealed-envelope/token/route MECHANICS, not
     # re-litigating an old snapshot's continuity shape.
-    pkg = json.load(open(scratch))
+    pkg = json.load(open(scratch, encoding="utf-8"))
     for sh in pkg.get("shots", []):
         if sh.get("shotId") == "1.B1.S1":
             sh["continuityIn"] = None
@@ -217,9 +217,9 @@ def legacy_scratch_pkg(monkeypatch, tmp_path):
             led["voiceApproval"] = {"approved": True, "path": str(vo_dst),
                                       "at": "2026-07-19T00:00:00",
                                       "reviewedBy": "TestReviewer(legacy-backfill)"}
-    json.dump(pkg, open(scratch, "w"), indent=1, ensure_ascii=False)
+    json.dump(pkg, open(scratch, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     monkeypatch.setattr(cb_render, "load_pkg",
-                        lambda scene, episode="Ep1": (json.load(open(scratch)), scratch))
+                        lambda scene, episode="Ep1": (json.load(open(scratch, encoding="utf-8")), scratch))
     monkeypatch.setattr(cb_render, "MEDIA", tmp_path / "shots")
     # THE LINEAGE CHECK, BYPASSED HERE ON PURPOSE (2026-07-17 state-integrity checkpoint):
     # this archived rev-6 snapshot predates the lineage doctrine entirely (it has no
@@ -250,7 +250,7 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     full immutable-script-to-master proof lives in test_golden_path.py.
     """
     real = HERE.parent / P.OUTPUT_REL / "Ep1_scene1_production_package.json"
-    live = json.load(open(real))
+    live = json.load(open(real, encoding="utf-8"))
     golden_shot_id = live["shots"][0]["shotId"]
     assert golden_shot_id.startswith("S1.SH1"), (
         "golden_path_scratch_pkg requires the live package to hold the real promoted "
@@ -260,7 +260,7 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
         "be treated as the golden path.")
     scratch = tmp_path / "Ep1_scene1_production_package.json"
     shutil.copy(real, scratch)
-    scratch_pkg = json.load(open(scratch))
+    scratch_pkg = json.load(open(scratch, encoding="utf-8"))
     current_script = cb_render.SCRIPT_STORE.current("Ep1", required=True)
     source_ref = {key: current_script[key] for key in
                   ("episodeId", "scriptVersionId", "sha256", "byteLength", "contentPath")}
@@ -274,7 +274,7 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     storyboard_md5 = hashlib.md5(scratch_storyboard.read_bytes()).hexdigest()
     storyboard_sha256 = cb_lineage.sha256_file(scratch_storyboard)
     beat_pkg = json.load(open(HERE.parent / P.OUTPUT_REL /
-                              "Ep1_The_Adventure_Begins_beat_package.json"))
+                              "Ep1_The_Adventure_Begins_beat_package.json", encoding="utf-8"))
     beat_signature = cb_lineage.beat_package_signature(beat_pkg)
     card_hashes = (scratch_pkg.get("sourceStoryboard") or {}).get("creativeCardHashes") or {}
     scratch_pkg["sourceScript"] = source_ref
@@ -303,9 +303,9 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     first_ledger.setdefault("departmentWork", {})["cinematography"] = {"approved": {
         "packageRevision": scratch_pkg.get("revision"),
         "output": _pose_first_cinematography_output(first_shot, prior_output)}}
-    json.dump(scratch_pkg, open(scratch, "w"), indent=1, ensure_ascii=False)
+    json.dump(scratch_pkg, open(scratch, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     monkeypatch.setattr(cb_render, "load_pkg",
-                        lambda scene, episode="Ep1": (json.load(open(scratch)), scratch))
+                        lambda scene, episode="Ep1": (json.load(open(scratch, encoding="utf-8")), scratch))
     monkeypatch.setattr(cb_render, "_storyboard_path",
                         lambda scene, episode="Ep1": scratch_storyboard)
     monkeypatch.setattr(cb_render, "MEDIA", tmp_path / "shots")
@@ -390,12 +390,12 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
              "singleSubject": True, "turnaroundAuthority": True,
              "turnaroundGroupHash": "fixture-" + cb_render._resolve_char(name, cfg)}
             for view in ("front", "rear")])
-    scratch_pkg = json.load(open(scratch))
+    scratch_pkg = json.load(open(scratch, encoding="utf-8"))
     first_ledger = scratch_pkg["continuityLedger"][0]
     first_ledger["departmentWork"]["cinematography"]["approved"]["inputSignature"] = \
         cb_render._department_input_signature(
             scratch_pkg, "cinematography", golden_shot_id, "1", "Ep1")
-    json.dump(scratch_pkg, open(scratch, "w"), indent=1, ensure_ascii=False)
+    json.dump(scratch_pkg, open(scratch, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     return scratch
 
 
@@ -424,7 +424,7 @@ def test_legacy_1b1s1_outgoing_provider_request_is_the_sealed_brief(monkeypatch,
     # 1) disclosure: no token -> REFUSED (designed), sealed envelope stored on the scratch ledger
     with pytest.raises(cb_render.Refused, match="SPEND NOT APPROVED"):
         cb_render.fire_shot("1", "1.B1.S1", "Ep1", candidates=3, log=lambda *a, **k: None)
-    pkg = json.load(open(legacy_scratch_pkg))
+    pkg = json.load(open(legacy_scratch_pkg, encoding="utf-8"))
     led = [x for x in pkg["continuityLedger"] if x["shotId"] == "1.B1.S1"][0]
     auth = led["pendingSpendAuth"]
     env = auth["envelope"]
@@ -449,7 +449,7 @@ def test_legacy_1b1s1_outgoing_provider_request_is_the_sealed_brief(monkeypatch,
     assert env["references"][0]["md5"] == "c02dc92cbb300cc25898b4231ad04d6e"   # signed keyframe
     assert sent["audio_urls"] == [f"file://{env['audio']['path']}"]
     # single-use: consumed
-    pkg2 = json.load(open(legacy_scratch_pkg))
+    pkg2 = json.load(open(legacy_scratch_pkg, encoding="utf-8"))
     led2 = [x for x in pkg2["continuityLedger"] if x["shotId"] == "1.B1.S1"][0]
     assert led2["pendingSpendAuth"] is None and led2["status"] == "candidates-pending"
 
@@ -458,11 +458,11 @@ def test_legacy_pre_envelope_token_is_void(monkeypatch, legacy_scratch_pkg):
     """LEGACY (item 5): a token issued before the sealed-envelope protocol (e.g.
     db660b33...) can never fire — pinned against the original revision-6 package."""
     monkeypatch.setattr(cb_render, "_require_confirmed_billing", lambda prov: None)
-    pkg = json.load(open(legacy_scratch_pkg))
+    pkg = json.load(open(legacy_scratch_pkg, encoding="utf-8"))
     led = [x for x in pkg["continuityLedger"] if x["shotId"] == "1.B1.S1"][0]
     led["pendingSpendAuth"] = {"token": "oldtokenoldtoken",
                                 "bindingHash": "x" * 32}     # no envelope — pre-protocol shape
-    json.dump(pkg, open(legacy_scratch_pkg, "w"), indent=1, ensure_ascii=False)
+    json.dump(pkg, open(legacy_scratch_pkg, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     with pytest.raises(cb_render.Refused):
         cb_render.fire_shot("1", "1.B1.S1", "Ep1", spend_token="oldtokenoldtoken",
                              log=lambda *a, **k: None)
@@ -474,7 +474,7 @@ def test_legacy_dry_run_issues_no_token_and_stores_nothing(monkeypatch, legacy_s
     with pytest.raises(cb_render.Refused, match="DRY RUN"):
         cb_render.fire_shot("1", "1.B1.S1", "Ep1", candidates=3, dry_run=True,
                              log=lambda *a, **k: None)
-    pkg = json.load(open(legacy_scratch_pkg))
+    pkg = json.load(open(legacy_scratch_pkg, encoding="utf-8"))
     led = [x for x in pkg["continuityLedger"] if x["shotId"] == "1.B1.S1"][0]
     assert not led.get("pendingSpendAuth")
 
@@ -501,10 +501,10 @@ def test_golden_path_keyframe_refuses_on_the_actual_current_lineage_mismatch(
     monkeypatch.setattr(cb_render, "_require_current_lineage",
                         lambda *args, **kwargs: (_ for _ in ()).throw(
                             cb_render.Refused("storyboard-content-mismatch")))
-    shot_id = json.load(open(golden_path_scratch_pkg))["shots"][0]["shotId"]
+    shot_id = json.load(open(golden_path_scratch_pkg, encoding="utf-8"))["shots"][0]["shotId"]
     with pytest.raises(cb_render.Refused, match="storyboard-content-mismatch"):
         cb_render.keyframe_shot("1", shot_id, "Ep1", log=lambda *a, **k: None)
-    written = json.load(open(golden_path_scratch_pkg))
+    written = json.load(open(golden_path_scratch_pkg, encoding="utf-8"))
     led = [x for x in written["continuityLedger"] if x["shotId"] == shot_id][0]
     assert "keyframeCandidate" not in led                            # nothing was ever generated
 
@@ -523,7 +523,7 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
     real, promoted content. ONLY cb_gen.generate_image (the actual paid provider call) is
     stubbed — no media, no spend. Writes are redirected to a scratch copy
     (golden_path_scratch_pkg); the real live file is never touched by this test."""
-    pkg_md5 = json.load(open(golden_path_scratch_pkg))["sourceStoryboard"]["md5"]
+    pkg_md5 = json.load(open(golden_path_scratch_pkg, encoding="utf-8"))["sourceStoryboard"]["md5"]
     monkeypatch.setattr(cb_render, "_current_storyboard_md5", lambda scene, episode="Ep1": pkg_md5)
     real_live = HERE.parent / P.OUTPUT_REL / "Ep1_scene1_production_package.json"
     real_before = real_live.read_bytes()
@@ -544,7 +544,7 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
             "review": {"verdict": "pass", "summary": "Test fixture passes."},
         })
 
-    shot_id = json.load(open(golden_path_scratch_pkg))["shots"][0]["shotId"]
+    shot_id = json.load(open(golden_path_scratch_pkg, encoding="utf-8"))["shots"][0]["shotId"]
     out_path = cb_render.keyframe_shot("1", shot_id, "Ep1", log=lambda *a, **k: None)
 
     assert len(calls) == 2                                          # sealed A/B provider pair
@@ -574,7 +574,7 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
 
     # THE KEYFRAME LIFECYCLE (2026-07-17): a fresh generation is a CANDIDATE, awaiting a
     # decision — never auto-approved, never a bare keyframePath pointer on its own.
-    written = json.load(open(golden_path_scratch_pkg))
+    written = json.load(open(golden_path_scratch_pkg, encoding="utf-8"))
     led = [x for x in written["continuityLedger"] if x["shotId"] == shot_id][0]
     assert led["keyframeCandidate"]["path"] == out_path[0]
     assert [item["path"] for item in led["keyframeCandidates"]] == out_path

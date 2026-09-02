@@ -36,6 +36,14 @@ function Say($msg) { Write-Host ("== " + $msg) -ForegroundColor Cyan }
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Fail "git is not installed or not on PATH." }
 if (-not (Test-Path -LiteralPath (Join-Path $studioRoot ".git"))) { Fail "This folder is not a git checkout: $studioRoot" }
 
+# A previous run that was closed mid-way can leave git's own lock/housekeeping files behind; git refuses to
+# run while they exist. Nothing of Julian's lives in these three files.
+foreach ($stale in @(".git\index.lock", ".git\gc.log", ".git\gc.pid")) {
+    if (Test-Path -LiteralPath $stale) {
+        try { Remove-Item -LiteralPath $stale -Force; Say "Removed stale $stale from an interrupted run" } catch { Write-Host ("   could not remove " + $stale + ": " + $_.Exception.Message) -ForegroundColor Yellow }
+    }
+}
+
 $before = (git rev-parse --short HEAD).Trim()
 $beforeBranch = (git rev-parse --abbrev-ref HEAD).Trim()
 Say "Studio at $studioRoot - currently $beforeBranch @ $before"
@@ -64,7 +72,7 @@ if ($dirty -gt 0) {
 } else {
     Say "No edited tracked files to save"
 }
-$untracked = @(git ls-files --others --exclude-standard | Where-Object { $_ -and -not ($_ -like ".venv/*") -and -not ($_ -like ".pytest_cache/*") -and -not ($_ -like "*__pycache__*") -and -not ($_ -like "studio-update.bundle") -and -not ($_ -like "update-studio.*") -and -not ($_ -like "HANDOVER_*") })
+$untracked = @(git ls-files --others --exclude-standard | Where-Object { $_ -and -not ($_ -like ".venv/*") -and -not ($_ -like ".venv-old-*") -and -not ($_ -like "_local-work-*") -and -not ($_ -like ".pytest_cache/*") -and -not ($_ -like "*__pycache__*") -and -not ($_ -like "studio-update.bundle") -and -not ($_ -like "update-studio.*") -and -not ($_ -like "HANDOVER_*") })
 if ($untracked.Count -gt 0) {
     $aside = Join-Path $studioRoot ("_local-work-" + $stamp)
     Say ("Moving " + $untracked.Count + " new local file(s) aside into " + $aside + " (nothing is deleted)")

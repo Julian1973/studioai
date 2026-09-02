@@ -4213,7 +4213,9 @@ class H(http.server.SimpleHTTPRequestHandler):
                     safe = "CB_" + re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_") + "_anchor." + ext
                     ASSETS.mkdir(parents=True, exist_ok=True)
                     (ASSETS / safe).write_bytes(base64.b64decode(raw))
-                    entry["anchor"] = "../cb-seed/assets/" + safe
+                    # recorded where it landed - the active project's own assets folder
+                    # (2026-09-02: this used to hardcode the first show's ../cb-seed/assets)
+                    entry["anchor"] = (ASSETS / safe).resolve().relative_to(ROOT.resolve()).as_posix()
                 if d.get("turnData"):
                     raw = d["turnData"]
                     if raw.strip().startswith("data:") and "," in raw:
@@ -4224,7 +4226,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     safe = "CB_" + re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_") + "_turn4." + ext
                     ASSETS.mkdir(parents=True, exist_ok=True)
                     (ASSETS / safe).write_bytes(base64.b64decode(raw))
-                    turn_path = "../cb-seed/assets/" + safe
+                    turn_path = (ASSETS / safe).resolve().relative_to(ROOT.resolve()).as_posix()
                     entry["turn4"] = turn_path
                     entry.setdefault("refs", [])
                     if turn_path not in entry["refs"]:
@@ -4251,7 +4253,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                         filename = f"CB_{slug(name)}_{source_stem or ('reference_' + str(index))}.{ext}"
                         out = char_dir / filename
                         out.write_bytes(base64.b64decode(raw))
-                        rel = "../" + out.relative_to(ROOT).as_posix()
+                        rel = out.resolve().relative_to(ROOT.resolve()).as_posix()
                         if rel not in entry["refs"]:
                             entry["refs"].append(rel)
                 for k in ("key_features", "voiceId", "size", "sizeRef", "cadence",

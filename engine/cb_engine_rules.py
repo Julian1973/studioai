@@ -21,6 +21,15 @@ def _norm(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
 
 
+def _text_list(value):
+    if value is None:
+        return []
+    if isinstance(value, str):
+        text = _norm(value)
+        return [text] if text else []
+    return [_norm(item) for item in value if _norm(item)]
+
+
 def _line_text(line):
     return _norm(line.get("exactText") if line.get("exactText") is not None else line.get("text"))
 
@@ -441,8 +450,8 @@ def geometry_agreement(cinematography, animation):
     cine = cinematography or {}
     anim = animation or {}
     errors = []
-    cine_geo = [_norm(item) for item in cine.get("geography") or []]
-    anim_geo = [_norm(item) for item in anim.get("geography") or []]
+    cine_geo = _text_list(cine.get("geography"))
+    anim_geo = _text_list(anim.get("geography"))
     if anim_geo and cine_geo != anim_geo:
         errors.append("keyframe and render geography are not verbatim-identical")
     shot_plan = anim.get("shotPlan") or []

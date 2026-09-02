@@ -215,6 +215,15 @@ class CinematographyDirection(BaseModel):
     continuityProtections: List[str] = Field(default_factory=list, max_length=4)
     providerPrompt: str = Field(min_length=40)
 
+    @field_validator(
+        "geography", "charactersInFrame", "negativeSpace", "referenceUse",
+        "continuityProtections",
+        mode="before",
+    )
+    @classmethod
+    def coerce_provider_text_lists(cls, value):
+        return _coerce_text_list(value)
+
 
 class VoiceTagPurpose(BaseModel):
     tag: str = Field(min_length=1)

@@ -1,8 +1,10 @@
 import copy
 import json
+from pathlib import Path
 
 import pytest
 
+import cb_audio_authority
 import cb_voice_director as V
 
 
@@ -214,6 +216,28 @@ def test_provider_request_pronounces_ada_as_lowercase_ada():
     request = V.emit_v3_requests(compiled)[0]
     assert compiled["exactDialogue"] == "Bo, this is Ada."
     assert request["body"]["text"] == "Bo, this is ada."
+
+
+def test_ep2_s4_countdown_is_locked_to_bo_keen_chorus():
+    package_path = Path("cb-output/Ep2_scene4_production_package.json")
+    package = json.loads(package_path.read_text(encoding="utf-8"))
+    shot = next(item for item in package["shots"] if item["shotId"] == "S4.SH1")
+    voice = package["continuityLedger"][0]["departmentWork"]["voice"]["approved"]
+    direction, locked = cb_audio_authority.route_voice_direction(
+        voice["output"], shot["dialogueLines"])
+
+    compiled = V.compile_track(direction, locked)
+    countdowns = [
+        line for line in compiled["lines"]
+        if line["exactDialogue"].strip() == "3, 2, 1…"
+    ]
+
+    assert len(countdowns) == 3
+    for line in countdowns:
+        assert line["character"] == "Bo/Keen"
+        assert line["voiceTreatment"] == "group_chorus"
+        assert line["chorusMembers"] == ["Bo", "Keen"]
+        assert line["voiceIds"] == ["AAF2q3NCwTrLMMkEnRLB", "TCRj5m2u9xhZHJ8h9pMv"]
 
 
 def test_bo_has_canon_voice_card_matching_character_registry():

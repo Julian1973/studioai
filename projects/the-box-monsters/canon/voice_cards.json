@@ -1,24 +1,109 @@
 {
-  "schemaVersion": 1,
-  "modelId": "eleven_v3",
-  "characters": {
-    "Jenny": {
-      "voiceId": "BUhaNjY74aXLexxM9qfh",
-      "modelId": "eleven_v3",
-      "settings": {
-        "stability": 0.45,
-        "similarity_boost": 0.9,
-        "style": 0.15
-      },
-      "cadenceSignature": "Thoughtful, sensitive, quietly funny; goes small and careful when embarrassed, warms when she dares.",
-      "defaultTags": [
-        "softly",
-        "quietly"
-      ],
-      "bannedTags": [
-        "shouting"
-      ]
-    }
+ "schemaVersion": 1,
+ "modelId": "eleven_v3",
+ "characters": {
+  "Jenny": {
+   "voiceId": "BUhaNjY74aXLexxM9qfh",
+   "modelId": "eleven_v3",
+   "settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.9,
+    "style": 0.2
+   },
+   "cadenceSignature": "Thoughtful and quiet with a small dry humour; she gets smaller and slower when she is embarrassed, never louder.",
+   "defaultTags": [
+    "quietly",
+    "softly",
+    "hesitates",
+    "exhales"
+   ],
+   "bannedTags": [
+    "shouting",
+    "angry"
+   ],
+   "physicalSignature": "Shoulders draw in and the breath shortens before she speaks; stillness is her tell, not movement."
   },
-  "_note": "Patch, Rumble, Tilly and Nib have no ElevenLabs voice yet — Julian casts them in the studio before any dialogue beat can fire (Law 5: a beat with dialogue and no V3 track refuses to render)."
+  "Patch": {
+   "voiceId": "67QOLFteDdoiZMleE6eY",
+   "modelId": "eleven_v3",
+   "settings": {
+    "stability": 0.4,
+    "similarity_boost": 0.9,
+    "style": 0.3
+   },
+   "cadenceSignature": "Bright mid-high UK with light South Wales musicality; brisk and persuasive, and doubt catches the final word.",
+   "physicalSignature": "Leads with the body and arrives before the plan does; the hands keep going after the sentence stops.",
+   "defaultTags": [
+    "excited",
+    "warmly",
+    "breathes"
+   ],
+   "bannedTags": [
+    "shouting",
+    "angry"
+   ]
+  },
+  "Rumble": {
+   "voiceId": "L8A6aQ3mNR9yA65Zultc",
+   "modelId": "eleven_v3",
+   "settings": {
+    "stability": 0.65,
+    "similarity_boost": 0.9,
+    "style": 0.1
+   },
+   "cadenceSignature": "Warm low baritone with gentle Welsh warmth; slow, exact and underplayed, courage grows firmer rather than louder.",
+   "physicalSignature": "Moves late and settles heavily; the stillness of the biggest body in the room is what makes the space feel safe.",
+   "defaultTags": [
+    "calm",
+    "warmly",
+    "gently",
+    "exhales"
+   ],
+   "bannedTags": [
+    "shouting",
+    "excited"
+   ]
+  },
+  "Tilly": {
+   "voiceId": "nlHpoIXHq17kPfPORuwX",
+   "modelId": "eleven_v3",
+   "settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.9,
+    "style": 0.25
+   },
+   "cadenceSignature": "Focused contemporary British mid register; precise and accelerating, until feeling interrupts the perfect list.",
+   "physicalSignature": "Hands sort and label while she talks; the tidying stops dead the moment she actually listens.",
+   "defaultTags": [
+    "quickly",
+    "calm",
+    "breathes"
+   ],
+   "bannedTags": [
+    "shouting",
+    "angry"
+   ]
+  },
+  "Nib": {
+   "voiceId": "mQF4SvS3dYAPKiawWrYJ",
+   "modelId": "eleven_v3",
+   "settings": {
+    "stability": 0.35,
+    "similarity_boost": 0.9,
+    "style": 0.35
+   },
+   "cadenceSignature": "Agile modern British mid-high; fast and sideways, and the sincere truth arrives suddenly still.",
+   "physicalSignature": "Never settles, then freezes completely on the one true thing he says by accident.",
+   "defaultTags": [
+    "playfully",
+    "excited",
+    "quietly"
+   ],
+   "bannedTags": [
+    "shouting",
+    "angry"
+   ]
+  }
+ },
+ "_note": "Voice cards for the full speaking cast. Each cadence and physical signature is drawn from that character's own essence in characters.json and the register Julian wrote into the ElevenLabs voice; Jenny's card was missing physicalSignature entirely, which made every voice take raise KeyError (2026-09-02)."
 }

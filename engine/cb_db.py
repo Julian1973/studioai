@@ -296,6 +296,26 @@ def _fs(path) -> str:
     return text
 
 
+def _replace_waiting_for_windows(source, target) -> None:
+    """os.replace, waiting out a transient Windows lock rather than failing on it.
+
+    Windows refuses to replace a file another handle still holds — a reader not yet collected,
+    a virus scanner, the search indexer, or the Studio's own preview of the very image being
+    archived. POSIX has no such rule, so this only ever waits here. Bounded to about a second,
+    then the real error is raised, never swallowed. The same guard cb_scripts._atomic_write
+    already had; archiving a rejected keyframe is where its absence here surfaced, mid-production
+    (2026-09-02) — the pattern belonged in both from the start.
+    """
+    for attempt in range(10):
+        try:
+            os.replace(source, target)
+            return
+        except PermissionError:
+            if os.name != "nt" or attempt == 9:
+                raise
+            time.sleep(0.05 * (attempt + 1))
+
+
 def atomic_write_bytes(root, path, raw, expected_digest=None):
     """Atomically replace an artifact if its on-disk revision is still expected."""
     path = pathlib.Path(path).resolve()
@@ -321,7 +341,7 @@ def atomic_write_bytes(root, path, raw, expected_digest=None):
                 handle.write(raw)
                 handle.flush()
                 os.fsync(handle.fileno())
-            os.replace(tmp_name, _fs(path))
+            _replace_waiting_for_windows(tmp_name, _fs(path))
             try:
                 dir_fd = os.open(_fs(path.parent), os.O_RDONLY)
                 try:

@@ -4093,7 +4093,23 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                     **context["shot"],
                     "watchDirectorFeedbackApproved": director_feedback,
                 }
-            result = cb_departments.prepare_animation(context, images, log=log)
+            try:
+                result = cb_departments.prepare_animation(context, images, log=log)
+            except RuntimeError as exc:
+                # The Animation Director's guards protect the approved storyboard — the stage
+                # count, the internal-shot count, the locked visual events — and they raise
+                # rather than repair. A single miscount in one sample then cost the whole shot
+                # with no way forward (2026-09-02: S2.SH03 and S2.SH04 both stopped here). One
+                # automatic re-fire, exactly the economy every other paid step already gets;
+                # a second miss is a real refusal and still stops the shot.
+                log(f"ANIMATION DIRECTION REFUSED — {exc}", flush=True)
+                log("ANIMATION DIRECTION — one automatic re-fire (no media spend)", flush=True)
+                # The refusal names exactly what was broken ("stage 2 primaryEvent changed",
+                # "changed the approved number of motivated internal shots"). A blind re-roll
+                # just breaks a different rule; handing the specialist its own refusal makes the
+                # second attempt a correction rather than another guess.
+                context = {**context, "refusedPreviousAttempt": str(exc)}
+                result = cb_departments.prepare_animation(context, images, log=log)
             # The sealed upload plan, not an older specialist guess, owns provider slot
             # numbering.  Rebind every role before compiling or validating the prompt.
             result.referenceContract = [

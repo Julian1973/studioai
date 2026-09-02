@@ -750,24 +750,24 @@
       "worker": "Cinematographer / DP",
       "skill": "studio/chairs/cinematographer/SKILL.md",
       "model": "gpt-5.5",
-      "preparedAt": "2026-09-02T18:29:36",
+      "preparedAt": "2026-09-02T23:37:35",
       "editedAt": null,
       "preparedBy": "specialist",
       "creativeDirectingStandardVersion": 4,
       "sourceHash": "4034567a1bd398b1260b19aaccb7f19e04924cf3d42e6ec54b822928301eb0a2",
       "output": {
        "shotId": "S2.SH03",
-       "audienceRead": "A quiet low-floor bedroom ritual: Jenny is trying to make the shame disappear by folding the worksheet smaller and tucking it into the decorated shoebox, but the careful handling shows it still matters.",
-       "composition": "One low, wide floor-level frame in Jenny’s bedroom with Jenny kneeling beside the decorated shoebox near the bed, the worksheet visible in her hands, and the bed softened behind; keep hands, feet, worksheet, shoebox, and bed all readable with a clear performance corridor across the floor space between Jenny and the box.",
-       "lensAndCameraRelationship": "Gentle wide relationship lens feel from bedroom-floor height at roughly shoebox-lid level, respectful and close enough to read the hands and paper without distortion; camera stays mostly still with only a tiny settling drift as the action slows.",
-       "lightingAndDepth": "Dim evening warmth, soft practical bedroom light, gentle falloff into the background; the bed sits softened in the rear plane while Jenny and the shoebox occupy the active near/mid ground; preserve a cozy safe-room palette without turning the shoebox into a bright hero prop.",
+       "audienceRead": "A quiet low floor-level bedroom frame where Jenny’s careful, over-precise hiding ritual reads as a private attempt to make shame disappear; the decorated shoebox remains the emotional center, closed by the end, with the bed softened behind and no awareness of the box’s tiny response.",
+       "composition": "Low wide 16:9 composition from bedroom-floor height, respectful and still, with Jenny kneeling beside the decorated shoebox in the near/mid ground and the bed soft in the background. Keep the worksheet, Jenny’s hands, the shoebox, and the bed all readable in one frame. Maintain a clear floor-space corridor between Jenny and the box so the hand-pause and lid-close can be read without cropping.",
+       "lensAndCameraRelationship": "Gentle wide relationship lens feel, near 24–28mm equivalent, camera held low at lid height with only a tiny settling drift as motion slows. No distortion, no close-up isolation, no reaction cut; the frame should feel like a patient observer sharing floor space.",
+       "lightingAndDepth": "Dim evening bedroom warmth with soft practical light and muted cozy shadows. Bed and room edges fall gently softer behind the active floor action; the shoebox and Jenny’s hands hold the clearest mid/near-plane readability. Keep the palette subdued and domestic, not showcase-bright.",
        "geography": [
-        "Bedroom-floor height, camera placed low beside the shoebox and bed.",
-        "Jenny kneels on the floor beside the decorated shoebox, close enough to touch the lid.",
-        "The bed sits behind Jenny, softened and readable as the background anchor.",
-        "The shoebox stays on the floor in the same frame as Jenny’s hands and the worksheet.",
-        "Keep the open-shut action traveling downward into the box and back up to Jenny’s withdrawn hand.",
-        "Leave the floor space between Jenny and the shoebox clear for the ritual and the later closed-lid landing."
+        "Floor-level view in Jenny’s bedroom, camera positioned beside the bed and looking across the floor toward the shoebox.",
+        "Jenny kneels on the floor beside the decorated shoebox, close enough to touch the lid while staying in the same wide frame.",
+        "The bed sits behind Jenny and the box, softened by evening warmth and acting as the background anchor.",
+        "The shoebox is on the bedroom floor in the foreground/mid-ground relationship space, readable as a trusted hiding place.",
+        "The worksheet remains between Jenny’s hands and the box until it is folded smaller and placed inside.",
+        "Hold the open floor space around the action so the lid close and Jenny’s withdrawal remain visible and unblocked."
        ],
        "charactersInFrame": [
         "Jenny"
@@ -777,38 +777,38 @@
        "openingFrameLayout": {
         "aspectRatio": "16:9",
         "referenceCharacter": "Jenny",
-        "referenceHeightFraction": 0.55,
+        "referenceHeightFraction": 0.52,
         "sameDepth": true,
         "placements": [
          {
           "character": "Jenny",
-          "centerX": 0.36,
-          "centerY": 0.69,
+          "centerX": 0.34,
+          "centerY": 0.6961,
           "apparentScale": 1.0,
           "depthPlane": 1,
           "bodyAngleDegrees": 18.0,
           "facing": "down toward the shoebox",
-          "pose": "kneeling beside the shoebox with the worksheet held low in front of her, ready for careful folding without starting the later lid-close yet"
+          "pose": "kneeling at bedroom-floor height with a quiet anticipatory hand position near the worksheet and lid; calm, careful, and inward-facing"
          }
         ]
        },
        "negativeSpace": [
-        "Hold empty space frame-right for the shoebox and its lid movement.",
-        "Preserve open floor space between Jenny and the bed for the action corridor.",
-        "Leave a small quiet area above the bed line for the room to breathe without adding new reveals."
+        "Hold empty floor space frame-right for the shoebox lid close and Jenny’s hand withdrawal.",
+        "Hold unobstructed space between Jenny and the bed so the low wide relationship stays readable.",
+        "Preserve a small clear corridor around the shoebox for the tiny missed cardboard response after closing."
        ],
        "referenceUse": [
-        "Bind Jenny identity, face, hair, clothing, and child scale only to the approved Jenny reference image in context.",
-        "Bind the bedroom palette, materials, warm evening light, and decorated shoebox treatment to the approved scene-look reference in context.",
-        "Use the provider-reference order exactly as supplied in context; do not improvise additional identities or props."
+        "Use the Jenny reference for identity, canon scale, and school uniform proportions.",
+        "Use the bedroom scene look for materials, palette, and evening softness.",
+        "Use the shoebox reference for the decorated trusted-box design and worn cardboard texture."
        ],
        "continuityProtections": [
-        "Keep the entire action in one low wide floor-level bedroom frame; do not crop hands, feet, worksheet, shoebox, or bed.",
-        "The worksheet must remain visible as a folded paper object that can be tracked into the shoebox path.",
-        "Do not reveal Box Monsters, The Fold, or any visible route; only the smallest missed cardboard sigh belongs later.",
-        "Maintain Jenny’s playable anticipation state only; do not freeze the later reaction or lid-close endpoint in the opening frame."
+        "Keep only Jenny in frame; any other speaking character remains offscreen.",
+        "Do not show Box Monsters, The Fold, or any visible route.",
+        "Do not crop hands, feet, the worksheet, the shoebox, or the bed.",
+        "Keep the box response subtle and easy to miss, with Jenny unaware of it."
        ],
-       "providerPrompt": "Low floor-level wide view in Jenny’s bedroom, 16:9. Jenny kneels beside the decorated shoebox near the bed, holding the worksheet low and looking down at it with quiet practical focus. Keep Jenny, the worksheet, the shoebox, and the bed all readable in one frame with her hands and feet fully visible. The room is softly lit with dim evening warmth, muted handcrafted bedroom materials, and the bed softened behind the floor action. Respect the approved Jenny character reference for identity and scale and the approved scene look for palette and materials. No extra characters, no cropped props, no reveal of anything supernatural or hidden routes. Opening frame only: anticipation before the fold-and-place ritual, with clear space for the shoebox action to continue."
+       "providerPrompt": "Low floor-level wide view in Jenny’s bedroom at dim evening warmth. Jenny kneels beside a decorated shoebox on the floor with the bed softened behind her, all key elements readable in one 16:9 frame: Jenny, the folded worksheet, the shoebox, and the bed. Respectful, still, gentle wide relationship lens feel; camera at bedroom-floor height, slightly low and patient, with only a tiny settling drift. Jenny is in a quiet anticipatory kneel beside the box, facing down toward it, hands near the worksheet and lid, as if in the middle of a careful hiding ritual. Keep the floor space open so the hand pause, lid close, and tiny missed cardboard response can read clearly. Subdued cozy bedroom materials, muted evening palette, soft practical light, no extra characters, no reveal of hidden routes or magical entities, no cropped hands or props."
       },
       "packageRevision": 2,
       "inputSignature": {
@@ -818,7 +818,7 @@
         "cinematography": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd",
         "dp": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd"
        },
-       "canonProfileDigest": "5c7cf8516ec77a672a0f375e5af3a6d1687983f9b7033ca8e7b87ab062f1ce36",
+       "canonProfileDigest": "7f027a31ef08a38fe028dc8d91682098fbfa38551310a7c549e3c46cbfe52983",
        "shotContractHash": "c7647f3ca26cc449c7d1284e68b7c26831e0fb09ef48ddf93e95226ac0a3dcd6",
        "sceneLookHash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268",
        "references": [
@@ -941,6 +941,545 @@
        "outcome": "invalidated",
        "invalidatedAt": "2026-09-02T18:20:06",
        "invalidationReason": "direct inputs changed before replacement preparation"
+      },
+      {
+       "department": "Cinematography",
+       "worker": "Cinematographer / DP",
+       "skill": "studio/chairs/cinematographer/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-09-02T18:29:36",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 4,
+       "sourceHash": "4034567a1bd398b1260b19aaccb7f19e04924cf3d42e6ec54b822928301eb0a2",
+       "output": {
+        "shotId": "S2.SH03",
+        "audienceRead": "A quiet low-floor bedroom ritual: Jenny is trying to make the shame disappear by folding the worksheet smaller and tucking it into the decorated shoebox, but the careful handling shows it still matters.",
+        "composition": "One low, wide floor-level frame in Jenny’s bedroom with Jenny kneeling beside the decorated shoebox near the bed, the worksheet visible in her hands, and the bed softened behind; keep hands, feet, worksheet, shoebox, and bed all readable with a clear performance corridor across the floor space between Jenny and the box.",
+        "lensAndCameraRelationship": "Gentle wide relationship lens feel from bedroom-floor height at roughly shoebox-lid level, respectful and close enough to read the hands and paper without distortion; camera stays mostly still with only a tiny settling drift as the action slows.",
+        "lightingAndDepth": "Dim evening warmth, soft practical bedroom light, gentle falloff into the background; the bed sits softened in the rear plane while Jenny and the shoebox occupy the active near/mid ground; preserve a cozy safe-room palette without turning the shoebox into a bright hero prop.",
+        "geography": [
+         "Bedroom-floor height, camera placed low beside the shoebox and bed.",
+         "Jenny kneels on the floor beside the decorated shoebox, close enough to touch the lid.",
+         "The bed sits behind Jenny, softened and readable as the background anchor.",
+         "The shoebox stays on the floor in the same frame as Jenny’s hands and the worksheet.",
+         "Keep the open-shut action traveling downward into the box and back up to Jenny’s withdrawn hand.",
+         "Leave the floor space between Jenny and the shoebox clear for the ritual and the later closed-lid landing."
+        ],
+        "charactersInFrame": [
+         "Jenny"
+        ],
+        "canonicalStyleVersion": "v1.0.0",
+        "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+        "openingFrameLayout": {
+         "aspectRatio": "16:9",
+         "referenceCharacter": "Jenny",
+         "referenceHeightFraction": 0.55,
+         "sameDepth": true,
+         "placements": [
+          {
+           "character": "Jenny",
+           "centerX": 0.36,
+           "centerY": 0.69,
+           "apparentScale": 1.0,
+           "depthPlane": 1,
+           "bodyAngleDegrees": 18.0,
+           "facing": "down toward the shoebox",
+           "pose": "kneeling beside the shoebox with the worksheet held low in front of her, ready for careful folding without starting the later lid-close yet"
+          }
+         ]
+        },
+        "negativeSpace": [
+         "Hold empty space frame-right for the shoebox and its lid movement.",
+         "Preserve open floor space between Jenny and the bed for the action corridor.",
+         "Leave a small quiet area above the bed line for the room to breathe without adding new reveals."
+        ],
+        "referenceUse": [
+         "Bind Jenny identity, face, hair, clothing, and child scale only to the approved Jenny reference image in context.",
+         "Bind the bedroom palette, materials, warm evening light, and decorated shoebox treatment to the approved scene-look reference in context.",
+         "Use the provider-reference order exactly as supplied in context; do not improvise additional identities or props."
+        ],
+        "continuityProtections": [
+         "Keep the entire action in one low wide floor-level bedroom frame; do not crop hands, feet, worksheet, shoebox, or bed.",
+         "The worksheet must remain visible as a folded paper object that can be tracked into the shoebox path.",
+         "Do not reveal Box Monsters, The Fold, or any visible route; only the smallest missed cardboard sigh belongs later.",
+         "Maintain Jenny’s playable anticipation state only; do not freeze the later reaction or lid-close endpoint in the opening frame."
+        ],
+        "providerPrompt": "Low floor-level wide view in Jenny’s bedroom, 16:9. Jenny kneels beside the decorated shoebox near the bed, holding the worksheet low and looking down at it with quiet practical focus. Keep Jenny, the worksheet, the shoebox, and the bed all readable in one frame with her hands and feet fully visible. The room is softly lit with dim evening warmth, muted handcrafted bedroom materials, and the bed softened behind the floor action. Respect the approved Jenny character reference for identity and scale and the approved scene look for palette and materials. No extra characters, no cropped props, no reveal of anything supernatural or hidden routes. Opening frame only: anticipation before the fold-and-place ritual, with clear space for the shoebox action to continue."
+       },
+       "packageRevision": 2,
+       "inputSignature": {
+        "stage": "cinematography",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "cinematography": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd",
+         "dp": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd"
+        },
+        "canonProfileDigest": "5c7cf8516ec77a672a0f375e5af3a6d1687983f9b7033ca8e7b87ab062f1ce36",
+        "shotContractHash": "c7647f3ca26cc449c7d1284e68b7c26831e0fb09ef48ddf93e95226ac0a3dcd6",
+        "sceneLookHash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268",
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "Jenny",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "3cf805613f2969dc6c3ee475045789aacb8ea9cfc563aed28321121bbebe1825",
+          "hash": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图2",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268"
+         }
+        ]
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-02T23:37:00",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      }
+     ]
+    },
+    "voice": {
+     "approved": null,
+     "candidate": {
+      "department": "Voice",
+      "worker": "Voice Director",
+      "skill": "studio/chairs/voice-director/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-09-02T23:48:12",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "5aecd93dcc564a797f847257873d8c1e29b339157cbd99737e7f4291b12874ca",
+      "output": {
+       "shotId": "S2.SH03",
+       "sceneIntention": "Jenny tries to turn a hurt into a tidy task she can finish, while her hands reveal that the paper still matters.",
+       "lines": [
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:f72fc9c0b381d5a218333f3bbbbb5089d1d75a27adb883f7e47a3e2017f4e90f",
+         "sourceEventId": "script-event:sha256:79496c0f6957b51cc1a484b14eae797c4853c6f6786a18dd23eebd2221566c23",
+         "speaker": "Jenny",
+         "character": "Jenny",
+         "exactDialogue": "It wasn’t even that funny.",
+         "performedText": "[deadpan][quietly] It wasn’t even that funny.",
+         "dramaticIntention": "Make the room accept the dismissal before her hands confess otherwise.",
+         "subtext": "If I say it plainly, maybe it becomes small enough to file away.",
+         "cadenceAndBreath": "Short, controlled line; a tiny breath before ‘even,’ then a restrained release at the end.",
+         "timingAndBody": "Deliver while folding continues; eyes stay down on the worksheet, shoulders slightly tucked, with a practical little shrug in the body rather than the voice.",
+         "archetypeId": "deadpan-affection",
+         "performanceQuestions": {
+          "intention": "How can I sound practical enough to dismiss it?",
+          "subtext": "I’m embarrassed, but I want this to feel ordinary.",
+          "thoughtBefore": "She has just looked at the worksheet and is trying to minimize the moment.",
+          "changeDuring": "The line starts as a tidy dismissal and lands with a faintly unconvincing self-protection.",
+          "operativeWords": [
+           "even",
+           "funny"
+          ]
+         },
+         "physicalState": "Kneeling low on the bedroom floor, handling paper carefully beside the open shoebox.",
+         "emotionalState": {
+          "entry": "Private shame covered by a small performance of not caring.",
+          "exit": "A brief surface calm that still can’t erase how much the worksheet matters."
+         },
+         "listener": "Mostly herself, with the shoebox and the room as silent witnesses.",
+         "bodyVoiceRelationship": "The voice stays small and controlled while the hands do the over-careful acting.",
+         "previousText": "The worksheet has been opened and examined; she is in the middle of the denial ritual.",
+         "startsAtSec": 4.8,
+         "estimatedDurationSec": 1.7,
+         "pauseReasons": [
+          "Let the dismissive thought land before the folding continues."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "deadpan",
+           "purpose": "Keep the line dry and self-protective rather than openly emotional."
+          },
+          {
+           "tag": "quietly",
+           "purpose": "Lower the delivery so it feels like Jenny is trying not to make a scene, even to herself."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S2.SH03.L1.T1",
+           "label": "primary",
+           "performedText": "[deadpan][quietly] It wasn’t even that funny.",
+           "primary": true,
+           "takesCount": 1
+          }
+         ]
+        },
+        {
+         "dialogueOccurrenceId": "dialogue-occurrence:sha256:006a91cc44f9dd4b082ab36390463ce91022f8b2a4abef9d25c90d4d1edf2a88",
+         "sourceEventId": "script-event:sha256:9fcb62d92a97599a35ed90372e7720b19f768eca03f67f76e15c26c61ab4c4f4",
+         "speaker": "Jenny",
+         "character": "Jenny",
+         "exactDialogue": "I don’t want to think about it.",
+         "performedText": "[quietly][exhales] I don’t want to think about it.",
+         "dramaticIntention": "Turn the thought into a rule and hope the closing lid can enforce it.",
+         "subtext": "Please let this be over if I stop touching it mentally.",
+         "cadenceAndBreath": "Quieter than the first line, with a soft exhale into the first word and a slightly held end on ‘it.’",
+         "timingAndBody": "Say it after the worksheet has been folded smaller and her hand has rested on it; the lid close should follow immediately after the line, with her body still low and contained.",
+         "archetypeId": "held-heart",
+         "performanceQuestions": {
+          "intention": "How do I make this sound like a rule I need to work?",
+          "subtext": "I’m trying not to feel this, and I want the box to help me.",
+          "thoughtBefore": "Her hand is resting on the paper inside the shoebox.",
+          "changeDuring": "The line moves from avoidance into a quiet command to herself.",
+          "operativeWords": [
+           "don’t",
+           "think",
+           "it"
+          ]
+         },
+         "physicalState": "Still kneeling, close to the shoebox lid, hand about to withdraw.",
+         "emotionalState": {
+          "entry": "Controlled and quiet, trying not to show the hurt.",
+          "exit": "A surface stillness that hides how much care went into the concealment."
+         },
+         "listener": "Herself, with the shoebox as the trusted keeper of the feeling.",
+         "bodyVoiceRelationship": "The voice softens as the hand prepares to lift away, matching the finality of the lid.",
+         "previousText": "The worksheet is smaller now, placed inside the shoebox, and her hand is resting on it.",
+         "startsAtSec": 11.2,
+         "estimatedDurationSec": 1.9,
+         "pauseReasons": [
+          "Give the rule enough space to feel like an attempt at control.",
+          "Let the lid close and the tiny cardboard response sit after the line."
+         ],
+         "tagPurposes": [
+          {
+           "tag": "quietly",
+           "purpose": "Keep the line intimate and inward, like a private instruction."
+          },
+          {
+           "tag": "exhales",
+           "purpose": "Show the small release of breath that carries the wish to stop thinking."
+          }
+         ],
+         "takeRecipes": [
+          {
+           "recipeId": "S2.SH03.L2.T1",
+           "label": "primary",
+           "performedText": "[quietly][exhales] I don’t want to think about it.",
+           "primary": true,
+           "takesCount": 1
+          }
+         ]
+        }
+       ]
+      },
+      "packageRevision": 2,
+      "inputSignature": {
+       "stage": "voice",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "voice": "1f3edb35b4d3702d0cbfedf202c9dd9ba7d88143c2d60321c5b1fb438f243cb1"
+       },
+       "canonProfileDigest": "b25544503bc03fd3534e2b3c80c93850a47a291f6bdd73b10f8152748d12151d",
+       "shotContractHash": "c7647f3ca26cc449c7d1284e68b7c26831e0fb09ef48ddf93e95226ac0a3dcd6",
+       "dialogueHash": "f0c6a26cb02d7f73874b72bf998ad7a2d5c94728ca7fbe1367d17041bd892f6d",
+       "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+       "voiceCardsHash": "cb84821f9d308e3b4bcaedef61efe40f0fcb20dc54bab59fa7874dd19f51f92a",
+       "voiceRegistersHash": "08c24b17dc12a99751623f31f3f327cad94e26ae9e8aa1cfe8834a7df94757bc",
+       "voiceRulebookHash": "bd96e9c57ee257ec5932ba51a3a2ce22de243e94a4d6f02a0ae905eb6a443674",
+       "voiceCompilerVersion": "voice-director-v1",
+       "voiceIds": [
+        "BUhaNjY74aXLexxM9qfh",
+        "BUhaNjY74aXLexxM9qfh"
+       ]
+      }
+     },
+     "history": [
+      {
+       "department": "Voice",
+       "worker": "Voice Director",
+       "skill": "studio/chairs/voice-director/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-09-02T22:48:43",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 4,
+       "sourceHash": "5aecd93dcc564a797f847257873d8c1e29b339157cbd99737e7f4291b12874ca",
+       "output": {
+        "shotId": "S2.SH03",
+        "sceneIntention": "Jenny tries to turn a hurt into a tidy task she can finish, while her hands reveal that the paper still matters.",
+        "lines": [
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:f72fc9c0b381d5a218333f3bbbbb5089d1d75a27adb883f7e47a3e2017f4e90f",
+          "sourceEventId": "script-event:sha256:79496c0f6957b51cc1a484b14eae797c4853c6f6786a18dd23eebd2221566c23",
+          "speaker": "Jenny",
+          "character": "Jenny",
+          "exactDialogue": "It wasn’t even that funny.",
+          "performedText": "[flatly] It wasn’t even that funny.",
+          "dramaticIntention": "Dismiss the moment as trivial so she can keep control of the ritual.",
+          "subtext": "If she calls it small enough, maybe it stops feeling personal.",
+          "cadenceAndBreath": "Dry, compact, almost matter-of-fact; a tiny caught breath before 'funny' without making it a joke.",
+          "timingAndBody": "Speak while looking down at the worksheet, with a small practical shrug in the shoulders and hands still busy near the box.",
+          "archetypeId": "deadpan-affection",
+          "performanceQuestions": {
+           "intention": "Make the hurt sound ordinary enough to put away.",
+           "subtext": "She is trying to convince herself the feeling does not deserve attention.",
+           "thoughtBefore": "She has just looked at the worksheet and is deciding to minimize it.",
+           "changeDuring": "The line starts as dismissal and ends with the truth still leaking through.",
+           "operativeWords": [
+            "wasn’t",
+            "funny"
+           ]
+          },
+          "physicalState": "Kneeling on the bedroom floor, hands close to the shoebox and worksheet, posture contained.",
+          "emotionalState": {
+           "entry": "Private shame covered by a small performance of not caring.",
+           "exit": "A brief, controlled dismissal that does not fully hide the hurt."
+          },
+          "listener": "The shoebox, and by extension herself.",
+          "bodyVoiceRelationship": "The voice stays controlled while the body keeps revealing care in the hands and posture.",
+          "previousText": "[opening action and paper handling]",
+          "startsAtSec": 4.8,
+          "estimatedDurationSec": 1.7,
+          "pauseReasons": [
+           "A tiny beat to let the denial land before she keeps folding."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "flatly",
+            "purpose": "Gives the line a dry, minimizing surface that tries to treat the moment as unimportant."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S2.SH03.L1.T1",
+            "label": "primary",
+            "performedText": "[flatly] It wasn’t even that funny.",
+            "primary": true,
+            "takesCount": 1
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:006a91cc44f9dd4b082ab36390463ce91022f8b2a4abef9d25c90d4d1edf2a88",
+          "sourceEventId": "script-event:sha256:9fcb62d92a97599a35ed90372e7720b19f768eca03f67f76e15c26c61ab4c4f4",
+          "speaker": "Jenny",
+          "character": "Jenny",
+          "exactDialogue": "I don’t want to think about it.",
+          "performedText": "[quietly] I don’t want to think about it.",
+          "dramaticIntention": "Set a rule for herself and press the feeling into the box with the lid.",
+          "subtext": "If she can stop thinking, maybe she can stop feeling watched by it.",
+          "cadenceAndBreath": "Lower and quieter than the first line; slower onset, restrained breath, with a small release on 'it' that turns into stillness.",
+          "timingAndBody": "Deliver with eyes on the box, hand resting on the paper before the lid closes, then let the last word settle into the quiet as her hand begins to withdraw.",
+          "archetypeId": "held-heart",
+          "performanceQuestions": {
+           "intention": "Tell herself to stop engaging with the shame.",
+           "subtext": "This is an instruction, but it is also a plea for relief.",
+           "thoughtBefore": "She has already made the worksheet smaller and is ready to seal it away.",
+           "changeDuring": "The line moves from control into a quieter, more vulnerable self-protection.",
+           "operativeWords": [
+            "don’t",
+            "think"
+           ]
+          },
+          "physicalState": "Still kneeling, one hand on the worksheet inside the shoebox, the other near the lid.",
+          "emotionalState": {
+           "entry": "Holding herself together while the feeling remains present in the paper.",
+           "exit": "Surface quiet after the lid closes, with the cost of hiding still there underneath."
+          },
+          "listener": "The shoebox, and herself.",
+          "bodyVoiceRelationship": "The voice becomes softer as the hand stays in contact with the paper, making the protection feel physical.",
+          "previousText": "[lid close and tiny cardboard sigh beat]",
+          "startsAtSec": 11.2,
+          "estimatedDurationSec": 1.9,
+          "pauseReasons": [
+           "A small pause before the line to let the resting hand and closed-lid intent register.",
+           "A brief settle after 'it' so the box can feel like the place she has put the thought."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Keeps the line inward and self-directed, like she is speaking to the feeling rather than the room."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S2.SH03.L2.T1",
+            "label": "primary",
+            "performedText": "[quietly] I don’t want to think about it.",
+            "primary": true,
+            "takesCount": 1
+           }
+          ]
+         }
+        ]
+       },
+       "packageRevision": 2,
+       "inputSignature": {
+        "stage": "voice",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "voice": "1f3edb35b4d3702d0cbfedf202c9dd9ba7d88143c2d60321c5b1fb438f243cb1"
+        },
+        "canonProfileDigest": "4101341521d4649b31289e7b05e4c57b48f55bd486db759ceea0f5c941ad7184",
+        "shotContractHash": "c7647f3ca26cc449c7d1284e68b7c26831e0fb09ef48ddf93e95226ac0a3dcd6",
+        "dialogueHash": "f0c6a26cb02d7f73874b72bf998ad7a2d5c94728ca7fbe1367d17041bd892f6d",
+        "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "voiceCardsHash": "b2551170c587a074684e8edbf10d2c72c0324477fef59153d95b122effc44f06",
+        "voiceRegistersHash": "08c24b17dc12a99751623f31f3f327cad94e26ae9e8aa1cfe8834a7df94757bc",
+        "voiceRulebookHash": "bd96e9c57ee257ec5932ba51a3a2ce22de243e94a4d6f02a0ae905eb6a443674",
+        "voiceCompilerVersion": "voice-director-v1",
+        "voiceIds": [
+         "BUhaNjY74aXLexxM9qfh",
+         "BUhaNjY74aXLexxM9qfh"
+        ]
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-02T23:36:43",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      },
+      {
+       "department": "Voice",
+       "worker": "Voice Director",
+       "skill": "studio/chairs/voice-director/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-09-02T23:36:53",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 4,
+       "sourceHash": "5aecd93dcc564a797f847257873d8c1e29b339157cbd99737e7f4291b12874ca",
+       "output": {
+        "shotId": "S2.SH03",
+        "sceneIntention": "Jenny tries to turn a hurt into a tidy task she can finish, while her hands reveal that the paper still matters.",
+        "lines": [
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:f72fc9c0b381d5a218333f3bbbbb5089d1d75a27adb883f7e47a3e2017f4e90f",
+          "sourceEventId": "script-event:sha256:79496c0f6957b51cc1a484b14eae797c4853c6f6786a18dd23eebd2221566c23",
+          "speaker": "Jenny",
+          "character": "Jenny",
+          "exactDialogue": "It wasn’t even that funny.",
+          "performedText": "[deadpan] It wasn’t even that funny.",
+          "dramaticIntention": "Cover the hurt with practical dismissal.",
+          "subtext": "If she says it lightly enough, maybe it becomes small.",
+          "cadenceAndBreath": "Short, controlled line; the breath stays low and contained, with a tiny shrug on the release.",
+          "timingAndBody": "Delivered while kneeling over the worksheet, eyes still down, hands keeping the paper too neatly aligned.",
+          "archetypeId": "deadpan-affection",
+          "performanceQuestions": {
+           "intention": "Dismiss the moment as unimportant without fully convincing herself.",
+           "subtext": "The joke landed harder than she wants to admit.",
+           "thoughtBefore": "She has already decided this should be easy to brush off.",
+           "changeDuring": "The line tries to make the feeling shrink, but the hands will contradict it.",
+           "operativeWords": [
+            "even",
+            "funny"
+           ]
+          },
+          "physicalState": "Kneeling on the bedroom floor beside the open shoebox, handling the worksheet with careful precision.",
+          "emotionalState": {
+           "entry": "Private shame covered by a small performance of not caring.",
+           "exit": "A little quieter and more careful, with the hurt still present under the practical tone."
+          },
+          "listener": "The shoebox as trusted hiding place, and by extension herself.",
+          "bodyVoiceRelationship": "Her voice tries to stay tidy while her fingers keep betraying how much the paper matters.",
+          "previousText": "Jenny opens the shoebox gently and studies the worksheet.",
+          "startsAtSec": 4.8,
+          "estimatedDurationSec": 1.7,
+          "pauseReasons": [
+           "A tiny beat after ‘even’ to keep the dismissal from sounding too polished."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "deadpan",
+            "purpose": "Keep the line dry and practical so the denial feels lightly self-protective rather than openly emotional."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S2.SH03.T1",
+            "label": "primary",
+            "performedText": "[deadpan] It wasn’t even that funny.",
+            "primary": true,
+            "takesCount": 1
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:006a91cc44f9dd4b082ab36390463ce91022f8b2a4abef9d25c90d4d1edf2a88",
+          "sourceEventId": "script-event:sha256:9fcb62d92a97599a35ed90372e7720b19f768eca03f67f76e15c26c61ab4c4f4",
+          "speaker": "Jenny",
+          "character": "Jenny",
+          "exactDialogue": "I don’t want to think about it.",
+          "performedText": "[quietly] I don’t want to think about it.",
+          "dramaticIntention": "Turn the feeling into a rule she can obey.",
+          "subtext": "If she avoids it hard enough, she can keep control of the room.",
+          "cadenceAndBreath": "Quieter than the first line, with a small inward pull on ‘want’ and a softer tail that drops away into the lid-close beat.",
+          "timingAndBody": "Spoken with her hand resting on the folded worksheet inside the shoebox, just before she closes the lid.",
+          "archetypeId": "quiet-warning",
+          "performanceQuestions": {
+           "intention": "Give herself a small instruction to avoid the feeling.",
+           "subtext": "This is less a statement than a fragile attempt at control.",
+           "thoughtBefore": "She feels the moment becoming too present in the room.",
+           "changeDuring": "The line tightens her resolve right before the lid goes down.",
+           "operativeWords": [
+            "don’t",
+            "think"
+           ]
+          },
+          "physicalState": "Still kneeling, hand resting on the smaller folded paper inside the box, body lowered and careful.",
+          "emotionalState": {
+           "entry": "Trying to stay practical, but now the hurt feels too close.",
+           "exit": "Surface quiet, with the feeling transferred into the closed box."
+          },
+          "listener": "The worksheet, the shoebox, and herself.",
+          "bodyVoiceRelationship": "Her body stays close to the box while the voice tries to make avoidance sound like a simple decision.",
+          "previousText": "She places the folded worksheet inside and keeps her hand on it.",
+          "startsAtSec": 11.2,
+          "estimatedDurationSec": 1.9,
+          "pauseReasons": [
+           "A brief hold before ‘think’ so the line feels self-instructive, not merely stated.",
+           "Make room for the lid to close after the line."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Keep the instruction intimate and inward, as if she is trying not to wake the feeling."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "S2.SH03.T2",
+            "label": "primary",
+            "performedText": "[quietly] I don’t want to think about it.",
+            "primary": true,
+            "takesCount": 1
+           }
+          ]
+         }
+        ]
+       },
+       "packageRevision": 2,
+       "inputSignature": {
+        "stage": "voice",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "voice": "1f3edb35b4d3702d0cbfedf202c9dd9ba7d88143c2d60321c5b1fb438f243cb1"
+        },
+        "canonProfileDigest": "b25544503bc03fd3534e2b3c80c93850a47a291f6bdd73b10f8152748d12151d",
+        "shotContractHash": "c7647f3ca26cc449c7d1284e68b7c26831e0fb09ef48ddf93e95226ac0a3dcd6",
+        "dialogueHash": "f0c6a26cb02d7f73874b72bf998ad7a2d5c94728ca7fbe1367d17041bd892f6d",
+        "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "voiceCardsHash": "b8f24b608575c32712e29ac45b3554f4ae0cd4f319c6bd3fdb8e47f314713157",
+        "voiceRegistersHash": "08c24b17dc12a99751623f31f3f327cad94e26ae9e8aa1cfe8834a7df94757bc",
+        "voiceRulebookHash": "bd96e9c57ee257ec5932ba51a3a2ce22de243e94a4d6f02a0ae905eb6a443674",
+        "voiceCompilerVersion": "voice-director-v1",
+        "voiceIds": [
+         "BUhaNjY74aXLexxM9qfh",
+         "BUhaNjY74aXLexxM9qfh"
+        ]
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-02T23:48:02",
+       "invalidationReason": "direct inputs changed before replacement preparation"
       }
      ]
     }
@@ -963,89 +1502,25 @@
    },
    "keyframeApproval": {
     "approved": true,
-    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_keyframe_A_6123a89b.png",
-    "at": "2026-09-02T22:22:21",
+    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_keyframe_candidate_36bc6e00.png",
+    "at": "2026-09-03T00:09:58",
     "reviewedBy": "Julian",
-    "source": "generated",
+    "source": "library",
     "inputSignature": {
      "cardHash": "b522d53e26da070e280b3c1504bf9bc95e64b3e4a7f6f8d03cbd2ad50a1255a4",
+     "canonProfileDigest": "7f027a31ef08a38fe028dc8d91682098fbfa38551310a7c549e3c46cbfe52983",
      "sceneLookHash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268",
-     "referenceHashes": {
-      "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
-      "Ep1_S2_plate_candidate_a7eeeca5.png": "9b69cdb5613efcd66dc5263c28803c84"
-     },
-     "briefHash": "0d72d8305122c9ffe6bcd32bd6b6af070aac3a37f7561e813d31f6b72896d921",
-     "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
-     "canonProfileDigest": "5c7cf8516ec77a672a0f375e5af3a6d1687983f9b7033ca8e7b87ab062f1ce36"
+     "selectedAssetHash": "783e150f6a5c21026b5217ef0f5cc8b0",
+     "source": "library"
     },
-    "promptContract": {
-     "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S2.SH03; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA quiet low-floor bedroom ritual: Jenny is trying to make the shame disappear by folding the worksheet smaller and tucking it into the decorated shoebox, but the careful handling shows it still matters.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ lower-left area; kneeling beside the shoebox with the worksheet held low in front of her, ready for careful folding without starting the later lid-close yet; facing down toward the shoebox.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nBedroom-floor height, camera placed low beside the shoebox and bed.\nJenny kneels on the floor beside the decorated shoebox, close enough to touch the lid.\nThe bed sits behind Jenny, softened and readable as the background anchor.\nThe shoebox stays on the floor in the same frame as Jenny’s hands and the worksheet.\nKeep the open-shut action traveling downward into the box and back up to Jenny’s withdrawn hand.\nLeave the floor space between Jenny and the shoebox clear for the ritual and the later closed-lid landing.\n\n[Negative Space]\nHold empty space frame-right for the shoebox and its lid movement.\nPreserve open floor space between Jenny and the bed for the action corridor.\nLeave a small quiet area above the bed line for the room to breathe without adding new reveals.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nGentle wide relationship lens feel from bedroom-floor height at roughly shoebox-lid level, respectful and close enough to read the hands and paper without distortion; camera stays mostly still with only a tiny settling drift as the action slows.\n\n[Light]\nDim evening warmth, soft practical bedroom light, gentle falloff into the background; the bed sits softened in the rear plane while Jenny and the shoebox occupy the active near/mid ground; preserve a cozy safe-room palette without turning the shoebox into a bright hero prop.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nKeep the entire action in one low wide floor-level bedroom frame; do not crop hands, feet, worksheet, shoebox, or bed.\nThe worksheet must remain visible as a folded paper object that can be tracked into the shoebox path.\nDo not reveal Box Monsters, The Fold, or any visible route; only the smallest missed cardboard sigh belongs later.\nMaintain Jenny’s playable anticipation state only; do not freeze the later reaction or lid-close endpoint in the opening frame.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
-     "promptHash": "0d72d8305122c9ffe6bcd32bd6b6af070aac3a37f7561e813d31f6b72896d921",
-     "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
-     "provider": "seedream",
-     "providerModelId": "dola-seedream-5-0-pro-260628",
-     "modelVersion": "dola-seedream-5-0-pro-260628",
-     "directionContract": {
-      "canonicalStyleVersion": "v1.0.0",
-      "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
-      "lightingAndDepth": "Dim evening warmth, soft practical bedroom light, gentle falloff into the background; the bed sits softened in the rear plane while Jenny and the shoebox occupy the active near/mid ground; preserve a cozy safe-room palette without turning the shoebox into a bright hero prop.",
-      "geography": [
-       "Bedroom-floor height, camera placed low beside the shoebox and bed.",
-       "Jenny kneels on the floor beside the decorated shoebox, close enough to touch the lid.",
-       "The bed sits behind Jenny, softened and readable as the background anchor.",
-       "The shoebox stays on the floor in the same frame as Jenny’s hands and the worksheet.",
-       "Keep the open-shut action traveling downward into the box and back up to Jenny’s withdrawn hand.",
-       "Leave the floor space between Jenny and the shoebox clear for the ritual and the later closed-lid landing."
-      ],
-      "charactersInFrame": [
-       "Jenny"
-      ],
-      "emptySections": []
-     },
-     "contractHash": "c9f89454cfce67e8bdc24be1ae216a0a2c4bcab2cc743979eb461c788724f522"
-    },
-    "abTest": {
-     "winner": "A",
-     "candidates": [
-      {
-       "candidateId": "A",
-       "label": "A - Seedream 5 Pro",
-       "provider": "byteplus",
-       "model": "dola-seedream-5-0-pro-260628",
-       "generatedAt": "2026-09-02T18:35:08",
-       "selected": true,
-       "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_keyframe_A_6123a89b.png"
-      },
-      {
-       "candidateId": "B",
-       "label": "B - Nano Banana 2",
-       "provider": "google",
-       "model": "gemini-3.1-flash-image",
-       "generatedAt": "2026-09-02T18:36:20",
-       "selected": false,
-       "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S2.SH03_see_ab_20260902T222221\\Ep1_S2.SH03_keyframe_B_dc0c2eec.png"
-      }
-     ],
-     "contract": {
-      "createdAt": "2026-09-02T18:36:20",
-      "promptHash": "0d72d8305122c9ffe6bcd32bd6b6af070aac3a37f7561e813d31f6b72896d921",
-      "referenceHashes": [
-       "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
-       "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268"
-      ],
-      "candidateIds": [
-       "A",
-       "B"
-      ],
-      "selectionRequired": true
-     }
-    },
+    "promptContract": null,
+    "abTest": null,
     "packageRevision": 2,
     "contentHash": "cdf614baee96416ff24183cd6dc36a488d126086eb5e1f768fef8d4497be2d86",
     "conformanceScreening": {
      "status": "fail",
-     "reason": "Single subject matches Jenny and the bedroom scene/look is consistent, but the opening-frame pose and prop handling do not satisfy the contract. Jenny is shown kneeling and holding the worksheet above the shoebox rather than low in front of her ready for careful folding; the shoebox is also clearly foregrounded with readable text, which is acceptable, but the composition is weaker than requested for the intended action-ready setup.",
-     "checkedAt": "2026-09-02T18:35:08",
+     "reason": "Single subject present and the character matches Jenny’s reference in general silhouette and costume, but the frame fails contract on relative scale and opening-frame geography; it also introduces a visible text watermark/logo on the box and a composition that does not match the authored kneeling-at-box layout tightly enough for pre-approval.",
+     "checkedAt": "2026-09-03T00:09:37",
      "screenVersion": 2,
      "validatorModel": "gpt-5.4-mini",
      "mediaProviderCalled": false,
@@ -1064,43 +1539,327 @@
       ],
       "expectedSubjectCount": 1,
       "subjectCount": 1,
-      "summary": "Single subject matches Jenny and the bedroom scene/look is consistent, but the opening-frame pose and prop handling do not satisfy the contract. Jenny is shown kneeling and holding the worksheet above the shoebox rather than low in front of her ready for careful folding; the shoebox is also clearly foregrounded with readable text, which is acceptable, but the composition is weaker than requested for the intended action-ready setup.",
+      "summary": "Single subject present and the character matches Jenny’s reference in general silhouette and costume, but the frame fails contract on relative scale and opening-frame geography; it also introduces a visible text watermark/logo on the box and a composition that does not match the authored kneeling-at-box layout tightly enough for pre-approval.",
       "identityAndDistinguishability": {
        "score": 2,
-       "visibleEvidence": "One clearly visible schoolgirl matches Jenny's reference: brown side ponytail, maroon cardigan, white shirt, striped tie, gray skirt, socks, and dark shoes. No extra characters are present.",
-       "correction": "No identity change needed."
+       "visibleEvidence": "Only one character is visible; she reads as Jenny with the same brown ponytail, school cardigan, tie, skirt, socks, and shy expression consistent with the turnaround.",
+       "correction": "Keep Jenny’s current identity features and single-subject cast."
       },
       "relativeScaleAndGeography": {
-       "score": 1,
-       "visibleEvidence": "Jenny is placed left of the shoebox in the bedroom, but her apparent scale and exact screen placement are looser than the authored layout; she sits more centrally than the requested centerX 0.36 and the shoebox sits very close to foreground right.",
-       "correction": "Shift Jenny slightly left and keep her lower on the floor plane so her screen geography matches the authored left-of-box kneeling placement."
+       "score": 0,
+       "visibleEvidence": "Jenny occupies a much larger portion of the frame than the contract’s 0.52 reference-height opening read, and her kneeling placement is left-of-center rather than the authored centerX 0.34 / centerY 0.6961 floor-level staging near the shoebox.",
+       "correction": "Reduce Jenny’s apparent scale and reposition her to the lower-left floor area so she kneels at bedroom-floor height beside the shoebox with the authored screen geography."
       },
       "anatomyAndSilhouette": {
        "score": 2,
-       "visibleEvidence": "The character silhouette is readable with intact limbs, head proportion, and no obvious anatomical distortion. Clothing and hair are consistent with Jenny's reference.",
-       "correction": "No anatomy change needed."
+       "visibleEvidence": "Jenny’s body proportions, head-to-torso relationship, limbs, and kneeling silhouette are readable and internally consistent; no obvious character blending or borrowed anatomy is visible.",
+       "correction": "Preserve the current anatomy and readable kneeling silhouette."
       },
       "actionReadyComposition": {
        "score": 1,
-       "visibleEvidence": "The pose reads as kneeling and thoughtful, but the worksheet is held up in both hands instead of low in front of her for careful folding, and the scene feels like a paused illustration rather than the requested action-ready opening beat.",
-       "correction": "Pose Jenny kneeling beside the shoebox with the worksheet held low in front of her, angled toward the box, ready to fold without starting the lid-close yet."
+       "visibleEvidence": "The frame is emotionally legible and the shoebox is present, but Jenny’s pose and box relationship are less exact than specified; the shot feels staged more as a finished illustration than a precise opening beat with the quiet anticipatory hand position near the worksheet and lid.",
+       "correction": "Adjust Jenny’s hands and torso so she is clearly hovering near the worksheet and shoebox lid in a quiet, inward-facing preparatory pose."
       },
       "forbiddenContent": {
-       "score": 2,
-       "visibleEvidence": "No extra characters, no visible watermark, logo, or unrelated prop conflict. The shoebox text is part of the scene and not a forbidden overlay.",
-       "correction": "No forbidden-content change needed."
+       "score": 0,
+       "visibleEvidence": "The shoebox has visible text reading 'JENNY’S SHOEBOX' and 'DO NOT TOUCH'; this is readable on-screen text/label content, which is forbidden by the contract’s no text/logo/watermark rule.",
+       "correction": "Remove all readable text from props and keep the shoebox plain, with no labels, logos, or watermark-like markings."
       },
-      "recommendedCorrection": "Keep Jenny's identity and bedroom look, but lower the worksheet into her lap/front of the shoebox, move her slightly left on the floor plane, and preserve the shoebox and warm bedroom lighting."
+      "recommendedCorrection": "Keep Jenny’s current look, but shrink and shift her to the lower-left floor-level kneeling position beside the shoebox, refine her hands into the specified quiet pre-hiding pose near the worksheet and lid, and remove all readable text from the shoebox and any other props."
      }
     },
     "conformanceAdvisoryDecision": {
      "acceptedBy": "Julian",
-     "acceptedAt": "2026-09-02T22:22:21",
+     "acceptedAt": "2026-09-03T00:09:58",
      "statusAtDecision": "fail",
-     "reasonAtDecision": "Single subject matches Jenny and the bedroom scene/look is consistent, but the opening-frame pose and prop handling do not satisfy the contract. Jenny is shown kneeling and holding the worksheet above the shoebox rather than low in front of her ready for careful folding; the shoebox is also clearly foregrounded with readable text, which is acceptable, but the composition is weaker than requested for the intended action-ready setup."
+     "reasonAtDecision": "Single subject present and the character matches Jenny’s reference in general silhouette and costume, but the frame fails contract on relative scale and opening-frame geography; it also introduces a visible text watermark/logo on the box and a composition that does not match the authored kneeling-at-box layout tightly enough for pre-approval."
     }
    },
-   "keyframePath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_keyframe_A_6123a89b.png"
+   "keyframePath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_keyframe_candidate_36bc6e00.png",
+   "voPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_vo_candidate_9940f92c.wav",
+   "voGeneratedFrom": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:f72fc9c0b381d5a218333f3bbbbb5089d1d75a27adb883f7e47a3e2017f4e90f",
+     "sourceEventId": "script-event:sha256:79496c0f6957b51cc1a484b14eae797c4853c6f6786a18dd23eebd2221566c23",
+     "speaker": "Jenny",
+     "text": "[deadpan][quietly] It wasn’t even that funny.",
+     "voiceId": "BUhaNjY74aXLexxM9qfh",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.5,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "The worksheet has been opened and examined; she is in the middle of the denial ritual.",
+     "compiledHash": "597177efd3eba50f1925db4426e5e518afa292423955a422fb5ad98335482131",
+     "recipeId": "S2.SH03.L1.T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "BUhaNjY74aXLexxM9qfh"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:006a91cc44f9dd4b082ab36390463ce91022f8b2a4abef9d25c90d4d1edf2a88",
+     "sourceEventId": "script-event:sha256:9fcb62d92a97599a35ed90372e7720b19f768eca03f67f76e15c26c61ab4c4f4",
+     "speaker": "Jenny",
+     "text": "[quietly][exhales] I don’t want to think about it.",
+     "voiceId": "BUhaNjY74aXLexxM9qfh",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.5,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "The worksheet is smaller now, placed inside the shoebox, and her hand is resting on it.",
+     "compiledHash": "8c39d2a4befe3413aa3860f249fcf54c8a5b885eda8384f1889be589e1819039",
+     "recipeId": "S2.SH03.L2.T1",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "BUhaNjY74aXLexxM9qfh"
+     ]
+    }
+   ],
+   "voRawPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_vo_raw_candidate_9940f92c.mp3",
+   "voTimingPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_vo_raw_candidate_9940f92c.mp3.dialogue.json",
+   "voPlacementPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_vo_candidate_9940f92c.wav.timing.json",
+   "voicePlacementFailure": null,
+   "voInputSignature": {
+    "canonProfileDigest": "b25544503bc03fd3534e2b3c80c93850a47a291f6bdd73b10f8152748d12151d",
+    "dialogueHash": "4a01ab5c9af587ad2b5a6f53a0ab8bbc41f520a4c89bbef932b2843ebae08eb0",
+    "performanceHash": "ab86ceb07e735a4812ea8cdb4eaedb7f9b3870bb7bbecb5e5eaa983153ffe588",
+    "voiceCardsHash": "cb84821f9d308e3b4bcaedef61efe40f0fcb20dc54bab59fa7874dd19f51f92a",
+    "voiceRegistersHash": "08c24b17dc12a99751623f31f3f327cad94e26ae9e8aa1cfe8834a7df94757bc",
+    "voiceRulebookHash": "bd96e9c57ee257ec5932ba51a3a2ce22de243e94a4d6f02a0ae905eb6a443674",
+    "voiceCompilerVersion": "voice-director-v1",
+    "pronunciationOverrides": {},
+    "voiceIds": [
+     "BUhaNjY74aXLexxM9qfh",
+     "BUhaNjY74aXLexxM9qfh"
+    ]
+   },
+   "voPackageRevision": 2,
+   "voicePrevious": {
+    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_vo_candidate_a5fa3799.wav",
+    "rawPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_vo_raw_candidate_a5fa3799.mp3",
+    "timingPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_vo_raw_candidate_a5fa3799.mp3.dialogue.json",
+    "placementPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_vo_candidate_a5fa3799.wav.timing.json",
+    "generatedFrom": [
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:f72fc9c0b381d5a218333f3bbbbb5089d1d75a27adb883f7e47a3e2017f4e90f",
+      "sourceEventId": "script-event:sha256:79496c0f6957b51cc1a484b14eae797c4853c6f6786a18dd23eebd2221566c23",
+      "speaker": "Jenny",
+      "text": "[deadpan][quietly] It wasn’t even that funny.",
+      "voiceId": "BUhaNjY74aXLexxM9qfh",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.5,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "The worksheet has been opened and examined; she is in the middle of the denial ritual.",
+      "compiledHash": "597177efd3eba50f1925db4426e5e518afa292423955a422fb5ad98335482131",
+      "recipeId": "S2.SH03.L1.T1",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "BUhaNjY74aXLexxM9qfh"
+      ]
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:006a91cc44f9dd4b082ab36390463ce91022f8b2a4abef9d25c90d4d1edf2a88",
+      "sourceEventId": "script-event:sha256:9fcb62d92a97599a35ed90372e7720b19f768eca03f67f76e15c26c61ab4c4f4",
+      "speaker": "Jenny",
+      "text": "[quietly][exhales] I don’t want to think about it.",
+      "voiceId": "BUhaNjY74aXLexxM9qfh",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+       "stability": 0.5,
+       "similarity_boost": 0.9,
+       "style": 0.2
+      },
+      "previousText": "The worksheet is smaller now, placed inside the shoebox, and her hand is resting on it.",
+      "compiledHash": "8c39d2a4befe3413aa3860f249fcf54c8a5b885eda8384f1889be589e1819039",
+      "recipeId": "S2.SH03.L2.T1",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+       "BUhaNjY74aXLexxM9qfh"
+      ]
+     }
+    ],
+    "supersededAt": "2026-09-02T23:58:54"
+   },
+   "voiceApproval": {
+    "approved": true,
+    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_vo_candidate_9940f92c.wav",
+    "at": "2026-09-02T23:58:59",
+    "reviewedBy": "Julian",
+    "packageRevision": 2,
+    "inputSignature": {
+     "canonProfileDigest": "b25544503bc03fd3534e2b3c80c93850a47a291f6bdd73b10f8152748d12151d",
+     "dialogueHash": "4a01ab5c9af587ad2b5a6f53a0ab8bbc41f520a4c89bbef932b2843ebae08eb0",
+     "performanceHash": "ab86ceb07e735a4812ea8cdb4eaedb7f9b3870bb7bbecb5e5eaa983153ffe588",
+     "voiceCardsHash": "cb84821f9d308e3b4bcaedef61efe40f0fcb20dc54bab59fa7874dd19f51f92a",
+     "voiceRegistersHash": "08c24b17dc12a99751623f31f3f327cad94e26ae9e8aa1cfe8834a7df94757bc",
+     "voiceRulebookHash": "bd96e9c57ee257ec5932ba51a3a2ce22de243e94a4d6f02a0ae905eb6a443674",
+     "voiceCompilerVersion": "voice-director-v1",
+     "pronunciationOverrides": {},
+     "voiceIds": [
+      "BUhaNjY74aXLexxM9qfh",
+      "BUhaNjY74aXLexxM9qfh"
+     ]
+    },
+    "contentHash": "71f1d8f24ea937e9e3716dae900bb27768218ce046209baea1173fb30e5ba4cf",
+    "rawContentHash": "9a49500f78c86d90fc3ced2e3a13bbf2f52ea93fcc1dffce4ab5522a917bb25a",
+    "timingContentHash": "b9abd02c65b364b4648bd69d0af3cd205d0faded4adb65f164e00decb930c524",
+    "placementContentHash": "c3261ff74e3134a9c85113010db9a8db37b1d221e62b79cdaac72c3d815c68ea"
+   },
+   "keyframeHistory": [
+    {
+     "approved": true,
+     "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_keyframe_A_6123a89b.png",
+     "at": "2026-09-02T22:22:21",
+     "reviewedBy": "Julian",
+     "source": "generated",
+     "inputSignature": {
+      "cardHash": "b522d53e26da070e280b3c1504bf9bc95e64b3e4a7f6f8d03cbd2ad50a1255a4",
+      "sceneLookHash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268",
+      "referenceHashes": {
+       "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
+       "Ep1_S2_plate_candidate_a7eeeca5.png": "9b69cdb5613efcd66dc5263c28803c84"
+      },
+      "briefHash": "0d72d8305122c9ffe6bcd32bd6b6af070aac3a37f7561e813d31f6b72896d921",
+      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+      "canonProfileDigest": "5c7cf8516ec77a672a0f375e5af3a6d1687983f9b7033ca8e7b87ab062f1ce36"
+     },
+     "promptContract": {
+      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S2.SH03; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA quiet low-floor bedroom ritual: Jenny is trying to make the shame disappear by folding the worksheet smaller and tucking it into the decorated shoebox, but the careful handling shows it still matters.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ lower-left area; kneeling beside the shoebox with the worksheet held low in front of her, ready for careful folding without starting the later lid-close yet; facing down toward the shoebox.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nBedroom-floor height, camera placed low beside the shoebox and bed.\nJenny kneels on the floor beside the decorated shoebox, close enough to touch the lid.\nThe bed sits behind Jenny, softened and readable as the background anchor.\nThe shoebox stays on the floor in the same frame as Jenny’s hands and the worksheet.\nKeep the open-shut action traveling downward into the box and back up to Jenny’s withdrawn hand.\nLeave the floor space between Jenny and the shoebox clear for the ritual and the later closed-lid landing.\n\n[Negative Space]\nHold empty space frame-right for the shoebox and its lid movement.\nPreserve open floor space between Jenny and the bed for the action corridor.\nLeave a small quiet area above the bed line for the room to breathe without adding new reveals.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nGentle wide relationship lens feel from bedroom-floor height at roughly shoebox-lid level, respectful and close enough to read the hands and paper without distortion; camera stays mostly still with only a tiny settling drift as the action slows.\n\n[Light]\nDim evening warmth, soft practical bedroom light, gentle falloff into the background; the bed sits softened in the rear plane while Jenny and the shoebox occupy the active near/mid ground; preserve a cozy safe-room palette without turning the shoebox into a bright hero prop.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nKeep the entire action in one low wide floor-level bedroom frame; do not crop hands, feet, worksheet, shoebox, or bed.\nThe worksheet must remain visible as a folded paper object that can be tracked into the shoebox path.\nDo not reveal Box Monsters, The Fold, or any visible route; only the smallest missed cardboard sigh belongs later.\nMaintain Jenny’s playable anticipation state only; do not freeze the later reaction or lid-close endpoint in the opening frame.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
+      "promptHash": "0d72d8305122c9ffe6bcd32bd6b6af070aac3a37f7561e813d31f6b72896d921",
+      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+      "provider": "seedream",
+      "providerModelId": "dola-seedream-5-0-pro-260628",
+      "modelVersion": "dola-seedream-5-0-pro-260628",
+      "directionContract": {
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "lightingAndDepth": "Dim evening warmth, soft practical bedroom light, gentle falloff into the background; the bed sits softened in the rear plane while Jenny and the shoebox occupy the active near/mid ground; preserve a cozy safe-room palette without turning the shoebox into a bright hero prop.",
+       "geography": [
+        "Bedroom-floor height, camera placed low beside the shoebox and bed.",
+        "Jenny kneels on the floor beside the decorated shoebox, close enough to touch the lid.",
+        "The bed sits behind Jenny, softened and readable as the background anchor.",
+        "The shoebox stays on the floor in the same frame as Jenny’s hands and the worksheet.",
+        "Keep the open-shut action traveling downward into the box and back up to Jenny’s withdrawn hand.",
+        "Leave the floor space between Jenny and the shoebox clear for the ritual and the later closed-lid landing."
+       ],
+       "charactersInFrame": [
+        "Jenny"
+       ],
+       "emptySections": []
+      },
+      "contractHash": "c9f89454cfce67e8bdc24be1ae216a0a2c4bcab2cc743979eb461c788724f522"
+     },
+     "abTest": {
+      "winner": "A",
+      "candidates": [
+       {
+        "candidateId": "A",
+        "label": "A - Seedream 5 Pro",
+        "provider": "byteplus",
+        "model": "dola-seedream-5-0-pro-260628",
+        "generatedAt": "2026-09-02T18:35:08",
+        "selected": true,
+        "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH03_keyframe_A_6123a89b.png"
+       },
+       {
+        "candidateId": "B",
+        "label": "B - Nano Banana 2",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "generatedAt": "2026-09-02T18:36:20",
+        "selected": false,
+        "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S2.SH03_see_ab_20260902T222221\\Ep1_S2.SH03_keyframe_B_dc0c2eec.png"
+       }
+      ],
+      "contract": {
+       "createdAt": "2026-09-02T18:36:20",
+       "promptHash": "0d72d8305122c9ffe6bcd32bd6b6af070aac3a37f7561e813d31f6b72896d921",
+       "referenceHashes": [
+        "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+        "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268"
+       ],
+       "candidateIds": [
+        "A",
+        "B"
+       ],
+       "selectionRequired": true
+      }
+     },
+     "packageRevision": 2,
+     "contentHash": "cdf614baee96416ff24183cd6dc36a488d126086eb5e1f768fef8d4497be2d86",
+     "conformanceScreening": {
+      "status": "fail",
+      "reason": "Single subject matches Jenny and the bedroom scene/look is consistent, but the opening-frame pose and prop handling do not satisfy the contract. Jenny is shown kneeling and holding the worksheet above the shoebox rather than low in front of her ready for careful folding; the shoebox is also clearly foregrounded with readable text, which is acceptable, but the composition is weaker than requested for the intended action-ready setup.",
+      "checkedAt": "2026-09-02T18:35:08",
+      "screenVersion": 2,
+      "validatorModel": "gpt-5.4-mini",
+      "mediaProviderCalled": false,
+      "referenceHashes": {
+       "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+       "Ep1_S2_plate_candidate_a7eeeca5.png": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268"
+      },
+      "candidateSha256": "cdf614baee96416ff24183cd6dc36a488d126086eb5e1f768fef8d4497be2d86",
+      "review": {
+       "verdict": "block",
+       "expectedCharacters": [
+        "Jenny"
+       ],
+       "detectedCharacters": [
+        "Jenny"
+       ],
+       "expectedSubjectCount": 1,
+       "subjectCount": 1,
+       "summary": "Single subject matches Jenny and the bedroom scene/look is consistent, but the opening-frame pose and prop handling do not satisfy the contract. Jenny is shown kneeling and holding the worksheet above the shoebox rather than low in front of her ready for careful folding; the shoebox is also clearly foregrounded with readable text, which is acceptable, but the composition is weaker than requested for the intended action-ready setup.",
+       "identityAndDistinguishability": {
+        "score": 2,
+        "visibleEvidence": "One clearly visible schoolgirl matches Jenny's reference: brown side ponytail, maroon cardigan, white shirt, striped tie, gray skirt, socks, and dark shoes. No extra characters are present.",
+        "correction": "No identity change needed."
+       },
+       "relativeScaleAndGeography": {
+        "score": 1,
+        "visibleEvidence": "Jenny is placed left of the shoebox in the bedroom, but her apparent scale and exact screen placement are looser than the authored layout; she sits more centrally than the requested centerX 0.36 and the shoebox sits very close to foreground right.",
+        "correction": "Shift Jenny slightly left and keep her lower on the floor plane so her screen geography matches the authored left-of-box kneeling placement."
+       },
+       "anatomyAndSilhouette": {
+        "score": 2,
+        "visibleEvidence": "The character silhouette is readable with intact limbs, head proportion, and no obvious anatomical distortion. Clothing and hair are consistent with Jenny's reference.",
+        "correction": "No anatomy change needed."
+       },
+       "actionReadyComposition": {
+        "score": 1,
+        "visibleEvidence": "The pose reads as kneeling and thoughtful, but the worksheet is held up in both hands instead of low in front of her for careful folding, and the scene feels like a paused illustration rather than the requested action-ready opening beat.",
+        "correction": "Pose Jenny kneeling beside the shoebox with the worksheet held low in front of her, angled toward the box, ready to fold without starting the lid-close yet."
+       },
+       "forbiddenContent": {
+        "score": 2,
+        "visibleEvidence": "No extra characters, no visible watermark, logo, or unrelated prop conflict. The shoebox text is part of the scene and not a forbidden overlay.",
+        "correction": "No forbidden-content change needed."
+       },
+       "recommendedCorrection": "Keep Jenny's identity and bedroom look, but lower the worksheet into her lap/front of the shoebox, move her slightly left on the floor plane, and preserve the shoebox and warm bedroom lighting."
+      }
+     },
+     "conformanceAdvisoryDecision": {
+      "acceptedBy": "Julian",
+      "acceptedAt": "2026-09-02T22:22:21",
+      "statusAtDecision": "fail",
+      "reasonAtDecision": "Single subject matches Jenny and the bedroom scene/look is consistent, but the opening-frame pose and prop handling do not satisfy the contract. Jenny is shown kneeling and holding the worksheet above the shoebox rather than low in front of her ready for careful folding; the shoebox is also clearly foregrounded with readable text, which is acceptable, but the composition is weaker than requested for the intended action-ready setup."
+     },
+     "outcome": "superseded",
+     "supersededAt": "2026-09-03T00:09:58",
+     "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S2.SH03_20260903T000958\\Ep1_S2.SH03_keyframe_A_6123a89b.png"
+    }
+   ]
   },
   {
    "shotId": "S2.SH04",
@@ -1133,7 +1892,341 @@
     ]
    },
    "approvedTake": null,
-   "harvestFrame": null
+   "harvestFrame": null,
+   "departmentWork": {
+    "voice": {
+     "approved": null,
+     "candidate": {
+      "department": "Voice",
+      "worker": "Voice Director",
+      "skill": "studio/chairs/voice-director/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-09-02T23:59:18",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "53249cfdf821a3b5a5e8eac8b2ba76bf778c7b1bd1d44de23aa12d18bbcbbc6f",
+      "output": {
+       "lines": [],
+       "audioAuthority": "seedance-2.5-sfx-only"
+      },
+      "packageRevision": 2,
+      "inputSignature": {
+       "stage": "voice",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "voice": "1f3edb35b4d3702d0cbfedf202c9dd9ba7d88143c2d60321c5b1fb438f243cb1"
+       },
+       "canonProfileDigest": "b25544503bc03fd3534e2b3c80c93850a47a291f6bdd73b10f8152748d12151d",
+       "shotContractHash": "e3267f733f3c97c1bfd4928963c1e20fc88c613f6c67d34906755ca67ac176eb",
+       "dialogueHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+       "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+       "voiceCardsHash": "cb84821f9d308e3b4bcaedef61efe40f0fcb20dc54bab59fa7874dd19f51f92a",
+       "voiceRegistersHash": "08c24b17dc12a99751623f31f3f327cad94e26ae9e8aa1cfe8834a7df94757bc",
+       "voiceRulebookHash": "bd96e9c57ee257ec5932ba51a3a2ce22de243e94a4d6f02a0ae905eb6a443674",
+       "voiceCompilerVersion": "voice-director-v1",
+       "voiceIds": []
+      }
+     },
+     "history": [
+      {
+       "department": "Voice",
+       "worker": "Voice Director",
+       "skill": "studio/chairs/voice-director/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-09-02T22:47:31",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 4,
+       "sourceHash": "53249cfdf821a3b5a5e8eac8b2ba76bf778c7b1bd1d44de23aa12d18bbcbbc6f",
+       "output": {
+        "lines": [],
+        "audioAuthority": "seedance-2.5-sfx-only"
+       },
+       "packageRevision": 2,
+       "inputSignature": {
+        "stage": "voice",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "voice": "1f3edb35b4d3702d0cbfedf202c9dd9ba7d88143c2d60321c5b1fb438f243cb1"
+        },
+        "canonProfileDigest": "4101341521d4649b31289e7b05e4c57b48f55bd486db759ceea0f5c941ad7184",
+        "shotContractHash": "e3267f733f3c97c1bfd4928963c1e20fc88c613f6c67d34906755ca67ac176eb",
+        "dialogueHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "voiceCardsHash": "b2551170c587a074684e8edbf10d2c72c0324477fef59153d95b122effc44f06",
+        "voiceRegistersHash": "08c24b17dc12a99751623f31f3f327cad94e26ae9e8aa1cfe8834a7df94757bc",
+        "voiceRulebookHash": "bd96e9c57ee257ec5932ba51a3a2ce22de243e94a4d6f02a0ae905eb6a443674",
+        "voiceCompilerVersion": "voice-director-v1",
+        "voiceIds": []
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-02T23:59:18",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      }
+     ]
+    },
+    "cinematography": {
+     "approved": null,
+     "candidate": {
+      "department": "Cinematography",
+      "worker": "Cinematographer / DP",
+      "skill": "studio/chairs/cinematographer/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-09-02T23:38:20",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "cdd085af9f2e1333d93525b20e0d97ba0d9a1dd5adf89435968ddcf144d39c6b",
+      "output": {
+       "shotId": "S2.SH04",
+       "audienceRead": "A quiet low-wide bedroom frame where the shoebox is the active foreground subject: its lid has opened only a narrow crack, a restrained warm golden seam lights the folded worksheet inside, and Jenny remains asleep in soft background depth, unaware.",
+       "composition": "Low floor-level wide composition in the darkened bedroom. The decorated shoebox anchors the near foreground with the lid crack and worksheet clearly readable; Jenny lies asleep beyond it in the deeper room, separated by distance and stillness. Keep the box and sleeping child connected within one calm room relationship, with a clear corridor of empty floor and a respectful, unobstructed view.",
+       "lensAndCameraRelationship": "Wide relationship lens feel from floor height, patient and still, favoring room geography over isolation. The camera does not push into the glow; it holds the box, floor, bed zone, and Jenny in one coherent frame.",
+       "lightingAndDepth": "Later-night bedroom darkness held back by a narrow warm golden seam from the shoebox lid crack. The seam is the only active light source; it gently reveals the folded worksheet inside the box while the rest of the room stays muted in blue-brown hush. Depth should read as layered and private, with Jenny softly present in the background and the box carrying the emotional foreground.",
+       "geography": [
+        "Low floor-level view across the bedroom floor toward the bed.",
+        "Decorated shoebox sits in the near foreground or near-mid foreground on the floor.",
+        "The lid is open only a narrow crack with a thin warm golden seam visible.",
+        "A folded worksheet is lit inside the box and must remain readable.",
+        "Jenny sleeps beyond the shoebox in soft background depth.",
+        "The camera remains still; do not travel toward the light.",
+        "The room stays dark and quiet, with no visible route or traveling glow path."
+       ],
+       "charactersInFrame": [
+        "Jenny"
+       ],
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "openingFrameLayout": {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Jenny",
+        "referenceHeightFraction": 0.28,
+        "sameDepth": false,
+        "placements": [
+         {
+          "character": "Jenny",
+          "centerX": 0.66,
+          "centerY": 0.62,
+          "apparentScale": 1.0,
+          "depthPlane": 2,
+          "bodyAngleDegrees": 0.0,
+          "facing": "away from the shoebox toward the bed space",
+          "pose": "lying still asleep in bed, unchanged and unaware"
+         }
+        ]
+       },
+       "negativeSpace": [
+        "Hold empty floor space frame-left and center for the shoebox foreground action and lid crack.",
+        "Hold empty space between the shoebox and Jenny for the quiet depth separation.",
+        "Reserve unobstructed darkness around the seam so the narrow light remains readable.",
+        "Keep the upper frame uncluttered for the bedroom hush and no extra reveals."
+       ],
+       "referenceUse": [
+        "Use the Jenny character reference for identity, scale, and sleeping demeanor only.",
+        "Use the approved bedroom scene look for palette, materials, darkness, and lamp-lit hush.",
+        "Use the shoebox reference for the decorated cardboard box, lid crack, and narrow warm seam.",
+        "Bind references by the provided labels in order; do not invent new identity details."
+       ],
+       "continuityProtections": [
+        "Keep Jenny visibly asleep, still, and unaware; no stir, reach, wake, or reaction.",
+        "Keep the shoebox magic small: only a fractional lid lift, a narrow golden seam, and a subtle worksheet tremble.",
+        "Do not show Box Monsters, The Fold, a travelling glow path, or any route out of the bedroom.",
+        "Hold the camera low and wide; do not convert the shot into a glow insert or a chase."
+       ],
+       "providerPrompt": "Stylised feature-quality 3D CGI matching the approved scene look and approved Jenny reference. Low floor-level wide view in the darkened bedroom. The decorated shoebox sits in the near foreground on the floor; its lid is open only a narrow crack, revealing a restrained warm golden seam that lights the folded worksheet inside, which trembles slightly. Jenny sleeps beyond the shoebox in soft background depth, unchanged and unaware, with no stir, reach, or reaction. Keep the room still, private, and quiet; the camera remains fixed and low, the light stays narrow rather than swelling, and no travelling glow path, Box Monsters, or route out of the bedroom is shown. Preserve a calm, respectful 16:9 composition with clear separation between the active box in front and Jenny asleep behind it."
+      },
+      "packageRevision": 2,
+      "inputSignature": {
+       "stage": "cinematography",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "cinematography": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd",
+        "dp": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd"
+       },
+       "canonProfileDigest": "7f027a31ef08a38fe028dc8d91682098fbfa38551310a7c549e3c46cbfe52983",
+       "shotContractHash": "e3267f733f3c97c1bfd4928963c1e20fc88c613f6c67d34906755ca67ac176eb",
+       "sceneLookHash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268",
+       "references": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "Jenny",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "3cf805613f2969dc6c3ee475045789aacb8ea9cfc563aed28321121bbebe1825",
+         "hash": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7"
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图2",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268"
+        }
+       ]
+      }
+     },
+     "history": []
+    }
+   },
+   "keyframeCandidates": [],
+   "keyframeCandidate": null,
+   "selectedKeyframeCandidateId": "A",
+   "keyframeABTest": {
+    "createdAt": "2026-09-02T23:42:47",
+    "promptHash": "3a8584309dde89866b9e0ceceea935969a68a4b0173789517b346e0b4d5e2e94",
+    "referenceHashes": [
+     "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+     "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268"
+    ],
+    "candidateIds": [
+     "A",
+     "B"
+    ],
+    "selectionRequired": true
+   },
+   "keyframeApproval": {
+    "approved": true,
+    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH04_keyframe_A_94a62436.png",
+    "at": "2026-09-02T23:59:15",
+    "reviewedBy": "Julian",
+    "source": "generated",
+    "inputSignature": {
+     "cardHash": "0ca1101a0fbb6eaeaf48d8776f28c0e2038e16b039564f1463cfce266ce34678",
+     "sceneLookHash": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268",
+     "referenceHashes": {
+      "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
+      "Ep1_S2_plate_candidate_a7eeeca5.png": "9b69cdb5613efcd66dc5263c28803c84"
+     },
+     "briefHash": "3a8584309dde89866b9e0ceceea935969a68a4b0173789517b346e0b4d5e2e94",
+     "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+     "canonProfileDigest": "7f027a31ef08a38fe028dc8d91682098fbfa38551310a7c549e3c46cbfe52983"
+    },
+    "promptContract": {
+     "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S2.SH04; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA quiet low-wide bedroom frame where the shoebox is the active foreground subject: its lid has opened only a narrow crack, a restrained warm golden seam lights the folded worksheet inside, and Jenny remains asleep in soft background depth, unaware.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ lower-right area; lying still asleep in bed, unchanged and unaware; facing away from the shoebox toward the bed space.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nLow floor-level view across the bedroom floor toward the bed.\nDecorated shoebox sits in the near foreground or near-mid foreground on the floor.\nThe lid is open only a narrow crack with a thin warm golden seam visible.\nA folded worksheet is lit inside the box and must remain readable.\nJenny sleeps beyond the shoebox in soft background depth.\nThe camera remains still; do not travel toward the light.\nThe room stays dark and quiet, with no visible route or traveling glow path.\n\n[Negative Space]\nHold empty floor space frame-left and center for the shoebox foreground action and lid crack.\nHold empty space between the shoebox and Jenny for the quiet depth separation.\nReserve unobstructed darkness around the seam so the narrow light remains readable.\nKeep the upper frame uncluttered for the bedroom hush and no extra reveals.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nWide relationship lens feel from floor height, patient and still, favoring room geography over isolation. The camera does not push into the glow; it holds the box, floor, bed zone, and Jenny in one coherent frame.\n\n[Light]\nLater-night bedroom darkness held back by a narrow warm golden seam from the shoebox lid crack. The seam is the only active light source; it gently reveals the folded worksheet inside the box while the rest of the room stays muted in blue-brown hush. Depth should read as layered and private, with Jenny softly present in the background and the box carrying the emotional foreground.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nKeep Jenny visibly asleep, still, and unaware; no stir, reach, wake, or reaction.\nKeep the shoebox magic small: only a fractional lid lift, a narrow golden seam, and a subtle worksheet tremble.\nDo not show Box Monsters, The Fold, a travelling glow path, or any route out of the bedroom.\nHold the camera low and wide; do not convert the shot into a glow insert or a chase.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
+     "promptHash": "3a8584309dde89866b9e0ceceea935969a68a4b0173789517b346e0b4d5e2e94",
+     "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+     "provider": "seedream",
+     "providerModelId": "dola-seedream-5-0-pro-260628",
+     "modelVersion": "dola-seedream-5-0-pro-260628",
+     "directionContract": {
+      "canonicalStyleVersion": "v1.0.0",
+      "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+      "lightingAndDepth": "Later-night bedroom darkness held back by a narrow warm golden seam from the shoebox lid crack. The seam is the only active light source; it gently reveals the folded worksheet inside the box while the rest of the room stays muted in blue-brown hush. Depth should read as layered and private, with Jenny softly present in the background and the box carrying the emotional foreground.",
+      "geography": [
+       "Low floor-level view across the bedroom floor toward the bed.",
+       "Decorated shoebox sits in the near foreground or near-mid foreground on the floor.",
+       "The lid is open only a narrow crack with a thin warm golden seam visible.",
+       "A folded worksheet is lit inside the box and must remain readable.",
+       "Jenny sleeps beyond the shoebox in soft background depth.",
+       "The camera remains still; do not travel toward the light.",
+       "The room stays dark and quiet, with no visible route or traveling glow path."
+      ],
+      "charactersInFrame": [
+       "Jenny"
+      ],
+      "emptySections": []
+     },
+     "contractHash": "4abc49c10222dc04b48a0e55a35b7ec66dee48ccab9ddb46e818f99cffb8ac95"
+    },
+    "abTest": {
+     "winner": "A",
+     "candidates": [
+      {
+       "candidateId": "A",
+       "label": "A - Seedream 5 Pro",
+       "provider": "byteplus",
+       "model": "dola-seedream-5-0-pro-260628",
+       "generatedAt": "2026-09-02T23:41:56",
+       "selected": true,
+       "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH04_keyframe_A_94a62436.png"
+      },
+      {
+       "candidateId": "B",
+       "label": "B - Nano Banana 2",
+       "provider": "google",
+       "model": "gemini-3.1-flash-image",
+       "generatedAt": "2026-09-02T23:42:47",
+       "selected": false,
+       "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S2.SH04_see_ab_20260902T235915\\Ep1_S2.SH04_keyframe_B_a416f693.png"
+      }
+     ],
+     "contract": {
+      "createdAt": "2026-09-02T23:42:47",
+      "promptHash": "3a8584309dde89866b9e0ceceea935969a68a4b0173789517b346e0b4d5e2e94",
+      "referenceHashes": [
+       "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+       "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268"
+      ],
+      "candidateIds": [
+       "A",
+       "B"
+      ],
+      "selectionRequired": true
+     }
+    },
+    "packageRevision": 2,
+    "contentHash": "f687b126b4488b2b42569ea7c21b7b699123c16b9c139943232a855c23405b03",
+    "conformanceScreening": {
+     "status": "fail",
+     "reason": "Jenny is present and largely matches her identity reference, but the frame contains an extra prominent foreground shoebox subject, so the opening keyframe does not satisfy the single-subject contract as written. The bedroom geography and asleep pose are otherwise aligned with the scene look.",
+     "checkedAt": "2026-09-02T23:41:56",
+     "screenVersion": 2,
+     "validatorModel": "gpt-5.4-mini",
+     "mediaProviderCalled": false,
+     "referenceHashes": {
+      "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+      "Ep1_S2_plate_candidate_a7eeeca5.png": "244760407da945b393d6921e0e1372ee238ea5d1551e80b59976acc29b51f268"
+     },
+     "candidateSha256": "f687b126b4488b2b42569ea7c21b7b699123c16b9c139943232a855c23405b03",
+     "review": {
+      "verdict": "revise",
+      "expectedCharacters": [
+       "Jenny"
+      ],
+      "detectedCharacters": [
+       "Jenny"
+      ],
+      "expectedSubjectCount": 1,
+      "subjectCount": 2,
+      "summary": "Jenny is present and largely matches her identity reference, but the frame contains an extra prominent foreground shoebox subject, so the opening keyframe does not satisfy the single-subject contract as written. The bedroom geography and asleep pose are otherwise aligned with the scene look.",
+      "identityAndDistinguishability": {
+       "score": 2,
+       "visibleEvidence": "The sleeping girl on the bed matches Jenny’s brown hair in a low ponytail, school-uniform cardigan, white socks, and small child silhouette; no obvious borrowed features from another character are visible.",
+       "correction": "Keep Jenny’s face, hair, uniform, and sleepy pose as shown."
+      },
+      "relativeScaleAndGeography": {
+       "score": 1,
+       "visibleEvidence": "Jenny is in the correct background bed area, but the foreground shoebox occupies a second major subject role and dominates the frame more than the contract’s background-only read for Jenny suggests.",
+       "correction": "Preserve Jenny asleep on the bed in the background, but reduce the shoebox’s prominence so the frame reads as one clear character subject with the box as a prop/foreground element."
+      },
+      "anatomyAndSilhouette": {
+       "score": 2,
+       "visibleEvidence": "Jenny’s body proportions and sleeping silhouette are readable and natural; limbs, head, and posture are coherent.",
+       "correction": "No anatomy change needed for Jenny."
+      },
+      "actionReadyComposition": {
+       "score": 1,
+       "visibleEvidence": "The composition is cinematic and the shoebox glow works, but the contract asks for a low-wide frame with the shoebox as the active foreground subject while Jenny remains unaware in soft background depth; the current setup is closer to a balanced two-subject tableau.",
+       "correction": "Recompose to prioritize the shoebox in the foreground while keeping Jenny smaller and more clearly background, asleep and unaware."
+      },
+      "forbiddenContent": {
+       "score": 1,
+       "visibleEvidence": "No watermark or extra character is visible, but the shoebox front is lettered with readable text ('JENNY'S SHOEBOX / DO NOT TOUCH'), which may be disallowed if text on props is considered forbidden content for the keyframe.",
+       "correction": "Remove or minimize all readable text on the shoebox and any other props."
+      },
+      "recommendedCorrection": "Keep Jenny asleep in the same bed position and preserve the warm glowing shoebox, but make the shot read as one clear background character with a single foreground prop by reducing the box’s dominance and removing readable prop text."
+     }
+    },
+    "conformanceAdvisoryDecision": {
+     "acceptedBy": "Julian",
+     "acceptedAt": "2026-09-02T23:59:15",
+     "statusAtDecision": "fail",
+     "reasonAtDecision": "Jenny is present and largely matches her identity reference, but the frame contains an extra prominent foreground shoebox subject, so the opening keyframe does not satisfy the single-subject contract as written. The bedroom geography and asleep pose are otherwise aligned with the scene look."
+    }
+   },
+   "keyframePath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S2.SH04_keyframe_A_94a62436.png"
   }
  ],
  "validation": {

@@ -1,23 +1,118 @@
 {
- "approved": null,
- "candidate": {
-  "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S1_plate_candidate_2be13efd.png",
-  "hash": "0d0975f0281965f59594119cdac19d54fae696aee66cbee8402241fc22274b5c",
+ "approved": {
+  "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S1_plate_candidate_2520e4b3.png",
+  "hash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
   "inputSignature": {
    "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
-   "briefHash": "23913eeedd85e0890ef67528e98e227b554c6b362aa7182b859fb8155f49f933",
+   "briefHash": "1aeddde018a1d6ec43c675431fa24e536d5341ba7fcab8a3b8db588add3485b9",
    "referenceHashes": {},
-   "plateHash": "0d0975f0281965f59594119cdac19d54fae696aee66cbee8402241fc22274b5c"
+   "plateHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
   },
   "referencePath": null,
-  "generatedAt": "2026-09-02T15:53:08",
-  "packageRevision": 1
+  "generatedAt": "2026-09-02T23:27:55",
+  "source": "uploaded",
+  "preservedOriginal": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\uploads\\Ep1_S1_scenelook_upload_5ba57e3b.png",
+  "packageRevision": 3,
+  "approvedAt": "2026-09-02T23:28:17",
+  "reviewedBy": "Julian"
  },
- "history": [],
+ "candidate": null,
+ "history": [
+  {
+   "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S1_plate_candidate_2be13efd.png",
+   "hash": "0d0975f0281965f59594119cdac19d54fae696aee66cbee8402241fc22274b5c",
+   "inputSignature": {
+    "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
+    "briefHash": "23913eeedd85e0890ef67528e98e227b554c6b362aa7182b859fb8155f49f933",
+    "referenceHashes": {},
+    "plateHash": "0d0975f0281965f59594119cdac19d54fae696aee66cbee8402241fc22274b5c"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-09-02T15:53:08",
+   "packageRevision": 1,
+   "outcome": "rejected",
+   "rejectedAt": "2026-09-02T23:00:01",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Iterated, not rejected on looks: the Look direction was re-prepared after this plate was generated (15:53), so it can no longer be approved against the current direction. Regenerating the same classroom against the fresh Look. Julian authorised this pass.",
+   "rejectedArchivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\scenelook_rejected\\20260902T230001\\Ep1_S1_plate_candidate_2be13efd.png"
+  },
+  {
+   "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S1_plate_candidate_882ad7db.png",
+   "hash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
+   "inputSignature": {
+    "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
+    "briefHash": "1aeddde018a1d6ec43c675431fa24e536d5341ba7fcab8a3b8db588add3485b9",
+    "referenceHashes": {},
+    "plateHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-09-02T23:20:52",
+   "source": "uploaded",
+   "preservedOriginal": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\uploads\\Ep1_S1_scenelook_upload_0da9985a.png",
+   "packageRevision": 3,
+   "outcome": "rejected",
+   "rejectedAt": "2026-09-02T23:26:05",
+   "reviewedBy": "Julian",
+   "rejectedNote": "WRONG WORLD - my error, not the render. Jenny classroom is the naturalistic school room (cream walls, wooden desks, blue chairs, green chalkboard reading BRIDGE). Cardboard belongs to the Box Monsters world only. Replacing with Julian own signed-off classroom reference.",
+   "rejectedArchivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\scenelook_rejected\\20260902T232605\\Ep1_S1_plate_candidate_882ad7db.png"
+  },
+  {
+   "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S1_plate_candidate_d877908f.png",
+   "hash": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b",
+   "inputSignature": {
+    "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
+    "briefHash": "1aeddde018a1d6ec43c675431fa24e536d5341ba7fcab8a3b8db588add3485b9",
+    "referenceHashes": {},
+    "plateHash": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-09-02T23:02:05",
+   "packageRevision": 3,
+   "approvedAt": "2026-09-02T23:02:42",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-09-02T23:28:17",
+   "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\scenelook_superseded\\20260902T232817\\Ep1_S1_plate_candidate_d877908f.png"
+  }
+ ],
  "departmentWork": {
   "look": {
    "approved": null,
-   "candidate": null,
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "studio/chairs/cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-09-02T22:59:21",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "creativeDirectingStandardVersion": 4,
+    "sourceHash": "c5a8ab89cb6619b25346c35f12fd8bf31f2fa5d4ebf4c77ceaf74d2f45708eda",
+    "output": {
+     "creativeIntent": "Environment-only scene look plate for a classroom where an embarrassing public reading mistake has just happened; the room should carry the emotional aftertaste without showing characters. The space must feel ordinary, safe, and suddenly heavy with remembered shame.",
+     "storyOfPlace": "A small elementary classroom after a reading turn. Desks, chalkboard, books, and learning materials remain in place, but the air feels paused and self-conscious, as if the room has absorbed the mistake and moved on before the feeling did.",
+     "paletteAndLighting": "Soft daylight mixed with warm practical lamp glow, using gentle creams, muted wood tones, dusty blues, and faded primary accents. Keep contrast moderate with slightly dimmed corners, a calm mid-morning brightness, and a subtle cooler cast in the distant room to suggest emotional distance.",
+     "materialsAndAtmosphere": "Premium stylized 3D CGI with tactile handmade cardboard construction: visible paper fibres, folded edges, stitched seams, layered cardstock surfaces, chalk dust, worn painted wood, matte paper books, and soft fabric textures. The atmosphere should feel quiet, slightly held-breath, and emotionally sticky, with delicate depth and clear spatial grounding.",
+     "continuityRules": [
+      "Do not include any characters, bodies, faces, reflections, or readable text.",
+      "Preserve the approved classroom location as a believable everyday school interior with handcrafted cardboard realism.",
+      "Keep the environment emotionally charged but understated; the shame is implied through lighting and stillness, not through exaggerated props.",
+      "Maintain locked character identity and production asset continuity for any future character shots, but this plate remains environment-only.",
+      "Avoid stylistic drift: no photorealism, no flat 2D look, no glossy plastic surfaces, no fantasy embellishment."
+     ],
+     "providerPrompt": "Environment-only scene look plate of Jenny’s classroom after a public reading mistake, empty classroom interior with desks, chalkboard, books, learning materials, and everyday school clutter arranged naturally, the room feeling slightly too quiet and emotionally heavy after the moment has passed. Premium stylized 3D CGI in a tactile handmade cardboard world, visible paper fibres, folded edges, stitched repairs, layered cardstock, chalk dust, worn painted wood, matte paper books, soft fabric textures. Soft daylight mixed with warm practical lamp glow, muted creams, dusty blues, faded primary accents, gentle mid-morning brightness with slightly dim corners and a subtle cooler emotional cast in the distance. Cinematic depth, real weight, clear spatial staging, understated lingering shame in the atmosphere, no characters, no readable text, no reflections, no exaggeration."
+    },
+    "packageRevision": 3,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd"
+     },
+     "canonProfileDigest": "a0ef8bc1d6ad00153606c57a5a1877273917be42ebb5a9497452e0d99d2afa4a",
+     "sceneContextHash": "e3a8d93cef08ecad2026430149ecf437fcf85459827239cfc9b084480bcd1263"
+    }
+   },
    "history": [
     {
      "department": "Look Development",

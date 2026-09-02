@@ -5357,7 +5357,7 @@ function renderShotStage(mode){
   art.innerHTML=mode==="animation"
     ?`${nav}<div class="stage-media-label">${stageMedia[0]} <div class="stage-media-tools"><span>${stageMedia[1]}</span>${expandAction}</div></div><div class="artefact-center">${body}</div>${contextCard}`
     :mode==="keyframe"
-      ?`${nav}<div class="see-focus-head"><div><div class="stage-media-label" style="margin:0">SEE · ${_esc(s.shotId)}</div><div class="see-focus-title">Opening frame</div><div class="see-focus-brief">${_esc(shotFocusCopy(mode,s))}</div></div>${expandAction}</div>${visualAnchors}<div class="artefact-center see-supporting ${keyframeAnchorOwnsCurrent?'has-anchor-keyframe':''}">${body}</div>${referenceHTML}<details class="focus-evidence see-context"><summary>Shot brief &amp; continuity</summary><div class="focus-evidence-body">${contextCard}</div></details>`
+      ?`${nav}${seeScenePlateSectionHTML()}<div class="see-focus-head"><div><div class="stage-media-label" style="margin:0">2 · OPENING KEYFRAME — ${_esc(s.shotId)}</div><div class="see-focus-title">Opening frame</div><div class="see-focus-brief">${_esc(shotFocusCopy(mode,s))}</div></div>${expandAction}</div>${visualAnchors}<div class="artefact-center see-supporting ${keyframeAnchorOwnsCurrent?'has-anchor-keyframe':''}">${body}</div><div class="see-source-row"><div class="see-source-head">Opening keyframe source</div>${shOpeningFrameChoices(tok,s)}</div>${referenceHTML}<details class="focus-evidence see-context"><summary>Shot brief &amp; continuity</summary><div class="focus-evidence-body">${contextCard}</div></details>`
       :`${nav}${contextCard}<div class="stage-media-label">${stageMedia[0]} <div class="stage-media-tools"><span>${stageMedia[1]}</span>${expandAction}</div></div><div class="artefact-center">${body}</div>`;
   // 2026-07-17 correction: this shared tail used to show s.seedancePrompt (the VIDEO/motion
   // brief, compile_shot_contract's output) unconditionally on EVERY mode — including
@@ -6282,6 +6282,32 @@ function shOverrideModelLimited(shotId){
 // approved+harvested landing frame carried forward as a fresh candidate, no generation
 // cost). Every one of the last three ends at the SAME approval area as
 // generation — "Approve" / "Choose another" — selection is never approval.
+function seeScenePlateSectionHTML(){
+  // SEE IS TWO SECTIONS (2026-09-02, Julian: "two nice sections for see, scene plate and
+  // keyframe", and "i cant see the generate upload or use library on opening keyframe").
+  // The plate and the keyframe are separate STAGES internally, so SEE only ever showed one of
+  // them and every source choice sat in the side decision column, below the fold. This puts the
+  // approved plate at the top of SEE with its own picture and its own three choices, and the
+  // keyframe's three choices sit directly under the keyframe image.
+  const sl=SH_SCENELOOK||{};
+  const shown=(sl.approved&&sl.approved.url)||(sl.candidate&&sl.candidate.url)||sl.plateUrl||null;
+  const state=sl.approved?"APPROVED":(sl.candidate?"AWAITING YOUR DECISION":"NOT BUILT YET");
+  const media=shown
+    ?`<img src="${BASE}${_esc(shown)}?v=${MEDIA_V}" alt="Scene ${_esc(SH_SC)} plate" style="width:100%;display:block;border-radius:10px"/>`
+    :`<div class="artefact-empty" style="min-height:120px"><div style="color:var(--muted)">No Scene Plate yet for scene ${_esc(SH_SC)}.</div></div>`;
+  return `<section class="see-plate-section" style="margin-bottom:18px">
+    <div class="stage-media-label" style="margin:0 0 6px">1 · SCENE PLATE — SCENE ${_esc(SH_SC)}
+      <div class="stage-media-tools"><span>${_esc(state)}</span></div></div>
+    ${media}
+    <div class="see-source-row"><div class="see-source-head">Scene plate source</div>
+      <div class="ofc-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn ghost" onclick="openStageOutcome('scenelook')">Review Scene Plate</button>
+        <button class="btn ghost" onclick="document.getElementById('seePlateUpload').click()">Upload scene plate · no generation cost</button>
+        <input type="file" id="seePlateUpload" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="slUpload(this)"/>
+        <button class="btn ghost" onclick="slLibrary()">Use library image</button>
+      </div></div>
+  </section>`;
+}
 function shOpeningFrameChoices(tok,s){
   const refs=SH_REFERENCE_CACHE[refCacheKey(tok)]||{},build=refs.keyframeBuild||{};
   const kr=(RATES||{})["seedream5pro_image"],fallback=kr?Number(kr.usd):null;

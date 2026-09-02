@@ -990,16 +990,37 @@ def prepare_look(context, *, log=print):
         LookDirection, label="department_look", log=log)
 
 
+def opening_frame_cast(shot):
+    """Exactly who stands in the OPENING frame — openingCharactersInFrame when the shot declares
+    one, else everyone in frame. The DP is briefed with this and judged against it; they used to
+    be two different lists, and the specialist could not win. S1.SH01 is the worked case: Jenny
+    alone opens the shot, Teacher speaks three lines from outside it, so the brief said
+    ['Jenny', 'Teacher'] while the guard demanded ['Jenny'] and every run failed (2026-09-02)."""
+    shot = shot or {}
+    declared = (shot.get("openingCharactersInFrame")
+                if shot.get("openingCharactersInFrame") is not None
+                else shot.get("charactersInFrame") or [])
+    return list(dict.fromkeys(
+        str(name).strip() for name in declared if str(name).strip()))
+
+
 def prepare_cinematography(context, images, *, log=print):
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
-    result = cb_llm.structured_with_repair(
+    expected_cast = opening_frame_cast(context.get("shot") or {})
+    opening_cast_law = (
+        "OPENING FRAME CAST — place EXACTLY these characters in openingFrameLayout.placements, "
+        f"no one else and no one missing: {expected_cast}. A character who speaks in this shot "
+        "but is not on this list is heard from outside the opening frame; do not stage them.\n\n")
+    system = (
         _system("cinematography",
                 "Own this shot's performance-ready opening stage. Establish the world, "
                 "camera, light, cast identity, canon relative scale, loose starting "
                 "relationship and clear action space. Do not pre-perform or freeze the "
                 "acting that belongs to Animation. The attached images are in the exact "
                 "labelled provider-reference order in the context.", standard_version) + "\n\n" +
-                load_runtime_skill("dp", standard_version),
+                load_runtime_skill("dp", standard_version))
+    user = (
+        opening_cast_law +
         "APPROVED SHOT CONTRACT AND ORDERED IMAGE LABELS:\n" + _j(context) +
         "\n\nReturn one keyframe-provider direction and one machine-readable "
         "openingFrameLayout staging envelope. Return geography as one to eight concise, "
@@ -1021,16 +1042,28 @@ def prepare_cinematography(context, images, *, log=print):
         "locked turnarounds and Scene Look in providerReferencePlan order. Never assign an "
         "opening composition, sizing board or generated pose plate to an @图 label: those "
         "remain local advisory evidence. Bind references by the labels stated in context; "
-        "do not describe character identity from memory.",
-        CinematographyDirection, label="department_cinematography", log=log,
+        "do not describe character identity from memory.")
+    result = cb_llm.structured_with_repair(
+        system, user, CinematographyDirection, label="department_cinematography", log=log,
         images=images)
-    shot = context.get("shot") or {}
-    expected_cast = list(dict.fromkeys(
-        str(name).strip() for name in (
-            shot.get("openingCharactersInFrame")
-            if shot.get("openingCharactersInFrame") is not None
-            else shot.get("charactersInFrame") or [])
-        if str(name).strip()))
+
+    def _placed(direction):
+        return [item.character for item in direction.openingFrameLayout.placements]
+
+    if sorted(_placed(result)) != sorted(expected_cast):
+        # ONE correction pass, seeded with what the DP actually returned — the same
+        # business-rule repair the Director's own scene breakdown already gets, rather than a
+        # hard stop on a single miscount. A second miss is a real refusal.
+        log(f"  [cinematography] opening cast came back {_placed(result)}, not {expected_cast}"
+            " — running ONE seeded correction pass...", flush=True)
+        result = cb_llm.structured_with_repair(
+            system,
+            user + "\n\nCORRECTION - your previous answer staged "
+            f"{_placed(result)}. openingFrameLayout.placements must contain exactly "
+            f"{expected_cast}: no extra character, none missing, one entry each. Anyone else "
+            "who speaks in this shot is off-frame at the opening and must not be placed.",
+            CinematographyDirection, label="department_cinematography/cast-correction",
+            log=log, images=images)
     placements = list(result.openingFrameLayout.placements)
     placed_cast = [item.character for item in placements]
     if (len(placed_cast) != len(expected_cast) or
@@ -1308,6 +1341,33 @@ def creative_translation_report(shot, direction, provider_prompt=None):
         "compiledGagBeatCodes": actual_codes,
         "derivedFromApprovedContracts": derived,
     }
+
+
+def carry_approved_stage_events(shot, direction):
+    """Restore the storyboard-locked primaryEvent and observableEndState on each stage.
+
+    Exactly the reason carry_approved_gag_clock_text exists, one field-set along: the approved
+    visual events are immutable story facts, animation_story_lock_report compares them BYTE FOR
+    BYTE, and structured model output paraphrases them however plainly it is told to copy. Asking
+    a language model to echo a sentence verbatim and then refusing the whole shot when it
+    rewrites one word is a guard the specialist cannot satisfy — S2.SH03 failed it on every
+    sample, on three different stages (2026-09-02). Stamping the approved wording back on makes
+    the fact immutable by construction; the report still rejects a stage that is missing,
+    reordered, or absent from the provider prompt, which is what it is really there to catch.
+    """
+    approved = animation_locked_visual_events(shot)
+    stages = list(getattr(direction, "stagePlan", None) or [])
+    if not approved or len(stages) != len(approved):
+        return direction                       # a real count mismatch: leave it for the guard
+    for stage, locked in zip(stages, approved):
+        if list(getattr(stage, "beatIds", None) or []) != list(locked.get("beatIds") or []):
+            return direction                   # a real reassignment: leave it for the guard
+    for stage, locked in zip(stages, approved):
+        for field in ("primaryEvent", "observableEndState"):
+            value = locked.get(field)
+            if value and hasattr(stage, field):
+                setattr(stage, field, value)
+    return direction
 
 
 def carry_approved_gag_clock_text(shot, direction):
@@ -2526,13 +2586,34 @@ def prepare_animation(context, images, *, log=print):
 
     locked_visual_events = animation_locked_visual_events(shot)
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
+    # The approved counts are hard guards below, and the specialist was never told the numbers —
+    # a sample returning three internal shots where the storyboard approved two lost the whole
+    # shot with no way back (2026-09-02, S2.SH03). State them first, in the same plain "exactly
+    # these, no more, no fewer" form the DP's opening-cast law uses.
+    _approved_stages = shot.get("storyboardStagePlanApproved") or []
+    _approved_shots = shot.get("storyboardInternalShotPlanApproved") or []
+    counts_law = ""
+    if _approved_stages:
+        counts_law += (f"APPROVED STAGE COUNT - return exactly {len(_approved_stages)} stages, "
+                       "same beatIds, same order.\n")
+    if _approved_shots:
+        counts_law += (f"APPROVED INTERNAL SHOT COUNT - return exactly {len(_approved_shots)} "
+                       "motivated internal shots in shotPlan, no more and no fewer.\n")
+    if counts_law:
+        counts_law += "\n"
     result = cb_llm.structured_with_repair(
         _system("animation",
                 "Turn the approved dramatic beat into one playable Seedance generation unit. "
                 "The first attached image is the approved opening frame; remaining attachments "
-                "follow the exact reference order in the context. Continuous relay may use one "
-                "shot; action units use two to four internal shots, each with one clean motion "
-                "idea and a real story, performance or reaction purpose.", standard_version),
+                "follow the exact reference order in the context. "
+                + (f"This shot's storyboard approved exactly {len(_approved_shots)} internal "
+                   "shot(s); return that many, covering every approved stage inside them. "
+                   if _approved_shots else
+                   "Continuous relay may use one shot; action units use two to four internal "
+                   "shots, ")
+                + "each with one clean motion idea and a real story, performance or reaction "
+                "purpose.", standard_version),
+        counts_law +
         "APPROVED SHOT, VOICE DIRECTION AND ORDERED ATTACHMENTS:\n" + _j(context) +
         "\n\nDIRECTORIAL FREEDOM CONTRACT:\n"
         "When humanWorkingAnimationPrompt or watchDirectorFeedback is present, treat it as "
@@ -2642,6 +2723,7 @@ def prepare_animation(context, images, *, log=print):
         AnimationDirection, label="department_animation", log=log, images=images)
 
     result = enforce_aerial_camera_contract(result)
+    result = carry_approved_stage_events(shot, result)
     result = carry_approved_gag_clock_text(shot, result)
 
     if result.durationSec != duration:

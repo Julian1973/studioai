@@ -945,7 +945,789 @@
     ]
    },
    "approvedTake": null,
-   "harvestFrame": null
+   "harvestFrame": null,
+   "departmentWork": {
+    "cinematography": {
+     "approved": null,
+     "candidate": {
+      "department": "Cinematography",
+      "worker": "Cinematographer / DP",
+      "skill": "studio/chairs/cinematographer/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-09-02T23:28:54",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "891602aaa44b217620ecda81ebd86a467dfcadd52c259da290a2eaac3bda3ea4",
+      "output": {
+       "shotId": "S1.SH01",
+       "audienceRead": "A quiet classroom read-aloud turns publicly awkward the moment the wrong word is heard, with Jenny’s embarrassment readable in her posture, hands, and the shared silence.",
+       "composition": "Wide classroom frame at student eye level, front-of-room axis, with Jenny placed front-center and the board fully readable behind/near her in the same shared geometry; keep the room calm, intimate, and unobstructed so the worksheet, Jenny’s face, and the board remain readable together.",
+       "lensAndCameraRelationship": "Natural-perspective wide-to-medium-wide view, student eye level, mostly still with a slight withheld feel; preserve classroom geometry and allow a gentle inward tightening only through framing emphasis, not dramatic lensing.",
+       "lightingAndDepth": "Neutral classroom daylight with soft, ordinary school warmth, slightly cooler and flatter in emotional feel at the embarrassment peak; clear foreground Jenny against a legible board and softly present room depth.",
+       "geography": [
+        "Front-of-room classroom axis faces the chalkboard and the listening class.",
+        "Jenny stands near the front-center between student seating and the board.",
+        "The board remains readable in the same wide geometry as Jenny.",
+        "Desks and chairs sit back in depth, leaving a clear performance corridor at the front.",
+        "Windows and daylight live to one side of the room, keeping the space bright and ordinary.",
+        "The teacher is implied at the front-of-room area but not staged in this opening frame.",
+        "Keep the floor lane open from camera to Jenny for a clean public-reading line of action."
+       ],
+       "charactersInFrame": [
+        "Jenny"
+       ],
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "openingFrameLayout": {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Jenny",
+        "referenceHeightFraction": 0.42,
+        "sameDepth": true,
+        "placements": [
+         {
+          "character": "Jenny",
+          "centerX": 0.47,
+          "centerY": 0.59,
+          "apparentScale": 1.0,
+          "depthPlane": 0,
+          "bodyAngleDegrees": 0.0,
+          "facing": "toward the board and class",
+          "pose": "standing at the front with the worksheet held in both hands, loosely gathered and ready to read"
+         }
+        ]
+       },
+       "negativeSpace": [
+        "Hold empty space frame-right and behind Jenny for the board to remain readable.",
+        "Keep open floor space in front of Jenny for the public-reading performance corridor.",
+        "Leave airy headroom above Jenny so her smallness against the room stays legible."
+       ],
+       "referenceUse": [
+        "Use the provided Jenny reference for identity, school uniform, hair, and expression family only.",
+        "Use the provided classroom reference for layout, materials, lighting, and board placement only."
+       ],
+       "continuityProtections": [
+        "Do not add Teacher or any other character into the opening frame.",
+        "Keep Jenny and the board readable together in one uninterrupted classroom geometry.",
+        "Do not crop the worksheet, Jenny’s face, or the board text.",
+        "Preserve a calm, still room with no extra reaction in the opening frame."
+       ],
+       "providerPrompt": "Wide classroom frame at student eye level, front-of-room axis, with Jenny alone at the front-center of the classroom and the board readable in the same shot; keep the room calm, quiet, and clearly readable around her. Jenny stands with her worksheet held in both hands, ready to read, her posture slightly tentative but not yet collapsed, facing toward the board and class. Natural-perspective composition, neutral classroom daylight, soft ordinary school realism, clear foreground figure against a legible board and softly present classroom depth, unobstructed performance corridor, open floor space, and enough headroom to preserve her vulnerability."
+      },
+      "packageRevision": 3,
+      "inputSignature": {
+       "stage": "cinematography",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "cinematography": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd",
+        "dp": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd"
+       },
+       "canonProfileDigest": "70fef16686e6acd6d212f116cc67acc55f4bd6d54651b962552b628689f55e41",
+       "shotContractHash": "c6a24a1c05af8cc089990720421ac0c1d308305b3955ae75cbf2ff92fe4279a3",
+       "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
+       "references": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "Jenny",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "3cf805613f2969dc6c3ee475045789aacb8ea9cfc563aed28321121bbebe1825",
+         "hash": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7"
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图2",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
+        }
+       ]
+      }
+     },
+     "history": [
+      {
+       "department": "Cinematography",
+       "worker": "Cinematographer / DP",
+       "skill": "studio/chairs/cinematographer/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-09-02T23:06:33",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 4,
+       "sourceHash": "dd08b0932595ea7ac510b95f5513d64fc7e93c258d2973939f3abcaa62b925b8",
+       "output": {
+        "shotId": "S1.SH01",
+        "audienceRead": "A quiet classroom read-aloud opening frame with Jenny at the front, the board clearly present, and enough empty room for the embarrassed beat to land without visual clutter.",
+        "composition": "Wide classroom frame at student eye level, shared front-of-room axis, Jenny placed front-center with the board legible behind or beside her and the listening classroom held softly in depth; keep the body readable full figure, the worksheet visible, and preserve a calm performance corridor around her.",
+        "lensAndCameraRelationship": "Natural-perspective wide lens feel, slightly withheld and observational, with the camera steady at student eye level and only a very gentle inward readiness implied for the later emotional tightening; no aggressive perspective or heroic angle.",
+        "lightingAndDepth": "Neutral, slightly cool classroom daylight with soft even fill, no decorative contrast spikes; foreground Jenny reads crisply against a legible board and softly present room depth, keeping social space clear and emotionally ordinary.",
+        "geography": [
+         "Front-of-room classroom view with Jenny at the teaching front and the chalkboard / blackboard readable in the same frame.",
+         "Student desks and classroom furnishing recede behind her, establishing a calm waiting audience without crowding the foreground.",
+         "Camera is inside the room on the shared front-of-room axis, looking toward Jenny and the board.",
+         "Leave a clear corridor in front of Jenny for the read-aloud performance space and small posture change.",
+         "Keep the board, worksheet, and Jenny’s full body readable together in one uninterrupted wide composition."
+        ],
+        "charactersInFrame": [
+         "Jenny"
+        ],
+        "canonicalStyleVersion": "v1.0.0",
+        "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+        "openingFrameLayout": {
+         "aspectRatio": "16:9",
+         "referenceCharacter": "Jenny",
+         "referenceHeightFraction": 0.42,
+         "sameDepth": true,
+         "placements": [
+          {
+           "character": "Jenny",
+           "centerX": 0.42,
+           "centerY": 0.62,
+           "apparentScale": 1.0,
+           "depthPlane": 0,
+           "bodyAngleDegrees": 0.0,
+           "facing": "toward the board and class",
+           "pose": "standing at the front with the worksheet open in both hands, ready to begin the read-aloud with a careful, poised start"
+          }
+         ]
+        },
+        "negativeSpace": [
+         "Hold open space frame-right for the classroom’s listening depth and the teacher’s offscreen vocal presence.",
+         "Reserve clear empty space above and beside Jenny for the readable board content.",
+         "Keep the foreground uncluttered so the worksheet and her tightened hands remain visible.",
+         "Leave room around her shoulders and torso so the later inward shrink can read cleanly."
+        ],
+        "referenceUse": [
+         "Use the approved Jenny reference for identity, school uniform, hair shape, and expression family only.",
+         "Use the approved classroom scene look for palette, materials, chalkboard treatment, and daylight behavior.",
+         "Respect the locked reference order supplied in context; do not invent new identity cues."
+        ],
+        "continuityProtections": [
+         "Maintain exact approved cast in frame: Jenny only in this opening frame.",
+         "Do not crop the board or Jenny’s body; keep both legible in one wide geometry.",
+         "Keep camera height at student eye level and the atmosphere calm, not dramatic.",
+         "Preserve a simple, honest starting pose that supports later embarrassment without pre-performing it."
+        ],
+        "providerPrompt": "Wide classroom frame at student eye level, with Jenny front-center at the front of the room and the board clearly visible in the same shot; keep the classroom quiet, ordinary, and readable, with Jenny in a careful poised start holding her worksheet open in both hands, full body visible, clear performance corridor around her, soft natural classroom daylight, neutral slightly cool tone, gentle handcrafted animation realism, tactile schoolroom materials, no extra characters in frame, no cropping of Jenny or the board, steady intimate composition, the room receding softly behind her."
+       },
+       "packageRevision": 3,
+       "inputSignature": {
+        "stage": "cinematography",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "cinematography": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd",
+         "dp": "b32287227440c6b36863833f84d64ebeab49555e977c82e2cce3d89379661ccd"
+        },
+        "canonProfileDigest": "5c7cf8516ec77a672a0f375e5af3a6d1687983f9b7033ca8e7b87ab062f1ce36",
+        "shotContractHash": "c6a24a1c05af8cc089990720421ac0c1d308305b3955ae75cbf2ff92fe4279a3",
+        "sceneLookHash": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b",
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "Jenny",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "3cf805613f2969dc6c3ee475045789aacb8ea9cfc563aed28321121bbebe1825",
+          "hash": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图2",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b"
+         }
+        ]
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-02T23:28:22",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      }
+     ]
+    }
+   },
+   "keyframeCandidates": [],
+   "keyframeCandidate": null,
+   "selectedKeyframeCandidateId": null,
+   "keyframeABTest": {
+    "createdAt": "2026-09-02T23:17:00",
+    "promptHash": "8c51b1a438935dd303262b389b2eb504527b8bf5153400af7456c79903dfec96",
+    "referenceHashes": [
+     "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+     "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b"
+    ],
+    "candidateIds": [
+     "A",
+     "B"
+    ],
+    "selectionRequired": true
+   },
+   "keyframeRejections": [
+    {
+     "candidateId": "A",
+     "label": "A - Seedream 5 Pro",
+     "provider": "byteplus",
+     "model": "dola-seedream-5-0-pro-260628",
+     "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_A_66dc9c3e.png",
+     "generatedAt": "2026-09-02T23:09:53",
+     "source": "generated",
+     "inputSignature": {
+      "cardHash": "c95f4956cb826e8e8d821d2b790bf83f4d122697a0ba4bce16c5a6eb060c7973",
+      "sceneLookHash": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b",
+      "referenceHashes": {
+       "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
+       "Ep1_S1_plate_candidate_d877908f.png": "8cb1ff6e619d2f487c0a5437c143fa00"
+      },
+      "briefHash": "8c51b1a438935dd303262b389b2eb504527b8bf5153400af7456c79903dfec96",
+      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+      "canonProfileDigest": "5c7cf8516ec77a672a0f375e5af3a6d1687983f9b7033ca8e7b87ab062f1ce36"
+     },
+     "promptContract": {
+      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S1.SH01; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA quiet classroom read-aloud opening frame with Jenny at the front, the board clearly present, and enough empty room for the embarrassed beat to land without visual clutter.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ lower-centre area; standing at the front with the worksheet open in both hands, ready to begin the read-aloud with a careful, poised start; facing toward the board and class.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nFront-of-room classroom view with Jenny at the teaching front and the chalkboard / blackboard readable in the same frame.\nStudent desks and classroom furnishing recede behind her, establishing a calm waiting audience without crowding the foreground.\nCamera is inside the room on the shared front-of-room axis, looking toward Jenny and the board.\nLeave a clear corridor in front of Jenny for the read-aloud performance space and small posture change.\nKeep the board, worksheet, and Jenny’s full body readable together in one uninterrupted wide composition.\n\n[Negative Space]\nHold open space frame-right for the classroom’s listening depth and the teacher’s offscreen vocal presence.\nReserve clear empty space above and beside Jenny for the readable board content.\nKeep the foreground uncluttered so the worksheet and her tightened hands remain visible.\nLeave room around her shoulders and torso so the later inward shrink can read cleanly.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nNatural-perspective wide lens feel, slightly withheld and observational, with the camera steady at student eye level and only a very gentle inward readiness implied for the later emotional tightening; no aggressive perspective or heroic angle.\n\n[Light]\nNeutral, slightly cool classroom daylight with soft even fill, no decorative contrast spikes; foreground Jenny reads crisply against a legible board and softly present room depth, keeping social space clear and emotionally ordinary.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nMaintain exact approved cast in frame: Jenny only in this opening frame.\nDo not crop the board or Jenny’s body; keep both legible in one wide geometry.\nKeep camera height at student eye level and the atmosphere calm, not dramatic.\nPreserve a simple, honest starting pose that supports later embarrassment without pre-performing it.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
+      "promptHash": "8c51b1a438935dd303262b389b2eb504527b8bf5153400af7456c79903dfec96",
+      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+      "provider": "seedream",
+      "providerModelId": "dola-seedream-5-0-pro-260628",
+      "modelVersion": "dola-seedream-5-0-pro-260628",
+      "directionContract": {
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "lightingAndDepth": "Neutral, slightly cool classroom daylight with soft even fill, no decorative contrast spikes; foreground Jenny reads crisply against a legible board and softly present room depth, keeping social space clear and emotionally ordinary.",
+       "geography": [
+        "Front-of-room classroom view with Jenny at the teaching front and the chalkboard / blackboard readable in the same frame.",
+        "Student desks and classroom furnishing recede behind her, establishing a calm waiting audience without crowding the foreground.",
+        "Camera is inside the room on the shared front-of-room axis, looking toward Jenny and the board.",
+        "Leave a clear corridor in front of Jenny for the read-aloud performance space and small posture change.",
+        "Keep the board, worksheet, and Jenny’s full body readable together in one uninterrupted wide composition."
+       ],
+       "charactersInFrame": [
+        "Jenny"
+       ],
+       "emptySections": []
+      },
+      "contractHash": "710f62d64c1b460ba3c22f7444ec4d43b2351595337957966f9a0bf3d106b16f"
+     },
+     "geometryScreening": {
+      "status": "fail",
+      "reason": "one or more subjects drifted outside authored position or size tolerances",
+      "candidateSize": [
+       2816,
+       1584
+      ],
+      "positionTolerance": 0.12,
+      "heightScaleTolerance": [
+       0.75,
+       1.25
+      ],
+      "matches": [
+       {
+        "character": "Jenny",
+        "passed": false,
+        "positionDelta": 0.155,
+        "heightScaleAgainstLayout": 2.0824,
+        "expectedCenter": [
+         0.42,
+         0.62
+        ],
+        "actualCenter": [
+         0.5689,
+         0.577
+        ],
+        "expectedHeightFraction": 0.4062,
+        "actualHeightFraction": 0.846,
+        "detectedBoundsPx": [
+         1325,
+         244,
+         1879,
+         1584
+        ]
+       }
+      ],
+      "detectedComponentCount": 1,
+      "method": "local-u2net-foreground-geometry-v1",
+      "zeroSpend": true,
+      "providerCalled": false
+     },
+     "conformanceScreening": {
+      "status": "fail",
+      "reason": "Single-character cast matches Jenny, but the opening frame misses the required geography and action-readiness: she is too centered/right of frame, the worksheet is present but her pose does not read as clearly poised at the front facing the board and class, and the composition lacks the authored empty room emphasis. No forbidden extra characters or overt text/watermarks are visible.",
+      "checkedAt": "2026-09-02T23:09:53",
+      "screenVersion": 2,
+      "validatorModel": "gpt-5.4-mini",
+      "mediaProviderCalled": false,
+      "referenceHashes": {
+       "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+       "Ep1_S1_plate_candidate_d877908f.png": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b"
+      },
+      "candidateSha256": "ab66e949c26f2827f9302557f1dd4b9282f34eb2b0c4a16f2701990c61248ae3",
+      "review": {
+       "verdict": "revise",
+       "expectedCharacters": [
+        "Jenny"
+       ],
+       "detectedCharacters": [
+        "Jenny"
+       ],
+       "expectedSubjectCount": 1,
+       "subjectCount": 1,
+       "summary": "Single-character cast matches Jenny, but the opening frame misses the required geography and action-readiness: she is too centered/right of frame, the worksheet is present but her pose does not read as clearly poised at the front facing the board and class, and the composition lacks the authored empty room emphasis. No forbidden extra characters or overt text/watermarks are visible.",
+       "identityAndDistinguishability": {
+        "score": 2,
+        "visibleEvidence": "One girl only, with Jenny’s canonical brown hair in a side ponytail, school uniform, and childlike face matching the turnaround reference. No borrowed features from another character are visible.",
+        "correction": "Keep Jenny’s canonical hair, uniform, and proportions unchanged."
+       },
+       "relativeScaleAndGeography": {
+        "score": 1,
+        "visibleEvidence": "Jenny is full-body and appropriately child-sized in the classroom, but her placement is farther right and more central than the contract’s centerX 0.42 / centerY 0.62 front-of-class layout. The board is behind her, but the authored screen geography is not exact.",
+        "correction": "Shift Jenny slightly left and a bit lower so she sits at the front-left/mid-left of frame per the approved layout, with the board clearly behind her."
+       },
+       "anatomyAndSilhouette": {
+        "score": 2,
+        "visibleEvidence": "Body proportions, hands, legs, and silhouette are readable and coherent. The worksheet is held in both hands and the figure remains cleanly articulated.",
+        "correction": "Preserve the current anatomy and clear silhouette."
+       },
+       "actionReadyComposition": {
+        "score": 1,
+        "visibleEvidence": "The classroom is readable, but Jenny’s stance feels more like a static hold than a careful read-aloud start facing the board and class. The empty-room beat is present but weaker than requested because Jenny dominates the frame slightly off the intended positioning.",
+        "correction": "Compose Jenny as a poised read-aloud starter at the front, facing toward the board/class with a little more negative space around her."
+       },
+       "forbiddenContent": {
+        "score": 2,
+        "visibleEvidence": "No extra characters, logos, watermarks, or obvious forbidden props are visible.",
+        "correction": "Keep the frame free of extra subjects and visible branding."
+       },
+       "recommendedCorrection": "Move Jenny slightly left to the authored front-of-class position, preserve her exact identity and worksheet, and widen the empty classroom space so she reads as poised to begin the read-aloud facing the board and class."
+      }
+     },
+     "packageRevision": 3,
+     "contentHash": "ab66e949c26f2827f9302557f1dd4b9282f34eb2b0c4a16f2701990c61248ae3",
+     "outcome": "rejected",
+     "rejectedAt": "2026-09-02T23:12:30",
+     "reason": "Jenny reads correctly - apprehensive, worksheet held open in both hands. Two corrections. 1) WORLD: the room drifted cold blue-grey; it must match the approved Scene Look plate - warm cream cardboard walls and floor, soft daylight from the window with the warm practical lamp glow, dusty-blue chalkboard and faded primary accents, not a cool blue cast. 2) POSITION: place her at the authored front-of-class spot from the opening layout, left of centre, with the teacher desk clear frame-left and an unobstructed corridor around her. Keep her exact identity, costume and the worksheet unchanged.",
+     "reviewedBy": "Julian",
+     "rejectedFile": null,
+     "abCandidates": [
+      {
+       "candidateId": "A",
+       "provider": "byteplus",
+       "model": "dola-seedream-5-0-pro-260628",
+       "rejectedFile": null
+      },
+      {
+       "candidateId": "B",
+       "provider": "google",
+       "model": "gemini-3.1-flash-image",
+       "rejectedFile": null
+      }
+     ],
+     "archivedSidecars": [],
+     "contentHashAtGeneration": true
+    },
+    {
+     "candidateId": "A",
+     "label": "A - Seedream 5 Pro",
+     "provider": "byteplus",
+     "model": "dola-seedream-5-0-pro-260628",
+     "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_A_30baaccb.png",
+     "generatedAt": "2026-09-02T23:16:10",
+     "source": "generated",
+     "inputSignature": {
+      "cardHash": "c95f4956cb826e8e8d821d2b790bf83f4d122697a0ba4bce16c5a6eb060c7973",
+      "sceneLookHash": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b",
+      "referenceHashes": {
+       "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
+       "Ep1_S1_plate_candidate_d877908f.png": "8cb1ff6e619d2f487c0a5437c143fa00"
+      },
+      "briefHash": "8c51b1a438935dd303262b389b2eb504527b8bf5153400af7456c79903dfec96",
+      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+      "canonProfileDigest": "5c7cf8516ec77a672a0f375e5af3a6d1687983f9b7033ca8e7b87ab062f1ce36"
+     },
+     "promptContract": {
+      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S1.SH01; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA quiet classroom read-aloud opening frame with Jenny at the front, the board clearly present, and enough empty room for the embarrassed beat to land without visual clutter.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ lower-centre area; standing at the front with the worksheet open in both hands, ready to begin the read-aloud with a careful, poised start; facing toward the board and class.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nFront-of-room classroom view with Jenny at the teaching front and the chalkboard / blackboard readable in the same frame.\nStudent desks and classroom furnishing recede behind her, establishing a calm waiting audience without crowding the foreground.\nCamera is inside the room on the shared front-of-room axis, looking toward Jenny and the board.\nLeave a clear corridor in front of Jenny for the read-aloud performance space and small posture change.\nKeep the board, worksheet, and Jenny’s full body readable together in one uninterrupted wide composition.\n\n[Negative Space]\nHold open space frame-right for the classroom’s listening depth and the teacher’s offscreen vocal presence.\nReserve clear empty space above and beside Jenny for the readable board content.\nKeep the foreground uncluttered so the worksheet and her tightened hands remain visible.\nLeave room around her shoulders and torso so the later inward shrink can read cleanly.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nNatural-perspective wide lens feel, slightly withheld and observational, with the camera steady at student eye level and only a very gentle inward readiness implied for the later emotional tightening; no aggressive perspective or heroic angle.\n\n[Light]\nNeutral, slightly cool classroom daylight with soft even fill, no decorative contrast spikes; foreground Jenny reads crisply against a legible board and softly present room depth, keeping social space clear and emotionally ordinary.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nMaintain exact approved cast in frame: Jenny only in this opening frame.\nDo not crop the board or Jenny’s body; keep both legible in one wide geometry.\nKeep camera height at student eye level and the atmosphere calm, not dramatic.\nPreserve a simple, honest starting pose that supports later embarrassment without pre-performing it.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
+      "promptHash": "8c51b1a438935dd303262b389b2eb504527b8bf5153400af7456c79903dfec96",
+      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+      "provider": "seedream",
+      "providerModelId": "dola-seedream-5-0-pro-260628",
+      "modelVersion": "dola-seedream-5-0-pro-260628",
+      "directionContract": {
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "lightingAndDepth": "Neutral, slightly cool classroom daylight with soft even fill, no decorative contrast spikes; foreground Jenny reads crisply against a legible board and softly present room depth, keeping social space clear and emotionally ordinary.",
+       "geography": [
+        "Front-of-room classroom view with Jenny at the teaching front and the chalkboard / blackboard readable in the same frame.",
+        "Student desks and classroom furnishing recede behind her, establishing a calm waiting audience without crowding the foreground.",
+        "Camera is inside the room on the shared front-of-room axis, looking toward Jenny and the board.",
+        "Leave a clear corridor in front of Jenny for the read-aloud performance space and small posture change.",
+        "Keep the board, worksheet, and Jenny’s full body readable together in one uninterrupted wide composition."
+       ],
+       "charactersInFrame": [
+        "Jenny"
+       ],
+       "emptySections": []
+      },
+      "contractHash": "710f62d64c1b460ba3c22f7444ec4d43b2351595337957966f9a0bf3d106b16f"
+     },
+     "geometryScreening": {
+      "status": "fail",
+      "reason": "one or more subjects drifted outside authored position or size tolerances",
+      "candidateSize": [
+       2816,
+       1584
+      ],
+      "positionTolerance": 0.12,
+      "heightScaleTolerance": [
+       0.75,
+       1.25
+      ],
+      "matches": [
+       {
+        "character": "Jenny",
+        "passed": false,
+        "positionDelta": 0.0698,
+        "heightScaleAgainstLayout": 2.0622,
+        "expectedCenter": [
+         0.42,
+         0.62
+        ],
+        "actualCenter": [
+         0.478,
+         0.5811
+        ],
+        "expectedHeightFraction": 0.4062,
+        "actualHeightFraction": 0.8378,
+        "detectedBoundsPx": [
+         958,
+         257,
+         1734,
+         1584
+        ]
+       }
+      ],
+      "detectedComponentCount": 1,
+      "method": "local-u2net-foreground-geometry-v1",
+      "zeroSpend": true,
+      "providerCalled": false
+     },
+     "conformanceScreening": {
+      "status": "fail",
+      "reason": "The frame contains only Jenny, but the opening composition and action do not match the contract: she is centered-right rather than at the specified front/center-left placement, she is not clearly oriented toward the board/class, and she holds a booklet rather than a worksheet open in both hands. The classroom board is present and there is no extra cast or visible watermark/text conflict.",
+      "checkedAt": "2026-09-02T23:16:10",
+      "screenVersion": 2,
+      "validatorModel": "gpt-5.4-mini",
+      "mediaProviderCalled": false,
+      "referenceHashes": {
+       "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+       "Ep1_S1_plate_candidate_d877908f.png": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b"
+      },
+      "candidateSha256": "5d77da2e36b44cee60836be81bb007d6c78d73a68d2822cea8a4f276cccdac2e",
+      "review": {
+       "verdict": "block",
+       "expectedCharacters": [
+        "Jenny"
+       ],
+       "detectedCharacters": [
+        "Jenny"
+       ],
+       "expectedSubjectCount": 1,
+       "subjectCount": 1,
+       "summary": "The frame contains only Jenny, but the opening composition and action do not match the contract: she is centered-right rather than at the specified front/center-left placement, she is not clearly oriented toward the board/class, and she holds a booklet rather than a worksheet open in both hands. The classroom board is present and there is no extra cast or visible watermark/text conflict.",
+       "identityAndDistinguishability": {
+        "score": 2,
+        "visibleEvidence": "Jenny matches the reference well: same child character, dark brown side-parted ponytail, large eyes, maroon cardigan, white collar, green striped tie, gray skirt, socks and dark shoes.",
+        "correction": "Keep Jenny’s reference identity unchanged."
+       },
+       "relativeScaleAndGeography": {
+        "score": 1,
+        "visibleEvidence": "Jenny is correctly the only subject, but her placement is off-contract: she stands near center-right, not near center-left/front at the specified screen geography, and her apparent scale reads smaller than the requested reference framing.",
+        "correction": "Move Jenny to the front-left/center-left placement with the authored 0.42 width fraction and keep the board clearly behind her."
+       },
+       "anatomyAndSilhouette": {
+        "score": 2,
+        "visibleEvidence": "Figure anatomy and silhouette are readable and intact; proportions look stable and the single-subject outline is clear.",
+        "correction": "No change needed to anatomy or silhouette."
+       },
+       "actionReadyComposition": {
+        "score": 1,
+        "visibleEvidence": "The frame is clean and classroom readable, but Jenny is not posed as a careful read-aloud start with the worksheet open in both hands toward the board/class; she instead appears to be calmly holding a booklet at chest height.",
+        "correction": "Pose Jenny standing at the front, facing the board and class, with the worksheet open in both hands as if ready to begin the read-aloud."
+       },
+       "forbiddenContent": {
+        "score": 2,
+        "visibleEvidence": "No extra character, no obvious logo, watermark, or on-screen text conflict is visible.",
+        "correction": "No change needed for forbidden content."
+       },
+       "recommendedCorrection": "Keep Jenny’s reference design and the clean classroom, but reposition her to the front-left/center-left, facing the board and class, and change the prop/pose so she holds the worksheet open in both hands in a poised read-aloud start."
+      }
+     },
+     "packageRevision": 3,
+     "contentHash": "5d77da2e36b44cee60836be81bb007d6c78d73a68d2822cea8a4f276cccdac2e",
+     "outcome": "rejected",
+     "rejectedAt": "2026-09-02T23:30:09",
+     "reason": "Replaced by Julian own signed-off reference frame for this beat. The generated candidate inherited the wrong-world cardboard plate; the correct naturalistic classroom plate is now approved and this keyframe is his own image, uploaded at no generation cost.",
+     "reviewedBy": "Julian",
+     "rejectedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_A_30baaccb.png",
+     "abCandidates": [
+      {
+       "candidateId": "A",
+       "provider": "byteplus",
+       "model": "dola-seedream-5-0-pro-260628",
+       "rejectedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_A_30baaccb.png"
+      },
+      {
+       "candidateId": "B",
+       "provider": "google",
+       "model": "gemini-3.1-flash-image",
+       "rejectedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_B_fc9055e1.png"
+      }
+     ],
+     "archivedSidecars": [
+      "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_A_30baaccb.png.gen.json",
+      "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_B_fc9055e1.png.gen.json"
+     ],
+     "contentHashAtGeneration": true
+    }
+   ],
+   "keyframeRejected": {
+    "candidateId": "A",
+    "label": "A - Seedream 5 Pro",
+    "provider": "byteplus",
+    "model": "dola-seedream-5-0-pro-260628",
+    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_A_30baaccb.png",
+    "generatedAt": "2026-09-02T23:16:10",
+    "source": "generated",
+    "inputSignature": {
+     "cardHash": "c95f4956cb826e8e8d821d2b790bf83f4d122697a0ba4bce16c5a6eb060c7973",
+     "sceneLookHash": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b",
+     "referenceHashes": {
+      "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
+      "Ep1_S1_plate_candidate_d877908f.png": "8cb1ff6e619d2f487c0a5437c143fa00"
+     },
+     "briefHash": "8c51b1a438935dd303262b389b2eb504527b8bf5153400af7456c79903dfec96",
+     "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+     "canonProfileDigest": "5c7cf8516ec77a672a0f375e5af3a6d1687983f9b7033ca8e7b87ab062f1ce36"
+    },
+    "promptContract": {
+     "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S1.SH01; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA quiet classroom read-aloud opening frame with Jenny at the front, the board clearly present, and enough empty room for the embarrassed beat to land without visual clutter.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ lower-centre area; standing at the front with the worksheet open in both hands, ready to begin the read-aloud with a careful, poised start; facing toward the board and class.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nFront-of-room classroom view with Jenny at the teaching front and the chalkboard / blackboard readable in the same frame.\nStudent desks and classroom furnishing recede behind her, establishing a calm waiting audience without crowding the foreground.\nCamera is inside the room on the shared front-of-room axis, looking toward Jenny and the board.\nLeave a clear corridor in front of Jenny for the read-aloud performance space and small posture change.\nKeep the board, worksheet, and Jenny’s full body readable together in one uninterrupted wide composition.\n\n[Negative Space]\nHold open space frame-right for the classroom’s listening depth and the teacher’s offscreen vocal presence.\nReserve clear empty space above and beside Jenny for the readable board content.\nKeep the foreground uncluttered so the worksheet and her tightened hands remain visible.\nLeave room around her shoulders and torso so the later inward shrink can read cleanly.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nNatural-perspective wide lens feel, slightly withheld and observational, with the camera steady at student eye level and only a very gentle inward readiness implied for the later emotional tightening; no aggressive perspective or heroic angle.\n\n[Light]\nNeutral, slightly cool classroom daylight with soft even fill, no decorative contrast spikes; foreground Jenny reads crisply against a legible board and softly present room depth, keeping social space clear and emotionally ordinary.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nMaintain exact approved cast in frame: Jenny only in this opening frame.\nDo not crop the board or Jenny’s body; keep both legible in one wide geometry.\nKeep camera height at student eye level and the atmosphere calm, not dramatic.\nPreserve a simple, honest starting pose that supports later embarrassment without pre-performing it.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
+     "promptHash": "8c51b1a438935dd303262b389b2eb504527b8bf5153400af7456c79903dfec96",
+     "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+     "provider": "seedream",
+     "providerModelId": "dola-seedream-5-0-pro-260628",
+     "modelVersion": "dola-seedream-5-0-pro-260628",
+     "directionContract": {
+      "canonicalStyleVersion": "v1.0.0",
+      "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+      "lightingAndDepth": "Neutral, slightly cool classroom daylight with soft even fill, no decorative contrast spikes; foreground Jenny reads crisply against a legible board and softly present room depth, keeping social space clear and emotionally ordinary.",
+      "geography": [
+       "Front-of-room classroom view with Jenny at the teaching front and the chalkboard / blackboard readable in the same frame.",
+       "Student desks and classroom furnishing recede behind her, establishing a calm waiting audience without crowding the foreground.",
+       "Camera is inside the room on the shared front-of-room axis, looking toward Jenny and the board.",
+       "Leave a clear corridor in front of Jenny for the read-aloud performance space and small posture change.",
+       "Keep the board, worksheet, and Jenny’s full body readable together in one uninterrupted wide composition."
+      ],
+      "charactersInFrame": [
+       "Jenny"
+      ],
+      "emptySections": []
+     },
+     "contractHash": "710f62d64c1b460ba3c22f7444ec4d43b2351595337957966f9a0bf3d106b16f"
+    },
+    "geometryScreening": {
+     "status": "fail",
+     "reason": "one or more subjects drifted outside authored position or size tolerances",
+     "candidateSize": [
+      2816,
+      1584
+     ],
+     "positionTolerance": 0.12,
+     "heightScaleTolerance": [
+      0.75,
+      1.25
+     ],
+     "matches": [
+      {
+       "character": "Jenny",
+       "passed": false,
+       "positionDelta": 0.0698,
+       "heightScaleAgainstLayout": 2.0622,
+       "expectedCenter": [
+        0.42,
+        0.62
+       ],
+       "actualCenter": [
+        0.478,
+        0.5811
+       ],
+       "expectedHeightFraction": 0.4062,
+       "actualHeightFraction": 0.8378,
+       "detectedBoundsPx": [
+        958,
+        257,
+        1734,
+        1584
+       ]
+      }
+     ],
+     "detectedComponentCount": 1,
+     "method": "local-u2net-foreground-geometry-v1",
+     "zeroSpend": true,
+     "providerCalled": false
+    },
+    "conformanceScreening": {
+     "status": "fail",
+     "reason": "The frame contains only Jenny, but the opening composition and action do not match the contract: she is centered-right rather than at the specified front/center-left placement, she is not clearly oriented toward the board/class, and she holds a booklet rather than a worksheet open in both hands. The classroom board is present and there is no extra cast or visible watermark/text conflict.",
+     "checkedAt": "2026-09-02T23:16:10",
+     "screenVersion": 2,
+     "validatorModel": "gpt-5.4-mini",
+     "mediaProviderCalled": false,
+     "referenceHashes": {
+      "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+      "Ep1_S1_plate_candidate_d877908f.png": "d4da1bac6f358c4cff14b847afb3c82b1a788fc063b9830ca20909a63ec7750b"
+     },
+     "candidateSha256": "5d77da2e36b44cee60836be81bb007d6c78d73a68d2822cea8a4f276cccdac2e",
+     "review": {
+      "verdict": "block",
+      "expectedCharacters": [
+       "Jenny"
+      ],
+      "detectedCharacters": [
+       "Jenny"
+      ],
+      "expectedSubjectCount": 1,
+      "subjectCount": 1,
+      "summary": "The frame contains only Jenny, but the opening composition and action do not match the contract: she is centered-right rather than at the specified front/center-left placement, she is not clearly oriented toward the board/class, and she holds a booklet rather than a worksheet open in both hands. The classroom board is present and there is no extra cast or visible watermark/text conflict.",
+      "identityAndDistinguishability": {
+       "score": 2,
+       "visibleEvidence": "Jenny matches the reference well: same child character, dark brown side-parted ponytail, large eyes, maroon cardigan, white collar, green striped tie, gray skirt, socks and dark shoes.",
+       "correction": "Keep Jenny’s reference identity unchanged."
+      },
+      "relativeScaleAndGeography": {
+       "score": 1,
+       "visibleEvidence": "Jenny is correctly the only subject, but her placement is off-contract: she stands near center-right, not near center-left/front at the specified screen geography, and her apparent scale reads smaller than the requested reference framing.",
+       "correction": "Move Jenny to the front-left/center-left placement with the authored 0.42 width fraction and keep the board clearly behind her."
+      },
+      "anatomyAndSilhouette": {
+       "score": 2,
+       "visibleEvidence": "Figure anatomy and silhouette are readable and intact; proportions look stable and the single-subject outline is clear.",
+       "correction": "No change needed to anatomy or silhouette."
+      },
+      "actionReadyComposition": {
+       "score": 1,
+       "visibleEvidence": "The frame is clean and classroom readable, but Jenny is not posed as a careful read-aloud start with the worksheet open in both hands toward the board/class; she instead appears to be calmly holding a booklet at chest height.",
+       "correction": "Pose Jenny standing at the front, facing the board and class, with the worksheet open in both hands as if ready to begin the read-aloud."
+      },
+      "forbiddenContent": {
+       "score": 2,
+       "visibleEvidence": "No extra character, no obvious logo, watermark, or on-screen text conflict is visible.",
+       "correction": "No change needed for forbidden content."
+      },
+      "recommendedCorrection": "Keep Jenny’s reference design and the clean classroom, but reposition her to the front-left/center-left, facing the board and class, and change the prop/pose so she holds the worksheet open in both hands in a poised read-aloud start."
+     }
+    },
+    "packageRevision": 3,
+    "contentHash": "5d77da2e36b44cee60836be81bb007d6c78d73a68d2822cea8a4f276cccdac2e",
+    "outcome": "rejected",
+    "rejectedAt": "2026-09-02T23:30:09",
+    "reason": "Replaced by Julian own signed-off reference frame for this beat. The generated candidate inherited the wrong-world cardboard plate; the correct naturalistic classroom plate is now approved and this keyframe is his own image, uploaded at no generation cost.",
+    "reviewedBy": "Julian",
+    "rejectedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_A_30baaccb.png",
+    "abCandidates": [
+     {
+      "candidateId": "A",
+      "provider": "byteplus",
+      "model": "dola-seedream-5-0-pro-260628",
+      "rejectedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_A_30baaccb.png"
+     },
+     {
+      "candidateId": "B",
+      "provider": "google",
+      "model": "gemini-3.1-flash-image",
+      "rejectedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_B_fc9055e1.png"
+     }
+    ],
+    "archivedSidecars": [
+     "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_A_30baaccb.png.gen.json",
+     "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_rejected\\Ep1_S1.SH01_keyframe_20260902T233009\\Ep1_S1.SH01_keyframe_B_fc9055e1.png.gen.json"
+    ],
+    "contentHashAtGeneration": true
+   },
+   "keyframeApproval": {
+    "approved": true,
+    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_candidate_05a16f04.png",
+    "at": "2026-09-02T23:30:48",
+    "reviewedBy": "Julian",
+    "source": "uploaded",
+    "inputSignature": {
+     "cardHash": "c95f4956cb826e8e8d821d2b790bf83f4d122697a0ba4bce16c5a6eb060c7973",
+     "canonProfileDigest": "70fef16686e6acd6d212f116cc67acc55f4bd6d54651b962552b628689f55e41",
+     "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
+     "selectedAssetHash": "ce2288911ff3de221e95a293a68e8949",
+     "source": "uploaded"
+    },
+    "promptContract": null,
+    "abTest": null,
+    "packageRevision": 3,
+    "contentHash": "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
+    "conformanceScreening": {
+     "status": "fail",
+     "reason": "Single subject and classroom geography are present, but the keyframe fails identity-specific and pose-specific compliance: Jenny is present yet not matching the authoritative turnaround exactly in expression/posture for this opening read-aloud, and she is holding the worksheet close rather than clearly loosely gathered and ready to read. No forbidden extra cast or text/logo issues are visible.",
+     "checkedAt": "2026-09-02T23:30:21",
+     "screenVersion": 2,
+     "validatorModel": "gpt-5.4-mini",
+     "mediaProviderCalled": false,
+     "referenceHashes": {
+      "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+      "Ep1_S1_plate_candidate_2520e4b3.png": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
+     },
+     "candidateSha256": "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
+     "review": {
+      "verdict": "revise",
+      "expectedCharacters": [
+       "Jenny"
+      ],
+      "detectedCharacters": [
+       "Jenny"
+      ],
+      "expectedSubjectCount": 1,
+      "subjectCount": 1,
+      "summary": "Single subject and classroom geography are present, but the keyframe fails identity-specific and pose-specific compliance: Jenny is present yet not matching the authoritative turnaround exactly in expression/posture for this opening read-aloud, and she is holding the worksheet close rather than clearly loosely gathered and ready to read. No forbidden extra cast or text/logo issues are visible.",
+      "identityAndDistinguishability": {
+       "score": 1,
+       "visibleEvidence": "One girl matching Jenny’s general school uniform, brown hair in a side ponytail, and childlike proportions is centered in the classroom. However, the face is more downcast and inward than the reference set, and the specific ashamed/thinking/open front cues are not cleanly aligned to the canonical turnaround view.",
+       "correction": "Adjust Jenny to match the reference identity more tightly, especially facial structure, eye shape, and the more neutral/thoughtful schoolgirl expression from the turnaround."
+      },
+      "relativeScaleAndGeography": {
+       "score": 2,
+       "visibleEvidence": "Jenny stands alone at the front of the classroom at the expected general scale, with the chalkboard behind her and the class-facing geography intact. No extra subjects are present.",
+       "correction": "No change needed for subject count or overall classroom placement."
+      },
+      "anatomyAndSilhouette": {
+       "score": 2,
+       "visibleEvidence": "Jenny’s anatomy is readable and stable: full body visible, clear limbs, consistent skirt/legs/shoes silhouette, no obvious extra limbs or broken body geometry.",
+       "correction": "No change needed unless finer identity cleanup is desired."
+      },
+      "actionReadyComposition": {
+       "score": 1,
+       "visibleEvidence": "She is standing in front of the board holding the worksheet with both hands, but it is held more tightly and closer to the torso than the contract’s loose, ready-to-read posture. The pose reads hesitant rather than performance-ready.",
+       "correction": "Open Jenny’s posture slightly and hold the worksheet lower/looser in both hands so she reads as ready to begin the class read-aloud."
+      },
+      "forbiddenContent": {
+       "score": 2,
+       "visibleEvidence": "No duplicate subjects, watermark, logo, or unrelated forbidden props are visible.",
+       "correction": "No change needed."
+      },
+      "recommendedCorrection": "Keep the same classroom framing and single Jenny, but loosen her worksheet hold, open her posture slightly, and nudge her face/expression closer to the canonical Jenny reference so she reads as the intended embarrassed-thoughtful schoolgirl at the front of class."
+     }
+    },
+    "conformanceAdvisoryDecision": {
+     "acceptedBy": "Julian",
+     "acceptedAt": "2026-09-02T23:30:48",
+     "statusAtDecision": "fail",
+     "reasonAtDecision": "Single subject and classroom geography are present, but the keyframe fails identity-specific and pose-specific compliance: Jenny is present yet not matching the authoritative turnaround exactly in expression/posture for this opening read-aloud, and she is holding the worksheet close rather than clearly loosely gathered and ready to read. No forbidden extra cast or text/logo issues are visible."
+    }
+   },
+   "keyframePath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_candidate_05a16f04.png"
   },
   {
    "shotId": "S1.SH02",

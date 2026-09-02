@@ -85,11 +85,36 @@ if (-not (Test-Path -LiteralPath $python) -or ($requirementsBefore -ne $requirem
     Say ".venv unchanged (requirements identical)"
 }
 
-# 4. prove the checkout can run
+# 4. prove the checkout can run — real symlinks need Developer Mode (or admin) on Windows.
 Say "Checking compatibility links"
 & $python "tools\check_links.py" | Out-Host
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Symlinks are not real on this checkout. Enable Developer Mode (Settings > For developers), then re-run this script." -ForegroundColor Yellow
+    Say "Symlinks are not real yet — switching Developer Mode on (Windows will ask for permission once: click Yes)"
+    $reg = 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'
+    $cmd = "reg add `"$reg`" /v AllowDevelopmentWithoutDevLicense /t REG_DWORD /d 1 /f"
+    try {
+        Start-Process -FilePath "powershell.exe" -Verb RunAs -Wait -ArgumentList "-NoProfile", "-Command", $cmd
+    } catch {
+        Write-Host "Could not switch Developer Mode on (permission refused). Turn it on yourself: Settings > For developers > Developer Mode, then run this script again." -ForegroundColor Yellow
+    }
+    # re-create the links now that the permission exists: remove the text-file stand-ins, check out again
+    $links = @("shows", "cb-output", "engine\config", "cb-studio\data\scripts",
+               "CRYSTAL_BEARS_LOCKED_CANON.md", "CRYSTAL_BEARS_STUDIO_BIBLE.md", "EP1_GATE1_STORYBOARD.md",
+               "projects\crystal-bears\assets",
+               "skills\crystal-bears-writer\SKILL.md", "skills\crystal-bears-director\SKILL.md",
+               "skills\crystal-bears-cinematographer\SKILL.md", "skills\crystal-bears-voice-director\SKILL.md",
+               "skills\crystal-bears-composer\SKILL.md", "skills\crystal-bears-continuity\SKILL.md",
+               "skills\crystal-bears-post\SKILL.md", "skills\seedance-production-director\SKILL.md")
+    foreach ($l in $links) {
+        if ((Test-Path -LiteralPath $l) -and -not ((Get-Item -LiteralPath $l -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            if (Test-Path -LiteralPath $l -PathType Container) { Remove-Item -LiteralPath $l -Recurse -Force } else { Remove-Item -LiteralPath $l -Force }
+        }
+    }
+    git checkout -- . | Out-Host
+    & $python "tools\check_links.py" | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "The links are still not real. Log out and back in (Developer Mode takes effect at sign-in), then run this script again." -ForegroundColor Yellow
+    }
 }
 
 $after = (git rev-parse --short HEAD).Trim()

@@ -630,7 +630,7 @@
    "title": "Forest path countdown and Keen reassurance",
    "durationSec": 30.0,
    "purpose": "Bo and Keen turn the tail puff into a shared countdown game, then Bo’s confidence falters when the Learning Circle becomes real. Keen gives the simple reassurance that meeting new people can still be good.",
-   "visualPayoff": "Bo’s tail puffs on the shared countdown, his smile drops at the Learning Circle sound, and Keen steadies him without forcing the next step.",
+   "visualPayoff": "Bo’s tail starts small and normal, stays normal through each shared “3, 2,” then blooms into the big rounded puff exactly on each “1.” After each puff it settles back to normal; when Bo and Keen sit on the fallen log, the tail is normal again.",
    "sourceType": "opener",
    "sourceShotId": null,
    "location": "FOREST PATH",
@@ -643,7 +643,7 @@
    "emotionalIntent": "Playful courage becomes exposed worry, then settles into gentle support.",
    "kidRead": "Bo and Keen make the poofy tail a game, then Bo gets worried again and Keen helps him.",
    "adultRead": "A child uses play to manage embarrassment, then needs a friend to hold the feeling when the social moment becomes real.",
-   "action": "A winding path through the Whispering Woods. Sunlight flickers through the leaves. Bo walks beside Keen with careful new confidence. Keen and Bo count down together three times; each time they reach one, Bo’s tail puffs up, then settles back down. The third puff makes Bo giggle, but the sound of the Learning Circle nearby stops him. He grips his satchel and sits on a fallen log. Keen sits beside him, gives him space, and gently says it can be hard to meet new people but good to make new friends.",
+   "action": "A winding path through the Whispering Woods. Sunlight flickers through the leaves. Bo walks beside Keen with careful new confidence. Keen and Bo count down together three times. Tail timing is exact: on each “3” and “2” Bo’s tail is small and normal; on each “1” it blooms into the big rounded puff like the approved reference, then settles back down to normal before the next count. The third puff makes Bo giggle, then it returns to normal before the Learning Circle sound stops him. He grips his satchel and sits on a fallen log with his tail normal. Keen sits beside him, gives him space, and gently says it can be hard to meet new people but good to make new friends.",
    "dialogueLines": [
     {
      "speaker": "Bo/Keen",
@@ -1487,7 +1487,7 @@
        "composition": "Wide 16:9 opening frame on the Crystal Woods path. Bo and Keen are mid-ground, full bodies visible, walking frame-right with room ahead of them and no third character yet in frame.",
        "lensAndCameraRelationship": "Gentle child-height camera, medium-wide lens, no compression that crops tails, feet, or ears. The path leads into depth and keeps both bears readable against the approved scene plate.",
        "lightingAndDepth": "Warm dappled woods light from the approved plate, soft foreground crystals and deep forest layers. Character silhouettes remain clear and not swallowed by foliage.",
-       "geography": "A winding path through the Whispering Woods. Sunlight flickers through the leaves. Bo walks beside Keen with careful new confidence. Keen and Bo count down together three times; each time they reach one, Bo’s tail puffs up, then settles back down. The third puff makes Bo giggle, but the sound of the Learning Circle nearby stops him. He grips his satchel and sits on a fallen log. Keen sits beside him, gives him space, and gently says it can be hard to meet new people but good to make new friends.",
+       "geography": "A winding path through the Whispering Woods. Sunlight flickers through the leaves. Bo walks beside Keen with careful new confidence. Keen and Bo count down together three times. Tail timing is exact: on each “3” and “2” Bo’s tail is small and normal; on each “1” it blooms into the big rounded puff like the approved reference, then settles back down to normal before the next count. The third puff makes Bo giggle, then it returns to normal before the Learning Circle sound stops him. He grips his satchel and sits on a fallen log with his tail normal. Keen sits beside him, gives him space, and gently says it can be hard to meet new people but good to make new friends.",
        "charactersInFrame": [
         "Bo",
         "Keen"
@@ -1534,7 +1534,8 @@
        "continuityProtections": [
         "Do not place Aida in the opening keyframe.",
         "Do not crop Keen vertically or crop Bo’s tail during the countdown setup.",
-        "Bo’s tail begins small; the puff is an animated action on the count, not the opening resting state."
+        "Bo’s tail begins small and normal; it must puff only on each spoken “1,” never on “3” or “2.”",
+        "After every puff, Bo’s tail settles back to normal before the next count; when Bo and Keen sit down, the tail is normal again."
        ],
        "providerPrompt": "[Opening Stage]\nCreate a playable 16:9 opening for S4.SH1; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nBo and Keen brace themselves on the forest path; Bo is anxious but trying, and Keen gives him steady space before Aida enters later.\n\n[References]\n- Project-stable slots: @图1=Keen; @图2=Bo; @图3=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Keen; @图2=one Bo; views are angles, not extra characters.\n- @图1: Keen's complete, uncropped 360 turnaround is the 100% identity authority. Match Keen exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Bo's complete, uncropped 360 turnaround is the 100% identity authority. Match Bo exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Keen and Bo distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Bo\n- Keen\n\n[Frame]\n- Bo @ middle-centre area; small cautious walking pose; tail starts small and settled; full body visible; facing three-quarter frame-right toward the path.\n- Keen @ middle-centre area; calm supportive walking pose, watching Bo without crowding him; full body visible; facing three-quarter frame-right beside Bo.\n- Same depth: Bo 30 inches; Keen 57 inches; preserve relative-size truth only.\n\n[Geography]\nScene 4 starts on the forest path in the Crystal Woods, before the Learning Circle is reached.\nBo and Keen move together along the path; Aida is not in the opening frame and enters later in the same shot.\nThe approved S4 scene plate is the environmental anchor for trees, crystals, path direction, light and depth.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nKeep a clear entrance lane on the right side of the path for Aida later in the shot.\nLeave overhead and tail clearance so Bo’s tail can puff on the countdown without cropping.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nGentle child-height camera, medium-wide lens, no compression that crops tails, feet, or ears. The path leads into depth and keeps both bears readable against the approved scene plate.\n\n[Light]\nWarm dappled woods light from the approved plate, soft foreground crystals and deep forest layers. Character silhouettes remain clear and not swallowed by foliage.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Bo and one Keen appear in this image.\nKeep Bo and Keen at the same distance from the camera; Keen appears about 90% taller than Bo.\nDo not place Aida in the opening keyframe.\nDo not crop Keen vertically or crop Bo’s tail during the countdown setup.\nBo’s tail begins small; the puff is an animated action on the count, not the opening resting state.\nNatural staging lock: restage Bo, Keen from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Bo, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
        "splitCarryForward": {
@@ -1554,7 +1555,7 @@
         "dp": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
        },
        "canonProfileDigest": "afcb7bafde3200c05afd876becdd08f8db82503dba1c4a9aea158cfa4cb19045",
-       "shotContractHash": "2f02aa7d974825d08801d01d1b8a0a6697d5b66e91258633674a72dfcb1ea82e",
+       "shotContractHash": "02db73f56cbe07aa0e1cfb21fb26625861e47f7ece28ce0bd7c6d95812df80a2",
        "sceneLookHash": "5c93cd0d742b371e26f40ab5455d637d10ecc22d58accc200302723242d1ace9",
        "references": [
         {
@@ -1588,6 +1589,11 @@
        "fromSec": 30.0,
        "newDurationSec": 30.0,
        "reason": "Approved direction carried across timing-only retime"
+      },
+      "packageRevision": 2,
+      "tailTimingCarryForward": {
+       "at": "2026-09-02T13:05:51",
+       "reason": "Human-directed S4.SH1 animation contract: tail stays normal on 3 and 2, puffs only on 1, then returns to normal before sitting."
       }
      },
      "candidate": null,

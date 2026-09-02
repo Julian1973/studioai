@@ -3,7 +3,11 @@ $env:PYTHONUTF8 = "1"
 
 $studioRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $python = Join-Path $studioRoot ".venv\Scripts\python.exe"
+# credentials: api.rtf beside the studio folder, or inside it, or beside the original OneDrive copy
 $apiFile = Join-Path (Split-Path -Parent $studioRoot) "api.rtf"
+foreach ($candidate in @((Join-Path (Split-Path -Parent $studioRoot) "api.rtf"), (Join-Path $studioRoot "api.rtf"), (Join-Path $env:USERPROFILE "OneDrive\Desktop\api.rtf"), (Join-Path $env:USERPROFILE "Desktop\api.rtf"))) {
+    if (Test-Path -LiteralPath $candidate) { $apiFile = $candidate; break }
+}
 
 if (-not (Test-Path -LiteralPath $python)) {
     throw "Windows environment missing. Build .venv before starting the studio."

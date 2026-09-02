@@ -47,6 +47,16 @@ if (-not $isAdmin -and -not $devMode) {
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Fail "git is not installed or not on PATH." }
 
+# 0b. stop any running studio FIRST (2026-09-02). Updating underneath a live server made it reload
+#     itself mid-update and the browser then said "Can't reach the studio server". The updater now
+#     owns the whole cycle: stop -> update -> start -> open the browser.
+$running = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like "*serve.py*" }
+if ($running) {
+    Say ("Stopping the running studio (" + @($running).Count + " process(es))")
+    foreach ($p in $running) { try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop } catch {} }
+    Start-Sleep -Seconds 2
+}
+
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-not (Test-Path -LiteralPath (Join-Path $scriptRoot ".git"))) { Fail "This folder is not a git checkout: $scriptRoot" }
 $bundle = Join-Path $scriptRoot "studio-update.bundle"
@@ -375,4 +385,27 @@ Say $subject
 Say ("The studio now lives at: " + $studioRoot)
 if ($dirty -gt 0) { Say "Your edited files are safe in git stash (git stash list)." }
 if ($aside) { Say ("Your new local files are in " + $aside) }
+
+# 6. start the studio again and open the Productions page (the stop happened in step 0b)
+$startCmd = Join-Path $studioRoot "start-studio.cmd"
+if (Test-Path -LiteralPath $startCmd) {
+    Say "Starting the studio..."
+    Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", ('"' + $startCmd + '"')) -WorkingDirectory $studioRoot
+    $ready = $false
+    for ($i = 0; $i -lt 60 -and -not $ready; $i++) {
+        Start-Sleep -Seconds 2
+        try {
+            $r = Invoke-WebRequest -Uri "http://127.0.0.1:8765/api/health" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
+            if ($r.StatusCode -eq 200) { $ready = $true }
+        } catch {
+            try { $null = (New-Object Net.Sockets.TcpClient).Connect("127.0.0.1", 8765); $ready = $true } catch {}
+        }
+    }
+    if ($ready) {
+        Say "The studio is up - opening it in your browser"
+        Start-Process "http://127.0.0.1:8765/cb-studio/app.html"
+    } else {
+        Warn "The studio has not answered yet - look at the 'AI Studio' window for its message, then open http://127.0.0.1:8765/cb-studio/app.html"
+    }
+}
 Read-Host "Done. Press Enter to close"

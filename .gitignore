@@ -100,3 +100,7 @@ __pycache__/
 
 # hand-delivered update bundle (a delivery artifact, never source)
 studio-update.bundle
+
+# the studio's local browser-session secret (per machine, never source)
+cb-studio/data/.studio_session_secret
+cb-studio/data/.studio_session_secret.*.tmp

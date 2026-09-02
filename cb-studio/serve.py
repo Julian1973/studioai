@@ -122,7 +122,11 @@ def _load_or_create_session_token():
     to the current user, and allow an explicit path override for isolated tests.
     """
     configured = os.environ.get("CB_STUDIO_SESSION_SECRET_FILE", "").strip()
-    path = pathlib.Path(configured) if configured else OUT / "state" / ".studio_session_secret"
+    # The secret belongs to the STUDIO, not to a project: it used to live under the active project's
+    # own output folder, so switching productions (T59 re-exec) minted a new secret and every open tab
+    # was logged out with "Studio launch authentication required" (found on the PC, 2026-09-02).
+    path = (pathlib.Path(configured) if configured
+            else pathlib.Path(__file__).resolve().parent / "data" / ".studio_session_secret")
     path.parent.mkdir(parents=True, exist_ok=True)
     try:
         token = path.read_text(encoding="utf-8").strip()
@@ -134,6 +138,19 @@ def _load_or_create_session_token():
             return token
     except OSError:
         pass
+    # adopt the secret an earlier release stored under this project's output, so the tabs that were
+    # signed in before this change stay signed in
+    try:
+        legacy = (OUT / "state" / ".studio_session_secret").read_text(encoding="utf-8").strip()
+    except OSError:
+        legacy = ""
+    if len(legacy) >= 32:
+        try:
+            path.write_text(legacy + "\n", encoding="utf-8")
+            path.chmod(0o600)
+        except OSError:
+            pass
+        return legacy
     token = secrets.token_urlsafe(32)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp")
     fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)

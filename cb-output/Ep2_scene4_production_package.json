@@ -3580,13 +3580,197 @@
    "keyframeCandidates": [],
    "selectedKeyframeCandidateId": null,
    "voicePlacementFailure": null,
-   "voPath": null,
-   "voGeneratedFrom": null,
-   "voRawPath": null,
-   "voTimingPath": null,
-   "voPlacementPath": null,
-   "voInputSignature": null,
-   "voPackageRevision": null,
+   "voPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_c38de406.wav",
+   "voGeneratedFrom": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:cdb317a25385630e547e92338611ed7d5ce8a57cb3ddbae08456993f03f20f6b",
+     "sourceEventId": "script-event:sha256:7f85f6bcc4e7c2aafc70175cacd5c6fdee412154dc03d016200835992058953c",
+     "speaker": "Bo/Keen",
+     "text": "3, 2, 1…",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Opening silence: Bo and Keen are walking; Bo is working up courage.",
+     "compiledHash": "6087dd0e772ce33b14f92e7b9b1019916bc5a67fbe394d18e079cd33d07a160a",
+     "recipeId": "shared-countdown-1",
+     "voiceTreatment": "group_chorus",
+     "chorusMembers": [
+      "Bo",
+      "Keen"
+     ],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB",
+      "TCRj5m2u9xhZHJ8h9pMv"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:908d40a0a5cf7a51c94e74b63f2ab20d4175e81c4ff86ceed4f6fdc6f78088d1",
+     "sourceEventId": "script-event:sha256:1402b19e4ef3d73d5a5c0b113adaeb19b2b5fc8da7322387f27855102ee83c14",
+     "speaker": "Bo/Keen",
+     "text": "3, 2, 1…",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Bo/Keen: 3, 2, 1…",
+     "compiledHash": "d0af6b35aa127424bf29d1a7d02b2beeae43e91315b62c4d1163d756c0a8b3ce",
+     "recipeId": "shared-countdown-2",
+     "voiceTreatment": "group_chorus",
+     "chorusMembers": [
+      "Bo",
+      "Keen"
+     ],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB",
+      "TCRj5m2u9xhZHJ8h9pMv"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:8733f5d233eadb00f1cfb76a298766c8508e8922f1168f49519bb04ed63b7838",
+     "sourceEventId": "script-event:sha256:557e9735ec2b44746ae48f26d3bf8b190c03ede80654f42e3c20b6acd1451a97",
+     "speaker": "Bo/Keen",
+     "text": "3, 2, 1…",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Bo/Keen: 3, 2, 1…",
+     "compiledHash": "6a76284f99f3a8648be643bd9f992ccc2e3a8c54a2699f7dc9843aa22a43b144",
+     "recipeId": "shared-countdown-3",
+     "voiceTreatment": "group_chorus",
+     "chorusMembers": [
+      "Bo",
+      "Keen"
+     ],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB",
+      "TCRj5m2u9xhZHJ8h9pMv"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:1db3bc020bae81be1284784eb3c36825f95d09bd1b5c9d452cc0a243ddc592fe",
+     "sourceEventId": "script-event:sha256:1adc1d5f8027a7f6407b9f8d3f3e912d31a95e5671f2e7a75cd684123eaffc40",
+     "speaker": "Bo",
+     "text": "I’m STILL worried about going to the Learning Circle.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Bo: 3, 2, 1…",
+     "compiledHash": "45f0454a6da7c473e9b817edf372c91c0f0586c91372ff80fbb5dae863de46c4",
+     "recipeId": "bo-worry-learning-circle",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:55960bd73a0a35d56856878f1e367d7c2c1a3c5801ca2584473e852edc394b55",
+     "sourceEventId": "script-event:sha256:1fde90a5212c908bace6ae111f5ca9cfee8c4ac81e6959cb1447f5a0ef752018",
+     "speaker": "Bo",
+     "text": "They all know each other.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Bo: I’m STILL worried about going to the Learning Circle.",
+     "compiledHash": "251b4cbf27e8c79cf7bccd971076ba3d2151b2725d2e8591594a571c7f794520",
+     "recipeId": "bo-they-know-each-other",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbefd5d7ce5d0e894423f8329ed297cd9449708d8787af7eb72f59e87340b4ec",
+     "sourceEventId": "script-event:sha256:6b05ff9daa7d6497719f1bfc9c94e0dd7103a3724c21bd1ba701ce8a0fdfc448",
+     "speaker": "Bo",
+     "text": "But I don’t know them, and they don’t know me.",
+     "voiceId": "AAF2q3NCwTrLMMkEnRLB",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Bo: They all know each other.",
+     "compiledHash": "e0fca91f8e916752848c2deef715256d7c13eba2c3a2fb5a6908fd0eabf1afac",
+     "recipeId": "bo-i-dont-know-them",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "AAF2q3NCwTrLMMkEnRLB"
+     ]
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:88af7403633caf51d133b77a69c5128ce30a796bf23e90947b462f7ebdad8a06",
+     "sourceEventId": "script-event:sha256:3c7ee893f53d80a390325b76a6d70542375749e6568087dc2e92fb70c3f19e43",
+     "speaker": "Keen",
+     "text": "It can be hard to meet new people, but it’s good to make new friends.",
+     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+     "modelId": "eleven_v3",
+     "voiceSettings": {
+      "stability": 0.4,
+      "similarity_boost": 0.9,
+      "style": 0.2
+     },
+     "previousText": "Bo: But I don’t know them, and they don’t know me.",
+     "compiledHash": "dcde5961d0a9a54a8243c1a3a2c936f0b2c6ec53cc63839e447ba050c341e717",
+     "recipeId": "keen-new-friends",
+     "voiceTreatment": "single_voice",
+     "chorusMembers": [],
+     "voiceIds": [
+      "TCRj5m2u9xhZHJ8h9pMv"
+     ]
+    }
+   ],
+   "voRawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_c38de406_chorus.mp3",
+   "voTimingPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_c38de406_chorus.mp3.dialogue.json",
+   "voPlacementPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_c38de406.wav.timing.json",
+   "voInputSignature": {
+    "canonProfileDigest": "09d0e5fe98a2d972756d54eed38527e95cf207770a010548591733c0282433a5",
+    "dialogueHash": "673b502100e31b55b8a0d0269272c31524ebddee9bb73690241fc0887746ce75",
+    "performanceHash": "9518721fdd507f75cc1177438091102bd8e8843d02365c1618b0ceda2b832ad3",
+    "voiceCardsHash": "eb091fe1d723e2d81b1cc09c93fde063d25e853cbf1a7ce4c3e5e9e47c766147",
+    "voiceRegistersHash": "2852bee052eff12741eab878545e15afb90b645814cf74d899c234f65e26f463",
+    "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+    "voiceCompilerVersion": "voice-director-v1",
+    "pronunciationOverrides": {
+     "Aida": "ada",
+     "Ada": "ada"
+    },
+    "voiceIds": [
+     "AAF2q3NCwTrLMMkEnRLB",
+     "TCRj5m2u9xhZHJ8h9pMv",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "TCRj5m2u9xhZHJ8h9pMv",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "TCRj5m2u9xhZHJ8h9pMv",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "AAF2q3NCwTrLMMkEnRLB",
+     "TCRj5m2u9xhZHJ8h9pMv"
+    ]
+   },
+   "voPackageRevision": 2,
    "voicePrevious": {
     "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_candidate_732fdefb.wav",
     "rawPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep2_S4.SH1_vo_raw_candidate_8e0bdcab_chorus.mp3",

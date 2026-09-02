@@ -5498,7 +5498,8 @@ async function openDisclosureModal(kind,ctx){
     confirmLabel="Build keyframe";
     confirm=()=>{closeM();shRun('build-keyframe',ctx.shotId);};
   } else if(kind=="voice"){
-    const inp=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.shots&&SH_PREFLIGHT.productionInputs.shots[ctx.shotId];
+    const inp=(SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.shots&&SH_PREFLIGHT.productionInputs.shots[ctx.shotId])
+      || currentProductionDirection("voice",ctx.shotId);
     if(!inp||!inp.voiceLines){alert("Voice direction is still being prepared.");return;}
     title="Final confirmation · generate voice";
     rows=[["Model","ElevenLabs (V3 dialogue)"],["Shot",ctx.shotId],["Performance",inp.voiceLines.map(x=>x.speaker+": "+x.performedText).join("\n")],

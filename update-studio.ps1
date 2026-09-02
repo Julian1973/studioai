@@ -79,6 +79,11 @@ if ($untracked.Count -gt 0) {
 
 # 2. real symlinks - the studio refuses to start without them (tools/check_links.py)
 git config core.symlinks true
+# OneDrive refuses to let git delete its own folders; git's automatic repack/prune would ask "try
+# again? (y/n)" for every one of them. Switch the housekeeping off for this checkout.
+git config gc.auto 0
+git config gc.autoDetach false
+git config fetch.prune false
 $requirementsBefore = ""
 if (Test-Path -LiteralPath "requirements.txt") { $requirementsBefore = (Get-FileHash requirements.txt).Hash }
 

@@ -999,13 +999,18 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                            "Selecting a candidate does not approve it.")
                 primary = None
                 decisions = []
-            elif _ai_creative_review(package_ledger, phase)["available"]:
+            else:
+                # The human decision is the authority (CLAUDE.md: the AI Director reviews and
+                # recommends, it cannot approve). Accept / Iterate are offered as soon as a
+                # candidate is selected; the AI review stays available as an optional opinion.
+                # Before 2026-09-03 Accept only appeared AFTER the AI review had run, so a
+                # freshly selected candidate answered "That action is no longer current".
                 decisions = [
                     _action("accept-keyframe", "Accept"),
                     _action("iterate-keyframe", "Iterate", destructive=True),
                 ]
-            else:
-                primary = _action("run-ai-review", "Run AI Director review")
+                if not _ai_creative_review(package_ledger, phase)["available"]:
+                    primary = _action("run-ai-review", "Run AI Director review (optional)")
         elif not keyframe_ready:
             phase = "keyframe"
             status = "ready_to_fire"

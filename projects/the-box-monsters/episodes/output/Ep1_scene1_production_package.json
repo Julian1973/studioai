@@ -2551,440 +2551,210 @@
       }
      },
      "history": []
-    }
-   },
-   "keyframeCandidates": [
-    {
-     "candidateId": "A",
-     "label": "A - Seedream 5 Pro",
-     "provider": "byteplus",
-     "model": "dola-seedream-5-0-pro-260628",
-     "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_A_12dfacce.png",
-     "generatedAt": "2026-09-03T08:14:06",
-     "source": "generated",
-     "inputSignature": {
-      "cardHash": "c95f4956cb826e8e8d821d2b790bf83f4d122697a0ba4bce16c5a6eb060c7973",
-      "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
-      "referenceHashes": {
-       "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
-       "Ep1_S1_plate_candidate_2520e4b3.png": "dacedbb2f75ecf5dba93d557c529b7ae"
-      },
-      "briefHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
-      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
-      "canonProfileDigest": "2fbbae15f42679f3af1ac68936bf7173a0eca39bfaa45993837ae9fe2df9e824"
-     },
-     "promptContract": {
-      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S1.SH01; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA calm wide classroom opening that lets Jenny’s public reading pressure read in one clean geometry: the board stays legible, the room stays quiet, and the frame is held with enough restraint that her small hesitation can carry the embarrassment beat without extra staging.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ middle-centre area; standing at the front with the worksheet held ready in both hands, calm but slightly braced before speaking; facing toward the board and class.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nFront-of-room classroom axis facing the chalkboard.\nJenny stands at the front-center area with clear walking and speaking space around her.\nThe blackboard remains readable in the same frame as Jenny.\nDesks and chairs occupy the lower and side foregrounds as quiet audience space.\nWindows run along one side of the room and provide soft daylight.\nTeacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame.\nKeep an unobstructed corridor between Jenny and the board for the reading beat.\nLeave the classroom still and orderly so the silence reads as social pressure.\n\n[Negative Space]\nHold open space frame-right for the teacher’s off-frame spoken correction to feel sourced beyond the visible edge.\nPreserve clear empty space between Jenny and the board for the public-reading corridor.\nLeave the upper frame uncluttered so the classroom ceiling and board line do not crowd her.\nKeep enough space around Jenny’s shoulders for the later inward shrink to read without re-framing.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nNatural-perspective classroom lens, wide-to-medium-wide feel with no distortion. Camera height is student eye level. Camera remains mostly still and observant, with only the faintest inward motivation implied for later moments; the opening frame itself should feel steady and human, not theatrical.\n\n[Light]\nNeutral, soft classroom daylight with a slightly warm morning cast from the windows and simple ambient fill across the room. Maintain clear depth separation: Jenny is the readable foreground subject, the board and front wall are legible in the middle distance, and the desks/windows recede softly. The atmosphere should stay ordinary and calm, supporting the beat rather than decorating it.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nDo not stage Teacher in the opening frame; the teacher’s voice is off-frame only.\nMaintain exact cast count of one visible character at the opening.\nKeep Jenny readable full-body enough to support the worksheet grip and later posture change.\nPreserve the same front-of-room axis used by the contract so the embarrassment can unfold without spatial confusion.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.\n\n[Director Iteration]\nCorrect only this observed issue in the next revision: Julian: wrong stage - the classroom must show the pupils at their desks and the teacher; this frame has Jenny alone at the board with empty desks.\nPreserve every successful identity, canon, geography, lighting, reference-role and continuity decision from the current signed direction.",
-      "promptHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
-      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
-      "provider": "seedream",
-      "providerModelId": "dola-seedream-5-0-pro-260628",
-      "modelVersion": "dola-seedream-5-0-pro-260628",
-      "directionContract": {
-       "canonicalStyleVersion": "v1.0.0",
-       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
-       "lightingAndDepth": "Neutral, soft classroom daylight with a slightly warm morning cast from the windows and simple ambient fill across the room. Maintain clear depth separation: Jenny is the readable foreground subject, the board and front wall are legible in the middle distance, and the desks/windows recede softly. The atmosphere should stay ordinary and calm, supporting the beat rather than decorating it.",
-       "geography": [
-        "Front-of-room classroom axis facing the chalkboard.",
-        "Jenny stands at the front-center area with clear walking and speaking space around her.",
-        "The blackboard remains readable in the same frame as Jenny.",
-        "Desks and chairs occupy the lower and side foregrounds as quiet audience space.",
-        "Windows run along one side of the room and provide soft daylight.",
-        "Teacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame.",
-        "Keep an unobstructed corridor between Jenny and the board for the reading beat.",
-        "Leave the classroom still and orderly so the silence reads as social pressure."
-       ],
-       "charactersInFrame": [
-        "Jenny"
-       ],
-       "emptySections": []
-      },
-      "contractHash": "2fd7cea83e35d1c974d00488dd42d94e4ebc9c76e4f864c6181fa9ad1fe4f1b2"
-     },
-     "geometryScreening": {
-      "status": "fail",
-      "reason": "one or more subjects drifted outside authored position or size tolerances",
-      "candidateSize": [
-       2816,
-       1584
-      ],
-      "positionTolerance": 0.12,
-      "heightScaleTolerance": [
-       0.75,
-       1.25
-      ],
-      "matches": [
-       {
-        "character": "Jenny",
-        "passed": false,
-        "positionDelta": 0.0428,
-        "heightScaleAgainstLayout": 1.6836,
-        "expectedCenter": [
-         0.5,
-         0.58
-        ],
-        "actualCenter": [
-         0.5009,
-         0.6228
-        ],
-        "expectedHeightFraction": 0.3611,
-        "actualHeightFraction": 0.608,
-        "detectedBoundsPx": [
-         1263,
-         505,
-         1558,
-         1468
-        ]
-       }
-      ],
-      "detectedComponentCount": 3,
-      "method": "local-u2net-foreground-geometry-v1",
-      "zeroSpend": true,
-      "providerCalled": false
-     },
-     "conformanceScreening": {
-      "status": "fail",
-      "reason": "Jenny matches her reference well and the classroom geography is coherent, but the frame fails the contract because the required full class of seated schoolchildren and the teacher are missing, and the opening composition is therefore incomplete for the authored scene population.",
-      "checkedAt": "2026-09-03T08:14:06",
-      "screenVersion": 2,
-      "validatorModel": "gpt-5.4-mini",
-      "mediaProviderCalled": false,
-      "referenceHashes": {
-       "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
-       "Ep1_S1_plate_candidate_2520e4b3.png": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
-      },
-      "candidateSha256": "45c084c9e29983d20c341a279ec0becaf413e60f14465ea109f12d82397d9689",
-      "review": {
-       "verdict": "revise",
-       "expectedCharacters": [
-        "Jenny"
-       ],
-       "detectedCharacters": [
-        "Jenny"
-       ],
-       "expectedSubjectCount": 1,
-       "subjectCount": 1,
-       "backgroundAllowed": true,
-       "summary": "Jenny matches her reference well and the classroom geography is coherent, but the frame fails the contract because the required full class of seated schoolchildren and the teacher are missing, and the opening composition is therefore incomplete for the authored scene population.",
-       "identityAndDistinguishability": {
-        "score": 2,
-        "visibleEvidence": "The central girl matches Jenny’s canonical look: brown side-parted ponytail, maroon cardigan, white shirt, striped tie, gray skirt, white socks, and brown shoes. No borrowed features from another character are visible.",
-        "correction": "Keep Jenny’s current identity intact."
-       },
-       "relativeScaleAndGeography": {
-        "score": 2,
-        "visibleEvidence": "Jenny is centered at the front of the room in the expected general placement, standing before the board in a readable classroom layout. Her apparent scale is consistent with a child at the front of the class.",
-        "correction": "Preserve Jenny’s current front-of-room placement and scale."
-       },
-       "anatomyAndSilhouette": {
-        "score": 2,
-        "visibleEvidence": "Jenny’s anatomy and silhouette are readable and proportionate, with no visible limb errors or silhouette corruption.",
-        "correction": "No change needed."
-       },
-       "actionReadyComposition": {
-        "score": 0,
-        "visibleEvidence": "Jenny is holding the worksheet ready and the board is visible, but the room is mostly empty of people; the contract specifically requires a full class of seated schoolchildren turned to watch her, plus an unnamed teacher standing one side of the board. That authored audience setup is absent.",
-        "correction": "Populate the classroom with seated schoolchildren around Jenny, all turned to watch her, and add the unnamed adult teacher standing calmly to one side of the board while keeping Jenny front and centered."
-       },
-       "forbiddenContent": {
-        "score": 2,
-        "visibleEvidence": "No duplicate named characters, text overlays, logos, or watermarks are visible; the blackboard text belongs to the scene itself.",
-        "correction": "No forbidden-content change needed."
-       },
-       "recommendedCorrection": "Keep Jenny unchanged, but add a full seated class of schoolchildren around her facing the front and an unnamed adult teacher standing calmly to one side of the board, while preserving the current classroom layout and Jenny’s centered standing pose."
-      }
-     },
-     "packageRevision": 3,
-     "contentHash": "45c084c9e29983d20c341a279ec0becaf413e60f14465ea109f12d82397d9689"
     },
-    {
-     "candidateId": "B",
-     "label": "B - Nano Banana 2",
-     "provider": "google",
-     "model": "gemini-3.1-flash-image",
-     "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_B_ab03e5ce.png",
-     "generatedAt": "2026-09-03T08:14:57",
-     "source": "generated",
-     "inputSignature": {
-      "cardHash": "c95f4956cb826e8e8d821d2b790bf83f4d122697a0ba4bce16c5a6eb060c7973",
-      "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
-      "referenceHashes": {
-       "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
-       "Ep1_S1_plate_candidate_2520e4b3.png": "dacedbb2f75ecf5dba93d557c529b7ae"
-      },
-      "briefHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
-      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
-      "canonProfileDigest": "2fbbae15f42679f3af1ac68936bf7173a0eca39bfaa45993837ae9fe2df9e824"
-     },
-     "promptContract": {
-      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S1.SH01; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA calm wide classroom opening that lets Jenny’s public reading pressure read in one clean geometry: the board stays legible, the room stays quiet, and the frame is held with enough restraint that her small hesitation can carry the embarrassment beat without extra staging.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ middle-centre area; standing at the front with the worksheet held ready in both hands, calm but slightly braced before speaking; facing toward the board and class.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nFront-of-room classroom axis facing the chalkboard.\nJenny stands at the front-center area with clear walking and speaking space around her.\nThe blackboard remains readable in the same frame as Jenny.\nDesks and chairs occupy the lower and side foregrounds as quiet audience space.\nWindows run along one side of the room and provide soft daylight.\nTeacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame.\nKeep an unobstructed corridor between Jenny and the board for the reading beat.\nLeave the classroom still and orderly so the silence reads as social pressure.\n\n[Negative Space]\nHold open space frame-right for the teacher’s off-frame spoken correction to feel sourced beyond the visible edge.\nPreserve clear empty space between Jenny and the board for the public-reading corridor.\nLeave the upper frame uncluttered so the classroom ceiling and board line do not crowd her.\nKeep enough space around Jenny’s shoulders for the later inward shrink to read without re-framing.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nNatural-perspective classroom lens, wide-to-medium-wide feel with no distortion. Camera height is student eye level. Camera remains mostly still and observant, with only the faintest inward motivation implied for later moments; the opening frame itself should feel steady and human, not theatrical.\n\n[Light]\nNeutral, soft classroom daylight with a slightly warm morning cast from the windows and simple ambient fill across the room. Maintain clear depth separation: Jenny is the readable foreground subject, the board and front wall are legible in the middle distance, and the desks/windows recede softly. The atmosphere should stay ordinary and calm, supporting the beat rather than decorating it.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nDo not stage Teacher in the opening frame; the teacher’s voice is off-frame only.\nMaintain exact cast count of one visible character at the opening.\nKeep Jenny readable full-body enough to support the worksheet grip and later posture change.\nPreserve the same front-of-room axis used by the contract so the embarrassment can unfold without spatial confusion.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.\n\n[Director Iteration]\nCorrect only this observed issue in the next revision: Julian: wrong stage - the classroom must show the pupils at their desks and the teacher; this frame has Jenny alone at the board with empty desks.\nPreserve every successful identity, canon, geography, lighting, reference-role and continuity decision from the current signed direction.",
-      "promptHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
-      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
-      "provider": "seedream",
-      "providerModelId": "dola-seedream-5-0-pro-260628",
-      "modelVersion": "dola-seedream-5-0-pro-260628",
-      "directionContract": {
-       "canonicalStyleVersion": "v1.0.0",
-       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
-       "lightingAndDepth": "Neutral, soft classroom daylight with a slightly warm morning cast from the windows and simple ambient fill across the room. Maintain clear depth separation: Jenny is the readable foreground subject, the board and front wall are legible in the middle distance, and the desks/windows recede softly. The atmosphere should stay ordinary and calm, supporting the beat rather than decorating it.",
-       "geography": [
-        "Front-of-room classroom axis facing the chalkboard.",
-        "Jenny stands at the front-center area with clear walking and speaking space around her.",
-        "The blackboard remains readable in the same frame as Jenny.",
-        "Desks and chairs occupy the lower and side foregrounds as quiet audience space.",
-        "Windows run along one side of the room and provide soft daylight.",
-        "Teacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame.",
-        "Keep an unobstructed corridor between Jenny and the board for the reading beat.",
-        "Leave the classroom still and orderly so the silence reads as social pressure."
-       ],
-       "charactersInFrame": [
-        "Jenny"
-       ],
-       "emptySections": []
-      },
-      "contractHash": "2fd7cea83e35d1c974d00488dd42d94e4ebc9c76e4f864c6181fa9ad1fe4f1b2"
-     },
-     "geometryScreening": {
-      "status": "pass",
-      "reason": "all subjects are within authored position and size tolerances",
-      "candidateSize": [
-       2752,
-       1536
-      ],
-      "positionTolerance": 0.12,
-      "heightScaleTolerance": [
-       0.75,
-       1.25
-      ],
-      "matches": [
-       {
-        "character": "Jenny",
-        "passed": true,
-        "positionDelta": 0.0531,
-        "heightScaleAgainstLayout": 0.8293,
-        "expectedCenter": [
-         0.5,
-         0.58
-        ],
-        "actualCenter": [
-         0.5069,
-         0.5273
-        ],
-        "expectedHeightFraction": 0.3611,
-        "actualHeightFraction": 0.2995,
-        "detectedBoundsPx": [
-         1321,
-         580,
-         1469,
-         1040
-        ]
-       }
-      ],
-      "detectedComponentCount": 4,
-      "method": "local-u2net-foreground-geometry-v1",
-      "zeroSpend": true,
-      "providerCalled": false
-     },
-     "conformanceScreening": {
-      "status": "fail",
-      "reason": "Jenny is present and roughly matches her reference, but the keyframe violates the cast/subject contract because the frame includes a full class of seated children plus no visible teacher. The opening geography also does not match the authored layout: Jenny is centered in front of the board, but the expected background population is not arranged as specified and the candidate does not clearly show the teacher standing to one side. No forbidden text/logo/watermark is visible beyond the board word 'BRIDGE', but the subject count and background population mismatch block approval.",
-      "checkedAt": "2026-09-03T08:14:57",
-      "screenVersion": 2,
-      "validatorModel": "gpt-5.4-mini",
-      "mediaProviderCalled": false,
-      "referenceHashes": {
-       "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
-       "Ep1_S1_plate_candidate_2520e4b3.png": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
-      },
-      "candidateSha256": "90585cdb28bfc1ae87415accfed4bd27ad1533fd25ac6b7f19d5efd091b6b42a",
-      "review": {
+    "review-keyframe": {
+     "approved": null,
+     "candidate": {
+      "department": "Director Review",
+      "worker": "Director Review / Continuity Supervisor",
+      "skill": "studio/chairs/continuity/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-09-03T08:49:46",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "creativeDirectingStandardVersion": 4,
+      "sourceHash": "f9c9e39b333adb1d6de1ffd0ba156cd67dd04254b963b5c0aeb5010ed2fac2a3",
+      "output": {
+       "artifactType": "keyframe",
        "verdict": "block",
-       "expectedCharacters": [
-        "Jenny"
+       "summary": "The rendered evidence shows the classroom set and Jenny identity cleanly, but it does not yet land the approved public-embarrassment beat. The visible frame is a calm posed wide shot with Jenny centered and composed, while the required stumble, wrong word, inward collapse, and teacher response are not present in the actual render. The beat is legible as an opener, not as the emotional turn of the shot.",
+       "intendedRead": "A routine classroom read turns into public embarrassment when Jenny stalls, says the wrong word aloud, then retries smaller while the room holds still.",
+       "actualRead": "Jenny stands centered in a bright classroom holding a worksheet, with the board word 'BRIDGE' visible behind her and classmates watching, but the moment reads as a neutral setup rather than a visible mistake or shame turn.",
+       "finalFrameUsable": false,
+       "recommendedCandidate": null,
+       "candidateAssessments": [
+        {
+         "candidateId": "orderedReviewImages:1",
+         "verdict": "revise",
+         "summary": "Identity and classroom geography are strong, but the frame is too general and staged to carry the public embarrassment beat on its own.",
+         "beatLands": false,
+         "strongestEvidence": "Jenny is front-center with the worksheet and the board readable in the same wide classroom geometry; identity and environment are clear.",
+         "weakestDimension": "No visible hesitation, wrong-word event, or shrinking reaction; the emotional beat is absent."
+        },
+        {
+         "candidateId": "orderedReviewImages:2",
+         "verdict": "block",
+         "summary": "Reference sheet confirms Jenny design consistency, but it is not story evidence and cannot land the beat.",
+         "beatLands": false,
+         "strongestEvidence": "Jenny identity model is consistent across front, three-quarter, side, and emotional expressions.",
+         "weakestDimension": "Not an actual rendered scene frame; no classroom action, timing, or public embarrassment evidence."
+        },
+        {
+         "candidateId": "orderedReviewImages:3",
+         "verdict": "block",
+         "summary": "This empty classroom establishes the set but omits Jenny, Teacher, and the live reading moment entirely.",
+         "beatLands": false,
+         "strongestEvidence": "Clear classroom layout, board placement, and lighting continuity are visible.",
+         "weakestDimension": "No characters or performance, so the beat cannot be evaluated as landed."
+        }
        ],
-       "detectedCharacters": [
-        "Jenny"
-       ],
-       "expectedSubjectCount": 1,
-       "subjectCount": 12,
-       "backgroundAllowed": true,
-       "summary": "Jenny is present and roughly matches her reference, but the keyframe violates the cast/subject contract because the frame includes a full class of seated children plus no visible teacher. The opening geography also does not match the authored layout: Jenny is centered in front of the board, but the expected background population is not arranged as specified and the candidate does not clearly show the teacher standing to one side. No forbidden text/logo/watermark is visible beyond the board word 'BRIDGE', but the subject count and background population mismatch block approval.",
-       "identityAndDistinguishability": {
+       "beatDelivery": {
         "score": 2,
-        "visibleEvidence": "The central girl matches Jenny’s reference in age, brown ponytail, burgundy cardigan, white shirt, green-striped tie, gray skirt, white socks, and brown shoes. She is clearly distinguishable as the named character.",
-        "correction": "Keep Jenny’s current identity exactly as shown; do not alter her hair, outfit, or age."
+        "intended": "Public reading turns painful when the wrong word is heard aloud and the room feels it.",
+        "observed": "The room is quiet and readable, but there is no observable stall, misread, correction, or embarrassment collapse in the keyframe.",
+        "diagnosis": "The scene is present as staging only; the crucial narrative turn is missing from the rendered evidence.",
+        "confidence": "high"
        },
-       "relativeScaleAndGeography": {
-        "score": 0,
-        "visibleEvidence": "Jenny is centered at the front, but the expected full class of seated schoolchildren and the unnamed teacher are not laid out per contract. The frame reads as a populated classroom, yet the background population count/geography is not contract-clear enough for the opening geometry.",
-        "correction": "Place Jenny at the front while clearly preserving the full seated class around her and the unnamed teacher standing calmly to one side of the board."
-       },
-       "anatomyAndSilhouette": {
+       "actingAndPerformance": {
         "score": 2,
-        "visibleEvidence": "Jenny’s body proportions, standing pose, hands holding a worksheet, and silhouette are readable and intact with no obvious anatomical errors.",
-        "correction": "Keep Jenny standing with the worksheet held in both hands and preserve her readable silhouette."
+        "intended": "Jenny should look brave, stall, blurt the wrong word, then shrink into a smaller retry.",
+        "observed": "Jenny’s expression is neutral-to-soft and controlled, with no visible struggle or embarrassed shrink.",
+        "diagnosis": "Performance does not yet show the thought change or public shame turn.",
+        "confidence": "high"
        },
-       "actionReadyComposition": {
+       "physicalCausality": {
+        "score": 2,
+        "intended": "Hesitation in a quiet room triggers a visible inward fold and tighter worksheet hold.",
+        "observed": "Jenny holds the worksheet, but there is no visible tightening, recoil, or body collapse caused by a heard mistake.",
+        "diagnosis": "Cause-and-effect is implied by context but not embodied in-frame.",
+        "confidence": "high"
+       },
+       "timingAndReaction": {
         "score": 1,
-        "visibleEvidence": "The composition is a stable wide classroom shot, but the performance beat is diluted by the extra seating clutter and the class density; Jenny’s braced readiness is visible, though the frame is less clean than specified.",
-        "correction": "Retain the wide classroom view but simplify the staging so Jenny’s hesitant public-reading moment reads more cleanly at the front of the room."
+        "intended": "A stall, wrong word, short afterbeat, correction, and tiny retry with room tone pressure.",
+        "observed": "Only a static posed moment is visible; no timing chain is readable.",
+        "diagnosis": "Temporal beat design is not present in the rendered frame.",
+        "confidence": "high"
        },
-       "forbiddenContent": {
+       "cameraAndEdit": {
+        "score": 2,
+        "intended": "Wide student-eye-level view held steady with a subtle inward tightening at the mistake.",
+        "observed": "The view is wide and steady, but it feels like a setup plate rather than motivated emotional tightening.",
+        "diagnosis": "Camera geography is correct, but editorial progression is absent from the visible evidence.",
+        "confidence": "medium"
+       },
+       "compositionAndContinuity": {
+        "score": 2,
+        "intended": "Jenny, board, and listening room remain in one legible classroom geometry throughout.",
+        "observed": "Composition is clean and continuous, with the board readable and the room intact.",
+        "diagnosis": "Spatial continuity is strong, though the ending state is not the approved embarrassed hold.",
+        "confidence": "high"
+       },
+       "identityAndReferenceUse": {
         "score": 1,
-        "visibleEvidence": "No watermark or logo is visible. The blackboard text 'BRIDGE' is visible, which is acceptable as set dressing, but it is the only readable text present.",
-        "correction": "Keep the classroom set clean with no watermark, logo, or extra readable signage."
+        "intended": "Jenny should match the reference and remain the same sensitive child in the classroom beat.",
+        "observed": "Jenny resembles the reference sheet closely, including hair, uniform, and general facial design.",
+        "diagnosis": "Identity use is the strongest aspect; however, reference fidelity alone does not satisfy the shot beat.",
+        "confidence": "high"
        },
-       "recommendedCorrection": "Keep Jenny unchanged, but revise the opening frame to clearly show the full seated class of children around her and the unnamed teacher standing to one side of the board, while preserving the wide classroom geography and removing any ambiguity in subject count and placement."
-      }
-     },
-     "packageRevision": 3,
-     "contentHash": "90585cdb28bfc1ae87415accfed4bd27ad1533fd25ac6b7f19d5efd091b6b42a"
-    }
-   ],
-   "keyframeCandidate": {
-    "candidateId": "A",
-    "label": "A - Seedream 5 Pro",
-    "provider": "byteplus",
-    "model": "dola-seedream-5-0-pro-260628",
-    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_A_12dfacce.png",
-    "generatedAt": "2026-09-03T08:14:06",
-    "source": "generated",
-    "inputSignature": {
-     "cardHash": "c95f4956cb826e8e8d821d2b790bf83f4d122697a0ba4bce16c5a6eb060c7973",
-     "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
-     "referenceHashes": {
-      "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
-      "Ep1_S1_plate_candidate_2520e4b3.png": "dacedbb2f75ecf5dba93d557c529b7ae"
-     },
-     "briefHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
-     "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
-     "canonProfileDigest": "2fbbae15f42679f3af1ac68936bf7173a0eca39bfaa45993837ae9fe2df9e824"
-    },
-    "promptContract": {
-     "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S1.SH01; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA calm wide classroom opening that lets Jenny’s public reading pressure read in one clean geometry: the board stays legible, the room stays quiet, and the frame is held with enough restraint that her small hesitation can carry the embarrassment beat without extra staging.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ middle-centre area; standing at the front with the worksheet held ready in both hands, calm but slightly braced before speaking; facing toward the board and class.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nFront-of-room classroom axis facing the chalkboard.\nJenny stands at the front-center area with clear walking and speaking space around her.\nThe blackboard remains readable in the same frame as Jenny.\nDesks and chairs occupy the lower and side foregrounds as quiet audience space.\nWindows run along one side of the room and provide soft daylight.\nTeacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame.\nKeep an unobstructed corridor between Jenny and the board for the reading beat.\nLeave the classroom still and orderly so the silence reads as social pressure.\n\n[Negative Space]\nHold open space frame-right for the teacher’s off-frame spoken correction to feel sourced beyond the visible edge.\nPreserve clear empty space between Jenny and the board for the public-reading corridor.\nLeave the upper frame uncluttered so the classroom ceiling and board line do not crowd her.\nKeep enough space around Jenny’s shoulders for the later inward shrink to read without re-framing.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nNatural-perspective classroom lens, wide-to-medium-wide feel with no distortion. Camera height is student eye level. Camera remains mostly still and observant, with only the faintest inward motivation implied for later moments; the opening frame itself should feel steady and human, not theatrical.\n\n[Light]\nNeutral, soft classroom daylight with a slightly warm morning cast from the windows and simple ambient fill across the room. Maintain clear depth separation: Jenny is the readable foreground subject, the board and front wall are legible in the middle distance, and the desks/windows recede softly. The atmosphere should stay ordinary and calm, supporting the beat rather than decorating it.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nDo not stage Teacher in the opening frame; the teacher’s voice is off-frame only.\nMaintain exact cast count of one visible character at the opening.\nKeep Jenny readable full-body enough to support the worksheet grip and later posture change.\nPreserve the same front-of-room axis used by the contract so the embarrassment can unfold without spatial confusion.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.\n\n[Director Iteration]\nCorrect only this observed issue in the next revision: Julian: wrong stage - the classroom must show the pupils at their desks and the teacher; this frame has Jenny alone at the board with empty desks.\nPreserve every successful identity, canon, geography, lighting, reference-role and continuity decision from the current signed direction.",
-     "promptHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
-     "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
-     "provider": "seedream",
-     "providerModelId": "dola-seedream-5-0-pro-260628",
-     "modelVersion": "dola-seedream-5-0-pro-260628",
-     "directionContract": {
-      "canonicalStyleVersion": "v1.0.0",
-      "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
-      "lightingAndDepth": "Neutral, soft classroom daylight with a slightly warm morning cast from the windows and simple ambient fill across the room. Maintain clear depth separation: Jenny is the readable foreground subject, the board and front wall are legible in the middle distance, and the desks/windows recede softly. The atmosphere should stay ordinary and calm, supporting the beat rather than decorating it.",
-      "geography": [
-       "Front-of-room classroom axis facing the chalkboard.",
-       "Jenny stands at the front-center area with clear walking and speaking space around her.",
-       "The blackboard remains readable in the same frame as Jenny.",
-       "Desks and chairs occupy the lower and side foregrounds as quiet audience space.",
-       "Windows run along one side of the room and provide soft daylight.",
-       "Teacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame.",
-       "Keep an unobstructed corridor between Jenny and the board for the reading beat.",
-       "Leave the classroom still and orderly so the silence reads as social pressure."
-      ],
-      "charactersInFrame": [
-       "Jenny"
-      ],
-      "emptySections": []
-     },
-     "contractHash": "2fd7cea83e35d1c974d00488dd42d94e4ebc9c76e4f864c6181fa9ad1fe4f1b2"
-    },
-    "geometryScreening": {
-     "status": "fail",
-     "reason": "one or more subjects drifted outside authored position or size tolerances",
-     "candidateSize": [
-      2816,
-      1584
-     ],
-     "positionTolerance": 0.12,
-     "heightScaleTolerance": [
-      0.75,
-      1.25
-     ],
-     "matches": [
-      {
-       "character": "Jenny",
-       "passed": false,
-       "positionDelta": 0.0428,
-       "heightScaleAgainstLayout": 1.6836,
-       "expectedCenter": [
-        0.5,
-        0.58
+       "finishAndProductionValue": {
+        "score": 2,
+        "intended": "Polished classroom render with subtle emotional realism.",
+        "observed": "The image is well finished and cleanly lit, but emotionally underplayed for this beat.",
+        "diagnosis": "High production value, low dramatic specificity.",
+        "confidence": "high"
+       },
+       "likelyRootCause": "provider-variance",
+       "rootCauseReasoning": "The render appears to have delivered a generic classroom opener that preserves set, identity, and framing, but not the specific performance turn and timing required for the embarrassment beat. Because the issue is the absence of the actual moment rather than a clear prompt contradiction, this is most consistent with provider variance or an early-frame selection that stopped before the story event.",
+       "cheapestNextAction": {
+        "action": "recover-in-edit",
+        "rerenderRequired": false,
+        "reason": "The set, identity, and board geometry are usable; the missing element is the performance beat, which may be recoverable only if there are additional frames in the clip or an alternate candidate that contains the stumble and recoil.",
+        "changeOneLever": "Select or cut to a frame where Jenny is mid-stall or immediately after the wrong word, with shoulders folding inward and the worksheet pulled closer.",
+        "preserveExactly": [
+         "Jenny identity and wardrobe",
+         "shared front-of-room classroom axis",
+         "board readability",
+         "calm classroom lighting",
+         "only Jenny and Teacher in frame"
+        ],
+        "proofOfImprovement": "A usable frame will visibly show the wrong-word aftermath: tightened hands, inward shoulders, reduced retry or correction posture, and a readable shift from brave setup to embarrassed shrink.",
+        "zeroCostChecksFirst": [
+         "Review the full orderedReviewImages sequence for a later frame containing the stumble or reaction",
+         "Check whether the source clip includes a mid-beat frame not shown in the representative still",
+         "Confirm whether an alternate candidate already captures Jenny’s inward fold and teacher response"
+        ]
+       },
+       "learningTags": [
+        "identity-strong",
+        "beat-not-landed",
+        "setup-only",
+        "timing-missing",
+        "wide-geography-correct",
+        "embarrassment-needs-visible-collapse",
+        "reference-fidelity-good",
+        "edit-or-select-better-frame"
        ],
-       "actualCenter": [
-        0.5009,
-        0.6228
-       ],
-       "expectedHeightFraction": 0.3611,
-       "actualHeightFraction": 0.608,
-       "detectedBoundsPx": [
-        1263,
-        505,
-        1558,
-        1468
+       "findings": [
+        {
+         "severity": "BLOCK",
+         "criterion": "Beat must land as public embarrassment, not just classroom setup",
+         "visibleEvidence": "Jenny is standing centered with a worksheet in hand and the board word 'BRIDGE' visible, but her face and posture are composed rather than stung.",
+         "owner": "director",
+         "suggestedAction": "Use a frame or candidate that shows the stall/mistake aftermath, not only the opener."
+        },
+        {
+         "severity": "BLOCK",
+         "criterion": "Required emotional turn should be readable in posture and prop contact",
+         "visibleEvidence": "The worksheet is held normally; shoulders are not visibly folded inward and the grip does not look tightened.",
+         "owner": "animation",
+         "suggestedAction": "Find or cut to a moment where the paper is pulled closer and the body visibly closes around it."
+        },
+        {
+         "severity": "NOTE",
+         "criterion": "Camera and classroom geometry are on target",
+         "visibleEvidence": "Wide student-eye-level classroom composition is clear, with Jenny, the board, and the room sharing the frame.",
+         "owner": "cinematography",
+         "suggestedAction": "Preserve this axis and room layout if recovering in edit or selecting another frame."
+        },
+        {
+         "severity": "NOTE",
+         "criterion": "Identity fidelity is strong",
+         "visibleEvidence": "Jenny closely matches the reference art in hairstyle, face, and uniform.",
+         "owner": "continuity",
+         "suggestedAction": "Keep this candidate’s character look if choosing an alternate frame from the same render."
+        }
+       ]
+      },
+      "reviewedMediaPaths": [
+       "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_A_12dfacce.png"
+      ],
+      "packageRevision": 3,
+      "inputSignature": {
+       "stage": "review-keyframe",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "review": "300882c94bcefff130d31c0d788262944a3b53c255a105bf65233f96654c9d5f"
+       },
+       "canonProfileDigest": "f069a617b201272a56f65ddd560b10976dda2228d6e9978063d6f5c683fdb725",
+       "shotContractHash": "cdb5f11e2b92083f24476cf9768f403fe46402865810368489a56a6141675281",
+       "mediaHash": "45c084c9e29983d20c341a279ec0becaf413e60f14465ea109f12d82397d9689",
+       "references": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "Jenny",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "3cf805613f2969dc6c3ee475045789aacb8ea9cfc563aed28321121bbebe1825",
+         "hash": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7"
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图2",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
+        }
        ]
       }
-     ],
-     "detectedComponentCount": 3,
-     "method": "local-u2net-foreground-geometry-v1",
-     "zeroSpend": true,
-     "providerCalled": false
-    },
-    "conformanceScreening": {
-     "status": "fail",
-     "reason": "Jenny matches her reference well and the classroom geography is coherent, but the frame fails the contract because the required full class of seated schoolchildren and the teacher are missing, and the opening composition is therefore incomplete for the authored scene population.",
-     "checkedAt": "2026-09-03T08:14:06",
-     "screenVersion": 2,
-     "validatorModel": "gpt-5.4-mini",
-     "mediaProviderCalled": false,
-     "referenceHashes": {
-      "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
-      "Ep1_S1_plate_candidate_2520e4b3.png": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
      },
-     "candidateSha256": "45c084c9e29983d20c341a279ec0becaf413e60f14465ea109f12d82397d9689",
-     "review": {
-      "verdict": "revise",
-      "expectedCharacters": [
-       "Jenny"
-      ],
-      "detectedCharacters": [
-       "Jenny"
-      ],
-      "expectedSubjectCount": 1,
-      "subjectCount": 1,
-      "backgroundAllowed": true,
-      "summary": "Jenny matches her reference well and the classroom geography is coherent, but the frame fails the contract because the required full class of seated schoolchildren and the teacher are missing, and the opening composition is therefore incomplete for the authored scene population.",
-      "identityAndDistinguishability": {
-       "score": 2,
-       "visibleEvidence": "The central girl matches Jenny’s canonical look: brown side-parted ponytail, maroon cardigan, white shirt, striped tie, gray skirt, white socks, and brown shoes. No borrowed features from another character are visible.",
-       "correction": "Keep Jenny’s current identity intact."
-      },
-      "relativeScaleAndGeography": {
-       "score": 2,
-       "visibleEvidence": "Jenny is centered at the front of the room in the expected general placement, standing before the board in a readable classroom layout. Her apparent scale is consistent with a child at the front of the class.",
-       "correction": "Preserve Jenny’s current front-of-room placement and scale."
-      },
-      "anatomyAndSilhouette": {
-       "score": 2,
-       "visibleEvidence": "Jenny’s anatomy and silhouette are readable and proportionate, with no visible limb errors or silhouette corruption.",
-       "correction": "No change needed."
-      },
-      "actionReadyComposition": {
-       "score": 0,
-       "visibleEvidence": "Jenny is holding the worksheet ready and the board is visible, but the room is mostly empty of people; the contract specifically requires a full class of seated schoolchildren turned to watch her, plus an unnamed teacher standing one side of the board. That authored audience setup is absent.",
-       "correction": "Populate the classroom with seated schoolchildren around Jenny, all turned to watch her, and add the unnamed adult teacher standing calmly to one side of the board while keeping Jenny front and centered."
-      },
-      "forbiddenContent": {
-       "score": 2,
-       "visibleEvidence": "No duplicate named characters, text overlays, logos, or watermarks are visible; the blackboard text belongs to the scene itself.",
-       "correction": "No forbidden-content change needed."
-      },
-      "recommendedCorrection": "Keep Jenny unchanged, but add a full seated class of schoolchildren around her facing the front and an unnamed adult teacher standing calmly to one side of the board, while preserving the current classroom layout and Jenny’s centered standing pose."
-     }
-    },
-    "packageRevision": 3,
-    "contentHash": "45c084c9e29983d20c341a279ec0becaf413e60f14465ea109f12d82397d9689"
+     "history": []
+    }
    },
-   "selectedKeyframeCandidateId": null,
+   "keyframeCandidates": [],
+   "keyframeCandidate": null,
+   "selectedKeyframeCandidateId": "B",
    "keyframeABTest": {
     "createdAt": "2026-09-03T08:14:57",
     "promptHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
@@ -3488,25 +3258,91 @@
    },
    "keyframeApproval": {
     "approved": true,
-    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_candidate_169e5860.png",
-    "at": "2026-09-03T08:00:25",
+    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_B_ab03e5ce.png",
+    "at": "2026-09-03T08:52:01",
     "reviewedBy": "Julian",
-    "source": "library",
+    "source": "generated",
     "inputSignature": {
      "cardHash": "c95f4956cb826e8e8d821d2b790bf83f4d122697a0ba4bce16c5a6eb060c7973",
-     "canonProfileDigest": "2fbbae15f42679f3af1ac68936bf7173a0eca39bfaa45993837ae9fe2df9e824",
      "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
-     "selectedAssetHash": "ce2288911ff3de221e95a293a68e8949",
-     "source": "library"
+     "referenceHashes": {
+      "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
+      "Ep1_S1_plate_candidate_2520e4b3.png": "dacedbb2f75ecf5dba93d557c529b7ae"
+     },
+     "briefHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
+     "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+     "canonProfileDigest": "2fbbae15f42679f3af1ac68936bf7173a0eca39bfaa45993837ae9fe2df9e824"
     },
-    "promptContract": null,
-    "abTest": null,
+    "promptContract": {
+     "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S1.SH01; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA calm wide classroom opening that lets Jenny’s public reading pressure read in one clean geometry: the board stays legible, the room stays quiet, and the frame is held with enough restraint that her small hesitation can carry the embarrassment beat without extra staging.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ middle-centre area; standing at the front with the worksheet held ready in both hands, calm but slightly braced before speaking; facing toward the board and class.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nFront-of-room classroom axis facing the chalkboard.\nJenny stands at the front-center area with clear walking and speaking space around her.\nThe blackboard remains readable in the same frame as Jenny.\nDesks and chairs occupy the lower and side foregrounds as quiet audience space.\nWindows run along one side of the room and provide soft daylight.\nTeacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame.\nKeep an unobstructed corridor between Jenny and the board for the reading beat.\nLeave the classroom still and orderly so the silence reads as social pressure.\n\n[Negative Space]\nHold open space frame-right for the teacher’s off-frame spoken correction to feel sourced beyond the visible edge.\nPreserve clear empty space between Jenny and the board for the public-reading corridor.\nLeave the upper frame uncluttered so the classroom ceiling and board line do not crowd her.\nKeep enough space around Jenny’s shoulders for the later inward shrink to read without re-framing.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nNatural-perspective classroom lens, wide-to-medium-wide feel with no distortion. Camera height is student eye level. Camera remains mostly still and observant, with only the faintest inward motivation implied for later moments; the opening frame itself should feel steady and human, not theatrical.\n\n[Light]\nNeutral, soft classroom daylight with a slightly warm morning cast from the windows and simple ambient fill across the room. Maintain clear depth separation: Jenny is the readable foreground subject, the board and front wall are legible in the middle distance, and the desks/windows recede softly. The atmosphere should stay ordinary and calm, supporting the beat rather than decorating it.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nDo not stage Teacher in the opening frame; the teacher’s voice is off-frame only.\nMaintain exact cast count of one visible character at the opening.\nKeep Jenny readable full-body enough to support the worksheet grip and later posture change.\nPreserve the same front-of-room axis used by the contract so the embarrassment can unfold without spatial confusion.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.\n\n[Director Iteration]\nCorrect only this observed issue in the next revision: Julian: wrong stage - the classroom must show the pupils at their desks and the teacher; this frame has Jenny alone at the board with empty desks.\nPreserve every successful identity, canon, geography, lighting, reference-role and continuity decision from the current signed direction.",
+     "promptHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
+     "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+     "provider": "seedream",
+     "providerModelId": "dola-seedream-5-0-pro-260628",
+     "modelVersion": "dola-seedream-5-0-pro-260628",
+     "directionContract": {
+      "canonicalStyleVersion": "v1.0.0",
+      "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+      "lightingAndDepth": "Neutral, soft classroom daylight with a slightly warm morning cast from the windows and simple ambient fill across the room. Maintain clear depth separation: Jenny is the readable foreground subject, the board and front wall are legible in the middle distance, and the desks/windows recede softly. The atmosphere should stay ordinary and calm, supporting the beat rather than decorating it.",
+      "geography": [
+       "Front-of-room classroom axis facing the chalkboard.",
+       "Jenny stands at the front-center area with clear walking and speaking space around her.",
+       "The blackboard remains readable in the same frame as Jenny.",
+       "Desks and chairs occupy the lower and side foregrounds as quiet audience space.",
+       "Windows run along one side of the room and provide soft daylight.",
+       "Teacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame.",
+       "Keep an unobstructed corridor between Jenny and the board for the reading beat.",
+       "Leave the classroom still and orderly so the silence reads as social pressure."
+      ],
+      "charactersInFrame": [
+       "Jenny"
+      ],
+      "emptySections": []
+     },
+     "contractHash": "2fd7cea83e35d1c974d00488dd42d94e4ebc9c76e4f864c6181fa9ad1fe4f1b2"
+    },
+    "abTest": {
+     "winner": "B",
+     "candidates": [
+      {
+       "candidateId": "A",
+       "label": "A - Seedream 5 Pro",
+       "provider": "byteplus",
+       "model": "dola-seedream-5-0-pro-260628",
+       "generatedAt": "2026-09-03T08:14:06",
+       "selected": false,
+       "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S1.SH01_see_ab_20260903T085201\\Ep1_S1.SH01_keyframe_A_12dfacce.png"
+      },
+      {
+       "candidateId": "B",
+       "label": "B - Nano Banana 2",
+       "provider": "google",
+       "model": "gemini-3.1-flash-image",
+       "generatedAt": "2026-09-03T08:14:57",
+       "selected": true,
+       "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_B_ab03e5ce.png"
+      }
+     ],
+     "contract": {
+      "createdAt": "2026-09-03T08:14:57",
+      "promptHash": "2c70748ea5f01e96c85ed2386f5ba7bd0630971f794a27c2870a6f144c85b3e4",
+      "referenceHashes": [
+       "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+       "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
+      ],
+      "candidateIds": [
+       "A",
+       "B"
+      ],
+      "selectionRequired": true
+     }
+    },
     "packageRevision": 3,
-    "contentHash": "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
+    "contentHash": "90585cdb28bfc1ae87415accfed4bd27ad1533fd25ac6b7f19d5efd091b6b42a",
     "conformanceScreening": {
      "status": "fail",
-     "reason": "Jenny is present and matches her reference generally, but the opening frame fails contract geography/composition: the required seated class audience is missing, Jenny is not clearly at the authored front-center scale/placement facing the board and class, and the board text reads as a single word rather than the expected classroom reading setup. No forbidden duplicate named character or watermark is visible.",
-     "checkedAt": "2026-09-03T08:00:21",
+     "reason": "Jenny is present and roughly matches her reference, but the keyframe violates the cast/subject contract because the frame includes a full class of seated children plus no visible teacher. The opening geography also does not match the authored layout: Jenny is centered in front of the board, but the expected background population is not arranged as specified and the candidate does not clearly show the teacher standing to one side. No forbidden text/logo/watermark is visible beyond the board word 'BRIDGE', but the subject count and background population mismatch block approval.",
+     "checkedAt": "2026-09-03T08:14:57",
      "screenVersion": 2,
      "validatorModel": "gpt-5.4-mini",
      "mediaProviderCalled": false,
@@ -3514,9 +3350,9 @@
       "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
       "Ep1_S1_plate_candidate_2520e4b3.png": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
      },
-     "candidateSha256": "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
+     "candidateSha256": "90585cdb28bfc1ae87415accfed4bd27ad1533fd25ac6b7f19d5efd091b6b42a",
      "review": {
-      "verdict": "revise",
+      "verdict": "block",
       "expectedCharacters": [
        "Jenny"
       ],
@@ -3524,45 +3360,45 @@
        "Jenny"
       ],
       "expectedSubjectCount": 1,
-      "subjectCount": 1,
+      "subjectCount": 12,
       "backgroundAllowed": true,
-      "summary": "Jenny is present and matches her reference generally, but the opening frame fails contract geography/composition: the required seated class audience is missing, Jenny is not clearly at the authored front-center scale/placement facing the board and class, and the board text reads as a single word rather than the expected classroom reading setup. No forbidden duplicate named character or watermark is visible.",
+      "summary": "Jenny is present and roughly matches her reference, but the keyframe violates the cast/subject contract because the frame includes a full class of seated children plus no visible teacher. The opening geography also does not match the authored layout: Jenny is centered in front of the board, but the expected background population is not arranged as specified and the candidate does not clearly show the teacher standing to one side. No forbidden text/logo/watermark is visible beyond the board word 'BRIDGE', but the subject count and background population mismatch block approval.",
       "identityAndDistinguishability": {
        "score": 2,
-       "visibleEvidence": "The girl in Image 1 matches Jenny’s identity view: brown hair in a side ponytail, school uniform, child proportions, and the same anxious/downcast expression style.",
-       "correction": "Keep Jenny’s face, hair, uniform, and age-appropriate proportions unchanged."
+       "visibleEvidence": "The central girl matches Jenny’s reference in age, brown ponytail, burgundy cardigan, white shirt, green-striped tie, gray skirt, white socks, and brown shoes. She is clearly distinguishable as the named character.",
+       "correction": "Keep Jenny’s current identity exactly as shown; do not alter her hair, outfit, or age."
       },
       "relativeScaleAndGeography": {
-       "score": 1,
-       "visibleEvidence": "Jenny stands near center, but the frame does not show the expected full class of seated schoolchildren filling the room around her, so the authored classroom geography is incomplete. Her apparent scale reads closer to a single isolated subject than the specified front-of-class smallness against an audience.",
-       "correction": "Restore the full seated class around Jenny and place her clearly at the front of the room at the authored scale and depth."
+       "score": 0,
+       "visibleEvidence": "Jenny is centered at the front, but the expected full class of seated schoolchildren and the unnamed teacher are not laid out per contract. The frame reads as a populated classroom, yet the background population count/geography is not contract-clear enough for the opening geometry.",
+       "correction": "Place Jenny at the front while clearly preserving the full seated class around her and the unnamed teacher standing calmly to one side of the board."
       },
       "anatomyAndSilhouette": {
        "score": 2,
-       "visibleEvidence": "Jenny’s limbs, hands holding the worksheet, legs, shoes, and silhouette are coherent and readable with no obvious anatomical corruption.",
-       "correction": "No anatomy change needed."
+       "visibleEvidence": "Jenny’s body proportions, standing pose, hands holding a worksheet, and silhouette are readable and intact with no obvious anatomical errors.",
+       "correction": "Keep Jenny standing with the worksheet held in both hands and preserve her readable silhouette."
       },
       "actionReadyComposition": {
        "score": 1,
-       "visibleEvidence": "Jenny is readable holding a worksheet, but the scene lacks the required watching classmates and does not strongly read as a public-reading opening frame ready for the class.",
-       "correction": "Compose Jenny at the front facing the board and class, with seated schoolchildren visible watching her read."
+       "visibleEvidence": "The composition is a stable wide classroom shot, but the performance beat is diluted by the extra seating clutter and the class density; Jenny’s braced readiness is visible, though the frame is less clean than specified.",
+       "correction": "Retain the wide classroom view but simplify the staging so Jenny’s hesitant public-reading moment reads more cleanly at the front of the room."
       },
       "forbiddenContent": {
-       "score": 2,
-       "visibleEvidence": "No duplicate Jenny, text logo, or watermark is visible; no forbidden borrowed character features are apparent.",
-       "correction": "Keep the frame free of extra named-character copies, logos, and watermarks."
+       "score": 1,
+       "visibleEvidence": "No watermark or logo is visible. The blackboard text 'BRIDGE' is visible, which is acceptable as set dressing, but it is the only readable text present.",
+       "correction": "Keep the classroom set clean with no watermark, logo, or extra readable signage."
       },
-      "recommendedCorrection": "Add the seated classroom audience around Jenny, preserve Jenny’s current identity, and reframe her at the front in the authored public-reading setup with the worksheet open and the class watching."
+      "recommendedCorrection": "Keep Jenny unchanged, but revise the opening frame to clearly show the full seated class of children around her and the unnamed teacher standing to one side of the board, while preserving the wide classroom geography and removing any ambiguity in subject count and placement."
      }
     },
     "conformanceAdvisoryDecision": {
      "acceptedBy": "Julian",
-     "acceptedAt": "2026-09-03T08:00:25",
+     "acceptedAt": "2026-09-03T08:52:01",
      "statusAtDecision": "fail",
-     "reasonAtDecision": "Jenny is present and matches her reference generally, but the opening frame fails contract geography/composition: the required seated class audience is missing, Jenny is not clearly at the authored front-center scale/placement facing the board and class, and the board text reads as a single word rather than the expected classroom reading setup. No forbidden duplicate named character or watermark is visible."
+     "reasonAtDecision": "Jenny is present and roughly matches her reference, but the keyframe violates the cast/subject contract because the frame includes a full class of seated children plus no visible teacher. The opening geography also does not match the authored layout: Jenny is centered in front of the board, but the expected background population is not arranged as specified and the candidate does not clearly show the teacher standing to one side. No forbidden text/logo/watermark is visible beyond the board word 'BRIDGE', but the subject count and background population mismatch block approval."
     }
    },
-   "keyframePath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_candidate_169e5860.png",
+   "keyframePath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_B_ab03e5ce.png",
    "voiceAuditions": {
     "status": "ready_for_hear_verdict",
     "runId": "8e7e6fd8",
@@ -4022,6 +3858,85 @@
      "outcome": "superseded",
      "supersededAt": "2026-09-03T08:00:25",
      "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S1.SH01_20260903T080025\\Ep1_S1.SH01_keyframe_candidate_05a16f04.png"
+    },
+    {
+     "approved": true,
+     "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_candidate_169e5860.png",
+     "at": "2026-09-03T08:00:25",
+     "reviewedBy": "Julian",
+     "source": "library",
+     "inputSignature": {
+      "cardHash": "c95f4956cb826e8e8d821d2b790bf83f4d122697a0ba4bce16c5a6eb060c7973",
+      "canonProfileDigest": "2fbbae15f42679f3af1ac68936bf7173a0eca39bfaa45993837ae9fe2df9e824",
+      "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
+      "selectedAssetHash": "ce2288911ff3de221e95a293a68e8949",
+      "source": "library"
+     },
+     "promptContract": null,
+     "abTest": null,
+     "packageRevision": 3,
+     "contentHash": "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
+     "conformanceScreening": {
+      "status": "fail",
+      "reason": "Jenny is present and matches her reference generally, but the opening frame fails contract geography/composition: the required seated class audience is missing, Jenny is not clearly at the authored front-center scale/placement facing the board and class, and the board text reads as a single word rather than the expected classroom reading setup. No forbidden duplicate named character or watermark is visible.",
+      "checkedAt": "2026-09-03T08:00:21",
+      "screenVersion": 2,
+      "validatorModel": "gpt-5.4-mini",
+      "mediaProviderCalled": false,
+      "referenceHashes": {
+       "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+       "Ep1_S1_plate_candidate_2520e4b3.png": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
+      },
+      "candidateSha256": "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
+      "review": {
+       "verdict": "revise",
+       "expectedCharacters": [
+        "Jenny"
+       ],
+       "detectedCharacters": [
+        "Jenny"
+       ],
+       "expectedSubjectCount": 1,
+       "subjectCount": 1,
+       "backgroundAllowed": true,
+       "summary": "Jenny is present and matches her reference generally, but the opening frame fails contract geography/composition: the required seated class audience is missing, Jenny is not clearly at the authored front-center scale/placement facing the board and class, and the board text reads as a single word rather than the expected classroom reading setup. No forbidden duplicate named character or watermark is visible.",
+       "identityAndDistinguishability": {
+        "score": 2,
+        "visibleEvidence": "The girl in Image 1 matches Jenny’s identity view: brown hair in a side ponytail, school uniform, child proportions, and the same anxious/downcast expression style.",
+        "correction": "Keep Jenny’s face, hair, uniform, and age-appropriate proportions unchanged."
+       },
+       "relativeScaleAndGeography": {
+        "score": 1,
+        "visibleEvidence": "Jenny stands near center, but the frame does not show the expected full class of seated schoolchildren filling the room around her, so the authored classroom geography is incomplete. Her apparent scale reads closer to a single isolated subject than the specified front-of-class smallness against an audience.",
+        "correction": "Restore the full seated class around Jenny and place her clearly at the front of the room at the authored scale and depth."
+       },
+       "anatomyAndSilhouette": {
+        "score": 2,
+        "visibleEvidence": "Jenny’s limbs, hands holding the worksheet, legs, shoes, and silhouette are coherent and readable with no obvious anatomical corruption.",
+        "correction": "No anatomy change needed."
+       },
+       "actionReadyComposition": {
+        "score": 1,
+        "visibleEvidence": "Jenny is readable holding a worksheet, but the scene lacks the required watching classmates and does not strongly read as a public-reading opening frame ready for the class.",
+        "correction": "Compose Jenny at the front facing the board and class, with seated schoolchildren visible watching her read."
+       },
+       "forbiddenContent": {
+        "score": 2,
+        "visibleEvidence": "No duplicate Jenny, text logo, or watermark is visible; no forbidden borrowed character features are apparent.",
+        "correction": "Keep the frame free of extra named-character copies, logos, and watermarks."
+       },
+       "recommendedCorrection": "Add the seated classroom audience around Jenny, preserve Jenny’s current identity, and reframe her at the front in the authored public-reading setup with the worksheet open and the class watching."
+      }
+     },
+     "conformanceAdvisoryDecision": {
+      "acceptedBy": "Julian",
+      "acceptedAt": "2026-09-03T08:00:25",
+      "statusAtDecision": "fail",
+      "reasonAtDecision": "Jenny is present and matches her reference generally, but the opening frame fails contract geography/composition: the required seated class audience is missing, Jenny is not clearly at the authored front-center scale/placement facing the board and class, and the board text reads as a single word rather than the expected classroom reading setup. No forbidden duplicate named character or watermark is visible."
+     },
+     "outcome": "superseded",
+     "supersededAt": "2026-09-03T08:52:01",
+     "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S1.SH01_20260903T085201\\Ep1_S1.SH01_keyframe_candidate_169e5860.png"
     }
    ],
    "durationProvenance": {

@@ -900,7 +900,10 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
     else:
         current = selected_state.get("current") or {}
         pending = selected_state.get("pending") or {}
-        keyframe_ready = bool(current.get("keyframe") or shot_media.get("keyframeApproved"))
+        # A new keyframe candidate awaiting the human decision outranks an older approval: the
+        # second decision chain below must not re-route the shot to HEAR/WATCH past it (2026-09-03).
+        keyframe_ready = (bool(current.get("keyframe") or shot_media.get("keyframeApproved"))
+                          and not pending.get("keyframe"))
         voice_ready = bool(not selected_state.get("talky") or current.get("voice"))
         purpose = str(shot.get("purpose") or shot.get("storyBeat") or "").strip()
         keyframe_headline = (((preflight.get("productionInputs") or {}).get("shots") or {})

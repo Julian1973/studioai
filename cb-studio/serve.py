@@ -565,7 +565,7 @@ _DIRECTOR_SESSION_BUILD_LOCK = threading.Lock()
 # Production mutations and completed jobs explicitly invalidate this cache. Keep
 # browser polling on the proven projection instead of rebuilding the full ledger
 # every minute; the freshness guard restarts the server for code/data-file changes.
-_DIRECTOR_SESSION_CACHE_TTL_SEC = 3600.0
+_DIRECTOR_SESSION_CACHE_TTL_SEC = 20.0   # was 3600; the key also carries on-disk state now
 DIRECTOR_ACTION_IDS = {
     "open-inspector", "open-provider-setup", "direct-scene",
     "build-scene-plate", "select-scene-plate-library", "select-scene-plate-upload",
@@ -2126,8 +2126,28 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
     return session
 
 
+def _production_state_stamp(scene, episode="Ep1"):
+    """mtime/size of the scene's production package and the canon lock: any on-disk change to
+    either must produce a fresh Director session at the very next poll (2026-09-03)."""
+    stamp = []
+    try:
+        _pkg, path = _load_director_package(scene, episode)
+        st = os.stat(path)
+        stamp.append((st.st_mtime_ns, st.st_size))
+    except Exception:
+        stamp.append(None)
+    try:
+        lock = pathlib.Path(_paths().CANON_LOCK)
+        st = os.stat(lock)
+        stamp.append((st.st_mtime_ns, st.st_size))
+    except Exception:
+        stamp.append(None)
+    return tuple(stamp)
+
+
 def _cached_director_session(scene, episode="Ep1", requested_shot_id=None):
-    key = (str(episode), str(scene), str(requested_shot_id or ""))
+    key = (str(episode), str(scene), str(requested_shot_id or ""),
+           _production_state_stamp(scene, episode))
     now = time.time()
     with _DIRECTOR_SESSION_CACHE_LOCK:
         cached = _DIRECTOR_SESSION_CACHE.get(key)

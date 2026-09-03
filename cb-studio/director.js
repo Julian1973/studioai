@@ -2132,8 +2132,8 @@
     const sourceMessage = locked
       ? "A keyframe candidate is already waiting. Review it, approve it, or refire it before replacing the source."
       : !keyframeToolsAvailable
-        ? "Scene plate selection is available now. Keyframe source controls unlock after the scene direction package is current."
-      : "Pick a previous keyframe from this shot's library, upload your own frame, or generate a new one.";
+        ? "Keyframe controls unlock once the scene direction package is current (start the scene first)."
+      : "Generate the stage for this shot, upload your own frame, or reuse a previous keyframe from this shot's library.";
     const assetItems = Array.isArray(app.sceneAssetLibrary) && app.sceneAssetLibraryKey === `${session.episode}:${session.scene}` ? app.sceneAssetLibrary : [];
     const assetError = app.sceneAssetLibrary && !Array.isArray(app.sceneAssetLibrary) ? app.sceneAssetLibrary.error : "";
     const sceneLook = session.sceneLook || {};
@@ -2143,21 +2143,29 @@
       : sceneLook.approved?.source
         ? `Approved scene plate · ${sceneLook.approved.source}`
         : "Current scene plate";
-    return `<section class="keyframe-source-panel">
+    const selectedShot = (session.shots || []).find((shot) => shot.selected) || session.shot || {};
+    const keyframeArtifact = session.phase === "keyframe" && session.artifact?.type === "image" ? session.artifact.url : "";
+    const keyframeUrl = selectedShot.keyframeUrl || selectedShot.acceptedUrl || keyframeArtifact || "";
+    const keyframeLabel = selectedShot.keyframeUrl || selectedShot.acceptedUrl
+      ? "Approved keyframe · the stage for this shot"
+      : keyframeArtifact
+        ? "Keyframe candidate awaiting your decision"
+        : "No keyframe yet";
+    const keyframeDisabled = locked || !keyframeToolsAvailable;
+    return `<section class="keyframe-source-panel see-panel">
       <div class="source-panel-head">
-        <div><span>Scene plate</span><strong>Choose the world plate before keyframe work</strong></div>
-        <em>${esc(assetItems.length ? `${assetItems.length} assets` : "Ready")}</em>
+        <div><span>SEE · Scene plate</span><strong>The world this shot lives in</strong></div>
+        <em>${esc(scenePlateUrl ? (sceneLook.approved ? "Approved" : "Pending") : "Missing")}</em>
       </div>
-      <p>Use a reusable location, house or scene asset as the scene plate source, fire a fresh plate, or upload your own. This is separate from approving the current keyframe.</p>
-      ${scenePlateUrl ? `<div class="scene-plate-current">
+      ${scenePlateUrl ? `<div class="scene-plate-current see-visual">
         <img src="${esc(scenePlateUrl)}?v=${Date.now()}" alt="Current scene plate">
         <div><span>${esc(scenePlateLabel)}</span><strong>${esc(sceneLook.plateHash ? sceneLook.plateHash.slice(0, 12) : "scene plate")}</strong></div>
-      </div>` : `<div class="source-empty">No current scene plate preview available.</div>`}
+      </div>` : `<div class="source-empty">No scene plate yet. Pick one from the library, generate one, or upload your own.</div>`}
       <div class="source-actions">
         <button type="button" class="secondary" data-toggle-scene-plate-library="">${esc(app.scenePlateLibraryOpen ? "Hide Library" : "From Library")}</button>
-        <button type="button" class="secondary" data-fire-scene-plate="">Fire Scene Plate</button>
+        <button type="button" class="secondary" data-fire-scene-plate="">Generate Plate</button>
         <label class="secondary">
-          Upload Scene Plate
+          Upload Plate
           <input type="file" accept="image/png,image/jpeg,image/webp" data-scene-plate-upload>
         </label>
       </div>
@@ -2174,19 +2182,24 @@
               </article>`).join("")
               : `<div class="source-empty">No scene or house library assets found.</div>`}
       </div>` : ""}
-      ${keyframeToolsAvailable ? `<div class="source-panel-head">
-        <div><span>Keyframe source</span><strong>Generate, previous keyframe, or upload</strong></div>
-        <em>${esc(locked ? "Review candidate first" : "Ready")}</em>
+      <div class="source-panel-head see-keyframe-head">
+        <div><span>SEE · Keyframe</span><strong>The stage for this shot, with every reference in place</strong></div>
+        <em>${esc(locked ? "Review candidate first" : keyframeToolsAvailable ? (keyframeUrl ? "Approved" : "Ready") : "Locked")}</em>
       </div>
-      <p>${esc(sourceMessage)}</p>
+      ${keyframeUrl ? `<div class="scene-plate-current see-visual">
+        <img src="${esc(keyframeUrl)}?v=${Date.now()}" alt="Keyframe for this shot">
+        <div><span>${esc(keyframeLabel)}</span><strong>${esc(session.selectedShotId || selectedShot.id || "keyframe")}</strong></div>
+      </div>` : `<div class="source-empty">${esc(sourceMessage)}</div>`}
       <div class="source-actions">
-        <label class="secondary ${locked ? "disabled" : ""}">
+        <button type="button" class="secondary ${keyframeDisabled ? "disabled" : ""}" data-generate-keyframe ${keyframeDisabled ? "disabled" : ""}>Generate Keyframe</button>
+        <label class="secondary ${keyframeDisabled ? "disabled" : ""}">
           Upload Keyframe
-          <input type="file" accept="image/png,image/jpeg,image/webp" data-keyframe-upload ${locked ? "disabled" : ""}>
+          <input type="file" accept="image/png,image/jpeg,image/webp" data-keyframe-upload ${keyframeDisabled ? "disabled" : ""}>
         </label>
-        <button type="button" class="secondary" data-refresh-keyframe-library>Refresh Library</button>
+        <button type="button" class="secondary" data-refresh-keyframe-library ${!keyframeToolsAvailable ? "disabled" : ""}>From this shot's library</button>
       </div>
-      <div class="source-library-row">
+      ${keyframeUrl ? `<p>${esc(sourceMessage)}</p>` : ""}
+      ${keyframeToolsAvailable ? `<div class="source-library-row">
         ${!libraryReady || app.keyframeLibraryLoading
           ? `<div class="source-empty">Loading keyframe library...</div>`
           : app.keyframeLibrary?.error
@@ -2198,7 +2211,7 @@
                 <button type="button" data-select-keyframe-library="${esc(item.path)}" ${locked ? "disabled" : ""}>Use</button>
               </article>`).join("")
               : `<div class="source-empty">No prior keyframes for this shot yet.</div>`}
-      </div>` : `<div class="source-empty">${esc(sourceMessage)}</div>`}
+      </div>` : ""}
     </section>`;
   }
 
@@ -2582,6 +2595,13 @@
       if (app.scenePlateLibraryOpen) await loadSceneAssetLibrary(app.session || session);
       renderSignoffRelay(app.session || session);
     }));
+    host.querySelectorAll("[data-generate-keyframe]").forEach((button) => button.addEventListener("click", () => {
+      const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
+      const action = actions.find((item) => item.id === "build-keyframe");
+      if (!action) return toast("Generate is not available for this shot right now. Start the scene or finish the pending keyframe review first.", true);
+      button.disabled = true;
+      handleAction(action);
+    }));
     host.querySelectorAll("[data-fire-scene-plate]").forEach((button) => button.addEventListener("click", () => {
       runScenePlateAction("build-scene-plate");
     }));
@@ -2736,6 +2756,13 @@
       app.scenePlateLibraryOpen = !app.scenePlateLibraryOpen;
       if (app.scenePlateLibraryOpen) await loadSceneAssetLibrary(app.session || session);
       renderSceneWorkbench(app.session || session);
+    }));
+    host.querySelectorAll("[data-generate-keyframe]").forEach((button) => button.addEventListener("click", () => {
+      const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
+      const action = actions.find((item) => item.id === "build-keyframe");
+      if (!action) return toast("Generate is not available for this shot right now. Start the scene or finish the pending keyframe review first.", true);
+      button.disabled = true;
+      handleAction(action);
     }));
     host.querySelectorAll("[data-fire-scene-plate]").forEach((button) => button.addEventListener("click", () => {
       runScenePlateAction("build-scene-plate");

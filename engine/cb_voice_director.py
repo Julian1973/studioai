@@ -167,10 +167,15 @@ def post_direction_audit(line, locked_line, card, register):
         tags = _tags(text)
         illegal = sorted(set(tags) - palette)
         blocked = sorted(set(tags) & banned)
-        _check(checks, f"tag-palette:{recipe_id}", not illegal and not blocked,
+        # Banned tags are a hard fail. Off-palette tags are advisory only: the palette is the
+        # character's SIGNATURE, not a whitelist, and the Director's delivery note can motivate a
+        # tag outside it (Jenny's 'slightly too fast to be fully true' -> [quickly]).
+        _check(checks, f"tag-palette:{recipe_id}", not blocked,
                f"{recipe_id} uses only the character and archetype tag palette."
                if not illegal and not blocked else
-               f"{recipe_id} has off-palette/banned tags: {', '.join(illegal + blocked)}")
+               f"{recipe_id} has off-palette/banned tags: {', '.join(blocked)}" if blocked else
+               f"{recipe_id} steps outside the default palette (allowed, Director-motivated): "
+               f"{', '.join(illegal)}")
         crowded = []
         for segment in _SEGMENT_RE.findall(text):
             segment_tags = _tags(segment)
@@ -182,9 +187,12 @@ def post_direction_audit(line, locked_line, card, register):
         _check(checks, f"take-count:{recipe_id}", take_count >= 1,
                f"{recipe_id} has a positive takes count.")
         if len(_words(locked_text)) <= int(rules["shortLineMaxWords"]):
+            # 'At least two takes' is a LINE rule: count takes across every recipe of the line,
+            # not per recipe (two one-take recipes satisfy it).
             has_context = bool(str(line.get("previousText") or "").strip())
+            line_takes = sum(int(item.get("takesCount") or 0) for item in recipes)
             _check(checks, f"short-line-context:{recipe_id}", has_context and
-                   take_count >= int(rules["shortLineMinimumTakes"]),
+                   line_takes >= int(rules["shortLineMinimumTakes"]),
                    f"Short line {recipe_id} includes previous_text runway and at least two takes.")
 
     all_tags = sorted({tag for recipe in recipes for tag in _tags(recipe.get("performedText"))})

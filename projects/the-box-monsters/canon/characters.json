@@ -1,113 +1,117 @@
 {
- "_note": "SSOT character register for The Box Monsters (Julian, 2026-09-01, via the Codex-built project; re-homed into the projects/ layout by T57). anchor = the reference image used reference-only (never described). sizeRank 1=smallest.",
- "_sizeRule": "Guest characters are sized by class via sizeClasses (a child = Jenny's size; a monster = the named monster's).",
- "sizeClasses": {
-  "adult_female": null,
-  "adult_male": null,
-  "child_female": "Jenny",
-  "child_male": "Jenny"
- },
- "Nib": {
-  "key_features": "The smallest, fastest and strangest. Nib is curious, funny and easily distracted, but often says the emotional truth by accident.",
-  "bible": {
-   "essence": "Curious, funny and easily distracted; often says the emotional truth by accident."
+  "_note": "SSOT character register for The Box Monsters (Julian, 2026-09-01, via the Codex-built project; re-homed into the projects/ layout by T57). anchor = the reference image used reference-only (never described). sizeRank 1=smallest.",
+  "_sizeRule": "Guest characters are sized by class via sizeClasses (a child = Jenny's size; a monster = the named monster's).",
+  "sizeClasses": {
+    "adult_female": null,
+    "adult_male": null,
+    "child_female": "Jenny",
+    "child_male": "Jenny"
   },
-  "size": "smallest Box Monster",
-  "sizeRank": 1,
-  "anchor": "projects/the-box-monsters/assets/nib_anchor.png",
-  "refs": [
-   "projects/the-box-monsters/assets/nib_anchor.png"
-  ],
-  "heightIn": 6,
-  "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust",
-  "voiceId": "mQF4SvS3dYAPKiawWrYJ",
-  "_voiceNote": "ElevenLabs voice cast by Julian and matched to the character by name and description on his own account (2026-09-02)."
- },
- "Rumble": {
-  "key_features": "The biggest monster with the softest heart. Rumble is gentle, careful and protective. He is strong, but his real gift is making space feel safe.",
-  "bible": {
-   "essence": "The biggest monster with the softest heart; gentle, careful and protective."
+  "Nib": {
+    "key_features": "The smallest, fastest and strangest. Nib is curious, funny and easily distracted, but often says the emotional truth by accident.",
+    "bible": {
+      "essence": "Curious, funny and easily distracted; often says the emotional truth by accident."
+    },
+    "size": "smallest Box Monster",
+    "sizeRank": 1,
+    "anchor": "projects/the-box-monsters/assets/nib_anchor.png",
+    "refs": [
+      "projects/the-box-monsters/assets/nib_anchor.png"
+    ],
+    "heightIn": 6,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust",
+    "voiceId": "mQF4SvS3dYAPKiawWrYJ",
+    "_voiceNote": "ElevenLabs voice cast by Julian and matched to the character by name and description on his own account (2026-09-02)."
   },
-  "size": "largest Box Monster",
-  "sizeRank": 4,
-  "anchor": "projects/the-box-monsters/assets/rumble_anchor.png",
-  "refs": [
-   "projects/the-box-monsters/assets/rumble_anchor.png"
-  ],
-  "heightIn": 14,
-  "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust",
-  "voiceId": "L8A6aQ3mNR9yA65Zultc",
-  "_voiceNote": "ElevenLabs voice cast by Julian and matched to the character by name and description on his own account (2026-09-02)."
- },
- "Tilly": {
-  "key_features": "The organiser and inventor. Tilly loves systems, tools, labels and machines. She often tries to solve feelings like puzzles, then learns that some feelings need listening before fixing.",
-  "bible": {
-   "essence": "The organiser and inventor who learns that feelings need listening before fixing."
+  "Rumble": {
+    "key_features": "The biggest monster with the softest heart. Rumble is gentle, careful and protective. He is strong, but his real gift is making space feel safe.",
+    "bible": {
+      "essence": "The biggest monster with the softest heart; gentle, careful and protective."
+    },
+    "size": "largest Box Monster",
+    "sizeRank": 4,
+    "anchor": "projects/the-box-monsters/assets/rumble_anchor.png",
+    "refs": [
+      "projects/the-box-monsters/assets/rumble_anchor.png"
+    ],
+    "heightIn": 14,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust",
+    "voiceId": "L8A6aQ3mNR9yA65Zultc",
+    "_voiceNote": "ElevenLabs voice cast by Julian and matched to the character by name and description on his own account (2026-09-02)."
   },
-  "size": "medium Box Monster",
-  "sizeRank": 3,
-  "anchor": "projects/the-box-monsters/assets/tilly_anchor.png",
-  "refs": [
-   "projects/the-box-monsters/assets/tilly_anchor.png"
-  ],
-  "heightIn": 11,
-  "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust",
-  "voiceId": "nlHpoIXHq17kPfPORuwX",
-  "_voiceNote": "ElevenLabs voice cast by Julian and matched to the character by name and description on his own account (2026-09-02)."
- },
- "Patch": {
-  "key_features": "The brave first responder. Patch is quick, warm, impulsive and loyal. He jumps in before he has a full plan, then learns by staying with the feeling instead of rushing past it.",
-  "bible": {
-   "essence": "The brave, warm first responder who learns by staying with the feeling."
+  "Tilly": {
+    "key_features": "The organiser and inventor. Tilly loves systems, tools, labels and machines. She often tries to solve feelings like puzzles, then learns that some feelings need listening before fixing.",
+    "bible": {
+      "essence": "The organiser and inventor who learns that feelings need listening before fixing."
+    },
+    "size": "medium Box Monster",
+    "sizeRank": 3,
+    "anchor": "projects/the-box-monsters/assets/tilly_anchor.png",
+    "refs": [
+      "projects/the-box-monsters/assets/tilly_anchor.png"
+    ],
+    "heightIn": 11,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust",
+    "voiceId": "nlHpoIXHq17kPfPORuwX",
+    "_voiceNote": "ElevenLabs voice cast by Julian and matched to the character by name and description on his own account (2026-09-02)."
   },
-  "size": "small Box Monster",
-  "sizeRank": 2,
-  "anchor": "projects/the-box-monsters/assets/patch_anchor.png",
-  "refs": [
-   "projects/the-box-monsters/assets/patch_anchor.png"
-  ],
-  "heightIn": 9,
-  "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust",
-  "voiceId": "67QOLFteDdoiZMleE6eY",
-  "_voiceNote": "ElevenLabs voice cast by Julian and matched to the character by name and description on his own account (2026-09-02)."
- },
- "Jenny": {
-  "key_features": "A thoughtful, sensitive schoolgirl with a quiet sense of humor. In the pilot, one small mistake in class makes her feel tiny in front of everyone.",
-  "bible": {
-   "essence": "A thoughtful, sensitive schoolgirl with a quiet sense of humour."
+  "Patch": {
+    "key_features": "The brave first responder. Patch is quick, warm, impulsive and loyal. He jumps in before he has a full plan, then learns by staying with the feeling instead of rushing past it.",
+    "bible": {
+      "essence": "The brave, warm first responder who learns by staying with the feeling."
+    },
+    "size": "small Box Monster",
+    "sizeRank": 2,
+    "anchor": "projects/the-box-monsters/assets/patch_anchor.png",
+    "refs": [
+      "projects/the-box-monsters/assets/patch_anchor.png"
+    ],
+    "heightIn": 9,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust",
+    "voiceId": "67QOLFteDdoiZMleE6eY",
+    "_voiceNote": "ElevenLabs voice cast by Julian and matched to the character by name and description on his own account (2026-09-02)."
   },
-  "sizeRank": 5,
-  "anchor": "projects/the-box-monsters/assets/jenny_anchor.png",
-  "turn4": "projects/the-box-monsters/assets/jenny_turn4.png",
-  "refs": [
-   "projects/the-box-monsters/assets/jenny_anchor.png",
-   "projects/the-box-monsters/assets/jenny_turn4.png"
-  ],
-  "tier": "guest",
-  "size": "young girl",
-  "sizeRef": "tilly",
-  "voiceId": "BUhaNjY74aXLexxM9qfh",
-  "heightIn": 52,
-  "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust"
- },
- "Teacher": {
-  "_status": "script role awaiting approved character reference",
-  "key_features": "Jenny's teacher; calm and reassuring during the classroom mistake.",
-  "tier": "supporting"
- },
- "Classmate": {
-  "_status": "script role awaiting approved character reference",
-  "key_features": "A kind classmate who quietly checks whether Jenny is all right.",
-  "tier": "supporting"
- },
- "BRIGGLE ECHO": {
-  "_status": "script voice awaiting approved sound treatment",
-  "key_features": "The shame world's disembodied echo of Jenny's mistaken word.",
-  "tier": "environmental-voice"
- },
- "MACHINE": {
-  "_status": "script voice awaiting approved sound treatment",
-  "key_features": "The Fold machine's functional voice.",
-  "tier": "environmental-voice"
- }
+  "Jenny": {
+    "key_features": "A thoughtful, sensitive schoolgirl with a quiet sense of humor. In the pilot, one small mistake in class makes her feel tiny in front of everyone.",
+    "bible": {
+      "essence": "A thoughtful, sensitive schoolgirl with a quiet sense of humour."
+    },
+    "sizeRank": 5,
+    "anchor": "projects/the-box-monsters/assets/jenny_anchor.png",
+    "turn4": "projects/the-box-monsters/assets/jenny_turn4.png",
+    "refs": [
+      "projects/the-box-monsters/assets/jenny_anchor.png",
+      "projects/the-box-monsters/assets/jenny_turn4.png"
+    ],
+    "tier": "guest",
+    "size": "young girl",
+    "sizeRef": "tilly",
+    "voiceId": "BUhaNjY74aXLexxM9qfh",
+    "heightIn": 52,
+    "_heightNote": "heightIn set 2026-09-02 from the locked size order (Nib < Patch < Tilly < Rumble << Jenny, a child) so the keyframe layout can scale the cast; Julian to confirm or adjust"
+  },
+  "Teacher": {
+    "_status": "script role awaiting approved character reference",
+    "key_features": "Jenny's teacher; calm and reassuring during the classroom mistake.",
+    "tier": "supporting",
+    "voiceId": "cPVuhpOYUJYFLr3qTrKc",
+    "voiceNote": "ElevenLabs library 'Rose - Literature Teacher', cast 2026-09-03 by Julian"
+  },
+  "Classmate": {
+    "_status": "script role awaiting approved character reference",
+    "key_features": "A kind classmate who quietly checks whether Jenny is all right.",
+    "tier": "supporting",
+    "voiceId": "9lJhQTNhE6XNSstSyMzH",
+    "voiceNote": "ElevenLabs library 'Ahmed - Young Asian American', cast 2026-09-03 by Julian"
+  },
+  "BRIGGLE ECHO": {
+    "_status": "script voice awaiting approved sound treatment",
+    "key_features": "The shame world's disembodied echo of Jenny's mistaken word.",
+    "tier": "environmental-voice"
+  },
+  "MACHINE": {
+    "_status": "script voice awaiting approved sound treatment",
+    "key_features": "The Fold machine's functional voice.",
+    "tier": "environmental-voice"
+  }
 }

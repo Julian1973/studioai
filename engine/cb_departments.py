@@ -1129,10 +1129,12 @@ def validate_voice_direction(result, locked_lines):
             out.speaker = str(locked["speaker"])
             out.character = str(locked["speaker"])
         if locked.get("dialogueOccurrenceId"):
-            if out.dialogueOccurrenceId != locked["dialogueOccurrenceId"]:
-                raise RuntimeError(f"Voice Director changed occurrence ID on line {idx}")
-            if out.sourceEventId != locked.get("sourceEventId"):
-                raise RuntimeError(f"Voice Director changed source event ID on line {idx}")
+            # The occurrence/source ids are locked provenance, not performance: an LLM cannot be
+            # trusted to echo 64-hex digests byte-for-byte, and it has no authority over them
+            # anyway. Restore them from the locked line at this index; the speaker, text and
+            # count guards below are what actually hold the line order.
+            out.dialogueOccurrenceId = locked["dialogueOccurrenceId"]
+            out.sourceEventId = locked.get("sourceEventId")
         if out.speaker.strip().lower() != str(locked["speaker"]).strip().lower():
             raise RuntimeError(f"Voice Director changed speaker on line {idx}")
         if out.character.strip().lower() != str(locked["speaker"]).strip().lower():
@@ -1277,6 +1279,7 @@ def creative_translation_report(shot, direction, provider_prompt=None):
         }
         derived = True
     errors = []
+    carried = []   # approved contract fields carried into the design instead of refusing on mismatch
 
     expected_codes = [str(item.get("beatCode") or "") for item in approved]
     actual_codes = [str(item.get("beatCode") or "") for item in clocks]
@@ -1338,7 +1341,10 @@ def creative_translation_report(shot, direction, provider_prompt=None):
         ((shot.get("storyboardStagePlanApproved") or [{}])[-1].get("observableEndState"))
         or "").strip()
     if required_handoff and str(design.get("handoffState") or "").strip() != required_handoff:
-        errors.append("generation design changed the approved handoff state")
+        # The approved end state is law and the design has no authority over it: carry it in
+        # rather than refusing the whole render because the generator paraphrased it.
+        design["handoffState"] = required_handoff
+        carried.append("handoffState")
 
     return {
         "ready": not errors,
@@ -1346,6 +1352,7 @@ def creative_translation_report(shot, direction, provider_prompt=None):
         "approvedGagBeatCodes": expected_codes,
         "compiledGagBeatCodes": actual_codes,
         "derivedFromApprovedContracts": derived,
+        "carriedFromApprovedContracts": carried,
     }
 
 
@@ -1493,6 +1500,28 @@ def carry_approved_gag_clock_text(shot, direction):
     return direction
 
 
+def _mechanical_rules_brief():
+    """The Voice Director rulebook's mechanical rules, stated in the brief BEFORE the LLM answers.
+    Until 2026-09-03 they were only enforced by the post-direction audit, so a short line such as
+    'Take your time, Jenny.' was refused for having one take and no previousText runway."""
+    rules = cb_voice_director.rulebook().get("mechanicalRules") or {}
+    short_words = int(rules.get("shortLineMaxWords") or 4)
+    short_takes = int(rules.get("shortLineMinimumTakes") or 2)
+    return (
+        f"- SHORT LINES: any locked line of {short_words} words or fewer needs at least {short_takes} "
+        f"takes in total across its take recipes AND a non-empty previousText runway. For "
+        f"the first line of a shot the runway is the beat immediately before it, in words "
+        f"(e.g. 'The room has gone quiet; the teacher lets the silence sit.').\n"
+        f"- TAG DENSITY: no more than {int(rules.get('maxTagsPerSegment') or 2)} bracketed tags per "
+        f"sentence segment; every tag has one tagPurposes row.\n"
+        f"- DURATION: no line longer than {int(rules.get('maxLineDurationSec') or 15)} seconds.\n"
+        f"- ALWAYS: entry and exit emotional states, a named listener, a bodyVoiceRelationship, "
+        f"and a pauseReasons entry whenever the performed text contains a pause (..., em dash).\n"
+        f"- NEVER dialogue on frame one: the earliest startsAtSec must leave the opening frame silent.\n"
+        f"- TAGS ARE OPEN ONLY: write [quietly] before the words it colours; ElevenLabs v3 has no closing form, so never write [/quietly].\n"
+        f"- WORDS ARE LOCKED: performedText adds tags only; every script word stays, in order.\n")
+
+
 def prepare_voice(context, locked_lines, *, log=print):
     locked_lines = cb_audio_authority.route_lines(locked_lines)["spokenDialogue"]
     if not locked_lines:
@@ -1513,6 +1542,8 @@ def prepare_voice(context, locked_lines, *, log=print):
         "APPROVED SHOT CONTEXT:\n" + _j(context) +
         "\n\nREGISTERED VOICE ARCHETYPES (archetypeId must be one exact key; "
         "use only its allowedTags):\n" + _j(register_contract) +
+        "\n\nMECHANICAL RULES (the post-direction audit refuses the whole shot if any one "
+        "fails, so obey them while writing, not after):\n" + _mechanical_rules_brief() +
         "\n\nTAG PURPOSE LAW: every bracketed audio tag used in performedText or in any "
         "takeRecipes.performedText must have one matching tagPurposes row. The tag value "
         "must omit brackets and its purpose must explain the dramatic job of that tag.\n" +

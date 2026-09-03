@@ -3442,3 +3442,8 @@ body.studio-stale .workspace, body.studio-stale .side-nav { pointer-events: none
   .truth-rail { display: flex; overflow-x: auto; padding-bottom: 2px; }
   .truth-chip { min-width: 126px; }
 }
+
+/* SEE panel: two sections, visual on top (2026-09-03) */
+.see-keyframe-head { margin-top: 14px; padding-top: 12px; border-top: 1px solid #34423e; }
+.see-visual img { width: 100%; max-height: 320px; object-fit: contain; background: #0b1110; }
+.source-actions .disabled { opacity: .45; pointer-events: none; }

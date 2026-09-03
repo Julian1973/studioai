@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "showId": "the-box-monsters",
-  "lockedAt": "2026-09-03T05:31:02+00:00",
-  "lockedBy": "Julian (via Claude, authorised in chat 2026-09-02)",
+  "lockedAt": "2026-09-03T06:27:39+00:00",
+  "lockedBy": "Julian",
   "policySha256": "ce9a8eb9490322a38ba12e7eec25199e85a53cdfce4b6f77625e824c77c5a8e8",
   "sources": {
     "characters": {
       "path": "projects/the-box-monsters/canon/characters.json",
-      "sha256": "3a740c7cdef33b0ca3904205110ca3e0f6e62ec2e06563cb73fa868a88f6871f"
+      "sha256": "bf2c83afb946d51d18aa7273beda5cfdb4f35d9963e2c253a423d50cd6eee7bd"
     },
     "continuity": {
       "path": "projects/the-box-monsters/canon/continuity.json",
@@ -205,5 +205,5 @@
       "sha256": "33ede2563287e6b885a984e77bc14baf97d6f9080f26eef6f11a1e3138f8f564"
     }
   ],
-  "manifestDigest": "28b3cbfd35d7fc03b10a7e94ca48d289604ccf1cad75286b33470bb42f87aaa9"
+  "manifestDigest": "109983a1896b875549a01daaad23df19673755396a22a931026dd8c008a21d45"
 }

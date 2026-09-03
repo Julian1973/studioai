@@ -72,9 +72,6 @@ def test_compiler_emits_nine_stable_v3_requests_with_canon_settings():
     (lambda item: item["takeRecipes"][0].update(
         {"performedText": "[exhales][confident] Totally nailed it."}),
      "must preserve every locked script word"),
-    (lambda item: item["takeRecipes"][0].update(
-        {"performedText": "[exhales][confident][angry] Nailed it."}),
-     "off-palette/banned tags"),
     (lambda item: item.update({"previousText": ""}),
      "previous_text runway"),
 ])
@@ -84,6 +81,22 @@ def test_post_direction_audit_hard_blocks_rulebook_failures(mutation, match):
     with pytest.raises(V.VoiceContractError, match=match):
         V.compile_line(item, LOCKED)
 
+
+
+def test_post_direction_audit_advises_off_palette_but_blocks_banned(monkeypatch):
+    # The palette is the character's signature, not a whitelist: a Director-motivated tag outside
+    # it compiles (advisory); a tag on the character's bannedTags still hard-blocks (2026-09-03).
+    monkeypatch.setattr(V, "voice_cards", lambda: {"characters": {
+        "Fuzzby": {"voiceId": "x", "modelId": "eleven_v3", "settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.2}, "cadenceSignature": "Boasts fast, crashes slow.", "physicalSignature": "Chest out, wobbling.", "defaultTags": ["exhales"], "bannedTags": ["angry"]}}})
+    item = copy.deepcopy(direction())
+    item["takeRecipes"][0].update({"performedText": "[exhales][whispers] Nailed it."})
+    item["tagPurposes"]["whispers"] = "Hides the claim from the room."
+    V.compile_line(item, LOCKED)
+    item = copy.deepcopy(direction())
+    item["takeRecipes"][0].update({"performedText": "[exhales][angry] Nailed it."})
+    item["tagPurposes"]["angry"] = "Snaps at the listener."
+    with pytest.raises(V.VoiceContractError, match="off-palette/banned tags"):
+        V.compile_line(item, LOCKED)
 
 def test_track_refuses_an_uncovered_locked_line():
     with pytest.raises(V.VoiceContractError, match="script locks 2"):

@@ -1142,6 +1142,20 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             artifact = {"type": "image", "url": shot_media.get("keyframeApproved")
                         or shot_media.get("keyframe"), "label": "Accepted opening frame"}
         elif (not all_animations_current and keyframe_ready and voice_ready
+              and package_ledger.get("status") == "candidates-pending"
+              and not current.get("animationBatch")):
+            # A take rendered from a since-superseded direction: it can never be accepted, but the
+            # engine still needs it rejected before a fresh seal. Offer exactly that (2026-09-03).
+            phase = "animation"
+            status = "ready_to_review"
+            headline = "This take was rendered from a superseded direction"
+            summary = "Reject it with one line so the shot can be re-sealed from the current direction."
+            candidates = shot_media.get("candidates") or []
+            artifact = {"type": "video-set", "items": candidates, "stale": True,
+                        "notice": "Rendered before the direction changed; view only.",
+                        "label": "Superseded animation candidates"}
+            decisions = [_action("iterate-animation", "Reject and re-seal", destructive=True)]
+        elif (not all_animations_current and keyframe_ready and voice_ready
               and pending.get("animation")):
             phase = "animation"
             status = "ready_to_review"

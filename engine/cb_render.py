@@ -6498,6 +6498,24 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
     return cand["path"]
 
 
+def cancel_spend_authorization(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
+    """Cancel a sealed-but-unfired render request so a fresh one can be sealed. The cancelled
+    request is kept under cancelledSpendAuths; nothing is deleted (2026-09-03)."""
+    pkg, path = load_pkg(scene, episode)
+    led = _ledger(pkg, shot_id)
+    auth = led.get("pendingSpendAuth")
+    if not auth:
+        log(f"NO SEALED REQUEST - {shot_id}: nothing to cancel")
+        return None
+    history = list(led.get("cancelledSpendAuths") or [])
+    history.append({**auth, "cancelledAt": _now(), "cancelledBy": reviewed_by})
+    led["cancelledSpendAuths"] = history[-10:]
+    led.pop("pendingSpendAuth", None)
+    _save(pkg, path)
+    log(f"SEALED REQUEST CANCELLED - {shot_id} by {reviewed_by}; seal a fresh request to render")
+    return auth
+
+
 def abandon_batch(scene, shot_id, reason, episode="Ep1", reviewed_by="Julian", log=print):
     """Release a render batch that will never complete (killed mid-flight, provider task lost).
     Records it as abandoned with the reason and clears the pending spend authorization so a
@@ -11055,6 +11073,8 @@ if __name__ == "__main__":
             select_keyframe_source(pos[0], pos[1], "upload", ep(3), upload_path=pos[2])
         elif cmd == "select-library":
             select_keyframe_source(pos[0], pos[1], "library", ep(3), library_path=pos[2])
+        elif cmd == "cancel-spend":
+            cancel_spend_authorization(pos[0], pos[1], ep(2))
         elif cmd == "abandon-batch":
             abandon_batch(pos[0], pos[1], pos[2], ep(3))
         elif cmd == "select-previous":

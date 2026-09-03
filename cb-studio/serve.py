@@ -4619,7 +4619,18 @@ class H(http.server.SimpleHTTPRequestHandler):
                     job_id = shot_run_job("fire", scene, ep, target, candidates=candidate_count,
                                           spend_token=token)
                 elif action == "cancel-spend":
-                    self._json(200, {"ok": True, "zeroSpend": True, "noChange": True}); return
+                    # Actually cancels (2026-09-03): the sealed request is recorded and cleared so a
+                    # fresh prepare-render can seal against the current inputs.
+                    _CBR = _canonical_cb_render()
+                    try:
+                        _CBR.cancel_spend_authorization(
+                            scene, target, episode=ep, reviewed_by=str(d.get("by") or "Julian"),
+                            log=lambda message: print(message, flush=True))
+                    except _CBR.Refused as e:
+                        self._json(409, {"error": str(e), "session": session}); return
+                    _clear_director_session_cache(scene=scene, episode=ep)
+                    self._json(200, {"ok": True, "zeroSpend": True,
+                                     "session": _cached_director_session(scene, ep, target)}); return
                 elif action == "accept-animation":
                     candidate = d.get("candidate")
                     choices = (((session.get("artifact") or {}).get("items")) or [])

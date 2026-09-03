@@ -1058,10 +1058,30 @@ def install(m):
             log(f"VOICE DIRECTOR - {shot_id}: {len(requests)} auditions ready for Julian")
             return str(bundle["candidates"][0]["path"])
 
-        if (ledger.get("voiceApproval") or {}).get("approved"):
-            raise m.Refused(
-                f"REFUSED - {shot_id}'s complete voice track is already approved; "
-                "auditions may be heard, but reject the approved track before replacing it")
+        approval = ledger.get("voiceApproval") or {}
+        if approval.get("approved"):
+            scene_id = str(pkg.get("scene") or pkg.get("sceneNumber") or "")
+            try:
+                current_sig = department_input_signature(pkg, "voice", shot_id, scene_id, episode)
+            except Exception:
+                current_sig = None
+            if current_sig is not None and approval.get("inputSignature") != current_sig:
+                # The approval is stale against the current signed inputs (a canon re-lock, a
+                # recast, new direction). Accept would refuse it and nothing could replace it:
+                # supersede it here, on the record, and build the current track (2026-09-03).
+                history = list(ledger.get("supersededVoiceApprovals") or [])
+                history.append({**approval, "supersededAt": m._now(),
+                                "supersededReason": "direct voice inputs changed since approval"})
+                ledger["supersededVoiceApprovals"] = history
+                ledger["voiceApproval"] = {**approval, "approved": False,
+                                           "supersededAt": m._now()}
+                m._save(pkg, path)
+                log(f"VOICE APPROVAL SUPERSEDED - {shot_id}: the approved track no longer matches "
+                    "the current signed voice inputs; building the current track")
+            else:
+                raise m.Refused(
+                    f"REFUSED - {shot_id}'s complete voice track is already approved; "
+                    "auditions may be heard, but reject the approved track before replacing it")
         lines, turns = voice_lines(pkg, shot), []
         for performance in lines:
             turns.append({"text": performance["text"], "voice_id": performance["voiceId"]})

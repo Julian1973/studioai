@@ -99,6 +99,18 @@ def _opening_frame_media(shot: dict[str, Any], media: dict[str, Any] | None) -> 
     return own_media
 
 
+# Scene-wide gates have no shot in their gate/args, but they block every shot in the scene
+# (flow audit, 2026-09-03): a running scene direction or Scene Look must show as the
+# running job on whichever shot is selected.
+_SCENE_WIDE_GATE_PREFIXES = (
+    "director:scene", "shot:scenelook", "shot:stitch", "director:final-review", "department:look",
+)
+
+
+def _scene_wide_gate(gate: str) -> bool:
+    return any(gate.startswith(prefix) for prefix in _SCENE_WIDE_GATE_PREFIXES)
+
+
 def _latest_running_job(jobs: dict[str, Any] | None, scene: str,
                         shot_id: str | None) -> dict[str, Any] | None:
     matches = []
@@ -107,7 +119,8 @@ def _latest_running_job(jobs: dict[str, Any] | None, scene: str,
             continue
         gate = str(job.get("gate") or "")
         args = [str(value) for value in (job.get("args") or [])]
-        if shot_id and shot_id not in gate and shot_id not in args:
+        if (shot_id and shot_id not in gate and shot_id not in args
+                and not _scene_wide_gate(gate)):
             continue
         matches.append(job)
     if not matches:
@@ -341,13 +354,24 @@ def _prepared_animation_contract(ledger: dict[str, Any]) -> dict[str, Any] | Non
     }
 
 
-def _spend_disclosure(package: dict[str, Any] | None, shot_id: str | None) -> dict[str, Any] | None:
+def _spend_disclosure(package: dict[str, Any] | None, shot_id: str | None,
+                      state: dict[str, Any] | None = None) -> dict[str, Any] | None:
     if not package or not shot_id:
         return None
     ledger = next((item for item in (package.get("continuityLedger") or [])
                    if item.get("shotId") == shot_id), {})
-    disclosure = ((ledger.get("pendingSpendAuth") or {}).get("disclosure") or {})
+    auth = ledger.get("pendingSpendAuth") or {}
+    disclosure = auth.get("disclosure") or {}
     if not disclosure:
+        return None
+    # A disclosure sealed against an older package revision (or a re-sealed envelope) is not
+    # an approvable spend: the fire would be refused, so offer no approve-spend decision
+    # (flow audit, 2026-09-03).
+    state_revision = (state or {}).get("packageRevision")
+    if state_revision is not None and disclosure.get("packageRevision") != state_revision:
+        return None
+    if (disclosure.get("envelopeHash") and auth.get("envelopeHash")
+            and disclosure.get("envelopeHash") != auth.get("envelopeHash")):
         return None
     allowed = (
         "shotId", "candidateCount", "costPerCandidateUsd", "maxBatchCostUsd",
@@ -382,6 +406,25 @@ def _voice_audition_candidates(ledger: dict[str, Any]) -> list[dict[str, Any]]:
             ),
         })
     return out
+
+
+def _voice_audition_line_meta(ledger: dict[str, Any], shot: dict[str, Any]) -> dict[str, Any]:
+    """Which spoken line the current audition bundle is for, so HEAR can say "Line 2 of 3"."""
+    auditions = ledger.get("voiceAuditions") or {}
+    occurrence = auditions.get("dialogueOccurrenceId")
+    try:
+        import cb_audio_authority
+        lines = cb_audio_authority.spoken_dialogue_lines(shot)
+    except Exception:
+        lines = [line for line in (shot.get("dialogueLines") or []) if isinstance(line, dict)]
+    ids = [line.get("dialogueOccurrenceId") for line in lines]
+    line_index = (ids.index(occurrence) + 1) if occurrence in ids else None
+    return {
+        "lineIndex": line_index,
+        "lineCount": len(lines),
+        "dialogueOccurrenceId": occurrence,
+        "selectedCandidateId": (auditions.get("selected") or {}).get("candidateId"),
+    }
 
 
 def _production_advisories(shot: dict[str, Any], session_phase: str,
@@ -809,7 +852,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
     recent_failure = _latest_failed_job(jobs, scene, shot_id)
     stages = state.get("stages") or {}
     provider_blocker = _provider_blocker(preflight)
-    spend = _spend_disclosure(package, shot_id)
+    spend = _spend_disclosure(package, shot_id, state)
     package_ledger = next((item for item in ((package or {}).get("continuityLedger") or [])
                            if item.get("shotId") == shot_id), {})
     if running:
@@ -993,7 +1036,17 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             else:
                 artifact = {"type": "image", "url": shot_media.get("keyframeCandidate")
                             or shot_media.get("keyframe"), "label": "Opening-frame candidate"}
-            if len(keyframe_candidates) > 1 and not selected_keyframe_candidate_id:
+            if not current.get("keyframeCandidate"):
+                # The candidate on disk no longer matches the current inputs (cb_state's
+                # keyframeCandidate currency): approving it would be refused, so the only
+                # honest moves are regenerate or iterate (flow audit, 2026-09-03).
+                status = "ready_to_fire"
+                headline = "Candidate is stale — regenerate"
+                summary = ("The opening-frame candidate was built from earlier inputs. "
+                           "Build it again, or iterate with one correction.")
+                primary = _action("build-keyframe", "Build opening frame", paid=True)
+                decisions = [_action("iterate-keyframe", "Iterate", destructive=True)]
+            elif len(keyframe_candidates) > 1 and not selected_keyframe_candidate_id:
                 headline = "Choose the SEE stage to review"
                 summary = ("Compare A from Seedream 5.0 Pro with B from Nano Banana 2. "
                            "Selecting a candidate does not approve it.")
@@ -1011,6 +1064,21 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                 ]
                 if not _ai_creative_review(package_ledger, phase)["available"]:
                     primary = _action("run-ai-review", "Run AI Director review (optional)")
+        elif not keyframe_ready and shot.get("sourceType") == "relay":
+            # A relay shot never builds its own keyframe: it opens on the predecessor's
+            # approved final frame, so it waits on that approval (flow audit, 2026-09-03).
+            phase = "keyframe"
+            status = "blocked"
+            source_shot_id = shot.get("sourceShotId") or "the previous shot"
+            headline = f"Waiting on {source_shot_id}"
+            summary = keyframe_headline or purpose
+            blocker = {
+                "code": "RELAY_SOURCE_NOT_APPROVED",
+                "shotId": shot.get("sourceShotId"),
+                "message": (f"Approve {source_shot_id}'s take first; "
+                            "this shot opens on its final frame"),
+            }
+            primary = None
         elif not keyframe_ready:
             phase = "keyframe"
             status = "ready_to_fire"
@@ -1019,7 +1087,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             primary = _action("build-keyframe", "Build opening frame", paid=True)
             if (scene_look or {}).get("plateUrl"):
                 artifact = {"type": "image", "url": scene_look.get("plateUrl"),
-                            "label": "Current Scene Look"}
+                            "label": "Current Scene Look", "role": "scene-plate"}
         voice_auditions = _voice_audition_candidates(package_ledger)
         if (not all_animations_current and keyframe_ready and pending.get("voice")
                 and shot_media.get("vo")):
@@ -1039,12 +1107,17 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             status = "ready_to_review"
             headline = "Choose the voice performance"
             summary = purpose
+            audition_meta = _voice_audition_line_meta(package_ledger, shot)
             artifact = {"type": "audio-set", "items": voice_auditions,
-                        "label": "Voice performance auditions"}
-            decisions = [
-                _action("accept-voice", "Accept"),
-                _action("iterate-voice", "Iterate", destructive=True),
-            ]
+                        "label": "Voice performance auditions", **audition_meta}
+            # An audition is a per-line direction choice, not the shot track: nothing can be
+            # accepted here. Once a take is chosen and no complete track exists yet, the next
+            # move is the paid build of the next line / complete track (flow audit, 2026-09-03).
+            decisions = []
+            if audition_meta.get("selectedCandidateId") and not package_ledger.get("voPath"):
+                primary = _action("build-voice", "Build next line / complete track", paid=True)
+            else:
+                primary = None
         elif not all_animations_current and keyframe_ready and pending.get("voice"):
             phase = "voice"
             status = "ready_to_review"
@@ -1077,14 +1150,15 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             candidates = shot_media.get("candidates") or []
             artifact = {"type": "video-set", "items": candidates,
                         "label": "Animation candidates"}
-            if _ai_creative_review(package_ledger, phase)["available"]:
-                decisions = [
-                    _action("accept-animation", "Accept", candidate=(candidates[0].get("n")
-                                                                      if len(candidates) == 1 else None)),
-                    _action("iterate-animation", "Iterate", destructive=True),
-                ]
-            else:
-                primary = _action("run-ai-review", "Run AI Director review")
+            # Mirrors SEE: the human decision is the authority, the AI review is optional
+            # (flow audit, 2026-09-03).
+            decisions = [
+                _action("accept-animation", "Accept", candidate=(candidates[0].get("n")
+                                                                  if len(candidates) == 1 else None)),
+                _action("iterate-animation", "Iterate", destructive=True),
+            ]
+            if not _ai_creative_review(package_ledger, phase)["available"]:
+                primary = _action("run-ai-review", "Run AI Director review (optional)")
         elif (not all_animations_current and keyframe_ready and voice_ready
               and not current.get("animation")):
             phase = "animation"
@@ -1260,9 +1334,10 @@ def allowed_action_ids(session: dict[str, Any]) -> set[str]:
     actions.extend(session.get("decisionActions") or [])
     actions.extend(session.get("scenePlateActions") or [])
     out = {str(action.get("id")) for action in actions if action.get("id")}
+    # Library/upload are locked only while a candidate is under review (or a job runs);
+    # a scene-plate artifact or a stale candidate does not lock them (flow audit, 2026-09-03).
     if (session.get("phase") == "keyframe" and
-            session.get("status") != "rendering" and
-            not (session.get("artifact") or {}).get("url")):
+            session.get("status") not in ("rendering", "ready_to_review")):
         out.update({"select-keyframe-library", "select-keyframe-upload"})
     if ((session.get("artifact") or {}).get("type") == "image-set"):
         out.add("select-keyframe-candidate")

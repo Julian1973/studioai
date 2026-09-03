@@ -775,12 +775,44 @@
     setLocalActivity(null);
   }
 
+  function auditionLineLabel(source) {
+    // "Line 2 of 3": the session artifact carries lineIndex/lineCount; a voice-status
+    // bundle only carries the occurrence id, so fall back to the live session artifact.
+    const artifact = app.session?.artifact?.type === "audio-set" ? app.session.artifact : {};
+    const sameLine = !source?.dialogueOccurrenceId || !artifact.dialogueOccurrenceId ||
+      source.dialogueOccurrenceId === artifact.dialogueOccurrenceId;
+    const lineIndex = Number(source?.lineIndex || (sameLine ? artifact.lineIndex : 0));
+    const lineCount = Number(source?.lineCount || (sameLine ? artifact.lineCount : 0));
+    return lineIndex && lineCount ? `Line ${lineIndex} of ${lineCount}` : "";
+  }
+
+  function auditionGridMarkup(artifact) {
+    return `<div class="relay-candidate-grid voice-audition-relay">
+      ${(artifact.items || []).map((item) => `<article class="relay-candidate ${item.selected ? "selected" : ""}">
+        <header><strong>${esc(item.label || `Voice take ${item.n}`)}</strong><span>${item.primary ? "Primary direction" : `Take ${esc(item.takeNumber || item.n)}`}</span></header>
+        ${item.performedText ? `<code>${esc(item.performedText)}</code>` : ""}
+        <div class="relay-audio-player">${audioWaveformMarkup(item.label || "Voice performance")}<audio controls preload="metadata" src="${esc(item.url)}?v=${Date.now()}"></audio></div>
+        <button type="button" data-voice-audition="${esc(item.candidateId || "")}" ${item.selected ? "disabled" : ""}>${item.selected ? "Direction chosen" : "Choose this voice"}</button>
+      </article>`).join("")}
+    </div>`;
+  }
+
+  function bindAuditionButtons(root) {
+    root.querySelectorAll("[data-voice-audition]").forEach((button) => button.addEventListener("click", () => selectVoiceAudition(button.dataset.voiceAudition)));
+  }
+
   function renderArtifact(session) {
     const stage = $("#media-stage");
     const artifact = session.artifact || {};
     app.selectedCandidate = null;
     if (session.status === "rendering") {
       stage.innerHTML = renderProgress(session);
+      return;
+    }
+    if (artifact.type === "audio-set" && (artifact.items || []).length) {
+      const lineLabel = auditionLineLabel(artifact);
+      stage.innerHTML = `<span class="stage-badge">${esc(artifact.label || "Voice performance auditions")}${lineLabel ? ` · ${esc(lineLabel)}` : ""}</span>${auditionGridMarkup(artifact)}`;
+      bindAuditionButtons(stage);
       return;
     }
     if (artifact.type === "image-set" && (artifact.items || []).length) {
@@ -1438,9 +1470,9 @@
   }
 
   function hasVisibleKeyframeArtifact(session) {
-    return session?.phase === "keyframe" &&
-      session?.artifact?.type === "image" &&
-      Boolean(session.artifact.url);
+    // A candidate under review locks the keyframe source. A scene-plate artifact shown while
+    // no candidate exists, or a stale candidate, must not (flow audit, 2026-09-03).
+    return session?.phase === "keyframe" && session?.status === "ready_to_review";
   }
 
   function keyframeSourceLocked(session) {
@@ -2257,6 +2289,13 @@
       </div>`;
     }
     const artifact = session.artifact || {};
+    if (artifact.type === "audio-set" && (artifact.items || []).length) {
+      const lineLabel = auditionLineLabel(artifact);
+      return `<div class="workbench-artifact-frame voice">
+        <span>${esc(artifact.label || "Voice performance auditions")}${lineLabel ? ` · ${esc(lineLabel)}` : ""}</span>
+        ${auditionGridMarkup(artifact)}
+      </div>`;
+    }
     if (artifact.type === "image-set" && (artifact.items || []).length) {
       return `<div class="relay-candidate-grid see-ab-grid">
         ${artifact.items.map((item) => `<article class="relay-candidate ${artifact.selectedCandidateId && String(item.candidateId) === String(artifact.selectedCandidateId) ? "selected" : ""}">
@@ -2376,14 +2415,8 @@
     }
     if (stage === 2) {
       if (artifact.type === "audio-set" && (artifact.items || []).length) {
-        return `<div class="relay-candidate-grid voice-audition-relay">
-          ${artifact.items.map((item) => `<article class="relay-candidate ${item.selected ? "selected" : ""}">
-            <header><strong>${esc(item.label || `Voice take ${item.n}`)}</strong><span>${item.primary ? "Primary direction" : `Take ${esc(item.takeNumber || item.n)}`}</span></header>
-            ${item.performedText ? `<code>${esc(item.performedText)}</code>` : ""}
-            <div class="relay-audio-player">${audioWaveformMarkup(item.label || "Voice performance")}<audio controls preload="metadata" src="${esc(item.url)}?v=${Date.now()}"></audio></div>
-            <button type="button" data-voice-audition="${esc(item.candidateId || "")}" ${item.selected ? "disabled" : ""}>${item.selected ? "Direction chosen" : "Choose this voice"}</button>
-          </article>`).join("")}
-        </div>`;
+        const lineLabel = auditionLineLabel(artifact);
+        return `${lineLabel ? `<div class="relay-line-label">${esc(lineLabel)}</div>` : ""}${auditionGridMarkup(artifact)}`;
       }
       const url = session.phase === "voice" && artifact.type === "audio" ? artifact.url : selected.voiceUrl;
       if (url) return `<div class="relay-audio-player">${audioWaveformMarkup("Approved voice performance")}<audio controls preload="metadata" src="${esc(url)}"></audio></div>`;
@@ -3529,7 +3562,7 @@
       ${status.compiler?.error ? `<div class="voice-compiler-status blocked"><strong>Voice compiler blocked</strong><p>${esc(status.compiler.error)}</p></div>` : ""}
       ${status.compiler?.ready ? `<div class="voice-compiler-status ready"><strong>Post-Direction Audit passed</strong><p>The locked script, canon voice, performance questions, tag palette, context runway and take recipes are current.</p></div>` : ""}
       ${auditionCandidates.length ? `<section class="voice-auditions">
-        <div class="voice-auditions-head"><div><span>DIRECTION AUDITIONS · NOT THE SHOT TRACK</span><h4>${esc(auditions.character || "Voice")} · ${esc(auditions.archetypeId || "directed takes")}</h4></div><strong>${auditionCandidates.length} short auditions</strong></div>
+        <div class="voice-auditions-head"><div><span>DIRECTION AUDITIONS · NOT THE SHOT TRACK${auditionLineLabel(auditions) ? ` · ${esc(auditionLineLabel(auditions))}` : ""}</span><h4>${esc(auditions.character || "Voice")} · ${esc(auditions.archetypeId || "directed takes")}</h4></div><strong>${auditionCandidates.length} short auditions</strong></div>
         <p>Use these only to choose the acting direction for this line. Nothing is approved automatically. Your choice banks the character × archetype recipe${status.voiceApprovalRecorded ? ". The existing approved track stays protected until you reject it." : ", then builds a separate complete shot track containing every line at its approved timing."}</p>
         <div class="voice-audition-grid">${auditionCandidates.map((candidate) => {
           const chosen = selectedAudition.candidateId === candidate.candidateId;
@@ -3642,10 +3675,17 @@
         toast("HEAR choice saved. The existing approved track remains protected; reject it before building its replacement.");
         return;
       }
-      toast("HEAR choice saved. Building the complete shot track...");
+      // The choice is a zero-spend direction decision. The paid build of the next line /
+      // complete track is a separate action the refreshed session offers (never implied).
+      await loadSession();
       const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
       const action = actions.find((item) => item.id === "build-voice");
-      if (action) await handleAction(action);
+      if (action) {
+        toast(`HEAR choice saved. Next: ${action.label}.`);
+        await handleAction(action);
+      } else {
+        toast("HEAR choice saved. Nothing was generated.");
+      }
     } catch (error) {
       toast(error.message, true);
     }
@@ -3762,6 +3802,20 @@
     }
     if (artifact.type === "image" && artifact.url) {
       return `<div class="pipeline-artifact"><img src="${esc(artifact.url)}?v=${Date.now()}" alt="${esc(artifact.label || "Current production result")}"><span>${esc(artifact.label || "Current result")}</span></div>`;
+    }
+    if (artifact.type === "image-set" && (artifact.items || []).length) {
+      return `<div class="pipeline-artifact">
+        <div class="relay-candidate-grid see-ab-grid">
+          ${artifact.items.map((item) => `<article class="relay-candidate ${artifact.selectedCandidateId && String(item.candidateId) === String(artifact.selectedCandidateId) ? "selected" : ""}">
+            <header><strong>${esc(item.label || `Candidate ${item.candidateId}`)}</strong><span>${esc(item.provider || "provider")}</span></header>
+            <img src="${esc(item.url)}?v=${Date.now()}" alt="${esc(item.label || `SEE candidate ${item.candidateId}`)}">
+          </article>`).join("")}
+        </div>
+        <span>${esc(artifact.label || "SEE A/B comparison")}</span>
+      </div>`;
+    }
+    if (artifact.type === "audio" && artifact.url) {
+      return `<div class="pipeline-artifact"><div class="relay-audio-player">${audioWaveformMarkup(artifact.label || "Voice performance")}<audio controls preload="metadata" src="${esc(artifact.url)}?v=${Date.now()}"></audio></div><span>${esc(artifact.label || "Voice performance")}</span></div>`;
     }
     return "";
   }
@@ -4367,7 +4421,8 @@
       const payload = await api("/api/jobs");
       const job = payload.jobs?.[jobId];
       if (job && !["running", "queued", "finalizing"].includes(job.status)) return job;
-      await new Promise((resolve) => setTimeout(resolve, 900));
+      // Fast first 5 s (short zero-spend jobs return almost immediately), then 1 s.
+      await new Promise((resolve) => setTimeout(resolve, Date.now() - started < 5000 ? 400 : 1000));
     }
     return null;
   }
@@ -4661,7 +4716,11 @@
           shotId: app.session.selectedShotId,
           action: action.id,
           note: note || "",
-          candidate: app.selectedCandidate,
+          // A SEE A/B candidate id travels only with an image-set; a WATCH take number
+          // travels with a video-set. Anything else must not be sent as a candidate.
+          candidate: ["image-set", "video-set"].includes(app.session?.artifact?.type)
+            ? app.selectedCandidate
+            : null,
         }),
       });
       if (result.navigate) {
@@ -4670,11 +4729,13 @@
         return;
       }
       if (result.session) {
+        // The server already projected the new session: render it now, no extra fetch.
         setLocalActivity(null);
         app.session = result.session;
         renderDirector(app.session);
+        renderReview(app.session);
         if (app.view === "pipeline") renderPipeline();
-        toast(result.noChange ? "Nothing changed." : "Scene plate updated.");
+        toast(result.noChange ? "Nothing changed." : (action.id.includes("scene-plate") ? "Scene plate updated." : "Done."));
         return;
       }
       toast(result.noChange ? "Nothing changed." : "Director action started.");

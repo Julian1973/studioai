@@ -193,7 +193,7 @@ def _load_or_create_session_token():
 
 
 SESSION_TOKEN = _load_or_create_session_token()
-STUDIO_BUILD_VERSION = "see-ab-live-20260903-2"
+STUDIO_BUILD_VERSION = "flow-audit-20260903-3"
 SESSION_COOKIE = "cb_studio_session"
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 20 * 1024 * 1024
@@ -1298,7 +1298,9 @@ def _stream(jobId, args):
 
 def _start(jobId, gate, scene, args):
     args = list(args)
-    _clear_director_session_cache(scene=scene, episode=args[-1] if args else None)
+    # The episode is not reliably args[-1] (--candidates/--spend-token may follow it), so
+    # clear every cached session for the scene (flow audit, 2026-09-03).
+    _clear_director_session_cache(scene=scene)
     operation_key = cb_db.job_operation_key(gate, scene, args)
     stale = _is_stale()
     with _JOB_LOCK:
@@ -4565,7 +4567,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                         ["cb_studio_director.py", command, scene, target, ep])
                 elif action == "accept-keyframe":
                     import cb_render as _CBR
-                    candidate = str(d.get("candidate") or "").strip().upper()
+                    raw_candidate = d.get("candidate")
+                    # Only a SEE A/B candidate id (a string) selects; a numeric take number
+                    # from a previous WATCH selection is ignored (flow audit, 2026-09-03).
+                    candidate = (raw_candidate.strip().upper()
+                                 if isinstance(raw_candidate, str) else "")
                     if candidate:
                         _CBR.select_keyframe_candidate(
                             scene, target, candidate, episode=ep,

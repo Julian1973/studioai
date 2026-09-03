@@ -469,7 +469,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
         "pending": {
             "keyframe": bool(keyframe_candidate),
             "voice": bool(ledger.get("voPath") and not voice_ok),
-            "animation": ledger.get("status") == "candidates-pending",
+            "animation": ledger.get("status") == "candidates-pending" and batch_current,
             "directorReview": bool(review_work.get("candidate")),
         },
         "allowedActions": {

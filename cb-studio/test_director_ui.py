@@ -461,7 +461,7 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert ".shot-inputs" in CSS
     assert ".shot-prompt-panel pre" in CSS
     assert ".shot-input-ref-grid" in CSS
-    assert "scene-plate-direct-select-20260812-1" in HTML
+    assert "flow-audit-20260903-3" in HTML
 
 
 def test_shot_context_sits_above_see_hear_watch_and_carries_continuity_refs():
@@ -717,11 +717,11 @@ def test_shot_inputs_are_phase_specific_not_generic_keyframe_copy():
 
 def test_director_first_scene_workbench_matches_build_brief():
     assert 'id="scene-workbench"' in HTML
-    assert "scene-plate-direct-select-20260812-1" in HTML
+    assert "flow-audit-20260903-3" in HTML
 
 
 def test_browser_and_server_publish_the_same_studio_build_version():
-    assert 'STUDIO_BUILD_VERSION = "scene-plate-direct-select-20260812-1"' in SERVER
+    assert 'STUDIO_BUILD_VERSION = "flow-audit-20260903-3"' in SERVER
 
 
 def test_three_signoff_relay_and_parallel_scene_board_are_present():

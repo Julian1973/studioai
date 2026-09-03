@@ -291,6 +291,7 @@ def _state(**current):
             "badgeState": "ready",
             "current": {
                 "keyframe": False,
+                "keyframeCandidate": True,
                 "voice": False,
                 "animation": False,
                 **current,
@@ -663,9 +664,34 @@ def test_voice_auditions_are_a_reviewable_hear_decision():
     assert [item["candidateId"] for item in session["artifact"]["items"]] == [
         "audition-1", "audition-2"
     ]
-    assert {item["id"] for item in session["decisionActions"]} == {
-        "accept-voice", "iterate-voice"
-    }
+    # An audition is a per-line direction choice, never the shot track: nothing can be
+    # accepted until a take is chosen (flow audit, 2026-09-03).
+    assert session["decisionActions"] == []
+    assert session["primaryAction"] is None
+    assert session["artifact"]["lineCount"] == 0
+    assert session["artifact"]["lineIndex"] is None
+
+    package["shots"][0]["dialogueLines"] = [
+        {"dialogueOccurrenceId": "occ-1", "kind": "dialogue", "character": "Fuzzby",
+         "text": "Bizzy!"},
+        {"dialogueOccurrenceId": "occ-2", "kind": "dialogue", "character": "Zenny",
+         "text": "Like you said... it is part of growing up."},
+        {"dialogueOccurrenceId": "occ-3", "kind": "dialogue", "character": "Fuzzby",
+         "text": "Nailed it."},
+    ]
+    package["continuityLedger"][0]["voiceAuditions"]["dialogueOccurrenceId"] = "occ-2"
+    package["continuityLedger"][0]["voiceAuditions"]["selected"] = {"candidateId": "audition-1"}
+    session = _session(
+        state=_state(keyframe=True),
+        package=package,
+        media=_media(keyframeApproved="/engine/media/accepted.png"),
+    )
+    assert session["artifact"]["dialogueOccurrenceId"] == "occ-2"
+    assert (session["artifact"]["lineIndex"], session["artifact"]["lineCount"]) == (2, 3)
+    assert session["artifact"]["items"][0]["selected"] is True
+    assert session["decisionActions"] == []
+    assert session["primaryAction"]["id"] == "build-voice"
+    assert session["primaryAction"]["paid"] is True
 
 
 def test_complete_voice_track_takes_priority_over_old_auditions():
@@ -788,6 +814,7 @@ def test_spend_token_never_leaves_the_server_projection():
             "maxBatchCostUsd": 1.25,
             "bindingHash": "binding",
             "providerModelId": "seedance-2.5",
+            "packageRevision": 3,
         },
     }
     session = _session(
@@ -901,6 +928,7 @@ def test_dense_animation_spend_projection_warns_before_one_shot_render():
             "candidateCount": 1,
             "maxBatchCostUsd": 1.25,
             "providerModelId": "seedance-2.5",
+            "packageRevision": 3,
         },
     }
     package = _package(pending)
@@ -1191,12 +1219,104 @@ def test_latest_failed_action_is_still_reported():
 
 def test_allowed_actions_are_derived_from_the_current_session_only():
     session = _session()
+    # The scene plate shown while no candidate exists never locks the keyframe source.
+    assert session["artifact"]["role"] == "scene-plate"
     assert cb_studio_director.allowed_action_ids(session) == {
         "build-keyframe",
         "build-scene-plate",
+        "select-keyframe-library",
+        "select-keyframe-upload",
         "select-scene-plate-library",
         "select-scene-plate-upload",
     }
+
+    state = _state()
+    state["shots"][0]["pending"]["keyframe"] = True
+    reviewing = _session(state=state, media=_media(keyframeCandidate="/engine/media/c.png"))
+    assert reviewing["status"] == "ready_to_review"
+    assert "select-keyframe-upload" not in cb_studio_director.allowed_action_ids(reviewing)
+    assert "select-keyframe-library" not in cb_studio_director.allowed_action_ids(reviewing)
+
+
+def test_stale_keyframe_candidate_offers_regenerate_not_accept():
+    state = _state(keyframeCandidate=False)
+    state["shots"][0]["pending"]["keyframe"] = True
+    session = _session(state=state, media=_media(keyframeCandidate="/engine/media/c.png"))
+    assert session["phase"] == "keyframe"
+    assert session["status"] == "ready_to_fire"
+    assert session["headline"].startswith("Candidate is stale")
+    assert session["primaryAction"]["id"] == "build-keyframe"
+    assert [item["id"] for item in session["decisionActions"]] == ["iterate-keyframe"]
+    allowed = cb_studio_director.allowed_action_ids(session)
+    assert "accept-keyframe" not in allowed
+    assert {"select-keyframe-library", "select-keyframe-upload"} <= allowed
+
+
+def test_relay_shot_with_unapproved_source_is_blocked_on_that_shot():
+    package = _package()
+    package["shots"][0].update({"sourceType": "relay", "sourceShotId": "S1.SH0"})
+    session = _session(package=package, media=_media())
+    assert session["phase"] == "keyframe"
+    assert session["status"] == "blocked"
+    assert session["primaryAction"] is None
+    assert session["blocker"]["shotId"] == "S1.SH0"
+    assert session["blocker"]["message"] == (
+        "Approve S1.SH0's take first; this shot opens on its final frame")
+    assert "build-keyframe" not in cb_studio_director.allowed_action_ids(session)
+
+
+def test_watch_candidates_always_offer_the_human_decision_with_optional_ai_review():
+    state = _state(keyframe=True, voice=True)
+    state["shots"][0]["pending"]["animation"] = True
+    session = _session(
+        state=state,
+        media=_media(candidates=[{"n": 1, "url": "/engine/media/c1.mp4"}]),
+    )
+    assert session["phase"] == "animation"
+    assert session["status"] == "ready_to_review"
+    assert [item["id"] for item in session["decisionActions"]] == [
+        "accept-animation", "iterate-animation"]
+    assert session["decisionActions"][0]["candidate"] == 1
+    assert session["primaryAction"]["id"] == "run-ai-review"
+    assert "optional" in session["primaryAction"]["label"]
+
+
+def test_spend_disclosure_from_another_package_revision_is_not_approvable():
+    pending = {
+        "token": "secret-single-use-token",
+        "envelopeHash": "sealed",
+        "disclosure": {"shotId": SHOT_ID, "maxBatchCostUsd": 1.25, "packageRevision": 2,
+                       "envelopeHash": "sealed"},
+    }
+    session = _session(
+        state=_state(keyframe=True, voice=True, animationDirection=True),
+        preflight=_preflight(provider_ready=True),
+        package=_package(pending),
+    )
+    assert session["spendDisclosure"] is None
+    assert "approve-spend" not in cb_studio_director.allowed_action_ids(session)
+    assert session["primaryAction"]["id"] == "prepare-render"
+
+    pending["disclosure"]["packageRevision"] = 3
+    pending["disclosure"]["envelopeHash"] = "re-sealed"
+    session = _session(
+        state=_state(keyframe=True, voice=True, animationDirection=True),
+        preflight=_preflight(provider_ready=True),
+        package=_package(pending),
+    )
+    assert session["spendDisclosure"] is None
+
+
+def test_scene_wide_running_job_shows_on_every_shot():
+    jobs = {"j1": {"jobId": "j1", "status": "running", "scene": "1",
+                   "gate": "director:scene", "args": ["cb_creative.py", "1", "Ep1"],
+                   "started": 10.0, "step": "Directing scene"}}
+    session = _session(jobs=jobs)
+    assert session["status"] == "rendering"
+    assert session["runningJob"]["jobId"] == "j1"
+    other = {"j2": {"jobId": "j2", "status": "running", "scene": "1",
+                    "gate": "director:build-keyframe:S1.SH9", "args": [], "started": 10.0}}
+    assert _session(jobs=other)["runningJob"] is None
 
 
 def test_completed_animation_flows_to_quality_review_then_master():

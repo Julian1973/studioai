@@ -5675,7 +5675,10 @@ def main():
         JOBS.update(restored_jobs)
     reindex_media()
     episodes = reindex_episodes()
-    http.server.ThreadingHTTPServer.allow_reuse_address = True
+    # ONE studio per port (2026-09-03): with SO_REUSEADDR two launchers could both bind 8765 and
+    # split requests between two job registries ("action no longer current", stale SEE panels).
+    # A second instance must fail to bind, loudly, so the launcher shows the error.
+    http.server.ThreadingHTTPServer.allow_reuse_address = False
     threading.Thread(target=_freshness_watch, daemon=True).start()
     # Finish the authoritative projection before publishing the launch URL so
     # the first browser click does not race a cold state audit.

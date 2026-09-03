@@ -5805,6 +5805,25 @@ def main():
         base_url = PUBLIC_ORIGIN or f"http://{BIND_HOST}:{PORT}"
         launch_url = f"{base_url}/cb-studio/director.html?launchToken={LAUNCH_TOKEN}"
         print(f"Animation Studio launch URL -> {launch_url}", flush=True)
+        if os.environ.get("CB_STUDIO_NO_BROWSER") == "1":
+            print("Browser auto-open skipped (CB_STUDIO_NO_BROWSER=1)", flush=True)
+        else:
+            # Open the studio for Julian on start (2026-09-03). Always the FULL launch URL: the
+            # base URL alone answers 401, since every route is token-authenticated. Deferred
+            # import and a daemon thread so a machine with no default browser, a broken handler
+            # or a blocking BROWSER script can never delay or stop the studio starting - the URL
+            # is printed above either way. CB_STUDIO_NO_BROWSER=1 skips it (a code-edit session
+            # reloads the studio on every save, and each reload would otherwise open a tab).
+            def _open_browser(url=launch_url):
+                try:
+                    import webbrowser
+                    if not webbrowser.open(url):
+                        print("(no default browser found - open the launch URL above)", flush=True)
+                except Exception as exc:
+                    print(f"(could not open a browser automatically: {exc} - open the launch URL above)",
+                          flush=True)
+
+            threading.Thread(target=_open_browser, name="launch-browser", daemon=True).start()
         access_mode = "HTTPS tunnel" if PUBLIC_ORIGIN else "loopback-only"
         print(
             f"Serving {ROOT} ({len(episodes)} episodes) - {access_mode}, authenticated, "

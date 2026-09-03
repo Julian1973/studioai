@@ -43,8 +43,16 @@ def _offscreen_only_rule():
     return f"{' and '.join(names)} {verb} locked offscreen-only and can never appear in charactersInFrame. "
 
 def director_grammar_pack():
-    """Load versioned Director law as data; never let a worker improvise it."""
-    return json.loads(DIRECTOR_GRAMMAR_PACK.read_text(encoding="utf-8"))
+    """Versioned Director law as data; never improvised by a worker. The engine file holds only
+    the show-free mechanics (routes, camera families, boilerplate). Everything that describes a
+    SHOW - the style paragraph, the cast motion vocabulary, appearance words, canon blocks - is the
+    project's own (laws/director_grammar.json, read through project_laws) and overrides key by
+    key. Rule 87: a project that declares none gets none, never another show's (2026-09-03: the
+    first show's fur-and-wings paragraph was reaching every Box Monsters render prompt)."""
+    import project_laws
+    pack = json.loads(DIRECTOR_GRAMMAR_PACK.read_text(encoding="utf-8"))
+    pack.update(project_laws.director_grammar())
+    return pack
 
 
 def canonical_style_paragraph():
@@ -52,7 +60,7 @@ def canonical_style_paragraph():
     version = str(style.get("version") or "").strip()
     text = str(style.get("text") or "").strip()
     if not version or not text:
-        raise RuntimeError("Director grammar pack has no versioned canonical style paragraph")
+        raise RuntimeError("the project declares no versioned style paragraph - add laws/director_grammar.json (style_paragraph) to the project")
     return version, text
 
 
@@ -821,8 +829,12 @@ def _system(worker, job, standard_version=0):
             "structured result.")
 
 
-def _j(value, limit=22000):
-    return json.dumps(value, ensure_ascii=False, indent=1)[:limit]
+def _j(value, limit=None):
+    """The whole context, always. Before 2026-09-03 this sliced the JSON at 22,000 characters and
+    every real shot context (25-58k) lost its tail: the ordered attachments, the human WATCH
+    feedback, the one-re-fire refusal and the review image map never reached the department."""
+    text = json.dumps(value, ensure_ascii=False, indent=1)
+    return text[:limit] if limit else text
 
 
 class BeatSplit(BaseModel):

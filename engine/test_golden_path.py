@@ -437,7 +437,7 @@ class Providers:
             R, "_ensure_posed_integration_master", lambda *args, **kwargs: posed_record)
         def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                              platform="youtube", candidate_id=None, music=None,
-                             ambience=None):
+                             ambience=None, **kwargs):
             """Zero-ffmpeg post adapter with the production manifest contract.
 
             Media generation is mocked in this orchestration suite, but immutable paths,

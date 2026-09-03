@@ -589,6 +589,7 @@ DIRECTOR_ACTION_IDS = {
     "accept-animation", "iterate-animation",
     "run-ai-review",
     "run-quality-review", "accept-quality", "reopen-shot",
+    "abandon-batch", "override-model-limited",
     "build-master", "run-final-review", "accept-master", "iterate-master",
     "save-retake-note",
                 }
@@ -4126,9 +4127,26 @@ class H(http.server.SimpleHTTPRequestHandler):
                 import cb_canon
                 record = cb_canon.write_lock(root=ROOT, locked_by=by)
                 status = cb_canon.status("Ep1", root=ROOT)
+                # THE APPROVED EPISODE RIDES THE NEW LOCK (2026-09-03 audit): a re-lock used to
+                # strand every scene behind "Run Story & Direction" although the beat package,
+                # vision, storyboards and production packages were unchanged. rebase_canon_lock
+                # refuses anything but provenance, so it is safe to attempt here, every time.
+                rebase = None
+                try:
+                    import cb_intake as _CBI
+                    ep = str(d.get("episode") or "Ep1").strip() or "Ep1"
+                    st = _CBI.intake_status(ep)
+                    if st.get("rebaseEligible") or (
+                            st.get("canonicalCurrent") and _CBI.storyboards_behind_canon(ep)):
+                        rebase = _CBI.rebase_canon_lock(ep, reviewed_by=by)
+                except Exception as exc:
+                    rebase = {"outcome": "not-rebased", "reason": str(exc)}
+                with _DIRECTOR_SESSION_CACHE_LOCK:
+                    _DIRECTOR_SESSION_CACHE.clear()
                 self._json(200, {"ok": True, "manifestDigest": record.get("manifestDigest"),
                                  "lockedBy": by, "current": status.get("current"),
-                                 "episodeReady": status.get("episodeReady")})
+                                 "episodeReady": status.get("episodeReady"),
+                                 "rebase": rebase})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
@@ -4697,6 +4715,22 @@ class H(http.server.SimpleHTTPRequestHandler):
                     _CBR.reopen_approved_shot(
                         scene, target, note, category="other", episode=ep,
                         reviewed_by=str(d.get("by") or "Julian"))
+                    self._json(200, {"ok": True, "zeroSpend": True}); return
+                elif action == "abandon-batch":
+                    # A render killed mid-flight (Stop, restart, crash) left the batch
+                    # "generating" with no desk exit (2026-09-03 audit).
+                    import cb_render as _CBR
+                    _CBR.abandon_batch(
+                        scene, target, note or "Abandoned from the production desk - the render never completed",
+                        episode=ep, reviewed_by=str(d.get("by") or "Julian"))
+                    self._json(200, {"ok": True, "zeroSpend": True}); return
+                elif action == "override-model-limited":
+                    if not note:
+                        self._json(400, {"error": "Say what was redesigned before another render."}); return
+                    import cb_render as _CBR
+                    _CBR.override_model_limited(
+                        scene, target, note, episode=ep,
+                        reviewed_by=str(d.get("by") or "Julian"), implemented_by="Studio")
                     self._json(200, {"ok": True, "zeroSpend": True}); return
                 elif action == "build-master":
                     job_id = shot_run_job("stitch", scene, ep)

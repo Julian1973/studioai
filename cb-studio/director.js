@@ -3884,8 +3884,8 @@
     const scene = scenes.find((item) => String(item.sceneNumber) === String(app.scene)) || {};
     const sceneBeats = beats.filter((beat) => String(beat.sceneNumber) === String(app.scene));
     const sceneProduction = productionPlan.filter((shot) => String(shot.sceneNumber) === String(app.scene));
-    const waiting = intake.hasCandidate && !intake.approved;
-    const status = waiting ? "Your decision" : intake.approved ? "Approved" : "Not ready";
+    const waiting = intake.hasCandidate && !intake.candidateApproved;
+    const status = waiting ? "Your decision" : intake.candidateApproved ? "Approved" : "Not ready";
     const title = scene.location
       ? `Scene ${scene.sceneNumber} — ${scene.location}`
       : (candidate.title || `Scene ${app.scene}`);
@@ -4469,8 +4469,8 @@
       toast("Nothing spent. The sealed request remains available.");
       return;
     }
-    if (action.id.startsWith("iterate-")) {
-      openIteration(action);
+    if (action.id.startsWith("iterate-") || ["reopen-shot", "override-model-limited", "abandon-batch"].includes(action.id)) {
+      openIteration(action);   // these take the Director's note (2026-09-03)
       return;
     }
     if (action.paid) {

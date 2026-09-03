@@ -54,6 +54,7 @@ _OUT_RE = re.compile(r"^([A-Za-z0-9]+)_(\d+(?:\.[A-Za-z0-9]+)?)_")
 # cost item in the whole pipeline) into episode=None/code=None, invisible to every per-beat/per-scene
 # breakdown in report(). Checked FIRST, before the generic fallback.
 _VO_RE = re.compile(r"^vo_([A-Za-z0-9]+)_(\d+(?:\.[A-Za-z0-9]+)?)")
+_SHOT_RE = re.compile(r"^([A-Za-z0-9]+)_(S\d+\.SH\d+)(?:[_.]|$)")
 
 # The scene-level asset shape cb_post.py uses for a scene's music/ambience beds — "{episode}_S{scene}_...",
 # e.g. "Ep1_S1_music.mp3" — has no beat code at all, just a scene number; _OUT_RE's `\d+` right after the
@@ -69,6 +70,12 @@ def _attribution(out_path):
     fallback. Returns (episode, code) or (None, None) if none match — a scratch/test filename should never
     crash cost logging, just log unattributed."""
     base = os.path.basename(str(out_path or ""))
+
+    # The production naming since the shot pipeline: "{episode}_{S<n>.SH<nn>}_..." for keyframes,
+    # takes, auditions and voice candidates (2026-09-03: every real row was landing unattributed).
+    m = _SHOT_RE.match(base)
+    if m:
+        return m.group(1), m.group(2)
 
     m = _VO_RE.match(base)
     if m:

@@ -945,8 +945,11 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         pending = selected_state.get("pending") or {}
         # A new keyframe candidate awaiting the human decision outranks an older approval: the
         # second decision chain below must not re-route the shot to HEAR/WATCH past it (2026-09-03).
-        keyframe_ready = (bool(current.get("keyframe") or shot_media.get("keyframeApproved"))
-                          and not pending.get("keyframe"))
+        # cb_state's currency verdict only - never the asset registry's raw "approved" flag,
+        # which stayed true after a canon re-lock and routed the shot past SEE (2026-09-03 audit).
+        keyframe_ready = bool(current.get("keyframe") or (
+            shot.get("sourceType") == "relay" and shot_media.get("keyframeApproved"))
+        ) and not pending.get("keyframe")   # a relay shot inherits its anchor from the registry
         voice_ready = bool(not selected_state.get("talky") or current.get("voice"))
         purpose = str(shot.get("purpose") or shot.get("storyBeat") or "").strip()
         keyframe_headline = (((preflight.get("productionInputs") or {}).get("shots") or {})
@@ -1079,6 +1082,19 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                             "this shot opens on its final frame"),
             }
             primary = None
+        elif (not keyframe_ready and not pending.get("keyframe")
+              and (package_ledger.get("keyframeApproval") or {}).get("approved")):
+            # An approved opening frame whose direct inputs changed (canon re-lock, new
+            # direction, replaced reference): rebuild it, or re-confirm the same image from
+            # the library. Before 2026-09-03 this state was invisible and WATCH refused.
+            phase = "keyframe"
+            status = "ready_to_fire"
+            headline = "Opening frame approval is stale — rebuild or re-confirm"
+            summary = (str(selected_state.get("sub") or "").strip()
+                       or "The approved opening frame was signed on earlier inputs.")
+            primary = _action("build-keyframe", "Rebuild opening frame", paid=True)
+            artifact = {"type": "image", "url": shot_media.get("keyframeApproved")
+                        or shot_media.get("keyframe"), "label": "Stale opening frame"}
         elif not keyframe_ready:
             phase = "keyframe"
             status = "ready_to_fire"
@@ -1120,15 +1136,24 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                 primary = None
         elif not all_animations_current and keyframe_ready and pending.get("voice"):
             phase = "voice"
-            status = "ready_to_review"
-            headline = "Do the performances sound true?"
-            summary = purpose
             artifact = {"type": "audio", "url": shot_media.get("vo"),
                         "label": "Voice performance"}
-            decisions = [
-                _action("accept-voice", "Accept"),
-                _action("iterate-voice", "Iterate", destructive=True),
-            ]
+            if ((package_ledger.get("voiceApproval") or {}).get("approved")
+                    and not current.get("voice")):
+                # An accepted track signed on earlier inputs (re-lock, recast): Accept would be
+                # refused, so rebuild it - the build supersedes the stale approval on record.
+                status = "ready_to_fire"
+                headline = "Approved voice track is stale — rebuild it"
+                summary = "The accepted track was signed on earlier voice inputs."
+                primary = _action("build-voice", "Rebuild voice track", paid=True)
+            else:
+                status = "ready_to_review"
+                headline = "Do the performances sound true?"
+                summary = purpose
+                decisions = [
+                    _action("accept-voice", "Accept"),
+                    _action("iterate-voice", "Iterate", destructive=True),
+                ]
         elif (not all_animations_current and keyframe_ready and selected_state.get("talky")
               and not current.get("voice")):
             phase = "voice"
@@ -1192,7 +1217,25 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             else:
                 artifact = {"type": "image", "url": shot_media.get("keyframeApproved")
                             or shot_media.get("keyframe"), "label": "Accepted opening frame"}
-            if provider_blocker:
+            if package_ledger.get("status") == "model-limited":
+                status = "blocked"
+                headline = "Model-limited — a human redesign is required"
+                summary = ("Two candidate batches failed the same way. Say what was redesigned "
+                           "to reopen the shot for one more render.")
+                primary = _action("override-model-limited", "Reopen with a redesign note",
+                                  destructive=True)
+            elif package_ledger.get("status") == "approved":
+                status = "ready_to_fire"
+                headline = "Accepted take is stale — reopen to re-render"
+                summary = "The accepted take's inputs changed; reopening archives it and re-fires."
+                primary = _action("reopen-shot", "Reopen and re-render", destructive=True)
+            elif stale_batch.get("status") == "generating" and not running:
+                status = "blocked"
+                headline = "A render never completed"
+                summary = ("The last batch is still marked in flight but no job is running "
+                           "(stopped, restarted or crashed). Abandon it to seal a fresh request.")
+                primary = _action("abandon-batch", "Abandon the stuck batch", destructive=True)
+            elif provider_blocker:
                 status = "blocked"
                 headline = "Animation route needs activation"
                 summary = provider_blocker.get("message") or "The selected video route is not qualified."
@@ -1383,6 +1426,7 @@ def build_keyframe(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
         except (cb_render.Refused, KeyError, TypeError, ValueError):
             return False
 
+    prepared_now = False
     if not contract_is_complete(work.get("approved")):
         if work.get("candidate"):
             if contract_is_complete(work["candidate"]):
@@ -1404,6 +1448,15 @@ def build_keyframe(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
                 scene, "cinematography", "approved", shot_id=shot_id,
                 note="Refreshed to the current typed keyframe contract.", episode=episode,
                 reviewed_by="Studio contract migration", log=log)
+            prepared_now = True
+    if not prepared_now and not _direction_current(scene, shot_id, "cinematography", episode):
+        # Direction signed on earlier inputs would make keyframe_shot refuse (2026-09-03 audit).
+        log("DIRECTOR — cinematography direction is stale against current inputs; re-preparing")
+        cb_render.prepare_department(scene, "cinematography", shot_id, episode, log)
+        cb_render.decide_department(
+            scene, "cinematography", "approved", shot_id=shot_id,
+            note="Re-prepared on current inputs before the keyframe build.", episode=episode,
+            reviewed_by="Studio contract migration", log=log)
     cb_render.keyframe_shot(scene, shot_id, episode, log)
 
 

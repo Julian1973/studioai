@@ -977,6 +977,22 @@ def intake_status(episode="Ep1"):
              (cb_lineage.signature_matches(
                  pkg.get("inputSignature"), "beat-package-input", story_inputs) and
               source_report["ok"] and pkg.get("contentSignature") == expected_content)))
+        # Name WHY the package is behind and whether the zero-generation remedy applies
+        # (2026-09-03 audit: after a canon re-lock the desk said "Run Story & Direction" — the
+        # destructive path — while rebase_canon_lock passed every precondition).
+        script_ok = _package_script_version(pkg) == (current or {}).get("scriptVersionId")
+        content_ok = bool(source_report["ok"] and pkg.get("contentSignature") == expected_content)
+        codes = {str(b.get("code")) for b in (out.get("canonBlockers") or [])}
+        out["rebaseEligible"] = bool(
+            not out["canonicalCurrent"] and out["canonLockCurrent"] and out["canonEpisodeReady"]
+            and script_ok and content_ok and not (codes - {"CAST_CANON_INCOMPLETE"}))
+        out["canonicalReason"] = (None if out["canonicalCurrent"] else
+                                  "canon-lock-advanced" if (script_ok and content_ok) else
+                                  "script-advanced" if not script_ok else "content-changed")
+    out.setdefault("rebaseEligible", False)
+    out.setdefault("canonicalReason", None)
+    out["candidateApproved"] = bool(
+        ((out.get("candidate") or {}).get("approvalState")) == "approved")
     return out
 
 
@@ -1177,7 +1193,7 @@ def storyboards_behind_canon(episode="Ep1"):
         except Exception:
             continue
         inputs = ((sb.get("inputSignature") or {}).get("inputs") or {})
-        if (sb.get("approvalState") == "approved" and
+        if (sb.get("approvalState") in ("approved", "awaiting-human-storyboard-approval") and
                 (sb.get("inputSignature") or {}).get("kind") == "scene-storyboard" and
                 inputs.get("canonProfileDigest") != want):
             behind.append(str(sb.get("sceneNumber")))
@@ -1262,6 +1278,8 @@ def rebase_canon_lock(episode="Ep1", reviewed_by="Julian", log=print):
     # package are the unchanged ones, and which is approved, is re-signed onto the new canon
     # lock and the rebased vision — its creative content is never touched.
     rebased_scenes = []
+    resigned_storyboards = {}          # sha256 of the storyboard BEFORE re-signing -> its path
+    rebased_packages = []
     if vision is not None:
         creative_dir = OUT / "creative"
         for sb_path in sorted(creative_dir.glob(f"{episode}_scene*_storyboard.json")):
@@ -1272,7 +1290,7 @@ def rebase_canon_lock(episode="Ep1", reviewed_by="Julian", log=print):
             sig = sb.get("inputSignature") or {}
             inputs = dict(sig.get("inputs") or {})
             if (sig.get("kind") != "scene-storyboard" or
-                    sb.get("approvalState") != "approved" or
+                    sb.get("approvalState") not in ("approved", "awaiting-human-storyboard-approval") or
                     (sb.get("sourceScript") or {}).get("scriptVersionId") != current["scriptVersionId"] or
                     inputs.get("beatPackageDigest") != content_signature["digest"] or
                     not cb_lineage.signature_matches(sig, "scene-storyboard", inputs)):
@@ -1284,6 +1302,7 @@ def rebase_canon_lock(episode="Ep1", reviewed_by="Julian", log=print):
                 continue
             cb_db.atomic_write_json(
                 ROOT, archive / f"{sb_path.stem}_{stamp}_{sb_digest[:12]}.json", sb)
+            resigned_storyboards[cb_lineage.sha256_file(sb_path)] = sb_path
             sb["inputSignature"] = cb_lineage.dependency_signature("scene-storyboard", new_inputs)
             sb["canonLock"] = {
                 "manifestDigest": canon_lock["manifestDigest"],
@@ -1298,10 +1317,48 @@ def rebase_canon_lock(episode="Ep1", reviewed_by="Julian", log=print):
         log(f"CANON REBASE — scene direction carried forward unchanged for scene(s) "
             + ", ".join(rebased_scenes))
 
+    # THE PRODUCTION PACKAGES RIDE ALONG (2026-09-03 audit): re-signing a storyboard changes its
+    # bytes, and every production package binds its storyboard by md5/sha256 and signature. Without
+    # this step a rebase flipped an in-production scene to "handover is stale" and the only exit
+    # was a re-promotion that reset every shot's SEE/HEAR/WATCH ledger. Provenance only: shots,
+    # ledgers and revision are untouched.
+    for pkg_file in sorted(OUT.glob(f"{episode}_scene*_production_package.json")):
+        try:
+            prod, prod_digest = cb_db.read_json_document(ROOT, pkg_file)
+        except Exception:
+            continue
+        old_sha = (prod.get("sourceStoryboard") or {}).get("sha256")
+        sb_path = resigned_storyboards.get(old_sha)
+        if not sb_path:
+            continue
+        cb_db.atomic_write_json(
+            ROOT, archive / f"{pkg_file.stem}_{stamp}_{prod_digest[:12]}.json", prod)
+        source_sb = prod.setdefault("sourceStoryboard", {})
+        source_sb["md5"] = hashlib.md5(sb_path.read_bytes()).hexdigest()
+        source_sb["sha256"] = cb_lineage.sha256_file(sb_path)
+        inputs = dict((prod.get("inputSignature") or {}).get("inputs") or {})
+        if inputs:
+            inputs["storyboardSha256"] = source_sb["sha256"]
+            if "canonProfileDigest" in inputs:
+                inputs["canonProfileDigest"] = canon_lock["profileDigests"]["storyboard"]
+            prod["inputSignature"] = cb_lineage.dependency_signature("production-package", inputs)
+        lock_rec = dict(prod.get("canonLock") or {})
+        lock_rec["manifestDigest"] = canon_lock["manifestDigest"]
+        lock_rec["profileDigests"] = dict(canon_lock["profileDigests"])
+        lock_rec["storyboardProfileDigest"] = canon_lock["profileDigests"]["storyboard"]
+        prod["canonLock"] = lock_rec
+        prod["provenanceRebase"] = {**pkg["provenanceRebase"], "previousPackageDigest": prod_digest}
+        cb_db.atomic_write_json(ROOT, pkg_file, prod, expected_digest=prod_digest)
+        rebased_packages.append(str(prod.get("sceneNumber") or pkg_file.stem))
+    if rebased_packages:
+        log("CANON REBASE — production package provenance carried forward for scene(s) "
+            + ", ".join(rebased_packages))
+
     log(f"CANON REBASE APPROVED — {episode} by {reviewed_by}; creative beat content unchanged")
     return {"outcome": "rebased", "canonicalPackage": str(pkg_path.relative_to(ROOT)),
             "backup": str(backup.relative_to(ROOT)),
-            "contentSignature": content_signature, "rebasedScenes": rebased_scenes}
+            "contentSignature": content_signature, "rebasedScenes": rebased_scenes,
+            "rebasedPackages": rebased_packages}
 
 
 def _backfill_source_occurrences(beats, events, script_version_id):

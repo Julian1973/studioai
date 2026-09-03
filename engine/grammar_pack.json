@@ -1,11 +1,6 @@
 {
   "version": "1.0.0",
-  "_doc": "The engine's knowledge as DATA. Every rule cites the AAA Prompt Standard (docs/AAA_PROMPT_STANDARD.md). Change by version bump only — verdicts farm into farmed_negatives and candidate_rules via the verdict loop, never by hand-editing mid-production.",
-  "style_paragraph": {
-    "version": "v1.0.0",
-    "status": "ADOPTED — compiler-injected into every keyframe mint and render prompt",
-    "text": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere."
-  },
+  "_doc": "The engine's knowledge as DATA. Every rule cites the AAA Prompt Standard (docs/AAA_PROMPT_STANDARD.md). Change by version bump only — verdicts farm into farmed_negatives and candidate_rules via the verdict loop, never by hand-editing mid-production. Show-specific keys (style_paragraph, characters, appearance_words, canon_blocks) live in each project's laws/director_grammar.json and override this file key by key (2026-09-03).",
   "routes": {
     "fal-seedance-2.5": {
       "min_s": 4,
@@ -36,83 +31,6 @@
   },
   "narrative_char_note": 3500,
   "button_hold_min_s": 2.0,
-  "characters": {
-    "Fuzzby": {
-      "belongs": [
-        "careens",
-        "overcommits",
-        "barrels",
-        "bounces",
-        "improvises",
-        "presents",
-        "rockets"
-      ],
-      "banned": [
-        "slinks",
-        "hesitates",
-        "glides",
-        "sulks",
-        "waits",
-        "creeps"
-      ],
-      "tic": "checks whether anyone saw (CANDIDATE — awaiting sign-off)"
-    },
-    "Zenny": {
-      "belongs": [
-        "glides",
-        "observes",
-        "settles",
-        "arches",
-        "softens",
-        "levels"
-      ],
-      "banned": [
-        "scrambles",
-        "flails",
-        "rushes",
-        "panics",
-        "showboats"
-      ],
-      "tic": "eye-roll that softens into a loving smile (LOCKED — from the approved spine)"
-    },
-    "Aida": {
-      "belongs": [],
-      "banned": []
-    },
-    "Sunny": {
-      "belongs": [],
-      "banned": []
-    },
-    "Luna": {
-      "belongs": [],
-      "banned": []
-    },
-    "Misty": {
-      "belongs": [],
-      "banned": []
-    },
-    "Amie": {
-      "belongs": [],
-      "banned": []
-    },
-    "Howey": {
-      "belongs": [],
-      "banned": []
-    },
-    "Keen": {
-      "belongs": [],
-      "banned": []
-    },
-    "Squeaky": {
-      "belongs": [],
-      "banned": []
-    },
-    "Bo": {
-      "belongs": [],
-      "banned": []
-    }
-  },
-  "appearance_words": "\\b(fur|furry|plush|striped?s?|yellow|golden|black|pink|rose(?:-gold)?|teal|lavender|violet|pearlescent|blue-grey|spectacles|glasses|bulbous|translucent|fuzzy|plump)\\b",
   "brand_block": [
     "pixar",
     "disney",
@@ -166,12 +84,6 @@
     ]
   },
   "camera_family_budget": 2,
-  "canon_blocks": [
-    {
-      "pattern": "(Fuzzby|Zenny)[^.\\n]{0,140}crystal",
-      "message": "bees have NO crystal (locked canon §3/§5)"
-    }
-  ],
   "farmed_negatives": [
     "no duplicated characters",
     "no morphing",

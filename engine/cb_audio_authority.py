@@ -8,10 +8,11 @@ _SCRIPT_NUMBER = re.compile(r"^\s*\d+\s*\t")
 _TRAILING_STAGE_NOTE = re.compile(r"\s*\([^)]*\)\s*$")
 _STAGE_BEAT = re.compile(r"(?:^|(?<=[.!?…]))\s*BEAT\.\s*", re.I)
 _NONVERBAL_ACTION = r"laugh(?:s|ed|ing)?|giggl(?:e|es|ed|ing)|snort(?:s|ed|ing)?|sneez(?:e|es|ed|ing)|snor(?:e|es|ed|ing)"
+# Onomatopoeia ONLY. The bare verbs (laugh, giggle, snort, sneeze, snore) used to be here too, so an
+# ordinary line like "Don't laugh at me!" shipped to ElevenLabs as "Don't at me!" with an invented
+# laughter cue (2026-09-03 audit). Spoken words are never deleted; bracket tags carry the sounds.
 _SOUND = re.compile(
-    r"\b(?:z{3,}|a+h+c+h+o+o+|achoo+|ha(?:\s*ha)+|snor(?:e|es|ing)|"
-    r"snort(?:s|ing)?|sneez(?:e|es|ing)|laugh(?:s|ing)?|giggl(?:e|es|ing)|"
-    r"o{2,}h{2,}m{2,})\b[!.…]*",
+    r"\b(?:z{3,}|a+h+c+h+o+o+|achoo+|ha(?:\s*ha)+|o{2,}h{2,}m{2,})\b[!.…]*",
     re.I,
 )
 
@@ -70,8 +71,8 @@ def route_line(line):
     sound_matches = list(_SOUND.finditer(provider_text))
     matches = tag_matches + sound_matches
     kinds = list(dict.fromkeys(
-        [_kind(trailing_action)] if trailing_action else []
-        + [_kind(match.group(0)) for match in matches]))
+        ([_kind(trailing_action)] if trailing_action else [])
+        + [_kind(match.group(0)) for match in matches]))   # precedence fix (2026-09-03)
     if not matches and not trailing_action:
         return {**line, "scriptExactText": original, "exactText": provider_text}, None
     # A leading authored vocal event followed by words is one ordered performance,

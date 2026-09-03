@@ -1061,11 +1061,16 @@ def install(m):
         approval = ledger.get("voiceApproval") or {}
         if approval.get("approved"):
             scene_id = str(pkg.get("scene") or pkg.get("sceneNumber") or "")
+            # Compare like with like: the approval carries voice_signature(...) and only
+            # voice_approval_status knows its equivalence rules. Before 2026-09-03 (evening) this
+            # compared it against department_input_signature (a different shape), so EVERY
+            # regenerate superseded a current approval with a false reason on record.
             try:
-                current_sig = department_input_signature(pkg, "voice", shot_id, scene_id, episode)
+                approval_current = bool(
+                    voice_approval_status(pkg, shot, scene_id, episode).get("current"))
             except Exception:
-                current_sig = None
-            if current_sig is not None and approval.get("inputSignature") != current_sig:
+                approval_current = True
+            if not approval_current:
                 # The approval is stale against the current signed inputs (a canon re-lock, a
                 # recast, new direction). Accept would refuse it and nothing could replace it:
                 # supersede it here, on the record, and build the current track (2026-09-03).
@@ -1705,6 +1710,16 @@ def install(m):
                 "REFUSED — WATCH blocked because the approved SEE frame does not prove "
                 "the physical stage contract. SEE is the render's opening causality "
                 f"evidence, so text cannot safely override it: {stage_report['reason']}")
+        if shot.get("sourceType") != "relay" and ledger.get("keyframeApproval"):
+            # A SEE approval signed on earlier inputs (canon re-lock, new direction, replaced
+            # reference) must never anchor a paid render (2026-09-03 audit: nothing checked it).
+            kf_status = keyframe_record_status(
+                pkg, shot, ledger.get("keyframeApproval") or {}, scene, episode)
+            if not kf_status.get("current"):
+                raise m.Refused(
+                    "REFUSED — the approved SEE frame is stale against its direct inputs "
+                    f"({kf_status.get('reason')}); rebuild or re-confirm the opening frame "
+                    "before WATCH")
         stored = ((ledger.get("batch") or {}).get("envelope") or
                   (ledger.get("pendingSpendAuth") or {}).get("envelope") or {})
         if stored.get("comparisonRunId"):

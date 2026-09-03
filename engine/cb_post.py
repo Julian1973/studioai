@@ -802,7 +802,8 @@ def replace_guide_dialogue(video, approved_voice, out):
 
 def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                      platform=DEFAULT_PLATFORM, candidate_id=None, music=None,
-                     ambience=None, edit_decisions=None):
+                     ambience=None, edit_decisions=None, settle_trim=None, edge_frames=None,
+                     preserve_provider_mix=True):
     """Build one immutable post candidate transactionally.
 
     Nothing is exposed at its final path until conform, mix, vertical derivative, captions,
@@ -829,15 +830,13 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
         post_sources = []
         audio_provenance = []
         for index, (shot, clip) in enumerate(zip(shots, clips), start=1):
-            if cb_audio_authority.spoken_dialogue_lines(shot):
+            if cb_audio_authority.spoken_dialogue_lines(shot) and not preserve_provider_mix:
+                # The retired "guide track" lane: replace the provider soundtrack with the HEAR
+                # master over silence. Kept behind preserve_provider_mix=False for a future ruling.
                 voice = shot.get("approvedVoice")
-                provenance = shot.get("audioProvenance") or {}
                 if not voice or not os.path.exists(voice):
                     raise ValueError(
                         f"dialogue shot {shot.get('shotId')} has no approved voice master")
-                if provenance.get("postLaneStatus") != "required":
-                    raise ValueError(
-                        f"dialogue shot {shot.get('shotId')} has no audio provenance ledger")
                 restored = temp_dir / f"shot_{index:02d}_approved_dialogue.mp4"
                 if not replace_guide_dialogue(clip, voice, restored):
                     raise RuntimeError(
@@ -854,6 +853,24 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                     "guideDialogueRemoved": True,
                     "approvedDialogueRestored": True,
                 })
+            elif cb_audio_authority.spoken_dialogue_lines(shot):
+                # THE PROVIDER MIX IS THE DELIVERABLE (2026-09-03): the take the human accepted
+                # at WATCH carries the ElevenLabs performance lip-synced by Seedance plus the
+                # music and sound design the MUSIC LAW asked the render for. Post keeps it
+                # unchanged - no post voice swap (Law 5), no discarded score.
+                voice = shot.get("approvedVoice")
+                post_sources.append(clip)
+                audio_provenance.append({
+                    "shotId": shot.get("shotId"),
+                    "providerFinalMixPath": clip,
+                    "providerFinalMixSha256": _sha256(clip),
+                    "approvedVoicePath": voice,
+                    "approvedVoiceSha256": _sha256(voice) if voice and os.path.exists(voice) else None,
+                    "postSourcePath": clip,
+                    "postSourceSha256": _sha256(clip),
+                    "guideDialogueRemoved": False,
+                    "providerFinalMixPreserved": True,
+                })
             else:
                 post_sources.append(clip)
         normalized = _norm(post_sources)
@@ -864,8 +881,13 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                 "outSec": shot.get("editOutSec"),
                 "manualTrim": bool(shot.get("manualTrim")),
             } for shot in shots]
+        # A project with a fixed shot length (T71: the writer's shot IS the unit, ending on the
+        # writer's Final Frame) passes settle_trim=0 / edge_frames=0: the beat-era settle trim
+        # was silently cutting ~2 s off every accepted 30-second take (2026-09-03 audit).
         plan = conform_plan(
-            normalized, protected_windows=protected, edit_decisions=edit_decisions)
+            normalized, protected_windows=protected, edit_decisions=edit_decisions,
+            settle_trim=settle_trim,
+            edge_frames=(EDGE_FRAMES if edge_frames is None else edge_frames))
 
         names = {
             "conformedPicture": "picture_conformed.mp4",
@@ -916,7 +938,8 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                 abs(picture_probe["durationSec"] - master_probe["durationSec"]) <= 0.25),
             "dialogueOccurrenceCoverage": caption_occurrences == expected_occurrences,
             "approvedDialoguePostLane": all(
-                item["guideDialogueRemoved"] and item["approvedDialogueRestored"]
+                ((item.get("guideDialogueRemoved") and item.get("approvedDialogueRestored"))
+                 or item.get("providerFinalMixPreserved"))
                 for item in audio_provenance),
             "programAudioPresent": temp["programAudio"].exists() and
                 temp["programAudio"].stat().st_size > 0,

@@ -431,22 +431,33 @@ def production_preflight(scene, episode="Ep1", state=None):
               ", ".join(show_profile.get("missingRequiredPaths") or show_profile["missingRequiredContent"]),
               "Create the named project files before production.")
 
-    for provider in ("fal", "elevenlabs"):
-        if (provider == "elevenlabs" and package and
-                not any(shot.get("dialogueLines") for shot in package.get("shots") or [])):
-            continue
+    # The providers that actually bill this project (2026-09-03 audit: this used to demand a
+    # fal key while every keyframe and render is on BytePlus, and never mentioned BYTEPLUS or
+    # GEMINI at all): the selected video route, the two keyframe routes (Seedream on BytePlus
+    # ModelArk, Nano Banana on Google) and ElevenLabs whenever a line is spoken.
+    selected_video = next(
+        (row for row in provider_capabilities["models"] if row["selected"]), {})
+    spoken = bool(package and any(shot.get("dialogueLines")
+                                  for shot in package.get("shots") or []))
+    required = {str(selected_video.get("provider") or "")} - {""}
+    required |= {"byteplus", "google"} if cb_gen.IMAGE_PROVIDER == "seedream" else {"fal"}
+    if spoken:
+        required.add("elevenlabs")
+    for provider in sorted(required):
         try:
             cb_render._require_confirmed_billing(provider)
         except cb_render.Refused as exc:
             block("BILLING_NOT_CONFIRMED", "configuration", str(exc),
                   f"Confirm the {provider} plan and billing cadence in billing_profile.json.")
-    selected_video = next(
-        (row for row in provider_capabilities["models"] if row["selected"]), {})
-    fal_required = (
-        cb_gen.IMAGE_PROVIDER == "seedream" or selected_video.get("provider") == "fal")
-    if fal_required and not cb_gen.FAL_KEY:
-        block("CONFIG_FAL_KEY", "configuration", "FAL_KEY is not configured.",
-              "Preserve the Desktop .env or add the fal.ai key before paid work.")
+    key_of = {"fal": ("FAL_KEY", cb_gen.FAL_KEY),
+              "byteplus": ("BYTEPLUS_ARK_API_KEY", cb_gen.BYTEPLUS_ARK_KEY),
+              "google": ("GEMINI_API_KEY", cb_gen.GEMINI_KEY)}
+    for provider in sorted(required - {"elevenlabs"}):
+        name, value = key_of.get(provider, (None, "set"))
+        if name and not value:
+            block(f"CONFIG_{provider.upper()}_KEY", "configuration",
+                  f"{name} is not configured.",
+                  f"Add {name} to api.rtf (the launcher loads it) before paid {provider} work.")
     if (package and any(cb_audio_authority.spoken_dialogue_lines(shot)
                         for shot in package.get("shots") or []) and
             not cb_gen.ELEVEN_KEY):

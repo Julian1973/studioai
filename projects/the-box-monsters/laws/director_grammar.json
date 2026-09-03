@@ -1,0 +1,11 @@
+{
+  "_note": "The Box Monsters' Director grammar (2026-09-03). style_paragraph is this project's laws/style.txt; the cast declares no motion vocabulary yet; appearance_words is a never-matching regex until the project names its own.",
+  "style_paragraph": {
+    "version": "1.0.0",
+    "status": "locked",
+    "text": "Premium stylized 3D CGI with a tactile handmade cardboard world: visible paper fibres, folded edges, stitched repairs, warm practical lamps, expressive silhouettes, cinematic depth, real weight and clear emotional staging. Character identity and all production assets must remain locked to this project's approved references."
+  },
+  "characters": {},
+  "appearance_words": "(?!x)x",
+  "canon_blocks": []
+}

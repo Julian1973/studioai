@@ -99,6 +99,7 @@ CONFIG = os.path.dirname(CHARS)
 
 _LAWS = PROFILE.laws_paths
 STYLE_LAW = _s(_LAWS.get("style"))
+DIRECTOR_GRAMMAR = _s(_LAWS.get("directorGrammar"))   # laws/director_grammar.json (2026-09-03)
 MUSIC_LAW = _s(_LAWS.get("music"))          # the show's music register (2026-09-03)
 WING_LAW = _s(_LAWS.get("wingLaw"))
 FORBIDDEN_ELEMENTS = _s(_LAWS.get("forbiddenElements"))

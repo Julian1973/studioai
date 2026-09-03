@@ -121,7 +121,7 @@ def test_keyframe_conformance_cannot_pass_with_wrong_cast_or_partial_score():
         "actionReadyComposition": dimension,
         "forbiddenContent": dimension,
     }
-    with pytest.raises(ValueError, match="exact cast"):
+    with pytest.raises(ValueError, match="exact named cast"):
         cb_departments.KeyframeConformanceReview.model_validate(payload)
 
     payload["detectedCharacters"] = ["Fuzzby", "Zenny"]

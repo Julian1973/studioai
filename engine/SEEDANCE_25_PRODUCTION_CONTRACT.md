@@ -1,9 +1,12 @@
 # Seedance 2.5 Production Contract
 
 **Status:** production route qualified; every paid request remains human-authorised
-**Target model:** `fal-seedance-2.5`
-**Provider endpoint:** `bytedance/seedance-2.5/reference-to-video` on fal
-**Effective:** 2026-08-07
+**Target model:** `dreamina-seedance-2-5-260628` — Seedance 2.5 on BytePlus ModelArk (`engine/provider_capabilities.json` → `defaultVideoModelId`; the registry is the authority, this page describes it)
+**Provider endpoint:** `/api/v3/contents/generations/tasks` (asynchronous task; transport `byteplus-async`)
+**Effective:** 2026-08-16 (BytePlus qualified and billing-confirmed); the fal `bytedance/seedance-2.5/reference-to-video` route stays registered and enabled as the alternate, selectable only by `CB_VIDEO_MODEL_ID`
+**Verified resolution on the default route:** 480p only (854×480). fal's route verifies 480p and 720p. There is no delivery-resolution path above 480p on the default route until BytePlus 720p/1080p is qualified and registered — an open production decision, recorded 2026-09-03.
+
+> CORRECTED 2026-09-03: until this correction the header named fal as the target and called BytePlus "a separate disabled adapter until qualified" — stale since 2026-08-16; every real Box Monsters take shipped through BytePlus.
 
 ## One Creative Rule
 

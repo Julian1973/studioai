@@ -150,9 +150,33 @@ def _checked(r):
             f"{exc} — provider response: {body}", response=r
         ) from exc
     return r
+# The endpoints whose POST creates a BILLED artifact: never replayed on a timeout or a 5xx.
+_PAID_ENDPOINT_MARKERS = ("/contents/generations/tasks", "/images/generations", "/text-to-speech",
+                          "/text-to-dialogue", "/v1/music", "/sound-generation")
+
+
 def _rpost(url, **kw):
     kw.setdefault("timeout", 120)
+    if any(marker in str(url) for marker in _PAID_ENDPOINT_MARKERS):
+        return _rpost_paid(url, **kw)
     return _retry(lambda: _checked(requests.post(url, **kw)), what="POST " + str(url).rsplit("/", 1)[-1][:24])
+def _rpost_paid(url, **kw):
+    """A POST that creates a BILLED artifact (a video task, an image, a voice take). Never replayed
+    on a read timeout or a 5xx - the provider may already have accepted and charged the first
+    request (2026-09-03 audit: four paid POSTs were retried up to 4x with one ledger row). The
+    only retry is a ConnectionError raised before anything was sent."""
+    kw.setdefault("timeout", 120)
+    what = "POST " + str(url).rsplit("/", 1)[-1][:24]
+    for attempt in (1, 2):
+        try:
+            return _checked(requests.post(url, **kw))
+        except requests.exceptions.ConnectionError as e:
+            if attempt == 2 or "Read timed out" in str(e):
+                raise
+            print(f"  [retry] {what}: connection failed before send - {str(e)[:120]}; retrying once", flush=True)
+            time.sleep(3.0)
+
+
 def _rget(url, **kw):
     kw.setdefault("timeout", 120)
     return _retry(lambda: _checked(requests.get(url, **kw)), what="GET " + str(url).rsplit("/", 1)[-1][:24])
@@ -347,10 +371,17 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
         raise RuntimeError("BytePlus video task succeeded without a video URL")
     progress("downloading", taskId=task_id, videoUrl=url)
     print(f"BYTEPLUS DOWNLOADING — task {task_id}", flush=True)
-    video = _rget(url, timeout=(20, 300))
-    outp = MEDIA / out
-    outp.parent.mkdir(parents=True, exist_ok=True)
-    outp.write_bytes(video.content)
+    try:
+        video = _rget(url, timeout=(20, 300))
+        outp = MEDIA / out
+        outp.parent.mkdir(parents=True, exist_ok=True)
+        outp.write_bytes(video.content)
+    except Exception as exc:
+        # The task succeeded and is billed; say so, with the id, instead of letting the failure
+        # read like a render that never happened (2026-09-03 audit).
+        raise RuntimeError(
+            f"BytePlus task {task_id} SUCCEEDED (billed) but the download/write failed: "
+            f"{str(exc)[:200]} - re-download this task id rather than re-firing") from exc
     progress("downloaded", taskId=task_id, outputPath=str(outp),
              outputBytes=outp.stat().st_size)
     print(f"BYTEPLUS DOWNLOADED — task {task_id} -> {outp}", flush=True)
@@ -1046,7 +1077,10 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
                    json={"inputs": provider_inputs, "model_id": model_id, "settings": {"stability": stability},
                          "apply_text_normalization": "auto"}, timeout=180)
     except requests.HTTPError as exc:
-        if os.environ.get("CB_ELEVEN_DIALOGUE_TTS_FALLBACK", "1") != "0":
+        # Off by default since 2026-09-03: the per-line fallback silently replaced the in-context acted
+        # conversation with isolated reads at settings no card chose, and nothing told the reviewer.
+        if os.environ.get("CB_ELEVEN_DIALOGUE_TTS_FALLBACK", "0") == "1":
+            print(f"  VOICE FALLBACK - text-to-dialogue refused ({str(exc)[:160]}); building per-line TTS instead", flush=True)
             return _eleven_dialogue_tts_fallback(
                 provider_inputs, out, model_id, generation_kind, exc)
         raise

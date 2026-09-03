@@ -517,7 +517,11 @@ def test_keyframe_review_projects_two_provider_see_candidates(monkeypatch):
     assert "select-keyframe-candidate" in cb_studio_director.allowed_action_ids(session)
 
 
-def test_keyframe_cannot_be_accepted_until_ai_director_reviews_actual_image():
+def test_keyframe_accept_is_offered_before_any_ai_review_and_the_review_stays_optional():
+    # Ruling 2026-09-03 (439f82a9): the human decision is the authority. Accept / Iterate are
+    # offered as soon as a candidate is visible; the AI Director review is an optional opinion,
+    # never a gate. Before this ruling a freshly selected candidate answered
+    # "That action is no longer current" until the review had run.
     state = _state()
     state["shots"][0]["pending"]["keyframe"] = True
     session = _session(
@@ -525,10 +529,13 @@ def test_keyframe_cannot_be_accepted_until_ai_director_reviews_actual_image():
         media=_media(keyframeCandidate="/engine/media/candidate.png"),
     )
 
+    assert {action["id"] for action in session["decisionActions"]} == {
+        "accept-keyframe", "iterate-keyframe"
+    }
     assert session["primaryAction"]["id"] == "run-ai-review"
-    assert session["decisionActions"] == []
+    assert "optional" in session["primaryAction"]["label"].lower()
     assert session["humanReview"]["currentDecision"]["aiReview"]["verdict"] == "not-run"
-    assert session["humanReview"]["currentDecision"]["canApprove"] is False
+    assert session["humanReview"]["currentDecision"]["canApprove"] is True
 
 
 def test_ai_director_recommends_but_never_has_approval_authority():
@@ -550,7 +557,10 @@ def test_ai_director_recommends_but_never_has_approval_authority():
     }
 
 
-def test_ai_recommendation_for_an_older_artifact_never_unlocks_acceptance():
+def test_ai_recommendation_for_an_older_artifact_is_stale_but_never_blocks_the_human():
+    # A review of a previous artifact is reported as stale (it must not read as a recommendation
+    # for the new image) and the optional re-review is offered — but Accept / Iterate stay
+    # available: the AI review is never a gate (439f82a9).
     state = _state()
     state["shots"][0]["pending"]["keyframe"] = True
     package = _with_ai_review(_package(), "review-keyframe")
@@ -563,8 +573,11 @@ def test_ai_recommendation_for_an_older_artifact_never_unlocks_acceptance():
 
     ai_review = session["humanReview"]["currentDecision"]["aiReview"]
     assert ai_review["verdict"] == "stale"
+    assert ai_review["mayApprove"] is False
     assert session["primaryAction"]["id"] == "run-ai-review"
-    assert session["decisionActions"] == []
+    assert {action["id"] for action in session["decisionActions"]} == {
+        "accept-keyframe", "iterate-keyframe"
+    }
 
 
 def test_human_review_requires_visible_artifact_and_preserves_human_authority():

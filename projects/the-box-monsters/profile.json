@@ -46,7 +46,8 @@
     "forbiddenElements": "laws/forbidden_elements.json",
     "continuityRules": "laws/continuity_rules.json",
     "emissionChecks": "laws/emission_checks.json",
-    "music": "laws/music.txt"
+    "music": "laws/music.txt",
+    "directorGrammar": "laws/director_grammar.json"
   },
   "creative": {
     "root": "creative",

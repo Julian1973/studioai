@@ -213,6 +213,23 @@ def _norm(s):
 
 # ── package + ledger ────────────────────────────────────────────────────────────────────
 _PACKAGE_SNAPSHOTS = {}
+_PACKAGE_SNAPSHOTS_MAX = 16
+
+
+def _remember_snapshot(pkg, digest):
+    """Keep the compare-and-swap digest for recently loaded packages only. Before 2026-09-03 every
+    parsed package was retained forever (one director-session build loads it ~115 times), so the
+    long-lived studio process grew by ~2.5 MB per load. Only entries whose package object nothing
+    else still references are evicted, so a live load -> mutate -> _save keeps its CAS digest."""
+    _PACKAGE_SNAPSHOTS[id(pkg)] = (pkg, digest)
+    if len(_PACKAGE_SNAPSHOTS) > _PACKAGE_SNAPSHOTS_MAX:
+        for key, (held, _) in list(_PACKAGE_SNAPSHOTS.items()):
+            if held is pkg:
+                continue
+            if sys.getrefcount(held) <= 3:      # the tuple, `held`, and getrefcount's own argument
+                _PACKAGE_SNAPSHOTS.pop(key, None)
+            if len(_PACKAGE_SNAPSHOTS) <= _PACKAGE_SNAPSHOTS_MAX:
+                break
 
 
 def _pkg_path(scene, episode="Ep1"):
@@ -228,7 +245,7 @@ def load_pkg(scene, episode="Ep1"):
     if not p.exists():
         raise Refused(f"no production package at {p.name} — run cb_engine.py {scene} {episode} first")
     pkg, digest = cb_db.read_json_document(HERE.parent, p)
-    _PACKAGE_SNAPSHOTS[id(pkg)] = (pkg, digest)
+    _remember_snapshot(pkg, digest)
     return pkg, p
 
 
@@ -239,7 +256,7 @@ def _save(pkg, path):
         digest = cb_db.atomic_write_json(HERE.parent, path, pkg, expected_digest=expected)
     except cb_db.StateConflict as exc:
         raise Refused(f"REFUSED — {exc}; reload the scene and retry") from exc
-    _PACKAGE_SNAPSHOTS[id(pkg)] = (pkg, digest)
+    _remember_snapshot(pkg, digest)
 
 
 def _shot(pkg, shot_id):
@@ -6493,6 +6510,11 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
     led["keyframeCandidate"] = None
     led["keyframeCandidates"] = []
     led["selectedKeyframeCandidateId"] = selected_id or None
+    if led.get("pendingKeyframeCorrection"):
+        # A resolved correction must not ride every later build of this shot (2026-09-03 audit).
+        led.setdefault("keyframeCorrectionsApplied", []).append(
+            {**led["pendingKeyframeCorrection"], "appliedAt": _now(), "approvedPath": cand["path"]})
+        led["pendingKeyframeCorrection"] = None
     _save(pkg, path)
     log(f"KEYFRAME APPROVED — {shot_id} by {reviewed_by}")
     return cand["path"]
@@ -6537,6 +6559,15 @@ def abandon_batch(scene, shot_id, reason, episode="Ep1", reviewed_by="Julian", l
     led["abandonedBatches"] = history
     led.pop("pendingSpendAuth", None)
     _save(pkg, path)
+    # Release the sqlite candidate claims too, or the next seal is refused with "candidate N
+    # has an unresolved provider attempt; automatic repayment is blocked" (2026-09-03 audit).
+    count = int(((batch.get("envelope") or {}).get("candidateCount")
+                 or batch.get("candidateCount") or led.get("candidatesGenerated") or 1))
+    for i in range(1, count + 1):
+        try:
+            cb_db.fail_candidate(HERE.parent, batch["token"], i, f"abandoned: {reason.strip()}")
+        except Exception as exc:
+            log(f"  (candidate claim {i} not released: {str(exc)[:120]})")
     log(f"BATCH ABANDONED - {shot_id}: {reason.strip()} (token {str(batch.get('token'))[:8]}...)")
     return batch
 
@@ -6599,6 +6630,10 @@ def reject_keyframe(scene, shot_id, correction, episode="Ep1", reviewed_by="Juli
                      cand.get("contentHash") and cand.get("promptContract"))}
     led.setdefault("keyframeRejections", []).append(rejection)
     led["keyframeRejected"] = rejection
+    # The human's correction must reach the NEXT build: the installed prompt resolver
+    # (cb_safety.keyframe_prompt) reads pendingKeyframeCorrection only (2026-09-03 audit).
+    led["pendingKeyframeCorrection"] = {"reason": correction.strip(), "recordedAt": _now(),
+                                        "reviewedBy": reviewed_by}
     led["keyframeCandidate"] = None        # cleared from the current position
     led["keyframeCandidates"] = []
     led["selectedKeyframeCandidateId"] = None
@@ -10785,10 +10820,26 @@ def _scene_post_sources(pkg, scene=None, episode=None):
     if missing or scene is None:
         return list(source_by_id.values()), missing
     episode = episode or pkg.get("episode") or "Ep1"
-    cut = cb_rough_cut.scene_edit_decision(
-        episode, str(scene), out=HERE.parent / P.OUTPUT_REL)
-    if not cut.get("confirmedCurrent"):
-        raise Refused("REFUSED — lock the current Director's Seat cut before building the master")
+    cut_root = HERE.parent / P.OUTPUT_REL
+    try:
+        cut = cb_rough_cut.scene_edit_decision(episode, str(scene), out=cut_root)
+    except ValueError:
+        cut = None
+    if not cut or not cut.get("confirmedCurrent"):
+        # The desk offers "Build scene master" but has no "lock the cut" step (2026-09-03
+        # audit): lock what the Director has - the saved draft, or every approved take in
+        # package order - so the build never refuses on a step the desk cannot perform.
+        sequence = ([{"shotId": e["shotId"], "inSec": e.get("inSec"), "outSec": e.get("outSec"),
+                      "manualTrim": bool(e.get("manualTrim"))}
+                     for e in ((cut or {}).get("sequence") or []) if e.get("shotId")]
+                    or [{"shotId": sid} for sid in source_by_id])
+        try:
+            cb_rough_cut.save_scene_cut(episode, str(scene), sequence, confirm=True, out=cut_root)
+            cut = cb_rough_cut.scene_edit_decision(episode, str(scene), out=cut_root)
+        except ValueError as exc:
+            raise Refused(f"REFUSED — the scene cut cannot be locked: {exc}") from exc
+        if not cut.get("confirmedCurrent"):
+            raise Refused("REFUSED — lock the current Director's Seat cut before building the master")
     sources = []
     for entry in cut["sequence"]:
         source = source_by_id.get(entry["shotId"])
@@ -10826,10 +10877,14 @@ def stitch_scene(scene, episode="Ep1", log=print):
 
     signature = _post_input_signature(pkg, scene, episode)
     try:
+        fixed_format = bool(getattr(P.FORMAT, "shotSeconds", None)) if P.FORMAT else False
         manifest = cb_post.build_scene_post(
             sources, _media_root() / "post", episode, str(scene), signature,
             music=str(_media_root() / f"{episode}_S{scene}_music.mp3"),
-            ambience=str(_media_root() / f"{episode}_S{scene}_ambience.mp3"))
+            ambience=str(_media_root() / f"{episode}_S{scene}_ambience.mp3"),
+            # T71: a fixed-length writer's shot ends on its Final Frame - never trim it.
+            settle_trim=0.0 if fixed_format else None,
+            edge_frames=0 if fixed_format else None)
     except Exception as exc:
         raise Refused(f"REFUSED — post build failed: {exc}") from exc
     post["candidate"] = {"manifest": manifest, "preparedAt": _now(),

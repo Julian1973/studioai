@@ -368,7 +368,7 @@ def test_director_decisions_survive_expensive_authoritative_checks():
 def test_duplicate_and_background_session_reads_do_not_compete():
     assert "_DIRECTOR_SESSION_BUILD_LOCK = threading.Lock()" in SERVER
     assert "with _DIRECTOR_SESSION_BUILD_LOCK:" in SERVER
-    assert "_DIRECTOR_SESSION_CACHE_TTL_SEC = 3600.0" in SERVER
+    assert "_DIRECTOR_SESSION_CACHE_TTL_SEC = 20.0" in SERVER   # 5c57055d: key carries package/canon mtime
     assert 'document.visibilityState !== "visible"' in JS
     assert "setTimeout(pollLiveSession, 15000)" in JS
     assert 'document.addEventListener("visibilitychange"' in JS
@@ -775,11 +775,11 @@ def test_scene_workbench_is_active_beat_driven():
 
 def test_three_signoff_relay_exposes_real_inputs_and_source_choices():
     assert 'scene-workbench ~ .shot-inputs' not in CSS
-    assert 'Choose the world plate before keyframe work' in JS
+    assert 'reuse a previous keyframe from this shot' in JS   # 85ba6810 reworded the source panel
     assert 'renderKeyframeSourcePanel(session)' in JS
     assert 'renderSeeKeyframeReferences(session)' in JS
     assert 'These are the shot references going into SEE' in JS
-    assert 'Scene plate selection is available now' in JS
+    assert 'No scene plate reference loaded yet.' in JS   # 85ba6810 reworded the panel
     assert '/api/scenelook-library?episode=' in JS
     assert '.see-reference-pack' in CSS
     assert 'data-keyframe-upload' in JS

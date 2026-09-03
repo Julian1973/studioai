@@ -110,3 +110,7 @@ studio-update.bundle
 # the studio's local browser-session secret (per machine, never source)
 cb-studio/data/.studio_session_secret
 cb-studio/data/.studio_session_secret.*.tmp
+
+# studio runtime logs (per machine, never source)
+cb-studio/data/access.log
+cb-studio/data/studio-launch.log

@@ -1,0 +1,91 @@
+{
+  "style_paragraph": {
+    "version": "v1.0.0",
+    "status": "ADOPTED — compiler-injected into every keyframe mint and render prompt",
+    "text": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere."
+  },
+  "characters": {
+    "Fuzzby": {
+      "belongs": [
+        "careens",
+        "overcommits",
+        "barrels",
+        "bounces",
+        "improvises",
+        "presents",
+        "rockets"
+      ],
+      "banned": [
+        "slinks",
+        "hesitates",
+        "glides",
+        "sulks",
+        "waits",
+        "creeps"
+      ],
+      "tic": "checks whether anyone saw (CANDIDATE — awaiting sign-off)"
+    },
+    "Zenny": {
+      "belongs": [
+        "glides",
+        "observes",
+        "settles",
+        "arches",
+        "softens",
+        "levels"
+      ],
+      "banned": [
+        "scrambles",
+        "flails",
+        "rushes",
+        "panics",
+        "showboats"
+      ],
+      "tic": "eye-roll that softens into a loving smile (LOCKED — from the approved spine)"
+    },
+    "Aida": {
+      "belongs": [],
+      "banned": []
+    },
+    "Sunny": {
+      "belongs": [],
+      "banned": []
+    },
+    "Luna": {
+      "belongs": [],
+      "banned": []
+    },
+    "Misty": {
+      "belongs": [],
+      "banned": []
+    },
+    "Amie": {
+      "belongs": [],
+      "banned": []
+    },
+    "Howey": {
+      "belongs": [],
+      "banned": []
+    },
+    "Keen": {
+      "belongs": [],
+      "banned": []
+    },
+    "Squeaky": {
+      "belongs": [],
+      "banned": []
+    },
+    "Bo": {
+      "belongs": [],
+      "banned": []
+    }
+  },
+  "appearance_words": "\\b(fur|furry|plush|striped?s?|yellow|golden|black|pink|rose(?:-gold)?|teal|lavender|violet|pearlescent|blue-grey|spectacles|glasses|bulbous|translucent|fuzzy|plump)\\b",
+  "canon_blocks": [
+    {
+      "pattern": "(Fuzzby|Zenny)[^.\\n]{0,140}crystal",
+      "message": "bees have NO crystal (locked canon §3/§5)"
+    }
+  ],
+  "_note": "The first project's Director grammar, moved verbatim out of engine/grammar_pack.json on 2026-09-03 (rule 87: the engine contains no show)."
+}

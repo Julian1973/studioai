@@ -265,3 +265,10 @@ def chair_taste(role: str) -> str:
             return f.read().strip()
     except OSError:
         return ""
+
+
+def director_grammar() -> Dict[str, Any]:
+    """The project's own Director grammar - style paragraph, cast motion vocabulary, appearance
+    words, canon blocks (laws/director_grammar.json); {} when the project declares none."""
+    import paths as _paths
+    return _load(getattr(_paths, "DIRECTOR_GRAMMAR", None))

@@ -896,7 +896,10 @@ def production_state(scene, episode="Ep1", intake=None):
             "stage": "storyboard",
             "message": "The active script has a pending Story & Direction update.",
             "action": (
-                "Review and approve the current episode Story & Direction candidate."
+                "Re-lock canon in the studio (Canon → Lock canon): the approved Story & "
+                "Direction is carried forward onto the new lock unchanged — no regeneration."
+                if intake.get("rebaseEligible")
+                else "Review and approve the current episode Story & Direction candidate."
                 if intake.get("hasCandidate") and intake.get("candidateCurrent")
                 else "Run Story & Direction for the active script."),
         })

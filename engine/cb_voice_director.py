@@ -193,7 +193,9 @@ def post_direction_audit(line, locked_line, card, register):
             line_takes = sum(int(item.get("takesCount") or 0) for item in recipes)
             _check(checks, f"short-line-context:{recipe_id}", has_context and
                    line_takes >= int(rules["shortLineMinimumTakes"]),
-                   f"Short line {recipe_id} includes previous_text runway and at least two takes.")
+                   f"Short line {recipe_id} ({line.get('character')}: '{locked_spoken_text}') needs a "
+                   f"previous_text runway and at least {int(rules['shortLineMinimumTakes'])} takes "
+                   f"in total (has runway: {has_context}, takes: {line_takes}).")
 
     all_tags = sorted({tag for recipe in recipes for tag in _tags(recipe.get("performedText"))})
     purposes = _tag_purpose_map(line.get("tagPurposes"))
@@ -335,6 +337,26 @@ def emit_v3_requests(compiled, *, max_requests=None):
     return requests
 
 
+def _ensure_short_line_takes(line, locked_line):
+    """The rulebook wants at least N takes for a short line. takesCount is how many auditions of
+    the same recipe get generated - a mechanical quantity, not a creative one - so when the
+    Director under-counts, raise the first recipe to the minimum instead of refusing the shot.
+    The runway (previousText) is creative and is still audited."""
+    rules = rulebook()["mechanicalRules"]
+    recipes = line.get("takeRecipes") or []
+    if not recipes or len(_words(_locked_text(locked_line))) > int(rules["shortLineMaxWords"]):
+        return line
+    minimum = int(rules["shortLineMinimumTakes"])
+    have = sum(int(item.get("takesCount") or 0) for item in recipes)
+    if have >= minimum:
+        return line
+    repaired = deepcopy(line)
+    first = repaired["takeRecipes"][0]
+    first["takesCount"] = min(5, int(first.get("takesCount") or 0) + (minimum - have))
+    repaired["takesRaisedForShortLine"] = {"from": have, "to": minimum}
+    return repaired
+
+
 def compile_track(direction, locked_lines):
     by_occurrence = {
         item.get("dialogueOccurrenceId"): item for item in locked_lines
@@ -365,7 +387,7 @@ def compile_track(direction, locked_lines):
             raise VoiceContractError(
                 f"Direction references an unlocked dialogue occurrence: "
                 f"{line.get('dialogueOccurrenceId')}")
-        compiled.append(compile_line(line, locked))
+        compiled.append(compile_line(_ensure_short_line_takes(line, locked), locked))
     if len(compiled) != len(locked_lines):
         raise VoiceContractError(
             f"REFUSED - direction has {len(compiled)} line(s); script locks {len(locked_lines)}")

@@ -98,6 +98,19 @@ def test_post_direction_audit_advises_off_palette_but_blocks_banned(monkeypatch)
     with pytest.raises(V.VoiceContractError, match="off-palette/banned tags"):
         V.compile_line(item, LOCKED)
 
+
+def test_compile_track_raises_short_line_takes_to_the_minimum():
+    # 'Nailed it.' is a short line; the Director gave one take. takesCount is a count of
+    # auditions, so the compiler raises it to the rulebook minimum instead of refusing.
+    item = copy.deepcopy(direction())
+    for recipe in item["takeRecipes"]:
+        recipe["takesCount"] = 1
+    item["takeRecipes"] = item["takeRecipes"][:1]
+    track = V.compile_track({"shotId": "S1.SH1A", "lines": [item]}, [LOCKED])
+    assert len(track["lines"]) == 1
+    minimum = V.rulebook()["mechanicalRules"]["shortLineMinimumTakes"]
+    assert sum(1 for req in V.emit_v3_requests(track["lines"][0]) if req["recipeId"] == item["takeRecipes"][0]["recipeId"]) >= minimum
+
 def test_track_refuses_an_uncovered_locked_line():
     with pytest.raises(V.VoiceContractError, match="script locks 2"):
         V.compile_track({"shotId": "S1.SH1A", "lines": [direction()]},

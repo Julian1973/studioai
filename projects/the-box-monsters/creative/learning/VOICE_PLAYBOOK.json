@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "recipes": {
+    "Teacher::deadpan-affection": {
+      "character": "Teacher",
+      "archetypeId": "deadpan-affection",
+      "recipe": {
+        "recipeId": "S1.SH01-T1",
+        "label": "primary",
+        "performedText": "[calm]That’s all right. Try again.",
+        "primary": true,
+        "takesCount": 2
+      },
+      "sourceShotId": "S1.SH01",
+      "approvedCandidate": "0f39be00-S1.SH01-T1-1",
+      "approvedBy": "Julian"
+    },
+    "Jenny::held-heart": {
+      "character": "Jenny",
+      "archetypeId": "held-heart",
+      "recipe": {
+        "recipeId": "S1.SH01-T5-A",
+        "label": "primary",
+        "performedText": "[quietly]Bridge.",
+        "primary": true,
+        "takesCount": 2
+      },
+      "sourceShotId": "S1.SH01",
+      "approvedCandidate": "8208400a-S1.SH01-T5-A-1",
+      "approvedBy": "Julian"
+    },
+    "Classmate::held-heart": {
+      "character": "Classmate",
+      "archetypeId": "held-heart",
+      "recipe": {
+        "recipeId": "S1.SH02-L1-T1",
+        "label": "primary",
+        "performedText": "[quietly] You all right?",
+        "primary": true,
+        "takesCount": 2
+      },
+      "sourceShotId": "S1.SH02",
+      "approvedCandidate": "032af003-S1.SH02-L1-T1-1",
+      "approvedBy": "Julian"
+    },
+    "Jenny::deadpan-affection": {
+      "character": "Jenny",
+      "archetypeId": "deadpan-affection",
+      "recipe": {
+        "recipeId": "S1.SH02-L2-T1",
+        "label": "primary",
+        "performedText": "[quietly] Yeah.",
+        "primary": true,
+        "takesCount": 2
+      },
+      "sourceShotId": "S1.SH02",
+      "approvedCandidate": "abc476f6-S1.SH02-L2-T1-1",
+      "approvedBy": "Julian"
+    },
+    "Teacher::held-heart": {
+      "character": "Teacher",
+      "archetypeId": "held-heart",
+      "recipe": {
+        "recipeId": "S1.SH01-T4-A",
+        "label": "primary",
+        "performedText": "[calm]That’s all right. Try again.",
+        "primary": true,
+        "takesCount": 2
+      },
+      "sourceShotId": "S1.SH01",
+      "approvedCandidate": "0ed1fefc-S1.SH01-T4-A-1",
+      "approvedBy": "Julian"
+    },
+    "Jenny::quiet-warning": {
+      "character": "Jenny",
+      "archetypeId": "quiet-warning",
+      "recipe": {
+        "recipeId": "S1.SH01-T3-A",
+        "label": "primary",
+        "performedText": "Briggle.",
+        "primary": true,
+        "takesCount": 2
+      },
+      "sourceShotId": "S1.SH01",
+      "approvedCandidate": "ac0488eb-S1.SH01-T3-A-1",
+      "approvedBy": "Julian"
+    }
+  }
+}

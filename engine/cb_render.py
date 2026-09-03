@@ -2774,6 +2774,22 @@ def _stable_reference_role_key(role, usage, characters_cfg):
     return (rank if usage == "animation" else 1 + rank, -1, role.casefold())
 
 
+def _stub_role_outside_opening_frame(role, shot, characters_cfg):
+    """True when `role` is a roster 'stub' (no signed-off visual reference yet) that the approved
+    opening frame does not stage: such a character is voice / background only for this shot."""
+    try:
+        import cb_canon
+        roster = cb_canon.load_policy(None).get("roster") or {}
+    except Exception:
+        return False
+    canonical = _resolve_char(role, characters_cfg)
+    if str((roster.get(canonical) or roster.get(role) or {}).get("status") or "") != "stub":
+        return False
+    opening = [_resolve_char(name, characters_cfg)
+               for name in ((shot or {}).get("openingCharactersInFrame") or [])]
+    return canonical not in opening
+
+
 def _expanded_reference_blueprint(shot, slots_key, characters_cfg, scene=None,
                                   episode="Ep1"):
     """Bind each logical character slot to one complete, uncropped turnaround sheet."""
@@ -2785,10 +2801,22 @@ def _expanded_reference_blueprint(shot, slots_key, characters_cfg, scene=None,
         _stable_reference_role_key(slots[key], usage, characters_cfg), int(key[2:])))
     for source_slot in source_slots:
         role = slots[source_slot]
-        identities = ([None] if _is_non_identity_image_role(role) else
-                      _provider_identity_records(
-                          role, characters_cfg, usage, shot=shot, scene=scene,
-                          episode=episode))
+        if _is_non_identity_image_role(role):
+            identities = [None]
+        else:
+            try:
+                identities = _provider_identity_records(
+                    role, characters_cfg, usage, shot=shot, scene=scene, episode=episode)
+            except Refused:
+                if not _stub_role_outside_opening_frame(role, shot, characters_cfg):
+                    raise
+                # A scripted stub with no signed-off reference that the approved opening
+                # frame does not show as a named presence: heard (its voice is cast) and
+                # staged as an off-frame / unnamed presence, never drawn from a reference.
+                print(f"STUB ROLE OFF-FRAME — {role} has no locked identity reference and is "
+                      f"not in the opening frame; staged as an unnamed presence, no reference "
+                      f"attached", flush=True)
+                continue
         for identity in identities:
             expanded.append({
                 "position": len(expanded) + 1,

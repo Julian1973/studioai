@@ -109,12 +109,12 @@
     "Teacher": {
       "tier": "supporting",
       "status": "stub",
-      "voiceMode": "unassigned"
+      "voiceMode": "elevenlabs-v3"
     },
     "Classmate": {
       "tier": "supporting",
       "status": "stub",
-      "voiceMode": "unassigned"
+      "voiceMode": "elevenlabs-v3"
     },
     "BRIGGLE ECHO": {
       "tier": "environmental-voice",

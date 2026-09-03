@@ -1,13 +1,14 @@
 {
   "schemaVersion": 1,
   "showId": "the-box-monsters",
-  "lockedAt": "2026-09-03T06:27:39+00:00",
+  "lockedAt": "2026-09-03T06:55:51+00:00",
   "lockedBy": "Julian",
-  "policySha256": "ce9a8eb9490322a38ba12e7eec25199e85a53cdfce4b6f77625e824c77c5a8e8",
+  "policySha256": "7ccfd86a0c7a0c93ada191bd3e320e44617a471ecb95756a49268a3cac3d4b6b",
   "sources": {
     "characters": {
       "path": "projects/the-box-monsters/canon/characters.json",
-      "sha256": "bf2c83afb946d51d18aa7273beda5cfdb4f35d9963e2c253a423d50cd6eee7bd"
+      "sha256": "bf2c83afb946d51d18aa7273beda5cfdb4f35d9963e2c253a423d50cd6eee7bd",
+      "visualSha256": "b37e1d9066a4fe63f3a998efed858ce1ad4b8b49c40634fa31e9e67f50ba513d"
     },
     "continuity": {
       "path": "projects/the-box-monsters/canon/continuity.json",
@@ -145,13 +146,13 @@
     "Teacher": {
       "tier": "supporting",
       "status": "stub",
-      "voiceMode": "unassigned",
+      "voiceMode": "elevenlabs-v3",
       "assets": []
     },
     "Classmate": {
       "tier": "supporting",
       "status": "stub",
-      "voiceMode": "unassigned",
+      "voiceMode": "elevenlabs-v3",
       "assets": []
     },
     "BRIGGLE ECHO": {
@@ -205,5 +206,5 @@
       "sha256": "33ede2563287e6b885a984e77bc14baf97d6f9080f26eef6f11a1e3138f8f564"
     }
   ],
-  "manifestDigest": "109983a1896b875549a01daaad23df19673755396a22a931026dd8c008a21d45"
+  "manifestDigest": "c5228921bd20b6945268c11028e88e5437f56d00b7723e0c9f8c8b5abf0011cb"
 }

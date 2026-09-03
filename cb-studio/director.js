@@ -2186,7 +2186,9 @@
         <div><span>SEE · Keyframe</span><strong>The stage for this shot, with every reference in place</strong></div>
         <em>${esc(locked ? "Review candidate first" : keyframeToolsAvailable ? (keyframeUrl ? "Approved" : "Ready") : "Locked")}</em>
       </div>
-      ${keyframeUrl ? `<div class="scene-plate-current see-visual">
+      ${session.phase === "keyframe" && session.artifact?.type === "image-set" && (session.artifact.items || []).length
+        ? `<div class="see-visual see-ab-visual">${relayMedia(1, session)}</div>`
+        : keyframeUrl ? `<div class="scene-plate-current see-visual">
         <img src="${esc(keyframeUrl)}?v=${Date.now()}" alt="Keyframe for this shot">
         <div><span>${esc(keyframeLabel)}</span><strong>${esc(session.selectedShotId || selectedShot.id || "keyframe")}</strong></div>
       </div>` : `<div class="source-empty">${esc(sourceMessage)}</div>`}
@@ -2756,6 +2758,9 @@
       app.scenePlateLibraryOpen = !app.scenePlateLibraryOpen;
       if (app.scenePlateLibraryOpen) await loadSceneAssetLibrary(app.session || session);
       renderSceneWorkbench(app.session || session);
+    }));
+    host.querySelectorAll("[data-see-candidate]").forEach((button) => button.addEventListener("click", () => {
+      selectSeeCandidate(button.dataset.seeCandidate);
     }));
     host.querySelectorAll("[data-generate-keyframe]").forEach((button) => button.addEventListener("click", () => {
       const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);

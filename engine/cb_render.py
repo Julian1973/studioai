@@ -6498,6 +6498,31 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
     return cand["path"]
 
 
+def abandon_batch(scene, shot_id, reason, episode="Ep1", reviewed_by="Julian", log=print):
+    """Release a render batch that will never complete (killed mid-flight, provider task lost).
+    Records it as abandoned with the reason and clears the pending spend authorization so a
+    fresh request can be sealed. Completed candidates, if any, are left untouched (2026-09-03)."""
+    if not (reason or "").strip():
+        raise Refused("REFUSED - abandoning a batch requires a plain-language reason")
+    pkg, path = load_pkg(scene, episode)
+    led = _ledger(pkg, shot_id)
+    batch = led.get("batch")
+    if not batch or batch.get("status") != "generating":
+        log(f"NO IN-FLIGHT BATCH - {shot_id}: nothing to abandon")
+        return None
+    batch["status"] = "abandoned"
+    batch["abandonedAt"] = _now()
+    batch["abandonedBy"] = reviewed_by
+    batch["abandonReason"] = reason.strip()
+    history = list(led.get("abandonedBatches") or [])
+    history.append(dict(batch))
+    led["abandonedBatches"] = history
+    led.pop("pendingSpendAuth", None)
+    _save(pkg, path)
+    log(f"BATCH ABANDONED - {shot_id}: {reason.strip()} (token {str(batch.get('token'))[:8]}...)")
+    return batch
+
+
 def reject_keyframe(scene, shot_id, correction, episode="Ep1", reviewed_by="Julian", log=print):
     """Rejection ARCHIVES the CANDIDATE only (moved, never copied) — never a previously-
     approved keyframe, which stays live, approved and current exactly as it was. The next
@@ -11030,6 +11055,8 @@ if __name__ == "__main__":
             select_keyframe_source(pos[0], pos[1], "upload", ep(3), upload_path=pos[2])
         elif cmd == "select-library":
             select_keyframe_source(pos[0], pos[1], "library", ep(3), library_path=pos[2])
+        elif cmd == "abandon-batch":
+            abandon_batch(pos[0], pos[1], pos[2], ep(3))
         elif cmd == "select-previous":
             select_keyframe_source(pos[0], pos[1], "previousFinalFrame", ep(2))
         elif cmd == "select-render-upload":

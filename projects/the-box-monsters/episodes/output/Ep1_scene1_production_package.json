@@ -2117,79 +2117,79 @@
       "worker": "Seedance Production Director",
       "skill": "studio/chairs/animation/SKILL.md",
       "model": "gpt-5.5",
-      "preparedAt": "2026-09-03T08:01:54",
+      "preparedAt": "2026-09-03T08:53:31",
       "editedAt": null,
       "preparedBy": "specialist",
       "creativeDirectingStandardVersion": 4,
-      "sourceHash": "79af1900afdd9bbfa41ab110fadcdd2d713be6355578d345ac3d422845e0964a",
+      "sourceHash": "390edfa0b4096162e2bdc95b64901661dc4e1f7ebeb37eb3a9a60775971ded62",
       "output": {
        "shotId": "S1.SH01",
        "durationSec": 30,
        "taskMode": "reference-to-video",
        "pacingMode": "timestamp",
-       "generationGoal": "A classroom read turns publicly awkward when Jenny says the wrong word, then tries again smaller under the teacher’s calm encouragement.",
-       "deliveryPlan": "Stay on the shared front-of-room geometry, let silence build the pressure, tighten only when the mistake lands, and end on Jenny’s embarrassed corrected retry with the worksheet held close.",
+       "generationGoal": "Show Jenny’s public reading mistake turning into a small, embarrassed retry in one quiet classroom beat.",
+       "deliveryPlan": "Use three restrained views in the same classroom axis: establish Jenny at the front, tighten when the wrong word lands, then hold the teacher’s calm correction and Jenny’s smaller retry on a usable ending frame.",
        "creativeTranslation": {
         "interpretation": {
-         "jokeOrAche": "Ache with a small comic sting: a simple reading task becomes public embarrassment when a harmless misread is heard aloud.",
-         "mechanism": "Ordinary classroom expectation collides with one wrong word, then the teacher’s calm permission makes the retry socially visible instead of erasing it.",
-         "statusBefore": "Jenny is trying to read cleanly and be invisible inside a normal classroom routine.",
-         "statusAfter": "Jenny is still present but smaller, embarrassed, and carefully protecting herself behind the page.",
+         "jokeOrAche": "Ache: a child’s ordinary read becomes painful when the room hears the mistake.",
+         "mechanism": "A tiny misread against a quiet, attentive classroom turns private hesitation into public embarrassment.",
+         "statusBefore": "Jenny is trying to perform normally at the front of the room.",
+         "statusAfter": "Jenny is embarrassed, smaller, and still present after the retry.",
          "audienceProgression": [
-          "We watch a routine read and expect a smooth answer.",
-          "The stall and wrong word make the room feel too quiet and too public.",
-          "Kindness arrives, but the embarrassment lingers as Jenny retries in a reduced voice."
+          "First we read the setup as a routine classroom moment.",
+          "Then the wrong word makes the room feel suddenly exposed and personal.",
+          "Finally the kind correction leaves a tender, embarrassed aftertaste instead of a full recovery."
          ],
-         "emotionalHeart": "Jenny wants to get through the moment without drawing more attention, and the room’s attention makes that almost impossible."
+         "emotionalHeart": "Jenny wants to get through the read cleanly without drawing more attention to herself."
         },
         "gagClocks": [
          {
           "beatCode": "S01B01_PUBLIC_READING_BREAKS",
           "mode": "SMALL",
           "setup": "Jenny begins a simple read-aloud in a quiet room.",
-          "anticipation": "She looks between the worksheet and the board, and her hands tighten on the paper before she speaks.",
+          "anticipation": "Her hands tighten on the worksheet and she stalls before the troublesome word.",
           "impact": "Jenny says 'Briggle' instead of 'Bridge.'",
-          "reaction": "Her shoulders fold inward and the worksheet pulls closer to her chest as the room hears it.",
+          "reaction": "Her shoulders fold inward and the paper pulls closer to her chest.",
           "recoveryHold": "A short, quiet beat lets the odd word land without turning the room into a joke.",
           "recoveryHoldSec": 1.2,
           "button": "The Teacher calmly says, 'That’s all right. Try again.'",
           "retroactive": true,
-          "providerAction": "Jenny stalls over the line, blinks down at the worksheet, and physically curls inward when the wrong word is heard."
+          "providerAction": "Jenny tightens both hands on the worksheet and lets the wrong word hang in the quiet room before shrinking inward over the page."
          }
         ],
         "generationDesign": {
          "packagingDecision": "single-unit",
          "completeGagArcCount": 1,
-         "densityJudgement": "One public-reading embarrassment arc fits cleanly inside the approved 30-second unit with a single motivated camera grammar and one prop-state change.",
-         "splitOrNonSplitRationale": "No split is needed because the beat has one clear turn, one social reaction, and one landing hold; the camera can remain in the same classroom axis without losing clarity.",
+         "densityJudgement": "One public-reading mistake, one correction, one tiny retry fits cleanly inside a single playable unit with no need to split the beat.",
+         "splitOrNonSplitRationale": "The beat has one clear causal line and one spatial setup. Keeping it intact preserves the shame landing, the teacher’s kind correction, and the fragile retry in the same classroom moment.",
          "handoffState": "Jenny remains at the front, shoulders tucked in, holding the worksheet close after her tiny corrected answer."
         }
        },
-       "dramaticBeat": "A routine classroom read breaks when Jenny says the wrong word aloud and has to recover under watchful silence.",
-       "audienceBefore": "We expect an ordinary school read and a smooth, low-stakes answer.",
-       "audienceAfter": "We feel secondhand embarrassment and a protective tenderness as Jenny shrinks and then tries again.",
+       "dramaticBeat": "A simple classroom read breaks when Jenny says the wrong word aloud and has to try again.",
+       "audienceBefore": "Watching a routine read and expecting it to pass smoothly.",
+       "audienceAfter": "Feeling secondhand embarrassment, then protective tenderness as Jenny retries smaller.",
        "beatOwner": "S01B01_PUBLIC_READING_BREAKS",
-       "performanceFreedom": "Preserve the approved dialogue exactly through @Audio1, but allow natural timing, breath, eye flicks, paper tremor, and tiny posture changes around the mistake and retry.",
-       "performanceArc": "Jenny begins brave but careful, stalls, says the wrong word, curls inward when it lands publicly, then answers again in a smaller voice while still guarding the worksheet.",
-       "physicalCauseAndEffect": "The quiet room and waiting attention make the hesitation readable; the wrong word triggers a visible inward collapse and a tighter hold on the page; the teacher’s calm correction opens a narrow path back.",
-       "cameraBehaviour": "Mostly still at student eye level on the shared front-of-room axis, with only a subtle inward drift when the wrong word lands, then a patient hold for the fragile correction.",
-       "timingAndRhythm": "Give the teacher’s prompt room to land, then a public pause before the stumble; let the wrong word arrive cleanly, followed by a short afterbeat, then the smaller retry and a final hold.",
-       "landingBreath": "Hold long enough after the corrected answer for the embarrassment to read on Jenny’s face, shoulders, and grip on the worksheet.",
+       "performanceFreedom": "Keep Jenny’s timing, breath catches, eye flicks, and paper tension organic; preserve the teacher as calm and contained; let Seedance discover the exact micro-reactions inside the approved emotional shape.",
+       "performanceArc": "Brave start, public stall, involuntary wrong word, inward collapse, smaller retry.",
+       "physicalCauseAndEffect": "The quiet room and waiting classmates make Jenny’s hesitation readable; the wrong word triggers a visible shrink in posture and a tighter hold on the page.",
+       "cameraBehaviour": "Mostly still and observant, with a subtle inward drift on the mistake, then a patient hold for the correction and landing.",
+       "timingAndRhythm": "Give the teacher’s prompt room to land, stretch the pause so it feels public, let the wrong word arrive immediately after the stall, and leave air after the correction so the embarrassment can register.",
+       "landingBreath": "End on a quiet hold where Jenny stays visibly embarrassed, worksheet hugged close, with the corrected word still fragile in the air.",
        "directionDensity": "guided",
        "precisionReasons": [
-        "Exact dialogue order and speaker timing are locked by @Audio1.",
-        "The classroom front, board readability, and two-character blocking must remain continuous for the embarrassment to read.",
-        "The approved landing requires a held pose with the worksheet close and embarrassed body language."
+        "Locked dialogue must stay in approved order and in the owning stage.",
+        "The opening frame and classroom geography must remain readable in the same wide axis.",
+        "The ending must preserve the exact embarrassed handoff state for the next unit."
        ],
        "shotPlan": [
         {
          "shotNumber": 1,
-         "purpose": "Set the classroom pressure and the first brave attempt.",
-         "framingLensAndCamera": "Wide classroom frame at student eye level, 35mm feel, steady and slightly withheld, with Jenny front-center and the board legible behind her.",
-         "causalAction": "Jenny starts the line while the room stays quiet and the board word waits across from her.",
-         "observablePerformance": "She looks between the paper and the board, speaks carefully, and keeps her body upright even as the moment feels exposed.",
-         "compositionLightAndMaterials": "Warm afternoon classroom light from the windows, soft bounce on the floor, chalkboard matte against the pale wall, worksheet paper bright in her hands.",
-         "landingImage": "Jenny stands at the front with the worksheet open and the word BRIDGE visible on the board.",
+         "purpose": "Establish the classroom pressure and Jenny’s first brave attempt.",
+         "framingLensAndCamera": "Wide classroom view at student eye level, 35mm feel, steady and slightly withheld, with Jenny front-center and the board readable.",
+         "causalAction": "Jenny begins reading while the room stays quiet around her.",
+         "observablePerformance": "She looks between the worksheet and the board, speaks carefully, and keeps her body open just long enough to begin.",
+         "compositionLightAndMaterials": "Warm daylight from the left windows, soft bounce on the floor, chalkboard centered behind Jenny, wooden desks and paper surfaces clearly legible.",
+         "landingImage": "Jenny stands at the front with the worksheet open and the word BRIDGE visible on the board behind her.",
          "dialogueLineIndexes": [
           1
          ],
@@ -2203,12 +2203,12 @@
         },
         {
          "shotNumber": 2,
-         "purpose": "Let the stall and wrong word land as public embarrassment.",
-         "framingLensAndCamera": "Same axis, with a subtle inward drift to a medium-wide as the mistake becomes audible.",
-         "causalAction": "Jenny hesitates, then says the wrong word and hears the room register it.",
-         "observablePerformance": "Her fingers tighten on the page, her shoulders fold inward, and the page lifts closer as if it can hide her.",
-         "compositionLightAndMaterials": "The same neutral classroom light feels a little flatter and cooler; the chalkboard remains readable, and the paper edge catches a small highlight as it rises.",
-         "landingImage": "Jenny has curled inward over the worksheet, eyes lowered, with the laugh already gone from the room.",
+         "purpose": "Narrow the emotional distance as the wrong word lands and the room hears it.",
+         "framingLensAndCamera": "Same axis with a subtle inward drift, medium-wide feel, still student height, no flashy reframing.",
+         "causalAction": "Jenny stalls, says the wrong word, and the mistake becomes publicly audible.",
+         "observablePerformance": "Her fingers tighten on the paper, her shoulders fold inward, and the laugh passes through the room while she closes around the worksheet.",
+         "compositionLightAndMaterials": "The same neutral classroom light flattens slightly cooler at the peak of embarrassment; the board stays legible; the paper texture and hand tension read clearly.",
+         "landingImage": "Jenny is curled inward over the worksheet, eyes lowered, the wrong word just having landed in the quiet room.",
          "dialogueLineIndexes": [
           2,
           3
@@ -2217,19 +2217,19 @@
           "Start as if she can manage it; let the stumble arrive clearly but naturally, with a visible swallow in the voice at the end.",
           "Make it a quick, involuntary blurt, not a joke; the embarrassment should arrive on the tail of the word."
          ],
-         "holdAfterDialogue": true,
+         "holdAfterDialogue": false,
          "gagBeatIds": [
           "S01B01_PUBLIC_READING_BREAKS"
          ]
         },
         {
          "shotNumber": 3,
-         "purpose": "Hold the teacher’s kindness and Jenny’s smaller retry as the fragile landing.",
-         "framingLensAndCamera": "Return to a steady medium-wide on the same front-of-room axis, keeping Jenny, the board, and the teacher all readable.",
-         "causalAction": "The teacher gives permission to try again, and Jenny answers more quietly.",
-         "observablePerformance": "She stays folded in, then gives the corrected word in a reduced voice while keeping the worksheet close to her chest.",
-         "compositionLightAndMaterials": "Cooler classroom light settles over the room, with the board and wood trim still legible; the paper remains the main prop state change, pressed close against her cardigan.",
-         "landingImage": "Jenny stands at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer.",
+         "purpose": "Hold the correction and Jenny’s smaller retry as the end-state of the beat.",
+         "framingLensAndCamera": "Return to a steady medium-wide on the same front-of-room axis, giving the teacher’s kindness and Jenny’s reduced answer space to sit together.",
+         "causalAction": "The teacher invites another try and Jenny answers more quietly.",
+         "observablePerformance": "She remains tucked in, lifts the worksheet close, and gives the corrected word with reduced volume and guarded courage.",
+         "compositionLightAndMaterials": "Cool-neutral classroom light, gentle separation from the board, paper held close to chest, desk edges and floorboards still visible so the space remains public.",
+         "landingImage": "Jenny stands at the front, visibly embarrassed, with the worksheet held close and her voice diminished.",
          "dialogueLineIndexes": [
           4,
           5
@@ -2248,26 +2248,26 @@
         {
          "type": "reaction",
          "count": 1,
-         "source": "Teacher’s calm prompt opens the classroom read without rushing Jenny."
+         "source": "Teacher's calm permission before Jenny begins"
         },
         {
          "type": "load_release",
          "count": 1,
-         "source": "Jenny’s pause loads the embarrassment before the wrong word releases it publicly."
+         "source": "Jenny’s stall before the wrong word"
         },
         {
          "type": "impact",
          "count": 1,
-         "source": "The wrong word is heard aloud and changes the social meaning of the room."
+         "source": "The wrong word is heard aloud"
         },
         {
          "type": "settle",
          "count": 1,
-         "source": "The teacher’s reassurance and Jenny’s smaller retry settle the beat into a held embarrassment."
+         "source": "The teacher’s correction and Jenny’s smaller retry"
         }
        ],
        "witnessStagingSides": [
-        "Jenny remains front-center facing the board and class; Teacher stays near the front of the room facing Jenny; no extra characters enter; keep both Jenny and the board readable in the same wide classroom geometry; preserve the shared front-of-room axis."
+        "Jenny: front-center at the board-facing front of the room; Teacher: near the front of the room facing Jenny; classmates remain seated and silent as witnesses."
        ],
        "stagePlan": [
         {
@@ -2277,12 +2277,12 @@
          ],
          "purpose": "Establish the public reading pressure and let the sentence begin cleanly before the stumble lands.",
          "startSec": 0.0,
-         "endSec": 10.0,
-         "initialOrCarriedState": "Jenny stands at the front with the worksheet open, the board word visible, and the room waiting in quiet.",
-         "cause": "The class has paused for Jenny’s read, and the stillness makes her first attempt feel public.",
+         "endSec": 9.5,
+         "initialOrCarriedState": "Jenny stands at the front with the worksheet open while the room waits in neutral classroom light.",
+         "cause": "The teacher’s calm permission and the shared silence give Jenny a narrow opening to start.",
          "primaryEvent": "Jenny stands at the front, starts the line, and the room holds still around the word on the board.",
          "observableEndState": "Jenny is mid-read with the worksheet in hand and the board word looming in the same frame.",
-         "emotionOrCameraAnalysis": "A steady, slightly withheld wide frame lets the audience feel the exposed classroom space before the embarrassment arrives."
+         "emotionOrCameraAnalysis": "The wide, steady view makes the room’s attention feel public before the camera ever moves closer."
         },
         {
          "stageNumber": 2,
@@ -2290,45 +2290,49 @@
           "S01B01_PUBLIC_READING_BREAKS"
          ],
          "purpose": "Carry the hesitation into the wrong word and let the tiny social ripple register without widening the scene beyond its honest size.",
-         "startSec": 10.0,
-         "endSec": 20.0,
-         "initialOrCarriedState": "Jenny is mid-read, still holding the worksheet and trying to keep her composure while the room listens.",
-         "cause": "The stall hangs too long, the wrong word slips out, and the room hears it as a social event.",
+         "startSec": 9.5,
+         "endSec": 18.0,
+         "initialOrCarriedState": "Jenny is mid-read, trying to keep going with the board still readable behind her.",
+         "cause": "The stall resolves into a mistake that everyone can hear.",
          "primaryEvent": "Jenny pauses, says 'Briggle,' and a tiny laugh follows while her body tightens around the paper.",
          "observableEndState": "Jenny has curled inward over the worksheet and the laugh has already passed through the room.",
-         "emotionOrCameraAnalysis": "A subtle inward push makes the frame feel as if the room itself is closing around her once the mistake lands."
+         "emotionOrCameraAnalysis": "The subtle push inward should feel like the room tightening around her, not the camera showing off."
         },
         {
          "stageNumber": 3,
          "beatIds": [
           "S01B01_PUBLIC_READING_BREAKS"
          ],
-         "purpose": "Let the teacher’s correction and Jenny’s tiny retry land as the sad, small aftermath of the mistake.",
-         "startSec": 20.0,
+         "purpose": "Let the teacher’s correction and Jenny’s tiny retry land as the small aftermath of the mistake.",
+         "startSec": 18.0,
          "endSec": 30.0,
-         "initialOrCarriedState": "Jenny is curled inward over the worksheet, with embarrassment already visible and the room still quiet.",
-         "cause": "The teacher answers the mistake with calm permission, giving Jenny a narrow path back into the read.",
+         "initialOrCarriedState": "Jenny is curled inward, still holding the page close after the wrong word.",
+         "cause": "The teacher answers the mistake with calm encouragement, giving Jenny a path back.",
          "primaryEvent": "The teacher says 'That’s all right. Try again.' and Jenny answers 'Bridge.' with a reduced voice.",
          "observableEndState": "Jenny is still standing, still embarrassed, with the worksheet held close and her voice diminished.",
-         "emotionOrCameraAnalysis": "The final hold gives the corrected answer room to feel fragile rather than triumphant, preserving the ache of being heard wrong."
+         "emotionOrCameraAnalysis": "The hold gives the corrected word air so the audience can feel both kindness and lingering shame at once."
         }
        ],
        "geography": [
-        "Front-of-room classroom view looking toward the board.",
-        "Jenny stands at the front-center performance zone, between the class and the board.",
-        "The chalkboard remains fully legible behind Jenny.",
-        "The classroom desks and chairs recede behind and to the sides, leaving a clear corridor around Jenny.",
-        "Teacher presence is implied from the front-of-room axis and may remain offscreen in this opening frame.",
-        "Keep the worksheet readable in Jenny’s hands and the board word visible in the same wide geometry."
+        "Front-of-room classroom axis facing the chalkboard.",
+        "Jenny stands at the front-center area with clear walking and speaking space around her.",
+        "The blackboard remains readable in the same frame as Jenny.",
+        "Desks and chairs occupy the lower and side foregrounds as quiet audience space.",
+        "Windows run along one side of the room and provide soft daylight.",
+        "Teacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame.",
+        "Keep an unobstructed corridor between Jenny and the board for the reading beat.",
+        "Leave the classroom still and orderly so the silence reads as social pressure."
        ],
        "attributeOwnership": [
-        "Jenny owns the worksheet and her shrinking posture; the board owns the written word BRIDGE; the Teacher owns the calm corrective line and does not handle the worksheet; no other character may take or obscure the worksheet.",
-        "Jenny’s face, hands, shoulders, and grip are the emotional read; the classroom and board are environmental support only; the room does not change ownership of the moment."
+        "Jenny owns the worksheet and the embarrassed self-protective posture.",
+        "Teacher owns the calm corrective line and steady supervision.",
+        "The board owns the target word and must stay readable.",
+        "The classroom owns the silence, desks, windows, and listening space; no extra characters may enter."
        ],
        "environmentContract": [
-        "Stage 1: the classroom remains still and evenly lit while Jenny starts reading.",
-        "Stage 2: the same room tightens emotionally, but geometry stays fixed as the mistake lands.",
-        "Stage 3: the light cools slightly and the room stays quiet while Jenny holds the embarrassed retry."
+        "Stage 1: keep the room still and readable; sunlight stays warm from the windows.",
+        "Stage 2: let the emotional temperature feel slightly cooler at the mistake while the geometry stays fixed.",
+        "Stage 3: preserve the same front-of-room layout and end with the room quiet, no rearrangement of desks or people."
        ],
        "motionVocabulary": [
         {
@@ -2397,49 +2401,50 @@
         }
        ],
        "openingCarriedState": "Jenny stands at the front of the classroom with her worksheet open while the board word is visible across from her and the room waits.",
-       "openingMotionBridge": "Jenny steadies the paper and begins the line before the first pause arrives.",
+       "openingMotionBridge": "Jenny lifts her eyes from the worksheet to the board and takes the first careful breath before speaking.",
        "actionOwnership": [
-        "Jenny owns the reading attempt, the stall, the wrong word, and the smaller retry; the Teacher owns the calm permission to try again; the room only witnesses.",
-        "The worksheet remains in Jenny’s hands throughout; no one else reaches for it or blocks it from view."
+        "Jenny owns the reading attempt, the stall, the wrong word, and the smaller retry.",
+        "Teacher owns the calm correction only; do not assign the mistake or emotional collapse to the Teacher.",
+        "The room owns the silence and the tiny laugh; no extra classmates may step into frame."
        ],
        "consistencyContract": [
         "Keep Jenny and the board readable in the same wide classroom geometry throughout.",
         "Preserve the exact dialogue order and the short public pause before the wrong word.",
         "Maintain exactly the approved cast only: Jenny and Teacher, with no extra characters entering the frame.",
-        "End with Jenny front-center, embarrassed, worksheet held close, and the room still quiet."
+        "Do not crop the worksheet or the board out of the frame when the beat depends on them.",
+        "End with Jenny still at the front, embarrassed, and holding the worksheet close."
        ],
-       "audioContract": "@Audio1 is the sole authority for voice identity, cadence, delivery, and silence. Teacher speaks the calm prompt and correction; Jenny speaks the stumble and the smaller retry; no narration, no ad-libs, no humming, no exertion, no other voices; keep listeners’ mouths closed and preserve the approved track exactly.",
-       "continuityFinish": "Jenny remains at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer; the classroom stays quiet and the board remains readable.",
+       "audioContract": "@Audio1 is the sole authority for all spoken words, voice identity, cadence, delivery, mouth timing, and silence; Teacher and Jenny speak only the approved lines, in order, with no narration, ad-libs, humming, exertion, or other voices. No music.",
+       "continuityFinish": "Jenny remains at the front with her shoulders tucked in after the tiny retry, the worksheet held close, and the embarrassed public moment still active as the shot ends.",
        "surgicalSafeguards": [
-        "Do not crop the board or worksheet; both must stay readable in the same shot geometry.",
-        "Do not introduce any extra student reactions or offscreen voices; the embarrassment must come from silence and timing.",
-        "Do not turn the teacher’s line into a joke; it must stay plain and kind."
+        "Keep the worksheet and board legible in every shot.",
+        "Do not introduce any third student or offscreen voice.",
+        "Do not let the camera crop away Jenny’s hands during the mistake and retry."
        ],
-       "editScope": "Single continuous unit with one gentle inward tightening when the wrong word lands, then a patient hold to the ending.",
+       "editScope": "One continuous classroom beat with three motivated internal shots.",
        "contentToPreserve": [
-        "Approved dialogue order and speaker ownership",
-        "Shared front-of-room classroom geography",
-        "Jenny’s worksheet grip and embarrassed inward posture",
-        "The teacher’s calm, kind correction",
-        "The final held embarrassed landing"
+        "The exact classroom silence before the stall.",
+        "The wrong word 'Briggle' and the teacher’s calm 'That’s all right. Try again.'",
+        "Jenny’s smaller 'Bridge.' and the final embarrassed hold."
        ],
        "extensionDirection": "forward",
-       "transitionTrigger": "The wrong word is heard aloud and the room registers the mistake.",
-       "transitionTransformation": "The reading tension becomes public embarrassment and then a smaller, guarded retry.",
-       "transitionArrivalState": "Jenny remains at the front, shoulders tucked in, holding the worksheet close after her tiny corrected answer.",
-       "audioTransition": "No music underscore; preserve room tone, Teacher’s calm line, Jenny’s stumble, and the small retry exactly as approved.",
+       "transitionTrigger": "Jenny’s embarrassed hold after the corrected answer.",
+       "transitionTransformation": "The next unit can continue from a still-shrunk front-of-room posture with the worksheet hugged close.",
+       "transitionArrivalState": "Jenny remains at the front, embarrassed and small, still holding the worksheet close.",
+       "audioTransition": "Carry the approved classroom dialogue only; no score or added voices.",
        "firstFrameTag": "Jenny stands at the front of the classroom with her worksheet open while the board word is visible across from her and the room waits.",
        "lastFrameTag": "Jenny remains at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer.",
-       "storyboardTag": "Wide classroom geometry; Jenny front-center; board readable; teacher near the front; desks and windows present; quiet room.",
-       "storyboardReadingOrder": "Stage 1: setup and first attempt; Stage 2: stall and wrong word; Stage 3: correction and smaller retry.",
+       "storyboardTag": "Wide classroom frame, Jenny front-center, board visible, room silent, paper grip and small vocal stumble carrying the beat.",
+       "storyboardReadingOrder": "Shot 1 establishes the exposed classroom read; Shot 2 carries the stall and mistake; Shot 3 lands the teacher’s correction and Jenny’s smaller retry.",
        "blockoutKind": "coarse",
        "blockoutMappings": [
-        "Jenny front-center with worksheet in both hands",
-        "Teacher near the front facing Jenny",
-        "Board readable behind Jenny",
-        "Desks, windows, and warm classroom daylight establish scale"
+        "Front windows and warm daylight on the left.",
+        "Board centered on the front wall.",
+        "Teacher near the front of the room.",
+        "Jenny front-center holding the worksheet.",
+        "Seated classmates as silent background witnesses."
        ],
-       "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Jenny; @图3=location; @Audio1=audio; never swap.\nAngles: @图2=one Jenny; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Jenny identity, proportions, scale and approved wearable state: Jenny identity, proportions, scale and approved wearable state. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nJenny steadies the paper and begins the line before the first pause arrives.\n\n[ACTION OWNERSHIP]\nJenny owns the reading attempt, the stall, the wrong word, and the smaller retry; the Teacher owns the calm permission to try again; the room only witnesses.\nThe worksheet remains in Jenny’s hands throughout; no one else reaches for it or blocks it from view.\n\n[ATTRIBUTE OWNERSHIP]\nJenny owns the worksheet and her shrinking posture; the board owns the written word BRIDGE; the Teacher owns the calm corrective line and does not handle the worksheet; no other character may take or obscure the worksheet.\nJenny’s face, hands, shoulders, and grip are the emotional read; the classroom and board are environmental support only; the room does not change ownership of the moment.\n\n[ENVIRONMENT CONTRACT]\nStage 1: the classroom remains still and evenly lit while Jenny starts reading.\nStage 2: the same room tightens emotionally, but geometry stays fixed as the mistake lands.\nStage 3: the light cools slightly and the room stays quiet while Jenny holds the embarrassed retry.\n\n[One-Sentence Summary]\nA classroom read turns publicly awkward when Jenny says the wrong word, then tries again smaller under the teacher’s calm encouragement.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Front-of-room classroom view looking toward the board. Jenny stands at the front-center performance zone, between the class and the board. The chalkboard remains fully legible behind Jenny. The classroom desks and chairs recede behind and to the sides, leaving a clear corridor around Jenny. Teacher presence is implied from the front-of-room axis and may remain offscreen in this opening frame. Keep the worksheet readable in Jenny’s hands and the board word visible in the same wide geometry.\n\n[Living Performance]\nLiving performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: Wide classroom frame at student eye level, 35mm feel, steady and slightly withheld, with Jenny front-center and the board legible behind her. Action: Jenny starts the line while the room stays quiet and the board word waits across from her. Performance: She looks between the paper and the board, speaks carefully, and keeps her body upright even as the moment feels exposed. End state: Jenny stands at the front with the worksheet open and the word BRIDGE visible on the board. Spoken action: Teacher, Calm, contained classroom warmth; let 'Take your time' land as permission, with Jenny’s name lightly affectionate, never sugary: {Take your time, Jenny.} Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 2: Camera: Same axis, with a subtle inward drift to a medium-wide as the mistake becomes audible. Action: Jenny hesitates, then says the wrong word and hears the room register it. Performance: Her fingers tighten on the page, her shoulders fold inward, and the page lifts closer as if it can hide her. End state: Jenny has curled inward over the worksheet, eyes lowered, with the laugh already gone from the room. Spoken action: Jenny, Start as if she can manage it; let the stumble arrive clearly but naturally, with a visible swallow in the voice at the end: {The little rabbit crossed the...} The pose holds a full beat after the line ends. Spoken action: Jenny, Make it a quick, involuntary blurt, not a joke; the embarrassment should arrive on the tail of the word: {Briggle.} The pose holds a full beat after the line ends. Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 3: Camera: Return to a steady medium-wide on the same front-of-room axis, keeping Jenny, the board, and the teacher all readable. Action: The teacher gives permission to try again, and Jenny answers more quietly. Performance: She stays folded in, then gives the corrected word in a reduced voice while keeping the worksheet close to her chest. End state: Jenny stands at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer. Spoken action: Teacher, Keep it plain and kind; the second sentence should feel like a door opening, not a lesson: {That’s all right. Try again.} The pose holds a full beat after the line ends. Spoken action: Jenny, Softer than the mistake, smaller in volume, but cleaner in shape; let the courage be quiet: {Bridge.} The pose holds a full beat after the line ends. Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nWitness staging: Jenny remains front-center facing the board and class; Teacher stays near the front of the room facing Jenny; no extra characters enter; keep both Jenny and the board readable in the same wide classroom geometry; preserve the shared front-of-room axis. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Jenny and one Teacher throughout; no duplicates of either character. Maintain Jenny and the board readable in the same wide classroom geometry throughout. Safeguard: Do not crop the board or worksheet; both must stay readable in the same shot geometry. Safeguard: Do not introduce any extra student reactions or offscreen voices; the embarrassment must come from silence and timing. Living performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Jenny remains at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer; the classroom stays quiet and the board remains readable."
+       "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Jenny; @图3=location; @Audio1=audio; never swap.\nAngles: @图2=one Jenny; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Jenny identity, proportions, scale and approved wearable state: Jenny identity, proportions, scale and approved wearable state. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nJenny lifts her eyes from the worksheet to the board and takes the first careful breath before speaking.\n\n[ACTION OWNERSHIP]\nJenny owns the reading attempt, the stall, the wrong word, and the smaller retry.\nTeacher owns the calm correction only; do not assign the mistake or emotional collapse to the Teacher.\nThe room owns the silence and the tiny laugh; no extra classmates may step into frame.\n\n[ATTRIBUTE OWNERSHIP]\nJenny owns the worksheet and the embarrassed self-protective posture.\nTeacher owns the calm corrective line and steady supervision.\nThe board owns the target word and must stay readable.\nThe classroom owns the silence, desks, windows, and listening space; no extra characters may enter.\n\n[ENVIRONMENT CONTRACT]\nStage 1: keep the room still and readable; sunlight stays warm from the windows.\nStage 2: let the emotional temperature feel slightly cooler at the mistake while the geometry stays fixed.\nStage 3: preserve the same front-of-room layout and end with the room quiet, no rearrangement of desks or people.\n\n[One-Sentence Summary]\nShow Jenny’s public reading mistake turning into a small, embarrassed retry in one quiet classroom beat.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Front-of-room classroom axis facing the chalkboard. Jenny stands at the front-center area with clear walking and speaking space around her. The blackboard remains readable in the same frame as Jenny. Desks and chairs occupy the lower and side foregrounds as quiet audience space. Windows run along one side of the room and provide soft daylight. Teacher presence is off-frame at the opening; the speaking correction is heard from outside the opening frame. Keep an unobstructed corridor between Jenny and the board for the reading beat. Leave the classroom still and orderly so the silence reads as social pressure.\n\n[Living Performance]\nLiving performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: Wide classroom view at student eye level, 35mm feel, steady and slightly withheld, with Jenny front-center and the board readable. Action: Jenny begins reading while the room stays quiet around her. Performance: She looks between the worksheet and the board, speaks carefully, and keeps her body open just long enough to begin. End state: Jenny stands at the front with the worksheet open and the word BRIDGE visible on the board behind her. Spoken action: Teacher, Calm, contained classroom warmth; let 'Take your time' land as permission, with Jenny’s name lightly affectionate, never sugary: {Take your time, Jenny.} Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 2: Camera: Same axis with a subtle inward drift, medium-wide feel, still student height, no flashy reframing. Action: Jenny stalls, says the wrong word, and the mistake becomes publicly audible. Performance: Her fingers tighten on the paper, her shoulders fold inward, and the laugh passes through the room while she closes around the worksheet. End state: Jenny is curled inward over the worksheet, eyes lowered, the wrong word just having landed in the quiet room. Spoken action: Jenny, Start as if she can manage it; let the stumble arrive clearly but naturally, with a visible swallow in the voice at the end: {The little rabbit crossed the...} Spoken action: Jenny, Make it a quick, involuntary blurt, not a joke; the embarrassment should arrive on the tail of the word: {Briggle.} Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 3: Camera: Return to a steady medium-wide on the same front-of-room axis, giving the teacher’s kindness and Jenny’s reduced answer space to sit together. Action: The teacher invites another try and Jenny answers more quietly. Performance: She remains tucked in, lifts the worksheet close, and gives the corrected word with reduced volume and guarded courage. End state: Jenny stands at the front, visibly embarrassed, with the worksheet held close and her voice diminished. Spoken action: Teacher, Keep it plain and kind; the second sentence should feel like a door opening, not a lesson: {That’s all right. Try again.} The pose holds a full beat after the line ends. Spoken action: Jenny, Softer than the mistake, smaller in volume, but cleaner in shape; let the courage be quiet: {Bridge.} The pose holds a full beat after the line ends. Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nWitness staging: Jenny: front-center at the board-facing front of the room; Teacher: near the front of the room facing Jenny; classmates remain seated and silent as witnesses. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Jenny and one Teacher throughout; no duplicates of either character. Maintain Jenny and the board readable in the same wide classroom geometry throughout. Safeguard: the worksheet and board legible in every shot. Safeguard: Do not introduce any third student or offscreen voice. Living performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Jenny remains at the front with her shoulders tucked in after the tiny retry, the worksheet held close, and the embarrassed public moment still active as the shot ends."
       },
       "preflight": {
        "verdict": "PASS",
@@ -2491,10 +2496,10 @@
         "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
        },
        "canonProfileDigest": "7df833ccb64e2ad23bb0553dbe1fa7951584c4916295ea09b98b737ce7753458",
-       "shotContractHash": "41f836dae7990537411c831718b4cb3dfcb79f2a2a8d7df3416d6ad588dbcaa0",
-       "shotHash": "cd8247344cb1c205e6e42df1e0164152962388421a18b66e5eef72db58b88b6b",
-       "openingFrameHash": "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
-       "openingStageContractHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+       "shotContractHash": "cdb5f11e2b92083f24476cf9768f403fe46402865810368489a56a6141675281",
+       "shotHash": "642fbc7bff81ed07587e1de86c919401ed5735830f1e92dc2c3f9169d483ceea",
+       "openingFrameHash": "90585cdb28bfc1ae87415accfed4bd27ad1533fd25ac6b7f19d5efd091b6b42a",
+       "openingStageContractHash": "542540a42e674350194ada8c161e61f1e9bb9638d92049dcfc84013572d2f8f1",
        "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
        "referenceOrder": [
         "@图1",
@@ -2525,7 +2530,7 @@
         }
        ],
        "referenceHashes": [
-        "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
+        "90585cdb28bfc1ae87415accfed4bd27ad1533fd25ac6b7f19d5efd091b6b42a",
         "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
         "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
        ],
@@ -2550,7 +2555,449 @@
        "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
       }
      },
-     "history": []
+     "history": [
+      {
+       "department": "Animation",
+       "worker": "Seedance Production Director",
+       "skill": "studio/chairs/animation/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-09-03T08:01:54",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "creativeDirectingStandardVersion": 4,
+       "sourceHash": "79af1900afdd9bbfa41ab110fadcdd2d713be6355578d345ac3d422845e0964a",
+       "output": {
+        "shotId": "S1.SH01",
+        "durationSec": 30,
+        "taskMode": "reference-to-video",
+        "pacingMode": "timestamp",
+        "generationGoal": "A classroom read turns publicly awkward when Jenny says the wrong word, then tries again smaller under the teacher’s calm encouragement.",
+        "deliveryPlan": "Stay on the shared front-of-room geometry, let silence build the pressure, tighten only when the mistake lands, and end on Jenny’s embarrassed corrected retry with the worksheet held close.",
+        "creativeTranslation": {
+         "interpretation": {
+          "jokeOrAche": "Ache with a small comic sting: a simple reading task becomes public embarrassment when a harmless misread is heard aloud.",
+          "mechanism": "Ordinary classroom expectation collides with one wrong word, then the teacher’s calm permission makes the retry socially visible instead of erasing it.",
+          "statusBefore": "Jenny is trying to read cleanly and be invisible inside a normal classroom routine.",
+          "statusAfter": "Jenny is still present but smaller, embarrassed, and carefully protecting herself behind the page.",
+          "audienceProgression": [
+           "We watch a routine read and expect a smooth answer.",
+           "The stall and wrong word make the room feel too quiet and too public.",
+           "Kindness arrives, but the embarrassment lingers as Jenny retries in a reduced voice."
+          ],
+          "emotionalHeart": "Jenny wants to get through the moment without drawing more attention, and the room’s attention makes that almost impossible."
+         },
+         "gagClocks": [
+          {
+           "beatCode": "S01B01_PUBLIC_READING_BREAKS",
+           "mode": "SMALL",
+           "setup": "Jenny begins a simple read-aloud in a quiet room.",
+           "anticipation": "She looks between the worksheet and the board, and her hands tighten on the paper before she speaks.",
+           "impact": "Jenny says 'Briggle' instead of 'Bridge.'",
+           "reaction": "Her shoulders fold inward and the worksheet pulls closer to her chest as the room hears it.",
+           "recoveryHold": "A short, quiet beat lets the odd word land without turning the room into a joke.",
+           "recoveryHoldSec": 1.2,
+           "button": "The Teacher calmly says, 'That’s all right. Try again.'",
+           "retroactive": true,
+           "providerAction": "Jenny stalls over the line, blinks down at the worksheet, and physically curls inward when the wrong word is heard."
+          }
+         ],
+         "generationDesign": {
+          "packagingDecision": "single-unit",
+          "completeGagArcCount": 1,
+          "densityJudgement": "One public-reading embarrassment arc fits cleanly inside the approved 30-second unit with a single motivated camera grammar and one prop-state change.",
+          "splitOrNonSplitRationale": "No split is needed because the beat has one clear turn, one social reaction, and one landing hold; the camera can remain in the same classroom axis without losing clarity.",
+          "handoffState": "Jenny remains at the front, shoulders tucked in, holding the worksheet close after her tiny corrected answer."
+         }
+        },
+        "dramaticBeat": "A routine classroom read breaks when Jenny says the wrong word aloud and has to recover under watchful silence.",
+        "audienceBefore": "We expect an ordinary school read and a smooth, low-stakes answer.",
+        "audienceAfter": "We feel secondhand embarrassment and a protective tenderness as Jenny shrinks and then tries again.",
+        "beatOwner": "S01B01_PUBLIC_READING_BREAKS",
+        "performanceFreedom": "Preserve the approved dialogue exactly through @Audio1, but allow natural timing, breath, eye flicks, paper tremor, and tiny posture changes around the mistake and retry.",
+        "performanceArc": "Jenny begins brave but careful, stalls, says the wrong word, curls inward when it lands publicly, then answers again in a smaller voice while still guarding the worksheet.",
+        "physicalCauseAndEffect": "The quiet room and waiting attention make the hesitation readable; the wrong word triggers a visible inward collapse and a tighter hold on the page; the teacher’s calm correction opens a narrow path back.",
+        "cameraBehaviour": "Mostly still at student eye level on the shared front-of-room axis, with only a subtle inward drift when the wrong word lands, then a patient hold for the fragile correction.",
+        "timingAndRhythm": "Give the teacher’s prompt room to land, then a public pause before the stumble; let the wrong word arrive cleanly, followed by a short afterbeat, then the smaller retry and a final hold.",
+        "landingBreath": "Hold long enough after the corrected answer for the embarrassment to read on Jenny’s face, shoulders, and grip on the worksheet.",
+        "directionDensity": "guided",
+        "precisionReasons": [
+         "Exact dialogue order and speaker timing are locked by @Audio1.",
+         "The classroom front, board readability, and two-character blocking must remain continuous for the embarrassment to read.",
+         "The approved landing requires a held pose with the worksheet close and embarrassed body language."
+        ],
+        "shotPlan": [
+         {
+          "shotNumber": 1,
+          "purpose": "Set the classroom pressure and the first brave attempt.",
+          "framingLensAndCamera": "Wide classroom frame at student eye level, 35mm feel, steady and slightly withheld, with Jenny front-center and the board legible behind her.",
+          "causalAction": "Jenny starts the line while the room stays quiet and the board word waits across from her.",
+          "observablePerformance": "She looks between the paper and the board, speaks carefully, and keeps her body upright even as the moment feels exposed.",
+          "compositionLightAndMaterials": "Warm afternoon classroom light from the windows, soft bounce on the floor, chalkboard matte against the pale wall, worksheet paper bright in her hands.",
+          "landingImage": "Jenny stands at the front with the worksheet open and the word BRIDGE visible on the board.",
+          "dialogueLineIndexes": [
+           1
+          ],
+          "dialogueDirections": [
+           "Calm, contained classroom warmth; let 'Take your time' land as permission, with Jenny’s name lightly affectionate, never sugary."
+          ],
+          "holdAfterDialogue": false,
+          "gagBeatIds": [
+           "S01B01_PUBLIC_READING_BREAKS"
+          ]
+         },
+         {
+          "shotNumber": 2,
+          "purpose": "Let the stall and wrong word land as public embarrassment.",
+          "framingLensAndCamera": "Same axis, with a subtle inward drift to a medium-wide as the mistake becomes audible.",
+          "causalAction": "Jenny hesitates, then says the wrong word and hears the room register it.",
+          "observablePerformance": "Her fingers tighten on the page, her shoulders fold inward, and the page lifts closer as if it can hide her.",
+          "compositionLightAndMaterials": "The same neutral classroom light feels a little flatter and cooler; the chalkboard remains readable, and the paper edge catches a small highlight as it rises.",
+          "landingImage": "Jenny has curled inward over the worksheet, eyes lowered, with the laugh already gone from the room.",
+          "dialogueLineIndexes": [
+           2,
+           3
+          ],
+          "dialogueDirections": [
+           "Start as if she can manage it; let the stumble arrive clearly but naturally, with a visible swallow in the voice at the end.",
+           "Make it a quick, involuntary blurt, not a joke; the embarrassment should arrive on the tail of the word."
+          ],
+          "holdAfterDialogue": true,
+          "gagBeatIds": [
+           "S01B01_PUBLIC_READING_BREAKS"
+          ]
+         },
+         {
+          "shotNumber": 3,
+          "purpose": "Hold the teacher’s kindness and Jenny’s smaller retry as the fragile landing.",
+          "framingLensAndCamera": "Return to a steady medium-wide on the same front-of-room axis, keeping Jenny, the board, and the teacher all readable.",
+          "causalAction": "The teacher gives permission to try again, and Jenny answers more quietly.",
+          "observablePerformance": "She stays folded in, then gives the corrected word in a reduced voice while keeping the worksheet close to her chest.",
+          "compositionLightAndMaterials": "Cooler classroom light settles over the room, with the board and wood trim still legible; the paper remains the main prop state change, pressed close against her cardigan.",
+          "landingImage": "Jenny stands at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer.",
+          "dialogueLineIndexes": [
+           4,
+           5
+          ],
+          "dialogueDirections": [
+           "Keep it plain and kind; the second sentence should feel like a door opening, not a lesson.",
+           "Softer than the mistake, smaller in volume, but cleaner in shape; let the courage be quiet."
+          ],
+          "holdAfterDialogue": true,
+          "gagBeatIds": [
+           "S01B01_PUBLIC_READING_BREAKS"
+          ]
+         }
+        ],
+        "timingBeats": [
+         {
+          "type": "reaction",
+          "count": 1,
+          "source": "Teacher’s calm prompt opens the classroom read without rushing Jenny."
+         },
+         {
+          "type": "load_release",
+          "count": 1,
+          "source": "Jenny’s pause loads the embarrassment before the wrong word releases it publicly."
+         },
+         {
+          "type": "impact",
+          "count": 1,
+          "source": "The wrong word is heard aloud and changes the social meaning of the room."
+         },
+         {
+          "type": "settle",
+          "count": 1,
+          "source": "The teacher’s reassurance and Jenny’s smaller retry settle the beat into a held embarrassment."
+         }
+        ],
+        "witnessStagingSides": [
+         "Jenny remains front-center facing the board and class; Teacher stays near the front of the room facing Jenny; no extra characters enter; keep both Jenny and the board readable in the same wide classroom geometry; preserve the shared front-of-room axis."
+        ],
+        "stagePlan": [
+         {
+          "stageNumber": 1,
+          "beatIds": [
+           "S01B01_PUBLIC_READING_BREAKS"
+          ],
+          "purpose": "Establish the public reading pressure and let the sentence begin cleanly before the stumble lands.",
+          "startSec": 0.0,
+          "endSec": 10.0,
+          "initialOrCarriedState": "Jenny stands at the front with the worksheet open, the board word visible, and the room waiting in quiet.",
+          "cause": "The class has paused for Jenny’s read, and the stillness makes her first attempt feel public.",
+          "primaryEvent": "Jenny stands at the front, starts the line, and the room holds still around the word on the board.",
+          "observableEndState": "Jenny is mid-read with the worksheet in hand and the board word looming in the same frame.",
+          "emotionOrCameraAnalysis": "A steady, slightly withheld wide frame lets the audience feel the exposed classroom space before the embarrassment arrives."
+         },
+         {
+          "stageNumber": 2,
+          "beatIds": [
+           "S01B01_PUBLIC_READING_BREAKS"
+          ],
+          "purpose": "Carry the hesitation into the wrong word and let the tiny social ripple register without widening the scene beyond its honest size.",
+          "startSec": 10.0,
+          "endSec": 20.0,
+          "initialOrCarriedState": "Jenny is mid-read, still holding the worksheet and trying to keep her composure while the room listens.",
+          "cause": "The stall hangs too long, the wrong word slips out, and the room hears it as a social event.",
+          "primaryEvent": "Jenny pauses, says 'Briggle,' and a tiny laugh follows while her body tightens around the paper.",
+          "observableEndState": "Jenny has curled inward over the worksheet and the laugh has already passed through the room.",
+          "emotionOrCameraAnalysis": "A subtle inward push makes the frame feel as if the room itself is closing around her once the mistake lands."
+         },
+         {
+          "stageNumber": 3,
+          "beatIds": [
+           "S01B01_PUBLIC_READING_BREAKS"
+          ],
+          "purpose": "Let the teacher’s correction and Jenny’s tiny retry land as the sad, small aftermath of the mistake.",
+          "startSec": 20.0,
+          "endSec": 30.0,
+          "initialOrCarriedState": "Jenny is curled inward over the worksheet, with embarrassment already visible and the room still quiet.",
+          "cause": "The teacher answers the mistake with calm permission, giving Jenny a narrow path back into the read.",
+          "primaryEvent": "The teacher says 'That’s all right. Try again.' and Jenny answers 'Bridge.' with a reduced voice.",
+          "observableEndState": "Jenny is still standing, still embarrassed, with the worksheet held close and her voice diminished.",
+          "emotionOrCameraAnalysis": "The final hold gives the corrected answer room to feel fragile rather than triumphant, preserving the ache of being heard wrong."
+         }
+        ],
+        "geography": [
+         "Front-of-room classroom view looking toward the board.",
+         "Jenny stands at the front-center performance zone, between the class and the board.",
+         "The chalkboard remains fully legible behind Jenny.",
+         "The classroom desks and chairs recede behind and to the sides, leaving a clear corridor around Jenny.",
+         "Teacher presence is implied from the front-of-room axis and may remain offscreen in this opening frame.",
+         "Keep the worksheet readable in Jenny’s hands and the board word visible in the same wide geometry."
+        ],
+        "attributeOwnership": [
+         "Jenny owns the worksheet and her shrinking posture; the board owns the written word BRIDGE; the Teacher owns the calm corrective line and does not handle the worksheet; no other character may take or obscure the worksheet.",
+         "Jenny’s face, hands, shoulders, and grip are the emotional read; the classroom and board are environmental support only; the room does not change ownership of the moment."
+        ],
+        "environmentContract": [
+         "Stage 1: the classroom remains still and evenly lit while Jenny starts reading.",
+         "Stage 2: the same room tightens emotionally, but geometry stays fixed as the mistake lands.",
+         "Stage 3: the light cools slightly and the room stays quiet while Jenny holds the embarrassed retry."
+        ],
+        "motionVocabulary": [
+         {
+          "character": "Fuzzby",
+          "belongs": [
+           "careens",
+           "overcommits",
+           "barrels",
+           "bounces",
+           "improvises",
+           "presents",
+           "rockets"
+          ],
+          "banned": [
+           "slinks",
+           "hesitates",
+           "glides",
+           "sulks",
+           "waits",
+           "creeps"
+          ]
+         },
+         {
+          "character": "Zenny",
+          "belongs": [
+           "glides",
+           "observes",
+           "settles",
+           "arches",
+           "softens",
+           "levels"
+          ],
+          "banned": [
+           "scrambles",
+           "flails",
+           "rushes",
+           "panics",
+           "showboats"
+          ]
+         }
+        ],
+        "referenceContract": [
+         {
+          "assetTag": "@图1",
+          "role": "opening_frame",
+          "controls": "the exact first-frame composition and carried visible state from the approved opening keyframe",
+          "scope": "continuity"
+         },
+         {
+          "assetTag": "@图2",
+          "role": "character_identity",
+          "controls": "Jenny identity, proportions, scale and approved wearable state",
+          "scope": "canon"
+         },
+         {
+          "assetTag": "@图3",
+          "role": "location",
+          "controls": "the approved scene geography, world, light, materials and atmosphere",
+          "scope": "episode"
+         },
+         {
+          "assetTag": "@Audio1",
+          "role": "audio",
+          "controls": "approved dialogue, voice identity, cadence, delivery and mouth timing",
+          "scope": "continuity"
+         }
+        ],
+        "openingCarriedState": "Jenny stands at the front of the classroom with her worksheet open while the board word is visible across from her and the room waits.",
+        "openingMotionBridge": "Jenny steadies the paper and begins the line before the first pause arrives.",
+        "actionOwnership": [
+         "Jenny owns the reading attempt, the stall, the wrong word, and the smaller retry; the Teacher owns the calm permission to try again; the room only witnesses.",
+         "The worksheet remains in Jenny’s hands throughout; no one else reaches for it or blocks it from view."
+        ],
+        "consistencyContract": [
+         "Keep Jenny and the board readable in the same wide classroom geometry throughout.",
+         "Preserve the exact dialogue order and the short public pause before the wrong word.",
+         "Maintain exactly the approved cast only: Jenny and Teacher, with no extra characters entering the frame.",
+         "End with Jenny front-center, embarrassed, worksheet held close, and the room still quiet."
+        ],
+        "audioContract": "@Audio1 is the sole authority for voice identity, cadence, delivery, and silence. Teacher speaks the calm prompt and correction; Jenny speaks the stumble and the smaller retry; no narration, no ad-libs, no humming, no exertion, no other voices; keep listeners’ mouths closed and preserve the approved track exactly.",
+        "continuityFinish": "Jenny remains at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer; the classroom stays quiet and the board remains readable.",
+        "surgicalSafeguards": [
+         "Do not crop the board or worksheet; both must stay readable in the same shot geometry.",
+         "Do not introduce any extra student reactions or offscreen voices; the embarrassment must come from silence and timing.",
+         "Do not turn the teacher’s line into a joke; it must stay plain and kind."
+        ],
+        "editScope": "Single continuous unit with one gentle inward tightening when the wrong word lands, then a patient hold to the ending.",
+        "contentToPreserve": [
+         "Approved dialogue order and speaker ownership",
+         "Shared front-of-room classroom geography",
+         "Jenny’s worksheet grip and embarrassed inward posture",
+         "The teacher’s calm, kind correction",
+         "The final held embarrassed landing"
+        ],
+        "extensionDirection": "forward",
+        "transitionTrigger": "The wrong word is heard aloud and the room registers the mistake.",
+        "transitionTransformation": "The reading tension becomes public embarrassment and then a smaller, guarded retry.",
+        "transitionArrivalState": "Jenny remains at the front, shoulders tucked in, holding the worksheet close after her tiny corrected answer.",
+        "audioTransition": "No music underscore; preserve room tone, Teacher’s calm line, Jenny’s stumble, and the small retry exactly as approved.",
+        "firstFrameTag": "Jenny stands at the front of the classroom with her worksheet open while the board word is visible across from her and the room waits.",
+        "lastFrameTag": "Jenny remains at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer.",
+        "storyboardTag": "Wide classroom geometry; Jenny front-center; board readable; teacher near the front; desks and windows present; quiet room.",
+        "storyboardReadingOrder": "Stage 1: setup and first attempt; Stage 2: stall and wrong word; Stage 3: correction and smaller retry.",
+        "blockoutKind": "coarse",
+        "blockoutMappings": [
+         "Jenny front-center with worksheet in both hands",
+         "Teacher near the front facing Jenny",
+         "Board readable behind Jenny",
+         "Desks, windows, and warm classroom daylight establish scale"
+        ],
+        "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Jenny; @图3=location; @Audio1=audio; never swap.\nAngles: @图2=one Jenny; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Jenny identity, proportions, scale and approved wearable state: Jenny identity, proportions, scale and approved wearable state. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nJenny steadies the paper and begins the line before the first pause arrives.\n\n[ACTION OWNERSHIP]\nJenny owns the reading attempt, the stall, the wrong word, and the smaller retry; the Teacher owns the calm permission to try again; the room only witnesses.\nThe worksheet remains in Jenny’s hands throughout; no one else reaches for it or blocks it from view.\n\n[ATTRIBUTE OWNERSHIP]\nJenny owns the worksheet and her shrinking posture; the board owns the written word BRIDGE; the Teacher owns the calm corrective line and does not handle the worksheet; no other character may take or obscure the worksheet.\nJenny’s face, hands, shoulders, and grip are the emotional read; the classroom and board are environmental support only; the room does not change ownership of the moment.\n\n[ENVIRONMENT CONTRACT]\nStage 1: the classroom remains still and evenly lit while Jenny starts reading.\nStage 2: the same room tightens emotionally, but geometry stays fixed as the mistake lands.\nStage 3: the light cools slightly and the room stays quiet while Jenny holds the embarrassed retry.\n\n[One-Sentence Summary]\nA classroom read turns publicly awkward when Jenny says the wrong word, then tries again smaller under the teacher’s calm encouragement.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Front-of-room classroom view looking toward the board. Jenny stands at the front-center performance zone, between the class and the board. The chalkboard remains fully legible behind Jenny. The classroom desks and chairs recede behind and to the sides, leaving a clear corridor around Jenny. Teacher presence is implied from the front-of-room axis and may remain offscreen in this opening frame. Keep the worksheet readable in Jenny’s hands and the board word visible in the same wide geometry.\n\n[Living Performance]\nLiving performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: Wide classroom frame at student eye level, 35mm feel, steady and slightly withheld, with Jenny front-center and the board legible behind her. Action: Jenny starts the line while the room stays quiet and the board word waits across from her. Performance: She looks between the paper and the board, speaks carefully, and keeps her body upright even as the moment feels exposed. End state: Jenny stands at the front with the worksheet open and the word BRIDGE visible on the board. Spoken action: Teacher, Calm, contained classroom warmth; let 'Take your time' land as permission, with Jenny’s name lightly affectionate, never sugary: {Take your time, Jenny.} Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 2: Camera: Same axis, with a subtle inward drift to a medium-wide as the mistake becomes audible. Action: Jenny hesitates, then says the wrong word and hears the room register it. Performance: Her fingers tighten on the page, her shoulders fold inward, and the page lifts closer as if it can hide her. End state: Jenny has curled inward over the worksheet, eyes lowered, with the laugh already gone from the room. Spoken action: Jenny, Start as if she can manage it; let the stumble arrive clearly but naturally, with a visible swallow in the voice at the end: {The little rabbit crossed the...} The pose holds a full beat after the line ends. Spoken action: Jenny, Make it a quick, involuntary blurt, not a joke; the embarrassment should arrive on the tail of the word: {Briggle.} The pose holds a full beat after the line ends. Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 3: Camera: Return to a steady medium-wide on the same front-of-room axis, keeping Jenny, the board, and the teacher all readable. Action: The teacher gives permission to try again, and Jenny answers more quietly. Performance: She stays folded in, then gives the corrected word in a reduced voice while keeping the worksheet close to her chest. End state: Jenny stands at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer. Spoken action: Teacher, Keep it plain and kind; the second sentence should feel like a door opening, not a lesson: {That’s all right. Try again.} The pose holds a full beat after the line ends. Spoken action: Jenny, Softer than the mistake, smaller in volume, but cleaner in shape; let the courage be quiet: {Bridge.} The pose holds a full beat after the line ends. Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nWitness staging: Jenny remains front-center facing the board and class; Teacher stays near the front of the room facing Jenny; no extra characters enter; keep both Jenny and the board readable in the same wide classroom geometry; preserve the shared front-of-room axis. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Jenny and one Teacher throughout; no duplicates of either character. Maintain Jenny and the board readable in the same wide classroom geometry throughout. Safeguard: Do not crop the board or worksheet; both must stay readable in the same shot geometry. Safeguard: Do not introduce any extra student reactions or offscreen voices; the embarrassment must come from silence and timing. Living performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Jenny remains at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer; the classroom stays quiet and the board remains readable."
+       },
+       "preflight": {
+        "verdict": "PASS",
+        "score": 10.0,
+        "maximum": 10,
+        "checkerVerdict": "PASS",
+        "findings": [],
+        "seedanceAuthoring": {
+         "status": "ready",
+         "score": 12,
+         "maximum": 12,
+         "normalizedScore": 10.0,
+         "firingFloor": 9.5,
+         "summary": "Prompt matches every required authoring check."
+        },
+        "contractCompleteness": {
+         "score": 20,
+         "maximum": 20,
+         "threshold": 17,
+         "needsRevision": false,
+         "criticalFailures": []
+        },
+        "qualityGate": {
+         "score": 20,
+         "maximum": 20,
+         "threshold": 17,
+         "needsRevision": false,
+         "criticalFailures": []
+        }
+       },
+       "performanceBudget": {
+        "applicable": true,
+        "ready": true,
+        "durationSec": 30.0,
+        "dialogueOccupiedSec": 10.5,
+        "dialogueOccupancyRatio": 0.35,
+        "availableUnvoicedSec": 19.5,
+        "requiredSilentActingAndLandingSec": 15.0,
+        "emotionalTurnCount": 2,
+        "propStateChangeCount": 1,
+        "reasons": [],
+        "recommendedAction": "proceed-to-animatic"
+       },
+       "packageRevision": 3,
+       "inputSignature": {
+        "stage": "animation",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "animation": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
+        },
+        "canonProfileDigest": "7df833ccb64e2ad23bb0553dbe1fa7951584c4916295ea09b98b737ce7753458",
+        "shotContractHash": "41f836dae7990537411c831718b4cb3dfcb79f2a2a8d7df3416d6ad588dbcaa0",
+        "shotHash": "cd8247344cb1c205e6e42df1e0164152962388421a18b66e5eef72db58b88b6b",
+        "openingFrameHash": "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
+        "openingStageContractHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
+        "referenceOrder": [
+         "@图1",
+         "@图2",
+         "@图3"
+        ],
+        "referenceBindings": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "opening keyframe",
+          "view": null,
+          "sameCharacterGroup": null
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图2",
+          "role": "Jenny",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "7fdb2a4b5d2af6a0998398f9a03ce1524dc49647631921e7ab2ba5e03f5e0902"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图4",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null
+         }
+        ],
+        "referenceHashes": [
+         "c651519baf979fc44d7de88942a4ffefc09b5ee6cb8e42e58713675ae161143e",
+         "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+         "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
+        ],
+        "voiceHash": "b38b04acd40dce2b1616394466610c88282953f2467b0ec18cf2504b4e79f9fc",
+        "voiceApprovalSignature": {
+         "canonProfileDigest": "bed62978f5ac92703d7d2ceba8889cad714541a328075f387bcef80241508a9a",
+         "dialogueHash": "28dad2d94efd19ce03e74e74a9747314b164c43bf7b3dd070e2f9de56495f9cd",
+         "performanceHash": "ef43bf83c7fa99328e00f12447d8f2a2196446fa3ebe8cf46475a5088adc3cb6",
+         "voiceCardsHash": "6bfb605b16e8402dea9ed3c884b4d1ba7c1635e4709da1b70c665841ae200793",
+         "voiceRegistersHash": "08c24b17dc12a99751623f31f3f327cad94e26ae9e8aa1cfe8834a7df94757bc",
+         "voiceRulebookHash": "bd96e9c57ee257ec5932ba51a3a2ce22de243e94a4d6f02a0ae905eb6a443674",
+         "voiceCompilerVersion": "voice-director-v1",
+         "pronunciationOverrides": {},
+         "voiceIds": [
+          "cPVuhpOYUJYFLr3qTrKc",
+          "BUhaNjY74aXLexxM9qfh",
+          "BUhaNjY74aXLexxM9qfh",
+          "cPVuhpOYUJYFLr3qTrKc",
+          "BUhaNjY74aXLexxM9qfh"
+         ]
+        },
+        "directorFeedbackHash": "0b66796a6bcde69ca53349855748d46d6a43566082ba44c814af9daff8bac495"
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-09-03T08:52:32",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      }
+     ]
     },
     "review-keyframe": {
      "approved": null,
@@ -3949,7 +4396,6 @@
     "recommendedDurationSec": 8,
     "ready": true
    },
-   "pendingSpendAuth": null,
    "lastPromptVersion": "def5b7cf",
    "batch": {
     "token": "a7285ff53c2f47a1a814317eb6587da3",
@@ -4373,7 +4819,7 @@
      ],
      "tier": "standard"
     },
-    "status": "generating",
+    "status": "abandoned",
     "audioProvenance": {
      "policyVersion": "dialogue-post-lane-v1",
      "approvedMasterPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_vo_candidate_17495df8.wav",
@@ -4539,13 +4985,611 @@
       ],
       "providerTaskId": "cgt-20260903150341-b6vp9"
      }
-    }
+    },
+    "abandonedAt": "2026-09-03T08:54:46",
+    "abandonedBy": "Julian",
+    "abandonReason": "Render killed mid-flight on 2026-09-03: it was sealed against the wrong keyframe (Jenny alone, empty desks); Julian replaced the stage with candidate B."
    },
    "pendingKeyframeCorrection": {
     "reason": "Julian: wrong stage - the classroom must show the pupils at their desks and the teacher; this frame has Jenny alone at the board with empty desks.",
     "recordedAt": "2026-09-03T08:09:57",
     "reviewedBy": "Julian"
-   }
+   },
+   "abandonedBatches": [
+    {
+     "token": "a7285ff53c2f47a1a814317eb6587da3",
+     "bindingHash": "4dab4efaaca582a731df7e1dcd51fd2d",
+     "envelope": {
+      "shotId": "S1.SH01",
+      "prompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Jenny; @图3=location; @Audio1=audio; never swap.\nAngles: @图2=one Jenny; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Jenny identity, proportions, scale and approved wearable state: Jenny identity, proportions, scale and approved wearable state. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nJenny steadies the paper and begins the line before the first pause arrives.\n\n[ACTION OWNERSHIP]\nJenny owns the reading attempt, the stall, the wrong word, and the smaller retry; the Teacher owns the calm permission to try again; the room only witnesses.\nThe worksheet remains in Jenny’s hands throughout; no one else reaches for it or blocks it from view.\n\n[ATTRIBUTE OWNERSHIP]\nJenny owns the worksheet and her shrinking posture; the board owns the written word BRIDGE; the Teacher owns the calm corrective line and does not handle the worksheet; no other character may take or obscure the worksheet.\nJenny’s face, hands, shoulders, and grip are the emotional read; the classroom and board are environmental support only; the room does not change ownership of the moment.\n\n[ENVIRONMENT CONTRACT]\nStage 1: the classroom remains still and evenly lit while Jenny starts reading.\nStage 2: the same room tightens emotionally, but geometry stays fixed as the mistake lands.\nStage 3: the light cools slightly and the room stays quiet while Jenny holds the embarrassed retry.\n\n[One-Sentence Summary]\nA classroom read turns publicly awkward when Jenny says the wrong word, then tries again smaller under the teacher’s calm encouragement.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Front-of-room classroom view looking toward the board. Jenny stands at the front-center performance zone, between the class and the board. The chalkboard remains fully legible behind Jenny. The classroom desks and chairs recede behind and to the sides, leaving a clear corridor around Jenny. Teacher presence is implied from the front-of-room axis and may remain offscreen in this opening frame. Keep the worksheet readable in Jenny’s hands and the board word visible in the same wide geometry.\n\n[Living Performance]\nLiving performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: Wide classroom frame at student eye level, 35mm feel, steady and slightly withheld, with Jenny front-center and the board legible behind her. Action: Jenny starts the line while the room stays quiet and the board word waits across from her. Performance: She looks between the paper and the board, speaks carefully, and keeps her body upright even as the moment feels exposed. End state: Jenny stands at the front with the worksheet open and the word BRIDGE visible on the board. Spoken action: Teacher, Calm, contained classroom warmth; let 'Take your time' land as permission, with Jenny’s name lightly affectionate, never sugary: {Take your time, Jenny.} Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 2: Camera: Same axis, with a subtle inward drift to a medium-wide as the mistake becomes audible. Action: Jenny hesitates, then says the wrong word and hears the room register it. Performance: Her fingers tighten on the page, her shoulders fold inward, and the page lifts closer as if it can hide her. End state: Jenny has curled inward over the worksheet, eyes lowered, with the laugh already gone from the room. Spoken action: Jenny, Start as if she can manage it; let the stumble arrive clearly but naturally, with a visible swallow in the voice at the end: {The little rabbit crossed the...} The pose holds a full beat after the line ends. Spoken action: Jenny, Make it a quick, involuntary blurt, not a joke; the embarrassment should arrive on the tail of the word: {Briggle.} The pose holds a full beat after the line ends. Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 3: Camera: Return to a steady medium-wide on the same front-of-room axis, keeping Jenny, the board, and the teacher all readable. Action: The teacher gives permission to try again, and Jenny answers more quietly. Performance: She stays folded in, then gives the corrected word in a reduced voice while keeping the worksheet close to her chest. End state: Jenny stands at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer. Spoken action: Teacher, Keep it plain and kind; the second sentence should feel like a door opening, not a lesson: {That’s all right. Try again.} The pose holds a full beat after the line ends. Spoken action: Jenny, Softer than the mistake, smaller in volume, but cleaner in shape; let the courage be quiet: {Bridge.} The pose holds a full beat after the line ends. Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nWitness staging: Jenny remains front-center facing the board and class; Teacher stays near the front of the room facing Jenny; no extra characters enter; keep both Jenny and the board readable in the same wide classroom geometry; preserve the shared front-of-room axis. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Jenny and one Teacher throughout; no duplicates of either character. Maintain Jenny and the board readable in the same wide classroom geometry throughout. Safeguard: Do not crop the board or worksheet; both must stay readable in the same shot geometry. Safeguard: Do not introduce any extra student reactions or offscreen voices; the embarrassment must come from silence and timing. Living performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Jenny remains at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer; the classroom stays quiet and the board remains readable.",
+      "promptSource": "animation-director-current",
+      "durationSec": 30.0,
+      "provider": "byteplus",
+      "providerModelId": "dreamina-seedance-2-5-260628",
+      "modelVersion": "2.5-260628",
+      "transport": "byteplus-async",
+      "endpoint": "/api/v3/contents/generations/tasks",
+      "costRateKey": "seedance_25_byteplus_480p_per_sec",
+      "capabilityVerifiedAt": "2026-08-16",
+      "resolution": "480p",
+      "tier": "standard",
+      "candidateCount": 1,
+      "costPerCandidateUsd": 3.123,
+      "maxBatchCostUsd": 3.123,
+      "promptVersion": "def5b7cf",
+      "references": [
+       {
+        "slot": "@图1",
+        "sourceSlot": "@图1",
+        "role": "opening keyframe",
+        "view": null,
+        "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_candidate_169e5860.png",
+        "intactTurnaround": false,
+        "sameCharacterGroup": null,
+        "md5": "ce2288911ff3de221e95a293a68e8949"
+       },
+       {
+        "slot": "@图2",
+        "sourceSlot": "@图2",
+        "role": "Jenny",
+        "view": "complete-turnaround",
+        "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\assets\\jenny_turn4.png",
+        "intactTurnaround": true,
+        "sameCharacterGroup": "7fdb2a4b5d2af6a0998398f9a03ce1524dc49647631921e7ab2ba5e03f5e0902",
+        "md5": "14d5d39a5ade8a668fcae07cbb5c4462"
+       },
+       {
+        "slot": "@图3",
+        "sourceSlot": "@图4",
+        "role": "scene plate",
+        "view": null,
+        "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S1_plate_candidate_2520e4b3.png",
+        "intactTurnaround": false,
+        "sameCharacterGroup": null,
+        "md5": "dacedbb2f75ecf5dba93d557c529b7ae"
+       }
+      ],
+      "audio": {
+       "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_vo_candidate_17495df8.wav",
+       "md5": "406ec1f4230a163cbe495b7a2d71590d"
+      },
+      "executionPlan": {
+       "schemaVersion": 1,
+       "mode": "single-qualified-provider-call",
+       "continuityMode": "keyframe-handoff",
+       "studioShotId": "S1.SH01",
+       "studioDurationSec": 30.0,
+       "providerModelId": "dreamina-seedance-2-5-260628",
+       "comparisonRunId": null,
+       "parentPromptHash": "ae5ad5db71e51b4bb62740bc0c3b95c89416dcefd77214d15f68f153578fd5a0",
+       "costPerStudioCandidateUsd": 3.123,
+       "segments": [
+        {
+         "segmentIndex": 1,
+         "segmentCount": 1,
+         "globalStartSec": 0.0,
+         "globalEndSec": 30.0,
+         "durationSec": 30.0,
+         "stageNumbers": [],
+         "prompt": "[Locked Character Turnarounds]\n@图2 defines Jenny's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n\nAUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Jenny; @图3=location; @Audio1=audio; never swap.\nAngles: @图2=one Jenny; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Jenny identity, proportions, scale and approved wearable state: Jenny identity, proportions, scale and approved wearable state. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nJenny steadies the paper and begins the line before the first pause arrives.\n\n[ACTION OWNERSHIP]\nJenny owns the reading attempt, the stall, the wrong word, and the smaller retry; the Teacher owns the calm permission to try again; the room only witnesses.\nThe worksheet remains in Jenny’s hands throughout; no one else reaches for it or blocks it from view.\n\n[ATTRIBUTE OWNERSHIP]\nJenny owns the worksheet and her shrinking posture; the board owns the written word BRIDGE; the Teacher owns the calm corrective line and does not handle the worksheet; no other character may take or obscure the worksheet.\nJenny’s face, hands, shoulders, and grip are the emotional read; the classroom and board are environmental support only; the room does not change ownership of the moment.\n\n[ENVIRONMENT CONTRACT]\nStage 1: the classroom remains still and evenly lit while Jenny starts reading.\nStage 2: the same room tightens emotionally, but geometry stays fixed as the mistake lands.\nStage 3: the light cools slightly and the room stays quiet while Jenny holds the embarrassed retry.\n\n[One-Sentence Summary]\nA classroom read turns publicly awkward when Jenny says the wrong word, then tries again smaller under the teacher’s calm encouragement.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Front-of-room classroom view looking toward the board. Jenny stands at the front-center performance zone, between the class and the board. The chalkboard remains fully legible behind Jenny. The classroom desks and chairs recede behind and to the sides, leaving a clear corridor around Jenny. Teacher presence is implied from the front-of-room axis and may remain offscreen in this opening frame. Keep the worksheet readable in Jenny’s hands and the board word visible in the same wide geometry.\n\n[Living Performance]\nLiving performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: Wide classroom frame at student eye level, 35mm feel, steady and slightly withheld, with Jenny front-center and the board legible behind her. Action: Jenny starts the line while the room stays quiet and the board word waits across from her. Performance: She looks between the paper and the board, speaks carefully, and keeps her body upright even as the moment feels exposed. End state: Jenny stands at the front with the worksheet open and the word BRIDGE visible on the board. Spoken action: Teacher, Calm, contained classroom warmth; let 'Take your time' land as permission, with Jenny’s name lightly affectionate, never sugary: {Take your time, Jenny.} Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 2: Camera: Same axis, with a subtle inward drift to a medium-wide as the mistake becomes audible. Action: Jenny hesitates, then says the wrong word and hears the room register it. Performance: Her fingers tighten on the page, her shoulders fold inward, and the page lifts closer as if it can hide her. End state: Jenny has curled inward over the worksheet, eyes lowered, with the laugh already gone from the room. Spoken action: Jenny, Start as if she can manage it; let the stumble arrive clearly but naturally, with a visible swallow in the voice at the end: {The little rabbit crossed the...} The pose holds a full beat after the line ends. Spoken action: Jenny, Make it a quick, involuntary blurt, not a joke; the embarrassment should arrive on the tail of the word: {Briggle.} The pose holds a full beat after the line ends. Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nPhase 3: Camera: Return to a steady medium-wide on the same front-of-room axis, keeping Jenny, the board, and the teacher all readable. Action: The teacher gives permission to try again, and Jenny answers more quietly. Performance: She stays folded in, then gives the corrected word in a reduced voice while keeping the worksheet close to her chest. End state: Jenny stands at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer. Spoken action: Teacher, Keep it plain and kind; the second sentence should feel like a door opening, not a lesson: {That’s all right. Try again.} The pose holds a full beat after the line ends. Spoken action: Jenny, Softer than the mistake, smaller in volume, but cleaner in shape; let the courage be quiet: {Bridge.} The pose holds a full beat after the line ends. Hold: 1.2s — A short, quiet beat lets the odd word land without turning the room into a joke.\nWitness staging: Jenny remains front-center facing the board and class; Teacher stays near the front of the room facing Jenny; no extra characters enter; keep both Jenny and the board readable in the same wide classroom geometry; preserve the shared front-of-room axis. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Jenny and one Teacher throughout; no duplicates of either character. Maintain Jenny and the board readable in the same wide classroom geometry throughout. Safeguard: Do not crop the board or worksheet; both must stay readable in the same shot geometry. Safeguard: Do not introduce any extra student reactions or offscreen voices; the embarrassment must come from silence and timing. Living performance lock: Jenny, Teacher has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Jenny remains at the front, visibly embarrassed, with the worksheet held close after her tiny corrected answer; the classroom stays quiet and the board remains readable.",
+         "promptHash": "ae5ad5db71e51b4bb62740bc0c3b95c89416dcefd77214d15f68f153578fd5a0",
+         "signedPromptHash": "ae5ad5db71e51b4bb62740bc0c3b95c89416dcefd77214d15f68f153578fd5a0",
+         "promptAudit": {
+          "profile": "bytedance-seedance-2.5-2026-08-07",
+          "source": {
+           "title": "Dreamina Seedance 2.5 User Guide",
+           "url": "https://docs.byteplus.com/en/docs/ModelArk/2607689",
+           "larkUrl": "https://bytedance.larkoffice.com/docx/A88jd0B47oAd8zxWp5ycZFMfnxh",
+           "productUrl": "https://dreamina.capcut.com/seedance/seedance-2-5",
+           "apiQualificationUrl": "https://docs.byteplus.com/en/docs/modelark/1159178",
+           "skill": ".agents/skills/sd25-pe",
+           "lastUpdated": "2026-08-07",
+           "scope": "Official Dreamina/BytePlus prompt guidance; executable API schema, pricing and account access are separate"
+          },
+          "guideLimits": {
+           "standardDurationSec": {
+            "minimum": 4,
+            "maximum": 30
+           },
+           "betaLongVideoDurationSec": {
+            "minimum": 5,
+            "maximum": 180
+           },
+           "extensionDurationSec": {
+            "minimum": 4,
+            "maximum": 30
+           },
+           "outputResolutions": [
+            "480p",
+            "720p"
+           ],
+           "maxCombinedInputs": 50,
+           "maxImages": 30,
+           "maxVideos": 10,
+           "maxVideoDurationSec": 30,
+           "maxAudioClips": 10,
+           "maxAudioDurationSec": 30
+          },
+          "guideSemantics": {
+           "timestampControl": "Time ranges allocate pacing and exact time points improve alignment; they are not a frame-accurate edit guarantee.",
+           "extensionPreservation": "Preserve the source and match its boundary state, but review the join; generated continuation and boundary frames are not guaranteed pixel-identical.",
+           "negativeInstructions": "Explicit forbidden items improve reliability but remain probabilistic and require review.",
+           "identityStability": "Multi-character consistency is improved, not self-approving; identity and count still require visual review.",
+           "longVideoRoute": "The 5-180 second mode is a Dreamina beta product capability, not a qualified Studio API route.",
+           "audioOnly": "Dreamina product guidance describes audio-only creation; the current BytePlus Seedance 2.0 API still requires at least one image or video reference.",
+           "cleanOutput": "Dreamina advertises cleaner 4K output; the executable provider contract remains the authority for resolution and every render still requires QC.",
+           "watermarkPolicy": "The Studio never uses generative watermark removal as a production shortcut; source footage must be owned or licensed and delivered clean."
+          },
+          "taskMode": "reference-to-video",
+          "status": "ready",
+          "score": 11,
+          "maximum": 11,
+          "authorityScores": {
+           "official-guide": {
+            "label": "Official guide",
+            "score": 8,
+            "maximum": 8
+           },
+           "studio-policy": {
+            "label": "Studio production policy",
+            "score": 3,
+            "maximum": 3
+           }
+          },
+          "summary": "Prompt matches every required authoring check.",
+          "referenceCount": 4,
+          "referenceCounts": {
+           "image": 3,
+           "video": 0,
+           "audio": 1
+          },
+          "stageCount": 3,
+          "checks": [
+           {
+            "code": "goal",
+            "label": "One-sentence story summary",
+            "status": "pass",
+            "required": true,
+            "authority": "official-guide",
+            "detail": "[One-Sentence Summary] states the central event.",
+            "nextAction": ""
+           },
+           {
+            "code": "reference-roles",
+            "label": "Reference roles",
+            "status": "pass",
+            "required": true,
+            "authority": "official-guide",
+            "detail": "All 4 expected references are individually bound and scoped.",
+            "nextAction": ""
+           },
+           {
+            "code": "reference-limits",
+            "label": "Official reference-count limits",
+            "status": "pass",
+            "required": true,
+            "authority": "official-guide",
+            "detail": "Mapped 3 image(s), 0 video(s) and 1 audio clip(s).",
+            "nextAction": ""
+           },
+           {
+            "code": "opening-frame",
+            "label": "Opening-frame authority",
+            "status": "pass",
+            "required": false,
+            "authority": "studio-policy",
+            "detail": "The opening reference explicitly controls the first visible state.",
+            "nextAction": ""
+           },
+           {
+            "code": "global-settings",
+            "label": "Global world and anti-collapse settings",
+            "status": "pass",
+            "required": false,
+            "authority": "official-guide",
+            "detail": "[Global Settings] establishes the world, look and camera language.",
+            "nextAction": ""
+           },
+           {
+            "code": "stages",
+            "label": "Consecutive directed shots",
+            "status": "pass",
+            "required": true,
+            "authority": "official-guide",
+            "detail": "3 consecutive shot(s) carry the event progression.",
+            "nextAction": ""
+           },
+           {
+            "code": "approved-stage-plan",
+            "label": "Approved story plan",
+            "status": "pass",
+            "required": false,
+            "authority": "studio-policy",
+            "detail": "The typed approved stage plan remains the compiler source behind the shot sequence.",
+            "nextAction": ""
+           },
+           {
+            "code": "stage-direction",
+            "label": "Action and performance direction",
+            "status": "pass",
+            "required": true,
+            "authority": "official-guide",
+            "detail": "Every internal shot has one camera job, action and visible end state.",
+            "nextAction": ""
+           },
+           {
+            "code": "stage-end-states",
+            "label": "Visible shot handoffs",
+            "status": "pass",
+            "required": true,
+            "authority": "studio-policy",
+            "detail": "Every internal shot ends on a visible handoff.",
+            "nextAction": ""
+           },
+           {
+            "code": "consistency",
+            "label": "Global continuity supplement",
+            "status": "pass",
+            "required": true,
+            "authority": "official-guide",
+            "detail": "[Global Supplement] protects identity, ownership and screen geography.",
+            "nextAction": ""
+           },
+           {
+            "code": "audio",
+            "label": "Dialogue and audio authority",
+            "status": "pass",
+            "required": true,
+            "authority": "studio-policy",
+            "detail": "The prompt records silence, ambience or sound ownership.",
+            "nextAction": ""
+           },
+           {
+            "code": "pacing",
+            "label": "Pacing control",
+            "status": "pass",
+            "required": true,
+            "authority": "official-guide",
+            "detail": "Storyline stages control pacing; timestamps are optional unless a critical handoff, entrance, exit, transition or dialogue cue needs timing.",
+            "nextAction": ""
+           },
+           {
+            "code": "request-parameters",
+            "label": "Request parameters stay outside the prompt",
+            "status": "pass",
+            "required": true,
+            "authority": "studio-policy",
+            "detail": "Duration, aspect ratio, resolution and model selection remain in the API contract.",
+            "nextAction": ""
+           },
+           {
+            "code": "guide-duration",
+            "label": "Guide duration",
+            "status": "pass",
+            "required": true,
+            "authority": "official-guide",
+            "detail": "30s is within the official 4-30 second standard window.",
+            "nextAction": ""
+           }
+          ],
+          "repairActions": [],
+          "advisoryOnly": true,
+          "providerAvailabilityChecked": false,
+          "providerCalled": false,
+          "authoringScore10": 10.0,
+          "authoringMaximum": 10,
+          "firingFloor10": 9.5,
+          "creativeGate": {
+           "score": 18,
+           "maximum": 20,
+           "threshold": 17,
+           "ready": true,
+           "criticalFailures": []
+          },
+          "contractCompleteness": {
+           "score": 18,
+           "maximum": 20,
+           "threshold": 17,
+           "ready": true,
+           "criticalFailures": []
+          }
+         },
+         "dynamicOpeningRelay": false,
+         "references": [
+          {
+           "slot": "@图1",
+           "sourceSlot": "@图1",
+           "role": "opening keyframe",
+           "view": null,
+           "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_candidate_169e5860.png",
+           "intactTurnaround": false,
+           "sameCharacterGroup": null,
+           "md5": "ce2288911ff3de221e95a293a68e8949"
+          },
+          {
+           "slot": "@图2",
+           "sourceSlot": "@图2",
+           "role": "Jenny",
+           "view": "complete-turnaround",
+           "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\assets\\jenny_turn4.png",
+           "intactTurnaround": true,
+           "sameCharacterGroup": "7fdb2a4b5d2af6a0998398f9a03ce1524dc49647631921e7ab2ba5e03f5e0902",
+           "md5": "14d5d39a5ade8a668fcae07cbb5c4462"
+          },
+          {
+           "slot": "@图3",
+           "sourceSlot": "@图4",
+           "role": "scene plate",
+           "view": null,
+           "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\Ep1_S1_plate_candidate_2520e4b3.png",
+           "intactTurnaround": false,
+           "sameCharacterGroup": null,
+           "md5": "dacedbb2f75ecf5dba93d557c529b7ae"
+          }
+         ],
+         "videoReferences": [],
+         "audio": {
+          "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_vo_candidate_17495df8.wav",
+          "md5": "406ec1f4230a163cbe495b7a2d71590d",
+          "sourcePath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_vo_candidate_17495df8.wav",
+          "sourceMd5": "406ec1f4230a163cbe495b7a2d71590d"
+         },
+         "generateAudio": true,
+         "contract": {
+          "providerModelId": "dreamina-seedance-2-5-260628",
+          "provider": "byteplus",
+          "modelVersion": "2.5-260628",
+          "transport": "byteplus-async",
+          "mode": "reference-to-video",
+          "endpoint": "/api/v3/contents/generations/tasks",
+          "resolution": "480p",
+          "duration": 30,
+          "costRateKey": "seedance_25_byteplus_480p_per_sec",
+          "capabilityVerifiedAt": "2026-08-16",
+          "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757"
+         },
+         "costUsd": 3.123
+        }
+       ]
+      },
+      "comparisonRunId": null
+     },
+     "envelopeHash": "b333d8ff80ae188b8b00aa8b53f95586a39f50b4b90e594d3876c0821dce3bd2",
+     "batchId": "S1.SH01-b1-20260903T080334-23e44693",
+     "expected": 1,
+     "done": [],
+     "failed": [],
+     "disclosure": {
+      "shotId": "S1.SH01",
+      "candidateCount": 1,
+      "costPerCandidateUsd": 3.123,
+      "maxBatchCostUsd": 3.123,
+      "promptVersion": "def5b7cf",
+      "bindingHash": "4dab4efaaca582a731df7e1dcd51fd2d",
+      "envelopeHash": "b333d8ff80ae188b8b00aa8b53f95586a39f50b4b90e594d3876c0821dce3bd2",
+      "packageHash": "1b2a9189ea298fed",
+      "rerollOfUnchangedPackage": false,
+      "packageRevision": 3,
+      "referenceSlots": {
+       "@图1": "opening keyframe",
+       "@图2": "Jenny · complete-turnaround turnaround view",
+       "@图3": "scene plate"
+      },
+      "logicalReferenceSlots": {
+       "@图1": "opening keyframe",
+       "@图2": "Jenny",
+       "@图3": "Teacher",
+       "@图4": "scene plate",
+       "@Audio1": "voice track"
+      },
+      "openingAnchor": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_keyframe_candidate_169e5860.png",
+      "audioAsset": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_vo_candidate_17495df8.wav",
+      "shotDurationSec": 30.0,
+      "provider": "byteplus",
+      "providerModelId": "dreamina-seedance-2-5-260628",
+      "modelVersion": "2.5-260628",
+      "resolution": "480p",
+      "promptScores": {
+       "contractCompleteness": {
+        "score": 18,
+        "maximum": 20,
+        "threshold": 17,
+        "ready": true,
+        "criticalFailures": []
+       },
+       "creative": {
+        "score": 18,
+        "maximum": 20,
+        "threshold": 17,
+        "ready": true,
+        "criticalFailures": []
+       },
+       "authoringScore10": 10.0,
+       "authoringMaximum": 10,
+       "firingFloor10": 9.5
+      },
+      "comparisonRunId": null,
+      "internalProviderCalls": [
+       {
+        "segmentIndex": 1,
+        "durationSec": 30.0,
+        "stageNumbers": []
+       }
+      ],
+      "tier": "standard"
+     },
+     "status": "abandoned",
+     "audioProvenance": {
+      "policyVersion": "dialogue-post-lane-v1",
+      "approvedMasterPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH01_vo_candidate_17495df8.wav",
+      "approvedMasterSha256": "b38b04acd40dce2b1616394466610c88282953f2467b0ec18cf2504b4e79f9fc",
+      "providerUse": "performance-conditioning",
+      "passthroughGuaranteed": false,
+      "providerOutputRole": "guide-track-only",
+      "finalFilmDialogue": "approved-master-restored-in-post"
+     },
+     "transportCandidates": {
+      "1": {
+       "segments": [],
+       "status": "running",
+       "activeSegment": 1,
+       "lastProviderEvent": {
+        "event": "poll",
+        "at": "2026-09-03T08:08:08",
+        "segmentIndex": 1,
+        "taskId": "cgt-20260903150341-b6vp9",
+        "status": "running"
+       },
+       "providerEvents": [
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:04:40",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:04:51",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:05:02",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:05:13",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:05:24",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:05:35",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:05:46",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:05:57",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:06:08",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:06:19",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:06:30",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:06:41",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:06:52",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:07:03",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:07:13",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:07:24",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:07:36",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:07:47",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:07:58",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        },
+        {
+         "event": "poll",
+         "at": "2026-09-03T08:08:08",
+         "segmentIndex": 1,
+         "taskId": "cgt-20260903150341-b6vp9",
+         "status": "running"
+        }
+       ],
+       "providerTaskId": "cgt-20260903150341-b6vp9"
+      }
+     },
+     "abandonedAt": "2026-09-03T08:54:46",
+     "abandonedBy": "Julian",
+     "abandonReason": "Render killed mid-flight on 2026-09-03: it was sealed against the wrong keyframe (Jenny alone, empty desks); Julian replaced the stage with candidate B."
+    }
+   ]
   },
   {
    "shotId": "S1.SH02",
@@ -6079,88 +7123,25 @@
    },
    "keyframeApproval": {
     "approved": true,
-    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH02_keyframe_B_86929161.png",
-    "at": "2026-09-03T07:20:16",
+    "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH02_keyframe_candidate_3399d799.png",
+    "at": "2026-09-03T08:54:22",
     "reviewedBy": "Julian",
-    "source": "generated",
+    "source": "library",
     "inputSignature": {
      "cardHash": "282fc11e8111f295387cfe115de1590bafbb7f2d4462ab2aa73d1041115df852",
+     "canonProfileDigest": "2fbbae15f42679f3af1ac68936bf7173a0eca39bfaa45993837ae9fe2df9e824",
      "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
-     "referenceHashes": {
-      "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
-      "Ep1_S1_plate_candidate_2520e4b3.png": "dacedbb2f75ecf5dba93d557c529b7ae"
-     },
-     "briefHash": "936a669242e7ae02ec3bcb4e19f1f0b51a753a6a550db59fa2a17af9a0774748",
-     "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
-     "canonProfileDigest": "eef5b7125f7acbb2d28b00b0544d2981c19f517521c44f222f51d628d8ee4d70"
+     "selectedAssetHash": "181e7ef67bc698ddb8432fddeb16691c",
+     "source": "library"
     },
-    "promptContract": {
-     "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S1.SH02; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA quiet desk-level classroom opening frame that isolates Jenny in her embarrassed aftermath, with the room still active around her but no Classmate staged yet.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ lower-centre area; seated at her desk, folded inward and holding the worksheet in front of her; facing down toward the worksheet.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nDesk-center placement with Jenny seated at her desk in the classroom interior.\nCamera looks from within the room at seated student eye level, aligned to the desk plane.\nLeave a clear side lane beside Jenny for the later off-frame classmate check-in.\nKeep the front wall, windows, chalkboard, and surrounding desks readable as classroom context without stealing attention from the desk action.\nReserve visible space near Jenny’s bag-hand side for the eventual paper-to-bag concealment path.\n\n[Negative Space]\nHold empty space frame-right for the classmate’s later approach from outside the opening frame.\nKeep a clear low path near Jenny’s bag-side hand for the paper-to-bag concealment movement.\nLeave some air above the desk line so the classroom can feel present without crowding Jenny.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nModestly intimate lens relationship at desk level, natural perspective, slight compression of classroom bustle behind Jenny, mostly still camera with no dramatic push. Frame one should feel grounded and ordinary, not stylized or floating.\n\n[Light]\nSteady classroom daylight with a slightly cooler, flatter aftertaste that matches the embarrassed pause. Foreground Jenny is crisp; the background classroom softens gently so the desk action and concealment read first.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nOpening frame must contain exactly one placed character: Jenny.\nDo not stage the Classmate in this opening frame; any speaking from them remains off-frame until the later beat.\nPreserve Jenny’s hands and worksheet visibility so concealment can read physically later.\nMaintain seated eye-level continuity and the cooler classroom aftertaste described in the approved shot contract.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
-     "promptHash": "936a669242e7ae02ec3bcb4e19f1f0b51a753a6a550db59fa2a17af9a0774748",
-     "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
-     "provider": "seedream",
-     "providerModelId": "dola-seedream-5-0-pro-260628",
-     "modelVersion": "dola-seedream-5-0-pro-260628",
-     "directionContract": {
-      "canonicalStyleVersion": "v1.0.0",
-      "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
-      "lightingAndDepth": "Steady classroom daylight with a slightly cooler, flatter aftertaste that matches the embarrassed pause. Foreground Jenny is crisp; the background classroom softens gently so the desk action and concealment read first.",
-      "geography": [
-       "Desk-center placement with Jenny seated at her desk in the classroom interior.",
-       "Camera looks from within the room at seated student eye level, aligned to the desk plane.",
-       "Leave a clear side lane beside Jenny for the later off-frame classmate check-in.",
-       "Keep the front wall, windows, chalkboard, and surrounding desks readable as classroom context without stealing attention from the desk action.",
-       "Reserve visible space near Jenny’s bag-hand side for the eventual paper-to-bag concealment path."
-      ],
-      "charactersInFrame": [
-       "Jenny"
-      ],
-      "emptySections": []
-     },
-     "contractHash": "d01b2665ea7772e0dbb8d192baebcea0fb656eff03f9f428adf54677da53bca8"
-    },
-    "abTest": {
-     "winner": "B",
-     "candidates": [
-      {
-       "candidateId": "A",
-       "label": "A - Seedream 5 Pro",
-       "provider": "byteplus",
-       "model": "dola-seedream-5-0-pro-260628",
-       "generatedAt": "2026-09-03T07:16:08",
-       "selected": false,
-       "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S1.SH02_see_ab_20260903T072016\\Ep1_S1.SH02_keyframe_A_da533134.png"
-      },
-      {
-       "candidateId": "B",
-       "label": "B - Nano Banana 2",
-       "provider": "google",
-       "model": "gemini-3.1-flash-image",
-       "generatedAt": "2026-09-03T07:16:53",
-       "selected": true,
-       "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH02_keyframe_B_86929161.png"
-      }
-     ],
-     "contract": {
-      "createdAt": "2026-09-03T07:16:53",
-      "promptHash": "936a669242e7ae02ec3bcb4e19f1f0b51a753a6a550db59fa2a17af9a0774748",
-      "referenceHashes": [
-       "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
-       "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
-      ],
-      "candidateIds": [
-       "A",
-       "B"
-      ],
-      "selectionRequired": true
-     }
-    },
+    "promptContract": null,
+    "abTest": null,
     "packageRevision": 3,
     "contentHash": "8949cd326900b7962f548bc639c4ea43c993062f7b90238695d610f713468347",
     "conformanceScreening": {
      "status": "fail",
-     "reason": "Jenny is present and recognizable, but the frame contains a full class of seated children, which matches the declared background population. The main compliance issue is composition/geography: Jenny is centered instead of the authored left-of-center placement, her apparent scale and desk-level isolation are off, and the sheet reads like a large front-facing sign rather than a folded-in embarrassed worksheet hold. No forbidden duplicate named character or watermark is visible.",
-     "checkedAt": "2026-09-03T07:16:53",
+     "reason": "Jenny is present and generally matches the reference, but the frame contains a full visible class of seated schoolchildren, which makes the total subject count materially exceed the contract’s expected count of 1. The intended background population is present, but the opening keyframe is not a clean single-subject qualification for pre-approval under this contract.",
+     "checkedAt": "2026-09-03T08:54:20",
      "screenVersion": 2,
      "validatorModel": "gpt-5.4-mini",
      "mediaProviderCalled": false,
@@ -6170,7 +7151,7 @@
      },
      "candidateSha256": "8949cd326900b7962f548bc639c4ea43c993062f7b90238695d610f713468347",
      "review": {
-      "verdict": "revise",
+      "verdict": "block",
       "expectedCharacters": [
        "Jenny"
       ],
@@ -6180,43 +7161,43 @@
       "expectedSubjectCount": 1,
       "subjectCount": 6,
       "backgroundAllowed": true,
-      "summary": "Jenny is present and recognizable, but the frame contains a full class of seated children, which matches the declared background population. The main compliance issue is composition/geography: Jenny is centered instead of the authored left-of-center placement, her apparent scale and desk-level isolation are off, and the sheet reads like a large front-facing sign rather than a folded-in embarrassed worksheet hold. No forbidden duplicate named character or watermark is visible.",
+      "summary": "Jenny is present and generally matches the reference, but the frame contains a full visible class of seated schoolchildren, which makes the total subject count materially exceed the contract’s expected count of 1. The intended background population is present, but the opening keyframe is not a clean single-subject qualification for pre-approval under this contract.",
       "identityAndDistinguishability": {
        "score": 2,
-       "visibleEvidence": "The central girl matches Jenny's brown side-parted hair in a low ponytail, school cardigan/uniform palette, and small child proportions from the reference. No second Jenny or borrowed character features are visible.",
-       "correction": "Keep Jenny’s reference hair, uniform, and child proportions exactly as shown; do not introduce any second named character."
+       "visibleEvidence": "Center subject is a young schoolgirl with brown ponytail, maroon cardigan, white shirt, green striped tie, grey skirt, white socks, and dark shoes, matching Jenny’s reference well enough without obvious borrowed features.",
+       "correction": "Keep Jenny’s current identity features and pose."
       },
       "relativeScaleAndGeography": {
-       "score": 0,
-       "visibleEvidence": "Jenny is placed near the horizontal center of the room rather than around centerX 0.43, and she reads larger/more central than the specified quiet desk-level layout. The background children are spread around her, but her authored screen geography is not matched.",
-       "correction": "Move Jenny to the authored left-of-center position at the front desk level and reduce her prominence so she sits naturally within the classroom geography."
+       "score": 2,
+       "visibleEvidence": "Jenny is seated near the lower-center foreground at a desk, with a desk-level classroom geography that preserves the intended center placement and intimate classroom view.",
+       "correction": "Maintain Jenny’s current scale and seated front-center geography."
       },
       "anatomyAndSilhouette": {
-       "score": 1,
-       "visibleEvidence": "Her body reads seated and childlike, but the worksheet blocks most of the torso and is held upright in a way that weakens the intended folded-in silhouette. The pose is readable yet less natural than the reference embarrassed/quiet posture.",
-       "correction": "Pose Jenny folded inward at the desk with the worksheet held lower and closer to her body, preserving a small, embarrassed silhouette."
+       "score": 2,
+       "visibleEvidence": "Jenny’s silhouette is readable, seated posture is coherent, and the body/limb anatomy appears sound with no obvious distortions.",
+       "correction": "Preserve Jenny’s seated silhouette and natural anatomy."
       },
       "actionReadyComposition": {
-       "score": 1,
-       "visibleEvidence": "The classroom is clear and performance-ready, but the composition does not isolate Jenny in her aftermath; instead she becomes a centered focal point in a wider ensemble frame. The chalkboard text and classroom details are visible but not aligned to the desired opening-frame emphasis.",
-       "correction": "Reframe as a quiet desk-level opening that isolates Jenny as the primary subject while keeping the active classroom around her, without changing the room design."
+       "score": 2,
+       "visibleEvidence": "The frame is performance-ready: classroom context is readable, Jenny is centered and legible, and there is room around her for adjacent classmates in the background.",
+       "correction": "Keep the desk-level classroom composition and leave surrounding space open."
       },
       "forbiddenContent": {
-       "score": 2,
-       "visibleEvidence": "No text/logo/watermark or duplicate named character is visible. The extra seated children are expected background population, not cast duplication.",
-       "correction": "No change needed unless any text, logo, watermark, or extra Jenny appears."
+       "score": 0,
+       "visibleEvidence": "There are multiple additional seated children visible around and behind Jenny, creating extra subjects beyond the expected single named character; the shot is therefore not a single-subject pre-approval candidate for this contract.",
+       "correction": "Remove all visible background students so only Jenny remains in frame."
       },
-      "recommendedCorrection": "Shift Jenny left-of-center at desk level, scale her down slightly, and pose her folded inward holding the worksheet lower against her body while keeping the seated classroom background population and all existing room elements."
+      "recommendedCorrection": "Remove the visible background classmates so the opening frame contains only Jenny at her desk, while preserving her current identity, seated pose, classroom setting, and camera placement."
      }
     },
     "conformanceAdvisoryDecision": {
      "acceptedBy": "Julian",
-     "acceptedAt": "2026-09-03T07:20:16",
+     "acceptedAt": "2026-09-03T08:54:22",
      "statusAtDecision": "fail",
-     "reasonAtDecision": "Jenny is present and recognizable, but the frame contains a full class of seated children, which matches the declared background population. The main compliance issue is composition/geography: Jenny is centered instead of the authored left-of-center placement, her apparent scale and desk-level isolation are off, and the sheet reads like a large front-facing sign rather than a folded-in embarrassed worksheet hold. No forbidden duplicate named character or watermark is visible."
+     "reasonAtDecision": "Jenny is present and generally matches the reference, but the frame contains a full visible class of seated schoolchildren, which makes the total subject count materially exceed the contract’s expected count of 1. The intended background population is present, but the opening keyframe is not a clean single-subject qualification for pre-approval under this contract."
     }
    },
-   "keyframePath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH02_keyframe_B_86929161.png",
+   "keyframePath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH02_keyframe_candidate_3399d799.png",
    "voPath": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH02_vo_candidate_53cd6772.wav",
    "voGeneratedFrom": [
     {
@@ -6305,7 +7286,151 @@
     "rawContentHash": "2019c75610944084945ea532db9e3a690a8a50db0329a4dc3e73f74e7920e915",
     "timingContentHash": "f391619702f8cccdd915a46526077ed70adec7aaef3f68ba94d3cd1d6229b0c2",
     "placementContentHash": "b4642b2e6105ebd5dc0a0a8189f020a048b18ceb1cb9287dcffb4759ada541b2"
-   }
+   },
+   "keyframeHistory": [
+    {
+     "approved": true,
+     "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH02_keyframe_B_86929161.png",
+     "at": "2026-09-03T07:20:16",
+     "reviewedBy": "Julian",
+     "source": "generated",
+     "inputSignature": {
+      "cardHash": "282fc11e8111f295387cfe115de1590bafbb7f2d4462ab2aa73d1041115df852",
+      "sceneLookHash": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465",
+      "referenceHashes": {
+       "jenny_turn4.png": "14d5d39a5ade8a668fcae07cbb5c4462",
+       "Ep1_S1_plate_candidate_2520e4b3.png": "dacedbb2f75ecf5dba93d557c529b7ae"
+      },
+      "briefHash": "936a669242e7ae02ec3bcb4e19f1f0b51a753a6a550db59fa2a17af9a0774748",
+      "model": "seedream:dola-seedream-5-0-pro-260628:https://ark.ap-southeast.bytepluses.com/api/v3/images/generations:2K",
+      "canonProfileDigest": "eef5b7125f7acbb2d28b00b0544d2981c19f517521c44f222f51d628d8ee4d70"
+     },
+     "promptContract": {
+      "prompt": "[Opening Stage]\nCreate a playable 16:9 opening for S1.SH02; frame-one anticipation, not portrait or payoff.\n\n[Intended Read]\nA quiet desk-level classroom opening frame that isolates Jenny in her embarrassed aftermath, with the room still active around her but no Classmate staged yet.\n\n[References]\n- Project-stable slots: @图1=Jenny; @图2=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Jenny; views are angles, not extra characters.\n- @图1: Jenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Jenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n\n[Characters In Frame]\n- Jenny\n\n[Frame]\n- Jenny @ lower-centre area; seated at her desk, folded inward and holding the worksheet in front of her; facing down toward the worksheet.\n- Preserve canonical relative size, modified only by the authored depth relationship.\n\n[Geography]\nDesk-center placement with Jenny seated at her desk in the classroom interior.\nCamera looks from within the room at seated student eye level, aligned to the desk plane.\nLeave a clear side lane beside Jenny for the later off-frame classmate check-in.\nKeep the front wall, windows, chalkboard, and surrounding desks readable as classroom context without stealing attention from the desk action.\nReserve visible space near Jenny’s bag-hand side for the eventual paper-to-bag concealment path.\n\n[Negative Space]\nHold empty space frame-right for the classmate’s later approach from outside the opening frame.\nKeep a clear low path near Jenny’s bag-side hand for the paper-to-bag concealment movement.\nLeave some air above the desk line so the classroom can feel present without crowding Jenny.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Camera]\nModestly intimate lens relationship at desk level, natural perspective, slight compression of classroom bustle behind Jenny, mostly still camera with no dramatic push. Frame one should feel grounded and ordinary, not stylized or floating.\n\n[Light]\nSteady classroom daylight with a slightly cooler, flatter aftertaste that matches the embarrassed pause. Foreground Jenny is crisp; the background classroom softens gently so the desk action and concealment read first.\n\n[Physical Integration]\nKeep every subject grounded in the authored perspective and depth. Match the approved light direction and scale; preserve natural contact shadows, surface reflections and occlusion where subjects meet the environment.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nOpening frame must contain exactly one placed character: Jenny.\nDo not stage the Classmate in this opening frame; any speaking from them remains off-frame until the later beat.\nPreserve Jenny’s hands and worksheet visibility so concealment can read physically later.\nMaintain seated eye-level continuity and the cooler classroom aftertaste described in the approved shot contract.\nNatural staging lock: restage Jenny from identity reference into the authored scene action. Each body has believable balance, weight through the feet or supported hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform a motivated story action. Never copy a turnaround's front, side or presentation pose; no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or symmetrical display posture.\nLiving performance lock: Jenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, text or watermark. No extra cast, props, body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
+      "promptHash": "936a669242e7ae02ec3bcb4e19f1f0b51a753a6a550db59fa2a17af9a0774748",
+      "promptSource": "direct-stage-anchor-compiler-from-current-cinematography",
+      "provider": "seedream",
+      "providerModelId": "dola-seedream-5-0-pro-260628",
+      "modelVersion": "dola-seedream-5-0-pro-260628",
+      "directionContract": {
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "lightingAndDepth": "Steady classroom daylight with a slightly cooler, flatter aftertaste that matches the embarrassed pause. Foreground Jenny is crisp; the background classroom softens gently so the desk action and concealment read first.",
+       "geography": [
+        "Desk-center placement with Jenny seated at her desk in the classroom interior.",
+        "Camera looks from within the room at seated student eye level, aligned to the desk plane.",
+        "Leave a clear side lane beside Jenny for the later off-frame classmate check-in.",
+        "Keep the front wall, windows, chalkboard, and surrounding desks readable as classroom context without stealing attention from the desk action.",
+        "Reserve visible space near Jenny’s bag-hand side for the eventual paper-to-bag concealment path."
+       ],
+       "charactersInFrame": [
+        "Jenny"
+       ],
+       "emptySections": []
+      },
+      "contractHash": "d01b2665ea7772e0dbb8d192baebcea0fb656eff03f9f428adf54677da53bca8"
+     },
+     "abTest": {
+      "winner": "B",
+      "candidates": [
+       {
+        "candidateId": "A",
+        "label": "A - Seedream 5 Pro",
+        "provider": "byteplus",
+        "model": "dola-seedream-5-0-pro-260628",
+        "generatedAt": "2026-09-03T07:16:08",
+        "selected": false,
+        "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S1.SH02_see_ab_20260903T072016\\Ep1_S1.SH02_keyframe_A_da533134.png"
+       },
+       {
+        "candidateId": "B",
+        "label": "B - Nano Banana 2",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "generatedAt": "2026-09-03T07:16:53",
+        "selected": true,
+        "path": "C:\\Users\\julia\\AiStudio\\projects\\the-box-monsters\\episodes\\media\\shots\\Ep1_S1.SH02_keyframe_B_86929161.png"
+       }
+      ],
+      "contract": {
+       "createdAt": "2026-09-03T07:16:53",
+       "promptHash": "936a669242e7ae02ec3bcb4e19f1f0b51a753a6a550db59fa2a17af9a0774748",
+       "referenceHashes": [
+        "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+        "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
+       ],
+       "candidateIds": [
+        "A",
+        "B"
+       ],
+       "selectionRequired": true
+      }
+     },
+     "packageRevision": 3,
+     "contentHash": "8949cd326900b7962f548bc639c4ea43c993062f7b90238695d610f713468347",
+     "conformanceScreening": {
+      "status": "fail",
+      "reason": "Jenny is present and recognizable, but the frame contains a full class of seated children, which matches the declared background population. The main compliance issue is composition/geography: Jenny is centered instead of the authored left-of-center placement, her apparent scale and desk-level isolation are off, and the sheet reads like a large front-facing sign rather than a folded-in embarrassed worksheet hold. No forbidden duplicate named character or watermark is visible.",
+      "checkedAt": "2026-09-03T07:16:53",
+      "screenVersion": 2,
+      "validatorModel": "gpt-5.4-mini",
+      "mediaProviderCalled": false,
+      "referenceHashes": {
+       "jenny_turn4.png": "0a343bb4c985663ef28519dbf71392148fe41778d9da4798a2ec6f63b36a6cb7",
+       "Ep1_S1_plate_candidate_2520e4b3.png": "4bb79bd5a173673724a786f3955a54096535807cfdc62a3f8579f8a9fd44e465"
+      },
+      "candidateSha256": "8949cd326900b7962f548bc639c4ea43c993062f7b90238695d610f713468347",
+      "review": {
+       "verdict": "revise",
+       "expectedCharacters": [
+        "Jenny"
+       ],
+       "detectedCharacters": [
+        "Jenny"
+       ],
+       "expectedSubjectCount": 1,
+       "subjectCount": 6,
+       "backgroundAllowed": true,
+       "summary": "Jenny is present and recognizable, but the frame contains a full class of seated children, which matches the declared background population. The main compliance issue is composition/geography: Jenny is centered instead of the authored left-of-center placement, her apparent scale and desk-level isolation are off, and the sheet reads like a large front-facing sign rather than a folded-in embarrassed worksheet hold. No forbidden duplicate named character or watermark is visible.",
+       "identityAndDistinguishability": {
+        "score": 2,
+        "visibleEvidence": "The central girl matches Jenny's brown side-parted hair in a low ponytail, school cardigan/uniform palette, and small child proportions from the reference. No second Jenny or borrowed character features are visible.",
+        "correction": "Keep Jenny’s reference hair, uniform, and child proportions exactly as shown; do not introduce any second named character."
+       },
+       "relativeScaleAndGeography": {
+        "score": 0,
+        "visibleEvidence": "Jenny is placed near the horizontal center of the room rather than around centerX 0.43, and she reads larger/more central than the specified quiet desk-level layout. The background children are spread around her, but her authored screen geography is not matched.",
+        "correction": "Move Jenny to the authored left-of-center position at the front desk level and reduce her prominence so she sits naturally within the classroom geography."
+       },
+       "anatomyAndSilhouette": {
+        "score": 1,
+        "visibleEvidence": "Her body reads seated and childlike, but the worksheet blocks most of the torso and is held upright in a way that weakens the intended folded-in silhouette. The pose is readable yet less natural than the reference embarrassed/quiet posture.",
+        "correction": "Pose Jenny folded inward at the desk with the worksheet held lower and closer to her body, preserving a small, embarrassed silhouette."
+       },
+       "actionReadyComposition": {
+        "score": 1,
+        "visibleEvidence": "The classroom is clear and performance-ready, but the composition does not isolate Jenny in her aftermath; instead she becomes a centered focal point in a wider ensemble frame. The chalkboard text and classroom details are visible but not aligned to the desired opening-frame emphasis.",
+        "correction": "Reframe as a quiet desk-level opening that isolates Jenny as the primary subject while keeping the active classroom around her, without changing the room design."
+       },
+       "forbiddenContent": {
+        "score": 2,
+        "visibleEvidence": "No text/logo/watermark or duplicate named character is visible. The extra seated children are expected background population, not cast duplication.",
+        "correction": "No change needed unless any text, logo, watermark, or extra Jenny appears."
+       },
+       "recommendedCorrection": "Shift Jenny left-of-center at desk level, scale her down slightly, and pose her folded inward holding the worksheet lower against her body while keeping the seated classroom background population and all existing room elements."
+      }
+     },
+     "conformanceAdvisoryDecision": {
+      "acceptedBy": "Julian",
+      "acceptedAt": "2026-09-03T07:20:16",
+      "statusAtDecision": "fail",
+      "reasonAtDecision": "Jenny is present and recognizable, but the frame contains a full class of seated children, which matches the declared background population. The main compliance issue is composition/geography: Jenny is centered instead of the authored left-of-center placement, her apparent scale and desk-level isolation are off, and the sheet reads like a large front-facing sign rather than a folded-in embarrassed worksheet hold. No forbidden duplicate named character or watermark is visible."
+     },
+     "outcome": "superseded",
+     "supersededAt": "2026-09-03T08:54:22",
+     "archivedFile": "..\\projects\\the-box-monsters\\episodes\\media\\archive\\shots_superseded\\Ep1_S1.SH02_20260903T085422\\Ep1_S1.SH02_keyframe_B_86929161.png"
+    }
+   ]
   }
  ],
  "validation": {

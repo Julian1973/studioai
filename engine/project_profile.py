@@ -76,6 +76,8 @@ class LawsProfile(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     style: Optional[str] = None
+
+    music: Optional[str] = None   # laws/music.txt - the show music register (2026-09-03)
     wingLaw: Optional[WingLaw] = None
     forbiddenElements: Optional[str] = None
     emissionChecks: Optional[str] = None
@@ -339,7 +341,7 @@ class LoadedShowProfile:
     def laws_paths(self) -> dict[str, pathlib.Path]:
         out = {}
         laws = self.profile.laws
-        for key in ("style", "forbiddenElements", "emissionChecks", "castVocabulary", "continuityRules"):
+        for key in ("style", "music", "forbiddenElements", "emissionChecks", "castVocabulary", "continuityRules"):
             rel = getattr(laws, key, None)
             if rel:
                 out[key] = self.resolve(rel, f"laws.{key}")

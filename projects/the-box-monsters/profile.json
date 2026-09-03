@@ -45,7 +45,8 @@
     "castVocabulary": "laws/cast_vocabulary.json",
     "forbiddenElements": "laws/forbidden_elements.json",
     "continuityRules": "laws/continuity_rules.json",
-    "emissionChecks": "laws/emission_checks.json"
+    "emissionChecks": "laws/emission_checks.json",
+    "music": "laws/music.txt"
   },
   "creative": {
     "root": "creative",

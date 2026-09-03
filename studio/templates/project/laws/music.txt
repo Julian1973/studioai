@@ -1,0 +1,1 @@
+Music register: state the show's musical energy, tempo and mood rules here; every render prompt quotes this verbatim.

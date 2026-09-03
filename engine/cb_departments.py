@@ -1566,15 +1566,41 @@ SEEDANCE_AUDIO_EXCLUSIONS_SECTION = (
 )
 
 
+def _music_law_text():
+    """The project's music register, verbatim (laws/music.txt via paths.MUSIC_LAW). Empty when a
+    project declares none. Julian, 2026-09-03: a render without it scored a children's classroom
+    beat like a funeral."""
+    try:
+        import paths as _paths
+        path = getattr(_paths, "MUSIC_LAW", None)
+        if path and pathlib.Path(path).exists():
+            return " ".join(pathlib.Path(path).read_text(encoding="utf-8").split())
+    except Exception:
+        return ""
+    return ""
+
+
+MIX_PRIORITY_LINE = (
+    "MIX PRIORITY: the supplied @Audio1 dialogue performance is the loudest, clearest element of the "
+    "mix at all times; music and SFX sit underneath it and duck under every spoken line; nothing "
+    "masks, replaces or re-voices it."
+)
+
+
+def _seedance_music_and_mix_lines():
+    law = _music_law_text()
+    return (f"MUSIC: {law} " if law else "") + MIX_PRIORITY_LINE
+
+
 def _seedance_audio_exclusions_section():
-    return SEEDANCE_AUDIO_EXCLUSIONS_SECTION
+    return SEEDANCE_AUDIO_EXCLUSIONS_SECTION + "\n" + _seedance_music_and_mix_lines()
 
 
 def _seedance_nonverbal_audio_policy():
     return (
         "Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the "
         "scene; do not add sung lyrics, vocal music, narration, or any additional "
-        "spoken words."
+        "spoken words. " + _seedance_music_and_mix_lines()
     )
 
 

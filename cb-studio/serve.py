@@ -665,7 +665,7 @@ def _clear_director_session_cache(scene=None, episode=None):
             _DIRECTOR_SESSION_CACHE.clear()
             return
         for key in list(_DIRECTOR_SESSION_CACHE):
-            key_episode, key_scene, _ = key
+            key_episode, key_scene = key[0], key[1]   # key also carries the on-disk stamp (2026-09-03)
             if scene is not None and key_scene != str(scene):
                 continue
             if episode is not None and key_episode != str(episode):

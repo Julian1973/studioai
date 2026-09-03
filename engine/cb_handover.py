@@ -1561,6 +1561,15 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     design = cb_engine.SceneShotList(
         statement=cb_engine.DirectorStatement(**director_statement), shots=design_shots)
     report = cb_engine.validate_scene_design(design, validation_beats, characters_cfg)
+    if not report.get("passed"):
+        # Deterministic, field-scoped repair of ABSTRACT_DIRECTION-class refusals before the
+        # handover refuses (2026-09-03 audit: scene 5 was unpromotable on one phrase that no
+        # creative gate had ever checked). Protected fields are asserted unchanged inside.
+        try:
+            _, _, report = cb_engine.auto_repair_abstract_directions(
+                design, validation_beats, characters_cfg, log=log)
+        except Exception as exc:
+            log(f"HANDOVER — automatic direction repair failed: {exc}")
 
     # 2026-07-17 (Julian's layer-boundary directive, item 2): the canonical package path
     # comes from cb_engine.canonical_package_path — a pure path helper, not a render or

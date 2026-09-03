@@ -589,7 +589,7 @@ DIRECTOR_ACTION_IDS = {
     "accept-animation", "iterate-animation",
     "run-ai-review",
     "run-quality-review", "accept-quality", "reopen-shot",
-    "abandon-batch", "override-model-limited",
+    "abandon-batch", "override-model-limited", "rebase-canon",
     "build-master", "run-final-review", "accept-master", "iterate-master",
     "save-retake-note",
                 }
@@ -4716,6 +4716,17 @@ class H(http.server.SimpleHTTPRequestHandler):
                         scene, target, note, category="other", episode=ep,
                         reviewed_by=str(d.get("by") or "Julian"))
                     self._json(200, {"ok": True, "zeroSpend": True}); return
+                elif action == "rebase-canon":
+                    # Zero spend: provenance only (cb_intake.rebase_canon_lock refuses anything
+                    # else). The desk's remedy for an episode stranded by a re-lock (2026-09-03).
+                    import cb_intake as _CBI
+                    try:
+                        result = _CBI.rebase_canon_lock(ep, reviewed_by=str(d.get("by") or "Julian"))
+                    except _CBI.Refused as exc:
+                        self._json(409, {"error": str(exc)}); return
+                    with _DIRECTOR_SESSION_CACHE_LOCK:
+                        _DIRECTOR_SESSION_CACHE.clear()
+                    self._json(200, {"ok": True, "zeroSpend": True, "rebase": result}); return
                 elif action == "abandon-batch":
                     # A render killed mid-flight (Stop, restart, crash) left the batch
                     # "generating" with no desk exit (2026-09-03 audit).

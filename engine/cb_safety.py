@@ -1833,8 +1833,9 @@ def install(m):
             review = department_record_status(
                 pkg, shot["shotId"], "review-animation", scene, episode)
             if not review["current"]:
-                raise m.Refused(
-                    f"REFUSED — {shot['shotId']} has no current Director Review approval")
+                # The AI Director review is optional by ruling (2026-09-03, 439f82a9); the
+                # human Accept above is the approval. Noted, never a refusal.
+                log(f"STITCH - {shot['shotId']}: no current AI Director review on record (optional)")
         return original["stitch_scene"](scene, episode, log)
 
     m._resolve_scenelook_prompt = resolve_scenelook_prompt

@@ -624,6 +624,13 @@ def production_state(scene, episode="Ep1", intake=None):
         if intake.get("hasCandidate") and intake.get("candidateCurrent"):
             stages["storyboard"] = _stage(
                 "awaiting", "review and approve the episode Story & Direction candidate")
+        elif intake.get("rebaseEligible"):
+            # The approved package is only behind a canon re-lock (script, source events and
+            # creative content unchanged): the remedy is a zero-generation rebase, never a
+            # re-run of Story & Direction (2026-09-03 audit).
+            stages["storyboard"] = _stage(
+                "rebase", "canon was re-locked; carry the approved Story & Direction forward — "
+                          "no regeneration")
         else:
             stages["storyboard"] = _stage(
                 "ready", "run Story & Direction for the active script")

@@ -176,8 +176,9 @@ def _latest_failed_job(jobs: dict[str, Any] | None, scene: str,
             continue
         gate = str(job.get("gate") or "")
         args = [str(value) for value in (job.get("args") or [])]
-        if shot_id and shot_id not in gate and shot_id not in args:
-            continue
+        if (shot_id and not _scene_wide_gate(gate)
+                and shot_id not in gate and shot_id not in args):
+            continue   # a scene-wide failure (plate, direction, stitch) counts for every shot
         matches.append(job)
     if not matches:
         return None
@@ -922,6 +923,11 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                     "url": shot_media.get("keyframeApproved") or shot_media.get("keyframe"),
                     "label": "Preserved approved opening frame",
                 }
+        elif story_state == "rebase":
+            status = "ready_to_fire"
+            headline = "Canon was re-locked — carry the approved direction forward"
+            summary = (stages.get("storyboard") or {}).get("sub") or summary
+            primary = _action("rebase-canon", "Carry Story & Direction onto the new canon lock")
         elif story_state == "ready":
             status = "ready_to_fire"
             headline = "Direct this scene"

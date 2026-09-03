@@ -33,20 +33,31 @@ import tempfile
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "engine"))
 os.chdir(ROOT)
+# NOTE (2026-09-03): profile_paths.json is emitted from the ACTIVE project; run this check with the
+# first project active (STUDIO_PROJECT) for that one file - the 286 emissions do not depend on it.
 
 BASELINE = ROOT / "engine" / "goldens" / "T40_BASELINE"
 ABS_ROOT_RE = re.compile(re.escape(str(ROOT)))
 
 
 def _norm(text: str) -> str:
-    # Absolute paths differ per machine; the repo-relative form is the stable truth.
-    return ABS_ROOT_RE.sub("<ROOT>", str(text)).rstrip() + "\n"
+    # Absolute paths differ per machine; the repo-relative form is the stable truth. On Windows
+    # the root appears with backslashes, and inside JSON with doubled backslashes (2026-09-03):
+    # every form becomes "<ROOT>" and the path tail after it is written with "/" separators.
+    text = str(text)
+    root = str(ROOT)
+    for form in (root.replace("\\", "\\\\"), root, ROOT.as_posix()):
+        text = text.replace(form, "<ROOT>")
+    text = re.sub(r"<ROOT>((?:\\\\|\\)[^\"'\s]*)",
+                  lambda m: "<ROOT>" + m.group(1).replace("\\\\", "/").replace("\\", "/"), text)
+    return text.rstrip() + "\n"
 
 
 def _write(out: pathlib.Path, name: str, value) -> None:
     if not isinstance(value, str):
         value = json.dumps(value, indent=1, sort_keys=True, ensure_ascii=False, default=str)
-    (out / name).write_text(_norm(value), encoding="utf-8")
+    # newline="\n": on Windows text mode would write CRLF and every stored file would "differ" (2026-09-03)
+    (out / name).write_text(_norm(value), encoding="utf-8", newline="\n")
 
 
 def _try(fn, *a, **k):

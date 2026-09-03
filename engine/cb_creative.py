@@ -55,6 +55,7 @@ import datetime
 import filelock_compat
 import hashlib
 import json
+import shutil
 import os
 import pathlib
 import re
@@ -2950,7 +2951,22 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
            "approvalState": "awaiting-human-storyboard-approval"}
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{episode}_scene{scene_num}_storyboard.json"
-    json.dump(pkg, open(out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    import cb_db
+    if out.exists():
+        # Rejection archives, never deletes (2026-09-03 audit): the previous direction - the
+        # file the live production package binds by sha256 - is kept under creative/archive.
+        try:
+            previous = json.loads(out.read_text(encoding="utf-8"))
+            state = str(previous.get("approvalState") or "unknown").replace("/", "-")
+        except Exception:
+            previous, state = None, "unreadable"
+        archive_dir = OUT / "archive" / "storyboards"
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+        archived = archive_dir / f"{out.stem}_{state}_{stamp}.json"
+        shutil.copy2(out, archived)
+        log(f"STORYBOARD ARCHIVED — previous scene {scene_num} direction kept at {archived.name}")
+    cb_db.atomic_write_json(ROOT, out, pkg)
     log(f"STORYBOARD v2 — scene {scene_num}: {len(sd.beats)} beat(s), "
         f"{len(shots)} Seedance unit(s), "
         f"{len(packing_audit['fullThirtySecondUnitIds'])} full 30s, "

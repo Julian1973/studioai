@@ -46,6 +46,15 @@ MUTATING_OPERATIONS = (
     "approve_shot_edit",
     "reject_shot_edit",
     "stitch_scene",
+    # 2026-09-03 audit: these wrote the package outside the lease; a write landing during a
+    # render made the next progress save a StateConflict and failed a paid candidate.
+    "abandon_batch", "apply_scoped_dialogue_correction", "apply_scoped_voice_contract_correction",
+    "bind_animation_location_reference", "cancel_spend_authorization", "decide_timing_slate",
+    "import_animation_candidate", "import_approved_take", "override_model_limited",
+    "recompile_animation_candidate", "recover_approved_shot", "register_existing_keyframe_ab",
+    "reopen_approved_shot", "rescreen_keyframe_geometry", "save_opening_frame_layout",
+    "save_watch_director_feedback", "select_keyframe_candidate", "select_voice_audition",
+    "set_continuity_mode",
 )
 
 

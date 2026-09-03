@@ -955,7 +955,11 @@ def _load_scenelook_rec(scene, episode="Ep1"):
     sc_path = _scenelook_path(scene, episode)
     if not sc_path.exists():
         return {"approved": None, "candidate": None, "history": []}
-    rec = json.load(open(sc_path, encoding="utf-8"))
+    try:
+        rec = json.load(open(sc_path, encoding="utf-8"))
+    except ValueError as exc:
+        raise Refused(f"REFUSED — the scene look record is unreadable ({sc_path.name}: {exc}); "
+                      "restore it from media/archive or delete it to start the scene look over") from exc
     if "approved" in rec or "candidate" in rec:
         return rec   # already the current shape
     # legacy flat shape migration
@@ -971,7 +975,7 @@ def _load_scenelook_rec(scene, episode="Ep1"):
 def _save_scenelook_rec(rec, scene, episode="Ep1"):
     sc_path = _scenelook_path(scene, episode)
     sc_path.parent.mkdir(parents=True, exist_ok=True)
-    json.dump(rec, open(sc_path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    cb_db.atomic_write_json(HERE.parent, sc_path, rec)   # atomic since 2026-09-03 (a kill mid-write truncated it)
 
 
 def scenelook_status(scene, episode="Ep1"):
@@ -1113,7 +1117,7 @@ def generate_scenelook_plate(scene, episode="Ep1", reference_path=None, log=prin
     prompt = approved_look_prompt(scene, episode)
     if not prompt:
         raise Refused("REFUSED — Prepare current Look Development direction first.")
-    _require_confirmed_billing("fal")
+    _require_confirmed_billing("byteplus")   # Seedream 5 Pro bills on BytePlus ModelArk, not fal (2026-09-03)
     (_media_root()).mkdir(parents=True, exist_ok=True)
     out = _media_root() / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}.png"
     refs = [str(reference_path)] if reference_path else []
@@ -1797,7 +1801,7 @@ def generate_pose_reference(scene, shot_id, character, episode="Ep1", log=print)
     pkg, path = load_pkg(scene, episode)
     _require_valid(pkg)
     _require_current_lineage(pkg, scene, episode)
-    _require_confirmed_billing("fal")
+    _require_confirmed_billing("byteplus")   # Seedream 5 Pro bills on BytePlus ModelArk, not fal (2026-09-03)
     shot = _shot(pkg, shot_id)
     if shot.get("sourceType") != "opener":
         raise Refused(f"REFUSED — {shot_id} inherits its opening frame and needs no pose pass")
@@ -4417,6 +4421,15 @@ def recompile_animation_candidate(scene, shot_id, episode="Ep1", log=print):
     if not timing["ready"]:
         old_duration = float(source.get("durationSec") or shot.get("durationSec") or 0)
         new_duration = float(timing["recommendedDurationSec"])
+        ceiling = float(getattr(P.FORMAT, "shotSecondsMax", None) or 30.0) if P.FORMAT else 30.0
+        if new_duration > ceiling:
+            # The beat-cost rule has no ceiling; the provider and the project format do
+            # (2026-09-03 audit: a legal direction could push a 30 s unit to 48 s and the fire
+            # then refused on provider capability with no remedy named).
+            raise Refused(
+                f"REFUSED — {shot_id}'s approved animation direction needs "
+                f"{new_duration:g}s of timed beats but the unit ceiling is {ceiling:g}s; "
+                "reduce the direction's timingBeats (or split the unit) before rendering")
         source["durationSec"] = new_duration
         shot["durationSec"] = new_duration
         creative_shot["durationSec"] = new_duration
@@ -10350,7 +10363,11 @@ def reject_shot(scene, shot_id, correction, category="other", episode="Ep1",
         "bankedAt": bank_record["bankedAt"],
     })
     led.update({"batchAttempts": attempts, "candidatePaths": None, "batchId": None})
-    if attempts >= MAX_BATCH_ATTEMPTS:
+    # Count from the last human override, or a reopened shot re-enters MODEL-LIMITED on its
+    # very next rejection (2026-09-03 audit).
+    overrides = led.get("modelLimitedOverrides") or []
+    attempts_base = int((overrides[-1] if overrides else {}).get("batchAttemptsAtOverride") or 0)
+    if attempts - attempts_base >= MAX_BATCH_ATTEMPTS:
         led["status"] = "model-limited"
         _save(pkg, path)
         log(f"REJECTED — {shot_id} batch archived. {attempts} failed batches: shot is now "

@@ -1688,4 +1688,13 @@ if __name__ == "__main__":
     else:
         scene = sys.argv[1] if len(sys.argv) > 1 else "1"
         ep = sys.argv[2] if len(sys.argv) > 2 else "Ep1"
+        existing = canonical_package_path(scene, ep)
+        if existing.exists():
+            # 2026-09-03 audit: this legacy LLM design path would have replaced an approved,
+            # in-production package (its ledger of keyframes, voices and takes) with an
+            # unapproved revision-1 package, bypassing Story & Direction and handover.
+            raise SystemExit(
+                f"REFUSED - {existing.name} already exists; the live path is Story & Direction -> "
+                "handover (cb_handover.promote_to_canonical). Archive the package first if you "
+                "really mean to replace it.")
         compile_scene_package(scene, ep)

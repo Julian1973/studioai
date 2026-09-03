@@ -232,11 +232,22 @@ def _validated_content_length(headers):
 # auto-reloads itself the moment it's idle, so the UI always has the latest software behind it without anyone
 # remembering to restart. (The render itself already runs in a fresh subprocess; this closes the serve.py gap.)
 def _source_fingerprint():
-    # ONLY this server's own source. engine modules are reloaded fresh by each per-render SUBPROCESS, so they never
-    # need a serve.py reload — watching them would needlessly re-exec and DROP the UI's open connections on every
-    # engine edit ("can't reach server"). serve.py is the only long-lived code, so it's the only thing to watch.
-    try: return os.path.getmtime(os.path.abspath(__file__))
-    except OSError: return 0.0
+    """Newest mtime across this file AND engine/*.py. The Director session is built IN-PROCESS from
+    engine modules (cb_state / cb_studio_director / cb_render ...), so an engine edit must reload the
+    studio too or the page keeps projecting stale state (found 2026-09-03: a fresh SEE A/B stayed
+    invisible). The reload still waits for an idle server, so open UI connections are not dropped."""
+    newest = 0.0
+    try: newest = os.path.getmtime(os.path.abspath(__file__))
+    except OSError: pass
+    try:
+        engine_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "engine")
+        for name in os.listdir(engine_dir):
+            if name.endswith(".py") and not name.startswith("test_"):
+                try: newest = max(newest, os.path.getmtime(os.path.join(engine_dir, name)))
+                except OSError: pass
+    except OSError:
+        pass
+    return newest
 _STARTED_FP = _source_fingerprint()
 def _is_stale():
     return _source_fingerprint() > _STARTED_FP + 0.5      # 0.5s slop for save races

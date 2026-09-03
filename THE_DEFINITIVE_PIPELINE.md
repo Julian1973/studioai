@@ -310,7 +310,7 @@ else that restates it is commentary):
 | Rule | The one enforcing location |
 |---|---|
 | Script/dialogue verbatim | cb_script (ground truth) + cb_engine.validate_scene_design (DIALOGUE_NOT_VERBATIM/DROPPED/DUPLICATED) |
-| No spoken words in render prompts (Law 6) | KEYFRAME prompts: cb_engine._assert_no_spoken_words. VIDEO prompts: the exact lines DO appear, as a braced transcript bound to @Audio1 (cb_emission_conformance.dialogue_placement_line) and cb_emission_conformance.validate_dialogue_synthesis refuses a fire whose prompt omits or alters one — the transcript is lip-sync evidence, never a synthesis request. Recorded 2026-09-03; whether Law 6's WORDING is amended to say so is Julian's ruling. |
+| No spoken words in render prompts (Law 6) | KEYFRAME prompts: cb_engine._assert_no_spoken_words. VIDEO prompts: the exact lines DO appear, as a braced transcript bound to @Audio1 (cb_emission_conformance.dialogue_placement_line) and cb_emission_conformance.validate_dialogue_synthesis refuses a fire whose prompt omits or alters one — the transcript is lip-sync evidence, never a synthesis request. RULED 2026-09-03 (Julian): the voice audio is ALWAYS supplied as @Audio1; Law 6 means the provider never synthesises speech — the braced transcript is the lip-sync binding to that audio, never a synthesis request. |
 | No character description in prompts (rule 5) | cb_engine compilers (reference-first by construction; tests pin it) |
 | Voice = ElevenLabs @Audio1 only, no post swap (Law 5) | cb_render.voice_shot/fire_shot refusals |
 | The @图1 anchor contracts | cb_engine.OPENER_ANCHOR / RELAY_ANCHOR (verbatim constants) |

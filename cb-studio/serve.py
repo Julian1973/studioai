@@ -193,7 +193,7 @@ def _load_or_create_session_token():
 
 
 SESSION_TOKEN = _load_or_create_session_token()
-STUDIO_BUILD_VERSION = "scene-plate-direct-select-20260812-1"
+STUDIO_BUILD_VERSION = "see-ab-live-20260903-1"
 SESSION_COOKIE = "cb_studio_session"
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 20 * 1024 * 1024

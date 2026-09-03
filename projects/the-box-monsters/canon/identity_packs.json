@@ -11,7 +11,7 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.26,
       1.0
      ]
     }
@@ -22,32 +22,32 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.26,
       1.0
      ]
     },
     {
      "view": "three-quarter",
      "crop": [
-      0.25,
+      0.26,
       0.0,
-      0.5,
+      0.498,
       1.0
      ]
     },
     {
      "view": "side",
      "crop": [
-      0.5,
+      0.498,
       0.0,
-      0.75,
+      0.743,
       1.0
      ]
     },
     {
-     "view": "rear",
+     "view": "expressions",
      "crop": [
-      0.75,
+      0.743,
       0.0,
       1.0,
       1.0
@@ -59,7 +59,8 @@
    ],
    "mustNotBorrow": [
     "another character's hair, clothing or size"
-   ]
+   ],
+   "_note": "Four-view sheet; each crop is the measured column between figures, not an even quarter (Rumble is wide enough that quarters bled a neighbour's arm into 'front' and 'three-quarter'). The renderer attaches the complete sheet and reads only the view count; these crops are the canon's own record of what the sheet holds. The fourth column is the expressions strip, not a rear view; it was labelled 'rear' before 2026-09-03."
   },
   "Patch": {
    "schemaVersion": 1,
@@ -71,7 +72,7 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.266,
       1.0
      ]
     }
@@ -82,32 +83,32 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.266,
       1.0
      ]
     },
     {
      "view": "three-quarter",
      "crop": [
-      0.25,
+      0.266,
       0.0,
-      0.5,
+      0.517,
       1.0
      ]
     },
     {
      "view": "side",
      "crop": [
-      0.5,
+      0.517,
       0.0,
-      0.75,
+      0.713,
       1.0
      ]
     },
     {
      "view": "rear",
      "crop": [
-      0.75,
+      0.713,
       0.0,
       1.0,
       1.0
@@ -120,7 +121,7 @@
    "mustNotBorrow": [
     "another monster's colour, shape, box markings or size"
    ],
-   "_note": "Signed-off four-view turnaround sheet (front / three-quarter / side / rear, even quarters of a 1672x941 sheet). Registered as single-anchor until 2026-09-02, which handed the renderer the whole 4-up sheet as if it were one portrait - the ensemble frames then invented box-bodied monsters instead of these furry characters carrying boxes."
+   "_note": "Four-view sheet; each crop is the measured column between figures, not an even quarter (Rumble is wide enough that quarters bled a neighbour's arm into 'front' and 'three-quarter'). The renderer attaches the complete sheet and reads only the view count; these crops are the canon's own record of what the sheet holds."
   },
   "Rumble": {
    "schemaVersion": 1,
@@ -132,7 +133,7 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.276,
       1.0
      ]
     }
@@ -143,32 +144,32 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.276,
       1.0
      ]
     },
     {
      "view": "three-quarter",
      "crop": [
-      0.25,
+      0.276,
       0.0,
-      0.5,
+      0.525,
       1.0
      ]
     },
     {
      "view": "side",
      "crop": [
-      0.5,
+      0.525,
       0.0,
-      0.75,
+      0.679,
       1.0
      ]
     },
     {
      "view": "rear",
      "crop": [
-      0.75,
+      0.679,
       0.0,
       1.0,
       1.0
@@ -181,7 +182,7 @@
    "mustNotBorrow": [
     "another monster's colour, shape, box markings or size"
    ],
-   "_note": "Signed-off four-view turnaround sheet (front / three-quarter / side / rear, even quarters of a 1672x941 sheet). Registered as single-anchor until 2026-09-02, which handed the renderer the whole 4-up sheet as if it were one portrait - the ensemble frames then invented box-bodied monsters instead of these furry characters carrying boxes."
+   "_note": "Four-view sheet; each crop is the measured column between figures, not an even quarter (Rumble is wide enough that quarters bled a neighbour's arm into 'front' and 'three-quarter'). The renderer attaches the complete sheet and reads only the view count; these crops are the canon's own record of what the sheet holds."
   },
   "Tilly": {
    "schemaVersion": 1,
@@ -193,7 +194,7 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.27,
       1.0
      ]
     }
@@ -204,14 +205,14 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.27,
       1.0
      ]
     },
     {
      "view": "three-quarter",
      "crop": [
-      0.25,
+      0.27,
       0.0,
       0.5,
       1.0
@@ -222,14 +223,14 @@
      "crop": [
       0.5,
       0.0,
-      0.75,
+      0.706,
       1.0
      ]
     },
     {
      "view": "rear",
      "crop": [
-      0.75,
+      0.706,
       0.0,
       1.0,
       1.0
@@ -242,7 +243,7 @@
    "mustNotBorrow": [
     "another monster's colour, shape, box markings or size"
    ],
-   "_note": "Signed-off four-view turnaround sheet (front / three-quarter / side / rear, even quarters of a 1672x941 sheet). Registered as single-anchor until 2026-09-02, which handed the renderer the whole 4-up sheet as if it were one portrait - the ensemble frames then invented box-bodied monsters instead of these furry characters carrying boxes."
+   "_note": "Four-view sheet; each crop is the measured column between figures, not an even quarter (Rumble is wide enough that quarters bled a neighbour's arm into 'front' and 'three-quarter'). The renderer attaches the complete sheet and reads only the view count; these crops are the canon's own record of what the sheet holds."
   },
   "Nib": {
    "schemaVersion": 1,
@@ -254,7 +255,7 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.281,
       1.0
      ]
     }
@@ -265,32 +266,32 @@
      "crop": [
       0.0,
       0.0,
-      0.25,
+      0.281,
       1.0
      ]
     },
     {
      "view": "three-quarter",
      "crop": [
-      0.25,
+      0.281,
       0.0,
-      0.5,
+      0.516,
       1.0
      ]
     },
     {
      "view": "side",
      "crop": [
-      0.5,
+      0.516,
       0.0,
-      0.75,
+      0.706,
       1.0
      ]
     },
     {
      "view": "rear",
      "crop": [
-      0.75,
+      0.706,
       0.0,
       1.0,
       1.0
@@ -303,7 +304,7 @@
    "mustNotBorrow": [
     "another monster's colour, shape, box markings or size"
    ],
-   "_note": "Signed-off four-view turnaround sheet (front / three-quarter / side / rear, even quarters of a 1672x941 sheet). Registered as single-anchor until 2026-09-02, which handed the renderer the whole 4-up sheet as if it were one portrait - the ensemble frames then invented box-bodied monsters instead of these furry characters carrying boxes."
+   "_note": "Four-view sheet; each crop is the measured column between figures, not an even quarter (Rumble is wide enough that quarters bled a neighbour's arm into 'front' and 'three-quarter'). The renderer attaches the complete sheet and reads only the view count; these crops are the canon's own record of what the sheet holds."
   }
  }
 }

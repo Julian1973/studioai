@@ -778,6 +778,8 @@ class KeyframeConformanceReview(BaseModel):
     detectedCharacters: List[str] = Field(default_factory=list, max_length=8)
     expectedSubjectCount: int = Field(ge=1, le=8)
     subjectCount: int = Field(ge=0, le=12)
+    backgroundAllowed: bool = False       # 2026-09-03: the shot declares unnamed background people;
+    #                                        they are expected, never counted as cast, never extra
     summary: str = Field(min_length=1)
     identityAndDistinguishability: KeyframeConformanceDimension
     relativeScaleAndGeography: KeyframeConformanceDimension
@@ -797,11 +799,15 @@ class KeyframeConformanceReview(BaseModel):
         )
         expected = sorted(name.casefold() for name in self.expectedCharacters)
         detected = sorted(name.casefold() for name in self.detectedCharacters)
+        # With a declared background population the named cast is still exact, but the
+        # frame may hold MORE subjects than cast: the class at its desks is not extra cast.
+        cast_count_ok = (self.subjectCount >= self.expectedSubjectCount if self.backgroundAllowed
+                         else self.subjectCount == self.expectedSubjectCount)
         if self.verdict == "pass" and (
-                self.subjectCount != self.expectedSubjectCount or
+                not cast_count_ok or
                 expected != detected or any(item.score != 2 for item in dimensions)):
             raise ValueError(
-                "a passing keyframe must contain the exact cast and score 2 on every "
+                "a passing keyframe must contain the exact named cast and score 2 on every "
                 "objective dimension")
         if self.verdict != "pass" and not self.recommendedCorrection.strip():
             raise ValueError("a failed keyframe review must provide one corrective instruction")
@@ -2862,7 +2868,11 @@ def review_keyframe_conformance(context, images, *, log=print):
             "each named character visibly matching its own reference without blending, swapping "
             "or borrowed features; canonical relative size and authored screen geography; sound "
             "anatomy and readable silhouettes; a loose performance-ready opening composition; "
-            "and no forbidden props, duplicate subjects, text, logo or watermark. Score 2 only "
+            "and no forbidden props, duplicate subjects, text, logo or watermark. When the "
+            "contract declares a backgroundPopulation, those unnamed people are EXPECTED in the "
+            "frame: count them as subjects but never as cast, never ask for them to be removed, "
+            "and set backgroundAllowed true; only a second copy of a NAMED character is a "
+            "duplicate. Score 2 only "
             "when the requirement clearly passes, 1 when ambiguous or materially weak, and 0 "
             "when wrong. Any non-2 dimension makes the verdict revise or block. Return one concise "
             "prompt-ready correction that changes only failed features and preserves what worked. "

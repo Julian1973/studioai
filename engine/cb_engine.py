@@ -217,6 +217,9 @@ class Shot(BaseModel):
     #                                               plain flowing prose; the heart of the prompt
     camera: str = Field(min_length=1)             # lens/height/move in one line
     openingPose: str = Field(min_length=1)        # the ANTICIPATION instant (§4) — the keyframe truth
+    backgroundPopulation: str = ""                # unnamed people in frame who are not cast (2026-09-03):
+    #                                               staged in the keyframe, expected by the screen, never
+    #                                               counted as cast and never a duplicate of a named one
     sourceType: Literal["opener", "relay"]        # opener = generated keyframe; relay = harvested frame
     sourceShotId: Optional[str] = None            # relay: the EARLIER shot whose final frame anchors this one
     motionContinuityRequired: bool = False
@@ -1086,7 +1089,12 @@ def _assert_no_spoken_words(prompt, shot, artifact):
 # Authored shot constraints have no IDs: they ship VERBATIM and are never deduplicated or dropped.
 UNIVERSAL_CONSTRAINTS = [                                        # the lean five — every shot, always
     ("no_character_redesign", "no character redesign"),
-    ("no_extra_characters", "no extra characters"),
+    # "no extra characters" also forbade a classroom having children in it, a street having
+    # people — any populated world the approved staging actually calls for. S1.SH02's prompt
+    # asked for "the class continues around her" and banned it in the same breath, so the room
+    # came out empty (2026-09-03). What this guard is really for is a second Jenny or a
+    # duplicated monster, and saying so keeps every bit of that protection.
+    ("no_extra_characters", "no duplicated or invented cast members"),
     ("no_onscreen_text", "no on-screen text"),
     ("no_invented_voices", "no invented voices"),
     ("no_camera_cut", "no camera cut"),
@@ -1360,6 +1368,19 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
     pose, next_slot = _inline_bindings(
         shot.openingPose.strip().rstrip("."), shot, characters_cfg, start=1,
         characters=opening_cast)
+    # BACKGROUND POPULATION (2026-09-03): the unnamed people the script puts in the frame.
+    # Stated as its own sentence, after the cast, so the room is populated by declaration and
+    # the standing negative ("no duplicated or invented cast members") still bites on a second
+    # Jenny. Before this the only mention was a buried clause in the opening pose — and the
+    # negative used to say "no extra characters", so the two cancelled and the room came out
+    # empty every time (S1.SH02, the whole class missing from a public-embarrassment beat).
+    population = (shot.backgroundPopulation or "").strip().rstrip(".")
+    if population:
+        # Inside the opening sentence, not appended after it: the image model weights the
+        # first sentence and drops a trailing clause — the build that put children in the room
+        # named them in the opening line; the one that stated them afterwards drew it empty.
+        pose = (f"{pose}, with {population} (unnamed background, never a duplicate of any "
+                f"named character)")
     # correction #4: typed absence — None means nothing genuinely carries in, checked with
     # `is None`, never a sentinel-string comparison.
     if shot.continuityIn is None:
@@ -1397,8 +1418,8 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
         f"lighting only — never composition or geography.",
         cb_engine_rules.living_performance_boilerplate(
             {"charactersInFrame": list(opening_cast)}, medium="still"),
-        ("Negative: character redesign, appearance drift from the references, extra "
-         "characters, on-screen text."),
+        ("Negative: character redesign, appearance drift from the references, duplicated "
+         "or invented cast members, on-screen text."),
     ].copy())
     prompt = "\n\n".join(section for section in prompt.split("\n\n") if section.strip())
     wc = len(prompt.split())

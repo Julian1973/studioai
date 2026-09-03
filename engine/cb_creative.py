@@ -512,6 +512,13 @@ class StoryboardCard(BaseModel):
         "direction that MATERIALLY DEFINES that image — never all four as a required list, "
         "never a checklist. This field alone controls the compiled keyframe's composition; "
         "no compiler-level framing instruction and no reference image may override it."))
+    backgroundPopulation: str = Field(default="", description=(
+        "BACKGROUND POPULATION (2026-09-03): the unnamed people the script puts in this frame "
+        "who are not cast — 'a class of seated schoolchildren at their desks', 'shoppers on the "
+        "pavement'. Empty when the frame holds only named cast. They are staged in the keyframe "
+        "and expected by the identity screen, never counted as cast, never given a reference, "
+        "and never a duplicate of any named character. Read them straight from the script: "
+        "'one child lets out a tiny laugh' is a room full of children."))
     principalPerformance: str
     cameraRelationship: str                      # lead/pursue/lag/lose/rediscover/anticipate/
     #                                              arrive-late/still/abandon-for-another — whatever
@@ -1674,7 +1681,11 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "reduced to character pose alone. A wide establishing view is wrong when "
               "cameraRelationship calls for an embedded, in-the-world vantage — but the "
               "fix is judgment about THIS shot, not a mandatory formula repeated on every "
-              "shot. closingImage, like openingImage, is a purely VISUAL, PHYSICAL "
+              "shot. backgroundPopulation names the UNNAMED people the script puts in the "
+              "frame who are not cast — a class at its desks, a crowd, passers-by — read "
+              "straight from the script's own cues ('one child lets out a tiny laugh' means a "
+              "room full of children); leave it empty only when the frame genuinely holds "
+              "named cast alone. closingImage, like openingImage, is a purely VISUAL, PHYSICAL "
               "description of the final frame - describe only what is SEEN (pose, "
               "environment, the physical residue of what just happened), never a "
               "character's spoken line, quoted or paraphrased: the audio track alone "

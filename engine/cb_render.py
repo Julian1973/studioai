@@ -5958,6 +5958,11 @@ def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1",
         "shotId": shot["shotId"],
         "expectedCharacters": expected_cast,
         "expectedSubjectCount": len(expected_cast),
+        # 2026-09-03: unnamed people the shot declares (a class at its desks). Expected in the
+        # frame, never counted as cast — without this the screen told candidate B to "remove
+        # the other visible students" from a public-embarrassment beat.
+        "backgroundPopulation": str(shot.get("backgroundPopulation") or "").strip(),
+        "backgroundAllowed": bool(str(shot.get("backgroundPopulation") or "").strip()),
         "identityContracts": identity_contracts,
         "canonicalRelativeSize": [
             {"character": item["character"], "heightIn": item.get("heightIn")}

@@ -2186,7 +2186,7 @@
         <div><span>SEE · Keyframe</span><strong>The stage for this shot, with every reference in place</strong></div>
         <em>${esc(locked ? "Review candidate first" : keyframeToolsAvailable ? (keyframeUrl ? "Approved" : "Ready") : "Locked")}</em>
       </div>
-      ${session.phase === "keyframe" && session.artifact?.type === "image-set" && (session.artifact.items || []).length
+      ${session.artifact?.type === "image-set" && (session.artifact.items || []).length
         ? `<div class="see-visual see-ab-visual">${relayMedia(1, session)}</div>`
         : keyframeUrl ? `<div class="scene-plate-current see-visual">
         <img src="${esc(keyframeUrl)}?v=${Date.now()}" alt="Keyframe for this shot">

@@ -193,7 +193,7 @@ def _load_or_create_session_token():
 
 
 SESSION_TOKEN = _load_or_create_session_token()
-STUDIO_BUILD_VERSION = "see-ab-live-20260903-1"
+STUDIO_BUILD_VERSION = "see-ab-live-20260903-2"
 SESSION_COOKIE = "cb_studio_session"
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 20 * 1024 * 1024
@@ -5640,7 +5640,17 @@ class H(http.server.SimpleHTTPRequestHandler):
         self._json(404, {"error": "not found"})
 
     def log_message(self, *a):
-        pass
+        # Quiet console; a short rolling access log answers "which build did the browser load?"
+        try:
+            if "/cb-studio/director" in str(self.path) or "/api/director-session" in str(self.path):
+                log_path = DATA / "access.log"
+                with open(log_path, "a", encoding="utf-8") as fh:
+                    fh.write(f"{time.strftime('%H:%M:%S')} {self.command} {self.path}\n")
+                if log_path.stat().st_size > 200_000:
+                    lines = log_path.read_text(encoding="utf-8").splitlines()[-500:]
+                    log_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        except Exception:
+            pass
 
 def _install_requirements_if_changed():
     """SELF-HEALING DEPENDENCIES (2026-09-02): the first Windows keyframe build died on

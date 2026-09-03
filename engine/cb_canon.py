@@ -287,6 +287,30 @@ def _manifest_payload(manifest: dict) -> dict:
     )}
 
 
+VOICE_ONLY_CHARACTER_FIELDS = ("voiceId", "voiceNote", "voiceMode", "voiceCard")
+VOICE_AWARE_PROFILES = {"voice", "story", "storyboard", "post"}
+
+
+def _strip_voice_fields(characters):
+    """characters.json with the voice-only keys removed from every character record."""
+    if not isinstance(characters, dict):
+        return characters
+    return {
+        name: ({k: v for k, v in record.items() if k not in VOICE_ONLY_CHARACTER_FIELDS}
+               if isinstance(record, dict) else record)
+        for name, record in characters.items()
+    }
+
+
+def _profile_source_digest(profile, source_id, recorded):
+    """The digest one profile sees for one source: the visual digest of characters.json for the
+    visual profiles (a voice cast must never move a keyframe), the whole-file digest otherwise."""
+    if (source_id == "characters" and profile not in VOICE_AWARE_PROFILES
+            and recorded.get("visualSha256")):
+        return recorded["visualSha256"]
+    return recorded.get("sha256")
+
+
 def build_manifest(root: str | pathlib.Path | None = None,
                    locked_by: str = "Julian") -> dict:
     base = _root(root)
@@ -298,6 +322,12 @@ def build_manifest(root: str | pathlib.Path | None = None,
         path = resolve_declared_path(raw, base)
         digest = file_sha256(path)
         sources[source_id] = {"path": _relative(path, base), "sha256": digest}
+        if source_id == "characters" and digest is not None:
+            # Voice casting (voiceId / voiceNote) is not a visual input: the visual profiles
+            # hash characters.json WITHOUT those keys so casting a voice cannot invalidate a
+            # signed-off keyframe or DP direction (2026-09-03).
+            sources[source_id]["visualSha256"] = _digest(
+                _strip_voice_fields(_read_json_source(policy, "characters", base)))
         if digest is None:
             missing_sources.append(source_id)
     if missing_sources:
@@ -732,7 +762,7 @@ def _status_uncached(episode: str | None = None, cast: Iterable[str] | None = No
     recorded_sources = manifest.get("sources") or {}
     for profile, source_ids in (policy.get("profiles") or {}).items():
         profile_digests[profile] = _digest({
-            source_id: (recorded_sources.get(source_id) or {}).get("sha256")
+            source_id: _profile_source_digest(profile, source_id, recorded_sources.get(source_id) or {})
             for source_id in source_ids
         })
     warnings = list((script_canon or {}).get("warnings") or [])

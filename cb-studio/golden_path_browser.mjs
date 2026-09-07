@@ -257,7 +257,11 @@ async function run() {
     return json({});
   });
 
-  const target = `${studio.launch}#view=director&scene=1&shot=S1.SH1A&beat=chase`;
+  // The launch URL now opens Projects. Keep this compatibility journey explicitly
+  // bound to the Director surface whose mocked session contract it exercises.
+  const directorLaunch = new URL(studio.launch);
+  directorLaunch.pathname = "/cb-studio/director.html";
+  const target = `${directorLaunch.href}#view=director&scene=1&shot=S1.SH1A&beat=chase`;
   await page.goto(target, { waitUntil: "domcontentloaded" });
   await page.getByText("Scene 1 of 10 · Shot 1 · Sign-off 1 of 3", { exact: true }).waitFor();
   const navigationBaseline = mainNavigations;

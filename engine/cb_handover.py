@@ -172,7 +172,11 @@ def _require_storyboard_lineage(sb, episode):
             "exactText": cut["exactText"],
         } for cut in (source_beat.get("cuts") or [])
           if cut.get("sourceType") == "dialogue"]
-        if directed.get("dialogueOccurrences") != expected_occurrences:
+        directed_occurrences = [{key: occurrence.get(key) for key in (
+            "dialogueOccurrenceId", "sourceEventId", "sourceEventIndex", "beatId",
+            "sourceBeatId", "speaker", "exactText")}
+            for occurrence in (directed.get("dialogueOccurrences") or [])]
+        if directed_occurrences != expected_occurrences:
             raise HandoverRefused(
                 f"REFUSED — storyboard beat {directed.get('beatId')} changed its exact "
                 "dialogue occurrences")
@@ -720,6 +724,10 @@ def _required_prop_references(sb_shot, pd, cast, characters_cfg):
         "continuityOutState": pd.get("continuityOutState"),
     }, ensure_ascii=False).casefold()
     required = []
+    for prop_id in (sb_shot.get("requiredPropReferences") or []):
+        prop_id = str(prop_id).strip().casefold()
+        if prop_id and prop_id not in required:
+            required.append(prop_id)
     for character in cast:
         for prop_id in ((characters_cfg.get(character) or {}).get("props") or {}):
             prop_id = str(prop_id).strip().casefold()
@@ -891,12 +899,15 @@ def _performance_assignment(contract, beat_ids, cast, shot_id):
             f"REFUSED - {shot_id}.performanceContract requires one to four phases")
     phase_order = {"anticipation": 0, "action": 1, "reaction": 2, "settle": 3}
     names = [phase.get("phase") for phase in phases if isinstance(phase, dict)]
+    identities = [(phase.get("phase"), str(phase.get("performer") or "").casefold())
+                  for phase in phases if isinstance(phase, dict)]
     expected_phase_keys = {"phase", "performer", "observableAction"}
-    if (len(names) != len(phases) or len(names) != len(set(names)) or
+    if (len(names) != len(phases) or len(identities) != len(set(identities)) or
             any(name not in phase_order for name in names) or
             names != sorted(names, key=phase_order.__getitem__)):
         raise HandoverRefused(
-            f"REFUSED - {shot_id}.performanceContract phases are duplicated or out of order")
+            f"REFUSED - {shot_id}.performanceContract phase/performer pairs are "
+            "duplicated or phases are out of order")
     allowed = set(cast or []) | {"ENVIRONMENT"}
     for phase in phases:
         if set(phase) != expected_phase_keys or phase.get("performer") not in allowed:
@@ -978,7 +989,9 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
         raise HandoverRefused(
             f"REFUSED - {sb_shot['shotId']} targets {target_duration}s but its production "
             f"range normalizes to {duration:g}s")
-    opener = bool(pd.get("requiresNewKeyframe"))
+    # A declared editorial cut must never be downgraded to a harvested-frame relay
+    # by a stale/redundant production-detail flag.
+    opener = not prev or sb_shot.get("transitionType") == "PLANNED_CUT" or bool(pd.get("requiresNewKeyframe"))
     performance_contract = sb_shot.get("performanceContract")
     performance_assignment = _performance_assignment(
         performance_contract, sb_shot.get("beatIds") or [], cast, sb_shot["shotId"])
@@ -1047,7 +1060,14 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
             sb_shot, pd, characters_in_frame, characters_cfg),
         continuityIn=continuity_in,
         continuityOut=continuity_out)
-    retained = {"continuityProseIn": pd.get("continuityIn", ""),
+    retained = {"shotTransition": {
+                    "type": "scene-start" if not prev else "cut" if opener else "continuation",
+                    "stateSourceShotId": prev,
+                    "reason": sb_shot.get("transitionReason") or "",
+                    "openingImage": sb_shot.get("openingImage") or "",
+                    "camera": camera_instruction,
+                },
+                "continuityProseIn": pd.get("continuityIn", ""),
                 "continuityProseOut": pd.get("continuityOut", ""),
                 "dialogueTimingProse": pd.get("dialogueTiming"),
                 "referenceRolesProse": pd.get("referenceRoles"),
@@ -1401,7 +1421,7 @@ def _scoped_shot(storyboard, shot_id, characters_cfg, prev):
     return shot, retained, card_hash
 
 
-def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dry_run=True, log=print):
+def _promote_to_canonical_unlocked(storyboard_path, scene_num, shot_ids, episode="Ep1", dry_run=True, log=print):
     """THE SOURCE-LEVEL HANDOVER (2026-07-17, Julian's consolidation-checkpoint directive):
     approved Creative Room storyboard -> the ALREADY-EXISTING canonical production package
     format and location cb_render.py consumes (cb_engine.canonical_package_path, which
@@ -1771,7 +1791,6 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     return new_pkg, archived
 
 
-_promote_to_canonical_unlocked = promote_to_canonical
 
 
 def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dry_run=True,

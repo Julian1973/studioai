@@ -162,18 +162,24 @@ def fit_frame_safety(layout: dict[str, Any],
         character = characters.get(name) or {}
         height = float(character.get("heightIn") or 0)
         apparent = float(placement.get("apparentScale", 1.0))
-        fraction = reference_fraction * height / reference_height * apparent
-        target_axis_height = int(round(pixels_per_inch * height * apparent))
         angle = float(placement.get("bodyAngleDegrees", 0.0))
-        transformed = _rendered_character_cutout(
-            character, target_axis_height, angle)
-        horizontal_half = transformed.width / (2 * frame_width)
-        vertical_half = transformed.height / (2 * frame_height)
-        x_lower, x_upper = 0.02 + horizontal_half, 0.98 - horizontal_half
-        y_lower = max(0.02 + fraction / 2, 0.02 + vertical_half)
-        y_upper = min(0.98 - fraction / 2, 0.98 - vertical_half)
-        if x_lower > x_upper or y_lower > y_upper:
+        for _ in range(12):
+            fraction = reference_fraction * height / reference_height * apparent
+            target_axis_height = max(1, int(round(pixels_per_inch * height * apparent)))
+            transformed = _rendered_character_cutout(
+                character, target_axis_height, angle)
+            horizontal_half = transformed.width / (2 * frame_width)
+            vertical_half = transformed.height / (2 * frame_height)
+            x_lower, x_upper = 0.02 + horizontal_half, 0.98 - horizontal_half
+            y_lower = max(0.02 + fraction / 2, 0.02 + vertical_half)
+            y_upper = min(0.98 - fraction / 2, 0.98 - vertical_half)
+            if x_lower <= x_upper and y_lower <= y_upper:
+                break
+            apparent *= 0.9
+        else:
             raise LayoutError(f"{name} cannot fit in frame at the authored apparent scale")
+        if apparent != float(placement.get("apparentScale", 1.0)):
+            placement["apparentScale"] = round(apparent, 4)
         placement["centerX"] = round(
             min(max(float(placement["centerX"]), x_lower), x_upper), 4)
         placement["centerY"] = round(

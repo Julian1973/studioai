@@ -12,6 +12,27 @@ SCRIPT_TWO = "INT. CRYSTAL COVE - DAY 1\n\nKEEN\nHello again.\n"
 CANON_DIGEST = "c" * 64
 
 
+def test_parse_script_stops_dialogue_before_possessive_action_without_blank_line():
+    script = (
+        "EXT. KEEN'S GARDEN - EVENING 8\n\n"
+        "KEEN\n"
+        "(Sneeze)\n"
+        "ACHOO!\n"
+        "His sneeze blows Fuzzby's flower costume off.\n"
+        "58 KEEN\n"
+        "Never, ever - Fuzzby!\n"
+    )
+
+    parsed = cb_intake.parse_script(script, ["Keen", "Fuzzby"], log=lambda *_: None)
+
+    assert [(event["type"], event.get("speaker"), event["text"])
+            for event in parsed["events"]] == [
+        ("dialogue", "Keen", "ACHOO!"),
+        ("action", None, "His sneeze blows Fuzzby's flower costume off."),
+        ("dialogue", "Keen", "Never, ever - Fuzzby!"),
+    ]
+
+
 def _canon_status(episode="Ep1", cast=None, root=None):
     return {
         "current": True, "episodeReady": True,
@@ -166,14 +187,14 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
     )
 
 
-def test_episode_two_production_script_has_eight_scenes_and_59_exact_dialogue_lines():
+def test_episode_two_production_script_has_eight_scenes_and_60_exact_dialogue_lines():
     script_path = cb_intake.ROOT / "cb-studio/data/scripts/Ep2_Bos_Big_Day_V2.txt"
     parsed = cb_intake.parse_script(
         script_path.read_text(encoding="utf-8"), cb_intake._load_roster(),
         log=lambda *_: None)
     dialogue = [event for event in parsed["events"] if event["type"] == "dialogue"]
     assert len(parsed["scenes"]) == 8
-    assert len(dialogue) == 59
+    assert len(dialogue) == 60
     mum_lines = [event for event in dialogue if event["speaker"] == "Bo's Mum"]
     assert [event["text"] for event in mum_lines] == [
         "BO, it’s time for you to go to the Learning Circle? Don’t forget your lunch."
@@ -346,3 +367,50 @@ def test_package_scene_roster_keeps_scenes_without_production_packages():
 def test_legacy_lineage_cannot_manufacture_canon_provenance():
     with pytest.raises(cb_intake.Refused, match="cannot be retroactively signed"):
         cb_intake.migrate_legacy_lineage("Ep1", dry_run=True, log=lambda *_: None)
+
+
+def test_transition_after_dialogue_is_not_spoken_text():
+    script = (
+        "EXT. FOREST PATH - CONTINUOUS 5\n\n"
+        "BO\nEvery single time.\nCUT TO:\n\n"
+        "EXT. LEARNING CIRCLE - DAY 6\n")
+
+    parsed = cb_intake.parse_script(script, roster=["Bo"], log=lambda *_: None)
+
+    dialogue = [event for event in parsed["events"] if event["type"] == "dialogue"]
+    assert dialogue == [{"i": 0, "scene": 5, "type": "dialogue",
+                         "speaker": "Bo", "text": "Every single time."}]
+
+
+def test_group_action_after_dialogue_is_not_swallowed_as_spoken_text():
+    script = (
+        "EXT. LEARNING CIRCLE - DAY 6\n\n"
+        "AIME\n(giggles)\nIt’s so fluffy!\n"
+        "The group giggles together. Bo is happy and confident.\n")
+
+    parsed = cb_intake.parse_script(
+        script, roster=["Amie", "Bo"], log=lambda *_: None)
+
+    assert parsed["events"] == [
+        {"i": 0, "scene": 6, "type": "dialogue", "speaker": "Amie",
+         "text": "It’s so fluffy!"},
+        {"i": 1, "scene": 6, "type": "action", "speaker": None,
+         "text": "The group giggles together. Bo is happy and confident."},
+    ]
+
+
+def test_possessive_character_action_after_dialogue_is_not_spoken_text():
+    script = (
+        "EXT. LEARNING CIRCLE - LATER 7\n\n"
+        "KEEN\nMe too.\n"
+        "Bo’s tail suddenly POOFS twice its size. Bo and Keen giggle.\n")
+
+    parsed = cb_intake.parse_script(
+        script, roster=["Bo", "Keen"], log=lambda *_: None)
+
+    assert parsed["events"] == [
+        {"i": 0, "scene": 7, "type": "dialogue", "speaker": "Keen",
+         "text": "Me too."},
+        {"i": 1, "scene": 7, "type": "action", "speaker": None,
+         "text": "Bo’s tail suddenly POOFS twice its size. Bo and Keen giggle."},
+    ]

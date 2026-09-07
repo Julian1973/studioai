@@ -242,3 +242,21 @@ def test_migration_does_not_mark_unreviewed_voice_take_approved(monkeypatch, tmp
     records = {item["shotId"]: item for item in A._read()["assets"]}
     assert records["S4.SH1"]["status"] == "candidate"
     assert records["S4.SH2"]["status"] == "approved"
+
+
+def test_read_projection_does_not_migrate_or_write_registry(monkeypatch, tmp_path):
+    _tmp_registry(monkeypatch, tmp_path)
+    monkeypatch.setattr(A, 'migrate_existing', lambda *_: pytest.fail('a scene read must not migrate'))
+    result = A.shot_media_from_registry({'shots': [{'shotId': 'S1'}]}, '1', 'EpT', False)
+    assert result['S1']['clip'] is None
+    assert not A.REGISTRY_PATH.exists()
+
+
+def test_identical_registration_does_not_rewrite_registry(monkeypatch, tmp_path):
+    media, _ = _tmp_registry(monkeypatch, tmp_path)
+    plate = media / 'plate.png'
+    plate.write_bytes(b'plate')
+    kwargs = dict(episode='EpT', scene='1', kind='scene_plate', path=plate)
+    before = A.register_asset(**kwargs)
+    monkeypatch.setattr(A, '_write', lambda *_: pytest.fail('identical binding must not rewrite'))
+    assert A.register_asset(**kwargs) == before

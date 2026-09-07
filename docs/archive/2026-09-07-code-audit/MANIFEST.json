@@ -1,0 +1,272 @@
+[
+  {
+    "source": "AFTER_ARCHITECTURE.md",
+    "archive": "docs/archive/2026-09-07-code-audit/AFTER_ARCHITECTURE.md",
+    "sha256": "fafc19eed26637d86518f8e395e7b916bf02994b3936facd627afd123c1d86b6",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "CANONICAL_RELEASE_NOTES.md",
+    "archive": "docs/archive/2026-09-07-code-audit/CANONICAL_RELEASE_NOTES.md",
+    "sha256": "fb17a91c57966a239843c6e304d23573446f438688695a4dbe953be85aba9421",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "EPISODE_2_START_HERE.md",
+    "archive": "docs/archive/2026-09-07-code-audit/EPISODE_2_START_HERE.md",
+    "sha256": "b313d3de180221edf077b208ad15a309bfe25887013efd28d5d2ead0e00dc151",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "FIELD_TO_FRAME_AUDIT.md",
+    "archive": "docs/archive/2026-09-07-code-audit/FIELD_TO_FRAME_AUDIT.md",
+    "sha256": "56b78d2e5121c52ae8363aa75762d06a1c67696ff5e32d45ad2a46edcdfdd4be",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "GATE3_ANIMATION_DOCTRINE.md",
+    "archive": "docs/archive/2026-09-07-code-audit/GATE3_ANIMATION_DOCTRINE.md",
+    "sha256": "a941c7ed4a8e133e1ebcaf1027d07a02e79bedbbe51e16d54bc391280510d0dd",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "JOIN_CONTRACT.md",
+    "archive": "docs/archive/2026-09-07-code-audit/JOIN_CONTRACT.md",
+    "sha256": "f18ff4c45d412dcaba49e0debd9d5af157054060bb89368bfabc35c5bbb2ddfe",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "LAB_BACKLOG.md",
+    "archive": "docs/archive/2026-09-07-code-audit/LAB_BACKLOG.md",
+    "sha256": "e756d44fe6d6a5189aa9c5fe0399bda5608efee335adaa6190e907579d73d8d4",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "LINEAGE_RECONCILIATION.md",
+    "archive": "docs/archive/2026-09-07-code-audit/LINEAGE_RECONCILIATION.md",
+    "sha256": "461a91b04243fa0cb8c50cea002d582858f3938c03ef83892054eb5ca9278efa",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "MAGIC_WITHOUT_MICROMANAGEMENT.md",
+    "archive": "docs/archive/2026-09-07-code-audit/MAGIC_WITHOUT_MICROMANAGEMENT.md",
+    "sha256": "2d1d20b29da4cf0dae2d589337adf23af8176d4f41a6aaee4732c4e231ee0e66",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "MANIFEST.md",
+    "archive": "docs/archive/2026-09-07-code-audit/MANIFEST.md",
+    "sha256": "59f21c7291d8d30f3196ef24fc181fd66c2d94fe45ed2f1cf9c732fa8e61aa14",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "PIPELINE_CUTOVER_LEDGER.md",
+    "archive": "docs/archive/2026-09-07-code-audit/PIPELINE_CUTOVER_LEDGER.md",
+    "sha256": "7dc9c330739c6e2ef3b5f478c7eabf5da9411ab65b2d322e9d1f01250055d2fb",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "PRODUCTION_DOCTRINE.md",
+    "archive": "docs/archive/2026-09-07-code-audit/PRODUCTION_DOCTRINE.md",
+    "sha256": "0c24be3b686d8b559c06c29c3463c5113539bda5bf075a5ab3d6d5d177b51da2",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "RESTRUCTURE_SPEC_T30.md",
+    "archive": "docs/archive/2026-09-07-code-audit/RESTRUCTURE_SPEC_T30.md",
+    "sha256": "af2b794c5cab59b1d4884ed0bdcc7c5f5cac757e35f7dbe5a617a962d7c11d04",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "SEEDANCE_2_5_PRODUCTION_BLUEPRINT.md",
+    "archive": "docs/archive/2026-09-07-code-audit/SEEDANCE_2_5_PRODUCTION_BLUEPRINT.md",
+    "sha256": "a1e2cbeca99a667e6ffcc3a5d3042317eb93f61d1628cfa3157432dcea644602",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "STUDIO_AGENT_ARCHITECTURE.md",
+    "archive": "docs/archive/2026-09-07-code-audit/STUDIO_AGENT_ARCHITECTURE.md",
+    "sha256": "7b8aedc455571ee918ccc36082bffec312ea3de6ff80ff6ec99092d4dbf9d0ef",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "STUDIO_GATE_FLOW_SPEC.md",
+    "archive": "docs/archive/2026-09-07-code-audit/STUDIO_GATE_FLOW_SPEC.md",
+    "sha256": "549098c32f5ce020aa2dea29ac800cbc66b63e60b84763af54d7f924644afbff",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "STUDIO_WRITERS_ROOM_SPEC.md",
+    "archive": "docs/archive/2026-09-07-code-audit/STUDIO_WRITERS_ROOM_SPEC.md",
+    "sha256": "910e7086fbd64134320ce0dffab99d18799a732fed61ca9e24f8ba78cc30dacf",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "TICKET_PACK_001.md",
+    "archive": "docs/archive/2026-09-07-code-audit/TICKET_PACK_001.md",
+    "sha256": "3f450dfdf4954dedfd87c34c3bff19666009f0062a88bb1ad2493ebdb6002bab",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "WORLD_CLASS_ROADMAP.md",
+    "archive": "docs/archive/2026-09-07-code-audit/WORLD_CLASS_ROADMAP.md",
+    "sha256": "a29c0a1dcefdaa1f4c882d92a54336fe22b4c66086ce6f90564ffc8f4e037bcb",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "WORLD_CLASS_STUDIO_BLUEPRINT.md",
+    "archive": "docs/archive/2026-09-07-code-audit/WORLD_CLASS_STUDIO_BLUEPRINT.md",
+    "sha256": "8fca944a7326554f307102cfd5d55bc7e659a3548a65a5685861dffb97fa4e30",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "engine/KEYFRAME_DONE.md",
+    "archive": "docs/archive/2026-09-07-code-audit/engine/KEYFRAME_DONE.md",
+    "sha256": "54e599f6f377c9b5af794c23884b627910828ece0a13cff97fa8c779d975bc27",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "engine/CLIP_DONE.md",
+    "archive": "docs/archive/2026-09-07-code-audit/engine/CLIP_DONE.md",
+    "sha256": "4ea5efa0ebbbaf845aead73ee97233a92bc454bdafe8bbaa9e66e78f951d5d69",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "engine/QA_CALIBRATION_LOG.md",
+    "archive": "docs/archive/2026-09-07-code-audit/engine/QA_CALIBRATION_LOG.md",
+    "sha256": "f05154728e32bb20db16efcaac0e4db0ac77641fb8c4dd1e1ba653b85d4dd7c3",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "tools/sync_scenes.py",
+    "archive": "docs/archive/2026-09-07-code-audit/tools/sync_scenes.py.txt",
+    "sha256": "5c5721c242e095961895ffb826e49eab5a44bcbafa3376243ed5a0e14884b1bd",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "tools/build_episode_post95_master.py",
+    "archive": "docs/archive/2026-09-07-code-audit/tools/build_episode_post95_master.py.txt",
+    "sha256": "58ee3a3ad482183cc2c7cc8d995bb3f70c3241d7d21704dffb60692a1044f7e6",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "CLAUDE.md",
+    "archive": "docs/archive/2026-09-07-code-audit/CLAUDE.md",
+    "sha256": "00238dee3beba48845da9c7cd7b69a9a5596cabf4749af44df282bff9e453e4b",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "cb-studio/room.html",
+    "archive": "docs/archive/2026-09-07-code-audit/cb-studio/room.html.txt",
+    "sha256": "f4f697217528216d36062a447419488c42749ee451430b5d783f34078bb14774",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "cb-studio/board.html",
+    "archive": "docs/archive/2026-09-07-code-audit/cb-studio/board.html.txt",
+    "sha256": "177cf440855c6edce0bb948da421afb4051ab20ec6e21834d78acf635e0e1e8e",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "cb-studio/CODEX_ROOM_INSTRUCTION.md",
+    "archive": "docs/archive/2026-09-07-code-audit/cb-studio/CODEX_ROOM_INSTRUCTION.md",
+    "sha256": "338bcbf1d22bb076641f6c287692cac7ed5608f5735105c03e5d6cb7d06353a4",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "skills/crystal-bears-director/SKILL.md",
+    "archive": "docs/archive/2026-09-07-code-audit/skills/crystal-bears-director/SKILL.md",
+    "sha256": "938b0629f8c1eda37313bab7c8f183829413c5fa6d50941a0e80f53d17f05c93",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "skills/crystal-bears-cinematographer/SKILL.md",
+    "archive": "docs/archive/2026-09-07-code-audit/skills/crystal-bears-cinematographer/SKILL.md",
+    "sha256": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "skills/crystal-bears-voice-director/SKILL.md",
+    "archive": "docs/archive/2026-09-07-code-audit/skills/crystal-bears-voice-director/SKILL.md",
+    "sha256": "370d50358997e3447a48577b44eb48903e2ce5bf6eb3b3f1b2a13d227c8c8587",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "skills/crystal-bears-continuity/SKILL.md",
+    "archive": "docs/archive/2026-09-07-code-audit/skills/crystal-bears-continuity/SKILL.md",
+    "sha256": "8b6d8668632b679538b891dd722171985f51368247d55c8449e1a97786c6d798",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "skills/crystal-bears-post/SKILL.md",
+    "archive": "docs/archive/2026-09-07-code-audit/skills/crystal-bears-post/SKILL.md",
+    "sha256": "c54d22b1cdc3ccc5720b7e821abc5bd5ae0512fecca1022d64e0468541254577",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "engine/FULL_AUDIT_2026-07-11_findings.json",
+    "archive": "docs/archive/2026-09-07-code-audit/engine/FULL_AUDIT_2026-07-11_findings.json",
+    "sha256": "54075876f15a38d1499ba47f763212a91f4582e1e692d86943026ac618806076",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "tools/generate_episode_post95_assets.py",
+    "archive": "docs/archive/2026-09-07-code-audit/tools/generate_episode_post95_assets.py.txt",
+    "sha256": "009399f50b61e309ebeeb0c7e3e8ec43cf43a3bcdf41a286ae6e683241f5b8f2",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "tools/render_ep2_credits_presenter_v2.py",
+    "archive": "docs/archive/2026-09-07-code-audit/tools/render_ep2_credits_presenter_v2.py.txt",
+    "sha256": "6f14eedf5e2f8b23d1ecc8b33163977e307b89952aeea56c655cc601721c3fde",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "tools/compose_ep2_credits_presenter_v2.py",
+    "archive": "docs/archive/2026-09-07-code-audit/tools/compose_ep2_credits_presenter_v2.py.txt",
+    "sha256": "4c2008d9577d790d53dff8c4e337e2215577d0f40de48482cfa0e85b30fa1972",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "studio/standards/SEEDANCE_FIELD_NOTES.md",
+    "archive": "docs/archive/2026-09-07-code-audit/studio/standards/SEEDANCE_FIELD_NOTES.md",
+    "sha256": "d615d9a4b55f5bce1c39f1e2dc418c1b122d7b157b143ca3e6285ce9c40c684a",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "studio/standards/SEEDANCE_25_STANDARD.md",
+    "archive": "docs/archive/2026-09-07-code-audit/studio/standards/SEEDANCE_25_STANDARD.md",
+    "sha256": "20b34ca8b34e5b583c2980b429e3f4283e4242ce1ca8131ff9028531a5f08ec3",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "studio/standards/SEEDANCE_PROMPT_STRUCTURE.md",
+    "archive": "docs/archive/2026-09-07-code-audit/studio/standards/SEEDANCE_PROMPT_STRUCTURE.md",
+    "sha256": "9d71adef866b5f4ae87f4ad06942a4dd558008eb78aba2a06a1601d29f68ac17",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "studio/skills/seedance-shot-extension/SKILL.md",
+    "archive": "docs/archive/2026-09-07-code-audit/studio/skills/seedance-shot-extension/SKILL.md",
+    "sha256": "03252114fbf313f48f79641d4ccdd00c27c1f0643b070fede196924366bd964f",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "studio/skills/seedance-scene-wrapper/SKILL.md",
+    "archive": "docs/archive/2026-09-07-code-audit/studio/skills/seedance-scene-wrapper/SKILL.md",
+    "sha256": "b6cd5a7f892624d0a1638a0af6b215641caa322950d366400415052f43915a71",
+    "removedFromActiveTree": true
+  },
+  {
+    "source": "skills/crystal-bears-writer/SKILL.md",
+    "archive": "docs/archive/2026-09-07-code-audit/skills/crystal-bears-writer/SKILL.md",
+    "sha256": "57a999c5e0e0df3d338e54d6e5e7a37015f2125583cf402983f1c58dfa1bedb6",
+    "removedFromActiveTree": false
+  },
+  {
+    "source": "skills/crystal-bears-composer/SKILL.md",
+    "archive": "docs/archive/2026-09-07-code-audit/skills/crystal-bears-composer/SKILL.md",
+    "sha256": "7b359c3b9e35ef3a11aba7f9a19a93c0b5821c3ea5cbefcc4b45c82941f3cadc",
+    "removedFromActiveTree": false
+  }
+]

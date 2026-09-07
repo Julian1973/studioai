@@ -1,0 +1,56 @@
+{
+  "scope": "Top-level engine, server and maintenance Python; current Markdown and marked runtime skills. Excludes generated state/media, historical archives, locked canon prose, vendored grammar and unrelated imported projects.",
+  "pythonFilesParsed": 158,
+  "documentsChecked": 50,
+  "localImportReferences": 242,
+  "browserRouteCounts": {
+    "app.html": 59,
+    "director.js": 28,
+    "room.html": 0,
+    "board.html": 0
+  },
+  "runtimeSkills": [
+    {
+      "path": "skills/crystal-bears-post/SKILL.md",
+      "runtimeSha256": "511e86a9849fd9a577ab197250b2d4376402dd71978bebc09e18be9a9c96954f",
+      "bytes": 1125
+    },
+    {
+      "path": "skills/crystal-bears-continuity/SKILL.md",
+      "runtimeSha256": "03fa9a4441fbc9ac13e64d4920ac14c4005e1f6a22679c66a7fe338665944749",
+      "bytes": 1058
+    },
+    {
+      "path": "skills/crystal-bears-seedream-keyframes/SKILL.md",
+      "runtimeSha256": "283ff746270fdf681332b5308ac90eff160538c4f784c91e5c980cc025ca55e2",
+      "bytes": 13738
+    },
+    {
+      "path": "skills/crystal-bears-cinematographer/SKILL.md",
+      "runtimeSha256": "9d2488200f7d2ed9847034df9565aeb3e3943f919f79dea80a3905c5ae673cdc",
+      "bytes": 1190
+    },
+    {
+      "path": "skills/seedance-production-director/SKILL.md",
+      "runtimeSha256": "0095635be816754e0083aaed46b8f5f272bf6bad92857faf7cd6c46b14089861",
+      "bytes": 22461
+    },
+    {
+      "path": "skills/crystal-bears-voice-director/SKILL.md",
+      "runtimeSha256": "78e6f74d143d876c39be887db846339a079ef2ce83ac505af4731f3dec63ba98",
+      "bytes": 1640
+    },
+    {
+      "path": "skills/crystal-bears-director/SKILL.md",
+      "runtimeSha256": "fd7ad0d8ca2e9f618eb5a4079b27667edefc185ac7bc0d786e9a15e2354ea68b",
+      "bytes": 1768
+    }
+  ],
+  "issues": [],
+  "ready": true,
+  "retainedCompatibility": [
+    "director.html advanced inspector",
+    "legacy lock metadata readers",
+    "locked Studio Bible provenance; not supplied as workflow instructions"
+  ]
+}

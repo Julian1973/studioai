@@ -3,7 +3,7 @@
 Version 4 adds a signed emotional story-to-screen contract to the forward-only v3 production
 controls. Existing v2 and v3 packages, approvals and runtime skills remain unchanged.
 
-The `emotional-story-to-screen-director-v4` skill runs after immutable script/canon readiness
+The current Director runtime contract in `skills/crystal-bears-director/SKILL.md` runs after immutable script/canon readiness
 and before competing treatments. It is part of the existing Creative Room, not a parallel
 storyboard or generation path.
 
@@ -16,13 +16,13 @@ storyboard or generation path.
 3. Gates 1-6 author treatments, beats and shot cards from that contract. Every shot states its
    narrative function, outer and inner action, audience feeling, muted read, environment
    pressure, sound story, motif use and thought-motivated cut or hold.
-4. Julian reviews and approves the visible contract with the storyboard. Handover hash-binds
-   the approved heart contract and shot cards into production.
-5. SEE, HEAR, voice-timed slate, WATCH preflight and returned-media dailies retain the v3
-   capacity, approval and intended-versus-observed controls.
+4. Studio Director prepares and validates the contract internally. Handover hash-binds
+   the heart contract and shot cards into production; Julian reviews the resulting media.
+5. SEE, HEAR, WATCH request and returned media retain the human decisions. A timing slate
+   is supporting evidence, not an additional mandatory approval.
 
 ## Walk-Forward Rule
 
 Only newly authored v4 storyboards require these fields. Nothing rewrites an existing package,
-approval or media asset. Migrating a scene requires a fresh Creative Room run, human storyboard
-approval and explicit promotion through the existing lineage mechanism.
+approval or media asset. Migrating a scene requires a fresh Creative Room run, scoped revision preparation
+and explicit promotion through the existing lineage mechanism.

@@ -19,7 +19,7 @@ import time
 import uuid
 
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 DEFAULT_LEASE_SECONDS = 90.0
 DEFAULT_HEARTBEAT_SECONDS = 15.0
 
@@ -203,6 +203,8 @@ def _connect(root):
         conn.execute(
             "ALTER TABLE studio_jobs ADD COLUMN server_key TEXT NOT NULL DEFAULT 'legacy'"
         )
+    if "outcome" not in studio_job_columns:
+        conn.execute("ALTER TABLE studio_jobs ADD COLUMN outcome TEXT")
     rating_columns = {
         row["name"] for row in conn.execute("PRAGMA table_info(render_ratings)").fetchall()
     }
@@ -386,8 +388,8 @@ def persist_job(root, job):
             """
             INSERT INTO studio_jobs(
                 job_id, server_key, operation_key, gate, scene, args_json, status, step, log,
-                started, ended, pid, stopped, updated_at
-            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                started, ended, pid, stopped, updated_at, outcome
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(job_id) DO UPDATE SET
                 server_key=excluded.server_key,
                 operation_key=excluded.operation_key,
@@ -401,7 +403,8 @@ def persist_job(root, job):
                 ended=excluded.ended,
                 pid=excluded.pid,
                 stopped=excluded.stopped,
-                updated_at=excluded.updated_at
+                updated_at=excluded.updated_at,
+                outcome=excluded.outcome
             """,
             (
                 job_id, str(job.get("serverKey") or "legacy"), operation_key,
@@ -411,7 +414,7 @@ def persist_job(root, job):
                 float(job.get("started") or time.time()),
                 float(job["ended"]) if job.get("ended") is not None else None,
                 int(job["pid"]) if job.get("pid") is not None else None,
-                1 if job.get("stopped") else 0, utc_now(),
+                1 if job.get("stopped") else 0, utc_now(), job.get("outcome"),
             ),
         )
     return job_id
@@ -453,6 +456,7 @@ def load_jobs(root, limit=500, server_key=None):
             "ended": row["ended"],
             "pid": row["pid"],
             "stopped": bool(row["stopped"]),
+            "outcome": row["outcome"],
         }
     return jobs
 
@@ -647,7 +651,7 @@ def claim_spend_authorization(root, token, episode, scene, shot_id, binding_hash
     return str(batch_id)
 
 
-def claim_candidate(root, token, candidate_index, owner):
+def claim_candidate(root, token, candidate_index, owner, *, resume_existing=False):
     candidate_index = int(candidate_index)
     with transaction(root) as conn:
         auth = conn.execute(
@@ -667,6 +671,8 @@ def claim_candidate(root, token, candidate_index, owner):
         ).fetchone()
         if row and row["status"] == "completed":
             return {"action": "completed", **dict(row)}
+        if row and row["status"] == "started" and resume_existing:
+            return {"action": "resume", **dict(row)}
         if row and row["status"] == "started":
             raise SpendConflict(
                 f"candidate {candidate_index} has an unresolved provider attempt; "
@@ -710,7 +716,7 @@ def fail_candidate(root, token, candidate_index, error):
 
 
 def claim_candidate_segment(root, token, candidate_index, segment_index,
-                            segment_count, owner):
+                            segment_count, owner, *, resume_existing=False):
     """Claim one paid internal call belonging to one Studio review candidate."""
     candidate_index = int(candidate_index)
     segment_index = int(segment_index)
@@ -741,6 +747,8 @@ def claim_candidate_segment(root, token, candidate_index, segment_index,
             raise SpendConflict("provider segment count changed after authorization")
         if row and row["status"] == "completed":
             return {"action": "completed", **dict(row)}
+        if row and row["status"] == "started" and resume_existing:
+            return {"action": "resume", **dict(row)}
         if row and row["status"] == "started":
             raise SpendConflict(
                 f"candidate {candidate_index} segment {segment_index} has an unresolved "

@@ -1,3 +1,7 @@
+> Capability claims below were supplied with the skill and are research context, not a
+> qualification of the current account or API route. The Studio capability record and
+> endpoint-specific evidence take precedence. Do not promote these limits automatically.
+
 # Seedance 2.5 official capability boundary
 
 Use this reference to distinguish verified model capabilities from studio practice and provider-specific controls.
@@ -45,9 +49,11 @@ The following are disciplined production practices rather than official Seedance
 - 6–15 seconds as a conservative recurring-animation working range;
 - using the extracted final frame primarily for QA;
 - two or three identity anchors at a risk point;
-- a 17/20 internal quality threshold;
+- advisory craft review without an aggregate pass threshold;
 - refusal to extend an unapproved master;
 - one grading pass across a chained sequence.
+
+The supplied BytePlus Seedance 2.0 prompt material usefully reinforces numbered shots, time-sequential action, stable entity names, single-purpose asset references and shot-specific sound. Do not inherit its contradictory or provider-specific material as Seedance 2.5 fact: prompt text does not create 4K/60fps/HDR output settings; translated brace weights, reference-strength values, consistency sliders and named rendering modes require verification in the live provider; universal freeze frames and long negative-prompt walls are not production requirements.
 
 Present them as recommendations, never official limits.
 

@@ -137,6 +137,6 @@ def test_openai_request_uses_low_reasoning_output_cap_and_prompt_cache(monkeypat
     assert obj.answer == "ready"
     assert captured["max_output_tokens"] == 3210
     assert captured["reasoning"] == {"effort": "low"}
-    assert captured["verbosity"] == "low"
+    assert captured["text"] == {"verbosity": "low"}
     assert captured["prompt_cache_retention"] == "24h"
     assert captured["prompt_cache_key"].startswith("crystal-bears-")

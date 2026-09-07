@@ -206,6 +206,8 @@ def register_asset(*, episode: str, scene: str | int, kind: str, path: str | pat
         "metadata": metadata or {},
         "registeredAt": registered_at,
     }
+    if len(existing) == 1 and existing[0] == rec:
+        return rec
     if existing:
         index = next(i for i, item in enumerate(data["assets"])
                      if item.get("bindingKey") == key)
@@ -482,8 +484,10 @@ def library_for_scene(episode: str, scene: str | int, shot_id: str | None = None
     return deduped
 
 
-def shot_media_from_registry(pkg: dict[str, Any], scene: str | int, episode: str = "Ep1") -> dict[str, Any]:
-    migrate_existing(episode)
+def shot_media_from_registry(pkg: dict[str, Any], scene: str | int, episode: str = "Ep1",
+                             migrate: bool = True) -> dict[str, Any]:
+    if migrate:
+        migrate_existing(episode)
     assets = resolve_assets(episode, scene, include_global=False)
     by_shot: dict[str, list[dict[str, Any]]] = {}
     for asset in assets:

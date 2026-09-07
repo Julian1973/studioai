@@ -1103,7 +1103,6 @@ UNIVERSAL_CONSTRAINTS = [                                        # the lean five
     ("no_extra_characters", "no extra characters"),
     ("no_onscreen_text", "no on-screen text"),
     ("no_invented_voices", "no invented voices"),
-    ("no_camera_cut", "no camera cut"),
 ]
 SUBSUMES = {  # subsuming ID -> IDs it makes redundant ("no invented voices" covers background too)
     "no_invented_voices": {"no_invented_background_voices"},
@@ -1235,12 +1234,20 @@ def _render_critical(shot):
             out.append(sv + ".")
         else:
             out.append("Keep " + sv + ".")
-    marks = list(dict.fromkeys(
-        [m for cs in (shot.continuityIn.characters if shot.continuityIn else [])
-         for m in cs.visibleMarks]
-        + [m for cs in shot.continuityOut.characters for m in cs.visibleMarks]))
-    if marks:
-        out.append("Keep " + ", ".join(marks) + " visible.")
+    incoming_marks = list(dict.fromkeys(
+        m for cs in (shot.continuityIn.characters if shot.continuityIn else [])
+        for m in cs.visibleMarks))
+    outgoing_marks = list(dict.fromkeys(
+        m for cs in shot.continuityOut.characters for m in cs.visibleMarks))
+    if incoming_marks == outgoing_marks and incoming_marks:
+        out.append("Keep " + ", ".join(incoming_marks) + " visible.")
+    elif incoming_marks or outgoing_marks:
+        transition = []
+        if incoming_marks:
+            transition.append("Begin with " + ", ".join(incoming_marks) + " visible.")
+        if outgoing_marks:
+            transition.append("End with " + ", ".join(outgoing_marks) + " visible.")
+        out.append(" ".join(transition))
     return out[:2]   # + the standing identity/scale/sides line = never more than three
 
 

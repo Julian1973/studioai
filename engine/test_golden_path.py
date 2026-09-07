@@ -330,6 +330,8 @@ def _build_package(tmp, valid=True):
             kf, kwc, kslots = E.compile_keyframe_prompt(sh, {}, CFG)
             rec.update(keyframePrompt=kf, keyframePromptWords=kwc,
                        keyframeReferenceSlots=kslots)
+        if sh.sourceType != "opener":
+            rec["keyframeReferenceSlots"] = {"@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"}
         shots_out.append(rec)
     revision = 1
     pkg = {"episode": "EpT", "sceneNumber": "9", "revision": revision, "shots": shots_out,
@@ -949,7 +951,8 @@ def test_golden_path_package_to_approved_scene_master(world):
            ["Zenny_provider_front.png", "Fuzzby_provider_front.png",
             "EpT_S9_scenelook.png"]
     assert all("posed_integration" not in os.path.basename(r) for r in kf_call["refs"])
-    assert "[Performance Freedom]" in kf_call["prompt"]
+    assert "[MOTION READINESS]" in kf_call["prompt"]
+    assert "[ACCEPTANCE TEST]" in kf_call["prompt"]
     assert "nailed it" not in kf_call["prompt"].lower()          # Law 6
     assert (_led()["1.B1.S1"]["keyframeCandidate"]["conformanceScreening"]
             ["status"] == "pass")
@@ -963,7 +966,7 @@ def test_golden_path_package_to_approved_scene_master(world):
     # Gate 7 — SPEND CONTROL: no batch without a server-issued single-use token; the
     # disclosure is real, stored server-side, and bound to the exact package
     with pytest.raises(R.Refused, match="SPEND NOT APPROVED"):
-        R.next_shot("9", "EpT", log=lambda *a, **k: None)
+        R.next_shot("9", "EpT", candidates=3, log=lambda *a, **k: None)
     assert len(prov.fire_calls) == 0                              # refusal spent NOTHING
     auth = _led()["1.B1.S1"]["pendingSpendAuth"]
     disc = auth["disclosure"]
@@ -979,7 +982,7 @@ def test_golden_path_package_to_approved_scene_master(world):
                      log=lambda *a, **k: None)
 
     # approved batch: 3 candidates, IDENTICAL prompt/refs/audio, anchor first, slot order
-    R.next_shot("9", "EpT", spend_token=auth["token"], log=lambda *a, **k: None)  # 1.B1.S1
+    R.next_shot("9", "EpT", candidates=3, spend_token=auth["token"], log=lambda *a, **k: None)  # 1.B1.S1
     batch1 = prov.fire_calls[-3:]
     assert len(batch1) == 3
     assert len({c["prompt"] for c in batch1}) == 1                # identical prompt
@@ -1010,7 +1013,7 @@ def test_golden_path_package_to_approved_scene_master(world):
     # the token is SINGLE-USE (consumed) and nothing advances past a pending batch
     assert _led()["1.B1.S1"]["pendingSpendAuth"] is None
     with pytest.raises(R.Refused, match="pending"):
-        R.next_shot("9", "EpT", log=lambda *a, **k: None)
+        R.next_shot("9", "EpT", candidates=3, log=lambda *a, **k: None)
     with pytest.raises(R.Refused, match="pending"):
         R.fire_shot("9", "1.B1.S1", "EpT", spend_token=auth["token"],
                      log=lambda *a, **k: None)
@@ -1030,13 +1033,13 @@ def test_golden_path_package_to_approved_scene_master(world):
 
     # relay batch fires from the SELECTED candidate's harvested final frame
     t2 = _token("1.B1.S2")
-    R.next_shot("9", "EpT", spend_token=t2, log=lambda *a, **k: None)   # 1.B1.S2 batch
+    R.next_shot("9", "EpT", candidates=3, spend_token=t2, log=lambda *a, **k: None)   # 1.B1.S2 batch
     f2 = prov.fire_calls[-1]
     assert f2["image_urls"][0].endswith("EpT_1.B1.S1_final_frame.png")   # THE relay contract
     R.approve_shot("9", "1.B1.S2", 1, "EpT", log=lambda *a, **k: None)
 
     t3 = _token("1.B1.S3")
-    R.next_shot("9", "EpT", spend_token=t3, log=lambda *a, **k: None)   # silent 1.B1.S3
+    R.next_shot("9", "EpT", candidates=3, spend_token=t3, log=lambda *a, **k: None)   # silent 1.B1.S3
     f3 = prov.fire_calls[-1]
     assert f3["audio_urls"] is None                               # silent shot: no @Audio1
     assert f3["image_urls"][0].endswith("EpT_1.B1.S2_final_frame.png")
@@ -1331,6 +1334,32 @@ def test_human_uploaded_keyframe_accepts_when_automated_advice_is_unavailable(
         R.load_pkg("9", "EpT")[0],
         R._shot(R.load_pkg("9", "EpT")[0], "1.B1.S1"),
         approval, "9", "EpT")["current"] is True
+
+
+def test_human_selected_keyframe_is_not_blocked_by_missing_cinematography(
+        world, monkeypatch, tmp_path):
+    pkg, path = R.load_pkg("9", "EpT")
+    ledger = R._ledger(pkg, "1.B1.S1")
+    ledger["departmentWork"]["cinematography"] = {}
+    R._save(pkg, path)
+    monkeypatch.setattr(
+        R.cb_departments, "review_keyframe_conformance",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("an imported image must not trigger an LLM screen without direction")))
+    upload = tmp_path / "director-selected-keyframe.png"
+    upload.write_bytes(b"DIRECTOR_SELECTED_STAGE")
+
+    R.select_keyframe_source(
+        "9", "1.B1.S1", "upload", "EpT", upload_path=str(upload),
+        reviewed_by="TestReviewer", log=lambda *args, **kwargs: None)
+
+    candidate = R._ledger(
+        R.load_pkg("9", "EpT")[0], "1.B1.S1")["keyframeCandidate"]
+    assert candidate["source"] == "uploaded"
+    assert candidate["conformanceScreening"]["status"] == "unavailable"
+    assert candidate["conformanceScreening"]["mediaProviderCalled"] is False
+    assert "downstream direction will be rebuilt" in (
+        candidate["conformanceScreening"]["reason"])
 
 
 def test_same_process_comparison_returns_one_candidate_from_approved_stage_relay(
@@ -1879,7 +1908,7 @@ def test_batch_resume_is_idempotent_never_repays(world):
     R.cb_gen.generate_video_seedance_ref = flaky
     try:
         with _pt.raises(R.Refused, match="resumable"):
-            R.fire_shot("9", "1.B1.S1", "EpT", spend_token=tok, log=lambda *a, **k: None)
+            R.fire_shot("9", "1.B1.S1", "EpT", candidates=3, spend_token=tok, log=lambda *a, **k: None)
         led = _led()["1.B1.S1"]
         assert led["batch"]["status"] == "generating"
         assert led["batch"]["done"] == [1, 2]
@@ -1889,11 +1918,11 @@ def test_batch_resume_is_idempotent_never_repays(world):
         led["candidatesGenerated"] = None
         # a resume WITHOUT the original token is refused
         with _pt.raises(R.Refused, match="original spend token"):
-            R.fire_shot("9", "1.B1.S1", "EpT", spend_token="deadbeef" * 4,
+            R.fire_shot("9", "1.B1.S1", "EpT", candidates=3, spend_token="deadbeef" * 4,
                          log=lambda *a, **k: None)
         # resume with the original token: ONLY candidate 3 generates
         before = calls["n"]
-        R.fire_shot("9", "1.B1.S1", "EpT", spend_token=tok, log=lambda *a, **k: None)
+        R.fire_shot("9", "1.B1.S1", "EpT", candidates=3, spend_token=tok, log=lambda *a, **k: None)
         assert calls["n"] == before + 1                             # one call, no repays
         assert _led()["1.B1.S1"]["status"] == "candidates-pending"
         assert len(_led()["1.B1.S1"]["candidatePaths"]) == 3

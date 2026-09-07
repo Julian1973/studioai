@@ -268,3 +268,21 @@ def test_repository_ep1_human_canon_decisions_are_locked():
     assert "With open heart and love so bright" not in script
     assert "Zenny’s." not in script
     assert "Zenny's crystal" not in script
+
+
+def test_story_context_excludes_retired_workflow_without_rewriting_canon(tmp_path, monkeypatch):
+    historical = tmp_path / 'historical.md'
+    historical.write_text('RETIRED WORKFLOW: approve every planning gate before SEE.')
+    show = tmp_path / 'show.md'
+    show.write_text('Keen acts with careful courage.')
+    policy = {'sources': {name: str(show) for name in ('showBible','showrunnerTaste','directorTaste')}}
+    policy['sources']['studioBible'] = str(historical)
+    monkeypatch.setattr(cb_canon, 'load_policy', lambda *a: policy)
+    monkeypatch.setattr(cb_canon, 'require_locked', lambda *a: {'profileDigests': {'story': 'fixture'}})
+    monkeypatch.setattr(cb_canon, 'source_hashes', lambda *a: {'studioBible': 'preserved'})
+    monkeypatch.setattr(cb_canon, '_read_json_source', lambda *a: {})
+    context = cb_canon.story_context([], 'Ep3', root=tmp_path)
+    assert context['showBible'] == show.read_text()
+    assert 'RETIRED WORKFLOW' not in context['studioBible']
+    assert context['studioBible'] == (ROOT/'skills/production-standard.md').read_text()
+    assert historical.read_text() == 'RETIRED WORKFLOW: approve every planning gate before SEE.'

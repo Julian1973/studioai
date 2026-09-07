@@ -41,10 +41,15 @@ def test_recover_approved_shot_requires_matching_registry_review_and_prompt_bank
     }
     pathlib.Path(str(take) + ".review.json").write_text(json.dumps(review))
     package = {
+        "revision": 7,
         "shots": [{"shotId": "S2.SH1"}],
         "continuityLedger": [{
             "shotId": "S2.SH1", "status": "designed",
             "approvedTake": None, "harvestFrame": None,
+            "batch": {
+                "batchId": "S2.SH1-b1-proof",
+                "inputSignature": {"signed": "provider-inputs"},
+            },
         }],
     }
     assets = [
@@ -80,8 +85,112 @@ def test_recover_approved_shot_requires_matching_registry_review_and_prompt_bank
     assert ledger["harvestFrame"] == str(harvest.resolve())
     assert ledger["approval"]["source"] == "recovered-audited-provider-approval"
     assert ledger["approval"]["promptRecordId"] == "prompt-id"
+    assert ledger["approval"]["packageRevision"] == 7
+    assert ledger["approval"]["inputSignature"] == {"signed": "provider-inputs"}
     assert ledger["approvalRecoveryHistory"][-1]["batchId"] == "S2.SH1-b1-proof"
     assert saved
+
+
+def test_reject_comparison_reseals_protected_source_approval(tmp_path, monkeypatch):
+    take = tmp_path / "approved.mp4"
+    take.write_bytes(b"approved")
+    harvest = tmp_path / "final.png"
+    harvest.write_bytes(b"final")
+    candidate = tmp_path / "comparison.mp4"
+    candidate.write_bytes(b"comparison")
+    package = {
+        "revision": 12,
+        "continuityLedger": [{
+            "shotId": SHOT_ID,
+            "status": "approved",
+            "approvedTake": str(take),
+            "harvestFrame": str(harvest),
+            "batchId": "source-batch",
+            "batch": {
+                "batchId": "source-batch",
+                "inputSignature": {"signed": "source-inputs"},
+            },
+            "approval": {"approved": True, "batchId": "source-batch"},
+            "comparisonWork": {
+                "status": "candidate-pending",
+                "candidatePath": str(candidate),
+                "sourcePath": str(take),
+                "sourceSha256": cb_render._sha256_file(take),
+                "batchId": "comparison-batch",
+            },
+        }],
+    }
+    monkeypatch.setattr(cb_render, "MEDIA", tmp_path / "media")
+    monkeypatch.setattr(cb_render, "load_pkg",
+                        lambda scene, episode: (package, tmp_path / "pkg.json"))
+    monkeypatch.setattr(cb_render, "_save", lambda pkg, path: None)
+
+    archived = cb_render.reject_shot_comparison("1", SHOT_ID, episode="Ep1")
+
+    ledger = package["continuityLedger"][0]
+    assert pathlib.Path(archived).read_bytes() == b"comparison"
+    assert ledger["approvedTake"] == str(take)
+    assert ledger["comparisonWork"] is None
+    assert ledger["approval"]["packageRevision"] == 12
+    assert ledger["approval"]["inputSignature"] == {"signed": "source-inputs"}
+    assert ledger["approval"]["contentHash"] == cb_render._sha256_file(take)
+    assert ledger["approval"]["harvestHash"] == cb_render._sha256_file(harvest)
+
+
+def test_approve_comparison_records_signed_generation_and_media_hashes(
+        tmp_path, monkeypatch):
+    take = tmp_path / "approved.mp4"
+    take.write_bytes(b"approved")
+    old_harvest = tmp_path / "old-final.png"
+    old_harvest.write_bytes(b"old-final")
+    candidate = tmp_path / "comparison.mp4"
+    candidate.write_bytes(b"comparison")
+    package = {
+        "revision": 13,
+        "shots": [{"shotId": SHOT_ID}],
+        "continuityLedger": [{
+            "shotId": SHOT_ID,
+            "status": "approved",
+            "approvedTake": str(take),
+            "harvestFrame": str(old_harvest),
+            "approval": {"approved": True},
+            "comparisonBatch": {
+                "batchId": "comparison-batch",
+                "promptHash": "enhanced-prompt-hash",
+                "inputSignature": {"signed": "comparison-inputs"},
+            },
+            "comparisonWork": {
+                "status": "candidate-pending",
+                "candidatePath": str(candidate),
+                "candidateSha256": cb_render._sha256_file(candidate),
+                "sourcePath": str(take),
+                "sourceSha256": cb_render._sha256_file(take),
+                "batchId": "comparison-batch",
+            },
+        }],
+    }
+    monkeypatch.setattr(cb_render, "MEDIA", tmp_path / "media")
+    monkeypatch.setattr(cb_render, "load_pkg",
+                        lambda scene, episode: (package, tmp_path / "pkg.json"))
+    monkeypatch.setattr(cb_render, "_save", lambda pkg, path: None)
+    monkeypatch.setattr(
+        cb_render.cb_gen, "last_frame",
+        lambda selected, out: pathlib.Path(out).parent.mkdir(parents=True, exist_ok=True)
+        or pathlib.Path(out).write_bytes(b"new-final"))
+    monkeypatch.setattr(cb_render, "_candidate_review", lambda *args, **kwargs: None)
+
+    selected = cb_render.approve_shot_comparison("1", SHOT_ID, episode="Ep1")
+
+    ledger = package["continuityLedger"][0]
+    approval = ledger["approval"]
+    assert selected == str(candidate)
+    assert ledger["approvedTake"] == str(candidate)
+    assert ledger["comparisonWork"] is None
+    assert approval["packageRevision"] == 13
+    assert approval["inputSignature"] == {"signed": "comparison-inputs"}
+    assert approval["contentHash"] == cb_render._sha256_file(candidate)
+    assert approval["harvestHash"] == cb_render._sha256_file(ledger["harvestFrame"])
+    assert approval["promptHash"] == "enhanced-prompt-hash"
 
 
 def test_prepare_render_refreshes_stale_cinematography_before_sealing(monkeypatch):
@@ -1137,6 +1246,16 @@ def test_build_keyframe_refreshes_legacy_direction_before_provider_call(monkeypa
         work["candidate"] = {"output": {"complete": True}}
 
     monkeypatch.setattr(cb_render, "_keyframe_direction_contract", check_contract)
+    monkeypatch.setattr(
+        cb_render, "_department_record_status",
+        lambda *_args, **_kwargs: {
+            "current": bool(work.get("candidate", {}).get("output", {}).get("complete")),
+            "source": "prepared",
+            "record": work.get("candidate"),
+        })
+    monkeypatch.setattr(
+        cb_studio_director, "_direction_current",
+        lambda *_args, **_kwargs: bool(work.get("approved", {}).get("output", {}).get("complete")))
     monkeypatch.setattr(cb_render, "decide_department", decide)
     monkeypatch.setattr(cb_render, "prepare_department", prepare)
     monkeypatch.setattr(
@@ -1145,6 +1264,104 @@ def test_build_keyframe_refreshes_legacy_direction_before_provider_call(monkeypa
     cb_studio_director.build_keyframe("1", SHOT_ID, "Ep1", log=lambda *_: None)
 
     assert calls == ["rejected", "prepare", "approved", "keyframe"]
+
+
+def test_build_keyframe_reloads_after_promoting_complete_candidate(monkeypatch):
+    initial_work = {
+        "approved": None,
+        "candidate": {"output": {"complete": True}},
+        "history": [],
+    }
+    current_work = {
+        "approved": {"output": {"complete": True}},
+        "candidate": None,
+        "history": [],
+    }
+    initial = {
+        "shots": [{"shotId": SHOT_ID}],
+        "continuityLedger": [{"departmentWork": {"cinematography": initial_work}}],
+    }
+    current = {
+        "shots": [{"shotId": SHOT_ID}],
+        "continuityLedger": [{"departmentWork": {"cinematography": current_work}}],
+    }
+    calls = []
+    loads = iter([(initial, None), (current, None)])
+
+    monkeypatch.setattr(cb_render, "load_pkg", lambda *_: next(loads))
+    monkeypatch.setattr(cb_render, "_shot", lambda package, _shot_id: package["shots"][0])
+    monkeypatch.setattr(
+        cb_render, "_ledger", lambda package, _shot_id: package["continuityLedger"][0])
+    monkeypatch.setattr(
+        cb_render, "_keyframe_direction_contract",
+        lambda direction, _shot: direction["complete"])
+    monkeypatch.setattr(
+        cb_render, "_department_record_status",
+        lambda package, *_args, **_kwargs: {
+            "current": True,
+            "source": "prepared" if package is initial else "approved-legacy",
+            "record": (initial_work["candidate"] if package is initial
+                       else current_work["approved"]),
+        })
+    monkeypatch.setattr(
+        cb_studio_director, "_direction_current",
+        lambda *_args, **_kwargs: True)
+    monkeypatch.setattr(
+        cb_render, "decide_department",
+        lambda *_args, **_kwargs: calls.append("approved"))
+    monkeypatch.setattr(
+        cb_render, "prepare_department",
+        lambda *_args, **_kwargs: calls.append("prepare"))
+    monkeypatch.setattr(
+        cb_render, "keyframe_shot", lambda *_args, **_kwargs: calls.append("keyframe"))
+
+    cb_studio_director.build_keyframe("1", SHOT_ID, "Ep1", log=lambda *_: None)
+
+    assert calls == ["approved", "keyframe"]
+
+
+def test_build_keyframe_refreshes_complete_direction_after_scene_plate_change(monkeypatch):
+    stale = {"output": {"complete": True}}
+    fresh = {"output": {"complete": True}}
+    work = {"approved": stale, "candidate": None, "history": []}
+    ledger = {"departmentWork": {"cinematography": work}}
+    package = {"shots": [{"shotId": SHOT_ID}], "continuityLedger": [ledger]}
+    calls = []
+
+    monkeypatch.setattr(cb_render, "load_pkg", lambda *_: (package, None))
+    monkeypatch.setattr(cb_render, "_shot", lambda *_: package["shots"][0])
+    monkeypatch.setattr(cb_render, "_ledger", lambda *_: ledger)
+    monkeypatch.setattr(
+        cb_render, "_keyframe_direction_contract",
+        lambda direction, _shot: direction["complete"])
+    monkeypatch.setattr(
+        cb_studio_director, "_direction_current",
+        lambda *_args, **_kwargs: work["approved"] is fresh)
+    monkeypatch.setattr(
+        cb_render, "_department_record_status",
+        lambda *_args, **_kwargs: {
+            "current": work["approved"] is fresh,
+            "source": "approved-legacy",
+            "record": work["approved"],
+        })
+
+    def prepare(*_args, **_kwargs):
+        calls.append("prepare")
+        work["candidate"] = fresh
+
+    def decide(*_args, **_kwargs):
+        calls.append("approved")
+        work["approved"] = work["candidate"]
+        work["candidate"] = None
+
+    monkeypatch.setattr(cb_render, "prepare_department", prepare)
+    monkeypatch.setattr(cb_render, "decide_department", decide)
+    monkeypatch.setattr(
+        cb_render, "keyframe_shot", lambda *_args, **_kwargs: calls.append("keyframe"))
+
+    cb_studio_director.build_keyframe("1", SHOT_ID, "Ep1", log=lambda *_: None)
+
+    assert calls == ["prepare", "approved", "keyframe"]
 
 
 def test_older_failure_is_hidden_after_newer_completed_action():

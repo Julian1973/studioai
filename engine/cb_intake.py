@@ -353,7 +353,8 @@ def parse_script(text, roster=None, log=print):
     # semantic judgment; the heuristic name-checks the ROSTER, not any specific sentence, so
     # it generalizes to any script. Every firing is logged, never silent.
     action_bleed_re = re.compile(
-        r"^(" + "|".join(re.escape(_norm_apos(n)) for n in roster) + r")\s+[a-z]")
+        r"^(" + "|".join(re.escape(_norm_apos(n)) for n in roster) +
+        r")(?:'s)?\s+[a-z]")
 
     lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
     scenes, events, front_matter = [], [], []
@@ -407,6 +408,7 @@ def parse_script(text, roster=None, log=print):
             text_lines = []
             while (li < n and lines[li].strip()
                    and not _SCENE_RE.match(lines[li].rstrip())
+                   and not _TRANSITION_RE.match(lines[li].strip())
                    and not cue_record(lines[li])):
                 if _PAREN_ONLY_RE.match(lines[li].strip()):
                     li += 1
@@ -422,7 +424,16 @@ def parse_script(text, roster=None, log=print):
                     r"stares?|freezes?|softens?|nods?|shrugs?|reaches?|leans?|steps?|"
                     r"continues?|holds?|grips?)\b", cand, re.IGNORECASE)
                     if text_lines else None)
-                if bleed or stage_bleed or third_person_action_bleed:
+                possessive_action_bleed = (re.match(
+                    r"^(?:His|Her|Their)\s+(?:sneeze|tail|nose|ears?|eyes?|head|"
+                    r"face|smile|hands?|arms?|feet|wings?|body|voice|pendant)\b",
+                    cand, re.IGNORECASE) if text_lines else None)
+                group_action_bleed = (re.match(
+                    r"^The\s+groups?\s+(?:giggles?|laughs?|smiles?|cheers?|gasps?|"
+                    r"reacts?|settles?|gathers?|watches?|looks?|turns?|moves?)\b",
+                    cand, re.IGNORECASE) if text_lines else None)
+                if (bleed or stage_bleed or third_person_action_bleed or
+                        possessive_action_bleed or group_action_bleed):
                     log(f"ACTION-BLEED GUARD fired — stopped {speaker}'s dialogue before "
                         f"a directly-following, no-blank-line action sentence: {cand!r}")
                     break

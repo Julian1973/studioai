@@ -25,7 +25,7 @@ def test_uploaded_watch_render_becomes_zero_spend_pending_candidate(tmp_path, mo
     monkeypatch.setattr(cb_render, "load_pkg", lambda scene, episode: (package, tmp_path / "package.json"))
     monkeypatch.setattr(cb_render, "_require_valid", lambda pkg: None)
     monkeypatch.setattr(cb_render, "_require_current_lineage", lambda pkg, scene, episode: None)
-    monkeypatch.setattr(cb_render, "_require_stage_contract_keyframe", lambda current_shot, current_ledger: None)
+    monkeypatch.setattr(cb_render, "_require_stage_contract_keyframe", lambda current_shot, current_ledger, current_pkg=None: None)
     monkeypatch.setattr(cb_render.cb_post, "_dur", lambda path: 8.0)
     monkeypatch.setattr(cb_render, "_candidate_review", lambda *args, **kwargs: None)
     monkeypatch.setattr(cb_render, "_save", lambda pkg, path: saved.append((pkg, path)))

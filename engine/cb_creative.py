@@ -355,8 +355,9 @@ class ShotPerformanceContract(BaseModel):
     def phases_are_unique_and_ordered(self):
         order = {"anticipation": 0, "action": 1, "reaction": 2, "settle": 3}
         names = [phase.phase for phase in self.phases]
-        if len(names) != len(set(names)):
-            raise ValueError("performance phases must be unique")
+        identities = [(phase.phase, phase.performer.casefold()) for phase in self.phases]
+        if len(identities) != len(set(identities)):
+            raise ValueError("performance phase and performer pairs must be unique")
         if names != sorted(names, key=order.__getitem__):
             raise ValueError("performance phases must follow anticipation/action/reaction/settle order")
         return self
@@ -907,11 +908,12 @@ def _canon_text(key, limit=9000):
 
 
 def _canonical_exemplars(limit=6):
-    """THE SIMPLIFICATION CHECKPOINT (2026-07-17): role prompts receive ONLY the concise
-    approved canonical exemplar PRINCIPLES (EXEMPLAR_LIBRARY, reusable entries) — never
-    the raw exemplar dump (attempted/userWords prose), and never Evidence Library, Pattern
-    Library or Active Creative Memory content. Active Memory is an audit registry pointing
-    at approved source changes; its prose is never injected into a creative role."""
+    """Return approved canonical principles without the raw exemplar dump.
+
+    The separate, scoped learning context supplies relevant human observations as advisory
+    evidence. Pattern Library and Active Creative Memory remain audit/proposal stores;
+    neither is silently promoted to canon by this reader.
+    """
     p = _CANON_SOURCES["exemplars"]
     if not p.exists():
         return ""
@@ -1045,6 +1047,7 @@ def _unresolved_fields_for(names):
 # ROLE MINDS — taste canons + the exemplar library's explicit human verdicts
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def _mind(role, taste_keys, charge):
+    from cb_learning_context import current_brief
     taste = "\n\n".join(_canon_text(k, 7000) for k in taste_keys)
     # The Creative Room now genuinely hires the repository's specialist people.  Only the
     # concise marked runtime contracts are loaded (not historical/superseded pipeline notes
@@ -1079,6 +1082,7 @@ def _mind(role, taste_keys, charge):
             f"rejected artifact as a model, and do not reverse-engineer a 'desired shot' "
             f"from them):\n"
             + _canonical_exemplars()
+            + current_brief()
             + "\n\nSHOW CANON (authoritative, never contradicted):\n"
             + _canon_text("showBible", 6000)
             + "\n\nHARD RULES: approved dialogue is verbatim-locked — never reword, drop or "
@@ -2561,7 +2565,14 @@ def _serial_scene_director(fn):
 
 @_serial_scene_director
 def run_scene(scene_num, episode="Ep1", brief=None, log=print):
+    from cb_learning_context import scene_scope
     ready = gate0_readiness(episode, scene_num, brief, log=log)
+    with scene_scope(episode, scene_num, ready["cast"]):
+        return _run_scene(scene_num, episode, brief, log, ready)
+
+
+def _run_scene(scene_num, episode, brief, log, ready):
+    from cb_learning_context import current_brief
     source_pkg = ready["scriptPackage"]
     vpath = OUT / f"{episode}_episode_vision.json"
     vision = (json.load(open(vpath)) if vpath.exists() else episode_vision(episode, log=log))
@@ -2675,6 +2686,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
            "packingJudgement": review.packingJudgement if review else "",
            "packingPasses": bool(review and review.packingPasses),
            "internalRevisions": revisions, "escalation": escalation,
+           "reviewObservations": current_brief(),
            "provenance": {"showrunner": PROV("showrunner"), "director": PROV("director"),
                            "cinematographer": PROV("cinematographer"),
                            "voice": PROV("voice-director")},

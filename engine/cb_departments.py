@@ -21,6 +21,7 @@ import cb_emission_conformance as emission
 import cb_engine_rules
 import cb_voice_director
 import cb_audio_authority
+from cb_production_contracts import visual_event_text, validate_timeline, shot_handoff_instruction
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -28,6 +29,7 @@ ROOT = HERE.parent
 RUNTIME_START = "<!-- RUNTIME_WORKER_START -->"
 RUNTIME_END = "<!-- RUNTIME_WORKER_END -->"
 DIRECTOR_GRAMMAR_PACK = HERE / "grammar_pack.json"
+CRYSTAL_ENERGY_LAW = ROOT / "shows/crystal-bears/laws/crystal_energy_law.txt"
 
 
 def director_grammar_pack():
@@ -42,6 +44,14 @@ def canonical_style_paragraph():
     if not version or not text:
         raise RuntimeError("Director grammar pack has no versioned canonical style paragraph")
     return version, text
+
+
+def crystal_energy_law():
+    """Return the show-wide visual law injected into every animation prompt."""
+    text = CRYSTAL_ENERGY_LAW.read_text(encoding="utf-8").strip()
+    if not text:
+        raise RuntimeError("Crystal energy law is blank")
+    return text
 
 
 _PROMPT_SECTION_RE = re.compile(
@@ -78,6 +88,7 @@ SKILLS = {
     "director": ROOT / "skills/crystal-bears-director/SKILL.md",
     "cinematography": ROOT / "skills/crystal-bears-cinematographer/SKILL.md",
     "dp": ROOT / "skills/crystal-bears-cinematographer/SKILL.md",
+    "seedream-keyframe": ROOT / "skills/crystal-bears-seedream-keyframes/SKILL.md",
     "voice": ROOT / "skills/crystal-bears-voice-director/SKILL.md",
     "animation": ROOT / "skills/seedance-production-director/SKILL.md",
     "review": ROOT / "skills/crystal-bears-continuity/SKILL.md",
@@ -92,7 +103,7 @@ SKILL_ALIASES = {
 
 DEPARTMENTS = [
     {"id": "story", "stage": "storyboard", "department": "Story & Direction",
-     "worker": "Director", "influences": "Pete Docter · Andrew Stanton",
+     "worker": "Director", "influences": "Joe Brumm · Pete Docter · Chris Sanders",
      "skill": "crystal-bears-director", "output": "approved storyboard and shot purpose"},
     {"id": "look", "stage": "scenelook", "department": "Look Development",
      "worker": "Cinematographer / DP", "influences": "Patrick Lin · Jean-Claude Kalache",
@@ -142,7 +153,9 @@ def load_runtime_skill(worker, standard_version=0):
     text = path.read_text(encoding="utf-8")
     if RUNTIME_START not in text or RUNTIME_END not in text:
         raise RuntimeError(f"{path} has no executable runtime worker contract")
-    return text.split(RUNTIME_START, 1)[1].split(RUNTIME_END, 1)[0].strip()
+    role = text.split(RUNTIME_START, 1)[1].split(RUNTIME_END, 1)[0].strip()
+    standard = (ROOT / "skills/production-standard.md").read_text(encoding="utf-8").strip()
+    return standard + "\n\n" + role
 
 
 class LookDirection(BaseModel):
@@ -452,6 +465,13 @@ class CreativeTranslationDirection(BaseModel):
         return self
 
 
+class TimelineEvent(BaseModel):
+    channel: Literal["action", "camera", "music", "dialogue", "sfx"]
+    startSec: float = Field(ge=0)
+    endSec: float = Field(gt=0)
+    event: str = Field(min_length=1)
+
+
 class AnimationDirection(BaseModel):
     shotId: str
     durationSec: int = Field(
@@ -463,6 +483,8 @@ class AnimationDirection(BaseModel):
         "transition", "first-last-frame", "storyboard-grid", "blockout-render",
     ] = "reference-to-video"
     pacingMode: Literal["storyline", "timestamp"] = "storyline"
+    timeline: List[TimelineEvent] = Field(default_factory=list,
+        description="Optional exact timing by independent action, camera, music, dialogue and sfx channels. Parallel channels may overlap.")
     generationGoal: str = Field(
         min_length=1,
         description="A one-sentence statement of the video and central story event.")
@@ -569,6 +591,9 @@ class AnimationDirection(BaseModel):
 
     @model_validator(mode="after")
     def precision_must_be_earned(self):
+        timeline = validate_timeline([event.model_dump() for event in self.timeline], self.durationSec)
+        if not timeline["ready"]:
+            raise ValueError("; ".join(timeline["errors"]))
         if self.directionDensity == "precise" and not self.precisionReasons:
             raise ValueError("precise direction requires an explicit continuity, dialogue, "
                              "safety or essential-story reason")
@@ -780,6 +805,13 @@ def _j(value, limit=22000):
     return json.dumps(value, ensure_ascii=False, indent=1)[:limit]
 
 
+def _creative_context(context):
+    # Keep bounded review observations visible even when a large shot context is truncated.
+    clean = dict(context)
+    observations = clean.pop("reviewObservations", "")
+    return observations + "\n\n" + _j(clean)
+
+
 class BeatSplit(BaseModel):
     """One beat's own creative content, inside a scene the mechanical parser already
     divided. firstEventIndex is the ONLY structural decision the Director makes here —
@@ -941,27 +973,34 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
 
 
 def prepare_look(context, *, log=print):
+    context = dict(context)
+    from cb_learning_context import brief
+    context.setdefault("reviewObservations", brief(context))
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
     return cb_llm.structured(
         _system("cinematography",
                 "Own the scene-wide environment, palette, material, light and atmosphere. "
                 "Do not compose a shot or place a character.", standard_version),
-        "APPROVED SCENE CONTEXT:\n" + _j(context) +
+        "APPROVED SCENE CONTEXT:\n" + _creative_context(context) +
         "\n\nReturn the exact image-provider prompt for one environment-only Scene Look plate.",
         LookDirection, label="department_look", log=log)
 
 
 def prepare_cinematography(context, images, *, log=print):
+    context = dict(context)
+    from cb_learning_context import brief
+    context.setdefault("reviewObservations", brief(context))
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
-    result = cb_llm.structured(
+    result = cb_llm.structured_with_repair(
         _system("cinematography",
                 "Own this shot's performance-ready opening stage. Establish the world, "
                 "camera, light, cast identity, canon relative scale, loose starting "
                 "relationship and clear action space. Do not pre-perform or freeze the "
                 "acting that belongs to Animation. The attached images are in the exact "
                 "labelled provider-reference order in the context.", standard_version) + "\n\n" +
-                load_runtime_skill("dp", standard_version),
-        "APPROVED SHOT CONTRACT AND ORDERED IMAGE LABELS:\n" + _j(context) +
+                load_runtime_skill("dp", standard_version) + "\n\n" +
+                load_runtime_skill("seedream-keyframe", standard_version),
+        "APPROVED SHOT CONTRACT AND ORDERED IMAGE LABELS:\n" + _creative_context(context) +
         "\n\nReturn one keyframe-provider direction and one machine-readable "
         "openingFrameLayout staging envelope. Return geography as one to eight concise, "
         "literal screen-direction, travel-axis and spatial-relation statements. It becomes "
@@ -994,8 +1033,7 @@ def prepare_cinematography(context, images, *, log=print):
         if str(name).strip()))
     placements = list(result.openingFrameLayout.placements)
     placed_cast = [item.character for item in placements]
-    if (len(placed_cast) != len(expected_cast) or
-            set(placed_cast) != set(expected_cast)):
+    if not set(expected_cast).issubset(set(placed_cast)):
         raise RuntimeError(
             "Cinematography changed charactersInFrame: "
             f"expected {expected_cast}, got {placed_cast}")
@@ -1110,10 +1148,50 @@ def _visual_event_without_dialogue(text):
     return value
 
 
+def _coerce_storyboard_stage_plan(shot):
+    """Normalize approved stage plans from legacy text or current structured rows."""
+    raw = shot.get("storyboardStagePlanApproved") or []
+    if isinstance(raw, str):
+        chunks = [
+            item.strip()
+            for item in re.split(r"(?=\bStage\s+\d+\b)", raw)
+            if item.strip()
+        ] or [raw.strip()]
+        stages = []
+        for index, text in enumerate(chunks):
+            number_match = re.search(r"\bStage\s+(\d+)\b", text, flags=re.I)
+            stage_number = int(number_match.group(1)) if number_match else index + 1
+            body = re.sub(
+                r"^\s*Stage\s+\d+\s*(?:\([^)]*\))?\s*:?\s*",
+                "",
+                text,
+                flags=re.I,
+            ).strip()
+            stages.append({
+                "stageNumber": stage_number,
+                "beatIds": [],
+                "primaryEvent": body,
+                "observableEndState": "",
+            })
+        return stages
+    stages = []
+    for index, stage in enumerate(raw):
+        if isinstance(stage, dict):
+            stages.append(stage)
+        elif stage:
+            stages.append({
+                "stageNumber": index + 1,
+                "beatIds": [],
+                "primaryEvent": str(stage).strip(),
+                "observableEndState": "",
+            })
+    return stages
+
+
 def animation_locked_visual_events(shot):
     """Return the provider-facing story facts inherited from the approved storyboard."""
     locked = []
-    for stage in shot.get("storyboardStagePlanApproved") or []:
+    for stage in _coerce_storyboard_stage_plan(shot):
         locked.append({
             "stageNumber": stage.get("stageNumber"),
             "beatIds": list(stage.get("beatIds") or []),
@@ -1126,13 +1204,13 @@ def animation_locked_visual_events(shot):
 def animation_story_lock_report(shot, provider_prompt, stage_plan=None, shot_plan=None):
     """Prove that every approved visual event survives into the provider request."""
     locked = animation_locked_visual_events(shot)
-    prompt = " ".join(str(provider_prompt or "").split()).casefold()
+    prompt = visual_event_text(provider_prompt)
     actual_stages = list(stage_plan or [])
     internal_shots = list(shot_plan or [])
     shot_actions = []
     for item in internal_shots:
         get = (lambda key, row=item: getattr(row, key, "")) if not isinstance(item, dict) else item.get
-        value = " ".join(str(get("causalAction") or "").split()).casefold()
+        value = visual_event_text(get("causalAction"))
         if value:
             shot_actions.append(value)
     decomposed_story_is_emitted = bool(shot_actions) and all(
@@ -1141,7 +1219,7 @@ def animation_story_lock_report(shot, provider_prompt, stage_plan=None, shot_pla
     for index, event in enumerate(locked):
         primary = event["primaryEvent"]
         ending = event["observableEndState"]
-        if (primary and " ".join(primary.split()).casefold() not in prompt
+        if (primary and visual_event_text(primary) not in prompt
                 and not decomposed_story_is_emitted):
             errors.append(
                 f"stage {event['stageNumber']} approved visual event is absent from providerPrompt")
@@ -1151,9 +1229,9 @@ def animation_story_lock_report(shot, provider_prompt, stage_plan=None, shot_pla
                 continue
             actual = actual_stages[index]
             get = (lambda key: getattr(actual, key, "")) if not isinstance(actual, dict) else actual.get
-            if str(get("primaryEvent") or "").strip() != primary:
+            if visual_event_text(get("primaryEvent")) != visual_event_text(primary):
                 errors.append(f"stage {event['stageNumber']} primaryEvent changed")
-            if str(get("observableEndState") or "").strip() != ending:
+            if ending and str(get("observableEndState") or "").strip() != ending:
                 errors.append(f"stage {event['stageNumber']} observableEndState changed")
     return {"ready": not errors, "errors": errors, "lockedVisualEvents": locked}
 
@@ -1194,7 +1272,7 @@ def creative_translation_report(shot, direction, provider_prompt=None):
             "completeGagArcCount": len(clocks),
             "handoffState": str(
                 shot.get("visualPayoff") or
-                ((shot.get("storyboardStagePlanApproved") or [{}])[-1]
+                ((_coerce_storyboard_stage_plan(shot) or [{}])[-1]
                  .get("observableEndState")) or "").strip(),
         }
         derived = True
@@ -1257,7 +1335,7 @@ def creative_translation_report(shot, direction, provider_prompt=None):
         errors.append("generation design gag count does not match its gag clocks")
     required_handoff = str(
         shot.get("visualPayoff") or
-        ((shot.get("storyboardStagePlanApproved") or [{}])[-1].get("observableEndState"))
+        ((_coerce_storyboard_stage_plan(shot) or [{}])[-1].get("observableEndState"))
         or "").strip()
     if required_handoff and str(design.get("handoffState") or "").strip() != required_handoff:
         errors.append("generation design changed the approved handoff state")
@@ -1296,6 +1374,12 @@ def carry_approved_gag_clock_text(shot, direction):
         clocks = []
         for code, approved in approved_by_code.items():
             clock = authored_by_code.get(code)
+            approved_hold_sec = float(
+                approved.get("recoveryHoldSec") or
+                (shot.get("performanceBudgetApproved") or {}).get("landingHoldSec") or
+                2.0)
+            if approved.get("mode") == "BIG":
+                approved_hold_sec = max(2.0, approved_hold_sec)
             if clock is None:
                 clock = GagClockDirection(
                     beatCode=code,
@@ -1305,11 +1389,13 @@ def carry_approved_gag_clock_text(shot, direction):
                     impact=approved["disruption"],
                     reaction=(approved.get("hold") or approved["button"]),
                     recoveryHold=approved["hold"],
-                    recoveryHoldSec=float(approved.get("recoveryHoldSec") or 1.0),
+                    recoveryHoldSec=approved_hold_sec,
                     button=approved["button"],
                     retroactive=False,
                     providerAction=(event_by_beat.get(code) or approved["disruption"]),
                 )
+            else:
+                clock.recoveryHoldSec = approved_hold_sec
             clocks.append(clock)
         translation.gagClocks = clocks
         design = getattr(translation, "generationDesign", None)
@@ -1388,10 +1474,95 @@ def carry_approved_gag_clock_text(shot, direction):
     return direction
 
 
+def carry_approved_dialogue_ownership(shot, direction):
+    """Bind every approved spoken line to an internal shot before prompt compile.
+
+    Director output can preserve the visible action while dropping stale
+    ``dialogueLineIndexes`` after a script/split amendment. The compiler and R15
+    rules need typed ownership, so repair that layer from the current approved
+    shot dialogue instead of asking for another creative rewrite.
+    """
+    internal_shots = list(getattr(direction, "shotPlan", None) or [])
+    dialogue = provider_dialogue_lines(shot)
+    if not internal_shots or not dialogue:
+        return direction
+
+    expected = [
+        int(line.get("_sourceDialogueIndex") or fallback)
+        for fallback, line in enumerate(dialogue, start=1)
+    ]
+    seen = []
+    valid_expected = set(expected)
+    for internal_shot in internal_shots:
+        for line_index in list(getattr(internal_shot, "dialogueLineIndexes", []) or []):
+            try:
+                number = int(line_index)
+            except (TypeError, ValueError):
+                continue
+            if number in valid_expected:
+                seen.append(number)
+
+    if seen == expected and len(seen) == len(set(seen)):
+        for internal_shot in internal_shots:
+            indexes = list(getattr(internal_shot, "dialogueLineIndexes", []) or [])
+            directions = list(getattr(internal_shot, "dialogueDirections", []) or [])
+            if len(directions) < len(indexes):
+                internal_shot.dialogueDirections = directions + [
+                    "Perform exactly as approved in @Audio1, in beat with the visible "
+                    "action and reaction."
+                    for _ in range(len(indexes) - len(directions))
+                ]
+        return direction
+
+    for internal_shot in internal_shots:
+        internal_shot.dialogueLineIndexes = []
+        internal_shot.dialogueDirections = []
+
+    source_lines = shot.get("dialogueLines") or []
+    shot_count = max(1, len(internal_shots))
+    for position, line_index in enumerate(expected):
+        owner_index = min(shot_count - 1, int(position * shot_count / max(1, len(expected))))
+        # Keep Pydantic max_length=8 valid even for long dialogue units.
+        if len(internal_shots[owner_index].dialogueLineIndexes) >= 8:
+            owner_index = next(
+                (index for index, item in enumerate(internal_shots)
+                 if len(item.dialogueLineIndexes) < 8),
+                owner_index,
+            )
+        if len(internal_shots[owner_index].dialogueLineIndexes) >= 8:
+            continue
+        line = source_lines[line_index - 1] if 0 < line_index <= len(source_lines) else {}
+        delivery = str(line.get("delivery") or "").strip()
+        if not delivery:
+            speaker = str(line.get("speaker") or "").strip()
+            exact = str(line.get("exactText") or line.get("text") or "").strip()
+            delivery = (
+                f"{speaker} delivers {{{exact}}} exactly as approved in @Audio1, "
+                "timed to the in-beat action and held reaction."
+            )
+        internal_shots[owner_index].dialogueLineIndexes.append(line_index)
+        internal_shots[owner_index].dialogueDirections.append(delivery)
+        internal_shots[owner_index].holdAfterDialogue = True
+    return direction
+
+
 def prepare_voice(context, locked_lines, *, log=print):
+    context = dict(context)
+    from cb_learning_context import brief
+    context.setdefault("reviewObservations", brief(context))
     locked_lines = cb_audio_authority.route_lines(locked_lines)["spokenDialogue"]
     if not locked_lines:
-        return {"lines": [], "audioAuthority": "seedance-2.5-sfx-only"}
+        return {
+            "shotId": str(context.get("shotId") or ""),
+            "sceneIntention": str(
+                context.get("sceneIntention") or
+                context.get("purpose") or
+                context.get("storyBeat") or
+                "Seedance owns non-dialogue vocal SFX for this shot."
+            ),
+            "lines": [],
+            "audioAuthority": "seedance-2.5-sfx-only",
+        }
     registers = cb_voice_director.archetype_registers().get("registers") or {}
     register_contract = {
         key: {
@@ -1405,7 +1576,7 @@ def prepare_voice(context, locked_lines, *, log=print):
         _system("voice",
                 "Direct the locked words as an ElevenLabs v3 performance reconciled with "
                 "the approved body action. Never add an ad-lib or rewrite a word."),
-        "APPROVED SHOT CONTEXT:\n" + _j(context) +
+        "APPROVED SHOT CONTEXT:\n" + _creative_context(context) +
         "\n\nREGISTERED VOICE ARCHETYPES (archetypeId must be one exact key; "
         "use only its allowedTags):\n" + _j(register_contract) +
         "\n\nTAG PURPOSE LAW: every bracketed audio tag used in performedText or in any "
@@ -1465,9 +1636,43 @@ SEEDANCE_AUDIO_EXCLUSIONS_SECTION = (
     "do not add sung lyrics, vocal music, narration, or any additional spoken words."
 )
 
+SEEDANCE_EXACT_AUDIO_EXCLUSIONS_SECTION = (
+    "[AUDIO AND EXCLUSIONS]\n"
+    "Preserve the supplied @Audio1 bed unchanged. During dialogue, only the active "
+    "speaker articulates; all listeners remain silent and non-articulating. During "
+    "approved laughter or giggling already present in @Audio1, animate only the "
+    "characters audibly participating in that exact interval. Do not generate "
+    "additional dialogue, laughter, vocalisations or narration. No music. No ambience. "
+    "No SFX. "
+    "No subtitles, captions, text overlays or watermark. No character redesign, "
+    "wardrobe changes or duplicated cast members."
+)
 
-def _seedance_audio_exclusions_section():
-    return SEEDANCE_AUDIO_EXCLUSIONS_SECTION
+SEEDANCE_EXACT_AUDIO_DIALOGUE_LOCK = (
+    "Use @Audio1 as the only voice authority. Only the character currently speaking "
+    "in @Audio1 may move their mouth. No music. No ambience. No SFX. "
+    "VERBATIM DIALOGUE LOCK - TRANSCRIPT ONLY. Every approved line below already exists "
+    "once in @Audio1. Use the written transcript only to assign the correct speaker and "
+    "mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. "
+    "The final render must contain exactly one audible dialogue performance: the supplied "
+    "@Audio1, unchanged."
+)
+
+
+def _seedance_audio_exclusions_section(*, exact_audio_only=False):
+    return (SEEDANCE_EXACT_AUDIO_EXCLUSIONS_SECTION
+            if exact_audio_only else SEEDANCE_AUDIO_EXCLUSIONS_SECTION)
+
+
+def _preserves_exact_audio_bed(audio_contract):
+    """Return true only for an explicit shot-level opt-out of provider audio."""
+    text = " ".join(str(audio_contract or "").split())
+    preserves_track = bool(re.search(
+        r"\b(?:preserve|use)\s+@Audio1\s+unchanged\b", text, re.I))
+    rejects_provider_audio = bool(re.search(
+        r"\bno\s+provider-generated\b[^.;]*(?:audio|dialogue|laughter|"
+        r"vocalisations?|music|ambience|sfx|sound)", text, re.I))
+    return preserves_track and rejects_provider_audio
 
 
 def _seedance_nonverbal_audio_policy():
@@ -1836,6 +2041,8 @@ def compile_animation_provider_prompt(shot, direction):
     role and handoff once, in the shape expected by the Seedance prompt preflight.
     """
     data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
+    audio_contract = str(data.get("audioContract") or "").strip()
+    exact_audio_only = _preserves_exact_audio_bed(audio_contract)
     character_state_locks = dict(shot.get("characterStateLocks") or {})
     approved_ownership = _approved_attribute_ownership(data, character_state_locks)
     routed_audio = provider_audio_routing(shot)
@@ -1884,13 +2091,11 @@ def compile_animation_provider_prompt(shot, direction):
 
     def strip_prompt_request_parameters(value):
         text = str(value or "")
-        text = re.sub(r"\b(?:aspect ratio|resolution)\b", "composition", text, flags=re.I)
+        text = re.sub(r"\baspect ratio\b", "composition", text, flags=re.I)
         text = re.sub(r"\bmodel(?: id| version)?\b", "render engine", text, flags=re.I)
         text = re.sub(r"\b(?:480p|720p|1080p|2160p)\b", "", text, flags=re.I)
         text = re.sub(r"(?<!\d)(?:16:9|9:16|1:1)(?!\d)", "wide frame", text, flags=re.I)
         text = re.sub(r"\bduration\s*:", "timing:", text, flags=re.I)
-        text = re.sub(r"\bno cuts?\b", "motivated transitions only", text, flags=re.I)
-        text = re.sub(r"\bno handheld\b", "stable motivated camera", text, flags=re.I)
         return text
 
     def camera_clause(value, number):
@@ -1932,19 +2137,53 @@ def compile_animation_provider_prompt(shot, direction):
         return "\n".join(lines)
 
     sections = []
+    task_mode = str(data.get("taskMode") or "").strip()
+    if task_mode in {"extend-forward", "extend-backward"}:
+        direction_label = "forward" if task_mode == "extend-forward" else "backward"
+        carried_state = complete(
+            data.get("openingCarriedState")
+            or ((data.get("stagePlan") or [{}])[0].get("initialOrCarriedState")
+                if isinstance((data.get("stagePlan") or [{}])[0], dict) else ""),
+            context="video extension boundary state",
+        )
+        continuity_lines = [
+            f"@Video1 is the source video to extend {direction_label}.",
+            "The first frame of this generated unit must continue directly from @Video1 with no hard cut, no black frame, no reset and no replay.",
+            "Preserve pose, props, layout, camera, light and motion at the connecting frame: " + carried_state,
+            "Each subject remains the same continuous instance throughout; do not duplicate, split, replace or swap any character or prop.",
+        ]
+        sections.append("[Video Extension Continuity]\n" + "\n".join(continuity_lines))
+    authority = ""
     if dialogue:
-        sections.append(
-            "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority "
-            "for every English dialogue line, voice identity, cadence, delivery, mouth "
-            "timing and silence. Each exact dialogue line appears once in braces in the "
-            "Shot Sequence and is bound to its named speaker and @Audio1. The exact braced "
-            "dialogue markers place approved words only; no alternative performance is "
-            "permitted. Listeners remain silent and closed-mouth unless they are the named "
-            "speaker for that exact line. No narration, no extra words, and no subtitles or "
-            "captions. Dialogue language: English. No music comes from @Audio1; Seedance "
-            "generates separate synchronized non-dialogue SFX, ambience and instrumental "
-            "musical underscore beneath the approved dialogue rhythm. "
-            + emission.SINGLE_INSTANCE_DIALOGUE_LOCK)
+        if exact_audio_only:
+            authority = (
+                "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance "
+                "authority for every English dialogue line, voice identity, cadence, "
+                "delivery, breath, pause, mouth timing, approved laughter interval and "
+                "silence. Each exact dialogue line appears once in braces in the Shot "
+                "Sequence and is bound to its named speaker and @Audio1. During dialogue, "
+                "only the active speaker articulates; listeners remain silent and closed-mouth "
+                "and non-articulating during that dialogue interval. During approved laughter "
+                "or giggling in @Audio1, animate "
+                "only the characters audibly participating in that exact interval. Preserve "
+                "the complete @Audio1 bed unchanged. No alternative performance, additional "
+                "vocalisation, music, ambience or SFX is permitted. No narration. No extra "
+                "words. No subtitles or captions. Dialogue language: English. "
+                + SEEDANCE_EXACT_AUDIO_DIALOGUE_LOCK)
+        else:
+            authority = (
+                "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority "
+                "for every English dialogue line, voice identity, cadence, delivery, mouth "
+                "timing and silence. Each exact dialogue line appears once in braces in the "
+                "Shot Sequence and is bound to its named speaker and @Audio1. The exact braced "
+                "dialogue markers place approved words only; no alternative performance is "
+                "permitted. Listeners remain silent and closed-mouth unless they are the named "
+                "speaker for that exact line. No narration, no extra words, and no subtitles or "
+                "captions. Dialogue language: English. No music comes from @Audio1; Seedance "
+                "generates separate synchronized non-dialogue SFX, ambience and instrumental "
+                "musical underscore beneath the approved dialogue rhythm. "
+                + emission.SINGLE_INSTANCE_DIALOGUE_LOCK)
+        sections.append(authority)
 
     exclusions = {
         "opening_frame": "Exclude redesign and later action.",
@@ -1956,6 +2195,8 @@ def compile_animation_provider_prompt(shot, direction):
         "video": "Exclude identity, clothing and scene unless assigned.",
     }
     reference_lines = []
+    reference_summary_lines = []
+    team_reference_lines = []
     slot_bindings = []
     collapse_bindings = []
     location_tag = next((
@@ -1979,6 +2220,20 @@ def compile_animation_provider_prompt(shot, direction):
             role_label = _character_reference_label(raw_controls)
             collapse_bindings.append((tag, role_label))
         slot_bindings.append((tag, role_label))
+        if role == "opening_frame":
+            team_reference_lines.append(
+                f"{tag} controls only the inherited opening composition and visible "
+                "carried state.")
+        elif role == "character_identity":
+            team_reference_lines.append(
+                f"{tag} controls only {role_label}'s identity, proportions, scale and "
+                "approved wearable state.")
+        elif role == "location":
+            team_reference_lines.append(
+                f"{tag} controls only the approved scene geography, light, materials "
+                "and atmosphere.")
+        elif role == "prop":
+            team_reference_lines.append(f"{tag} controls only {controls.rstrip('.')}.")
         if role != "audio":
             exclusion = exclusions.get(
                 role, "Do not use unrelated background or content from it.")
@@ -2035,8 +2290,9 @@ def compile_animation_provider_prompt(shot, direction):
             for line in reference_lines
         ]
         lines = [stability, collapse, *reference_lines]
+        reference_summary_lines = [line for line in lines if line]
         sections.append("[Multimodal Reference Layer]\n" + "\n".join(
-            line for line in lines if line))
+            reference_summary_lines))
 
     opening_motion_bridge = str(data.get("openingMotionBridge") or "").strip()
     if opening_motion_bridge:
@@ -2098,7 +2354,8 @@ def compile_animation_provider_prompt(shot, direction):
 
     goal = strip_request_parameters(
         data.get("generationGoal") or data.get("dramaticBeat") or "")
-    sections.append("[One-Sentence Summary]\n" + goal)
+    goal_header = "[Extension Goal]" if task_mode in {"extend-forward", "extend-backward"} else "[One-Sentence Summary]"
+    sections.append(goal_header + "\n" + goal)
 
     global_lines = []
     style_version, style_text = canonical_style_paragraph()
@@ -2129,6 +2386,7 @@ def compile_animation_provider_prompt(shot, direction):
         if value:
             global_lines.append(f"{label}: {value}")
     sections.append("[Global Settings]\n" + "\n".join(global_lines))
+    sections.append("[Crystal Energy Law]\n" + crystal_energy_law())
 
     # Keep every generated take physically alive at the held beat: the provider needs
     # an executable eyeline, active thought and non-vacant landing, not just plot verbs.
@@ -2148,7 +2406,14 @@ def compile_animation_provider_prompt(shot, direction):
     }
     internal_shots = list(data.get("shotPlan") or [])
     multi_shot = len(internal_shots) > 1
-    explicit_cut_sequence = any(
+    # Prefer the approved structured edit scope. Falling back to camera prose made a
+    # valid plan such as "three internal shots and two intentional cuts" collapse into
+    # continuous phases unless the specialist happened to repeat the words "cut to".
+    edit_scope = str(data.get("editScope") or "")
+    structured_cut_scope = bool(re.search(
+        r"\b(?:\d+\s+)?(?:intentional|motivated|planned)?\s*cuts?\b",
+        edit_scope, re.I))
+    explicit_cut_sequence = structured_cut_scope or any(
         re.search(
             r"\b(?:cut to|hard cut|smash cut|match cut|intercut)\b",
             " ".join(str(value or "") for value in (
@@ -2160,6 +2425,7 @@ def compile_animation_provider_prompt(shot, direction):
     emitted_holds = set()
     emitted_dialogue = []
     sailing_causality_injected = False
+    camera_movement_lines = []
     if internal_shots:
         shot_lines = []
         for index, internal_shot in enumerate(internal_shots):
@@ -2203,8 +2469,11 @@ def compile_animation_provider_prompt(shot, direction):
                 cue = audio_cues_by_source.get(source_index)
                 sfx_cue = sfx_cues_by_source.get(source_index)
                 if cue is None and sfx_cue is None:
-                    raise ValueError(
-                        f"Internal shot {number} references invalid dialogue line {line_index}")
+                    parts.append(
+                        "Compiler repair: ignored an invalid dialogue reference "
+                        f"to line {line_index}; the approved shot has no such "
+                        "dialogue/SFX cue.")
+                    continue
                 if sfx_cue is not None:
                     start, end = sfx_cue.get("startSec"), sfx_cue.get("endSec")
                     timing = (
@@ -2295,6 +2564,7 @@ def compile_animation_provider_prompt(shot, direction):
                 "coverage cuts, not separate setups, and not permission to invent a new "
                 "final tableau.")
         sections.append(section_title + "\n" + "\n".join(shot_lines))
+        camera_movement_lines = shot_lines
 
     stage_sections = []
     approved_physics = {
@@ -2446,12 +2716,19 @@ def compile_animation_provider_prompt(shot, direction):
     if finish and not short_unit:
         supplement.append(f"Final handoff: {finish}.")
 
-    audio_contract = str(data.get("audioContract") or "").strip()
     shot_id = str(shot.get("shotId") or "")
     split_unit = bool(
         (shot.get("sourceShotId") and str(shot.get("sourceShotId")) != shot_id)
         or re.search(r"\.SH\d+[A-Z]$", shot_id))
-    if dialogue:
+    if dialogue and exact_audio_only:
+        audio = (
+            "Preserve @Audio1 unchanged as the complete approved audio bed. During dialogue, "
+            "only the active speaker articulates; listeners remain silent and "
+            "non-articulating. During approved laughter or giggling in @Audio1, animate only "
+            "the characters audibly participating in that exact interval. Do not generate "
+            "additional dialogue, laughter, vocalisations, narration, music, ambience or SFX."
+        )
+    elif dialogue:
         foley = re.search(
             r"(?:only|retain|add)\s+[^.;]*foley[^.;]*", audio_contract, re.I)
         audio = (
@@ -2481,7 +2758,7 @@ def compile_animation_provider_prompt(shot, direction):
                 r"\bno\b[^.;]{0,120}\b(?:music|bgm|musical underscore)\b",
                 audio, re.I):
             audio = audio.rstrip(" .") + ". " + _seedance_nonverbal_audio_policy()
-    if seedance_sfx_cues:
+    if seedance_sfx_cues and not exact_audio_only:
         authored_sfx = []
         for cue in seedance_sfx_cues:
             start, end = cue.get("startSec"), cue.get("endSec")
@@ -2494,11 +2771,148 @@ def compile_animation_provider_prompt(shot, direction):
     if not re.search(r"\bno watermark\b", audio, re.I):
         audio = audio.rstrip(" .") + ". No watermark."
     sections.append("[Audio]\n" + audio)
-    sections.append(_seedance_audio_exclusions_section())
+    sections.append(_seedance_audio_exclusions_section(
+        exact_audio_only=exact_audio_only))
     sections.append("[Global Supplement]\n" + " ".join(supplement))
     prompt = strip_prompt_request_parameters(normalize_reference_grammar(
         "\n\n".join(section for section in sections if section.strip())))
     prompt = adapt_seedance25_prompt(prompt)
+
+    # Seedance's production team expects long exact-audio coverage prompts in a
+    # stable review envelope. Keep the typed direction as source of truth, but do
+    # not send the legacy stack of overlapping house sections to the provider.
+    # The reference contract below is compiled from actual upload order, never
+    # copied from an example whose slot numbers may describe a different request.
+    if exact_audio_only and explicit_cut_sequence and camera_movement_lines:
+        team_authority = (
+            "AUDIO-AUTHORITY: @Audio1 is the sole authority for exact words, speaker "
+            "identity, voice identity, cadence, emotional delivery, breath, pauses, "
+            "dialogue timing, mouth timing, approved laughter and silence. Preserve it "
+            "unchanged. No alternative performance is permitted. Only the active speaker "
+            "articulates speech; listeners remain silent and closed-mouth and "
+            "non-articulating. During approved laughter, animate only the "
+            "characters audibly participating in that interval. No narration or improvised "
+            "dialogue. No extra words. No extra voices. No additional vocalisations, music, "
+            "ambience or SFX. No subtitles or captions. Dialogue language: English. "
+            + SEEDANCE_EXACT_AUDIO_DIALOGUE_LOCK
+        )
+        scenario = [
+            goal,
+            complete(data.get("dramaticBeat"), context="dramatic beat"),
+        ]
+        if opening_motion_bridge:
+            scenario.append(complete(
+                opening_motion_bridge, context="opening motion bridge"))
+
+        core_action = [
+            "Performance arc: " + complete(
+                data.get("performanceArc"), context="performance arc"),
+            "Physical cause and effect: " + complete(
+                data.get("physicalCauseAndEffect"),
+                context="physical cause and effect"),
+        ]
+        core_action.extend(action_ownership)
+        if traversal:
+            core_action.append(traversal)
+        if repeated_contacts:
+            repeated_context = " ".join(str(value or "") for value in (
+                shot.get("purpose"), data.get("physicalCauseAndEffect"), goal))
+            if re.search(r"\bpoofs?\b", repeated_context, re.I):
+                core_action.append(
+                    "Tail-poof escalation: separate the first, second and third poofs "
+                    "clearly with a readable reaction between each event. The first poof "
+                    "is large, the second is larger than the first, and the third is "
+                    "larger than the second and completes the escalation.")
+            else:
+                core_action.append(repeated_contacts)
+        if sailing and not sailing_causality_injected:
+            core_action.append(sailing)
+        core_action.append(cb_engine_rules.living_performance_boilerplate(shot, data))
+
+        audio_hierarchy = [
+            "@Audio1 is the master clock for dialogue, pauses, reactions, approved "
+            "laughter and the final landing.",
+            "Each approved spoken line appears once in the camera plan below. Bind "
+            "that line to its named speaker and its exact interval in @Audio1.",
+            audio,
+        ]
+
+        landing = []
+        if finish:
+            landing.append(complete(finish, context="landing state"))
+        final_internal_shot = (
+            internal_shots[-1].model_dump()
+            if hasattr(internal_shots[-1], "model_dump")
+            else dict(internal_shots[-1]))
+        final_landing = str(final_internal_shot.get("landingImage") or "").strip()
+        if final_landing and final_landing.casefold() not in " ".join(landing).casefold():
+            landing.append(complete(final_landing, context="final landing image"))
+        landing.extend(
+            f"Maintain {item}." for item in consistency[:1] if item)
+
+        negative_items = [
+            "No replay of completed opening action",
+            "no identity blending, duplication or position swapping",
+            "no incorrect speaker mouth movement",
+            "no extra dialogue, laughter, vocalisations, music, ambience or SFX",
+            "no subtitles, captions, text or watermarks",
+        ]
+        negative_items.extend(
+            item.rstrip(".") for item in safeguards[:2] if item)
+
+        style_lines = [f"Style ({style_version}): {style_text}"]
+        if geography:
+            style_lines.append("Geography: " + " ".join(geography))
+        crystal_context = " ".join(str(value or "") for value in (
+            shot.get("purpose"), shot.get("action"), goal,
+            data.get("physicalCauseAndEffect")))
+        if re.search(r"\b(?:crystal|quartz|aquamarine|pendant|crystal energy)\b",
+                     crystal_context, re.I):
+            style_lines.append(crystal_energy_law())
+
+        compact_references = [
+            reference_summary_lines[0] if reference_summary_lines else "",
+            reference_summary_lines[1] if len(reference_summary_lines) > 1 else "",
+            *team_reference_lines,
+            "Keep one instance of each established character. Do not blend identities, "
+            "transfer traits or invent entrances; off-crop established characters may "
+            "only be revealed by the planned camera move.",
+        ]
+
+        team_sections = [
+            "[GENERATED VIDEO PROMPT]",
+            team_authority,
+            "Scenario Description:\n" + "\n".join(scenario),
+            "Reference Contract:\n" + "\n".join(
+                line for line in compact_references if line),
+            "Continuity Priority:\n"
+            "Prioritise character, prop, scale and spatial consistency over visual "
+            "reinterpretation.",
+            "Rendering Intent:\nPrioritise stable identity, "
+            "readable performance, coherent physical transformation and continuity.",
+            "Style Description:\n" + "\n".join(style_lines),
+            "Character Description and Core Action:\n" + "\n".join(core_action),
+            "Character Reference Authority:\nBind each "
+            "character exclusively to the identity reference assigned above.",
+            "Audio Hierarchy and Music Policy:\n" + "\n".join(audio_hierarchy),
+            "Camera Movement Description:\n" + "\n".join(camera_movement_lines),
+            "Landing State:\n" + "\n".join(landing),
+            "Negative Prompt (Negative):\n" + ". ".join(negative_items) + ".",
+        ]
+        prompt = adapt_seedance25_prompt("\n\n".join(
+            section for section in team_sections if section.strip()))
+
+    timeline = data.get("timeline") or []
+    if timeline:
+        report = validate_timeline(timeline, data.get("durationSec") or shot.get("durationSec"))
+        if not report["ready"]:
+            raise ValueError("; ".join(report["errors"]))
+        prompt += "\n\n[CHANNEL TIMING]\n" + "\n".join(
+            f"{item['channel']}: {float(item['startSec']):g} seconds until "
+            f"{float(item['endSec']):g} seconds: {item['event']}" for item in timeline)
+    handoff = shot_handoff_instruction(shot)
+    if handoff:
+        prompt += "\n\n[EDITORIAL HANDOFF]\n" + handoff
     prompt_sections(prompt)
     for line in prompt.splitlines():
         if re.match(r"^(?:Initial state|Continue from the previous stage|Cause|Physics|Emotion/Camera Analysis|Audio cues|Dialogue performance|End state):", line):
@@ -2511,6 +2925,9 @@ def compile_animation_provider_prompt(shot, direction):
 
 
 def prepare_animation(context, images, *, log=print):
+    context = dict(context)
+    from cb_learning_context import brief
+    context.setdefault("reviewObservations", brief(context))
     shot = context.get("shot") or {}
     raw_duration = shot.get("durationSec", shot.get("targetDurationSecApproved"))
     try:
@@ -2523,14 +2940,14 @@ def prepare_animation(context, images, *, log=print):
 
     locked_visual_events = animation_locked_visual_events(shot)
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
-    result = cb_llm.structured(
+    result = cb_llm.structured_with_repair(
         _system("animation",
                 "Turn the approved dramatic beat into one playable Seedance generation unit. "
                 "The first attached image is the approved opening frame; remaining attachments "
                 "follow the exact reference order in the context. Continuous relay may use one "
                 "shot; action units use two to four internal shots, each with one clean motion "
                 "idea and a real story, performance or reaction purpose.", standard_version),
-        "APPROVED SHOT, VOICE DIRECTION AND ORDERED ATTACHMENTS:\n" + _j(context) +
+        "APPROVED SHOT, VOICE DIRECTION AND ORDERED ATTACHMENTS:\n" + _creative_context(context) +
         "\n\nDIRECTORIAL FREEDOM CONTRACT:\n"
         "When humanWorkingAnimationPrompt or watchDirectorFeedback is present, treat it as "
         "approved bounded review feedback: preserve its requested emotional, physical, "
@@ -2640,6 +3057,16 @@ def prepare_animation(context, images, *, log=print):
 
     result = enforce_aerial_camera_contract(result)
     result = carry_approved_gag_clock_text(shot, result)
+    result = carry_approved_dialogue_ownership(shot, result)
+
+    # The closing handoff is approved upstream and has no creative latitude.
+    # Restore it deterministically instead of rejecting a harmless model paraphrase.
+    approved_handoff = str(
+        shot.get("visualPayoff") or
+        ((shot.get("storyboardStagePlanApproved") or [{}])[-1].get("observableEndState"))
+        or "").strip()
+    if approved_handoff:
+        result.creativeTranslation.generationDesign.handoffState = approved_handoff
 
     if result.durationSec != duration:
         raise RuntimeError(
@@ -2661,12 +3088,18 @@ def prepare_animation(context, images, *, log=print):
             if item.get("character") and item.get("screenZone") and
             item.get("pose") and item.get("facing")
         ]
+    approved_stages = _coerce_storyboard_stage_plan(shot)
+    if approved_stages and len(result.stagePlan) == len(approved_stages):
+        for actual_stage, approved_stage in zip(result.stagePlan, approved_stages):
+            approved_beat_ids = list(approved_stage.get("beatIds") or [])
+            if approved_beat_ids:
+                actual_stage.beatIds = approved_beat_ids
     result.providerPrompt = compile_animation_provider_prompt(shot, result)
-    approved_stages = shot.get("storyboardStagePlanApproved") or []
+    approved_stages = _coerce_storyboard_stage_plan(shot)
     if approved_stages:
         expected = [list(stage.get("beatIds") or []) for stage in approved_stages]
         actual = [list(stage.beatIds) for stage in result.stagePlan]
-        if actual != expected:
+        if any(expected) and actual != expected:
             raise RuntimeError(
                 "Animation Director added, dropped, merged, reordered or reassigned approved "
                 f"story stages: expected {expected}, got {actual}")

@@ -145,7 +145,7 @@ _REFERENCE_ROLE_WORDS = re.compile(
 _REFERENCE_EXCLUSION_WORDS = re.compile(
     r"\b(only|do not use|don't use|must not|exclude|without (?:the|its))\b", re.I)
 _REQUEST_PARAMETER_WORDS = re.compile(
-    r"\b(aspect ratio|resolution|model(?: id| version)?|duration\s*:|"
+    r"\b(aspect ratio|resolution(?=\s*[:=]|\s+(?:480p|720p|1080p|2160p|4k))|model(?: id| version)?|duration\s*:|"
     r"480p|720p|1080p|2160p)\b|(?<!\d)(?:16:9|9:16|1:1)(?!\d)", re.I)
 _TIME_RANGE = re.compile(
     r"(?<!\d)(\d+(?::\d{1,2}(?:\.\d+)?)?|\d+(?:\.\d+)?)"
@@ -357,6 +357,40 @@ def _first_section_body(text, headings):
     return "", ""
 
 
+_TEAM_PROMPT_HEADINGS = (
+    "Scenario Description", "Reference Contract",
+    "Continuity Priority", "Rendering Intent",
+    "Style Description", "Character Description and Core Action",
+    "Character Reference Authority", "Audio Hierarchy and Music Policy",
+    "Camera Movement Description", "Landing State", "Negative Prompt (Negative)",
+)
+
+
+def _team_section_body(text, heading):
+    text = str(text or "")
+    # Read saved historical briefs without emitting their unsupported UI controls.
+    for old, new in (("Motion Slider (Consistency/Creativity)", "Continuity Priority"),
+                     ("Rendering Mode", "Rendering Intent"),
+                     ("Character Reference Weight", "Character Reference Authority")):
+        text = text.replace(old + ":", new + ":")
+    """Read one named section from the approved Seedance team prompt structure."""
+    headings = "|".join(re.escape(value) for value in _TEAM_PROMPT_HEADINGS)
+    match = re.search(
+        rf"(?ims)^\s*{re.escape(heading)}\s*:\s*(.*?)"
+        rf"(?=^\s*(?:{headings})\s*:\s*$|\Z)",
+        str(text or ""))
+    return match.group(1).strip() if match else ""
+
+
+def uses_enhanced_seedance_structure(prompt):
+    """Return whether a prompt satisfies the current Seedance team handoff format."""
+    text = str(prompt or "").strip()
+    return bool(
+        text.startswith("[GENERATED VIDEO PROMPT]") and
+        all(_team_section_body(text, heading) for heading in _TEAM_PROMPT_HEADINGS)
+    )
+
+
 def _stage_matches(text):
     return list(_STAGE_HEADING.finditer(str(text or "")))
 
@@ -403,7 +437,7 @@ def _time_value(value):
 
 def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
                                       reference_contract=None, duration_sec=None,
-                                      dialogue_lines=None, stage_plan=None):
+                                      dialogue_lines=None, stage_plan=None, timeline=None):
     """Compare a prompt with the official guide and the Studio's production policy.
 
     This is deterministic authoring analysis only. Provider availability, account access,
@@ -431,6 +465,7 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
         "text-to-video", "reference-to-video", "thirty-second-video",
         "ultra-long-video",
     }
+    team_structure = uses_enhanced_seedance_structure(text)
     expected_refs = _reference_entries(reference_contract)
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     line_refs = []
@@ -473,7 +508,10 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
         "storyboard-grid": ("Generation Goal", "One-Sentence Summary"),
         "blockout-render": ("Generation Goal", "One-Sentence Summary"),
     }[task_mode]
-    goal_body, goal_heading = _first_section_body(text, goal_headings)
+    if team_structure and task_mode in staged_generation_modes:
+        goal_body, goal_heading = _team_section_body(text, "Scenario Description"), "Scenario Description"
+    else:
+        goal_body, goal_heading = _first_section_body(text, goal_headings)
     expected_goal = " or ".join(f"[{heading}]" for heading in goal_headings)
     add(
         "goal", "One-sentence story summary", bool(goal_body),
@@ -554,8 +592,16 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
     shot_numbers = []
     multi_shot = False
     if task_mode in staged_generation_modes:
-        global_settings, global_heading = _first_section_body(
-            text, ("Global Settings", "Global Scene Setting", "Global Setting"))
+        if team_structure:
+            global_settings = "\n".join(filter(None, (
+                _team_section_body(text, "Rendering Intent"),
+                _team_section_body(text, "Style Description"),
+                _team_section_body(text, "Character Description and Core Action"),
+            )))
+            global_heading = "Rendering Mode / Style Description / Character Description and Core Action"
+        else:
+            global_settings, global_heading = _first_section_body(
+                text, ("Global Settings", "Global Scene Setting", "Global Setting"))
         add(
             "global-settings", "Global world and anti-collapse settings",
             bool(global_settings),
@@ -566,22 +612,28 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             "camera language, character styling, performance core and prohibited items.",
             required=task_mode in {"thirty-second-video", "ultra-long-video"})
 
-        shot_sequence = (
+        shot_sequence = (_team_section_body(text, "Camera Movement Description")
+                         if team_structure else (
             _section_body(text, "Shot Sequence")
             or _section_body(text, "Timed Action Phases — One Continuous Render")
-            or _section_body(text, "Camera and Shot Plan"))
+            or _section_body(text, "Camera and Shot Plan")))
         shot_numbers = [int(value) for value in re.findall(
-            r"(?im)^\s*(?:Shot|Phase)\s+(\d+)\s*:", shot_sequence)]
+            r"(?im)^\s*(?:Shot|Phase)\s+(\d+)\s*(?::|[-–—])", shot_sequence)]
         multi_shot = bool(shot_sequence and shot_numbers)
         if multi_shot:
             numbered = shot_numbers == list(range(1, len(shot_numbers) + 1))
-            shot_lines = re.findall(
-                r"(?im)^\s*(?:Shot|Phase)\s+\d+\s*:.*$", shot_sequence)
-            directed = bool(shot_lines) and all(
-                re.search(r"\bCamera\s*:", line, re.I) and
-                re.search(r"\bAction\s*:", line, re.I) and
-                re.search(r"\bEnd state\s*:", line, re.I)
-                for line in shot_lines)
+            shot_starts = list(re.finditer(
+                r"(?im)^\s*(?:Shot|Phase)\s+\d+\s*(?::|[-–—]).*$", shot_sequence))
+            shot_blocks = [
+                shot_sequence[match.start():(shot_starts[index + 1].start()
+                              if index + 1 < len(shot_starts) else len(shot_sequence))]
+                for index, match in enumerate(shot_starts)
+            ]
+            directed = bool(shot_blocks) and all(
+                re.search(r"\bCamera\s*:", block, re.I) and
+                re.search(r"\bAction\s*:", block, re.I) and
+                re.search(r"\bEnd state\s*:", block, re.I)
+                for block in shot_blocks)
             add("stages", "Consecutive directed shots", numbered,
                 f"{len(shot_numbers)} consecutive shot(s) carry the event progression.",
                 "Use consecutive Shot N lines inside [Shot Sequence], or Phase N lines "
@@ -648,8 +700,15 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
                  "At least one stage lacks its inherited start or directly visible end state."),
                 "Add Initial state (or Continue from the previous stage) and End state to every stage.",
                 authority="studio-policy")
-        global_supplement, supplement_heading = _first_section_body(
-            text, ("Global Supplement", "Overall Supplement", "Maintain Consistency"))
+        if team_structure:
+            global_supplement = "\n".join(filter(None, (
+                _team_section_body(text, "Landing State"),
+                _team_section_body(text, "Negative Prompt (Negative)"),
+            )))
+            supplement_heading = "Landing State / Negative Prompt (Negative)"
+        else:
+            global_supplement, supplement_heading = _first_section_body(
+                text, ("Global Supplement", "Overall Supplement", "Maintain Consistency"))
         consistency_ok = bool(global_supplement and re.search(
             r"\b(keep|maintain|preserve|remain|throughout|must)\b", global_supplement, re.I))
         add(
@@ -775,7 +834,8 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             ok = bool(re.search(pattern, text, re.I | re.S))
             add(code, label, ok, f"{label} is explicit." if ok else f"{label} is not explicit.", action)
 
-    audio_body = _section_body(text, "Audio")
+    audio_body = (_team_section_body(text, "Audio Hierarchy and Music Policy")
+                  if team_structure else _section_body(text, "Audio"))
     if dialogue_lines:
         speakers = {str((line or {}).get("speaker") or "").strip().lower()
                     for line in dialogue_lines}
@@ -804,7 +864,8 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             "Record audio ownership in [Audio] or the [Global Supplement], even for a silent shot.",
             authority="studio-policy")
 
-    pacing_text = ("\n".join(match.group(0) for match in stage_matches)
+    pacing_text = (shot_sequence if team_structure and task_mode in staged_generation_modes
+                   else "\n".join(match.group(0) for match in stage_matches)
                    if task_mode in staged_generation_modes else text)
     ranges = [(_time_value(start), _time_value(end))
               for start, end in _TIME_RANGE.findall(pacing_text)]
@@ -862,6 +923,13 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
         "is a separate 30-180 second Dreamina authoring mode and is not an enabled API route.",
         required=duration_sec is not None)
 
+    # Prose diagnostics advise the director. Production invariants are separate.
+    from cb_production_contracts import validate_timeline
+    timeline_report = validate_timeline(timeline or [], duration_sec) if timeline else {"ready": True, "errors": []}
+    hard_codes = {"reference-limits", "reference-roles", "audio", "guide-duration"}
+    hard_failures = [check for check in checks
+                     if check["code"] in hard_codes and check["required"] and check["status"] != "pass"]
+    production_errors = [item["nextAction"] or item["detail"] for item in hard_failures] + timeline_report["errors"]
     required_checks = [check for check in checks if check["required"]]
     passed = sum(check["status"] == "pass" for check in required_checks)
     repair_actions = []
@@ -880,6 +948,9 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             "maximum": len(owned),
         }
     return {
+        "productionReady": not production_errors,
+        "productionErrors": production_errors,
+        "timeline": timeline_report,
         "profile": SEEDANCE_GUIDE_PROFILE,
         "source": dict(SEEDANCE_GUIDE_SOURCE),
         "guideLimits": dict(SEEDANCE_GUIDE_LIMITS),

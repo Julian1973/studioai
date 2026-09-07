@@ -77,6 +77,13 @@ def history(episode, scene, shot_id, stage):
 
 
 def _scope_context(episode, scene, shot_id, stage, issue):
+    if stage == "script":
+        from cb_scripts import ScriptStore
+        store = ScriptStore(ROOT)
+        current = store.current(episode)
+        return {"episode": episode, "stage": stage, "scriptVersion": current["scriptVersionId"],
+                "script": store.content_path(episode).read_text(encoding="utf-8")[:20000],
+                "workflow": "Prepare direction internally. Human reviews keyframe, voice, WATCH request, then returned render."}
     pkg, _ = cb_render.load_pkg(scene, episode)
     shot = next((x for x in (pkg.get("shots") or []) if x.get("shotId") == shot_id), {})
     ledger = next((x for x in (pkg.get("continuityLedger") or [])
@@ -183,6 +190,13 @@ def chat(episode, scene, shot_id, stage, message, issue="", reviewer="Julian"):
     saved = history(episode, scene, shot_id, stage)
     prior = list(saved.get("messages") or [])[-8:]
     context = _scope_context(episode, scene, shot_id, stage, issue)
+    import cb_state
+    import cb_production_contracts
+    if shot_id:
+        state = cb_state.production_state(scene, episode)
+        row = next((r for r in state.get("shots", []) if r["shotId"] == shot_id), {})
+        context["nextAction"] = row.get("nextAction")
+        context["revisionImpact"] = cb_production_contracts.revision_impact(stage, shot_id)
     edit_window = None
     review_frames = []
     if stage == "animation-edit":

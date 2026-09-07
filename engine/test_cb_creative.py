@@ -476,7 +476,7 @@ def test_storyboard_production_unit_supports_natural_30_second_structure():
         C.CreativeShotCard(**card)
 
 
-def test_performance_contract_rejects_duplicate_or_reordered_phases():
+def test_performance_contract_allows_shared_phase_for_different_performers_but_rejects_duplicates():
     base = _performance_contract().model_dump()
     reordered = {**base, "phases": list(reversed(base["phases"]))}
     with pytest.raises(Exception, match="must follow"):
@@ -484,6 +484,13 @@ def test_performance_contract_rejects_duplicate_or_reordered_phases():
     duplicated = {**base, "phases": [base["phases"][0], base["phases"][0]]}
     with pytest.raises(Exception, match="must be unique"):
         C.ShotPerformanceContract(**duplicated)
+    shared_phase = {**base, "phases": [
+        base["phases"][0],
+        {**base["phases"][0], "performer": "Zenny",
+         "observableAction": "Zenny answers with a separate visible action."},
+    ]}
+    contract = C.ShotPerformanceContract(**shared_phase)
+    assert [phase.performer for phase in contract.phases] == ["Fuzzby", "Zenny"]
 
 
 def test_gate5_mechanically_attaches_big_comedy_staging_inside_a_packed_unit(monkeypatch):

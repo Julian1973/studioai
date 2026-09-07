@@ -58,7 +58,7 @@ Specify only useful spatial information:
 
 ### Light, atmosphere, and materials
 
-Use two to four story-relevant production details per shot:
+Choose only useful story-relevant production details, without a quota:
 
 - source: golden morning sun, cool skylight, lantern glow, reflected water;
 - separation: rim light, pollen halo, mist shaft, edge light;
@@ -87,6 +87,7 @@ Do not move all dialogue to the start or end. Preserve punctuation and words fro
 - One-shot clip: often 80–140 words
 - Two-shot clip: often 150–230 words
 - Three-shot clip: often 220–330 words
+- Four-shot 30-second clip: often 280–420 words
 
 These are diagnostic ranges, not limits. Remove any sentence that does not change action, performance, composition, light, material response, sound, or edit.
 

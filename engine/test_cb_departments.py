@@ -174,7 +174,8 @@ def test_cinematography_preserves_canonical_cast_order_without_rejecting_reorder
         negativeSpace=["Keep the narrow sky gap visible."],
         providerPrompt="A complete provider-facing opening-frame direction for the storm turn.",
     )
-    monkeypatch.setattr(D.cb_llm, "structured", lambda *_args, **_kwargs: direction)
+    monkeypatch.setattr(D.cb_llm, "structured_with_repair",
+                        lambda *_args, **_kwargs: direction)
 
     result = D.prepare_cinematography({
         "shot": {"charactersInFrame": ["Fuzzby", "Zenny"]},
@@ -206,7 +207,8 @@ def test_cinematography_allows_declared_later_entrant_outside_opening_frame(monk
         negativeSpace=["Keep water beside the hull empty for Squeaky's later entrance."],
         providerPrompt="A complete provider-facing opening-frame departure direction.",
     )
-    monkeypatch.setattr(D.cb_llm, "structured", lambda *_args, **_kwargs: direction)
+    monkeypatch.setattr(D.cb_llm, "structured_with_repair",
+                        lambda *_args, **_kwargs: direction)
 
     result = D.prepare_cinematography({
         "shot": {
@@ -452,6 +454,9 @@ def test_relay_opening_frame_contract_overrides_stale_first_frame_wording():
 
     compiled = D.compile_animation_provider_prompt(shot, direction)
 
+    assert "[Crystal Energy Law]" in compiled
+    assert "vibrational, living and beautiful" in compiled
+    assert "never a hard-edged beam" in compiled
     assert ("@图1 is the first frame and the previous shot's approved final frame."
             in compiled)
     assert "Use it only for carried character state" in compiled
@@ -462,6 +467,19 @@ def test_relay_opening_frame_contract_overrides_stale_first_frame_wording():
     assert "boat-position" not in compiled
     assert compiled.count("图1 is the first frame") == 1
     assert "It defines opening composition and state" not in compiled
+
+    extension_data = direction.model_dump()
+    extension_data["taskMode"] = "extend-forward"
+    extension_data["creativeTranslation"]["generationDesign"]["packagingDecision"] = "continuation-unit"
+    extension_direction = D.AnimationDirection.model_validate(extension_data)
+    extension_prompt = D.compile_animation_provider_prompt(shot, extension_direction)
+
+    assert "[Video Extension Continuity]" in extension_prompt
+    assert "[Extension Goal]" in extension_prompt
+    assert "[One-Sentence Summary]" not in extension_prompt
+    assert "@Video1 is the source video to extend forward." in extension_prompt
+    assert "Preserve pose, props, layout, camera, light and motion at the connecting frame" in extension_prompt
+    assert "Each subject remains the same continuous instance throughout" in extension_prompt
 
 
 def test_prepare_direction_archives_a_stale_candidate_before_replacing_it(
@@ -640,20 +658,22 @@ def test_animation_story_lock_requires_every_approved_visual_event():
     assert missing["ready"] is False
     assert "approved visual event is absent" in missing["errors"][0]
 
-    decomposed = D.animation_story_lock_report(
-        shot,
-        "Shot 1: Action: Fuzzby hits the leaf. End state: the leaf is loaded. "
-        "Shot 2: Action: The leaf rebounds him upright. End state: Fuzzby hovers.",
-        [{
-            "primaryEvent": "Fuzzby hits the leaf, and rebounds upright.",
-            "observableEndState": "Fuzzby hovers upright beside the recoiling leaf.",
-        }],
-        [
-            {"causalAction": "Fuzzby hits the leaf."},
-            {"causalAction": "The leaf rebounds him upright."},
-        ],
+
+def test_animation_story_lock_accepts_legacy_stage_plan_text():
+    shot = {
+        "storyboardStagePlanApproved": (
+            "Stage 1 (0-10s): Bo draws Keen on the leaf with a blue pencil. "
+            "Stage 2 (10-30s): Keen lifts the drawing and the friends laugh warmly."
+        )
+    }
+
+    locked = D.animation_locked_visual_events(shot)
+
+    assert [item["stageNumber"] for item in locked] == [1, 2]
+    assert locked[0]["primaryEvent"] == "Bo draws Keen on the leaf with a blue pencil."
+    assert locked[1]["primaryEvent"] == (
+        "Keen lifts the drawing and the friends laugh warmly."
     )
-    assert decomposed["ready"] is True
 
 
 def test_creative_translation_preserves_approved_gag_clock_and_provider_action():
@@ -911,6 +931,25 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     # delivers the beat and satisfies the Seedance/craft contracts.
     assert len(prompt.split()) > 0
 
+    exact_audio_direction = json.loads(json.dumps(direction))
+    exact_audio_direction["audioContract"] = (
+        "Preserve @Audio1 unchanged. During dialogue only the active speaker articulates; "
+        "during approved laughter and giggling animate only the characters audibly "
+        "participating in that exact interval. No provider-generated dialogue, laughter, "
+        "vocalisations, music, ambience or SFX."
+    )
+
+    exact_prompt = D.compile_animation_provider_prompt(shot, exact_audio_direction)
+
+    assert "Preserve the complete @Audio1 bed unchanged." in exact_prompt
+    assert "During approved laughter or giggling in @Audio1" in exact_prompt
+    assert "all listeners remain silent and non-articulating" in exact_prompt
+    assert "Do not generate additional dialogue, laughter, vocalisations" in exact_prompt
+    assert "No music. No ambience. No SFX." in exact_prompt
+    assert "Seedance generates separate synchronized non-dialogue SFX" not in exact_prompt
+    assert "Seedance 2.5 must provide instrumental music" not in exact_prompt
+    assert "Seedance 2.5 must provide the shot's directed non-verbal SFX" not in exact_prompt
+
 
 def test_animation_provider_prompt_emits_deterministic_dialogue_placements():
     shot = {
@@ -973,6 +1012,104 @@ def test_animation_provider_prompt_emits_deterministic_dialogue_placements():
     assert "Spoken action: Keen, breathy surface gasp: {I’ve got you!}" in prompt
     assert ("Spoken action: Keen, breathless surface self-command: "
             "{I’ve got this… I’ve got this…}") in prompt
+
+
+def test_exact_audio_multishot_uses_seedance_team_structure_and_live_slot_order():
+    shot = {
+        "shotId": "S6.SH2",
+        "durationSec": 30,
+        "charactersInFrame": ["Bo", "Misty", "Amie"],
+        "dialogueLines": [
+            {"speaker": "Misty", "exactText": "Can it do that again?",
+             "startSec": 4.0, "endSec": 5.2},
+            {"speaker": "Bo", "exactText": "3, 2, 1…",
+             "startSec": 12.0, "endSec": 14.0},
+        ],
+    }
+    direction = {
+        "durationSec": 30,
+        "generationGoal": "Bo's tail surprise becomes chosen play and belonging.",
+        "dramaticBeat": "Public embarrassment becomes shared affection.",
+        "performanceArc": "Bo moves from uncertainty to confident laughter.",
+        "physicalCauseAndEffect": "The tail poofs, grows, then settles fully puffed.",
+        "creativeTranslation": {"interpretation": {}, "gagClocks": []},
+        "referenceContract": [
+            {"assetTag": "@图1", "role": "opening_frame",
+             "controls": "the approved previous-shot final frame"},
+            {"assetTag": "@图2", "role": "character_identity",
+             "controls": "Misty identity and scale only"},
+            {"assetTag": "@图3", "role": "character_identity",
+             "controls": "Bo identity and scale only"},
+            {"assetTag": "@Audio1", "role": "audio",
+             "controls": "the approved exact performance"},
+        ],
+        "openingCarriedState": "Bo is seated with his normal tail visible.",
+        "openingMotionBridge": "Hold the inherited frame, then widen as the tail poofs.",
+        "actionOwnership": ["Only Bo owns and performs the tail poof."],
+        "shotPlan": [
+            {
+                "shotNumber": 1,
+                "framingLensAndCamera": "Begin on the inherited frame and widen.",
+                "causalAction": "Bo's tail poofs and Misty responds warmly.",
+                "observablePerformance": "Bo checks Misty's kind expression.",
+                "landingImage": "The first poof remains visible.",
+                "dialogueLineIndexes": [1],
+                "dialogueDirections": ["gentle delight"],
+                "gagBeatIds": [],
+            },
+            {
+                "shotNumber": 2,
+                "framingLensAndCamera": "Cut to Bo, then settle on the circle.",
+                "causalAction": "Bo counts and chooses the final poof.",
+                "observablePerformance": "Bo becomes confident.",
+                "landingImage": "Bo ends happy with his tail fully puffed.",
+                "dialogueLineIndexes": [2],
+                "dialogueDirections": ["shy, growing braver"],
+                "gagBeatIds": [],
+            },
+        ],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "startSec": 0.0,
+            "endSec": 30.0,
+            "beatIds": [],
+            "purpose": "Tail poof and belonging payoff.",
+            "initialOrCarriedState": "Bo is seated with his normal tail visible.",
+            "cause": "Bo's nervous tail reacts in public.",
+            "primaryEvent": "Three escalating poofs become a shared game.",
+            "emotionOrCameraAnalysis": "Keep Bo's changing confidence readable.",
+            "observableEndState": "Bo remains happy and included.",
+        }],
+        "editScope": "Two internal shots with one intentional cut.",
+        "geography": ["The Learning Circle remains fixed around Bo."],
+        "consistencyContract": ["Keep Bo seated and Misty opposite him."],
+        "surgicalSafeguards": ["Bo's tail remains anatomically attached."],
+        "continuityFinish": "Bo remains seated, happy and included.",
+        "audioContract": (
+            "Preserve @Audio1 unchanged. During dialogue only the active speaker "
+            "articulates; during approved laughter animate only audible participants. "
+            "No provider-generated dialogue, laughter, vocalisations, music, ambience "
+            "or SFX."
+        ),
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    for heading in (
+        "Scenario Description:", "Reference Contract:",
+        "Continuity Priority:", "Rendering Intent:",
+        "Style Description:", "Character Description and Core Action:",
+        "Character Reference Authority:", "Audio Hierarchy and Music Policy:",
+        "Camera Movement Description:", "Landing State:",
+        "Negative Prompt (Negative):",
+    ):
+        assert heading in prompt
+    assert "[One-Sentence Summary]" not in prompt
+    assert "[Global Supplement]" not in prompt
+    assert R.cb_prompt_lab.uses_enhanced_seedance_structure(prompt)
+    assert "Slots: @图1=opening_frame; @图2=Misty; @图3=Bo; @Audio1=audio; never swap." in prompt
+    assert prompt.count("{Can it do that again?}") == 1
+    assert prompt.count("{3, 2, 1…}") == 1
 
 
 def test_character_reference_label_accepts_authority_first_contracts():
@@ -1123,6 +1260,12 @@ def test_animation_compiler_emits_continuous_internal_units_as_timed_phases():
     assert "follows slightly late" in prompt
     assert "compresses the flower and loads the springy leaf" in prompt
     assert "one flip and a proud wobbling hover" in prompt
+
+    cut_prompt = D.compile_animation_provider_prompt(
+        shot, {**direction, "editScope": "One playable unit with three internal shots and two intentional cuts."})
+    assert "[Shot Sequence]" in cut_prompt
+    assert "Shot 1:" in cut_prompt
+    assert "One continuous Seedance render" not in cut_prompt
 
 
 def test_animation_compiler_normalizes_seedance_ready_watch_prompt():

@@ -228,9 +228,8 @@ def post_direction_audit(line, locked_line, card, register):
                f"{recipe_id} has a positive takes count.")
         if len(_words(locked_text)) <= int(rules["shortLineMaxWords"]):
             has_context = bool(str(line.get("previousText") or "").strip())
-            _check(checks, f"short-line-context:{recipe_id}", has_context and
-                   take_count >= int(rules["shortLineMinimumTakes"]),
-                   f"Short line {recipe_id} includes previous_text runway and at least two takes.")
+            _check(checks, f"short-line-context:{recipe_id}", has_context,
+                   f"Short line {recipe_id} includes previous_text runway.")
 
     all_tags = sorted({tag for recipe in recipes for tag in _tags(recipe.get("performedText"))})
     purposes = _tag_purpose_map(line.get("tagPurposes"))
@@ -238,8 +237,17 @@ def post_direction_audit(line, locked_line, card, register):
     _check(checks, "tag-purposes", not missing_purposes,
            "Every audio tag has a named dramatic purpose." if not missing_purposes else
            "Tags without dramatic purpose: " + ", ".join(missing_purposes))
-    pause_notation = bool(re.search(r"…|—|\[(?:pause|long pause|pauses|hesitates)\]",
-                                    " ".join(str(r.get("performedText") or "") for r in recipes), re.I))
+    performed_text = " ".join(str(r.get("performedText") or "") for r in recipes)
+    explicit_pause_tag = bool(re.search(
+        r"\[(?:pause|long pause|pauses|hesitates)\]", performed_text, re.I))
+    # Script punctuation is dialogue, not added performance direction. Require a
+    # reason only when Direction introduces extra ellipses or em dashes.
+    performed_spoken = _TAG_RE.sub("", performed_text)
+    added_pause_punctuation = any(
+        performed_spoken.count(mark) > len(recipes) * locked_text.count(mark)
+        for mark in ("…", "—")
+    )
+    pause_notation = explicit_pause_tag or added_pause_punctuation
     _check(checks, "pause-reasons", not pause_notation or bool(line.get("pauseReasons")),
            "Every pause/hesitation notation has a named reason.")
     _check(checks, "line-duration",

@@ -37,4 +37,4 @@ not an automatic artistic score.
 - Character-specific behaviour takes precedence over generic camera recipes.
 - Music is withheld or used with intent; it does not manufacture emotion missing on screen.
 - No model may submit a provider job, authorize spend, approve media or advance a production
-  gate. Human approval remains the authority at Story & Direction, SEE, HEAR and WATCH.
+  gate. Direction is prepared internally. Human approval remains the authority for SEE, HEAR, the WATCH request and returned media.

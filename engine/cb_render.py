@@ -107,6 +107,8 @@ import cb_identity
 import cb_voice_director
 import cb_emission_conformance as emission
 import cb_emission_standard
+import cb_production_contracts as production_contracts
+import cb_provider_jobs
 import cb_engine_rules
 import cb_asset_registry
 import cb_prompt_bank
@@ -128,6 +130,12 @@ def _as_text_list(value):
 
 def _submit_seedance_provider(prompt, image_inputs, **kwargs):
     """The sole production gateway into Seedance for generation, extension and editing."""
+    output = pathlib.Path(kwargs.get("out") or MEDIA)
+    parent = output.parent if output.is_absolute() else MEDIA
+    while not parent.exists():
+        parent = parent.parent
+    if shutil.disk_usage(parent).free < 256 * 1024 * 1024:
+        raise Refused("REFUSED — free at least 256 MB of storage before starting or recovering a render")
     return cb_gen.generate_video_seedance_ref(prompt, image_inputs, **kwargs)
 DUR_TOLERANCE_SEC = 1.5          # rendered clip may differ from designed duration by this much
 CHARACTER_SCALE_CONTROL_ROLE = "character scale control"
@@ -311,21 +319,29 @@ def _requires_stage_contract_keyframe(shot):
 
 def _shot_uses_own_keyframe(shot, ledger=None):
     """Whether SEE must author and approve a shot-owned opening frame."""
-    if shot.get("sourceType") == "opener":
-        return True
-    if not _requires_stage_contract_keyframe(shot):
-        return False
-    return str((ledger or {}).get("continuityMode") or "") != "video-extension"
+    # A relay's approved predecessor frame is already its authored SEE contract.
+    # Requiring another frame for a large cast breaks the exact continuity the relay
+    # exists to preserve and sends the Studio around SEE -> HEAR -> WATCH in a loop.
+    return shot.get("sourceType") == "opener"
 
 
-def _require_stage_contract_keyframe(shot, ledger):
+def _require_stage_contract_keyframe(shot, ledger, pkg=None):
     if not _requires_stage_contract_keyframe(shot):
         return
-    if (
-        (shot.get("sourceType") == "relay" or shot.get("sourceShotId"))
-        and ledger.get("continuityMode") == CONTINUITY_MODE_VIDEO_EXTENSION
-    ):
-        return
+    if shot.get("sourceType") == "relay" or shot.get("sourceShotId"):
+        if ledger.get("continuityMode") == CONTINUITY_MODE_VIDEO_EXTENSION:
+            return
+        source_id = shot.get("sourceShotId")
+        source = _ledger(pkg, source_id) if pkg and source_id else {}
+        inherited = source.get("harvestFrame")
+        if (source.get("status") == "approved" and inherited and
+                os.path.exists(inherited)):
+            return
+        raise Refused(
+            f"REFUSED — {shot.get('shotId')} is waiting for {source_id}'s approved "
+            "final frame. Approve the previous WATCH take first; its harvested final "
+            "frame becomes this relay shot's SEE contract automatically."
+        )
     approval = ledger.get("keyframeApproval") or {}
     path = approval.get("path")
     if approval.get("approved") and path and os.path.exists(path):
@@ -688,7 +704,21 @@ def _episode_character_state(character, shot, scene, episode):
     A transition shot keeps the incoming identity reference; the action and explicit prop
     reference create the new state. Subsequent shots inherit the new identity reference.
     """
-    if _norm(character) != _norm("Keen") or str(episode) != "Ep1":
+    canonical = _resolve_char(character, _characters_cfg())
+    if canonical == "Bo" and str(episode) == "Ep2":
+        required = {
+            str(item or "").strip().casefold()
+            for item in ((shot or {}).get("requiredPropReferences") or [])
+        }
+        try:
+            scene_number = int(str(scene))
+        except (TypeError, ValueError):
+            scene_number = 0
+        if ("bo_satchel" in required or "satchel" in required or
+                scene_number >= 4):
+            return "with-satchel"
+        return None
+    if _norm(canonical) != _norm("Keen") or str(episode) != "Ep1":
         return None
     text = _shot_continuity_text(shot or {})
     try:
@@ -1028,7 +1058,7 @@ def generate_scenelook_plate(scene, episode="Ep1", reference_path=None, log=prin
     prompt = approved_look_prompt(scene, episode)
     if not prompt:
         raise Refused("REFUSED — Prepare current Look Development direction first.")
-    _require_confirmed_billing("fal")
+    _require_confirmed_billing("byteplus")
     (HERE / "media").mkdir(parents=True, exist_ok=True)
     out = HERE / "media" / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}.png"
     refs = [str(reference_path)] if reference_path else []
@@ -2229,10 +2259,38 @@ def build_keyframe(scene, shot_id, episode="Ep1", log=print):
     shot = _shot(pkg, shot_id)
     if not _shot_uses_own_keyframe(shot, _ledger(pkg, shot_id)):
         raise Refused(f"REFUSED — {shot_id} inherits its opening frame and needs no build")
-    if (_ledger(pkg, shot_id).get("keyframeCandidate") or
-            _ledger(pkg, shot_id).get("keyframeCandidates")):
-        raise Refused(
-            f"REFUSED — {shot_id} already has a finished keyframe waiting for Accept or Iterate")
+    ledger = _ledger(pkg, shot_id)
+    pending = ledger.get("keyframeCandidate") or (
+        (ledger.get("keyframeCandidates") or [None])[0])
+    if pending:
+        # A candidate from an older plate/cast/reference graph must not trap the shot
+        # between the stale-input warning and the pending-review gate. Preserve it as
+        # history, then let Build create a candidate for the current inputs. Current
+        # candidates still require the explicit Accept or Iterate decision.
+        try:
+            current_signature = _keyframe_input_signature(pkg, shot, scene, episode)
+            candidate_current = pending.get("inputSignature") == current_signature
+        except (Refused, OSError, ValueError):
+            # An old layout can be too malformed to sign against the current cast.
+            # That is stale state, not a reason to keep the shot locked.
+            candidate_current = False
+        candidate_integrity = pending.get("contentHash") == file_sha256(pending.get("path"))
+        if not candidate_current or not candidate_integrity:
+            ledger.setdefault("keyframeSuperseded", []).extend(
+                ledger.get("keyframeCandidates") or [pending])
+            ledger["keyframeRejected"] = {
+                "reason": "Superseded automatically because keyframe inputs changed before review.",
+                "reviewedBy": "Studio",
+                "reviewedAt": _now(),
+                "category": "stale-inputs",
+            }
+            ledger["keyframeCandidate"] = None
+            ledger["keyframeCandidates"] = []
+            ledger["selectedKeyframeCandidateId"] = None
+            _save(pkg, _pkg_path(scene, episode))
+        else:
+            raise Refused(
+                f"REFUSED — {shot_id} already has a finished keyframe waiting for Accept or Iterate")
 
     result = keyframe_shot(scene, shot_id, episode, log=log)
     log(f"KEYFRAME BUILD COMPLETE — {shot_id}: SEE A/B is ready for comparison and explicit "
@@ -2507,6 +2565,27 @@ def _slots_need_continuation_rebuild(slots):
     )
 
 
+def _with_required_prop_slots(slots, shot, scene, episode):
+    """Append explicit prop authority to an image slot map exactly once."""
+    slots = dict(slots or {})
+    existing_roles = {
+        str(role or "").strip().casefold() for role in slots.values()
+    }
+    image_numbers = [
+        int(match.group(1))
+        for key in slots
+        if (match := re.fullmatch(r"@图(\d+)", str(key)))
+    ]
+    next_slot = max(image_numbers, default=0) + 1
+    for role in _required_prop_reference_roles(shot, scene, episode):
+        if role.casefold() in existing_roles:
+            continue
+        slots[f"@图{next_slot}"] = role
+        existing_roles.add(role.casefold())
+        next_slot += 1
+    return slots
+
+
 def _effective_reference_slots(pkg, shot, slots_key, scene, episode):
     slots = dict(shot.get(slots_key) or {})
     if not cb_audio_authority.spoken_dialogue_lines(shot):
@@ -2520,7 +2599,7 @@ def _effective_reference_slots(pkg, shot, slots_key, scene, episode):
         slots = _continuation_reference_slots(
             shot, include_audio=(slots_key == "referenceSlots"))
     if slots_key != "referenceSlots":
-        return slots
+        return _with_required_prop_slots(slots, shot, scene, episode)
     if not slots:
         approved = _stored_approved_department_output(
             pkg, shot.get("shotId"), "animation") or {}
@@ -2554,7 +2633,7 @@ def _effective_reference_slots(pkg, shot, slots_key, scene, episode):
         next_slot += 1
 
     # Required continuity props are first-class provider authorities, not optional prose.
-    # Append them to every animation bundle after resolving the shot's ordinary roles so
+    # Append them to every provider bundle after resolving the shot's ordinary roles so
     # explicit package slots, relay-generated slots and approved Director contracts all
     # receive the same protection. The provider attachment planner will then place these
     # semantic roles in its stable project-wide order.
@@ -2592,7 +2671,11 @@ def _animation_reference_contract(attachment_plan, shot, audio_path=None):
         role = str(item.get("role") or "").strip()
         if not tag or not role:
             continue
-        if role in ("opening keyframe", "previous shot final frame"):
+        if role == "previous shot state reference":
+            typed_role = "location"
+            controls = "preceding accepted world, prop and action state only; recompose the new view without copying camera framing"
+            scope = "continuity"
+        elif role in ("opening keyframe", "previous shot final frame"):
             typed_role = "opening_frame"
             controls = (
                 "the exact first-frame composition and carried visible state from the "
@@ -2644,7 +2727,7 @@ def _animation_reference_contract(attachment_plan, shot, audio_path=None):
 
 
 _NON_IDENTITY_IMAGE_ROLES = {
-    "scene plate", "opening keyframe", "previous shot final frame",
+    "scene plate", "opening keyframe", "previous shot final frame", "previous shot state reference",
     OPENING_COMPOSITION_ROLE, CLOSING_COMPOSITION_ROLE,
     POSED_INTEGRATION_ROLE, CHARACTER_SCALE_CONTROL_ROLE, "Bo vision plate",
 }
@@ -2708,7 +2791,14 @@ def _expanded_reference_blueprint(shot, slots_key, characters_cfg, scene=None,
                                   episode="Ep1"):
     """Bind each logical character slot to one complete, uncropped turnaround sheet."""
     usage = "keyframe" if slots_key == "keyframeReferenceSlots" else "animation"
-    slots = dict(shot.get(slots_key) or {})
+    slots = _with_required_prop_slots(
+        shot.get(slots_key) or {}, shot, scene, episode)
+    transition = shot.get("shotTransition") or {}
+    if usage == "keyframe" and transition.get("type") == "cut" and transition.get("stateSourceShotId"):
+        slots = dict(slots)
+        if "previous shot state reference" not in slots.values():
+            number = max([int(key[2:]) for key in slots if key.startswith("@图")] or [0]) + 1
+            slots[f"@图{number}"] = "previous shot state reference"
     expanded = []
     source_slots = [key for key in slots if key.startswith("@图")]
     relay_keyframe = bool(
@@ -2768,6 +2858,20 @@ def _provider_attachment_plan(shot, slots_key, anchor_path, scene, episode,
 
 def _slot_path_for_role(role, anchor_path, scene, episode, characters_cfg, shot=None,
                         usage="keyframe"):
+    if role == "previous shot state reference":
+        source_id = ((shot or {}).get("shotTransition") or {}).get("stateSourceShotId")
+        source_pkg, _ = load_pkg(scene, episode)
+        source = _ledger(source_pkg, source_id) if source_id else {}
+        frame = source.get("harvestFrame")
+        if source.get("status") != "approved" or not frame or not os.path.isfile(frame):
+            raise Refused("REFUSED — approve the preceding render before building this cut's opening frame")
+        expected = (source.get("approval") or {}).get("harvestHash")
+        if expected and _sha256_file(frame) != expected:
+            raise Refused("REFUSED — preceding approved landing frame changed; recover it before preparing the cut")
+        candidate = _resolved_reference_path(frame)
+        if not candidate or not _reference_path_is_approved(candidate):
+            raise Refused("REFUSED — preceding landing frame is outside the approved Studio library")
+        return str(candidate)
     if role == "previous shot final frame" and not anchor_path and shot:
         source_id = str(shot.get("sourceShotId") or "").strip()
         if source_id:
@@ -3201,7 +3305,8 @@ def _performance_budget_report(shot, led):
     required_unvoiced = reserve + landing
     minimum = float(budget.get("minimumHonestDurationSec") or 0)
     reasons = []
-    if budget.get("decision") != "single-unit":
+    decision = str(budget.get("decision") or "")
+    if decision != "single-unit" and not decision.startswith("single-unit-"):
         reasons.append("Director marked this unit for a split before generation")
     if minimum > duration:
         reasons.append(
@@ -3708,8 +3813,9 @@ def apply_scoped_voice_contract_correction(scene, shot_id, corrected_lines,
 
     shot["dialogueLines"] = normalized
     shot["dialogueBinding"] = (
-        "Perform only the ordered approved dialogue occurrences. The opening countdown is "
-        "a synchronous Bo-and-Keen chorus. Screenplay action, sound labels and BEAT are silent.")
+        "Perform only the ordered approved dialogue occurrences. Screenplay action, sound "
+        "labels and BEAT are silent. Only the active speaker moves their mouth; every other "
+        "character reacts silently.")
     shot["voiceDirectorBrief"] = [{
         "dialogueOccurrenceId": line["dialogueOccurrenceId"],
         "sourceEventId": line["sourceEventId"],
@@ -3813,7 +3919,8 @@ def _department_candidate(stage, output, context):
             "creativeDirectingStandardVersion": standard_version,
             "sourceHash": hashlib.sha256(json.dumps(context, sort_keys=True,
                                                        ensure_ascii=False).encode()).hexdigest(),
-            "output": output}
+            "output": output,
+            "reviewObservations": context.get("reviewObservations") or ""}
     if stage.startswith("review-"):
         candidate["reviewedMediaPaths"] = list(context.get("reviewedMediaPaths") or [])
     if stage == "animation" and context.get("animationPreflight"):
@@ -3873,9 +3980,11 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
         })
         work["candidate"] = None
 
+    from cb_learning_context import brief as review_observations
     temp_dir = None
     if stage == "look":
         context = _scene_context(pkg, scene, episode)
+        context["reviewObservations"] = review_observations(context)
         result = cb_departments.prepare_look(context, log=log)
     elif stage == "review-final":
         post = post_status(pkg, scene, episode)
@@ -3905,6 +4014,7 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
         if stage in ("cinematography", "animation"):
             _require_forward_directing_source(pkg, shot, scene, episode)
         context = _shot_context(pkg, shot, led, scene, episode)
+        context["reviewObservations"] = review_observations(context)
         if stage == "cinematography":
             chars = _characters_cfg()
             attachment_plan = _provider_attachment_plan(
@@ -3937,6 +4047,29 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                 name: (chars.get(_resolve_char(name, chars)) or {}).get("heightIn")
                 for name in (shot.get("charactersInFrame") or [])}
             result = cb_departments.prepare_cinematography(context, images, log=log)
+            # A scoped shot correction may carry an explicitly authored layout. Use it
+            # as the local geometry source even when the director cache returns an older
+            # prose response; identity/reference work remains provider-bound below.
+            authored_override = shot.get("authoredOpeningFrameLayout")
+            if authored_override:
+                authored_override = dict(authored_override)
+                authored_placements = list(authored_override.get("placements") or [])
+                opening_names = list(shot.get("openingCharactersInFrame") or
+                                     shot.get("charactersInFrame") or [])
+                by_character = {
+                    str(item.get("character") or "").strip(): item
+                    for item in authored_placements
+                    if isinstance(item, dict)
+                }
+                authored_override["placements"] = [
+                    by_character[name] for name in opening_names if name in by_character
+                ]
+                result = cb_departments.CinematographyDirection.model_validate({
+                    **result.model_dump(),
+                    "charactersInFrame": list(opening_cast if 'opening_cast' in locals() else (
+                        shot.get("openingCharactersInFrame") or shot.get("charactersInFrame") or [])),
+                    "openingFrameLayout": authored_override,
+                })
             opening_cast = list(dict.fromkeys(
                 shot.get("openingCharactersInFrame") or
                 shot.get("charactersInFrame") or []))
@@ -4240,6 +4373,26 @@ def recompile_animation_candidate(scene, shot_id, episode="Ep1", log=print):
 
     shot = _shot(pkg, shot_id)
     ledger = _ledger(pkg, shot_id)
+    # Script/storyboard migrations can change the scoped shot digest while leaving every
+    # cinematography input and authored direction unchanged.  In that one hash-only case,
+    # carry the prepared direction forward before rebuilding Animation.  Otherwise the
+    # automatic WATCH repair deadlocks behind a specialist refresh that has no creative work
+    # to redo.  Any substantive cinematography input change still fails closed below.
+    cine_checker = globals().get("_department_record_status")
+    if callable(cine_checker):
+        cine_state = cine_checker(pkg, shot_id, "cinematography", scene, episode)
+        cine_record = cine_state.get("record") or {}
+        cine_expected = cine_state.get("expectedInputSignature")
+        cine_changes = set(_signature_diff(
+            cine_record.get("inputSignature"), cine_expected))
+        if (not cine_state.get("current") and cine_record.get("output") and
+                cine_expected and cine_changes == {"shotContractHash"}):
+            cine_record["inputSignature"] = cine_expected
+            cine_record["hashOnlyCarryForward"] = {
+                "at": _now(),
+                "reason": "scoped shot metadata changed; cinematography inputs unchanged",
+                "changedFields": sorted(cine_changes),
+            }
     # Recompile from the same effective shot view used by the live safety gate.
     # This includes scene-level continuity locks as well as voice timing; using a
     # narrower view makes the freshly compiled prompt stale immediately.
@@ -4335,11 +4488,19 @@ def recompile_animation_candidate(scene, shot_id, episode="Ep1", log=print):
             HERE.parent, episode, scene, shot_id,
             "animation-prompt-recompiled-before-fire")
         ledger["pendingSpendAuth"] = None
-    if (ledger.get("batch") or {}).get("status") == "complete":
+    if (ledger.get("status") != "approved" and
+            (ledger.get("batch") or {}).get("status") == "complete" and
+            ledger.get("candidatePaths")):
         ledger["batch"]["supersededByDirectionAt"] = _now()
         ledger["batch"]["approvalBlockedReason"] = (
             "Director inputs were recompiled after these candidates were generated")
         ledger["status"] = "direction-recompiled-candidates-stale"
+    elif (not ledger.get("candidatePaths") and
+          ledger.get("status") == "direction-recompiled-candidates-stale"):
+        # A rejected batch remains in history as complete even after all of its media
+        # has been archived. With no live candidate there is nothing left to invalidate;
+        # keep the freshly compiled direction fireable instead of creating a dead gate.
+        ledger["status"] = "designed"
 
     candidate["inputSignature"] = _department_input_signature(
         pkg, "animation", shot_id, scene, episode)
@@ -4609,8 +4770,26 @@ def _keyframe_same_depth_scale_protection(direction, characters_cfg):
             "the camera; preserve their canonical relative heights.")
 
 
+SEEDREAM_KEYFRAME_PROMPT_STANDARD = "crystal-bears-seedream-keyframes@1.0.0"
+SEEDREAM_KEYFRAME_PROMPT_SECTIONS = (
+    "DELIVERABLE",
+    "UPSTREAM DELIVERY",
+    "PRIMARY OUTCOME",
+    "REFERENCE AUTHORITY",
+    "IDENTITY, COUNT AND STATE",
+    "COMPOSITION AND DECISIVE INSTANT",
+    "CAMERA",
+    "MOTION READINESS",
+    "ART DIRECTION",
+    "PHYSICAL INTEGRATION",
+    "PRESERVE",
+    "EXCLUDE",
+    "ACCEPTANCE TEST",
+)
+
+
 def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
-    """Compile the complete approved opening-stage direction."""
+    """Compile the documented Seedream 5 Pro production brief from approved direction."""
     if not direction or not direction.get("openingFrameLayout"):
         raise Refused(
             f"REFUSED — current Cinematography direction for {shot.get('shotId')} has no "
@@ -4642,11 +4821,19 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             grouped[-1][1].append(attachment)
     for _source_slot, attachments in grouped:
         role = attachments[0]["role"]
-        if role == "scene plate":
+        if role == "previous shot state reference":
+            slot = attachments[0]["slot"]
+            instruction = (f"- {slot}: preceding accepted landing frame; continuity evidence for world positions, "
+                           "props, action phase, lighting and emotion only. Compose the new authored camera view; "
+                           "do not copy its framing or mirror the set. Character references own identity.")
+            reference_lines.append(instruction)
+            compact_reference_lines.append(instruction)
+        elif role == "scene plate":
             slot = attachments[0]["slot"]
             scene_look_slot = slot
             reference_lines.append(
-                f"- {slot} is the locked Scene Look plate; inherit world, viewpoint, scale, "
+                f"- {slot} is the locked Scene Look plate; inherit world, "
+                + ("" if (shot.get("shotTransition") or {}).get("type") == "cut" else "viewpoint, ") + "scale, "
                 "materials, light and atmosphere only.")
             compact_reference_lines.append(
                 f"- {slot}: approved Scene Look; world, scale, materials, light and "
@@ -4747,58 +4934,64 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
     compact_reference_body = (
         "\n".join(compact_reference_lines) + compact_separation_line).strip()
 
-    protected_sections = {
-        "Intended Read": re.sub(r"\s+", " ", str(direction["audienceRead"])).strip(),
-        "Geography": "\n".join(contract["geography"]),
-        "Frame": _keyframe_frame_section(direction, characters_cfg),
-        "Negative Space": "\n".join(contract["negativeSpace"]),
-    }
+    intended_read = re.sub(r"\s+", " ", str(direction["audienceRead"])).strip()
+    frame = _keyframe_frame_section(direction, characters_cfg)
+    geography = "\n".join(contract["geography"])
+    negative_space = "\n".join(contract["negativeSpace"])
 
     scene_look_authority = (
         f"{scene_look_slot} is the approved visual authority for world, canonical style, "
         "materials, light and atmosphere."
         if scene_look_slot else None)
 
-    def _emit(*, compact_controls=False, compact_references=False,
-              compact_forbidden=False, spend_scene_look=False):
-        sections = [("Opening Stage",
-                     (f"Playable 16:9 anticipation for {shot.get('shotId')}; no portrait or payoff."
-                      if compact_controls else
-                      f"Create a playable 16:9 opening for {shot.get('shotId')}; frame-one "
-                      "anticipation, not portrait or payoff."))]
-        sections.append(("Intended Read", protected_sections["Intended Read"]))
-        refs = compact_reference_body if compact_references else reference_body
-        if refs:
-            sections.append(("References", refs))
-        sections.append((
-            "Characters In Frame",
-            "\n".join(f"- {name}" for name in contract["cast"])))
-        sections.extend([
-            ("Frame", protected_sections["Frame"]),
-            ("Geography", protected_sections["Geography"]),
-            ("Negative Space", protected_sections["Negative Space"]),
-        ])
-        if spend_scene_look and scene_look_authority:
-            sections.append(("Scene Look", scene_look_authority))
+    def _emit():
+        cast = contract["cast"]
+        cast_count = ", ".join(f"one {name}" for name in cast)
+        refs = reference_body
+        sections = [
+            ("DELIVERABLE",
+             f"KEYFRAME - {shot.get('shotId')} - 16:9 - 2K PNG. Create one motion-ready "
+             "opening frame for the approved Seedance shot."),
+            ("UPSTREAM DELIVERY",
+             f"Locked audience read: {intended_read}\n"
+             + (production_contracts.shot_handoff_instruction(shot, still=True) + "\n" if shot.get("shotTransition") else "") +
+             "Locked opening composition: use the typed COMPOSITION AND DECISIVE INSTANT "
+             "section below verbatim; do not recover staging from older free-form prose.\n"
+             "Decisive instant: frame one, before any later scripted action, payoff or landing."),
+            ("PRIMARY OUTCOME",
+             f"The opening image must clearly read as: {intended_read} It must be a playable "
+             "frame-one state, not a portrait or a later payoff."),
+            ("REFERENCE AUTHORITY", refs),
+            ("IDENTITY, COUNT AND STATE",
+             f"Render exactly {cast_count}; {len(cast)} visible character instance(s) total. "
+             "Each named identity comes only from its assigned reference slot. Keep every "
+             "identity distinct and preserve the temporary frame-one state defined below."),
+            ("COMPOSITION AND DECISIVE INSTANT",
+             f"Frame:\n{frame}\n\nGeography:\n{geography}\n\n"
+             f"Required negative space:\n{negative_space}"),
+            ("CAMERA", emission.ensure_complete_sentence(
+                direction["lensAndCameraRelationship"],
+                context="keyframe camera direction")),
+            ("MOTION READINESS",
+             "This is frame one only. Animation owns all later performance, movement, recovery "
+             "and camera evolution. Preserve readable anticipation, grounded weight, clean "
+             "silhouettes and the required negative space for the first scripted action. Do not "
+             "show the later payoff or landing state."),
+        ]
+        if scene_look_authority:
+            art_direction = (
+                f"{scene_look_authority} Do not redesign or embellish the approved Crystal Bears "
+                "world or import visual traits from character turnarounds.")
         else:
-            sections.append(("Canonical Style", direction["canonicalStyleParagraph"]))
-        sections.append(("Camera", emission.ensure_complete_sentence(
-            direction["lensAndCameraRelationship"],
-            context="keyframe camera direction")))
-        if not (spend_scene_look and scene_look_authority):
-            sections.append(("Light", str(direction["lightingAndDepth"]).strip()))
+            art_direction = str(direction["canonicalStyleParagraph"]).strip()
+        sections.append(("ART DIRECTION", art_direction))
         sections.append((
-            "Physical Integration",
-            "Keep every subject grounded in the authored perspective and depth. Match the "
-            "approved light direction and scale; preserve natural contact shadows, surface "
-            "reflections and occlusion where subjects meet the environment."))
-        sections.append((
-            "Performance Freedom",
-            ("Animation owns later performance and motion."
-             if compact_controls else
-             "Animation owns performance, movement, recovery and camera evolution.")))
-        if protections:
-            sections.append(("Protect", "\n".join(protections)))
+            "PHYSICAL INTEGRATION",
+            f"{str(direction['lightingAndDepth']).strip()} Keep every subject grounded in the "
+            "authored perspective and depth. Match the approved light direction and whole-character "
+            "scale; preserve natural contact shadows, surface reflections and occlusion where "
+            "subjects meet the environment."))
+        sections.append(("PRESERVE", "\n".join(protections)))
         required_props = [str(value).strip() for value in
                           shot.get("requiredPropReferences") or [] if str(value).strip()]
         if required_props:
@@ -4808,28 +5001,43 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             )
         else:
             prop_rule = "No extra cast, props, body-mounted bags, sacks, baskets or dangling loads."
-        sections.append(("Forbidden",
-                         ("No portrait/payoff, identity or scale drift, altered reference "
-                          f"features, duplicates, anatomy errors, text or watermarks. {prop_rule}"
-                          if compact_forbidden else
-                          "No portrait, locked extreme action pose or payoff, identity or scale "
-                          "drift, changed accessories, omitted reference features, duplicates, "
-                          f"anatomy errors, text or watermark. {prop_rule} Preserve the locked "
-                          "Scene Look.")))
+        sections.append((
+            "EXCLUDE",
+            "No portrait, locked extreme action pose or payoff, identity or scale drift, changed "
+            "accessories, omitted reference features, duplicates, anatomy errors, text or "
+            f"watermark. {prop_rule} Preserve the locked Scene Look."))
+        acceptance = [
+            f"- PASS only if the image contains exactly {cast_count} and no additional character.",
+            "- PASS only if every character matches the identity and accessories in the assigned "
+            "reference, with no trait swaps or blended identities.",
+            "- PASS only if every Frame and Geography statement above is visibly satisfied.",
+            "- PASS only if the composition preserves all required negative space and leaves the "
+            "first scripted action physically playable.",
+            "- PASS only if the image is the approved frame-one instant with no later payoff or "
+            "landing shown.",
+            "- PASS only if the Scene Look, perspective, scale, lighting, contact and material "
+            "integration remain coherent and no text or watermark appears.",
+        ]
+        sections.append(("ACCEPTANCE TEST", "\n".join(acceptance)))
         return "\n\n".join(f"[{name}]\n{body}" for name, body in sections).strip()
 
-    # Emit the complete approved direction. Prompt length never selects a shorter variant.
+    # Emit the complete documented brief. Prompt length never selects a shorter variant.
     prompt = _emit()
     try:
-        cb_departments.prompt_sections(prompt)
+        parsed = cb_departments.prompt_sections(prompt)
     except ValueError as exc:
         raise Refused(f"REFUSED — invalid keyframe prompt for {shot.get('shotId')}: {exc}")
+    if tuple(parsed) != SEEDREAM_KEYFRAME_PROMPT_SECTIONS:
+        raise Refused(
+            f"REFUSED — keyframe prompt for {shot.get('shotId')} does not follow "
+            f"{SEEDREAM_KEYFRAME_PROMPT_STANDARD}")
     # Run the same clipping guard used by render and voice over compiler-owned prose.
-    for name, body in cb_departments.prompt_sections(prompt).items():
-        if name in {"Frame", "Camera"}:
+    for name, body in parsed.items():
+        if name in {"COMPOSITION AND DECISIVE INSTANT", "CAMERA"}:
             for line in body.splitlines():
-                emission.require_complete_sentence(
-                    line.removeprefix("- "), context=f"keyframe [{name}]")
+                if line and not line.endswith(":"):
+                    emission.require_complete_sentence(
+                        line.removeprefix("- "), context=f"keyframe [{name}]")
     return prompt
 
 
@@ -5388,6 +5596,10 @@ def reject_voice(scene, shot_id, correction, episode="Ep1", reviewed_by="Julian"
     led["voPath"] = None
     led["voiceApproval"] = None
     led["voGeneratedFrom"] = None
+    # A formal human rejection applies to every derivative of that performance.
+    # Leaving the failed-placement cache live allowed the next voice run to silently
+    # recover rejected paid audio instead of generating the requested new take.
+    led["voicePlacementFailure"] = None
     # a formal reject is a bigger, explicit decision than a quiet regeneration — the
     # old-vs-new comparison slot no longer applies to whatever comes next, so it's cleared
     # rather than left pointing at a take from before this rejected one.
@@ -5686,49 +5898,41 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
         sections = cb_departments.prompt_sections(prompt)
     except ValueError as exc:
         raise Refused(f"REFUSED — invalid keyframe prompt contract: {exc}")
-    expected_sections = {
-        "Intended Read": re.sub(r"\s+", " ", str(specialist["audienceRead"])).strip(),
-        "Geography": "\n".join(direction_contract["geography"]),
-        "Frame": _keyframe_frame_section(specialist, _characters_cfg()),
-        "Negative Space": "\n".join(direction_contract["negativeSpace"]),
-    }
-    for section_name, expected in expected_sections.items():
-        if sections.get(section_name) != expected:
-            raise Refused(
-                f"REFUSED — keyframe prompt [{section_name}] does not match approved "
-                "Cinematography direction verbatim")
-    if "Scene Look" in sections:
-        plan = _expanded_reference_blueprint(
-            shot, "keyframeReferenceSlots", _characters_cfg())
-        scene_slot = next((item["slot"] for item in plan
-                           if item.get("role") == "scene plate"), None)
-        expected_scene_look = (
-            f"{scene_slot} is the approved visual authority for world, canonical style, "
-            "materials, light and atmosphere."
-            if scene_slot else None)
-        if not expected_scene_look or sections["Scene Look"] != expected_scene_look:
-            raise Refused(
-                "REFUSED — keyframe prompt [Scene Look] is not bound to the approved "
-                "Scene Look reference")
-        if "Canonical Style" in sections or "Light" in sections:
-            raise Refused(
-                "REFUSED — reference-backed keyframe prompt duplicates Scene Look prose")
-    else:
-        for section_name, expected in {
-                "Canonical Style": specialist["canonicalStyleParagraph"],
-                "Light": str(specialist["lightingAndDepth"]).strip(),
-        }.items():
-            if sections.get(section_name) != expected:
-                raise Refused(
-                    f"REFUSED — keyframe prompt [{section_name}] does not match approved "
-                    "Cinematography direction verbatim")
-    cast_lines = [line.removeprefix("- ").strip()
-                  for line in sections.get("Characters In Frame", "").splitlines()
-                  if line.strip()]
-    if cast_lines != direction_contract["cast"]:
+    if tuple(sections) != SEEDREAM_KEYFRAME_PROMPT_SECTIONS:
         raise Refused(
-            "REFUSED — keyframe prompt [Characters In Frame] must name each approved "
-            "in-frame character exactly once and in order")
+            "REFUSED — keyframe prompt does not use the complete ordered Seedream 5 Pro "
+            f"production brief required by {SEEDREAM_KEYFRAME_PROMPT_STANDARD}")
+    for required_text, section_name in [
+            (re.sub(r"\s+", " ", str(specialist["audienceRead"])).strip(),
+             "UPSTREAM DELIVERY"),
+            (_keyframe_frame_section(specialist, _characters_cfg()),
+             "COMPOSITION AND DECISIVE INSTANT"),
+            ("\n".join(direction_contract["geography"]),
+             "COMPOSITION AND DECISIVE INSTANT"),
+            ("\n".join(direction_contract["negativeSpace"]),
+             "COMPOSITION AND DECISIVE INSTANT"),
+            (emission.ensure_complete_sentence(
+                specialist["lensAndCameraRelationship"],
+                context="keyframe camera direction"), "CAMERA"),
+            (str(specialist["lightingAndDepth"]).strip(), "PHYSICAL INTEGRATION"),
+    ]:
+        if required_text not in sections[section_name]:
+            raise Refused(
+                f"REFUSED — keyframe prompt [{section_name}] does not contain the approved "
+                "Cinematography direction verbatim")
+    plan = _expanded_reference_blueprint(
+        shot, "keyframeReferenceSlots", _characters_cfg())
+    scene_slot = next((item["slot"] for item in plan
+                       if item.get("role") == "scene plate"), None)
+    if scene_slot and scene_slot not in sections["ART DIRECTION"]:
+        raise Refused(
+            "REFUSED — keyframe prompt [ART DIRECTION] is not bound to the approved "
+            "Scene Look reference")
+    for name in direction_contract["cast"]:
+        if f"one {name}" not in sections["IDENTITY, COUNT AND STATE"]:
+            raise Refused(
+                "REFUSED — keyframe prompt [IDENTITY, COUNT AND STATE] must name each "
+                "approved in-frame character exactly once")
     if cb_gen.IMAGE_PROVIDER == "seedream":
         provider_model_id = cb_gen.SEEDREAM_MODEL_ID
     else:
@@ -5736,9 +5940,11 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
     contract = {
         "prompt": prompt,
         "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
-        "promptSource": ("direct-stage-anchor-compiler-from-current-cinematography"
+        "promptSource": ("seedream-keyframe-doc-compiler-from-current-cinematography"
                          if specialist.get("openingFrameLayout")
                          else "missing-current-cinematography"),
+        "promptStandard": SEEDREAM_KEYFRAME_PROMPT_STANDARD,
+        "promptSections": list(SEEDREAM_KEYFRAME_PROMPT_SECTIONS),
         "provider": cb_gen.IMAGE_PROVIDER,
         "providerModelId": provider_model_id,
         "modelVersion": provider_model_id,
@@ -5984,7 +6190,9 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
         try:
             generator(prompt, refs=refs, out=str(out), production_route="cb_render")
         except BaseException as exc:
+            led["keyframeCandidates"] = candidates
             led["keyframeCandidate"] = candidates[0] if candidates else None
+            led["selectedKeyframeCandidateId"] = None
             led["keyframeABFailure"] = {
                 "candidateId": candidate_id,
                 "provider": provider,
@@ -5993,6 +6201,11 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
                 "completedCandidateIds": [item["candidateId"] for item in candidates],
             }
             _save(pkg, path)
+            if candidates:
+                log(f"SEE PARTIAL — {shot_id}: {len(candidates)} candidate(s) completed; "
+                    f"{candidate_id} / {label} failed after the completed candidate was saved "
+                    "(awaiting approval; no duplicate refire needed)")
+                return [candidate["path"] for candidate in candidates]
             raise
         geometry_screening = cb_layout.screen_candidate_geometry(out, composition_master)
         conformance_screening = screen_keyframe_conformance(
@@ -6855,15 +7068,11 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
             "criticalFailures": creative_gate["criticalFailures"],
         }
         audit["contractCompleteness"] = dict(audit["creativeGate"])
-        if audit["status"] != "ready":
+        if not audit.get("productionReady", audit["status"] == "ready"):
             raise Refused(
                 f"REFUSED — provider prompt audit is {audit['score']}/{audit['maximum']}; "
                 "repair the current prompt before spend")
-        if creative_gate["needsRevision"] or authoring_score < SEEDANCE_AUTHORING_FLOOR:
-            raise Refused(
-                f"REFUSED — prompt contract completeness is {creative_gate['score']}/"
-                f"{creative_gate['maximum']}, authoring {authoring_score}/10; "
-                f"minimum authoring floor is {SEEDANCE_AUTHORING_FLOOR}/10")
+        audit["advisoryOnly"] = True
         return {
             "schemaVersion": 1,
             "mode": "single-qualified-provider-call",
@@ -6994,7 +7203,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
         }
         audit["contractCompleteness"] = dict(audit["creativeGate"])
         segment["promptAudit"] = audit
-        if audit["status"] != "ready":
+        if not audit.get("productionReady", audit["status"] == "ready"):
             failed_codes = [
                 item["code"] for item in audit.get("checks") or []
                 if item.get("required") and item.get("status") != "pass"
@@ -7005,13 +7214,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
                 + (f" ({', '.join(failed_codes)})" if failed_codes else "")
                 + "; repair the current Animation direction"
             )
-        if creative_gate["needsRevision"] or authoring_score < SEEDANCE_AUTHORING_FLOOR:
-            raise Refused(
-                f"REFUSED — segment {segment['segmentIndex']} scores "
-                f"creative {creative_gate['score']}/{creative_gate['maximum']}, "
-                f"authoring {authoring_score}/10; minimum authoring floor is "
-                f"{SEEDANCE_AUTHORING_FLOOR}/10"
-            )
+        audit["advisoryOnly"] = True
     plan["costPerStudioCandidateUsd"] = round(total_cost, 4)
     return plan
 
@@ -7205,6 +7408,64 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
              for code in selected_codes if code in source_by_code]
 
     if target_shot_id:
+        target_ledger = _ledger(pkg, target_shot_id)
+        target_voice = (
+            target_ledger.get("voiceApproval")
+            or ((target_ledger.get("departmentWork") or {}).get("voice") or {}).get("approved")
+            or {}
+        )
+        target_voice_approved = bool(target_voice.get("approved") or target_voice.get("outcome") == "approved")
+        target_rec = next((rec for rec in pkg["shots"]
+                           if rec.get("shotId") == target_shot_id), None)
+        target_line_ids = {
+            line.get("dialogueOccurrenceId")
+            for line in (target_rec or {}).get("dialogueLines") or []
+            if line.get("dialogueOccurrenceId")
+        }
+        source_line_ids = {
+            cut.get("dialogueOccurrenceId")
+            for beat in beats
+            for cut in (beat.get("cuts") or [])
+            if cut.get("dialogueOccurrenceId")
+        }
+        if (target_rec and target_rec.get("dialogueLines") and
+                (not beats or not target_line_ids.issubset(source_line_ids))):
+            # Scoped production amendments can legitimately leave the current
+            # episode beat package with renamed/rehomed beat codes while this shot
+            # already has occurrence-locked shot dialogue. Fresh WATCH validation still
+            # needs a verbatim source ledger; use the current shot dialogue as that
+            # temporary source instead of comparing against stale episode-wide beats and
+            # falsely rejecting every line as non-verbatim.
+            voice_cuts = []
+            for index, line in enumerate(target_rec.get("dialogueLines") or [], start=1):
+                text = str(line.get("exactText") or line.get("text") or "").strip()
+                speaker = str(line.get("speaker") or "").strip()
+                if not text or not speaker:
+                    continue
+                voice_cuts.append({
+                    "n": index,
+                    "sourceEventId": line.get("sourceEventId"),
+                    "sourceEventType": "approved-shot-voice",
+                    "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
+                    "speaker": speaker,
+                    "exactText": text,
+                    "dialogue": f"{speaker}: {text}",
+                    "action": None,
+                })
+            synthetic_codes = selected_codes or [target_rec.get("beatCode") or target_shot_id]
+            beats = []
+            for index, code in enumerate(synthetic_codes):
+                cuts = voice_cuts if index == 0 else []
+                beats.append({
+                    "beatCode": code,
+                    "sceneNumber": pkg.get("sceneNumber"),
+                    "storyBeat": target_rec.get("purpose") or target_rec.get("visualPayoff") or target_shot_id,
+                    "cuts": cuts,
+                    "dialogueOccurrenceIds": [
+                        cut["dialogueOccurrenceId"] for cut in cuts
+                        if cut.get("dialogueOccurrenceId")
+                    ],
+                })
         # BIG-gag staging is owned by exactly one production unit. A later unit may
         # legitimately continue the same source beat after that physical gag has already
         # landed in approved media. Keep the source event for dialogue/action validation,
@@ -7228,12 +7489,8 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
     # to the target shot, only after human HEAR approval, and leaves all non-dialogue
     # source actions under the normal validator.
     if target_shot_id:
-        target_ledger = _ledger(pkg, target_shot_id)
-        target_voice = target_ledger.get("voiceApproval") or {}
-        target_rec = next((rec for rec in pkg["shots"]
-                           if rec.get("shotId") == target_shot_id), None)
-        if (target_voice.get("approved") and target_rec and
-                cb_audio_authority.spoken_dialogue_lines(target_rec)):
+        if (target_voice_approved and target_rec and
+                (target_rec.get("dialogueLines") or [])):
             target_codes = set(owned_beat_codes(target_rec))
             # Validate the immutable script representation, including pure and mixed SFX
             # occurrences. spoken_dialogue_lines() is the correct ElevenLabs provider view,
@@ -7472,7 +7729,7 @@ def _resolve_seedance_prompt(pkg, shot, scene=None, episode="Ep1", require_curre
             if scene is None:
                 scene = str(pkg.get("sceneNumber") or "")
             expected = _seedance_working_input_signature(pkg, shot, scene, episode)
-            if working.get("inputSignature") != expected:
+            if not production_contracts.working_signature_matches(working.get("inputSignature"), expected):
                 raise Refused(
                     "REFUSED — saved WATCH working prompt is stale against the current "
                     "SEE/HEAR/reference inputs. Restore it or save the prompt again after "
@@ -7594,6 +7851,22 @@ def save_watch_director_feedback(scene, shot_id, feedback, episode="Ep1",
     }
     _save(pkg, path)
     log(f"WATCH FEEDBACK SAVED — {shot_id} (AI Director input; no provider call)")
+    try:
+        import cb_learning
+        shot = _shot(pkg, shot_id)
+        key = hashlib.sha256(json.dumps({
+            "episode": episode, "scene": str(scene), "shot": shot_id,
+            "feedback": ledger["watchDirectorFeedback"],
+        }, sort_keys=True).encode()).hexdigest()
+        cb_learning.capture_evidence(
+            "retaken", note, episode=episode, scene=str(scene), shot=shot_id,
+            sourceVersion=pkg.get("revision"), role="Animation", category="creative",
+            scope="shot", capturedBy=reviewed_by, decisionKey=key,
+            context=json.dumps({"characters": shot.get("charactersInFrame") or [],
+                                "request": "bounded-watch-feedback"}),
+            assetPointers=[ledger["approvedTake"]] if ledger.get("approvedTake") else [])
+    except Exception as exc:
+        log(f"LEARNING CAPTURE WARNING — feedback saved: {exc}")
     return ledger["watchDirectorFeedback"]
 
 
@@ -7751,21 +8024,14 @@ def _animation_prompt_contract_report(shot, direction):
         duration_sec=data.get("durationSec") or shot.get("durationSec"),
         dialogue_lines=cb_departments.provider_dialogue_lines(shot),
         stage_plan=[] if data.get("shotPlan") else data.get("stagePlan") or [],
+        timeline=data.get("timeline") or None,
     )
     authoring["normalizedScore"] = _seedance_authoring_score(authoring)
     authoring["firingFloor"] = SEEDANCE_AUTHORING_FLOOR
     errors = []
-    if quality["needsRevision"]:
-        errors.append(
-            f"creative contract scores {quality['score']}/{quality['maximum']}"
-            + (f"; critical zero: {', '.join(quality['criticalFailures'])}"
-               if quality["criticalFailures"] else ""))
-    if authoring["status"] != "ready":
-        errors.extend(authoring["repairActions"] or [authoring["summary"]])
-    elif authoring["normalizedScore"] < SEEDANCE_AUTHORING_FLOOR:
-        errors.append(
-            f"Seedance authoring score is {authoring['normalizedScore']}/10; "
-            f"minimum is {SEEDANCE_AUTHORING_FLOOR}")
+    quality["advisoryOnly"] = True
+    if not authoring.get("productionReady", authoring["status"] == "ready"):
+        errors.extend(authoring.get("productionErrors") or authoring["repairActions"])
     story_lock = cb_departments.animation_story_lock_report(
         shot, prompt, data.get("stagePlan") or [], data.get("shotPlan") or [])
     if not story_lock["ready"]:
@@ -7819,7 +8085,7 @@ def _animation_preflight_summary(shot, direction):
         } for error in report.get("errors") or [])
     if authoring.get("status") != "ready":
         findings.extend({
-            "severity": "FATAL",
+            "severity": "WARNING" if authoring.get("productionReady") else "FATAL",
             "rule": "seedance-authoring",
             "message": action,
             "fix": "Apply the Seedance repair action and recompile.",
@@ -7827,7 +8093,6 @@ def _animation_preflight_summary(shot, direction):
     verdict = "PASS" if (
         report.get("ready")
         and emission_report.get("verdict") == "PASS"
-        and float(authoring.get("normalizedScore") or 0) >= SEEDANCE_AUTHORING_FLOOR
     ) else "BLOCK"
     return {
         "verdict": verdict,
@@ -8326,7 +8591,7 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     if quality["needsRevision"]:
         detail = (f"; critical zero: {', '.join(quality['criticalFailures'])}"
                   if quality["criticalFailures"] else "")
-        blockers.append(
+        warnings.append(
             f"prompt contract completeness is {quality['score']}/{quality['maximum']} "
             f"(target {quality['threshold']}){detail}")
 
@@ -8364,16 +8629,10 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         seedance_contract)
     seedance_contract["firingFloor"] = SEEDANCE_AUTHORING_FLOOR
     checks["seedancePromptContract"] = seedance_contract
-    if seedance_contract["status"] != "ready":
-        blockers.append(
-            f"Seedance authoring contract scores {seedance_contract['score']}/"
-            f"{seedance_contract['maximum']}; "
-            f"{len(seedance_contract['repairActions'])} repair action(s) remain")
-    elif seedance_contract["normalizedScore"] < SEEDANCE_AUTHORING_FLOOR:
-        blockers.append(
-            f"Seedance authoring contract scores "
-            f"{seedance_contract['normalizedScore']}/10 "
-            f"(floor {SEEDANCE_AUTHORING_FLOOR}); tighten the prompt before render")
+    if not seedance_contract.get("productionReady", seedance_contract["status"] == "ready"):
+        blockers.extend(seedance_contract.get("productionErrors") or seedance_contract["repairActions"])
+    elif seedance_contract["status"] != "ready":
+        warnings.extend(seedance_contract["repairActions"])
 
     creative_translation = cb_departments.creative_translation_report(
         _shot_creative_contract_view(pkg, shot, scene, episode),
@@ -8402,8 +8661,16 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
                 "use the entire sheet for face silhouette proportions markings",
                 "do not use the sheet layout as the shot composition",
                 "refer to that wearable state strictly exclude background pose unrelated props and scene",
+                "exclude its background people and composition",
                 "hold 2 0s hold the full team beach arrival with keen alive and squeaky safe",
                 "no extra voices",
+                "during approved laughter or giggling in audio1 animate only the characters audibly participating in that exact interval",
+                "no music",
+                "no ambience",
+                "no sfx",
+                "in every hold and final landing preserve subtle breathing natural blink timing focused eyes and a precise asymmetric micro expression",
+                "the beat owner looks toward the story target the witness looks toward the beat owner or visible evidence",
+                "no vacant forward stare unfocused eyes frozen smile mannequin stillness or generic camera facing expression",
                 "seedance may generate non verbal music ambience and sfx that support the scene")):
             continue
         seen[normalized] = seen.get(normalized, 0) + 1
@@ -8490,6 +8757,9 @@ def _prompt_contract_is_exact(contract):
         "prompt", "promptHash", "promptSource", "provider", "providerModelId", "modelVersion"]
     if "directionContract" in contract:
         names.append("directionContract")
+    for name in ("promptStandard", "promptSections"):
+        if name in contract:
+            names.append(name)
     payload = {name: contract.get(name) for name in names}
     actual = hashlib.sha256(json.dumps(
         payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
@@ -9012,7 +9282,7 @@ def rate_prompt_render(scene, shot_id, artifact_type, candidate_id, scores,
 def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast=False,
               spend_token=None, dry_run=False, comparison_model_id=None,
               comparison_run_id=None, log=print, include_audio_reference=True,
-              generate_audio=True):
+              generate_audio=True, protected_comparison=False):
     """Generate one CONTROLLED CANDIDATE BATCH behind Julian's six spend protections
     (2026-07-16): (1) approval is SERVER-SIDE, SINGLE-USE and bound to the exact package
     hash + provider + model + candidate count + cost rate + max batch cost — anything that
@@ -9027,6 +9297,15 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     # see keyframe_shot's identical fix (2026-07-19) for why this call was missing entirely.
     shot = _shot(pkg, shot_id)
     led = _ledger(pkg, shot_id)
+    protected_comparison = bool(protected_comparison)
+    if protected_comparison:
+        if led.get("status") != "approved" or not led.get("approvedTake"):
+            raise Refused(
+                f"REFUSED — {shot_id} needs an approved take before a protected prompt comparison")
+        comparison_work = led.get("comparisonWork") or {}
+        if comparison_work.get("status") in ("generating", "candidate-pending"):
+            raise Refused(
+                f"REFUSED — {shot_id} already has a protected prompt comparison awaiting completion or decision")
     if led.get("status") == "model-limited":
         raise Refused(f"REFUSED — {shot_id} is MODEL-LIMITED after {MAX_BATCH_ATTEMPTS} failed "
                       f"candidate batches; the ladder requires human redesign or an alternative "
@@ -9056,8 +9335,11 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         shot, scene, episode, _characters_cfg(), same_depth=None)
     comparison_model_id, comparison_run_id = _comparison_args(
         comparison_model_id, comparison_run_id)
-    existing_auth = led.get("pendingSpendAuth") or {}
-    existing_batch = led.get("batch") or {}
+    auth_field = "pendingComparisonSpendAuth" if protected_comparison else "pendingSpendAuth"
+    batch_field = "comparisonBatch" if protected_comparison else "batch"
+    spend_shot_id = f"{shot_id}.prompt-comparison" if protected_comparison else shot_id
+    existing_auth = led.get(auth_field) or {}
+    existing_batch = led.get(batch_field) or {}
     existing_envelope = (
         existing_batch.get("envelope") if existing_batch.get("status") == "generating"
         else existing_auth.get("envelope")
@@ -9085,9 +9367,11 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     if resolved_prompt != shot.get("seedancePrompt"):
         shot = {**shot, "seedancePrompt": resolved_prompt}
     candidates = max(1, min(MAX_CANDIDATES, int(candidates)))
-    if led.get("status") == "approved":
+    if protected_comparison:
+        candidates = 1
+    elif led.get("status") == "approved":
         raise Refused(f"REFUSED — {shot_id} is already approved; reject it first to re-fire")
-    _require_stage_contract_keyframe(shot, led)
+    _require_stage_contract_keyframe(shot, led, pkg)
     spoken_dialogue = cb_audio_authority.spoken_dialogue_lines(shot)
     if spoken_dialogue and not (led.get("voiceApproval") or {}).get("approved"):
         # 2026-07-19: requires APPROVAL, not mere file existence — matching the keyframe
@@ -9126,7 +9410,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
 
     # ── RESUME PATH (protection 2): an in-flight batch completes its MISSING candidates
     # only, under its ORIGINAL token — completed candidates are never regenerated or repaid
-    batch = led.get("batch")
+    batch = led.get(batch_field)
     if batch and batch.get("status") == "generating":
         if spend_token != batch["token"]:
             raise Refused(f"REFUSED — {shot_id} has an in-flight batch; resuming requires its "
@@ -9144,12 +9428,12 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         candidates = batch["expected"]
         try:
             cb_db.claim_spend_authorization(
-                HERE.parent, spend_token, episode, scene, shot_id, binding,
+                HERE.parent, spend_token, episode, scene, spend_shot_id, binding,
                 batch["envelopeHash"], batch["batchId"])
         except cb_db.SpendConflict as exc:
             raise Refused(f"REFUSED — {exc}") from exc
     else:
-        if led.get("status") == "candidates-pending":
+        if not protected_comparison and led.get("status") == "candidates-pending":
             raise Refused(f"REFUSED — {shot_id} has a candidate batch pending Julian's review "
                           f"(approve one candidate or reject the batch first)")
         # PROTECTION 4: fresh validation of the CURRENT package, every disclosure
@@ -9217,7 +9501,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
             disclosure["internalProviderCalls"], ensure_ascii=False))
         log(f"  referenceSlots (upload order): {json.dumps(disclosure['referenceSlots'])}")
 
-        auth = led.get("pendingSpendAuth")
+        auth = led.get(auth_field)
         if dry_run:
             log("SEALED PROVIDER-REQUEST ENVELOPE (dry run — no token issued, nothing stored):")
             log(json.dumps(envelope, indent=1, ensure_ascii=False))
@@ -9225,19 +9509,19 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
             raise Refused("REFUSED — DRY RUN. No spend token was issued and no state changed.")
         if spend_token is None:
             # issue (or re-issue) the server-side single-use token, bound to the SEALED envelope
-            led["pendingSpendAuth"] = {"token": uuid.uuid4().hex,
-                                        "bindingHash": binding,
-                                        "envelope": envelope, "envelopeHash": env_hash,
-                                        "disclosure": disclosure, "issuedAt": _now()}
+            led[auth_field] = {"token": uuid.uuid4().hex,
+                               "bindingHash": binding,
+                               "envelope": envelope, "envelopeHash": env_hash,
+                               "disclosure": disclosure, "issuedAt": _now()}
             try:
                 cb_db.issue_spend_authorization(
-                    HERE.parent, episode, scene, shot_id, led["pendingSpendAuth"])
+                    HERE.parent, episode, scene, spend_shot_id, led[auth_field])
             except cb_db.SpendConflict as exc:
                 raise Refused(f"REFUSED — {exc}") from exc
             _save(pkg, path)
             raise Refused("REFUSED — SPEND NOT APPROVED. A single-use spend token has been "
                           "issued, bound to the sealed envelope above; re-run with "
-                          f"--spend-token {led['pendingSpendAuth']['token']} "
+                          f"--spend-token {led[auth_field]['token']} "
                           "(Studio: 'Approve spend & fire').")
         # validate the presented token: server-issued, single-use, envelope-exact
         if not auth or spend_token != auth["token"]:
@@ -9258,15 +9542,16 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                     f"{uuid.uuid4().hex[:8]}")
         try:
             cb_db.claim_spend_authorization(
-                HERE.parent, spend_token, episode, scene, shot_id, binding,
+                HERE.parent, spend_token, episode, scene, spend_shot_id, binding,
                 auth["envelopeHash"], batch_id)
         except cb_db.SpendConflict as exc:
             raise Refused(f"REFUSED — {exc}") from exc
-        led["pendingSpendAuth"] = None                     # claimed now; consumed on completion
+        led[auth_field] = None                              # claimed now; consumed on completion
         pv = auth["disclosure"]["promptVersion"]
-        if led.get("lastPromptVersion") and led["lastPromptVersion"] != pv:
-            led["promptRevisions"] = led.get("promptRevisions", 0) + 1
-        led["lastPromptVersion"] = pv
+        if not protected_comparison:
+            if led.get("lastPromptVersion") and led["lastPromptVersion"] != pv:
+                led["promptRevisions"] = led.get("promptRevisions", 0) + 1
+            led["lastPromptVersion"] = pv
         batch = {"token": spend_token, "bindingHash": binding,
                  "envelope": envelope, "envelopeHash": auth["envelopeHash"],
                  "batchId": batch_id,
@@ -9281,18 +9566,36 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                      "providerOutputRole": "guide-track-only",
                      "finalFilmDialogue": "approved-master-restored-in-post",
                  } if cb_audio_authority.spoken_dialogue_lines(shot) and led.get("voPath") else None)}
-        led["batch"] = batch
+        led[batch_field] = batch
+        if protected_comparison:
+            led["comparisonWork"] = {
+                "status": "generating",
+                "batchId": batch_id,
+                "sourcePath": led.get("approvedTake"),
+                "sourceSha256": _sha256_file(led["approvedTake"]),
+                "prompt": prompt,
+                "promptSha256": hashlib.sha256(prompt.encode()).hexdigest(),
+                "disclosure": auth["disclosure"],
+                "startedAt": _now(),
+            }
         _save(pkg, path)
 
     execution_plan = envelope["executionPlan"]
 
     MEDIA.mkdir(parents=True, exist_ok=True)
     for i in range(1, batch["expected"] + 1):
-        out = MEDIA / f"{episode}_{shot_id}_c{i}.mp4"
+        out = (MEDIA / f"{episode}_{shot_id}_compare_{batch['batchId']}_c{i}.mp4"
+               if protected_comparison else MEDIA / f"{episode}_{shot_id}_c{i}.mp4")
         try:
+            resume_output = pathlib.Path(str(out) + "." + batch["batchId"])
             claim = cb_db.claim_candidate(
                 HERE.parent, batch["token"], i,
-                f"{os.getpid()}:{threading.get_ident()}")
+                f"{os.getpid()}:{threading.get_ident()}",
+                resume_existing=(cb_provider_jobs.resumable(resume_output) or any(
+                    cb_provider_jobs.resumable(pathlib.Path(str(
+                        MEDIA / "transport" / batch["batchId"] / f"c{i}" /
+                        f"segment_{seg['segmentIndex']}.mp4") + "." + batch["batchId"]))
+                    for seg in execution_plan["segments"])))
         except cb_db.SpendConflict as exc:
             raise Refused(f"REFUSED — {exc}") from exc
         if claim["action"] == "completed":
@@ -9342,7 +9645,9 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                 if segment_count > 1:
                     segment_claim = cb_db.claim_candidate_segment(
                         HERE.parent, batch["token"], i, segment_index, segment_count,
-                        f"{os.getpid()}:{threading.get_ident()}")
+                        f"{os.getpid()}:{threading.get_ident()}",
+                        resume_existing=cb_provider_jobs.resumable(
+                            pathlib.Path(str(segment_out) + "." + batch["batchId"])))
                 if segment_claim["action"] == "completed":
                     recorded = pathlib.Path(segment_claim.get("output_path") or "")
                     actual_hash = _sha256_file(recorded) if recorded.is_file() else None
@@ -9423,6 +9728,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                         "comparison_run_id": execution_plan.get("comparisonRunId"),
                         "generate_audio": bool(segment.get("generateAudio", True)),
                         "progress_callback": provider_progress,
+                        "request_id": batch["batchId"],
                     }
                     if video_inputs:
                         generate_kwargs["video_urls"] = video_inputs
@@ -9501,20 +9807,42 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         _save(pkg, path)                                   # persisted per candidate
 
     batch["status"] = "complete"
-    paths = [str(MEDIA / f"{episode}_{shot_id}_c{i}.mp4") for i in sorted(batch["done"])]
-    led.update({"status": "candidates-pending", "candidatePaths": paths,
-                "batchId": batch["batchId"],
-                "candidatesGenerated": (led.get("candidatesGenerated") or 0) + len(batch["done"]),
-                "disclosure": batch["disclosure"],
-                "lastBatchBinding": batch["bindingHash"], "firedAt": _now()})
+    paths = [
+        str(MEDIA / f"{episode}_{shot_id}_compare_{batch['batchId']}_c{i}.mp4")
+        if protected_comparison else str(MEDIA / f"{episode}_{shot_id}_c{i}.mp4")
+        for i in sorted(batch["done"])
+    ]
+    if protected_comparison:
+        source = pathlib.Path(led.get("approvedTake") or "")
+        work = led.get("comparisonWork") or {}
+        if (led.get("status") != "approved" or not source.is_file() or
+                _sha256_file(source) != work.get("sourceSha256")):
+            raise Refused(
+                f"REFUSED — {shot_id}'s approved source changed while the comparison rendered")
+        batch["candidatePaths"] = paths
+        work.update({
+            "status": "candidate-pending", "candidatePath": paths[0],
+            "candidateSha256": _sha256_file(paths[0]), "completedAt": _now(),
+        })
+        led["comparisonWork"] = work
+    else:
+        led.update({"status": "candidates-pending", "candidatePaths": paths,
+                    "batchId": batch["batchId"],
+                    "candidatesGenerated": (led.get("candidatesGenerated") or 0) + len(batch["done"]),
+                    "disclosure": batch["disclosure"],
+                    "lastBatchBinding": batch["bindingHash"], "firedAt": _now()})
     _save(pkg, path)
     try:
         cb_db.complete_spend_authorization(HERE.parent, batch["token"])
     except cb_db.SpendConflict as exc:
         raise Refused(f"REFUSED — {exc}") from exc
-    log(f"FIRE — {shot_id}: {len(paths)} candidate(s) rendered · STOPPED for Julian's "
-        f"review. Approve ONE (approve {scene} {shot_id} <n>) or reject the batch. "
-        f"No candidate is ever auto-approved.")
+    if protected_comparison:
+        log(f"COMPARISON READY — {shot_id}: one alternative rendered from the current "
+            "prompt; the approved take remains unchanged until Julian decides.")
+    else:
+        log(f"FIRE — {shot_id}: {len(paths)} candidate(s) rendered · STOPPED for Julian's "
+            f"review. Approve ONE (approve {scene} {shot_id} <n>) or reject the batch. "
+            f"No candidate is ever auto-approved.")
     return paths
 
 
@@ -9552,7 +9880,7 @@ def import_animation_candidate(scene, shot_id, upload_path, episode="Ep1", log=p
         raise Refused(f"REFUSED — {shot_id} already has an approved immutable take")
     if ledger.get("status") == "candidates-pending":
         raise Refused(f"REFUSED — {shot_id} already has a render awaiting review")
-    _require_stage_contract_keyframe(shot, ledger)
+    _require_stage_contract_keyframe(shot, ledger, pkg)
     if (cb_audio_authority.spoken_dialogue_lines(shot) and
             not (ledger.get("voiceApproval") or {}).get("approved")):
         raise Refused(f"REFUSED — {shot_id} needs its ElevenLabs v3 voice approval before WATCH")
@@ -9856,13 +10184,131 @@ def reject_shot_edit(scene, shot_id, correction, episode="Ep1",
     return str(archived)
 
 
+def approve_shot_comparison(scene, shot_id, episode="Ep1",
+                            reviewed_by="Julian", log=print):
+    """Promote a protected prompt comparison only after an explicit human decision."""
+    pkg, package_path = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    ledger = _ledger(pkg, shot_id)
+    work = ledger.get("comparisonWork") or {}
+    candidate = pathlib.Path(work.get("candidatePath") or "")
+    source = pathlib.Path(work.get("sourcePath") or "")
+    if ledger.get("status") != "approved" or not ledger.get("approvedTake"):
+        raise Refused(f"REFUSED — {shot_id} no longer has a protected approved source")
+    if work.get("status") != "candidate-pending" or not candidate.is_file():
+        raise Refused(f"REFUSED — {shot_id} has no prompt comparison awaiting approval")
+    if _sha256_file(candidate) != work.get("candidateSha256"):
+        raise Refused("REFUSED — prompt-comparison bytes changed after generation")
+    if (str(source.resolve()) != str(pathlib.Path(ledger["approvedTake"]).resolve()) or
+            not source.is_file() or _sha256_file(source) != work.get("sourceSha256")):
+        raise Refused("REFUSED — the protected source changed after the comparison began")
+    comparison_batch = ledger.get("comparisonBatch") or {}
+    comparison_signature = comparison_batch.get("inputSignature")
+    if (not isinstance(comparison_signature, dict) or
+            comparison_batch.get("batchId") != work.get("batchId")):
+        raise Refused(
+            "REFUSED — the prompt comparison has no matching signed generation inputs")
+    previous = {
+        "status": "superseded-by-approved-comparison",
+        "path": str(source), "sha256": work["sourceSha256"],
+        "approval": ledger.get("approval"),
+        "harvestFrame": ledger.get("harvestFrame"),
+        "comparisonBatchId": work.get("batchId"), "at": _now(),
+    }
+    ledger.setdefault("comparisonHistory", []).append(previous)
+    harvest = MEDIA / f"{episode}_{shot_id}_final_frame.png"
+    cb_gen.last_frame(candidate, out=str(harvest))
+    ledger.update({
+        "status": "approved", "approvedTake": str(candidate),
+        "approvedCandidate": "prompt-comparison",
+        "harvestFrame": str(harvest),
+        "approval": {
+            "approved": True, "source": "protected-prompt-comparison",
+            "reviewed_by": reviewed_by, "at": _now(),
+            "packageRevision": pkg.get("revision"),
+            "inputSignature": comparison_signature,
+            "contentHash": _sha256_file(candidate),
+            "harvestHash": _sha256_file(harvest),
+            "batchId": comparison_batch.get("batchId"),
+            "promptHash": comparison_batch.get("promptHash"),
+        },
+        "comparisonWork": None,
+    })
+    _candidate_review(shot, str(candidate), work.get("batchId") or "prompt-comparison", 1)
+    _save(pkg, package_path)
+    log(f"COMPARISON APPROVED — {shot_id}; prior approved take remains in comparison history")
+    return str(candidate)
+
+
+def reject_shot_comparison(scene, shot_id, episode="Ep1",
+                           reviewed_by="Julian", log=print):
+    """Archive one comparison candidate while leaving the approved source untouched."""
+    pkg, package_path = load_pkg(scene, episode)
+    ledger = _ledger(pkg, shot_id)
+    work = ledger.get("comparisonWork") or {}
+    candidate = pathlib.Path(work.get("candidatePath") or "")
+    source = pathlib.Path(work.get("sourcePath") or "")
+    if work.get("status") != "candidate-pending" or not candidate.is_file():
+        raise Refused(f"REFUSED — {shot_id} has no prompt comparison awaiting rejection")
+    if (ledger.get("status") != "approved" or not source.is_file() or
+            str(source.resolve()) != str(pathlib.Path(ledger.get("approvedTake") or "").resolve()) or
+            _sha256_file(source) != work.get("sourceSha256")):
+        raise Refused("REFUSED — the protected approved source is no longer current")
+    approval = ledger.get("approval") or {}
+    source_batch = ledger.get("batch") or {}
+    source_signature = approval.get("inputSignature")
+    source_batch_id = str(approval.get("batchId") or ledger.get("batchId") or "")
+    if not isinstance(source_signature, dict):
+        if (source_batch.get("batchId") != source_batch_id or
+                not isinstance(source_batch.get("inputSignature"), dict)):
+            raise Refused(
+                "REFUSED — the protected approved source has no matching signed generation inputs")
+        source_signature = source_batch["inputSignature"]
+    harvest = pathlib.Path(ledger.get("harvestFrame") or "")
+    if not harvest.is_file():
+        raise Refused("REFUSED — the protected approved source has no final-frame handoff")
+    archive = (MEDIA / "archive" / "prompt_comparisons" /
+               f"{episode}_{shot_id}_{uuid.uuid4().hex[:8]}")
+    archive.mkdir(parents=True, exist_ok=True)
+    archived = archive / candidate.name
+    shutil.move(str(candidate), archived)
+    sidecars = []
+    for suffix in (".review.json", ".gen.json"):
+        sidecar = pathlib.Path(str(candidate) + suffix)
+        if sidecar.is_file():
+            destination = archive / sidecar.name
+            shutil.move(str(sidecar), destination)
+            sidecars.append(str(destination))
+    ledger.setdefault("comparisonHistory", []).append({
+        **work, "status": "not-selected", "candidatePath": str(archived),
+        "archivedSidecars": sidecars, "reviewedBy": reviewed_by,
+        "reviewedAt": _now(),
+    })
+    ledger["comparisonWork"] = None
+    approval.update({
+        "approved": True,
+        "packageRevision": pkg.get("revision"),
+        "inputSignature": source_signature,
+        "contentHash": _sha256_file(source),
+        "harvestHash": _sha256_file(harvest),
+        "batchId": source_batch_id,
+        "keptCurrentAt": _now(),
+        "keptCurrentBy": reviewed_by,
+        "keptCurrentVia": "protected-prompt-comparison-not-selected",
+    })
+    ledger["approval"] = approval
+    _save(pkg, package_path)
+    log(f"COMPARISON NOT SELECTED — {shot_id}; approved take remains unchanged")
+    return str(archived)
+
+
 def next_shot(scene, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast=False,
               spend_token=None, dry_run=False, comparison_model_id=None,
               comparison_run_id=None, log=print):
     """Fire a candidate batch for the next fireable shot in order, then STOP."""
     pkg, path = load_pkg(scene, episode)
     _require_valid(pkg)
-    for s in pkg["shots"]:
+    for s in production_contracts.active_shots(pkg):
         led = _ledger(pkg, s["shotId"])
         if led.get("status") == "candidates-pending":
             raise Refused(f"REFUSED — {s['shotId']} has a candidate batch pending Julian's "
@@ -10003,8 +10449,11 @@ def recover_approved_shot(scene, shot_id, episode="Ep1", log=print):
                            f"cb_render.recover-approved:{shot_id}"):
         pkg, path = load_pkg(scene, episode)
         led = _ledger(pkg, shot_id)
+        approval = led.get("approval") or {}
         if (led.get("status") == "approved" and led.get("approvedTake") and
-                led.get("harvestFrame")):
+                led.get("harvestFrame") and
+                approval.get("packageRevision") == pkg.get("revision") and
+                isinstance(approval.get("inputSignature"), dict)):
             return led["approvedTake"]
 
         assets = cb_asset_registry.resolve_assets(
@@ -10051,6 +10500,11 @@ def recover_approved_shot(scene, shot_id, episode="Ep1", log=print):
             raise Refused(
                 f"REFUSED — {shot_id} recovery needs one matching approved prompt-bank record")
         prompt_record = prompt_records[0]
+        source_batch = led.get("batch") or {}
+        if (source_batch.get("batchId") != batch_id or
+                not isinstance(source_batch.get("inputSignature"), dict)):
+            raise Refused(
+                f"REFUSED — {shot_id} recovery needs the matching signed provider batch")
 
         recovered_at = _now()
         recovery = {
@@ -10082,6 +10536,8 @@ def recover_approved_shot(scene, shot_id, episode="Ep1", log=print):
                 "promptRecordId": prompt_record.get("recordId"),
                 "promptHash": prompt_record.get("promptHash"),
                 "batchId": batch_id,
+                "packageRevision": pkg.get("revision"),
+                "inputSignature": source_batch["inputSignature"],
                 "recoveredAt": recovered_at,
             },
         })
@@ -10786,6 +11242,17 @@ def evidence_pack(scene, episode="Ep1", log=print):
     return str(out_dir)
 
 
+def fire_credits(episode, token):
+    """Credits use their own sealed episode artifact, without fabricating scene approvals."""
+    import cb_credits
+    return cb_credits.fire(episode, token)
+
+
+def render_credits_job(episode, job, resume_existing=False):
+    import cb_credits
+    return cb_credits.run_worker(episode, job, resume_existing)
+
+
 def status(scene, episode="Ep1", log=print):
     pkg, _ = load_pkg(scene, episode)
     lin = lineage_status(pkg, scene, episode)
@@ -10806,12 +11273,104 @@ def status(scene, episode="Ep1", log=print):
     return rows
 
 
-# Install the production safety contract only after every implementation function exists.
-# The wrapper layer refuses stale/unapproved specialist inputs before any paid adapter runs.
+# Explicit composition root: each public operation names its production policy service.
+# The compatibility names below remain stable for workers and existing saved commands.
 import cb_safety as _cb_safety
-_cb_safety.install(sys.modules[__name__])
+_production_policy = _cb_safety.create_policy(sys.modules[__name__])
+_resolve_scenelook_prompt = _production_policy._resolve_scenelook_prompt
+scenelook_status = _production_policy.scenelook_status
+_scenelook_record_input_signature = _production_policy._scenelook_record_input_signature
+approved_look_prompt = _production_policy.approved_look_prompt
+generate_scenelook_plate = _production_policy.generate_scenelook_plate
+approve_scenelook = _production_policy.approve_scenelook
+select_scenelook_source = _production_policy.select_scenelook_source
+department_status = _production_policy.department_status
+prepare_department = _production_policy.prepare_department
+save_department_candidate = _production_policy.save_department_candidate
+decide_department = _production_policy.decide_department
+_current_department_output = _production_policy._current_department_output
+_require_approved_department_output = _production_policy._require_approved_department_output
+_approved_department_output = _production_policy._approved_department_output
+_department_input_signature = _production_policy._department_input_signature
+_department_record_status = _production_policy._department_record_status
+_resolve_keyframe_prompt = _production_policy._resolve_keyframe_prompt
+_keyframe_input_signature = _production_policy._keyframe_input_signature
+_keyframe_stage_contract_report = _production_policy._keyframe_stage_contract_report
+_approved_voice_lines = _production_policy._approved_voice_lines
+_voice_input_signature = _production_policy._voice_input_signature
+_voice_approval_status = _production_policy._voice_approval_status
+_voice_signature = _production_policy._voice_signature
+_animation_input_signature = _production_policy._animation_input_signature
+_animation_generation_signature = _production_policy._animation_generation_signature
+_animation_approval_status = _production_policy._animation_approval_status
+_external_import_input_signature = _production_policy._external_import_input_signature
+voice_shot = _production_policy.voice_shot
+approve_voice = _production_policy.approve_voice
+reject_voice = _production_policy.reject_voice
+restore_previous_voice_take = _production_policy.restore_previous_voice_take
+keyframe_shot = _production_policy.keyframe_shot
+select_keyframe_source = _production_policy.select_keyframe_source
+rescreen_keyframe_conformance = _production_policy.rescreen_keyframe_conformance
+approve_keyframe = _production_policy.approve_keyframe
+reassess_keyframe = _production_policy.reassess_keyframe
+_keyframe_record_input_signature = _production_policy._keyframe_record_input_signature
+_keyframe_record_status = _production_policy._keyframe_record_status
+_anchor_for = _production_policy._anchor_for
+_resolve_seedance_prompt = _production_policy._resolve_seedance_prompt
+_approved_seedance_prompt = _production_policy._approved_seedance_prompt
+check_seedance_structure = _production_policy.check_seedance_structure
+fire_shot = _production_policy.fire_shot
+next_shot = _production_policy.next_shot
+approve_shot = _production_policy.approve_shot
+stitch_scene = _production_policy.stitch_scene
 import cb_transactions as _cb_transactions
-_cb_transactions.install(sys.modules[__name__])
+_runtime = sys.modules[__name__]
+generate_scenelook_plate = _cb_transactions.protect(_runtime, "generate_scenelook_plate", generate_scenelook_plate)
+approve_scenelook = _cb_transactions.protect(_runtime, "approve_scenelook", approve_scenelook)
+reject_scenelook = _cb_transactions.protect(_runtime, "reject_scenelook", reject_scenelook)
+select_scenelook_source = _cb_transactions.protect(_runtime, "select_scenelook_source", select_scenelook_source)
+prepare_department = _cb_transactions.protect(_runtime, "prepare_department", prepare_department)
+save_department_candidate = _cb_transactions.protect(_runtime, "save_department_candidate", save_department_candidate)
+decide_department = _cb_transactions.protect(_runtime, "decide_department", decide_department)
+save_voice_working = _cb_transactions.protect(_runtime, "save_voice_working", save_voice_working)
+restore_voice_working = _cb_transactions.protect(_runtime, "restore_voice_working", restore_voice_working)
+voice_shot = _cb_transactions.protect(_runtime, "voice_shot", voice_shot)
+voice_scene = _cb_transactions.protect(_runtime, "voice_scene", voice_scene)
+regen_voice_shot = _cb_transactions.protect(_runtime, "regen_voice_shot", regen_voice_shot)
+approve_voice = _cb_transactions.protect(_runtime, "approve_voice", approve_voice)
+reject_voice = _cb_transactions.protect(_runtime, "reject_voice", reject_voice)
+restore_previous_voice_take = _cb_transactions.protect(_runtime, "restore_previous_voice_take", restore_previous_voice_take)
+animatic_scene = _cb_transactions.protect(_runtime, "animatic_scene", animatic_scene)
+build_keyframe = _cb_transactions.protect(_runtime, "build_keyframe", build_keyframe)
+generate_pose_reference = _cb_transactions.protect(_runtime, "generate_pose_reference", generate_pose_reference)
+select_pose_reference_source = _cb_transactions.protect(_runtime, "select_pose_reference_source", select_pose_reference_source)
+review_pose_reference = _cb_transactions.protect(_runtime, "review_pose_reference", review_pose_reference)
+qualify_pose_reference = _cb_transactions.protect(_runtime, "qualify_pose_reference", qualify_pose_reference)
+reuse_qualified_pose = _cb_transactions.protect(_runtime, "reuse_qualified_pose", reuse_qualified_pose)
+approve_pose_reference = _cb_transactions.protect(_runtime, "approve_pose_reference", approve_pose_reference)
+reject_pose_reference = _cb_transactions.protect(_runtime, "reject_pose_reference", reject_pose_reference)
+keyframe_shot = _cb_transactions.protect(_runtime, "keyframe_shot", keyframe_shot)
+select_keyframe_source = _cb_transactions.protect(_runtime, "select_keyframe_source", select_keyframe_source)
+approve_keyframe = _cb_transactions.protect(_runtime, "approve_keyframe", approve_keyframe)
+reject_keyframe = _cb_transactions.protect(_runtime, "reject_keyframe", reject_keyframe)
+save_seedance_working = _cb_transactions.protect(_runtime, "save_seedance_working", save_seedance_working)
+restore_seedance_working = _cb_transactions.protect(_runtime, "restore_seedance_working", restore_seedance_working)
+fire_shot = _cb_transactions.protect(_runtime, "fire_shot", fire_shot)
+next_shot = _cb_transactions.protect(_runtime, "next_shot", next_shot)
+approve_shot = _cb_transactions.protect(_runtime, "approve_shot", approve_shot)
+reject_shot = _cb_transactions.protect(_runtime, "reject_shot", reject_shot)
+edit_shot = _cb_transactions.protect(_runtime, "edit_shot", edit_shot)
+approve_shot_edit = _cb_transactions.protect(_runtime, "approve_shot_edit", approve_shot_edit)
+reject_shot_edit = _cb_transactions.protect(_runtime, "reject_shot_edit", reject_shot_edit)
+approve_shot_comparison = _cb_transactions.protect(_runtime, "approve_shot_comparison", approve_shot_comparison)
+reject_shot_comparison = _cb_transactions.protect(_runtime, "reject_shot_comparison", reject_shot_comparison)
+stitch_scene = _cb_transactions.protect(_runtime, "stitch_scene", stitch_scene)
+reopen_approved_shot = _cb_transactions.protect(_runtime, "reopen_approved_shot", reopen_approved_shot)
+import_animation_candidate = _cb_transactions.protect(_runtime, "import_animation_candidate", import_animation_candidate)
+import_approved_take = _cb_transactions.protect(_runtime, "import_approved_take", import_approved_take)
+recover_approved_shot = _cb_transactions.protect(_runtime, "recover_approved_shot", recover_approved_shot)
+set_continuity_mode = _cb_transactions.protect(_runtime, "set_continuity_mode", set_continuity_mode)
+bind_animation_location_reference = _cb_transactions.protect(_runtime, "bind_animation_location_reference", bind_animation_location_reference)
 
 
 if __name__ == "__main__":
@@ -10946,6 +11505,10 @@ if __name__ == "__main__":
                        spend_token=flags["spend_token"], dry_run=flags["dry_run"],
                        comparison_model_id=flags["comparison_model"],
                        comparison_run_id=flags["comparison_run_id"])
+        elif cmd == "compare-fire":
+            fire_shot(pos[0], pos[1], ep(2), candidates=1,
+                       spend_token=flags["spend_token"], dry_run=flags["dry_run"],
+                       protected_comparison=True)
         elif cmd == "override-model-limited":
             override_model_limited(pos[0], pos[1], pos[2], ep(3))
         elif cmd == "approve":
@@ -10959,6 +11522,10 @@ if __name__ == "__main__":
             approve_shot_edit(pos[0], pos[1], ep(2))
         elif cmd == "reject-edit":
             reject_shot_edit(pos[0], pos[1], pos[2], episode=ep(3))
+        elif cmd == "approve-comparison":
+            approve_shot_comparison(pos[0], pos[1], ep(2))
+        elif cmd == "reject-comparison":
+            reject_shot_comparison(pos[0], pos[1], ep(2))
         elif cmd == "stitch":
             stitch_scene(pos[0], ep(1))
         elif cmd == "status":
@@ -10970,4 +11537,6 @@ if __name__ == "__main__":
         else:
             print(f"unknown command {cmd}"); sys.exit(1)
     except Refused as e:
-        print(str(e)); sys.exit(1)
+        print(str(e))
+        print("STUDIO_OUTCOME " + json.dumps({"outcome": production_contracts.command_outcome(1, cmd, [str(e)])}))
+        sys.exit(1)

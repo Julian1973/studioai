@@ -1,0 +1,70 @@
+"""Single explicitly requested standalone credits candidate; no auto-approval or reruns."""
+from pathlib import Path
+import hashlib
+import json
+import os
+import sys
+import uuid
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'engine'))
+import cb_gen
+import cb_providers
+import cb_costs
+import cb_db
+
+OUT = ROOT / 'engine/media/credits_sequence'
+RECORD = OUT / 'Ep2_EC01_presenter_v2_request.json'
+
+def main():
+    if RECORD.exists():
+        raise SystemExit('Existing request record: inspect or retrieve; do not resubmit.')
+    prompt = (OUT / 'Ep2_EC01_presenter_v2_prompt.txt').read_text()
+    ref = ROOT / 'cb-seed/assets/final_turnarounds/CB_Bo_with_satchel.png'
+    contract = cb_providers.request_contract(duration=30, resolution='480p', image_count=1,
+        model_id='dreamina-seedance-2-5-260628')
+    billing = cb_costs.load_billing_profile('byteplus') or {}
+    if not (billing.get('planConfirmed') and billing.get('cadenceConfirmed')):
+        raise SystemExit('BytePlus billing unconfirmed.')
+    envelope = dict(candidateCount=1, episode='Ep2', shotId='EC01-presenter-v2', prompt=prompt,
+        contract=contract, imageReferences=[dict(tag='@Image1', path=str(ref),
+        sha256=hashlib.sha256(ref.read_bytes()).hexdigest())], generate_audio=False,
+        maxBatchCostUsd=cb_costs.estimate_video_cost(contract['costRateKey'], 30),
+        authorization='Julian requested a corrected standalone credits render with playful presenting Bo; typography composited separately.',
+        output='credits_sequence/Ep2_EC01_Bo_presenter_v2_plate.mp4')
+    digest = hashlib.sha256(json.dumps(envelope, sort_keys=True).encode()).hexdigest()
+    token = uuid.uuid4().hex
+    state = dict(status='prepared', envelope=envelope, envelopeHash=digest, token=token, humanReview='pending')
+    def save():
+        temp = RECORD.with_suffix('.tmp')
+        temp.write_text(json.dumps(state, ensure_ascii=False, indent=2))
+        temp.replace(RECORD)
+    save()
+    auth = dict(token=token, bindingHash=digest, envelopeHash=digest, envelope=envelope,
+        disclosure=dict(candidateCount=1, maxBatchCostUsd=envelope['maxBatchCostUsd'],
+                        resolution='480p', duration=30, provider='BytePlus Seedance 2.5'))
+    cb_db.issue_spend_authorization(ROOT, 'Ep2', 'credits-direct', 'EC01-presenter-v2', auth)
+    cb_db.claim_spend_authorization(ROOT, token, 'Ep2', 'credits-direct', 'EC01-presenter-v2', digest, digest, token)
+    cb_db.claim_candidate(ROOT, token, 1, str(os.getpid()))
+    def progress(event):
+        state['status'] = event.get('status') or event['event']
+        if event.get('taskId'):
+            state['providerTaskId'] = event['taskId']
+        save()
+    try:
+        result = cb_gen.generate_video_seedance_ref(prompt, [str(ref)], resolution='480p',
+            duration=30, out=envelope['output'], raw_prompt=True, production_route='cb_render',
+            model_id=contract['providerModelId'], generate_audio=False, progress_callback=progress)
+        cb_db.complete_candidate(ROOT, token, 1, result)
+        cb_db.complete_spend_authorization(ROOT, token)
+        state.update(status='returned', output=result)
+        save()
+        print('RETURNED', result, flush=True)
+    except Exception as exc:
+        state.update(status='error', error=str(exc))
+        save()
+        cb_db.fail_candidate(ROOT, token, 1, str(exc))
+        raise
+
+if __name__ == '__main__':
+    main()

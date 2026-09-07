@@ -1,0 +1,91 @@
+"""Typeset exact credits over the silent Seedance presenter plate."""
+from pathlib import Path
+import json
+import subprocess
+from PIL import Image, ImageDraw, ImageFont
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / 'engine/media/credits_sequence'
+CARDS = OUT / 'presenter_v2_cards'
+CARDS.mkdir(exist_ok=True)
+BANGERS = Path('/Users/julianjenkins/Library/Fonts/Bangers-Regular.ttf')
+NUNITO = OUT / 'fonts/NunitoSans[YTLC,opsz,wdth,wght].ttf'
+W, H = 1708, 960
+CX, MAX_W = 1195, 850
+TIMELINE = [
+    (0, 4, 'CREATED BY', ['Lloyd Knight & Julian Jenkins']),
+    (4, 8, 'WRITTEN BY', ['Lloyd Knight & Pete Young']),
+    (8, 12, 'VOICE CAST', ['Lloyd Knight', 'Pete Young', 'Julian Jenkins']),
+    (12, 17, 'ANIMATION & VISUAL PRODUCTION', ['Julian Jenkins', 'Lloyd Knight', 'Pete Young']),
+    (17, 21, 'MUSIC & SOUND', ['Julian Jenkins & Lloyd Knight']),
+    (21, 26, 'WITH THANKS TO', ['Mike Young & Liz Young', 'and everyone who believed', 'in the magic.']),
+    (26, 30, 'AN ENAID CREATIVE PRODUCTION', ['© 2026 Enaid Creative.', 'All rights reserved.']),
+]
+
+def font(size, heading=False):
+    f = ImageFont.truetype(str(BANGERS if heading else NUNITO), size)
+    if not heading:
+        f.set_variation_by_axes([600, 100, 12, 500])
+    return f
+
+def text(im, value, y, size, heading=False):
+    draw = ImageDraw.Draw(im)
+    while size > 20:
+        f = font(size, heading)
+        if draw.textlength(value, font=f) <= MAX_W:
+            break
+        size -= 1
+    box = draw.textbbox((0, 0), value, font=f)
+    x = CX - (box[2] - box[0]) / 2 - box[0]
+    draw.text((x, y - box[1]), value, font=f, fill=(255,255,255,255))
+
+def save(im, name):
+    path = CARDS / name
+    im.resize((854, 480), Image.Resampling.LANCZOS).save(path)
+    return path
+
+def make_cards():
+    header = Image.new('RGBA', (W,H))
+    text(header, 'The Crystal Bears', 98, 100, True)
+    text(header, 'Episode 2 : Bo’s Big Day', 230, 51, True)
+    save(header, 'header.png')
+    for i, (start, end, heading, lines) in enumerate(TIMELINE):
+        card = Image.new('RGBA', (W,H))
+        text(card, heading, 410, 68, True)
+        for j, line in enumerate(lines):
+            text(card, line, 515+j*75, 47 if (i==5 and j>0) or i==6 else 53)
+        if i == 6:
+            text(card, 'The Crystal Bears', 755, 76, True)
+        save(card, f'card_{i}.png')
+    (CARDS/'timeline.json').write_text(json.dumps(TIMELINE, ensure_ascii=False, indent=2))
+    preview = Image.new('RGBA', (854,480), '#a41524')
+    preview.alpha_composite(Image.open(CARDS/'header.png'))
+    preview.alpha_composite(Image.open(CARDS/'card_0.png'))
+    preview.convert('RGB').save(CARDS/'typography_preview.jpg')
+
+def compose():
+    plate = OUT / 'Ep2_EC01_Bo_presenter_v2_framed.mp4'
+    target = OUT / 'Ep2_EC01_Bo_presenter_BANGERS_review_v2.mp4'
+    if not plate.exists():
+        raise SystemExit('Presenter plate not returned yet; typography cards prepared.')
+    command = ['ffmpeg','-y','-v','error','-i',str(plate)]
+    for path in [CARDS/'header.png']+[CARDS/f'card_{i}.png' for i in range(7)]:
+        command += ['-loop','1','-framerate','24','-i',str(path)]
+    filters = ['[0:v]fps=24,trim=duration=30,setpts=PTS-STARTPTS[base]',
+               '[base][1:v]overlay=0:0:shortest=1[v0]']
+    for i, (start,end,_,_) in enumerate(TIMELINE):
+        fade = f'[{i+2}:v]format=rgba,fade=t=in:st={start}:d=0.25:alpha=1'
+        if end < 30:
+            fade += f',fade=t=out:st={end-0.2}:d=0.2:alpha=1'
+        filters += [fade+f'[c{i}]', f"[v{i}][c{i}]overlay=0:0:enable='gte(t,{start})*lt(t,{end})':shortest=1[v{i+1}]"]
+    command += ['-filter_complex_threads','1','-filter_complex',';'.join(filters),
+                '-map','[v7]','-an','-t','30','-c:v','libx264','-crf','17',
+                '-pix_fmt','yuv420p','-movflags','+faststart',str(target)]
+    subprocess.run(command, check=True)
+    print(target)
+
+if __name__ == '__main__':
+    make_cards()
+    import sys
+    if '--cards-only' not in sys.argv:
+        compose()

@@ -130,7 +130,11 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
             "not extra characters.") in prompt
     assert "do not describe, redesign, simplify, beautify" in prompt
     assert "omitted reference features" in prompt
-    assert "[Canonical Style]" in prompt
+    assert "[DELIVERABLE]" in prompt
+    assert "[REFERENCE AUTHORITY]" in prompt
+    assert "[ACCEPTANCE TEST]" in prompt
+    assert tuple(cb_render.cb_departments.prompt_sections(prompt)) == \
+        cb_render.SEEDREAM_KEYFRAME_PROMPT_SECTIONS
     assert "Hold frame-right open for the later flower reveal." in prompt
     assert "Hold frame-right open for the later flower reveal." in prompt
 
@@ -244,6 +248,19 @@ def test_keen_identity_reference_follows_episode_wristband_state(monkeypatch):
     assert award_transition["characterState"] == "vacant-wristbands"
     assert crystal["characterState"] == "crystal-set-wristbands"
     assert crystal["fileName"] == "CB_Keen.jpeg"
+
+
+def test_bo_identity_reference_uses_satchel_state_when_prop_is_required():
+    with_satchel = cb_render._episode_character_state(
+        "Bo", {"requiredPropReferences": ["bo_satchel"]}, "5", "Ep2")
+    later_continuity = cb_render._episode_character_state(
+        "Bo", {"requiredPropReferences": []}, "6", "Ep2")
+    before_satchel = cb_render._episode_character_state(
+        "Bo", {"requiredPropReferences": []}, "3", "Ep2")
+
+    assert with_satchel == "with-satchel"
+    assert later_continuity == "with-satchel"
+    assert before_satchel is None
 
 
 def test_reference_manifest_exposes_keyframe_and_animation_in_provider_order(
@@ -380,6 +397,27 @@ def test_required_prop_reference_gate_accepts_exact_sealed_attachment_role():
     assert report["present"] == ["prop:story_vehicle"]
 
 
+def test_required_prop_is_appended_to_keyframe_reference_slots():
+    shot = {
+        "shotId": "S6.SH1",
+        "requiredPropReferences": ["bo_satchel"],
+        "keyframeReferenceSlots": {
+            "@图1": "Bo",
+            "@图2": "scene plate",
+        },
+    }
+
+    slots = cb_render._effective_reference_slots(
+        {"continuityLedger": {}}, shot, "keyframeReferenceSlots", "6", "Ep2")
+
+    assert list(slots.values()) == ["Bo", "scene plate", "prop:bo_satchel"]
+
+    blueprint = cb_render._expanded_reference_blueprint(
+        shot, "keyframeReferenceSlots", {}, scene="6", episode="Ep2")
+    assert [item["role"] for item in blueprint] == [
+        "Bo", "prop:bo_satchel", "scene plate"]
+
+
 def test_prop_authority_uploads_after_characters_and_before_scene_plate(monkeypatch):
     characters = {
         "Lead": {"sizeRank": 1},
@@ -514,7 +552,7 @@ def test_composition_and_scale_controls_remain_local_while_locked_assets_own_pro
     assert "@图2: Fuzzby's single-subject character anchor is the 100% identity authority" in keyframe_prompt
     assert "round glasses" not in keyframe_prompt
     assert "@图3 is the locked Scene Look plate" in keyframe_prompt
-    assert "[Performance Freedom]" in keyframe_prompt
+    assert "[MOTION READINESS]" in keyframe_prompt
     assert cb_render.OPENING_COMPOSITION_ROLE not in keyframe_prompt
     assert cb_render.CHARACTER_SCALE_CONTROL_MARKER not in keyframe_prompt
     assert cb_render.CHARACTER_SCALE_CONTROL_MARKER not in animation_prompt
@@ -543,3 +581,25 @@ def test_composition_and_scale_controls_remain_local_while_locked_assets_own_pro
     zenny.write_bytes(b"changed-turnaround")
     assert cb_render._load_character_scale_control(
         shot, "1", "Ep1", characters) is None
+
+
+def test_cut_keyframe_attaches_accepted_state_without_using_it_as_opening(monkeypatch, tmp_path):
+    frame = _write(tmp_path / "landing.png")
+    source = {"shotId": "S1.SH1", "status": "approved", "harvestFrame": str(frame),
+              "approval": {"harvestHash": cb_render._sha256_file(frame)}}
+    monkeypatch.setattr(cb_render, "load_pkg", lambda *args: ({"continuityLedger": [source]}, None))
+    monkeypatch.setattr(cb_render, "_reference_path_is_approved", lambda path: True)
+    shot = {"shotId": "S1.SH2", "sourceType": "opener", "keyframeReferenceSlots": {},
+            "shotTransition": {"type": "cut", "stateSourceShotId": "S1.SH1"}}
+    plan = cb_render._provider_attachment_plan(shot, "keyframeReferenceSlots", None, "1", "EpT", {})
+    assert len(plan) == 1
+    assert plan[0]["role"] == "previous shot state reference"
+    assert plan[0]["path"] == str(frame)
+    assert cb_render._shot_uses_own_keyframe(shot)
+    assert not cb_render._expanded_reference_blueprint(shot, "referenceSlots", {})
+    frame.write_bytes(b"changed")
+    with pytest.raises(cb_render.Refused, match="landing frame changed"):
+        cb_render._provider_attachment_plan(shot, "keyframeReferenceSlots", None, "1", "EpT", {})
+    source["status"] = "designed"
+    with pytest.raises(cb_render.Refused, match="approve the preceding render"):
+        cb_render._provider_attachment_plan(shot, "keyframeReferenceSlots", None, "1", "EpT", {})

@@ -154,6 +154,82 @@ def test_fresh_validation_keeps_full_script_occurrences_for_mixed_sfx_dialogue()
     assert "target_lines = cb_audio_authority.spoken_dialogue_lines(target_rec)" not in validation
 
 
+def test_fresh_validation_uses_approved_hear_when_beat_codes_were_rehomed(
+        monkeypatch, tmp_path):
+    import cb_engine as E
+
+    (tmp_path / "cb-output").mkdir()
+    json.dump({
+        "beats": [{
+            "sceneNumber": "7",
+            "beatCode": "S7-B1",
+            "storyBeat": "Current source package has rehomed the beat code.",
+            "cuts": [],
+        }],
+    }, open(tmp_path / "cb-output" / "EpT_rehomed_beat_package.json", "w"))
+    monkeypatch.setattr(E, "HERE", tmp_path / "engine")
+    monkeypatch.setattr(R, "_characters_cfg", lambda: {})
+
+    line = {
+        "dialogueOccurrenceId": "occ-1",
+        "sourceEventId": "evt-1",
+        "speaker": "Bo",
+        "exactText": "That one is you. Look at your tail.",
+        "delivery": "Warm and playful.",
+        "startSec": 1.0,
+        "endSec": 3.0,
+    }
+    pkg = {
+        "sceneNumber": "7",
+        "directorStatement": {
+            "audienceFeeling": "safe",
+            "whoseScene": "Bo",
+            "emotionalChange": "nervous to included",
+            "theLaugh": "with him",
+            "visualSurprise": "the drawing",
+            "carryForward": "friendship",
+        },
+        "shots": [{
+            "shotId": "S7.SH1",
+            "beatCode": "7.B1",
+            "beatCodes": ["7.B1", "7.B2"],
+            "durationSec": 30,
+            "purpose": "Bo shares the drawing with Keen.",
+            "performanceAssignment": "Bo points to the leaf and waits for Keen.",
+            "camera": "Medium view.",
+            "openingPose": "Bo seated with the leaf.",
+            "sourceType": "opener",
+            "sourceShotId": None,
+            "dialogueBinding": "Bo says exactly That one is you. Look at your tail.",
+            "dialogueLines": [line],
+            "visualPayoff": "Keen sees the drawing.",
+            "prohibited": [],
+            "charactersInFrame": ["Bo", "Keen", "Kit"],
+            "continuityOut": {
+                "lighting": "afternoon sunlight",
+                "cameraSide": "front",
+                "characters": [
+                    {"character": "Bo", "screenZone": "left", "facing": "Keen",
+                     "pose": "seated", "expression": "warm", "visibleMarks": [],
+                     "heldProps": []},
+                    {"character": "Keen", "screenZone": "right", "facing": "Bo",
+                     "pose": "seated", "expression": "delighted", "visibleMarks": [],
+                     "heldProps": []},
+                    {"character": "Kit", "screenZone": "middle", "facing": "leaf",
+                     "pose": "seated", "expression": "kind", "visibleMarks": [],
+                     "heldProps": []},
+                ],
+            },
+        }],
+        "continuityLedger": [{
+            "shotId": "S7.SH1",
+            "voiceApproval": {"approved": True, "path": "/tmp/approved.wav"},
+        }],
+    }
+
+    assert R._fresh_validation(pkg, "EpT", "S7.SH1")["passed"] is True
+
+
 def test_voice_direction_save_is_scoped_to_spoken_dialogue():
     source = pathlib.Path(R.__file__).read_text()
     scoped_validation = (

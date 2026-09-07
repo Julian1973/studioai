@@ -13,8 +13,9 @@ THREE FORMS OF MEMORY, KEPT SEPARATE:
   2. PATTERN LIBRARY    — grouped evidence proposing possible lessons. Proposals, never rules.
   3. ACTIVE CREATIVE MEMORY — an AUDIT REGISTRY of human-approved changes, each pointing
      at the APPLIED, versioned source change (commit/version). Its prose is NEVER injected
-     into a creative role (2026-07-17 simplification checkpoint): roles receive only the
-     concise approved canonical exemplar principles, retrieved by cb_creative itself.
+     into a creative role. Since Julian's 2026-09-07 integration, cb_learning_context
+     additionally retrieves bounded, relevant human observations as advisory evidence.
+     These observations never become canon or a blocking rule by being retrieved.
 
 HARD RULES: generated prompts are immutable compiled artefacts — this module never appends a
 correction to a provider prompt and never imports cb_engine/cb_render/cb_gen. A proposal
@@ -36,6 +37,9 @@ import os
 import pathlib
 import sys
 import uuid
+import functools
+import fcntl
+import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -65,18 +69,38 @@ def _load(p, default):
 
 
 def _save(p, data):
-    LEARNING.mkdir(parents=True, exist_ok=True)
-    json.dump(data, open(p, "w"), indent=1, ensure_ascii=False)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=p.name + ".", dir=p.parent)
+    try:
+        with os.fdopen(fd, "w") as handle:
+            json.dump(data, handle, indent=1, ensure_ascii=False)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, p)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def _evidence_transaction(function):
+    @functools.wraps(function)
+    def wrapped(*args, **kwargs):
+        EVIDENCE_P.parent.mkdir(parents=True, exist_ok=True)
+        with open(str(EVIDENCE_P) + ".lock", "a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            return function(*args, **kwargs)
+    return wrapped
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # 1. EVIDENCE LIBRARY — immutable, append-only; the asset/decision/context/rationale is
 #    preserved, never only a summarised lesson
 # ─────────────────────────────────────────────────────────────────────────────────────────
+@_evidence_transaction
 def capture_evidence(outcome, userFeedback="", *, project="crystal-bears", episode="Ep1",
                      scene=None, beat=None, shot=None, role=None, sourceVersion=None,
                      classification="", category="creative", scope="scene",
-                     assetPointers=None, context="", capturedBy="system"):
+                     assetPointers=None, context="", capturedBy="system", decisionKey=None):
     """Record ONE outcome as immutable evidence. Returns the record (with its evidenceId).
     Every field the directive names is present; missing knowledge stays empty rather than
     invented."""
@@ -85,6 +109,10 @@ def capture_evidence(outcome, userFeedback="", *, project="crystal-bears", episo
     lib = _load(EVIDENCE_P, {"note": "IMMUTABLE evidence — append-only, never edited or "
                                        "summarised away; the asset, decision, context and "
                                        "rationale are preserved.", "records": []})
+    if decisionKey:
+        existing = next((r for r in lib["records"] if r.get("decisionKey") == decisionKey), None)
+        if existing:
+            return existing
     rec = {"evidenceId": f"ev-{uuid.uuid4().hex[:10]}",
            "capturedAt": _now(), "capturedBy": capturedBy,
            "project": project, "show": "Crystal Bears", "episode": episode,
@@ -97,6 +125,8 @@ def capture_evidence(outcome, userFeedback="", *, project="crystal-bears", episo
            "category": category, "scope": scope,
            "context": context,
            "assetPointers": assetPointers or []}
+    if decisionKey:
+        rec["decisionKey"] = decisionKey
     lib["records"].append(rec)
     _save(EVIDENCE_P, lib)
     return rec
@@ -146,7 +176,7 @@ def patterns(pattern_id=None):
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
-# 3. ACTIVE CREATIVE MEMORY — human-approved only; the ONLY store that guides generation
+# 3. ACTIVE CREATIVE MEMORY — audit of human-approved canonical source changes
 # ─────────────────────────────────────────────────────────────────────────────────────────
 class PromotionRefused(Exception):
     pass

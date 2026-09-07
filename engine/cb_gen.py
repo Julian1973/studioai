@@ -24,6 +24,7 @@ Endpoints verified against ai.google.dev + elevenlabs.io docs (June 2026).
 """
 import os, sys, json, time, base64, hashlib, mimetypes, argparse, pathlib, re, subprocess, tempfile
 import urllib.parse
+import cb_provider_jobs
 import requests
 import cb_costs
 import cb_providers
@@ -102,9 +103,12 @@ def _need_eleven_key():
 # ── TICKET 5 — API RESILIENCE: retry + exponential backoff on EVERY external call. A transient blip (network drop,
 #    429 rate-limit, 5xx, fal-queue hiccup) retries INSIDE the job instead of failing the whole render; a real client
 #    error (4xx except 429) raises immediately so we don't loop on a bad request. ────────────────────────────────────
+import cb_episode_budget as episode_budget
 import random
 _RETRY_STATUS = {429, 500, 502, 503, 504}
 def _retryable(e):
+    if isinstance(e, episode_budget.BudgetRefused):
+        return False
     rx = requests.exceptions
     if isinstance(e, (rx.ConnectionError, rx.Timeout, rx.ChunkedEncodingError)):
         return True
@@ -146,7 +150,12 @@ def _checked(r):
             f"{exc} — provider response: {body}", response=r
         ) from exc
     return r
-def _rpost(url, **kw):
+def _rpost(url, _retry_request=True, **kw):
+    if episode_budget.active():
+        kw.setdefault("timeout", 120)
+        return episode_budget.call(lambda: _checked(requests.post(url, **kw)))
+    if not _retry_request:
+        return _checked(requests.post(url, **kw))
     kw.setdefault("timeout", 120)
     return _retry(lambda: _checked(requests.post(url, **kw)), what="POST " + str(url).rsplit("/", 1)[-1][:24])
 def _rget(url, **kw):
@@ -163,6 +172,8 @@ def _fal_asset_url(value):
     return _fal_upload(str(pathlib.Path(value)))
 def _fal_subscribe(endpoint, arguments=None, with_logs=False):
     import fal_client
+    if episode_budget.active():
+        return episode_budget.call(lambda: fal_client.subscribe(endpoint, arguments=arguments, with_logs=with_logs))
     return _retry(lambda: fal_client.subscribe(endpoint, arguments=arguments, with_logs=with_logs),
                   what="fal:" + str(endpoint).rsplit("/", 1)[-1])
 
@@ -250,9 +261,10 @@ def _byteplus_task_url(endpoint):
     return BYTEPLUS_ARK.rstrip("/") + "/" + endpoint.lstrip("/").rstrip("/")
 
 
+@episode_budget.provider("animation", lambda a: cb_costs.estimate_video_cost(a["contract"]["costRateKey"], a["duration"]))
 def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolution,
                              duration, out, *, generate_audio=True, poll_interval=10,
-                             timeout=3600, progress_callback=None, video_refs=None):
+                             timeout=3600, progress_callback=None, video_refs=None, request_id=None):
     """Submit and retrieve one ModelArk asynchronous video task.
 
     Provider capability, spend authorization and billing confirmation happen before this
@@ -270,6 +282,25 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
         if progress_callback:
             progress_callback({"event": event, **data})
 
+    output = MEDIA / out
+    job_output = pathlib.Path(str(output) + "." + str(request_id)) if request_id else output
+    saved_job = cb_provider_jobs.read(job_output)
+    request_hash = cb_provider_jobs.fingerprint(
+        contract, prompt, image_refs, audio_refs, list(video_refs or []),
+        seconds, resolution, generate_audio)
+    if saved_job and saved_job.get("requestHash") != request_hash:
+        raise RuntimeError("Saved provider task belongs to different inputs; use a new candidate output.")
+    if saved_job and not saved_job.get("taskId"):
+        raise cb_provider_jobs.SubmissionUnknown(
+            "Provider submission outcome is unknown; reconcile this request before another paid submission.")
+    credential_id = hashlib.sha256(BYTEPLUS_ARK_KEY.encode()).hexdigest()[:16]
+    if saved_job and saved_job.get("credentialId") != credential_id:
+        raise RuntimeError("This provider job uses a different credential; restore its credential to resume.")
+    if (saved_job.get("state") == "downloaded" and output.is_file()
+            and saved_job.get("outputHash") == hashlib.sha256(output.read_bytes()).hexdigest()):
+        progress("downloaded", taskId=saved_job["taskId"], outputPath=str(output),
+                 outputBytes=output.stat().st_size, resumed=True)
+        return output, saved_job["taskId"], saved_job.get("result") or {}
     content = [{"type": "text", "text": str(prompt)}]
     content.extend({"type": "image_url", "image_url": {
         "url": _byteplus_asset_url(value, "image")}, "role": "reference_image"}
@@ -311,11 +342,30 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
         f"{len(audio_refs)} audio ref(s) · {len(video_refs)} video ref(s) · {body_bytes} bytes",
         flush=True,
     )
-    created = _rpost(task_url, headers=headers, json=body, timeout=(20, 180)).json()
-    task_id = str(created.get("id") or "").strip()
-    if not task_id:
-        raise RuntimeError("BytePlus video task creation returned no task ID")
-    progress("submitted", taskId=task_id, response=created)
+    if saved_job.get("taskId"):
+        task_id = saved_job["taskId"]
+        progress("submitted", taskId=task_id, resumed=True)
+    else:
+        saved_job = {"requestHash": request_hash, "credentialId": credential_id,
+                     "state": "submission_unknown"}
+        cb_provider_jobs.save(job_output, saved_job)
+        try:
+            # Creation is deliberately one HTTP attempt. GET/poll/download can retry.
+            created = _rpost(task_url, headers=headers, json=body,
+                             timeout=(20, 180), _retry_request=False).json()
+            task_id = str(created.get("id") or "").strip()
+            if not task_id:
+                raise ValueError("Provider response has no task ID")
+        except episode_budget.BudgetRefused:
+            # The reservation failed before HTTP submission; this is safe to try later.
+            cb_provider_jobs.record_path(job_output).unlink(missing_ok=True)
+            raise
+        except Exception as exc:
+            raise cb_provider_jobs.SubmissionUnknown(
+                "Provider submission outcome is unknown; reconcile before another paid submission.") from exc
+        saved_job.update(taskId=task_id, state="submitted")
+        cb_provider_jobs.save(job_output, saved_job)
+        progress("submitted", taskId=task_id, response=created)
     print(f"BYTEPLUS SUBMITTED — task {task_id}", flush=True)
 
     deadline = time.monotonic() + timeout
@@ -323,6 +373,8 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
     while time.monotonic() < deadline:
         task = _rget(f"{task_url}/{task_id}", headers=headers, timeout=(20, 120)).json()
         status = str(task.get("status") or "").lower()
+        saved_job["state"] = status
+        cb_provider_jobs.save(job_output, saved_job)
         progress("poll", taskId=task_id, status=status, response=task)
         print(f"BYTEPLUS POLL — task {task_id} · {status or 'blank'}", flush=True)
         if status == "succeeded":
@@ -346,7 +398,12 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
     video = _rget(url, timeout=(20, 300))
     outp = MEDIA / out
     outp.parent.mkdir(parents=True, exist_ok=True)
-    outp.write_bytes(video.content)
+    temporary = pathlib.Path(str(outp) + ".download")
+    temporary.write_bytes(video.content)
+    os.replace(temporary, outp)
+    saved_job.update(state="downloaded", outputHash=hashlib.sha256(video.content).hexdigest(),
+                     result={k: task[k] for k in ("duration", "usage") if k in task})
+    cb_provider_jobs.save(job_output, saved_job)
     progress("downloaded", taskId=task_id, outputPath=str(outp),
              outputBytes=outp.stat().st_size)
     print(f"BYTEPLUS DOWNLOADED — task {task_id} -> {outp}", flush=True)
@@ -373,6 +430,9 @@ _AUTHORIZED_PRODUCTION_ROUTE = "cb_render"
 
 
 def _require_production_route(production_route, op):
+    episode = episode_budget.episode_from_output()
+    if episode_budget.configured(episode) and op in {"generate_video", "lipsync"}:
+        raise episode_budget.BudgetRefused("This legacy operation has no qualified episode-budget quote")
     if production_route != _AUTHORIZED_PRODUCTION_ROUTE:
         raise RuntimeError(
             f"BLOCKED — legacy fire route disabled (production cutover, 2026-07-16). Every paid "
@@ -407,6 +467,7 @@ def generate_image_nanobanana_ab(prompt, refs=None, aspect="16:9", out="keyframe
         prompt, refs=refs, aspect=aspect, out=out,
         model=IMAGE_MODEL, image_size=image_size)
 
+@episode_budget.provider("keyframe", lambda a: cb_costs.estimate_image_cost(provider="seedream5pro", num_refs=len(a["refs"] or []), output_tier=a["image_size"]))
 def _generate_image_seedream(prompt, refs=None, aspect="16:9", out="keyframe.png", image_size="2K"):
     """Generate one Seedream 5.0 Pro image through BytePlus ModelArk.
 
@@ -463,6 +524,7 @@ def _generate_image_seedream(prompt, refs=None, aspect="16:9", out="keyframe.png
         num_image_refs=len(refs), output_url_retention_hours=24)
     return str(outp)
 
+@episode_budget.provider("keyframe-comparison", lambda a: cb_costs.estimate_image_cost(provider="nanobanana2"))
 def _generate_image_nanobanana(prompt, refs=None, aspect="16:9", out="keyframe.png",
                    model=IMAGE_MODEL, image_size="2K"):  # Nano Banana 2 (latest) — 2K + best ref-hold; CB_IMAGE_MODEL overrides
     _need(GEMINI_KEY, "GEMINI_API_KEY")
@@ -484,9 +546,9 @@ def _generate_image_nanobanana(prompt, refs=None, aspect="16:9", out="keyframe.p
     }
     url = f"{GLA}/v1beta/models/{model}:generateContent"
     def _post(b):
-        return requests.post(url, headers={"x-goog-api-key": GEMINI_KEY,
+        return episode_budget.call(lambda: requests.post(url, headers={"x-goog-api-key": GEMINI_KEY,
                                            "Content-Type": "application/json"},
-                             json=b, timeout=300)
+                             json=b, timeout=300))
     resp = _post(body)
     if resp.status_code == 400 and image_size and "imageSize" in resp.text:
         # model doesn't accept imageSize on this tier — retry aspect-only so we still get a frame
@@ -626,7 +688,7 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
                                 duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False,
                                 production_route=None, model_id=None,
                                 comparison_run_id=None, generate_audio=True,
-                                progress_callback=None, operation_mode=None):
+                                progress_callback=None, operation_mode=None, request_id=None):
     _require_production_route(production_route, "generate_video_seedance_ref")
     """Seedance reference-to-video through the exact selected capability-gated transport.
 
@@ -679,14 +741,14 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
         outp, task_id, task = _byteplus_generate_video(
             contract, _pr, image_urls, audio_urls, resolution, duration, out,
             generate_audio=generate_audio, progress_callback=progress_callback,
-            video_refs=video_urls)
+            video_refs=video_urls, request_id=request_id)
         seconds = float(duration)
         cb_costs.log_spend(
             "seedance_ref2vid",
             cb_costs.estimate_video_cost(contract["costRateKey"], seconds),
             out=out,
             meta={"resolution": resolution, "fast": False, "seconds": seconds,
-                  "provider": "byteplus"})
+                  "provider": "byteplus", "providerTaskId": task_id})
         cb_costs.write_gen_sidecar(
             outp, op="seedance_ref2vid", endpoint=contract["endpoint"],
             providerModelId=contract["providerModelId"], modelVersion=contract["modelVersion"],
@@ -726,7 +788,9 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
         args["video_urls"] = [_fal_asset_url(p) for p in video_urls]
     endpoint = contract["endpoint"]
     print(f"  seedance ref2vid ({endpoint}): rendering…")
-    result = _fal_subscribe(endpoint, arguments=args, with_logs=False)
+    with episode_budget.quote(episode_budget.episode_from_output(out),
+            cb_costs.estimate_video_cost(contract["costRateKey"], 15 if str(duration) == "auto" else float(duration)), "animation-comparison"):
+        result = _fal_subscribe(endpoint, arguments=args, with_logs=False)
     url = (result.get("video") or {}).get("url")
     if not url:
         raise SystemExit(f"Seedance ref2vid returned no video url: {str(result)[:400]}")
@@ -769,6 +833,7 @@ def lipsync(video, audio, out="lipsync.mp4", model="fal-ai/latentsync", producti
     vid = _rget(url, timeout=300)
     outp = MEDIA / out; outp.write_bytes(vid.content); return str(outp)
 
+@episode_budget.provider("voice", lambda a: cb_costs.estimate_tts_cost(_eleven_voice_text(a["text"])))
 def eleven_tts(text, voice_id, model_id="eleven_v3", out="vo.mp3",
                stability=0.35, similarity_boost=0.9, style=0.0, previous_text=None,
                production_route=None):
@@ -958,6 +1023,7 @@ def replace_group_chorus_segments(raw_audio, timing_path, performances,
     return str(rebuilt_audio), str(rebuilt_timing)
 
 
+@episode_budget.provider("isolated-voice", lambda a: 0)
 def eleven_isolated_dialogue(performances, out="vo.mp3", *, production_route=None):
     """Generate each approved line as an isolated ElevenLabs TTS part.
 
@@ -1140,6 +1206,7 @@ def _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, error_
     return str(outp)
 
 
+@episode_budget.provider("voice", lambda a: cb_costs.estimate_dialogue_cost(_eleven_dialogue_inputs(a["inputs"])))
 def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
                     generation_kind="generation", production_route=None):
     _require_production_route(production_route, "eleven_dialogue")
@@ -1227,6 +1294,7 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
     )
     return str(outp)
 
+@episode_budget.provider("music", lambda a: cb_costs.estimate_music_cost(a["length_ms"]))
 def eleven_music(prompt, length_ms=None, out="music.mp3", production_route=None):
     _require_production_route(production_route, "eleven_music")
     """ElevenLabs Music — generate an INSTRUMENTAL underscore bed (no vocals) that sits UNDER the dialogue
@@ -1278,6 +1346,7 @@ def voice_change(audio, voice_id, model_id="eleven_multilingual_sts_v2", out="sw
     r.raise_for_status()
     outp = MEDIA / out; outp.write_bytes(r.content); return str(outp)
 
+@episode_budget.provider("sfx", lambda a: cb_costs.RATES["elevenlabs_sfx_flat"][0])
 def eleven_sfx(text, duration=None, out="sfx.mp3", loop=False, production_route=None):
     _require_production_route(production_route, "eleven_sfx")
     """Text -> sound effect / ambience bed."""

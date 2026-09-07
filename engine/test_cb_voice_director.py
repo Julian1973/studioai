@@ -169,6 +169,30 @@ def test_voice_path_preserves_a_scripted_interruption():
     assert requests[0]["body"]["text"] == "[exhales][confident] I am extremely—"
 
 
+def test_source_pause_punctuation_does_not_require_a_direction_reason():
+    locked = {**LOCKED, "exactText": "Well… I can try."}
+    item = copy.deepcopy(direction())
+    item["exactDialogue"] = locked["exactText"]
+    item["takeRecipes"] = [{**item["takeRecipes"][0],
+                             "performedText": "[exhales] Well… I can try."}]
+    item["pauseReasons"] = []
+    V.compile_line(item, locked)
+
+
+def test_added_pause_tag_still_requires_a_direction_reason():
+    item = copy.deepcopy(direction())
+    item["takeRecipes"][0]["performedText"] = "[pause][confident] Nailed it."
+    item["tagPurposes"]["pause"] = "Holds the thought before the claim."
+    with pytest.raises(V.VoiceContractError, match="pause/hesitation"):
+        V.compile_line(item, LOCKED)
+
+
+def test_short_line_allows_one_intentionally_directed_take_with_context():
+    item = copy.deepcopy(direction())
+    item["takeRecipes"] = [{**item["takeRecipes"][0], "takesCount": 1}]
+    V.compile_line(item, LOCKED)
+
+
 def test_group_chorus_binds_every_named_canon_voice():
     locked = {
         **LOCKED,
@@ -236,7 +260,8 @@ def test_provider_request_pronounces_ada_as_lowercase_ada():
 
 
 def test_ep2_s4_countdown_is_locked_to_bo_keen_chorus():
-    package_path = Path("cb-output/Ep2_scene4_production_package.json")
+    package_path = (Path(__file__).resolve().parents[1] /
+                    "cb-output/Ep2_scene4_production_package.json")
     package = json.loads(package_path.read_text(encoding="utf-8"))
     shot = next(item for item in package["shots"] if item["shotId"] == "S4.SH1")
     voice = package["continuityLedger"][0]["departmentWork"]["voice"]["approved"]

@@ -202,22 +202,8 @@ def assemble_picture(clips, out):
     return _dur(out)
 
 def _settle_trim():
-    """The settle-trim length in seconds — read LIVE from cb_segprompt.HANDLE_SETTLE via a function-scoped
-    import, matching this codebase's established deferred-import convention for this module pair (e.g.
-    cb_scene.py's own relay_source_for / _settle_window). 2026-07-08 audit fix: this used to be a plain
-    hardcoded local literal (SETTLE_TRIM = 2.0) that merely "matched" HANDLE_SETTLE by comment, with no actual
-    import tying the two together — a future change to HANDLE_SETTLE would have silently stopped propagating
-    here. Same fix applied to cb_scene.py's SETTLE_WINDOW."""
-    # RE-HOMED (architecture recovery, 2026-07-16, THE_DEFINITIVE_PIPELINE.md re-home item 1):
-    # cb_segprompt is a cutover demolition target and this module is KEEP — the live read stays
-    # while cb_segprompt exists (identical behaviour today), with the value itself (2.0s) as the
-    # guarded fallback so this KEEP module survives the old path's archive. The settle-trim
-    # concept is itself beat-era (shots carry no settle window) and retires with the legacy path.
-    try:
-        import cb_segprompt
-        return float(cb_segprompt.HANDLE_SETTLE)
-    except Exception:
-        return 2.0
+    """Compatibility trim for historical beat exports; current shot cuts use their edit decisions."""
+    return 2.0
 
 # JOIN ON LIVE MOTION (Julian, 2026-07-03, superseding the earlier fixed-fraction trim below): the settle
 # exists in the footage for the relay's harvest and for these trim handles — it is trimmed OUT of the visible
@@ -306,7 +292,7 @@ def assemble_conformed(clips, out, settle_trim=None, edge_frames=EDGE_FRAMES, pl
     scene's last, PLUS a small edge_frames trim off the closing deceleration of what's left (every clip but the
     last) and off the opening ease-in (every clip, including the first). Never re-renders — trims/concats
     already-rendered clips only. This is the "conformed cut"; assemble_picture (unchanged) remains the raw
-    butt-join for comparison. `settle_trim` defaults to cb_segprompt.HANDLE_SETTLE (see _settle_trim) when not
+    butt-join for comparison. `settle_trim` defaults to the historical 2-second handle (see _settle_trim) when not
     given explicitly."""
     if plan is None:
         plan = conform_plan(clips, settle_trim=settle_trim, edge_frames=edge_frames)

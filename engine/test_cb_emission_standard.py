@@ -20,18 +20,19 @@ def test_golden_fixtures_score_at_least_nine_and_pass_manifests():
         prompt = (FIXTURES / name).read_text()
         flight = standard.preflight(prompt)
         manifest = standard.manifest_checks(archetype, prompt)
-        assert flight["score"] >= standard.EMISSION_FIRING_FLOOR, (name, flight)
+        assert flight["score"] >= standard.EMISSION_SCORE_TARGET, (name, flight)
         assert flight["verdict"] == "PASS", (name, flight)
         assert manifest["ready"], (name, manifest)
 
 
-def test_emission_firing_floor_is_nine_point_five():
+def test_craft_score_below_target_does_not_block_production():
     prompt = "Shot 1: Camera holds on the open flower. End state: The flower is open."
     flight = standard.preflight(prompt)
-    assert standard.EMISSION_FIRING_FLOOR == 9.5
+    assert standard.EMISSION_SCORE_TARGET == 9.5
     assert flight["score"] == 9.25
-    assert flight["firingFloor"] == 9.5
-    assert flight["verdict"] == "BLOCK"
+    assert flight["advisoryScoreTarget"] == 9.5
+    assert flight["scoreAdvisoryOnly"] is True
+    assert flight["verdict"] == "PASS"
 
 
 def test_duplicate_story_lock_is_a_mechanical_regression():
@@ -46,7 +47,7 @@ def test_specialist_missing_hold_is_polish_until_typed_emitter_runs():
     flight = standard.preflight(prompt)
     hold = [item for item in flight["findings"] if item["rule"] == "button-hold"]
     assert hold and hold[0]["severity"] == "POLISH"
-    assert flight["score"] >= standard.EMISSION_FIRING_FLOOR
+    assert flight["score"] >= standard.EMISSION_SCORE_TARGET
 
 
 def test_separate_shot_ordinals_do_not_invent_repeated_contacts():
@@ -117,3 +118,10 @@ No music."""
     )
 
     assert any(item["rule"] == "R9" for item in flight["findings"])
+
+
+def test_missing_landing_contract_still_blocks_even_though_craft_score_is_advisory():
+    flight = standard.preflight('Shot 1: The camera follows Bo. No music.')
+    assert flight['verdict'] == 'BLOCK'
+    assert any(item['rule'] == 'ending-state' and item['severity'] == 'FATAL'
+               for item in flight['findings'])

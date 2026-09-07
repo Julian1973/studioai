@@ -17,6 +17,8 @@ import re
 import tempfile
 import threading
 
+from cb_production_contracts import active_shots
+
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "cb-output"
@@ -116,7 +118,6 @@ def _approved_shots(episode, out=None):
 
 def _scene_shot_ids(episode, scene, out=None):
     """Return the live production units for one scene in story order."""
-    retired = {"superseded", "archived", "inactive"}
     for path in _output_root(out).glob(f"{episode}_scene*_production_package.json"):
         try:
             package = json.loads(path.read_text())
@@ -125,14 +126,7 @@ def _scene_shot_ids(episode, scene, out=None):
         if (str(package.get("episode") or episode) != episode or
                 str(package.get("sceneNumber") or "") != scene):
             continue
-        return [
-            str(shot.get("shotId"))
-            for shot in package.get("shots") or []
-            if shot.get("shotId") and
-            str(shot.get("status") or "").strip().lower() not in retired and
-            not str(shot.get("status") or "").strip().lower().startswith("skipped-") and
-            not shot.get("superseded")
-        ]
+        return [str(shot["shotId"]) for shot in active_shots(package) if shot.get("shotId")]
     return []
 
 

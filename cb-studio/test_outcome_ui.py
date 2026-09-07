@@ -232,7 +232,7 @@ def test_story_intake_remembers_runs_and_names_the_lock_boundary():
     assert 'title:"Story & Direction accepted"' in APP
     assert "Approved & locked" in APP
     assert "verdict,note,by:REVIEWER" in APP
-    assert 'subprocess.Popen(["python3", "-u"] + args' in SERVER
+    assert 'subprocess.Popen([sys.executable, "-u"] + args' in SERVER
     assert "cb_db.interrupt_running_jobs(ROOT, server_key=SERVER_KEY)" in SERVER
     assert "restored_jobs = cb_db.load_jobs(ROOT, server_key=SERVER_KEY)" in SERVER
     assert '!r.ok||!Array.isArray(payload)' in APP
@@ -347,7 +347,7 @@ def test_fire_prepares_internal_direction_then_returns_to_the_visible_outcome():
     assert 'prepareDirectionThen(directionStage,ctx.shotId,()=>openDisclosureModal(kind,ctx))' in APP
     assert 'prepareDirectionThen("animation",shotId,()=>shRender(shotId))' in APP
     assert "SH_AFTER_JOB" in APP
-    assert '>Fire candidates</button>' in APP
+    assert 'protectedComparison?"Fire one comparison":"Fire candidates"' in APP
     assert "Seedance 2.5 prompt preflight" in APP
     assert "Contract completeness" in APP
     assert "Creative direction" in APP
@@ -379,16 +379,13 @@ def test_hear_keeps_the_audio_outcome_prominent_before_and_after_generation():
     assert '<audio controls preload="metadata"' in APP
 
 
-def test_completed_audio_sits_between_progress_and_scene_shots():
+def test_director_desk_keeps_next_action_and_shots_above_media():
     rail = '<div id="railwrap">${renderStageRail()}</div>'
-    audio = '<div id="sceneaudio">${completedSceneAudioHTML()}</div>'
+    next_step = '<div id="director-next-step">${directorNextStepHTML()}</div>'
     shots = '<div id="shotoverview">${sceneShotOverviewHTML()}</div>'
-    assert rail in APP and audio in APP and shots in APP
-    assert APP.index(rail) < APP.index(audio) < APP.index(shots)
-    assert 'class="scene-audio-strip"' in APP
-    assert 'if(!media.vo)return ""' in APP
-    assert "openStageOutcome('voice')" in APP
-    assert "sceneAudio.innerHTML=completedSceneAudioHTML()" in APP
+    assert APP.index(rail) < APP.index(next_step) < APP.index(shots)
+    assert 'aria-label="Scene and shot navigation"' in APP
+    assert 'if(sceneAudio)sceneAudio.innerHTML=""' in APP
 
 
 def test_current_shot_is_visually_unmistakable_and_accessible():
@@ -519,11 +516,19 @@ def test_see_makes_revision_lineage_and_current_decision_explicit():
     assert 'No current keyframe yet.' in APP
 
 
+def test_current_voice_bed_note_overrides_an_old_rejection_reason():
+    assert 'const currentVoiceNote=' in APP
+    assert 'const voiceChangeNote=currentVoiceNote||previousVoiceCorrection' in APP
+    assert 'const voiceChangeLabel=currentVoiceNote?"Current take":"Your requested correction"' in APP
+
+
 def test_conversational_director_is_present_on_every_decision_surface():
     assert '<div id="director-chat-host">${directorChatHTML()}</div>' in APP
     assert '✦ Ask Director' in APP
     assert 'class="director-chat-backdrop"' in APP
-    assert 'role="dialog" aria-modal="true"' in APP
+    assert 'role="${docked?"region":"dialog"}"' in APP
+    assert '.director-chat.director-chat-docked{position:static' in APP
+    assert 'queueMicrotask(mountDirectorDesk)' in APP
     assert 'Apply to next revision and return' in APP
     assert 'What will visibly change' in APP
     assert 'Keep locked' in APP
@@ -660,7 +665,8 @@ def test_watch_discovers_server_jobs_after_reload_or_cross_tab_fire():
     assert 'SH_WATCH_POLL=setInterval(_watchServerPollTick,2500);' in APP
     assert 'startWatchServerPoll();' in APP
     assert 'function watchLiveProgressHTML(job,compact)' in APP
-    assert 'hasResult?`<div class="watch-live-results">${resultHTML}</div>`' in APP
+    assert 'const pendingEdit=media.edit&&media.edit.status==="candidate-pending"&&media.edit.candidateUrl;' in APP
+    assert 'hasResult?`<div class="watch-live-results">${reviewResultHTML}</div>`' in APP
     assert 'watchLiveProgressHTML(job,hasResult)' in APP
     assert 'if(existing){existing.outerHTML=watchLiveProgressHTML' in APP
 
@@ -686,7 +692,6 @@ def test_missing_required_keyframe_never_presents_watch_as_ready():
     assert 'if(policy.needsKeyframe&&!current.keyframe)return "ready";' in APP
     assert 'if(phase.id==="see")return policy.pending&&policy.pending.keyframe?"Review keyframe":"Keyframe required";' in APP
     assert 'if(phase.id==="watch")return "Waiting for SEE";' in APP
-    assert '?{label:"Continue to SEE keyframe",onclick:"openShotOutcome(\'keyframe\',PSHOT_I)"}' in APP
     assert 'if(policy.needsKeyframe&&!current.keyframe){openShotOutcome("keyframe",PSHOT_I);return;}' in APP
     assert '// WATCH remains inspectable while it waits for SEE.' in APP
 
@@ -746,7 +751,7 @@ def test_normal_watch_fire_never_selects_legacy_comparison_transport():
     assert "comparisonModelId" not in production_fire
     assert "comparisonRunId" not in production_fire
     assert "shRun('fire',shotId,{candidates:SH_CANDS" in production_fire
-    assert "let SH_CANDS=2;" in APP
+    assert "let SH_CANDS=1;" in APP
 
 
 def test_scene_boot_uses_one_authoritative_state_and_preflight_response():
@@ -790,10 +795,10 @@ def test_keyframe_screen_keeps_scene_plate_and_opening_frame_distinct():
 
 def test_see_stage_is_visual_first_and_demotes_repeated_context():
     assert 'resultFirst=mode==="keyframe"' in APP
-    assert 'overview.innerHTML=stage==="keyframe"?"":sceneShotOverviewHTML()' in APP
+    assert 'overview.innerHTML=sceneShotOverviewHTML()' in APP
     assert 'class="see-focus-title">Opening frame</div>' in APP
     assert '${visualAnchors}<div class="artefact-center see-supporting' in APP
-    assert '${referenceHTML}<details class="focus-evidence see-context"><summary>Shot brief &amp; continuity</summary>' in APP
+    assert '${handoffReview}${referenceHTML}<details class="focus-evidence see-context"><summary>Shot brief &amp; continuity</summary>' in APP
     assert 'workspace.classList.toggle("see-workspace",mode==="keyframe")' in APP
 
 
@@ -898,3 +903,34 @@ def test_working_prompt_keeps_current_animation_candidate_valid():
     restore_end = RENDER.index("def save_watch_director_feedback", restore_start)
     restore = RENDER[restore_start:restore_end]
     assert 'direction_record.pop("manualCurrentOverride", None)' in restore
+
+
+def test_visible_pipeline_tab_refetches_authoritative_production_state():
+    start = APP.index("async function refreshVisibleProductionState")
+    refresh = APP[start:APP.index("</script>", start)]
+    assert 'document.visibilityState!=="visible"' in refresh
+    assert 'page!=="pipeline"' in refresh
+    assert "await renderControl()" in refresh
+    assert 'document.addEventListener("visibilitychange",refreshVisibleProductionState)' in refresh
+    assert 'window.addEventListener("focus",refreshVisibleProductionState)' in refresh
+
+
+def test_department_endpoint_reuses_current_approved_direction():
+    endpoint = SERVER[SERVER.index('if self.path == "/api/department-run"'):]
+    endpoint = endpoint[:endpoint.index('if self.path == "/api/director-chat"')]
+    assert 'status.get("directionReady")' in endpoint
+    assert '"existing": True' in endpoint
+
+
+def test_scene_queue_uses_recommended_cut_without_hiding_a_real_cut_blocker():
+    import subprocess
+    function = APP[APP.index('function sceneCardStatus('):APP.index('function badge(')]
+    program = function + '''
+const stages={scenelook:{state:"blocked"},animation:{state:"approved"},
+              continuity:{state:"ready"},final:{state:"locked"}};
+if(sceneCardStatus(stages,"continuity")!=="needs-decision")throw Error("accepted cut hidden by draft");
+if(sceneCardStatus(stages)!=="blocked")throw Error("draft blocker disappeared");
+stages.continuity.state="blocked";
+if(sceneCardStatus(stages,"continuity")!=="blocked")throw Error("cut integrity blocker disappeared");
+'''
+    subprocess.run(['node', '-e', program], check=True, capture_output=True, text=True)

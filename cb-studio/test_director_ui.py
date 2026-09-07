@@ -180,7 +180,7 @@ def test_studio_jobs_force_current_engine_env_over_parent_env():
     assert "def _engine_env_overrides()" in SERVER
     assert 'env_file = CBGEN / ".env"' in SERVER
     assert "env.update(_engine_env_overrides())" in SERVER
-    assert "env=_engine_subprocess_env()" in SERVER
+    assert "env=_engine_subprocess_env(args)" in SERVER
 
 
 def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
@@ -190,49 +190,20 @@ def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
     assert 'app.pipelineStep = "analysis"' in JS
 
 
-def test_studio_room_is_allowlisted_and_uses_the_claude_proxy_contract():
+def test_retired_room_redirects_without_an_independent_paid_proxy():
     assert '"/cb-studio/room.html"' in SERVER
-    assert 'if self.path == "/api/room-chat":' in SERVER
-    assert '"model": "claude-opus-5"' in SERVER
-    assert '"max_tokens": int(payload.get("max_tokens") or 2048)' in SERVER
-    assert '"system": system' in SERVER
-    assert "isinstance(system, list)" in SERVER
-    assert 'return {"text": text}' in SERVER
-    assert "system untouched" in ROOM_INSTRUCTION
-    assert "claude-opus-5" in ROOM_INSTRUCTION
-    assert '{"text": "..."}' in ROOM_INSTRUCTION
-    assert "/api/room-chat" in ROOM
-    assert "system: systemBlocks(gate, u)" in ROOM
+    assert '"/api/write", "/api/room-chat"' in SERVER
+    assert '"zeroSpend": True' in SERVER
+    assert '_anthropic_room_chat' not in SERVER
+    assert 'location.replace(dest.href)' in ROOM
+    assert '/cb-studio/app.html' in ROOM
+    assert '/api/room-chat' not in ROOM
 
 
-def test_studio_board_is_allowlisted_and_reads_real_shot_media_urls():
+def test_old_board_bookmark_redirects_to_current_production():
     assert '"/cb-studio/board.html"' in SERVER
-    assert "/api/director-session?episode=" in BOARD
-    assert "s.keyframeUrl||s.imageUrl||null" in BOARD
-    assert "s.clipUrl||s.url||null" in BOARD
-    assert 'a.type==="video-set"' in BOARD
-    assert "no artifact yet" in BOARD
-    assert "def _expose_session_shot_media(session, media):" in SERVER
-    assert 'shot.setdefault("keyframeUrl", keyframe_url)' in SERVER
-    assert 'shot.setdefault("imageUrl", keyframe_url)' in SERVER
-    assert 'shot.setdefault("clipUrl", clip_url)' in SERVER
-    assert 'shot.setdefault("acceptedUrl", clip_url)' in SERVER
-
-
-def test_studio_room_verdicts_map_to_current_director_actions_and_rejects_send_notes():
-    expected_actions = (
-        "accept-keyframe", "iterate-keyframe", "accept-voice", "iterate-voice",
-        "accept-animation", "iterate-animation", "reopen-shot",
-        "accept-master", "iterate-master",
-    )
-    for action_id in expected_actions:
-        assert action_id in SERVER
-    assert "function pipeActions()" in ROOM
-    assert "function resolvePipeAction(verdict)" in ROOM
-    assert "const want = verdict===\"PASS\"" in ROOM
-    assert "await pipeAct(act, v===\"REJECT\" ? text.trim() : undefined)" in ROOM
-    assert "body.note = reason" in ROOM
-    assert 'if not note:' in SERVER
+    assert '/cb-studio/app.html' in BOARD
+    assert 'location.replace(dest.href)' in BOARD
 
 
 def test_exact_request_is_separate_and_named_authoritative():
@@ -952,8 +923,8 @@ def test_director_entry_is_authenticated_and_static_allowlisted():
     assert '"/cb-studio/director.html"' in SERVER
     assert 'parsed.path not in (' in SERVER
     assert '"/cb-studio/director.html", "/cb-studio/app.html"' in SERVER
-    assert '"Location", "/cb-studio/director.html"' in SERVER
-    assert "/cb-studio/director.html?launchToken=" in SERVER
+    assert '"Location", "/cb-studio/app.html"' in SERVER
+    assert "/cb-studio/app.html?launchToken=" in SERVER
 
 
 def test_paid_actions_receive_an_explicit_confirmation_without_exposing_tokens():

@@ -89,7 +89,8 @@ def test_canonical_engine_module_reloads_changed_source(monkeypatch, tmp_path):
         sys.modules.pop(module_name, None)
 
 
-def test_relay_opening_frame_is_not_exposed_as_watch_result(monkeypatch, tmp_path):
+@pytest.mark.parametrize("planned_cut", [False, True])
+def test_relay_opening_frame_is_not_exposed_as_watch_result(monkeypatch, tmp_path, planned_cut):
     module = _load_server_module("cb_studio_relay_media_test")
     media = tmp_path / "media"
     shots = media / "shots"
@@ -122,7 +123,20 @@ def test_relay_opening_frame_is_not_exposed_as_watch_result(monkeypatch, tmp_pat
         "continuityLedger": [{"shotId": "S1.SH2", "status": "designed"}],
     }
 
+    if planned_cut:
+        monkeypatch.setattr(module, "_url_from_abs", lambda path: "/engine/media/shots/" + pathlib.Path(path).name if path and pathlib.Path(path).is_file() else None)
+        package["shots"][0].update({"sourceType": "opener", "sourceShotId": None,
+            "shotTransition": {"type": "cut", "stateSourceShotId": "S1.SH1"}})
+        package["continuityLedger"].append({"shotId": "S1.SH1", "status": "approved",
+            "harvestFrame": str(shots / "EpT_S1.SH1_final_frame.png")})
     result = module.shot_media_map(package, "1", "EpT")["shots"]["S1.SH2"]
+    if planned_cut:
+        assert result["handoffFrame"].endswith("EpT_S1.SH1_final_frame.png")
+        assert result["handoffSourceShotId"] == "S1.SH1"
+        assert result["openingFrame"] is None
+        assert result["finalFrame"] is None
+        assert result["clip"] is None
+        return
 
     assert result["openingFrame"].endswith("EpT_S1.SH1_final_frame.png")
     assert result["openingFrameSourceShotId"] == "S1.SH1"
@@ -661,3 +675,100 @@ def test_parallel_index_reads_return_complete_json(studio):
     for status, _, body in results:
         assert status == 200
         assert isinstance(json.loads(body), list)
+
+
+def test_credits_endpoint_requires_auth_and_routes_one_explicit_fire(studio, monkeypatch):
+    from types import SimpleNamespace
+    module, port = studio
+    calls = []
+    credits = SimpleNamespace(
+        status=lambda ep: {"ok": True, "episode": ep, "characters": []},
+        episode_id=lambda ep: ep,
+        prepare=lambda ep, config: {"ok": True, "status": "prepared", "token": "sealed"},
+    )
+    render = SimpleNamespace(fire_credits=lambda ep, token: calls.append((ep, token)) or {"ok": True, "status": "starting"})
+    monkeypatch.setattr(module, "_canonical_engine_module", lambda name: render if name == "cb_render" else credits)
+    code, _, _ = _request(port, "GET", "/api/credits?episode=Ep2")
+    assert code == 401
+    _, headers, _ = _request(port, "GET", "/cb-studio/app.html")
+    auth = {"Cookie": headers["Set-Cookie"].split(";", 1)[0], "Origin": f"http://127.0.0.1:{port}", "Content-Type": "application/json"}
+    code, _, data = _request(port, "GET", "/api/credits?episode=Ep2", auth)
+    assert code == 200 and json.loads(data)["episode"] == "Ep2"
+    code, _, data = _request(port, "POST", "/api/credits", auth, json.dumps({"episode": "Ep2", "action": "prepare", "config": {}}))
+    assert code == 200 and calls == []
+    code, _, _ = _request(port, "POST", "/api/credits", auth, json.dumps({"episode": "Ep2", "action": "fire", "token": "sealed"}))
+    assert code == 200 and calls == [("Ep2", "sealed")]
+
+
+@pytest.mark.parametrize('gate,spoken,next_stage', [
+    ('chat:approve:keyframe', True, 'voice'),
+    ('chat:approve:keyframe', False, 'animation'),
+    ('chat:approve:voice', True, 'animation'),
+    ('chat:approve:render', True, 'voice'),
+])
+def test_chat_approval_prepares_only_next_outcome(monkeypatch, tmp_path, gate, spoken, next_stage):
+    module = _load_server_module('outcome_transition_' + next_stage)
+    import cb_episode_budget as budget
+    import cb_render as render
+    budget.approve('Ep3', 10, 'Julian', 'script')
+    pkg = {'shots': [{'shotId': 'S1.SH1', 'sourceType': 'opener'},
+                     {'shotId': 'S1.SH2', 'sourceType': 'relay'}]}
+    monkeypatch.setattr(render, 'load_pkg', lambda *a: (pkg, tmp_path / 'package.json'))
+    monkeypatch.setattr(render.cb_audio_authority, 'spoken_dialogue_lines', lambda *a: ['voice'] if spoken else [])
+    calls = []
+    monkeypatch.setattr(module, '_start', lambda jid, gate, scene, args: calls.append((gate,args)) or 'next')
+    job = {'status': 'finalizing', 'gate': gate,
+           'args': ['cb_outcome_chat.py','Ep3','1','S1.SH1','keyframe','hash','Julian']}
+    module._finalize_automatic_direction(job)
+    assert calls[0][0] == 'chat:prepare:' + next_stage
+    assert calls[0][1][-1] == next_stage
+    assert job['nextOutcomeScope']['shotId'] == ('S1.SH2' if gate.endswith(':render') else 'S1.SH1')
+    assert len(calls) == 1
+
+
+def test_budget_approval_does_not_approve_any_media(monkeypatch, tmp_path):
+    module = _load_server_module('outcome_budget')
+    import cb_director_chat as chat
+    import cb_outcome_chat as outcomes
+    monkeypatch.setattr(chat, 'CHAT_DIR', tmp_path / 'chat')
+    monkeypatch.setattr(module.SCRIPT_STORE, 'current', lambda *a, **kw: {'scriptVersionId': 'script'})
+    monkeypatch.setattr(cb_intake, 'intake_status', lambda *a: {'canonicalCurrent': False})
+    monkeypatch.setattr(outcomes, 'execute', lambda *a: pytest.fail('Budget is not media approval'))
+    calls = []
+    monkeypatch.setattr(module, '_start', lambda jid, gate, scene, args: calls.append((gate,args)) or 'intake')
+    result = module._outcome_chat_command({'message': 'Approve episode budget $50', 'by': 'Julian'}, 'Ep3','1',None,'script')
+    assert result['budget']['limitUsd'] == 50
+    assert calls == [('storyintake',['cb_intake.py','run','Ep3'])]
+    assert result['decisionKind'] is None
+
+
+@pytest.mark.parametrize('path', ['/api/room-chat', '/api/write'])
+def test_retired_paid_routes_fail_without_starting_work(studio, monkeypatch, path):
+    module, port = studio
+    monkeypatch.setattr(module, '_start', lambda *a, **kw: pytest.fail('Retired route started work'))
+    _, headers, _ = _request(port, 'GET', '/cb-studio/app.html')
+    cookie = headers['Set-Cookie'].split(';', 1)[0]
+    status, _, body = _request(port, 'POST', path, {'Cookie': cookie, 'Content-Type': 'application/json',
+        'Origin': f'http://127.0.0.1:{port}'}, '{}')
+    assert status == 410
+    assert json.loads(body)['zeroSpend'] is True
+
+
+@pytest.mark.parametrize('code,expected_jobs', [('prepare-keyframe', 1), ('review-request', 0), ('review-candidate', 0), ('recover-media', 0)])
+def test_continue_uses_shared_next_step_and_never_substitutes_for_approval(monkeypatch, tmp_path, code, expected_jobs):
+    module = _load_server_module('director_desk_continue_' + code)
+    import cb_director_chat as chat
+    import cb_episode_budget as budget
+    monkeypatch.setattr(chat, 'CHAT_DIR', tmp_path / 'chat')
+    monkeypatch.setattr(budget, 'status', lambda ep: {'approved': True})
+    stage = 'keyframe' if code == 'prepare-keyframe' else 'animation'
+    monkeypatch.setattr(module, '_outcome_chat_context', lambda *a: {'nextAction': {'code': code, 'stage': stage, 'label': 'Next'}})
+    calls = []
+    monkeypatch.setattr(module, '_start', lambda jid, gate, scene, args: calls.append((gate,args)) or 'prepare')
+    result = module._outcome_chat_command({'message': 'continue'}, 'Ep3', '1', 'S1.SH1', stage)
+    assert len(calls) == expected_jobs
+    assert result['navigation'] == stage
+    assert result['decisionKind'] is None
+    if calls:
+        assert calls[0][0] == 'chat:prepare:keyframe'
+        assert calls[0][1][1] == 'prepare'

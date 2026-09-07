@@ -1,14 +1,8 @@
 interface:
-  display_name: Seedance Production Director
-  short_description: Direct cinematic Seedance scenes and extensions
-  default_prompt: Use $seedance-production-director to direct this material into a
-    continuity-safe, production-ready Seedance scene.
-  icon_small: assets/icon.svg
-  icon_large: assets/icon.svg
+  display_name: "Seedance Production Director"
+  short_description: "Script-to-screen direction and scoped production"
+  default_prompt: "Use $seedance-production-director to turn my script into a coherent production plan with matched keyframe, voice and animation briefs."
+  icon_small: "./assets/icon.svg"
+  icon_large: "./assets/icon.svg"
 policy:
-  products:
-  - chatgpt
-  - codex
-  - api
-  - atlas
   allow_implicit_invocation: true

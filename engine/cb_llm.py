@@ -29,6 +29,7 @@ from contextlib import contextmanager
 from typing import get_origin
 from pydantic import ValidationError
 import cb_gen   # importing cb_gen loads engine/.env into os.environ (keys never leave the backend)
+import cb_episode_budget as episode_budget
 import cb_costs
 
 # models — environment first, defaults second (rule: read from env; never hardcode secrets)
@@ -39,7 +40,7 @@ GEMINI_MODEL = os.environ.get("DIRECTOR_GEMINI_MODEL", "gemini-3.1-pro-preview")
 # STOPS with the EXACT OpenAI error instead of silently producing inconsistent Gemini results. Set =true to re-enable.
 ENABLE_GEMINI_FALLBACK = os.environ.get("DIRECTOR_ENABLE_GEMINI_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
 PREMIUM_MAX_OUTPUT_TOKENS = int(os.environ.get("OPENAI_PREMIUM_MAX_OUTPUT_TOKENS", "24000"))
-STANDARD_MAX_OUTPUT_TOKENS = int(os.environ.get("OPENAI_STANDARD_MAX_OUTPUT_TOKENS", "12000"))
+STANDARD_MAX_OUTPUT_TOKENS = int(os.environ.get("OPENAI_STANDARD_MAX_OUTPUT_TOKENS", "8000"))
 MAX_OUTPUT_TOKENS = PREMIUM_MAX_OUTPUT_TOKENS  # backwards-compatible public constant
 OPENAI_DAILY_BUDGET_USD = float(os.environ.get("OPENAI_DAILY_BUDGET_USD", "5.00"))
 OPENAI_MAX_CALL_USD = float(os.environ.get("OPENAI_MAX_CALL_USD", "1.00"))
@@ -303,9 +304,9 @@ def _openai_call(model, system, user, schema, images=None, *, max_output_tokens,
         input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},
                {"role": "user", "content": user_parts}],
         text_format=schema,
+        text={"verbosity": "low"},
         max_output_tokens=max_output_tokens,
         reasoning={"effort": reasoning_effort},
-        verbosity="low",
         prompt_cache_key=prompt_cache_key,
         prompt_cache_retention="24h",
     )
@@ -452,18 +453,29 @@ def structured(system, user, schema, *, model=None, tier="standard", label="dire
         estimated_max_cost, _ = _assert_cost_budget(
             model, system, user, schema, images, max_output_tokens)
         for attempt in range(1, PROVIDER_ATTEMPTS + 1):
+            budget_episode = episode_budget.episode_from_output()
+            reservation = None
+            if episode_budget.configured(budget_episode):
+                reservation = episode_budget.reserve(budget_episode, estimated_max_cost, "text:" + label)
             try:
                 obj, resp = _openai_call(
                     model, system, user, schema, images=images,
                     max_output_tokens=max_output_tokens, reasoning_effort=reasoning_effort)
                 actual_cost = _log_openai_usage(resp, model, label, estimated_max_cost)
+                if reservation:
+                    episode_budget.finish(budget_episode, reservation, "committed", actual_cost)
                 _cache_store(digest, obj)
                 log(f"  [director] {label}: OpenAI {model} completed — logged ${actual_cost:.4f}",
                     flush=True)
                 return obj
             except ValidationError:
+                if reservation:
+                    episode_budget.finish(budget_episode, reservation, "unknown")
                 raise
             except Exception as exc:
+                if reservation:
+                    episode_budget.finish(budget_episode, reservation, "unknown")
+                    raise
                 openai_error = exc
                 if _non_retryable_provider_error(exc):
                     break

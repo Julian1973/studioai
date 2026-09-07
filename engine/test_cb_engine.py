@@ -405,6 +405,17 @@ def test_option_d_internal_contract_preserved_provider_brief_lean():
     assert "Keep Fuzzby's whole silhouette above the petals at all times." in brief
 
 
+def test_render_critical_marks_describe_state_change_instead_of_keep_both():
+    shot = _shot(chars=("Fuzzby",), marks_in=["tail small and normal"],
+                 marks_out=["tail fully puffed"])
+
+    protections = E._render_critical(shot)
+
+    assert protections == [
+        "Begin with tail small and normal visible. End with tail fully puffed visible."
+    ]
+
+
 def test_dedup_by_canonical_id_not_fuzzy_text():
     sh = _clean_design().shots[0]                             # dialogue shot: audio trigger fires
     line, prov = E.hard_constraints(sh, CFG)

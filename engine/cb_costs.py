@@ -99,8 +99,23 @@ def log_spend(op, cost_usd, out=None, meta=None):
             "out": os.path.basename(str(out)) if out else None,
             "meta": meta or {},
         }
-        with open(LEDGER_PATH, "a") as f:
+        import fcntl
+        with open(LEDGER_PATH, "a+") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            task_id = (meta or {}).get("providerTaskId")
+            if task_id:
+                f.seek(0)
+                for line in f:
+                    try:
+                        old = json.loads(line)
+                    except ValueError:
+                        continue
+                    if ((old.get("meta") or {}).get("providerTaskId") == task_id
+                            and (old.get("meta") or {}).get("provider") == (meta or {}).get("provider")):
+                        return
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
     except Exception as e:
         print(f"  (cost_ledger: skipped logging {op} — {str(e)[:120]})", flush=True)
 

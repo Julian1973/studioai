@@ -52,7 +52,7 @@ def test_platform_shell_is_ip_agnostic_and_projects_supply_identity():
 
 def test_first_viewport_names_productions_and_keeps_episode_decisions_inside_them():
     assert '<div class="screen-eyebrow">Studio workspace</div>' in APP
-    assert '<h1>Productions</h1>' in APP
+    assert '<h1>Projects</h1>' in APP
     assert 'Production library' in APP
     assert 'Props & references' in APP
     assert 'function productionLibraryHTML(active)' in APP

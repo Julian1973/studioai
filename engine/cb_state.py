@@ -17,6 +17,7 @@ import cb_quality
 import cb_render
 import cb_audio_authority
 import cb_rough_cut
+import cb_production_contracts as contracts
 
 
 POLICY_VERSION = "canon-locked-current-direction-outcome-approval-v5"
@@ -506,6 +507,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "directorReview": review["reason"],
         },
         "pending": {
+            "request": bool(ledger.get("pendingSpendAuth")),
             "keyframe": bool(keyframe_candidate),
             "voice": bool(ledger.get("voPath") and not voice_ok),
             "animation": ledger.get("status") == "candidates-pending",
@@ -614,20 +616,27 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "preservedFromSiblingAmendment": True,
             "changedShotId": amendment.get("shotId"),
         }
+    # Historical acceptance is independent of whether a new draft can be generated.
+    accepted = contracts.accepted_asset(ledger)
+    result["acceptedAsset"] = accepted
+    result["draftReadiness"] = {"label": result["label"], "sub": result["sub"],
+                                "readyToAnimate": result["readyToAnimate"]}
+    if accepted["intact"]:
+        result["label"] = "Approved take"
+        result["badgeState"] = "approved"
+        result["sub"] = ("A revised draft needs preparation; your accepted take is preserved."
+                         if (result.get("amendment") or {}).get("active") else
+                         "Ready to review in the scene cut. New drafts have separate input checks.")
+    elif accepted["accepted"]:
+        result["label"] = "Accepted media needs recovery"
+        result["badgeState"] = "blocked"
+        result["sub"] = "The recorded take or final frame is missing or changed; restore the exact accepted file."
+    result["nextAction"] = contracts.shot_next_action(result)
     return result
 
 
 def _active_package_shots(pkg):
-    """Return only production units that still belong to the live scene route."""
-    retired = {"superseded", "archived", "inactive"}
-    def is_retired(shot):
-        status = str(shot.get("status") or "").strip().lower()
-        return (status in retired or status.startswith("skipped-") or
-                bool(shot.get("superseded")))
-    return [
-        shot for shot in (pkg.get("shots") or [])
-        if not is_retired(shot)
-    ]
+    return contracts.active_shots(pkg)
 
 
 def production_state(scene, episode="Ep1", intake=None):
@@ -873,7 +882,13 @@ def production_state(scene, episode="Ep1", intake=None):
             f"{approved_animation} accepted; {ready_animation} ready; "
             f"{max(0, len(shots) - approved_animation - ready_animation)} waiting")
 
-    if approved_animation == 0:
+    accepted_count = sum(1 for shot in shots if shot["acceptedAsset"]["intact"])
+    draft_animation_stage = dict(stages["animation"])
+    accepted_complete = bool(shots and accepted_count == len(shots))
+    if accepted_complete and package_current and not amendment:
+        stages["animation"] = _stage("approved", f"{accepted_count} accepted takes preserved")
+
+    if accepted_count == 0:
         stages["continuity"] = _stage("locked", "accept the first WATCH take to open Director's Seat")
     else:
         try:
@@ -996,6 +1011,12 @@ def production_state(scene, episode="Ep1", intake=None):
                          "manifestDigest": (post["approved"].get("manifest") or {}).get(
                              "manifestDigest")},
         },
+        "acceptedComplete": accepted_complete,
+        "acceptedCount": accepted_count,
+        "draftStages": {"animation": draft_animation_stage},
+        "recommendedStage": ("continuity" if accepted_complete and package_current
+                             and not amendment and stages["continuity"]["state"] != "approved"
+                             else "final" if stages["continuity"]["state"] == "approved" else None),
         "stages": stages,
         "shots": shots,
         "_per": shots,

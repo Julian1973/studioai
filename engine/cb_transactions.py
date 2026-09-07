@@ -1,10 +1,54 @@
-"""Install scene-level mutation leases around the production runtime."""
+"""Declared scene commands and their explicit transaction boundary."""
 from __future__ import annotations
 
 import functools
 import inspect
+import hashlib
+import json
 
 import cb_db
+
+
+_MEDIA_DECISIONS = {
+    "approve_voice", "reject_voice", "approve_keyframe", "reject_keyframe",
+    "approve_shot", "reject_shot", "approve_shot_edit", "reject_shot_edit",
+    "approve_shot_comparison", "reject_shot_comparison",
+}
+
+
+def _decision_snapshot(module, scene, episode, shot_id):
+    pkg, _ = module.load_pkg(scene, episode)
+    shot = module._shot(pkg, shot_id)
+    ledger = module._ledger(pkg, shot_id)
+    return {"sourceVersion": pkg.get("revision"),
+            "characters": shot.get("charactersInFrame") or [],
+            "shot": shot, "ledger": ledger}
+
+
+def _record_decision(name, arguments, scene, episode, before, after):
+    import cb_learning
+    note = str(arguments.get("correction") or arguments.get("note") or "")
+    # Hash the actual before/after decision state so retried identical commands do not
+    # manufacture corroborating evidence. Preserve both accepted and rejected pointers.
+    identity = {"command": name, "episode": episode, "scene": str(scene),
+                "shot": arguments.get("shot_id"), "note": note, "after": after}
+    key = hashlib.sha256(json.dumps(identity, sort_keys=True, default=str).encode()).hexdigest()
+    pointers = []
+    for state in (before, after):
+        ledger = state.get("ledger") or {}
+        for field in ("approvedTake", "candidatePaths", "harvestFrame", "voPath",
+                      "voRawPath", "voTimingPath", "voiceApproval",
+                      "keyframeCandidate", "keyframeApproval"):
+            if ledger.get(field):
+                pointers.append({"field": field, "value": ledger[field]})
+    cb_learning.capture_evidence(
+        "approved" if name.startswith("approve") else "rejected", note,
+        episode=episode, scene=str(scene), shot=arguments.get("shot_id"),
+        role="Voice" if "voice" in name else "Cinematography" if "keyframe" in name else "Animation",
+        sourceVersion=after.get("sourceVersion"), scope="shot", category="media-review",
+        context=json.dumps({"command": name, "characters": after.get("characters") or [],
+                            "decisionStateHash": key}), assetPointers=pointers,
+        capturedBy=arguments.get("reviewed_by") or "Julian", decisionKey=key)
 
 
 MUTATING_OPERATIONS = (
@@ -45,7 +89,15 @@ MUTATING_OPERATIONS = (
     "edit_shot",
     "approve_shot_edit",
     "reject_shot_edit",
+    "approve_shot_comparison",
+    "reject_shot_comparison",
     "stitch_scene",
+    "reopen_approved_shot",
+    "import_animation_candidate",
+    "import_approved_take",
+    "recover_approved_shot",
+    "set_continuity_mode",
+    "bind_animation_location_reference",
 )
 
 
@@ -59,24 +111,37 @@ def _scope(name, signature, args, kwargs):
     return bound.arguments.get("scene"), bound.arguments.get("episode", "Ep1")
 
 
-def install(module):
-    for name in MUTATING_OPERATIONS:
-        target = getattr(module, name)
-        signature = inspect.signature(target)
+def protect(module, name, target):
+    """Compose one declared scene command with its reentrant transaction lease."""
+    if name not in MUTATING_OPERATIONS:
+        raise ValueError(f"Undeclared scene command: {name}")
+    signature = inspect.signature(target)
 
-        @functools.wraps(target)
-        def locked(*args, __name=name, __target=target, __signature=signature, **kwargs):
-            scene, episode = _scope(__name, __signature, args, kwargs)
-            if scene is None:
-                raise module.Refused(
-                    f"REFUSED - cannot determine scene scope for {__name}"
-                )
-            try:
-                with cb_db.scene_lease(
-                    module.HERE.parent, episode, scene, f"cb_render.{__name}"
-                ):
-                    return __target(*args, **kwargs)
-            except cb_db.SceneBusy as exc:
-                raise module.Refused(f"REFUSED - {exc}") from exc
+    @functools.wraps(target)
+    def locked(*args, **kwargs):
+        scene, episode = _scope(name, signature, args, kwargs)
+        if scene is None:
+            raise module.Refused(f"REFUSED - cannot determine scene scope for {name}")
+        try:
+            with cb_db.scene_lease(module.HERE.parent, episode, scene, f"cb_render.{name}"):
+                arguments = signature.bind_partial(*args, **kwargs).arguments
+                before = None
+                if name in _MEDIA_DECISIONS:
+                    try:
+                        before = _decision_snapshot(module, scene, episode, arguments.get("shot_id"))
+                    except Exception:
+                        pass
+                result = target(*args, **kwargs)
+                if before is not None:
+                    try:
+                        after = _decision_snapshot(module, scene, episode, arguments.get("shot_id"))
+                        _record_decision(name, arguments, scene, episode, before, after)
+                    except Exception as exc:
+                        arguments.get("log", print)(
+                            f"LEARNING CAPTURE WARNING — media decision saved: {exc}")
+                return result
+        except cb_db.SceneBusy as exc:
+            raise module.Refused(f"REFUSED - {exc}") from exc
 
-        setattr(module, name, locked)
+    locked.__studio_mutation__ = {"command": name, "scope": "scene"}
+    return locked

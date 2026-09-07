@@ -1,0 +1,7 @@
+interface:
+  display_name: "Crystal Bears Seedream Keyframes"
+  short_description: "Turns approved shot direction into locked keyframes"
+  default_prompt: "Use $crystal-bears-seedream-keyframes to deliver this approved Crystal Bears shot as a motion-ready Seedream 5 Pro keyframe."
+
+policy:
+  allow_implicit_invocation: true

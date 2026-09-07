@@ -1,6 +1,6 @@
 # Prompt quality gates
 
-Score each category internally from 0 to 2. Revise if the total is below 17/20 or if story, canon, dialogue/audio, or continuity scores 0.
+Use the dimensions below as advisory diagnostics. Address a concrete weakness when it affects this beat; there is no aggregate pass score and no score-driven retry loop. Stop only for a specific unresolved story, canon, reference, audio, continuity, provider or authorization conflict.
 
 | Gate | 0 | 1 | 2 |
 |---|---|---|---|
@@ -30,10 +30,15 @@ Score each category internally from 0 to 2. Revise if the total is below 17/20 o
 - The final state can open the next clip.
 - Safeguards are specific to real failure risks.
 - No sentence merely says the result should be good, cinematic, magical, premium, or high quality.
+- The selected model and route agree with the current Studio capability record.
+- Approved dialogue audio is bound according to the selected qualified route.
+- Actual speaker timing, pauses, mouth ownership, silent acting reserve and tail reserve are recorded.
+- Native conditioning and editorial retention are described accurately; the final voice master remains authoritative.
+- Cause, reaction and landing all have funded time; the final line does not consume the landing state.
 
 ## Mandatory extension gates
 
-For any continuation, these are pass/fail in addition to the score:
+For any continuation, these are pass/fail independent of craft diagnostics:
 
 - The named master clip is approved and free of the drift being corrected.
 - The selected operation is verified or accurately described as conditional.
@@ -45,3 +50,19 @@ For any continuation, these are pass/fail in addition to the score:
 - The landing picture and sound are usable by the next generation.
 
 Fail fast at the first broken extension gate. Do not compensate for a bad master with more prompt text.
+
+## Crystal Bears creative compass check
+
+Apply for Crystal Bears and other briefs explicitly using Julian's creative compass. Review observable direction, not the presence of creator names.
+
+- Humour, when called for, grows from a specific intention, play rule or relationship; setup, consequence and reaction have room to read.
+- The emotional turn is visible in behaviour and a changed connection; a vulnerable character retains dignity and agency.
+- Shot scale, depth, movement and the environment serve the beat; the important expression or bodily tell is readable.
+- The three influences support the same approved event without forcing a joke, tears or spectacle into every clip.
+- These choices preserve signed dialogue, approved audio, timing, designs and continuity. Flag any needed story revision separately.
+
+Revise applicable weak choices before delivery. Do not add a separate numerical score or pad the prompt with this checklist.
+
+## Script-to-screen gates
+
+For script-to-screen and matched prompt packages, apply the paper-reel and pair checks in script-direction-engine.md. Require traceability from source beat to editorial shot to generation unit. Check camera positions and reverse eyelines, readable pivotal reactions, exact image-to-animation opening states, and cut versus continuous-join logic. Record pending asset or timing checks as pending, never pass. Missing downstream assets must not suppress useful upstream direction. Do not report media QA when only prompts were reviewed.

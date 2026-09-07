@@ -182,16 +182,17 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
     assert "pollen sacks" not in prompt.lower()
     assert "opening composition master" not in prompt.lower()
     assert "@图1" in prompt and "@图2" in prompt and "@图3" in prompt
-    assert "playable 16:9 opening" in prompt
-    assert "[Performance Freedom]" in prompt
+    assert "16:9 - 2K PNG" in prompt
+    assert "[MOTION READINESS]" in prompt
     assert "relative-size truth only" in prompt
     assert "locked extreme action pose" in prompt
     assert "body-mounted bags, sacks, baskets or dangling loads" in prompt
-    assert "[Protect]" in prompt
+    assert "[PRESERVE]" in prompt
     assert ("Carry the prior aftermath: visible pollen coating and a smeared pollen "
             "moustache must already be present in the opening frame." in prompt)
     assert "Exactly one Fuzzby and one Zenny appear in this image." in prompt
-    assert "[Intended Read]" in prompt
+    assert "[UPSTREAM DELIVERY]" in prompt
+    assert "[ACCEPTANCE TEST]" in prompt
     assert "[Generation Goal]" not in prompt
     assert "[Starting Staging Envelope]" not in prompt
 
@@ -222,10 +223,10 @@ def test_stage_prompt_uses_opening_cast_and_does_not_forbid_required_satchel(mon
             "@图4": "scene plate"},
     })
     sections = cb_departments.prompt_sections(prompt)
-    assert "Aida" not in sections["Protect"]
-    assert "Bo, Keen each have" in sections["Protect"]
-    assert "required referenced satchel with its approved owner" in sections["Forbidden"]
-    assert "body-mounted bags, sacks" not in sections["Forbidden"]
+    assert "Aida" not in sections["PRESERVE"]
+    assert "Bo, Keen each have" in sections["PRESERVE"]
+    assert "required referenced satchel with its approved owner" in sections["EXCLUDE"]
+    assert "body-mounted bags, sacks" not in sections["EXCLUDE"]
 
 
 def test_stage_prompt_preserves_verbose_specialist_direction(monkeypatch):
@@ -346,22 +347,28 @@ def test_keyframe_budget_never_trims_director_creative_core(monkeypatch):
     })
     sections = cb_departments.prompt_sections(prompt)
 
-    assert sections["Intended Read"] == intended_read
-    assert sections["Geography"] == "\n".join(geography)
-    assert sections["Negative Space"] == (
-        "Lead room stays open frame-right for the approved direction of travel.\n" +
-        "\n".join(negative_space))
-    assert fuzzby_pose in sections["Frame"]
-    assert fuzzby_facing in sections["Frame"]
+    assert f"Locked audience read: {intended_read}" in sections["UPSTREAM DELIVERY"]
+    assert f"The opening image must clearly read as: {intended_read}" in sections["PRIMARY OUTCOME"]
+    assert f"Geography:\n{chr(10).join(geography)}" in sections[
+        "COMPOSITION AND DECISIVE INSTANT"]
+    assert ("Required negative space:\n"
+            "Lead room stays open frame-right for the approved direction of travel.\n" +
+            "\n".join(negative_space)) in sections["COMPOSITION AND DECISIVE INSTANT"]
+    assert fuzzby_pose in sections["COMPOSITION AND DECISIVE INSTANT"]
+    assert fuzzby_facing in sections["COMPOSITION AND DECISIVE INSTANT"]
     assert intended_read in prompt
-    assert list(sections).index("Intended Read") < list(sections).index("References")
-    assert list(sections).index("References") < list(sections).index("Frame")
-    assert list(sections).index("Frame") < list(sections).index("Canonical Style")
-    assert list(sections).index("Canonical Style") < list(sections).index(
-        "Physical Integration")
-    assert "natural contact shadows" in sections["Physical Integration"]
-    assert list(sections).index("Physical Integration") < list(sections).index("Protect")
-    assert list(sections).index("Protect") < list(sections).index("Forbidden")
+    assert tuple(sections) == cb_render.SEEDREAM_KEYFRAME_PROMPT_SECTIONS
+    assert list(sections).index("UPSTREAM DELIVERY") < list(sections).index(
+        "REFERENCE AUTHORITY")
+    assert list(sections).index("REFERENCE AUTHORITY") < list(sections).index(
+        "COMPOSITION AND DECISIVE INSTANT")
+    assert list(sections).index("COMPOSITION AND DECISIVE INSTANT") < list(
+        sections).index("ART DIRECTION")
+    assert list(sections).index("ART DIRECTION") < list(sections).index(
+        "PHYSICAL INTEGRATION")
+    assert "natural contact shadows" in sections["PHYSICAL INTEGRATION"]
+    assert list(sections).index("PHYSICAL INTEGRATION") < list(sections).index("PRESERVE")
+    assert list(sections).index("PRESERVE") < list(sections).index("EXCLUDE")
 
 
 def test_keyframe_word_count_never_blocks_load_bearing_direction(monkeypatch):
@@ -387,7 +394,8 @@ def test_keyframe_word_count_never_blocks_load_bearing_direction(monkeypatch):
     })
 
     assert " ".join(["load-bearing-drama"] * 610) in prompt
-    assert cb_departments.prompt_sections(prompt)["Intended Read"] == direction["audienceRead"]
+    assert f"Locked audience read: {direction['audienceRead']}" in (
+        cb_departments.prompt_sections(prompt)["UPSTREAM DELIVERY"])
 
 
 def test_keyframe_prompt_recompiles_from_exact_approved_direction(monkeypatch):
@@ -412,15 +420,19 @@ def test_keyframe_prompt_recompiles_from_exact_approved_direction(monkeypatch):
 
     first = cb_render._compile_keyframe_integration_prompt(direction, shot)
     sections = cb_departments.prompt_sections(first)
-    assert sections["Geography"] == direction["geography"][0]
-    assert sections["Light"] == direction["lightingAndDepth"]
-    assert sections["Canonical Style"] == direction["canonicalStyleParagraph"]
-    assert sections["Characters In Frame"].splitlines() == ["- Fuzzby", "- Zenny"]
-    assert "Exactly one Fuzzby and one Zenny appear in this image." in sections["Protect"]
+    assert f"Geography:\n{direction['geography'][0]}" in sections[
+        "COMPOSITION AND DECISIVE INSTANT"]
+    assert direction["lightingAndDepth"] in sections["PHYSICAL INTEGRATION"]
+    assert "@图3 is the approved visual authority for world, canonical style" in (
+        sections["ART DIRECTION"])
+    assert "Render exactly one Fuzzby, one Zenny; 2 visible character instance(s) total." in (
+        sections["IDENTITY, COUNT AND STATE"])
+    assert "Exactly one Fuzzby and one Zenny appear in this image." in sections["PRESERVE"]
     assert ("Keep Fuzzby and Zenny at the same distance from the camera; Fuzzby appears "
-            "about 17% taller than Zenny.") in sections["Protect"]
+            "about 17% taller than Zenny.") in sections["PRESERVE"]
     assert "apparentScale" not in first
-    assert "Lead room stays open frame-right" in sections["Negative Space"]
+    assert "Lead room stays open frame-right" in sections[
+        "COMPOSITION AND DECISIVE INSTANT"]
 
     changed = {**direction,
                "geography": [
@@ -429,8 +441,9 @@ def test_keyframe_prompt_recompiles_from_exact_approved_direction(monkeypatch):
     second = cb_render._compile_keyframe_integration_prompt(changed, shot)
     assert second != first
     changed_sections = cb_departments.prompt_sections(second)
-    assert changed_sections["Geography"] == changed["geography"][0]
-    assert changed_sections["Light"] == changed["lightingAndDepth"]
+    assert f"Geography:\n{changed['geography'][0]}" in changed_sections[
+        "COMPOSITION AND DECISIVE INSTANT"]
+    assert changed["lightingAndDepth"] in changed_sections["PHYSICAL INTEGRATION"]
 
 
 def test_keyframe_prompt_refuses_empty_sections_and_cast_drift(monkeypatch):

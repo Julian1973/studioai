@@ -3,10 +3,11 @@
 This local copy records the implemented Studio loop contract when the upstream PR artifact
 is not available to the checkout.
 
-## Emission Firing Floor
+## Emission readiness
 
-Render emissions must score at least 9.5 in `cb_emission_standard.preflight`.
-Anything below the floor is blocked before spend.
+`cb_emission_standard.preflight` checks the request contract. Craft scores are advisory;
+a score threshold is not a production gate. Actual script, reference, audio, provider-limit
+and authorization contradictions must be resolved before submission.
 
 ## Prompt Bank Record
 

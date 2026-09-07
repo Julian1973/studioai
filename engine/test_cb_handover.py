@@ -713,6 +713,15 @@ def test_first_stage_drives_opening_cast_and_visible_canon_props_are_bound():
         sb_shot, _pd("S4.SH1", True), ["Bo", "Keen", "Aida"], cfg) == ["satchel"]
 
 
+def test_explicit_action_state_reference_is_bound_without_character_prop_match():
+    sb_shot = _sb_shot("S6.SH2", ["S6-B2"], "PLANNED_CUT")
+    sb_shot["requiredPropReferences"] = ["bo_tail_puff_state"]
+
+    assert H._required_prop_references(
+        sb_shot, _pd("S6.SH2", False), ["Bo", "Misty", "Amie"],
+        {"Bo": {"props": {}}}) == ["bo_tail_puff_state"]
+
+
 def test_offscreen_speaker_is_removed_from_visual_continuity_boundary():
     boundary = {
         "lighting": "warm hollow light",
@@ -1079,6 +1088,22 @@ def test_promote_to_canonical_dry_run_writes_nothing_and_reports_honest_validati
     assert archived is None                                       # no prior package to archive
 
 
+def test_promotion_accepts_non_identity_voice_metadata_on_dialogue_occurrence(
+        tmp_path, monkeypatch):
+    sb_p, _ = _canonical_env(tmp_path, monkeypatch)
+    storyboard = json.loads(sb_p.read_text())
+    occurrence = storyboard["beats"][0]["dialogueOccurrences"][0]
+    occurrence["voiceTreatment"] = "single_voice"
+    occurrence["chorusMembers"] = []
+    sb_p.write_text(json.dumps(storyboard))
+
+    promoted, _ = H.promote_to_canonical(
+        sb_p, "1", ["S1.SH1"], episode="Ep1", dry_run=True,
+        log=lambda *a, **k: None)
+
+    assert promoted["shots"][0]["shotId"] == "S1.SH1"
+
+
 def test_promote_to_canonical_accepts_current_storyboard_snapshot_signature(tmp_path, monkeypatch):
     sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
     _convert_to_snapshot_storyboard(sb_p)
@@ -1293,3 +1318,20 @@ def test_current_packing_contract_requires_showrunner_acceptance():
 if __name__ == "__main__":
     import subprocess
     raise SystemExit(subprocess.call([sys.executable, "-m", "pytest", __file__, "-q"]))
+
+
+@pytest.mark.parametrize("transition,source_type", [("PLANNED_CUT", "opener"), ("CONTINUOUS", "relay")])
+def test_declared_join_controls_frame_source_despite_stale_keyframe_flag(transition, source_type):
+    import cb_render as R
+    sb = _sb_shot("1.SH2", ["1.B1"], transition)
+    pd = _pd("1.SH2", False, names_speaker=False)
+    shot, retained = H.distil_shot(sb, pd, ["Fuzzby", "Zenny"], [], "1.SH1", {})
+    assert shot.sourceType == source_type
+    assert shot.sourceShotId == (None if source_type == "opener" else "1.SH1")
+    assert retained["shotTransition"]["stateSourceShotId"] == "1.SH1"
+    expected = dict(pd["continuityInState"])
+    expected["characters"] = [{("character" if key == "characterId" else key): value
+                                for key, value in item.items()}
+                               for item in expected["characters"]]
+    assert shot.continuityIn.model_dump() == expected
+    assert R._shot_uses_own_keyframe(shot.model_dump()) == (source_type == "opener")

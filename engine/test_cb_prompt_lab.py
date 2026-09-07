@@ -288,7 +288,8 @@ def test_keyframe_prompt_contract_detects_record_tampering(monkeypatch):
             "pose": "playable anticipation"}]},
     }
     pkg = {"shots": [{"shotId": "S1"}], "continuityLedger": [{"shotId": "S1"}]}
-    shot = {"shotId": "S1", "charactersInFrame": ["Fuzzby"]}
+    shot = {"shotId": "S1", "charactersInFrame": ["Fuzzby"],
+            "keyframeReferenceSlots": {"@图1": "Fuzzby"}}
     monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
         "Fuzzby": {"heightIn": 14}})
     monkeypatch.setattr(cb_render, "_approved_department_output",

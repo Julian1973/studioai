@@ -15,6 +15,7 @@ MEDIA = ROOT / "engine" / "media"
 OUT = ROOT / "cb-output"
 DATA = ROOT / "cb-studio" / "data"
 DATA.mkdir(parents=True, exist_ok=True)
+_PROJECT_SETUP_LOCK = threading.RLock()
 
 def _engine_env_overrides():
     """Load engine/.env values for backend subprocesses.
@@ -37,15 +38,19 @@ def _engine_env_overrides():
             values[key] = value.strip()
     return values
 
-def _engine_subprocess_env():
+def _engine_subprocess_env(args=None):
     env = os.environ.copy()
     env.update(_engine_env_overrides())
+    episode = next((str(x) for x in (args or []) if re.fullmatch(r"Ep[0-9]+", str(x))), None)
+    if episode:
+        env["CB_PRODUCTION_EPISODE"] = episode
     return env
 
 import cb_scripts
 import cb_db
 import cb_asset_registry
 import cb_lineage
+import cb_production_contracts
 import studio_profile
 
 def _canonical_engine_module(module_name):
@@ -102,7 +107,7 @@ SCRIPTS = (
 )
 SCRIPTS.mkdir(parents=True, exist_ok=True)
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT, show_id=ACTIVE_SHOW.profile.showId)
-PORT = int(os.environ.get("CB_STUDIO_PORT", "8765"))
+PORT = int(os.environ.get("CB_STUDIO_PORT", "8899"))
 BIND_HOST = "127.0.0.1"
 PUBLIC_ORIGIN = os.environ.get("CB_STUDIO_PUBLIC_ORIGIN", "").strip().rstrip("/")
 if PUBLIC_ORIGIN:
@@ -207,14 +212,20 @@ def _validated_content_length(headers):
 # auto-reloads itself the moment it's idle, so the UI always has the latest software behind it without anyone
 # remembering to restart. (The render itself already runs in a fresh subprocess; this closes the serve.py gap.)
 def _source_fingerprint():
-    # ONLY this server's own source. engine modules are reloaded fresh by each per-render SUBPROCESS, so they never
-    # need a serve.py reload — watching them would needlessly re-exec and DROP the UI's open connections on every
-    # engine edit ("can't reach server"). serve.py is the only long-lived code, so it's the only thing to watch.
-    try: return os.path.getmtime(os.path.abspath(__file__))
-    except OSError: return 0.0
+    # Read APIs import engine modules too. Restart only when idle, but fingerprint
+    # every Python dependency so cached approval/readiness code cannot linger.
+    paths = [pathlib.Path(__file__), *sorted((ROOT / "engine").glob("*.py"))]
+    digest = hashlib.sha256()
+    for path in paths:
+        try:
+            digest.update(str(path).encode())
+            digest.update(path.read_bytes())
+        except OSError:
+            digest.update(b"missing")
+    return digest.hexdigest()
 _STARTED_FP = _source_fingerprint()
 def _is_stale():
-    return _source_fingerprint() > _STARTED_FP + 0.5      # 0.5s slop for save races
+    return _source_fingerprint() != _STARTED_FP
 def _reexec():
     """Reload the studio process with the CURRENT code (idle auto-reload + the restart endpoint)."""
     sys.stdout.flush()
@@ -542,71 +553,6 @@ DIRECTOR_ACTION_IDS = {
     "build-master", "run-final-review", "accept-master", "iterate-master",
     "save-retake-note",
                 }
-
-
-def _anthropic_room_chat(payload):
-    """Proxy one Studio-room message to Claude without altering the system prompt."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-    if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY is not set")
-    system = payload.get("system")
-    messages = payload.get("messages")
-    if isinstance(system, str):
-        if not system.strip():
-            raise ValueError("system is required")
-    elif isinstance(system, list) and system:
-        for block in system:
-            if not isinstance(block, dict):
-                raise ValueError("system blocks must be objects")
-            if block.get("type") != "text" or not isinstance(block.get("text"), str):
-                raise ValueError("system blocks must be Anthropic text blocks")
-    else:
-        raise ValueError("system is required")
-    if not isinstance(messages, list) or not messages:
-        raise ValueError("messages is required")
-    clean_messages = []
-    for item in messages:
-        if not isinstance(item, dict):
-            raise ValueError("messages must contain objects")
-        role = str(item.get("role") or "").strip()
-        content = str(item.get("content") or "").strip()
-        if role not in ("user", "assistant") or not content:
-            raise ValueError("each message needs role user|assistant and content")
-        clean_messages.append({"role": role, "content": content})
-    body = json.dumps({
-        "model": "claude-opus-5",
-        "max_tokens": int(payload.get("max_tokens") or 2048),
-        "system": system,
-        "messages": clean_messages,
-    }).encode("utf-8")
-    conn = http.client.HTTPSConnection("api.anthropic.com", timeout=90)
-    try:
-        conn.request(
-            "POST", "/v1/messages", body=body,
-            headers={
-                "content-type": "application/json",
-                "anthropic-version": "2023-06-01",
-                "x-api-key": api_key,
-            },
-        )
-        response = conn.getresponse()
-        raw = response.read()
-    finally:
-        conn.close()
-    try:
-        data = json.loads(raw.decode("utf-8") or "{}")
-    except json.JSONDecodeError:
-        data = {"error": {"message": raw.decode("utf-8", errors="replace")[:500]}}
-    if response.status >= 400:
-        message = ((data.get("error") or {}).get("message") or
-                   data.get("message") or f"Anthropic returned HTTP {response.status}")
-        raise RuntimeError(message)
-    text = "".join(
-        str(part.get("text") or "")
-        for part in (data.get("content") or [])
-        if isinstance(part, dict) and part.get("type") == "text"
-    ).strip()
-    return {"text": text}
 
 
 def _clear_director_session_cache(scene=None, episode=None):
@@ -953,14 +899,6 @@ def visions_state():
             out[ep] = [v.get("shot") for v in (block.get("visions") or []) if isinstance(v, dict) and v.get("shot")]
     return out
 
-def continuity_state():
-    try:
-        p = subprocess.run(["python3", "cb_continuity.py", "--json"], cwd=str(CBGEN),
-                           capture_output=True, text=True, timeout=60, stdin=subprocess.DEVNULL)
-        return json.loads(p.stdout or "[]")
-    except Exception as e:
-        return [{"level": "NOTE", "scene": "-", "shot": "-", "msg": f"continuity check error: {e}"}]
-
 def _humanise(line, gate=None):
     """Turn a raw pipeline log line into a friendly 'current step' for the UI."""
     l = line.strip()
@@ -1060,10 +998,10 @@ def _stream(jobId, args):
                 job["status"] = "stopped"
                 job["step"] = "Stopped by user."
                 return
-            p = subprocess.Popen(["python3", "-u"] + args, cwd=str(CBGEN),
+            p = subprocess.Popen([sys.executable, "-u"] + args, cwd=str(CBGEN),
                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  text=True, bufsize=1, stdin=subprocess.DEVNULL,
-                                 env=_engine_subprocess_env(),
+                                 env=_engine_subprocess_env(args),
                                  # Own process group, so STOP kills the gate and every
                                  # render child it spawns without inheriting server stdin.
                                  start_new_session=True)
@@ -1098,11 +1036,9 @@ def _stream(jobId, args):
             else:
                 # The first WATCH fire intentionally seals a request and stops before
                 # provider spend. That is a human decision outcome, not a failed job.
-                spend_decision = bool(
-                    p.returncode != 0 and
-                    str(job.get("gate") or "").startswith(("shot:fire", "shot:edit")) and
-                    any("SPEND NOT APPROVED" in line for line in lines)
-                )
+                outcome = cb_production_contracts.command_outcome(p.returncode, job.get("gate"), lines)
+                job["outcome"] = outcome
+                spend_decision = outcome == "needs_spend_approval"
                 job["status"] = "done" if (p.returncode == 0 or spend_decision) else "failed"
                 if p.returncode == 0:
                     # Publish success only after indexes and the Director cache have
@@ -1281,6 +1217,36 @@ def _queue_episode_storyboards(episode):
     return jobs
 
 
+def _approved_scene_needs_explicit_revision(episode, scene):
+    """Prevent an accidental Director pass from replacing approved production state.
+
+    Creative direction is allowed to produce a new candidate, but the live storyboard
+    must not be overwritten while any shot in the scene has an approved observable
+    artifact. The explicit revision flow can archive and replace it transactionally.
+    """
+    package_path = ROOT / "cb-output" / f"{episode}_scene{scene}_production_package.json"
+    if not package_path.exists():
+        return False
+    try:
+        import cb_render
+        package = json.loads(package_path.read_text(encoding="utf-8"))
+        if not cb_render.lineage_status(package, scene, episode).get("current"):
+            return False
+        ledger_by_shot = {
+            item.get("shotId"): item
+            for item in (package.get("continuityLedger") or [])
+            if item.get("shotId")
+        }
+        for shot in package.get("shots") or []:
+            ledger = ledger_by_shot.get(shot.get("shotId"), {})
+            for key in ("keyframeApproval", "voiceApproval", "animationApproval"):
+                if (ledger.get(key) or {}).get("approved"):
+                    return True
+        return False
+    except (OSError, ValueError, TypeError):
+        return False
+
+
 def _prepare_scene_direction_for_production(episode, scene):
     """Promote a generated scene direction as automatic script preparation.
 
@@ -1351,12 +1317,124 @@ def _prepare_scene_direction_for_production(episode, scene):
         return {"prepared": True, "handover": handover}
 
 
+def _outcome_chat_context(ep, scene, shot_id, stage):
+    import cb_episode_budget
+    import cb_outcome_chat
+    try:
+        target = cb_outcome_chat.target(ep, scene, shot_id, stage)
+    except (OSError, ValueError, RuntimeError):
+        target = None
+    import cb_state
+    import cb_production_contracts
+    try:
+        rows = cb_state.production_state(scene, ep).get("shots", []) if shot_id else []
+        shot_state = next((row for row in rows if row["shotId"] == shot_id), None)
+    except (OSError, ValueError, RuntimeError):
+        shot_state = None
+    return {"reviewTarget": target, "budget": cb_episode_budget.status(ep),
+            "nextAction": (shot_state or {}).get("nextAction"),
+            "revisionImpact": cb_production_contracts.revision_impact(stage, shot_id)}
+
+
+def _outcome_chat_command(d, ep, scene, shot_id, stage):
+    import cb_outcome_chat as outcomes
+    import cb_episode_budget as budget
+    import cb_director_chat
+    action = outcomes.intent(d.get("message"))
+    if not action:
+        if stage == "script" and not budget.status(ep)["approved"]:
+            action = {"kind": "budget-help"}
+        else:
+            return None
+    job = None
+    navigation = None
+    current = None
+    if action["kind"] == "budget-help":
+        message = "Enter your total episode allowance in USD above and approve it once. I will then prepare the scenes internally. You will review keyframes, voice, the WATCH request, and the returned render. Estimates include the configured text and media generation costs; provider invoices may differ."
+    elif action["kind"] == "budget":
+        script = SCRIPT_STORE.current(ep, required=True)
+        budget.approve(ep, action["amount"], str(d.get("by") or "Julian"), script["scriptVersionId"])
+        import cb_intake
+        if not cb_intake.intake_status(ep).get("canonicalCurrent"):
+            job = _start(_jid(f"storyintake_{ep}"), "storyintake", "-", ["cb_intake.py", "run", ep])
+        else:
+            _queue_episode_storyboards(ep)
+        message = "Episode allowance approved. I will prepare the production internally and bring you SEE, HEAR and WATCH decisions."
+    elif action["kind"] == "approve":
+        current = outcomes.target(ep, scene, shot_id, stage)
+        expected = d.get("reviewTarget") or {}
+        if not current or expected.get("hash") != current["hash"]:
+            raise ValueError("The review changed or is not loaded. Reopen the current outcome before approving.")
+        if action.get("targetKind") and current["kind"] != action["targetKind"]:
+            raise ValueError("That approval names a different outcome. Open the item you want to approve.")
+        if d.get("candidateId") is not None and current["kind"] in {"keyframe", "render"}:
+            action["candidateId"] = str(d["candidateId"])
+        if current["kind"] == "request" and not budget.status(ep)["approved"]:
+            raise ValueError("Approve the episode allowance before submitting the reviewed WATCH request")
+        job = _start(_jid("chat_approval"), "chat:approve:" + current["kind"], scene,
+                     ["cb_outcome_chat.py", ep, scene, shot_id, stage, current["hash"], str(d.get("by") or "Julian")] + ([action["candidateId"]] if action.get("candidateId") else []))
+        message = "Recording your approval of this " + current["label"] + "."
+    elif action["kind"] == "continue":
+        context = _outcome_chat_context(ep, scene, shot_id, stage)
+        next_step = context.get("nextAction") or {}
+        navigation = next_step.get("stage")
+        if not navigation:
+            raise ValueError("Choose a shot so I can prepare its next outcome.")
+        message = next_step.get("label") or "Review the current outcome."
+        if next_step.get("code") in {"prepare-keyframe", "prepare-voice", "prepare-request"}:
+            if not budget.status(ep)["approved"]:
+                raise ValueError("Approve the episode allowance first; then I can prepare this outcome.")
+            job = _start(_jid("chat_prepare"), "chat:prepare:" + navigation, scene,
+                         ["cb_outcome_chat.py", "prepare", ep, scene, shot_id, navigation])
+    elif action["kind"] == "next-shot":
+        navigation = "next-shot"
+        message = "Moving to the next shot."
+    else:
+        if not budget.status(ep)["approved"]:
+            raise ValueError("Approve an episode allowance in the budget field first.")
+        requested_stage = {"build-keyframe": "keyframe", "build-voice": "voice", "prepare-request": "animation"}[action["kind"]]
+        job = _start(_jid("chat_prepare"), "chat:prepare:" + requested_stage, scene,
+                     ["cb_outcome_chat.py", "prepare", ep, scene, shot_id or "scene", requested_stage])
+        navigation = requested_stage
+        message = "Preparing your " + {"keyframe": "SEE keyframe", "voice": "HEAR performance", "animation": "WATCH prompt, references and script for review"}[requested_stage] + "."
+    path = cb_director_chat._path(ep, scene, shot_id, stage)
+    history = cb_director_chat.history(ep, scene, shot_id, stage)
+    messages = history["messages"] + [{"role": "user", "text": d.get("message"), "at": time.time()},
+        {"role": "director", "text": message, "at": time.time(), "jobId": job}]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    cb_db.atomic_write_json(ROOT, path, {"model": "Studio outcome agent", "messages": messages[-20:]})
+    return {"ok": True, "messages": messages[-20:], "model": "Studio outcome agent",
+            "jobId": job, "navigation": navigation, "decisionKind": (current or {}).get("kind"),
+            **_outcome_chat_context(ep, scene, shot_id, stage)}
+
+
 def _finalize_automatic_direction(job):
     """Complete zero-media Direction preparation for a successful background job."""
     if job.get("status") != "finalizing":
         return None
     gate = str(job.get("gate") or "")
     args = list(job.get("args") or [])
+    if gate in {"chat:approve:keyframe", "chat:approve:voice", "chat:approve:render"}:
+        episode, scene, shot_id = args[1:4]
+        import cb_episode_budget
+        if cb_episode_budget.status(episode)["approved"]:
+            import cb_render as R
+            pkg, _ = R.load_pkg(scene, episode)
+            if gate.endswith(":render"):
+                shots = R.production_contracts.active_shots(pkg)
+                index = next(i for i, shot in enumerate(shots) if shot["shotId"] == shot_id) + 1
+                if index >= len(shots):
+                    return None
+                shot_id = shots[index]["shotId"]
+                stage = "keyframe" if R._shot_uses_own_keyframe(shots[index]) else "voice"
+            else:
+                stage = "voice" if gate.endswith(":keyframe") else "animation"
+            if stage == "voice" and not R.cb_audio_authority.spoken_dialogue_lines(R._shot(pkg, shot_id)):
+                stage = "animation"
+            job["nextOutcomeScope"] = {"episode": episode, "scene": scene, "shotId": shot_id, "stage": stage}
+            job["nextOutcomeJobId"] = _start(_jid("automatic_outcome"), "chat:prepare:" + stage, scene,
+                ["cb_outcome_chat.py", "prepare", episode, scene, shot_id, stage])
+        return None
     if gate == "storyintake":
         episode = str(args[-1] if args else "Ep1")
         import cb_intake
@@ -1381,16 +1459,14 @@ def _finalize_automatic_direction(job):
         prepared = _prepare_scene_direction_for_production(episode, scene)
         job["automaticDirection"] = prepared
         job["step"] = "Scene Direction prepared; SEE is ready."
+        import cb_episode_budget
+        if cb_episode_budget.status(episode)["approved"]:
+            prepared = prepared or {}
+            prepared["seeJobId"] = _start(_jid("automatic_see"), "chat:prepare:keyframe", scene,
+                ["cb_outcome_chat.py", "prepare", episode, scene, "scene", "keyframe"])
+            job["step"] = "Preparing the SEE keyframe for your review."
         return prepared
     return None
-
-def write_script(seed, episode="Ep1"):
-    """GATE 0 — the Writers' Room: turn a seed into a finished, scored, LOCKED screenplay (cb_writer)."""
-    SCRIPTS.mkdir(parents=True, exist_ok=True)
-    seedpath = SCRIPTS / f"_seed_{episode}.json"
-    seedpath.write_text(json.dumps(seed, ensure_ascii=False))
-    return _start(_jid(f"write{episode}"), "write", "0",
-                  ["cb_writer.py", str(seedpath), str(episode)])
 
 def stop_job(jobId):
     """Hard-stop a firing gate: kill its whole process group (the pipeline + every render child it spawned)."""
@@ -1426,34 +1502,7 @@ GATE_SEQ = ["1", "1.6", "2a", "2b", "3", "4", "5"]   # 1.6 = THE PREVIZ REEL (20
 # 4 Retakes · 5 Post. Named "1.6" (not "1.5") to avoid colliding with the already-established "Gate 1.5" —
 # Director's Eye (cb_director_eye.py), an unrelated automatic flag-only review with no lock state of its
 # own, never a member of this list. See engine/cb_previz.py's module docstring for the full note.
-def _scene_locks(scene, episode="Ep1"):
-    return locked_state().get(episode or "Ep1", {}).get(str(scene), {})
-# ── THE RELAY, front door (Julian, 2026-07-03) — job-launch wrappers around cb_pipeline.relay_prepare/
-#    relay_approve. relay_approve_beat is the ONLY function in this file that may fire fire_next_beat's
-#    approved=True launch — the Approve Anchor button in app.html is the only caller of it.
-#    THE ONE-RENDER ECONOMY (Julian, 2026-07-05): both phases dropped their seed/seed-path parameters — a beat
-#    has exactly one official clip now (auto-retried once internally on a failed gate), so there is no seed to
-#    designate and no "how many candidates" choice left to make.
-def relay_prepare_beat(scene, winner_code, episode="Ep1", fast=False):
-    """PHASE 1: harvest the winner's own official clip, re-mint (seamless joins only), drift-check, STOP for
-    approval (job). fast=False default: standard tier is the production default under the one-render economy."""
-    return _start(_jid(f"relayprep_{winner_code}"), f"relay-prepare:{winner_code}", scene,
-                  ["cb_pipeline.py", "relay-prepare", str(scene), str(winner_code),
-                   f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
-
-def relay_approve_beat(scene, winner_code, episode="Ep1", fast=False):
-    """PHASE 2: launch the next beat off the anchor an earlier relay_prepare_beat already produced (job) — one
-    take, one automatic re-fire on a failed gate, then a hard stop naming the layer at fault.
-    fast=False default: standard tier is the production default under the one-render economy."""
-    return _start(_jid(f"relayapprove_{winner_code}"), f"relay-approve:{winner_code}", scene,
-                  ["cb_pipeline.py", "relay-approve", str(scene), str(winner_code),
-                   f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
-
-# ── THE SHOT PIPELINE (cb_engine.py design → cb_render.py render loop) — ADDITIVE, 2026-07-16 ──────────────────────
-# A separate, parallel surface for the shot-sized production packages (cb-output/{ep}_scene{N}_production_
-# package.json). Nothing here touches GATE_SEQ, the beat pipeline, or any existing route — the two endpoints
-# (/api/shot-package GET, /api/shot-run POST) plus these helpers are the whole footprint. Jobs run through the
-# SAME _jid/_start/_stream runner every existing gate action uses (fresh subprocess, argv list, never a shell).
+# Current shot production commands; all workers use the shared job runner.
 SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "approve-timing-slate", "reject-timing-slate", "scenelook", "approve-scenelook", "reject-scenelook",
              "pose", "approve-pose", "reject-pose", "select-pose-upload",
              "build-keyframe", "keyframe", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
@@ -1463,6 +1512,7 @@ SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "approve-timing-s
              "select-scenelook-upload", "select-scenelook-library",
              "approve-voice", "reject-voice",
              "fire", "next", "approve", "reject", "override-model-limited",
+             "compare-fire", "approve-comparison", "reject-comparison",
              "edit", "approve-edit", "reject-edit", "stitch")
 # THE OPENING-FRAME SOURCE CHOICE (2026-07-18, Julian's directive): select-upload/select-library/
 # select-previous are the three NON-GENERATION opening-frame sources (cb_render.select_keyframe_source) —
@@ -1611,7 +1661,7 @@ def shot_media_map(pkg, scene, episode="Ep1"):
     shots_dir = MEDIA / "shots"
     def _url(p):
         return ("/engine/media/" + p.relative_to(MEDIA).as_posix()) if p.exists() else None
-    registry_shots = cb_asset_registry.shot_media_from_registry(pkg, scene, episode)
+    registry_shots = cb_asset_registry.shot_media_from_registry(pkg, scene, episode, False)
     shots = {}
     for s in pkg.get("shots") or []:
         sid = s.get("shotId")
@@ -1624,12 +1674,25 @@ def shot_media_map(pkg, scene, episode="Ep1"):
         record = dict(registry_shots.get(sid) or {})
         record.setdefault("keyframe", None)
         record.setdefault("keyframeCandidate", None)
+        record.setdefault("keyframeCandidates", [])
         record.setdefault("keyframeApproved", None)
         record.setdefault("openingFrame", None)
         record.setdefault("openingFrameSourceShotId", None)
         record.setdefault("clip", None)
         record.setdefault("finalFrame", None)
         record.setdefault("candidates", [])
+        # Package records are current media authority. Ordinary reads never migrate
+        # or rewrite the historical library, and never display its retired candidates.
+        record["clip"] = _url_from_abs(ledger.get("approvedTake"))
+        record["finalFrame"] = _url_from_abs(ledger.get("harvestFrame"))
+        candidate_paths = list(ledger.get("candidatePaths") or [])
+        for item in ((ledger.get("batch") or {}).get("transportCandidates") or {}).values():
+            value = (item or {}).get("candidatePath")
+            if value and value not in candidate_paths:
+                candidate_paths.append(value)
+        record["candidates"] = [{"n": index, "url": url}
+                                for index, value in enumerate(candidate_paths, 1)
+                                if (url := _url_from_abs(value))]
         edit_work = ledger.get("editWork") or {}
         record["edit"] = ({
             **edit_work,
@@ -1641,6 +1704,39 @@ def shot_media_map(pkg, scene, episode="Ep1"):
             "candidateUrl": _url_from_abs(item.get("candidatePath")),
             "sourceUrl": _url_from_abs(item.get("sourcePath") or item.get("path")),
         } for item in (ledger.get("editHistory") or [])[-12:]]
+        comparison_work = ledger.get("comparisonWork") or {}
+        record["comparison"] = ({
+            **comparison_work,
+            "candidateUrl": _url_from_abs(comparison_work.get("candidatePath")),
+            "sourceUrl": _url_from_abs(comparison_work.get("sourcePath")),
+        } if comparison_work else None)
+        record["comparisonHistory"] = [{
+            **item,
+            "candidateUrl": _url_from_abs(item.get("candidatePath")),
+            "sourceUrl": _url_from_abs(item.get("sourcePath") or item.get("path")),
+        } for item in (ledger.get("comparisonHistory") or [])[-12:]]
+        keyframe_candidates = []
+        for index, candidate in enumerate(ledger.get("keyframeCandidates") or []):
+            if not isinstance(candidate, dict):
+                continue
+            candidate_url = _url_from_abs(candidate.get("path"))
+            if not candidate_url:
+                continue
+            safe_candidate = {k: v for k, v in candidate.items() if k != "path"}
+            safe_candidate["url"] = candidate_url
+            safe_candidate["candidateNumber"] = index + 1
+            keyframe_candidates.append(safe_candidate)
+        record["keyframeCandidates"] = keyframe_candidates
+        approved_keyframe_url = _url_from_abs(
+            (ledger.get("keyframeApproval") or {}).get("path"))
+        candidate_keyframe_url = _url_from_abs(
+            (ledger.get("keyframeCandidate") or {}).get("path"))
+        first_candidate_url = (
+            keyframe_candidates[0]["url"] if keyframe_candidates else None)
+        record["keyframeApproved"] = approved_keyframe_url
+        record["keyframeCandidate"] = candidate_keyframe_url
+        record["keyframe"] = (
+            approved_keyframe_url or candidate_keyframe_url or first_candidate_url)
         # The continuity ledger is the authority for the current HEAR take. Registry
         # entries are durable media history and can outlive a scoped dialogue change;
         # allowing one of those entries to populate `vo` would make superseded audio
@@ -1654,7 +1750,10 @@ def shot_media_map(pkg, scene, episode="Ep1"):
         if s.get("sourceType") == "relay" and s.get("sourceShotId"):
             source_id = s["sourceShotId"]
             source_media = registry_shots.get(source_id) or {}
+            source_ledger = next((entry for entry in pkg.get("continuityLedger", [])
+                                  if entry.get("shotId") == source_id), {})
             relay_frame = (
+                _url_from_abs(source_ledger.get("harvestFrame")) or
                 source_media.get("finalFrame") or
                 _url(shots_dir / f"{episode}_{source_id}_final_frame.png")
             )
@@ -1667,6 +1766,17 @@ def shot_media_map(pkg, scene, episode="Ep1"):
             record["openingFrame"] = (
                 record.get("keyframeApproved") or record.get("keyframe")
             )
+        # SEE compares approved adjacent-shot evidence without claiming it is SH2's frame.
+        ordered_ids = [item.get("shotId") for item in pkg.get("shots") or []]
+        index = ordered_ids.index(sid)
+        previous_id = ((s.get("shotTransition") or {}).get("stateSourceShotId")
+                       or (ordered_ids[index - 1] if index else None))
+        previous = next((item for item in pkg.get("continuityLedger") or []
+                         if item.get("shotId") == previous_id), {})
+        record["handoffSourceShotId"] = previous_id
+        record["handoffFrame"] = (_url_from_abs(previous.get("harvestFrame"))
+                                  if previous.get("status") == "approved" else None)
+        record["handoffType"] = (s.get("shotTransition") or {}).get("type")
         shots[sid] = record
     timing_path = MEDIA / f"{episode}_Scene{scene}_timing_slate.mp4"
     if not timing_path.exists():
@@ -1806,7 +1916,6 @@ def scenelook_status_server(scene, episode="Ep1"):
     # Use the engine's one authoritative state calculation. The former server-side mirror
     # drifted from the production rules and could make the UI disagree with paid generation.
     cb_render = _canonical_cb_render()
-    cb_asset_registry.migrate_existing(episode)
     raw = cb_render.scenelook_status(scene, episode)
     approved, candidate, active = raw.get("approved"), raw.get("candidate"), raw.get("active")
     history = raw.get("history", [])
@@ -2174,7 +2283,7 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
     token resumes: only the missing candidates generate (ledger batch.status == "generating").
     Every value travels as its own argv element — never a shell string."""
     args = ["cb_render.py", cmd, str(scene)]
-    if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe", "recompile-animation",
+    if cmd in ("fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe", "recompile-animation",
                "pose", "approve-pose", "reject-pose", "select-pose-upload",
                "select-upload", "select-library", "select-previous", "select-render-upload",
                "approve-voice", "reject-voice", "regen-voice",
@@ -2225,8 +2334,8 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
         # <episode> [referencePath]; omitted entirely (the normal case) means no reference at
         # all, which now correctly routes to text-to-image rather than a guaranteed-422 edit call.
         args.append(str(source_path))
-    if cmd in ("fire", "next", "edit"):
-        if candidates is not None and cmd in ("fire", "next"):
+    if cmd in ("fire", "compare-fire", "next", "edit"):
+        if candidates is not None and cmd in ("fire", "compare-fire", "next"):
             args += ["--candidates", str(candidates)]
         if spend_token:
             args += ["--spend-token", str(spend_token)]
@@ -2703,8 +2812,17 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if self.path == "/" or self.path == "":
             self.send_response(302)
-            self.send_header("Location", "/cb-studio/director.html")
+            self.send_header("Location", "/cb-studio/app.html")
             self.end_headers()
+            return
+        if urlsplit(self.path).path == "/api/credits":
+            from urllib.parse import parse_qs
+            try:
+                credits = _canonical_engine_module("cb_credits")
+                episode = (parse_qs(urlsplit(self.path).query).get("episode") or [""])[0]
+                self._json(200, credits.status(episode))
+            except Exception as exc:
+                self._json(400, {"error": str(exc)})
             return
         if self.path == "/api/show-profile":
             return self._json(200, SHOW_PROFILE_STATUS)
@@ -2756,7 +2874,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/studio-version":
             self._json(200, {"version": STUDIO_BUILD_VERSION}); return
         if self.path == "/api/health":
-            return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
+            return self._json(200, {"stale": _is_stale(), "buildId": _STARTED_FP, "started": _STARTED_FP,
                                     "current": _source_fingerprint(), "running": len(PROCS)})
         if self.path.startswith("/api/canon-lock"):
             from urllib.parse import urlparse, parse_qs
@@ -2957,7 +3075,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "valid episode required"})
             try:
                 import cb_intake as _CBI
-                return self._json(200, _CBI.intake_status(ep))
+                import cb_episode_budget
+                return self._json(200, {**_CBI.intake_status(ep), "outcomeMode": cb_episode_budget.configured(ep), "budget": cb_episode_budget.status(ep)})
             except Exception as e:
                 return self._json(500, {"error": str(e)})
         if self.path.startswith("/api/scene-roster"):
@@ -3090,8 +3209,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "invalid Director chat scope"})
             try:
                 import cb_director_chat
-                return self._json(200, cb_director_chat.history(
-                    ep, scene, shot_id, stage))
+                return self._json(200, {**cb_director_chat.history(
+                    ep, scene, shot_id, stage), **_outcome_chat_context(ep, scene, shot_id, stage)})
             except Exception as exc:
                 return self._json(400, {"error": str(exc), "zeroMediaSpend": True})
         if self.path.startswith("/api/production-state"):
@@ -3569,7 +3688,10 @@ class H(http.server.SimpleHTTPRequestHandler):
                 sys.path.insert(0, str(CBGEN))
             import cb_render as _CBR
             try:
-                return self._json(200, _CBR.prompt_readback(scene, sid, ep))
+                import cb_episode_budget
+                with cb_episode_budget.quote(ep, None, "prompt-readback"):
+                    result = _CBR.prompt_readback(scene, sid, ep)
+                return self._json(200, result)
             except _CBR.Refused as e:
                 return self._json(409, {"error": str(e)})
             except Exception as e:
@@ -3632,13 +3754,28 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if _legacy_gone(self):
             return
-        if self.path == "/api/write":
+        if self.path == "/api/credits":
             try:
-                d = self._body(); seed = d.get("seed") or {}; episode = d.get("episode", "Ep1")
-                self._json(200, {"ok": True, "jobId": write_script(seed, episode)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
+                credits = _canonical_engine_module("cb_credits")
+                d = self._body()
+                episode = credits.episode_id(d.get("episode"))
+                action = d.get("action")
+                if action == "prepare":
+                    result = credits.prepare(episode, d.get("config"))
+                elif action == "fire":
+                    result = _canonical_engine_module("cb_render").fire_credits(episode, d.get("token"))
+                elif action == "resume":
+                    result = credits.resume(episode)
+                elif action in ("accept", "reject"):
+                    result = credits.verdict(episode, d.get("id"), action == "accept")
+                else:
+                    raise ValueError("Choose preview, create, resume or review credits.")
+                self._json(200, result)
+            except Exception as exc:
+                self._json(400, {"error": str(exc)})
             return
+        if self.path in {"/api/write", "/api/room-chat"}:
+            return self._json(410, {"error": "This retired route is unavailable. Use script upload and production chat in app.html.", "zeroSpend": True})
         # [removed 2026-07-16 cutover: /api/fire — handled by the 410 gate above]
         # [removed 2026-07-16 cutover: /api/retakes — handled by the 410 gate above]
         # [removed 2026-07-16 cutover: /api/retake-brief — handled by the 410 gate above]
@@ -3678,12 +3815,6 @@ class H(http.server.SimpleHTTPRequestHandler):
                     raise ValueError("action must be add, remove, save-scene or confirm-scene")
                 self._json(200, rough_cut_projection(
                     episode, scene if action.endswith("-scene") else None))
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/room-chat":
-            try:
-                self._json(200, _anthropic_room_chat(self._body()))
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
@@ -3738,14 +3869,17 @@ class H(http.server.SimpleHTTPRequestHandler):
                 import cb_intake as _CBI
                 direction_status = _CBI.intake_status(episode)
                 direction_job = None
-                if not direction_status.get("canonicalCurrent"):
+                import cb_episode_budget
+                allowance = cb_episode_budget.require_allowance(episode, current["scriptVersionId"], script)
+                if allowance["approved"] and not direction_status.get("canonicalCurrent"):
                     direction_job = _start(
                         _jid(f"storyintake_{episode}"), "storyintake", "-",
                         ["cb_intake.py", "run", episode])
                 self._json(200, {"ok": True, "script": fname,
                                   "scriptVersionId": current["scriptVersionId"],
                                   "directionPreparationJobId": direction_job,
-                                  "directionPreparation": "automatic",
+                                  "directionPreparation": "automatic" if allowance["approved"] else "awaiting-episode-budget",
+                                  "budget": allowance,
                                   "episodes": eps})
             except Exception as e:
                 self._json(400, {"error": str(e)})
@@ -3892,69 +4026,125 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
+        if self.path == "/api/project-episode":
+            try:
+                d = self._body()
+                pid = str(d.get("projectId") or "")
+                if not re.fullmatch(r"[a-z0-9-]+", pid):
+                    raise ValueError("valid project id required")
+                pdir = ROOT / "projects" / pid
+                meta = json.loads((pdir / "meta.json").read_text())
+                if meta.get("id") != pid or meta.get("setupVersion") != 1:
+                    raise ValueError("project is not managed by project setup")
+                title, script = str(d.get("title") or "").strip(), str(d.get("script") or "").strip()
+                if not title or not script:
+                    raise ValueError("title and script required")
+                with _PROJECT_SETUP_LOCK:
+                    episodes = json.loads((pdir / "episodes.json").read_text())
+                    number = max([int(item["number"]) for item in episodes] or [0]) + 1
+                    filename = f"scripts/part-{number}.txt"
+                    (pdir / filename).write_text(script)
+                    episodes.append({"number": number, "title": title, "script": filename, "status": "script-saved"})
+                    (pdir / "episodes.json").write_text(json.dumps(episodes, indent=2))
+                return self._json(200, {"ok": True, "episodes": episodes})
+            except Exception as exc:
+                return self._json(400, {"error": str(exc)})
         if self.path == "/api/project":
             try:
-                import datetime
-                d = self._body()
-                name = str(d.get("name", "")).strip()
-                if not name:
-                    raise ValueError("project name required")
-                pid = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "project"
-                base_pid = pid; i = 2
-                while (ROOT / "projects" / pid).exists():
-                    pid = base_pid + "-" + str(i); i += 1
-                pdir = ROOT / "projects" / pid
-                (pdir / "assets").mkdir(parents=True, exist_ok=True)
-                chars = {}
-                for ch in (d.get("characters") or []):
-                    cn = str(ch.get("name", "")).strip()
-                    if not cn:
-                        continue
-                    entry = {"key_features": str(ch.get("keyFeatures", "")).strip()}
-                    raw = ch.get("imageData") or ""
-                    if raw:
-                        blob, ext = decode_image_upload(raw)
-                        safe = slug(cn).lower()
-                        fn = safe + "_anchor" + ext
+                with _PROJECT_SETUP_LOCK:
+                    import datetime
+                    d = self._body()
+                    name = str(d.get("name", "")).strip()
+                    if not name:
+                        raise ValueError("project name required")
+                    if d.get("projectType", "series") not in {"series", "film"}:
+                        raise ValueError("project format must be series or film")
+                    for group in ("characters", "locations", "props"):
+                        seen = set()
+                        for item in d.get(group) or []:
+                            asset_name = str(item.get("name") or "").strip()
+                            if not asset_name or asset_name.casefold() in seen:
+                                raise ValueError(f"{group} need distinct non-empty names")
+                            seen.add(asset_name.casefold())
+                            if item.get("imageData"):
+                                decode_image_upload(item["imageData"])
+                    if d.get("coverImageData"):
+                        decode_image_upload(d["coverImageData"])
+                    pid = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "project"
+                    base_pid = pid; i = 2
+                    while (ROOT / "projects" / pid).exists():
+                        pid = base_pid + "-" + str(i); i += 1
+                    pdir = ROOT / "projects" / pid
+                    (pdir / "assets").mkdir(parents=True, exist_ok=True)
+                    chars = {}
+                    for char_index, ch in enumerate(d.get("characters") or []):
+                        cn = str(ch.get("name", "")).strip()
+                        if not cn:
+                            continue
+                        entry = {"key_features": str(ch.get("keyFeatures", "")).strip(), "approvalStatus": "draft", "voiceId": str(ch.get("voiceId") or ""), "size": str(ch.get("size") or "")}
+                        raw = ch.get("imageData") or ""
+                        if raw:
+                            blob, ext = decode_image_upload(raw)
+                            safe = slug(cn).lower()
+                            fn = str(char_index) + "_" + safe + "_anchor" + ext
+                            (pdir / "assets" / fn).write_bytes(blob)
+                            rel = "projects/" + pid + "/assets/" + fn
+                            entry["anchor"] = rel; entry["refs"] = [rel]
+                        chars[cn] = entry
+                    cover_image = ""
+                    raw_cover = d.get("coverImageData") or ""
+                    if raw_cover:
+                        blob, ext = decode_image_upload(raw_cover)
+                        fn = "project_key_art" + ext
                         (pdir / "assets" / fn).write_bytes(blob)
-                        rel = "projects/" + pid + "/assets/" + fn
-                        entry["anchor"] = rel; entry["refs"] = [rel]
-                    chars[cn] = entry
-                cover_image = ""
-                raw_cover = d.get("coverImageData") or ""
-                if raw_cover:
-                    blob, ext = decode_image_upload(raw_cover)
-                    fn = "project_key_art" + ext
-                    (pdir / "assets" / fn).write_bytes(blob)
-                    cover_image = "/projects/" + pid + "/assets/" + fn
-                (pdir / "characters.json").write_text(json.dumps(chars, indent=2, ensure_ascii=False))
-                (pdir / "show_bible.md").write_text(str(d.get("showBible", "")))
-                (pdir / "episodes.json").write_text("[]")
-                accent = str(d.get("accentColor", "")).strip().lower()
-                if not re.fullmatch(r"#[0-9a-f]{6}", accent):
-                    accent = "#0b8f87"
-                meta = {
-                    "id": pid, "name": name, "primary": False,
-                    "animationType": d.get("animationType", ""), "style": d.get("style", ""),
-                    "premise": d.get("premise", ""), "audience": d.get("audience", ""),
-                    "episodeLength": d.get("episodeLength", ""), "aspectRatio": d.get("aspectRatio", ""),
-                    "voiceProvider": d.get("voiceProvider", ""), "musicStyle": d.get("musicStyle", ""),
-                    "theme": {"accent": accent},
-                    "configBase": "projects/" + pid, "showBibleFile": "projects/" + pid + "/show_bible.md",
-                    "episodesFile": "projects/" + pid + "/episodes.json", "mediaBase": "projects/" + pid + "/media",
-                    "createdAt": str(datetime.date.today()),
-}
-                if cover_image:
-                    meta["coverImage"] = cover_image
-                    meta["episodeCoverImage"] = cover_image
-                (pdir / "meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))
-                pf = ROOT / "cb-studio" / "data" / "projects.json"
-                pdata = json.loads(pf.read_text()) if pf.exists() else {"projects": []}
-                if not isinstance(pdata, dict):
-                    pdata = {"projects": []}
-                pdata.setdefault("projects", []).append(meta)
-                pf.write_text(json.dumps(pdata, indent=2, ensure_ascii=False))
-                self._json(200, {"ok": True, "id": pid, "project": meta})
+                        cover_image = "/projects/" + pid + "/assets/" + fn
+                    (pdir / "characters.json").write_text(json.dumps(chars, indent=2, ensure_ascii=False))
+                    (pdir / "show_bible.md").write_text(str(d.get("showBible", "")))
+                    (pdir / "episodes.json").write_text("[]")
+                    (pdir / "media").mkdir(exist_ok=True)
+                    (pdir / "scripts").mkdir(exist_ok=True)
+                    (pdir / "media-index.json").write_text("[]")
+                    for group in ("locations", "props"):
+                        records = []
+                        for index, item in enumerate(d.get(group) or []):
+                            record = {"name": str(item["name"]).strip(), "notes": str(item.get("notes") or ""), "approvalStatus": "draft"}
+                            if item.get("imageData"):
+                                blob, ext = decode_image_upload(item["imageData"])
+                                filename = f"{group}_{index}{ext}"
+                                (pdir / "assets" / filename).write_bytes(blob)
+                                record["image"] = f"projects/{pid}/assets/{filename}"
+                            records.append(record)
+                        (pdir / f"{group}.json").write_text(json.dumps(records, indent=2, ensure_ascii=False))
+                    accent = str(d.get("accentColor", "")).strip().lower()
+                    if not re.fullmatch(r"#[0-9a-f]{6}", accent):
+                        accent = "#0b8f87"
+                    meta = {
+                        "id": pid, "name": name, "primary": False,
+                        "setupVersion": 1, "projectType": d.get("projectType", "series"),
+                        "setupStatus": "draft", "canonApproved": False,
+                        "setupGaps": (["Show bible"] if not str(d.get("showBible") or "").strip() else []) +
+                            [f"{group}: {item['name']} reference image" for group in ("characters", "locations", "props")
+                             for item in d.get(group) or [] if not item.get("imageData")],
+                        "animationType": d.get("animationType", ""), "style": d.get("style", ""),
+                        "premise": d.get("premise", ""), "audience": d.get("audience", ""),
+                        "episodeLength": d.get("episodeLength", ""), "aspectRatio": d.get("aspectRatio", ""),
+                        "voiceProvider": d.get("voiceProvider", ""), "musicStyle": d.get("musicStyle", ""),
+                        "theme": {"accent": accent},
+                        "configBase": "projects/" + pid, "showBibleFile": "projects/" + pid + "/show_bible.md",
+                        "episodesFile": "projects/" + pid + "/episodes.json", "mediaBase": "projects/" + pid + "/media",
+                        "createdAt": str(datetime.date.today()),
+    }
+                    if cover_image:
+                        meta["coverImage"] = cover_image
+                        meta["episodeCoverImage"] = cover_image
+                    (pdir / "meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))
+                    pf = ROOT / "cb-studio" / "data" / "projects.json"
+                    pdata = json.loads(pf.read_text()) if pf.exists() else {"projects": []}
+                    if not isinstance(pdata, dict):
+                        pdata = {"projects": []}
+                    pdata.setdefault("projects", []).append(meta)
+                    pf.write_text(json.dumps(pdata, indent=2, ensure_ascii=False))
+                    self._json(200, {"ok": True, "id": pid, "project": meta})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
@@ -4114,7 +4304,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 # Reuse only direction signed against the current direct inputs. A stale
                 # candidate must reach cb_safety.prepare_department(), which archives it
                 # and prepares its replacement instead of trapping WATCH in a loop.
-                if status.get("candidate") and status.get("candidateCurrent"):
+                if ((status.get("candidate") and status.get("candidateCurrent")) or
+                        status.get("directionReady")):
                     self._json(200, {
                         "ok": True,
                         "existing": True,
@@ -4130,7 +4321,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if self.path == "/api/director-chat":
             # A small-context OpenAI text call. It can discuss and propose one bounded
-            # correction, but cannot mutate production state or reach any media provider.
+            # Creative discussion proposes scoped changes; explicit outcome commands use the existing production jobs.
             try:
                 d = self._body()
                 scene = str(d.get("scene") or "").strip()
@@ -4142,10 +4333,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                         not _SHOT_TOKEN.match(stage)):
                     return self._json(400, {"error": "invalid Director chat scope"})
                 import cb_director_chat
-                result = cb_director_chat.chat(
-                    ep, scene, shot_id, stage, d.get("message"), issue=d.get("issue"),
-                    reviewer=str(d.get("by") or "Julian"))
-                return self._json(200, {"ok": True, **result})
+                command_result = _outcome_chat_command(d, ep, scene, shot_id, stage)
+                if command_result is not None:
+                    return self._json(200, command_result)
+                import cb_episode_budget
+                with cb_episode_budget.quote(ep, None, "director-chat"):
+                    result = cb_director_chat.chat(
+                        ep, scene, shot_id, stage, d.get("message"), issue=d.get("issue"),
+                        reviewer=str(d.get("by") or "Julian"))
+                return self._json(200, {"ok": True, **result, **_outcome_chat_context(ep, scene, shot_id, stage)})
             except Exception as exc:
                 return self._json(400, {"error": str(exc), "zeroMediaSpend": True})
         if self.path == "/api/director-action":
@@ -4207,6 +4403,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                                  (("&shot=" + quote(target)) if target else ""))
                     self._json(200, {"ok": True, "navigate": route, "zeroSpend": True}); return
                 if action == "direct-scene":
+                    if _approved_scene_needs_explicit_revision(ep, scene) and not d.get("explicitRevision"):
+                        self._json(409, {"error": (
+                            "Approved SEE/HEAR/WATCH work exists for this scene. "
+                            "Create an explicit revision before rerunning Director; "
+                            "approved production will be preserved." )}); return
                     args = ["cb_creative.py", "scene", scene, ep]
                     job_id = _start(_jid(f"director_scene_{scene}"),
                                     "director:scene", scene, args)
@@ -4628,6 +4829,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": "cmd must be vision|scene|envelope|migrate"}); return
                 if cmd == "scene" and not re.match(r"^\w+$", scene):
                     self._json(400, {"error": "scene must be a plain token"}); return
+                if cmd == "scene" and _approved_scene_needs_explicit_revision(ep, scene) and not d.get("explicitRevision"):
+                    self._json(409, {"error": (
+                        "Approved SEE/HEAR/WATCH work exists for this scene. "
+                        "Create an explicit revision before rerunning Director; "
+                        "approved production will be preserved." )}); return
                 args = ["cb_creative.py", cmd] + ([scene, ep] if cmd == "scene" else [ep])
                 self._json(200, {"ok": True,
                                   "jobId": _start(_jid(f"creative_{cmd}_{scene or ep}"),
@@ -5161,7 +5367,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 correction = str(d.get("correction")).strip() if d.get("correction") not in (None, "") else None
                 if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(episode):
                     self._json(400, {"error": "scene and episode must be plain tokens (e.g. 1, Ep1)"}); return
-                if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+                if cmd in ("fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
                            "pose", "approve-pose", "reject-pose", "select-pose-upload",
                            "select-upload", "select-library", "select-previous", "select-render-upload",
                            "approve-voice", "reject-voice", "regen-voice",
@@ -5278,8 +5484,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 # each validated, each optional.
                 candidates = d.get("candidates")
                 if candidates is not None:
-                    if cmd not in ("fire", "next"):
-                        self._json(400, {"error": "candidates applies to fire/next only"}); return
+                    if cmd not in ("fire", "compare-fire", "next"):
+                        self._json(400, {"error": "candidates applies to fire/compare-fire/next only"}); return
                     try:
                         candidates = int(candidates)
                     except (TypeError, ValueError):
@@ -5288,8 +5494,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                         self._json(400, {"error": "candidates must be an integer 1-4"}); return
                 spend_token = str(d.get("spendToken")).strip() if d.get("spendToken") not in (None, "") else None
                 if spend_token is not None:
-                    if cmd not in ("fire", "next", "edit"):
-                        self._json(400, {"error": "spendToken applies to fire/next/edit only"}); return
+                    if cmd not in ("fire", "compare-fire", "next", "edit"):
+                        self._json(400, {"error": "spendToken applies to fire/compare-fire/next/edit only"}); return
                     if not _SPEND_TOKEN_RE.match(spend_token):
                         self._json(400, {"error": "spendToken must be 16-64 lowercase hex characters"}); return
                 comparison_model_id = (str(d.get("comparisonModelId")).strip()
@@ -5369,13 +5575,13 @@ def main():
     gc.disable()
     with http.server.ThreadingHTTPServer((BIND_HOST, PORT), H) as httpd:
         base_url = PUBLIC_ORIGIN or f"http://{BIND_HOST}:{PORT}"
-        launch_url = f"{base_url}/cb-studio/director.html?launchToken={LAUNCH_TOKEN}"
+        launch_url = f"{base_url}/cb-studio/app.html?launchToken={LAUNCH_TOKEN}"
         print(f"Animation Studio launch URL -> {launch_url}", flush=True)
         access_mode = "HTTPS tunnel" if PUBLIC_ORIGIN else "loopback-only"
         print(
             f"Serving {ROOT} ({len(episodes)} episodes) - {access_mode}, authenticated, "
             f"threaded + byte-range; {len(restored_jobs)} durable job(s) restored, "
-            f"{interrupted} interrupted; freshness guard ON (fp={_STARTED_FP:.0f})",
+            f"{interrupted} interrupted; freshness guard ON (fp={_STARTED_FP[:12]})",
             flush=True,
         )
         httpd.serve_forever()

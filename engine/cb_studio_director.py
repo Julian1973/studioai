@@ -1281,9 +1281,22 @@ def build_keyframe(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
         except (cb_render.Refused, KeyError, TypeError, ValueError):
             return False
 
-    if not contract_is_complete(work.get("approved")):
+    def approved_direction_is_current() -> bool:
+        return (
+            contract_is_complete(work.get("approved"))
+            and _direction_current(scene, shot_id, "cinematography", episode)
+        )
+
+    if not approved_direction_is_current():
         if work.get("candidate"):
-            if contract_is_complete(work["candidate"]):
+            direction_state = cb_render._department_record_status(
+                package, shot_id, "cinematography", scene, episode)
+            candidate_is_current = (
+                direction_state.get("current")
+                and direction_state.get("source") == "prepared"
+                and direction_state.get("record") is work["candidate"]
+            )
+            if contract_is_complete(work["candidate"]) and candidate_is_current:
                 log("DIRECTOR — promoting the current complete cinematography contract")
                 cb_render.decide_department(
                     scene, "cinematography", "approved", shot_id=shot_id,
@@ -1295,7 +1308,14 @@ def build_keyframe(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
                     scene, "cinematography", "rejected", shot_id=shot_id,
                     note="Legacy direction is missing required typed keyframe fields.",
                     episode=episode, reviewed_by="Studio contract migration", log=log)
-        if not contract_is_complete(work.get("approved")):
+            # decide_department reloads and saves the package independently. Refresh this
+            # local view before deciding whether a replacement direction is still needed.
+            package, _ = cb_render.load_pkg(scene, episode)
+            shot = cb_render._shot(package, shot_id)
+            ledger = cb_render._ledger(package, shot_id)
+            work = ledger.setdefault("departmentWork", {}).setdefault(
+                "cinematography", {"approved": None, "candidate": None, "history": []})
+        if not approved_direction_is_current():
             cb_render.prepare_department(
                 scene, "cinematography", shot_id, episode, log)
             cb_render.decide_department(

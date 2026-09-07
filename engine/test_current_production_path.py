@@ -197,6 +197,90 @@ def _disclose_and_fire(shot_id):
                        log=lambda *a, **k: None)
 
 
+def test_prepare_department_reuses_current_approved_direction_without_provider_call(
+        world, monkeypatch):
+    _, tmp, pkg_path = world
+    pkg = json.loads(pkg_path.read_text())
+    _approve_specialist_inputs(pkg)
+    pkg_path.write_text(json.dumps(pkg, indent=1))
+    _approve_scene_look(tmp, pkg)
+    _sign_specialist_inputs(pkg)
+    pkg_path.write_text(json.dumps(pkg, indent=1))
+    shot_id = pkg["shots"][0]["shotId"]
+
+    monkeypatch.setattr(
+        R.cb_departments, "prepare_cinematography",
+        lambda *_args, **_kwargs: pytest.fail("provider direction was called"))
+
+    logs = []
+    result = R.prepare_department(
+        "9", "cinematography", shot_id, "EpT", log=logs.append)
+
+    assert result["output"] == _cinematography_output(pkg["shots"][0])
+    assert any("no OpenAI call, $0" in line for line in logs)
+
+
+def test_animation_recompile_carries_cinematography_across_metadata_only_hash_change(
+        world, monkeypatch):
+    _, tmp, pkg_path = world
+    monkeypatch.setattr(R, "screen_keyframe_conformance", lambda *args, **kwargs: {
+        "status": "pass", "reason": None,
+        "review": {"verdict": "pass", "summary": "Test fixture passes."},
+    })
+    monkeypatch.setattr(R, "_require_animation_prompt_contract", lambda *args: None)
+    monkeypatch.setattr(R, "_require_engine_rules", lambda *args, **kwargs: {
+        "ready": True, "errors": []})
+    pkg = json.loads(pkg_path.read_text())
+    _approve_specialist_inputs(pkg)
+    pkg_path.write_text(json.dumps(pkg, indent=1))
+    _approve_scene_look(tmp, pkg)
+    _sign_specialist_inputs(pkg)
+    pkg_path.write_text(json.dumps(pkg, indent=1))
+
+    shot_id = pkg["shots"][0]["shotId"]
+    R.regen_voice_shot("9", shot_id, "EpT", log=lambda *a, **k: None)
+    R.approve_voice("9", shot_id, "EpT", reviewed_by="Test",
+                    log=lambda *a, **k: None)
+    R.keyframe_shot("9", shot_id, "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate("9", shot_id, "A", "EpT",
+                                log=lambda *a, **k: None)
+    R.approve_keyframe("9", shot_id, "EpT", reviewed_by="Test",
+                       log=lambda *a, **k: None)
+
+    pkg, _ = R.load_pkg("9", "EpT")
+    shot = pkg["shots"][0]
+    shot["sourceBeatIds"] = list(shot.get("sourceBeatIds") or []) + [
+        "source-beat:metadata-only-migration"]
+    pkg_path.write_text(json.dumps(pkg, indent=1))
+
+    stale, _ = R.load_pkg("9", "EpT")
+    stale_ledger = next(item for item in stale["continuityLedger"]
+                        if item["shotId"] == shot["shotId"])
+    stale_ledger["batch"] = {"status": "complete"}
+    stale_ledger["candidatePaths"] = None
+    stale_ledger["status"] = "direction-recompiled-candidates-stale"
+    pkg_path.write_text(json.dumps(stale, indent=1))
+    stale, _ = R.load_pkg("9", "EpT")
+    state = R._department_record_status(
+        stale, shot["shotId"], "cinematography", "9", "EpT")
+    assert state["current"] is False
+    assert R._signature_diff(
+        state["record"].get("inputSignature"),
+        state["expectedInputSignature"]) == ["shotContractHash"]
+
+    R.recompile_animation_candidate(
+        "9", shot["shotId"], "EpT", log=lambda *a, **k: None)
+    refreshed, _ = R.load_pkg("9", "EpT")
+    assert R._department_record_status(
+        refreshed, shot["shotId"], "cinematography", "9", "EpT")["current"] is True
+    assert R._department_record_status(
+        refreshed, shot["shotId"], "animation", "9", "EpT")["current"] is True
+    refreshed_ledger = next(item for item in refreshed["continuityLedger"]
+                            if item["shotId"] == shot["shotId"])
+    assert refreshed_ledger["status"] == "designed"
+    assert "supersededByDirectionAt" not in refreshed_ledger["batch"]
+
+
 def test_current_path_reaches_an_approved_master_without_provider_spend(
         world, monkeypatch):
     providers, tmp, pkg_path = world
@@ -206,6 +290,18 @@ def test_current_path_reaches_an_approved_master_without_provider_spend(
     })
     pkg = json.loads(pkg_path.read_text())
     _approve_specialist_inputs(pkg)
+    # Trace distinctive creative decisions from the persisted specialist record all the
+    # way to the provider boundary, rather than only comparing two compiler outputs.
+    first_ledger = R._ledger(pkg, pkg["shots"][0]["shotId"])
+    direction = first_ledger["departmentWork"]["cinematography"]["approved"]["output"]
+    authored_choices = {
+        "audienceRead": "Fuzzby hides his uncertainty while Zenny quietly notices.",
+        "lensAndCameraRelationship": "A bee-height medium two-shot lets Zenny's listening reaction remain readable.",
+        "lightingAndDepth": "Soft side light separates the listeners from the layered flower corridor.",
+    }
+    direction.update(authored_choices)
+    authored_pose = "shoulders drawn inward in a hesitant frame-one anticipation"
+    direction["openingFrameLayout"]["placements"][0]["pose"] = authored_pose
     pkg_path.write_text(json.dumps(pkg, indent=1))
     _approve_scene_look(tmp, pkg)
     _sign_specialist_inputs(pkg)
@@ -240,6 +336,46 @@ def test_current_path_reaches_an_approved_master_without_provider_spend(
     assert R.post_status(final_pkg, "9", "EpT")["approved"]["current"] is True
     assert len(providers.voice_calls) == 2
     assert len(providers.image_calls) == 2
+    for image_call in providers.image_calls:
+        for text in authored_choices.values():
+            assert text in image_call["prompt"]
+        assert authored_pose in image_call["prompt"]
+    persisted = R._ledger(final_pkg, first)["departmentWork"]["cinematography"]["approved"]["output"]
+    assert all(persisted[key] == value for key, value in authored_choices.items())
     assert len(providers.fire_calls) == 3
     assert [x["prompt"] for x in providers.fire_calls] == [
         R._approved_seedance_prompt(final_pkg, s) for s in final_pkg["shots"]]
+
+    # The provider receives playable performance and landing choices from each saved
+    # animation direction, not merely a generic summary or a successful worker status.
+    for shot, call in zip(final_pkg["shots"], providers.fire_calls):
+        direction = R._ledger(final_pkg, shot["shotId"])["departmentWork"]["animation"]["approved"]["output"]
+        for view in direction["shotPlan"]:
+            for field in ("observablePerformance", "landingImage"):
+                assert view[field].rstrip(" .") in call["prompt"]
+
+
+@pytest.mark.parametrize("kind", ["cut", "continuation"])
+def test_editorial_handoff_reaches_both_provider_compilers(world, kind):
+    providers, tmp, pkg_path = world
+    shot = json.loads(pkg_path.read_text())["shots"][0]
+    legacy_image = R._compile_keyframe_integration_prompt(_cinematography_output(shot), shot, [])
+    assert "EDITORIAL HANDOFF" not in legacy_image
+    shot["shotTransition"] = {
+        "type": kind, "stateSourceShotId": "9.PREV",
+        "reason": "Reveal Zenny's listening reaction.",
+    }
+    still = R._compile_keyframe_integration_prompt(_cinematography_output(shot), shot, [])
+    animation = _animation_direction_output(shot)["providerPrompt"]
+    for prompt in (still, animation):
+        assert "EDITORIAL HANDOFF" in prompt
+        assert "9.PREV" in prompt
+        assert "Reveal Zenny's listening reaction." in prompt
+        if kind == "cut":
+            assert "preserve matched eyelines" in prompt
+            assert "never mirror the set" in prompt
+        else:
+            assert "landing frame as the opening anchor" in prompt
+    if kind == "cut":
+        assert "Compose this shot's new opening keyframe" in still
+        assert "Begin on this shot's own approved opening keyframe" in animation

@@ -1,12 +1,15 @@
 """Runtime safety layer for the single Crystal Bears production path.
 
-Installed by cb_render after its implementation functions are defined. Paid handoffs consume
+Constructed by cb_render after its implementation functions are defined.
+The factory returns named policy services; it never replaces module functions. Paid handoffs consume
 only current, signed specialist direction. Direction is machine-authored production input, not
 a claim that a human approved prose they cannot meaningfully judge. Human approval remains on
 observable media: keyframes, performances, animation takes and final masters. Package revisions
 remain audit provenance; validity is decided from the exact inputs an artefact actually depends
 on. No provider is called from this module by itself.
 """
+from types import SimpleNamespace
+
 import hashlib
 import json
 import math
@@ -19,6 +22,7 @@ import cb_audio_timing
 import cb_audio_authority
 import cb_canon
 import cb_providers
+import cb_production_contracts as production_contracts
 
 
 def selected_voice_recipe(recipes, selected, candidates, current_compiled_hash=None):
@@ -39,7 +43,43 @@ def selected_voice_recipe(recipes, selected, candidates, current_compiled_hash=N
     return None
 
 
-def install(m):
+def uses_isolated_voice_assembly(shot, lines):
+    """Keep turn boundaries hard when a shot cannot tolerate dialogue bleed.
+
+    Text-to-Dialogue is useful for tightly connected exchanges, but it returns one
+    continuous performance. When the approved script leaves a real action beat between
+    lines, that continuous file cannot be moved onto the separate anchors without rushing
+    the picture and leaving silence at the end of the slate.
+    """
+    if str((shot or {}).get("voiceAssemblyMode") or "").strip() == "isolated-lines":
+        return True
+    authored = []
+    for line in (shot or {}).get("dialogueLines") or []:
+        start = line.get("startSec")
+        if start is None:
+            start = line.get("startsAtSec")
+        end = line.get("endSec")
+        if end is None and start is not None and line.get("estimatedDurationSec") is not None:
+            end = float(start) + float(line["estimatedDurationSec"])
+        if start is None or end is None:
+            authored = []
+            break
+        authored.append((float(start), float(end)))
+    if len(authored) > 1 and any(
+            next_start - current_end >= 1.0
+            for (_, current_end), (next_start, _) in zip(authored, authored[1:])):
+        return True
+    return any(
+        sum(1 for line in lines or []
+            if line.get("voiceTreatment") == "group_chorus" and
+            str(line.get("text") or "").strip() == str(candidate.get("text") or "").strip()
+        ) > 1
+        for candidate in lines or []
+        if candidate.get("voiceTreatment") == "group_chorus"
+    )
+
+
+def create_policy(m):
     original = {name: getattr(m, name) for name in (
         "_resolve_scenelook_prompt", "scenelook_status", "approved_look_prompt",
         "generate_scenelook_plate", "approve_scenelook", "select_scenelook_source",
@@ -219,6 +259,7 @@ def install(m):
         }[stage]
         return {
             "model": m.cb_departments.cb_llm.DIRECTOR_MODEL,
+            "productionStandardHash": file_sha256(m.ROOT / "skills/production-standard.md"),
             "skillHashes": {
                 key: file_sha256(m.cb_departments.SKILLS[key]) for key in keys
             },
@@ -393,6 +434,25 @@ def install(m):
                              record.get("inputSignature"), legacy_expected)) <=
                              {"shotContractHash"})
                      )),
+                    (None, None),
+                )
+        if not current_record and shot_id:
+            # Scoped amendments can explicitly preserve a department whose real inputs
+            # are unchanged. The broad shot-contract hash may still move because it also
+            # includes fields owned by other departments. Honour that declaration only
+            # when the generic hash is the sole difference; every stage-specific input
+            # must continue to match exactly.
+            amendment = next((
+                item for item in reversed(pkg.get("scopedAmendments") or [])
+                if item.get("shotId") == shot_id
+                and stage in (item.get("preservedStages") or [])
+            ), None)
+            if amendment:
+                current_source, current_record = next(
+                    ((source, record) for source, record in existing
+                     if set(m._signature_diff(
+                         record.get("inputSignature"), expected)) <=
+                     {"shotContractHash"}),
                     (None, None),
                 )
         contract_error = None
@@ -583,6 +643,15 @@ def install(m):
 
     def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
         pkg, path = current_package(scene, episode)
+        if stage in direction_stages:
+            current = department_record_status(
+                pkg, shot_id, stage, scene, episode)
+            if current["current"] and (current.get("record") or {}).get("output"):
+                log(
+                    f"DEPARTMENT — reused current {stage} direction locally "
+                    "(no OpenAI call, $0)"
+                )
+                return current["record"]
         if stage == "animation":
             cinematography = department_record_status(
                 pkg, shot_id, "cinematography", scene, episode)
@@ -1231,18 +1300,11 @@ def install(m):
         reuse_failed_take = bool(
             failed.get("generatedFrom") == lines and reusable_raw.is_file() and
             reusable_timing.is_file())
-        repeated_chorus = any(
-            sum(1 for line in lines
-                if line.get("voiceTreatment") == "group_chorus" and
-                str(line.get("text") or "").strip() == str(candidate.get("text") or "").strip()
-            ) > 1
-            for candidate in lines
-            if candidate.get("voiceTreatment") == "group_chorus"
-        )
+        isolated_assembly = uses_isolated_voice_assembly(shot, lines)
         if reuse_failed_take:
             raw_out, timing_path = reusable_raw, reusable_timing
             log(f"VOICE — {shot_id}: recovering the existing paid take; no provider call")
-        elif repeated_chorus:
+        elif isolated_assembly:
             m.cb_gen.eleven_isolated_dialogue(
                 lines, out=str(raw_out), production_route="cb_render")
             timing_path = cb_audio_timing.dialogue_timing_path(raw_out)
@@ -1477,13 +1539,23 @@ def install(m):
 
     def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
         pkg, _ = current_package(scene, episode)
-        result = original["keyframe_shot"](scene, shot_id, episode, log)
+        failure = None
+        try:
+            result = original["keyframe_shot"](scene, shot_id, episode, log)
+        except BaseException as exc:
+            # An A/B provider failure must not strand a completed paid candidate as
+            # apparently stale. Finalize any candidate already persisted, then surface
+            # the original provider error unchanged.
+            result = None
+            failure = exc
         pkg, path = m.load_pkg(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
         candidates = list(ledger.get("keyframeCandidates") or [])
         if not candidates and ledger.get("keyframeCandidate"):
             candidates = [ledger["keyframeCandidate"]]
         if not candidates:
+            if failure is not None:
+                raise failure
             return result
         for candidate in candidates:
             candidate["packageRevision"] = pkg.get("revision")
@@ -1508,14 +1580,19 @@ def install(m):
                 log(f"KEYFRAME QC WARNING — {shot_id} SEE {candidate.get('candidateId')}: "
                     f"{correction}; candidate remains available for the human Director's "
                     "Accept or Refire decision")
+        if failure is not None:
+            raise failure
         return result
 
     def select_keyframe(scene, shot_id, mode, episode="Ep1", upload_path=None,
                         library_path=None, reviewed_by="Julian", log=print):
         pkg, _ = current_package(scene, episode)
-        # Source selection mutates the ledger. Validate SEE direction before copying or
-        # superseding a candidate so a refused action cannot change production state.
-        current_direction_output(pkg, shot_id, "cinematography")
+        # Uploading or reselecting an existing image is itself a human SEE decision and
+        # must remain available when specialist direction is missing or stale. Generated
+        # keyframes still require current Cinematography in keyframe_shot(). Downstream
+        # direction is prepared from the approved image after this zero-spend choice.
+        direction_current = department_record_status(
+            pkg, shot_id, "cinematography")["current"]
         result = original["select_keyframe_source"](
             scene, shot_id, mode, episode, upload_path, library_path, reviewed_by, log)
         pkg, path = m.load_pkg(scene, episode); shot = m._shot(pkg, shot_id)
@@ -1533,8 +1610,20 @@ def install(m):
         candidate["packageRevision"] = pkg.get("revision")
         candidate["inputSignature"] = keyframe_signature(pkg, shot, candidate, scene, episode)
         candidate["contentHash"] = file_sha256(candidate.get("path"))
-        candidate["conformanceScreening"] = m.screen_keyframe_conformance(
-            pkg, shot, candidate.get("path"), scene, episode, log)
+        candidate["conformanceScreening"] = (
+            m.screen_keyframe_conformance(
+                pkg, shot, candidate.get("path"), scene, episode, log)
+            if direction_current else {
+                "status": "unavailable",
+                "reason": (
+                    "Cinematography direction is not current. The imported image remains "
+                    "available for the human Director's SEE decision; downstream direction "
+                    "will be rebuilt from the approved image."),
+                "checkedAt": m._now(),
+                "screenVersion": 2,
+                "mediaProviderCalled": False,
+                "candidateSha256": file_sha256(candidate.get("path")),
+            })
         m._save(pkg, path)
         screening = candidate["conformanceScreening"]
         if screening.get("status") != "pass":
@@ -1682,6 +1771,21 @@ def install(m):
         if (not signatures_match and human_lineage_carry and
                 signature_diff == {"briefHash"}):
             signatures_match = True
+        # Non-generated SEE approvals are explicit human-selected visual evidence. A
+        # voice-only canon repair can change the broad canon profile digest without
+        # changing the uploaded/library image, its selected file hash, its scene plate,
+        # source card or source mode. Keep the approved frame usable in that bounded
+        # case; generated keyframes remain bound to their full prompt/reference graph.
+        non_generated_source = record.get("source") in (
+            "uploaded", "library", "previousFinalFrame")
+        if (not signatures_match and non_generated_source and
+                signature_diff == {"canonProfileDigest"} and
+                stored_signature.get("cardHash") == expected.get("cardHash") and
+                stored_signature.get("sceneLookHash") == expected.get("sceneLookHash") and
+                stored_signature.get("selectedAssetHash") ==
+                expected.get("selectedAssetHash") and
+                stored_signature.get("source") == expected.get("source")):
+            signatures_match = True
         # Compiler improvements must not rewrite the provenance of an image Julian already
         # approved. If only the compiled brief hash changed, retain the historical prompt
         # and prove that its protected Director sections still match current direction.
@@ -1773,6 +1877,16 @@ def install(m):
             return {"verdict": "regenerate", "changed": ["unresolvable-input"],
                     "reason": str(exc), "existing": existing, "currentSignature": None}
         changed = m._signature_diff(existing.get("inputSignature"), current_sig)
+        stored_signature = existing.get("inputSignature") or {}
+        non_generated_source = existing.get("source") in (
+            "uploaded", "library", "previousFinalFrame")
+        if (non_generated_source and set(changed) == {"canonProfileDigest"} and
+                stored_signature.get("cardHash") == current_sig.get("cardHash") and
+                stored_signature.get("sceneLookHash") == current_sig.get("sceneLookHash") and
+                stored_signature.get("selectedAssetHash") ==
+                current_sig.get("selectedAssetHash") and
+                stored_signature.get("source") == current_sig.get("source")):
+            changed = []
         if existing.get("contentHash") != file_sha256(existing.get("path")):
             changed.append("contentHash")
         human_advisory_accepted = bool(
@@ -1818,7 +1932,7 @@ def install(m):
             current_episode = episode or pkg.get("episode") or "Ep1"
             expected = m._seedance_working_input_signature(
                 pkg, shot, current_scene, current_episode)
-            if working.get("inputSignature") != expected:
+            if not production_contracts.working_signature_matches(working.get("inputSignature"), expected):
                 raise m.Refused(
                     "REFUSED — saved WATCH working prompt is stale against the current "
                     "SEE/HEAR/reference inputs. Restore it or save it again after preparing "
@@ -1846,10 +1960,10 @@ def install(m):
                     "checks": {"promptSource": "missing-current-approved-direction"},
                     "finalPrompt": ""}
 
-    def fire_shot(scene, shot_id, episode="Ep1", candidates=3, fast=False,
+    def fire_shot(scene, shot_id, episode="Ep1", candidates=1, fast=False,
                   spend_token=None, dry_run=False, comparison_model_id=None,
                   comparison_run_id=None, log=print, include_audio_reference=True,
-                  generate_audio=True):
+                  generate_audio=True, protected_comparison=False):
         pkg, _ = current_package(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
         if ledger.get("status") == "model-limited":
@@ -1863,8 +1977,11 @@ def install(m):
                 "REFUSED — WATCH blocked because the approved SEE frame does not prove "
                 "the physical stage contract. SEE is the render's opening causality "
                 f"evidence, so text cannot safely override it: {stage_report['reason']}")
-        stored = ((ledger.get("batch") or {}).get("envelope") or
-                  (ledger.get("pendingSpendAuth") or {}).get("envelope") or {})
+        stored = (((ledger.get("comparisonBatch") or {}).get("envelope") or
+                   (ledger.get("pendingComparisonSpendAuth") or {}).get("envelope") or {})
+                  if protected_comparison else
+                  ((ledger.get("batch") or {}).get("envelope") or
+                   (ledger.get("pendingSpendAuth") or {}).get("envelope") or {}))
         if stored.get("comparisonRunId"):
             if comparison_model_id and (
                     comparison_model_id != stored.get("providerModelId") or
@@ -1888,7 +2005,7 @@ def install(m):
             if not voice["current"]:
                 raise m.Refused(
                     f"REFUSED — Law 5: {shot_id}'s approved voice does not match current direction")
-        seedance_prompt(pkg, shot)
+        seedance_prompt(pkg, shot, scene, episode)
         generation_signature = animation_generation_signature(
             pkg, shot, scene, episode, fast=fast,
             comparison_model_id=comparison_model_id,
@@ -1898,10 +2015,11 @@ def install(m):
         result = original["fire_shot"](
             scene, shot_id, episode, candidates, fast, spend_token, dry_run,
             comparison_model_id, comparison_run_id, log, include_audio_reference,
-            generate_audio)
+            generate_audio, protected_comparison)
         pkg, path = m.load_pkg(scene, episode)
         ledger = m._ledger(pkg, shot_id)
-        batch = ledger.get("batch") or {}
+        batch = (ledger.get("comparisonBatch") if protected_comparison
+                 else ledger.get("batch")) or {}
         if batch.get("status") != "complete":
             raise m.Refused(
                 f"REFUSED — {shot_id}'s provider batch did not finish with a complete contract")
@@ -1917,12 +2035,14 @@ def install(m):
         batch["inputSignature"] = generation_signature
         batch["candidateHashes"] = [
             {"path": candidate_path, "sha256": file_sha256(candidate_path)}
-            for candidate_path in (ledger.get("candidatePaths") or [])
+            for candidate_path in (
+                batch.get("candidatePaths") if protected_comparison
+                else ledger.get("candidatePaths") or [])
         ]
         m._save(pkg, path)
         return result
 
-    def next_shot(scene, episode="Ep1", candidates=3, fast=False,
+    def next_shot(scene, episode="Ep1", candidates=1, fast=False,
                   spend_token=None, dry_run=False, comparison_model_id=None,
                   comparison_run_id=None, log=print):
         current_package(scene, episode)
@@ -1959,7 +2079,7 @@ def install(m):
 
     def stitch_scene(scene, episode="Ep1", log=print):
         pkg, _ = current_package(scene, episode)
-        for shot in pkg.get("shots") or []:
+        for shot in production_contracts.active_shots(pkg):
             ledger = m._ledger(pkg, shot["shotId"])
             approval = animation_approval_status(pkg, shot, scene, episode)
             if not approval["current"]:
@@ -1973,52 +2093,51 @@ def install(m):
                     f"REFUSED — {shot['shotId']} has no current Director Review approval")
         return original["stitch_scene"](scene, episode, log)
 
-    m._resolve_scenelook_prompt = resolve_scenelook_prompt
-    m.scenelook_status = scene_status
-    m._scenelook_record_input_signature = look_input_signature
-    m.approved_look_prompt = look_prompt
-    m.generate_scenelook_plate = generate_look
-    m.approve_scenelook = approve_look
-    m.select_scenelook_source = select_look
-    m.department_status = department_status
-    m.prepare_department = prepare_department
-    m.save_department_candidate = save_department
-    m.decide_department = decide_department
-    m._current_department_output = current_direction_output
-    # Compatibility aliases for older call sites. These now mean current signed direction;
-    # they never manufacture or imply a human approval.
-    m._require_approved_department_output = current_direction_output
-    m._approved_department_output = current_direction_output
-    m._department_input_signature = department_input_signature
-    m._department_record_status = department_record_status
-    m._resolve_keyframe_prompt = keyframe_prompt
-    m._keyframe_input_signature = keyframe_input_signature
-    m._keyframe_stage_contract_report = keyframe_stage_contract_report
-    m._approved_voice_lines = voice_lines
-    m._voice_input_signature = voice_signature
-    m._voice_approval_status = voice_approval_status
-    m._voice_signature = voice_signature
-    m._animation_input_signature = animation_input_signature
-    m._animation_input_signature = animation_input_signature
-    m._animation_generation_signature = animation_generation_signature
-    m._animation_approval_status = animation_approval_status
-    m._external_import_input_signature = external_import_input_signature
-    m.voice_shot = voice_shot
-    m.approve_voice = approve_voice
-    m.reject_voice = reject_voice
-    m.restore_previous_voice_take = restore_voice
-    m.keyframe_shot = keyframe_shot
-    m.select_keyframe_source = select_keyframe
-    m.rescreen_keyframe_conformance = rescreen_keyframe
-    m.approve_keyframe = approve_keyframe
-    m.reassess_keyframe = reassess_keyframe
-    m._keyframe_record_input_signature = keyframe_signature
-    m._keyframe_record_status = keyframe_record_status
-    m._anchor_for = anchor_for
-    m._resolve_seedance_prompt = seedance_prompt
-    m._approved_seedance_prompt = approved_seedance_prompt
-    m.check_seedance_structure = check_structure
-    m.fire_shot = fire_shot
-    m.next_shot = next_shot
-    m.approve_shot = approve_shot
-    m.stitch_scene = stitch_scene
+    return SimpleNamespace(
+        _resolve_scenelook_prompt=resolve_scenelook_prompt,
+        scenelook_status=scene_status,
+        _scenelook_record_input_signature=look_input_signature,
+        approved_look_prompt=look_prompt,
+        generate_scenelook_plate=generate_look,
+        approve_scenelook=approve_look,
+        select_scenelook_source=select_look,
+        department_status=department_status,
+        prepare_department=prepare_department,
+        save_department_candidate=save_department,
+        decide_department=decide_department,
+        _current_department_output=current_direction_output,
+        _require_approved_department_output=current_direction_output,
+        _approved_department_output=current_direction_output,
+        _department_input_signature=department_input_signature,
+        _department_record_status=department_record_status,
+        _resolve_keyframe_prompt=keyframe_prompt,
+        _keyframe_input_signature=keyframe_input_signature,
+        _keyframe_stage_contract_report=keyframe_stage_contract_report,
+        _approved_voice_lines=voice_lines,
+        _voice_input_signature=voice_signature,
+        _voice_approval_status=voice_approval_status,
+        _voice_signature=voice_signature,
+        _animation_input_signature=animation_input_signature,
+        _animation_generation_signature=animation_generation_signature,
+        _animation_approval_status=animation_approval_status,
+        _external_import_input_signature=external_import_input_signature,
+        voice_shot=voice_shot,
+        approve_voice=approve_voice,
+        reject_voice=reject_voice,
+        restore_previous_voice_take=restore_voice,
+        keyframe_shot=keyframe_shot,
+        select_keyframe_source=select_keyframe,
+        rescreen_keyframe_conformance=rescreen_keyframe,
+        approve_keyframe=approve_keyframe,
+        reassess_keyframe=reassess_keyframe,
+        _keyframe_record_input_signature=keyframe_signature,
+        _keyframe_record_status=keyframe_record_status,
+        _anchor_for=anchor_for,
+        _resolve_seedance_prompt=seedance_prompt,
+        _approved_seedance_prompt=approved_seedance_prompt,
+        check_seedance_structure=check_structure,
+        fire_shot=fire_shot,
+        next_shot=next_shot,
+        approve_shot=approve_shot,
+        stitch_scene=stitch_scene,
+    )

@@ -567,7 +567,8 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
         "Fuzzby_identity_front.jpeg", "Fuzzby_identity_rear.jpeg",
         "Ep1_S1_plate.png"]
     assert all("posed_integration" not in pathlib.Path(ref).name for ref in call["refs"])
-    assert "[Performance Freedom]" in call["prompt"]
+    assert "[MOTION READINESS]" in call["prompt"]
+    assert "[ACCEPTANCE TEST]" in call["prompt"]
     for ref in call["refs"]:
         assert pathlib.Path(ref).exists()
 

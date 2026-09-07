@@ -164,8 +164,10 @@ def test_current_prepared_direction_is_operational_without_fake_human_approval(
         package, shot["shotId"], "cinematography")["current"]
 
 
-def test_complex_relay_uses_its_approved_see_keyframe_as_watch_anchor(tmp_path):
+def test_complex_relay_inherits_approved_predecessor_frame_as_watch_anchor(tmp_path):
     package, shot, opening_frame = _pkg(tmp_path)
+    previous_frame = tmp_path / "previous-final.png"
+    previous_frame.write_bytes(b"previous-final")
     shot.update({
         "sourceType": "relay",
         "sourceShotId": "S1.PREV",
@@ -176,13 +178,36 @@ def test_complex_relay_uses_its_approved_see_keyframe_as_watch_anchor(tmp_path):
             {"speaker": "Keen", "exactText": "Hello."},
         ],
     })
+    package["continuityLedger"].append({
+        "shotId": "S1.PREV",
+        "status": "approved",
+        "harvestFrame": str(previous_frame),
+    })
     ledger = render._ledger(package, shot["shotId"])
 
-    assert render._shot_uses_own_keyframe(shot, ledger) is True
-    assert render._anchor_for(package, shot) == str(opening_frame)
+    assert render._shot_uses_own_keyframe(shot, ledger) is False
+    assert render._anchor_for(package, shot) == str(previous_frame)
+    render._require_stage_contract_keyframe(shot, ledger, package)
 
     ledger["continuityMode"] = "video-extension"
     assert render._shot_uses_own_keyframe(shot, ledger) is False
+
+
+def test_complex_relay_waits_for_predecessor_instead_of_requesting_duplicate_keyframe(
+        tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    shot.update({
+        "sourceType": "relay",
+        "sourceShotId": "S1.PREV",
+        "charactersInFrame": ["Aida", "Bo", "Keen", "Misty", "Amie"],
+    })
+    package["continuityLedger"].append({
+        "shotId": "S1.PREV", "status": "designed", "harvestFrame": None,
+    })
+    ledger = render._ledger(package, shot["shotId"])
+
+    with pytest.raises(render.Refused, match="waiting for S1.PREV's approved final frame"):
+        render._require_stage_contract_keyframe(shot, ledger, package)
 
 
 def test_simple_relay_still_inherits_predecessor_frame(tmp_path):
@@ -258,6 +283,41 @@ def test_visual_reference_change_does_not_stale_prepared_voice_direction(
     shot["dialogueLines"][0]["exactText"] = "The words really changed."
     assert render._department_record_status(
         package, shot["shotId"], "voice", "1", "Ep1")["current"] is False
+
+
+def test_visual_amendment_explicitly_preserves_voice_direction(
+        tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    shot["dialogueLines"] = [{"speaker": "Keen", "exactText": "I can do this."}]
+    candidate = _prepare_department(package, shot["shotId"], "voice")
+    candidate["output"] = {"shotId": shot["shotId"], "lines": []}
+    monkeypatch.setattr(
+        render.cb_audio_authority, "route_voice_direction",
+        lambda direction, original_lines: (direction, original_lines))
+    monkeypatch.setattr(
+        render.cb_departments.VoiceDirection, "model_validate",
+        lambda output: output)
+    monkeypatch.setattr(
+        render.cb_departments, "validate_voice_direction",
+        lambda direction, lines: None)
+
+    shot["continuityConstraints"] = [{
+        "label": "Visual identity",
+        "value": "Preserve the locked turnaround exactly.",
+        "severity": "critical",
+    }]
+    package["scopedAmendments"] = [{
+        "shotId": shot["shotId"],
+        "kind": "shot-visual-contract-correction",
+        "preservedStages": ["scenelook", "voice"],
+        "invalidatedStages": ["cinematography", "keyframe", "animation"],
+    }]
+
+    status = render._department_record_status(
+        package, shot["shotId"], "voice", "1", "Ep1")
+
+    assert status["current"] is True
+    assert status["source"] == "prepared"
 
 
 def test_legacy_whole_shot_department_signature_remains_current(tmp_path, monkeypatch):

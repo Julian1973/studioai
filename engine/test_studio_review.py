@@ -170,6 +170,51 @@ def test_timeline_notes_trims_join_signoff_and_export_are_version_bound(setup):
     assert all(a.get('src').startswith('file:///') for a in xml.findall('.//asset'))
 
 
+def test_post_handoff_contains_scoped_direction_and_approved_authorities(setup):
+    p,ws,t,_ = setup; finish(p)
+    before = p.snapshot('first','1')['state']
+    calls = len(t.calls)
+    timeline_command(p, 'export_cut')
+    snapshot = p.snapshot('first','1')
+    exported = snapshot['review']['timeline']['export']
+    manifest = json.loads(ws.project_path('first', exported['files'][1]['path']).read_text())
+    brief = manifest['postSupervisor']
+    assert brief['projectId'] == 'first' and brief['episode'] == '1'
+    assert brief['context']['bible'] == 'first world only'
+    assert 'second world only' not in json.dumps(manifest)
+    assert 'episode2-evidence.md' not in brief['postSupervisorReferences']
+    assert not brief['assemblyApproved'] and brief['reviewType'] == 'brief-only'
+    assert brief['assemblyFingerprint'] == manifest['fingerprint']
+    for bound, original in zip(brief['shots'], before['shots']):
+        assert bound['direction'] == fields(original)
+        assert not bound['missingAuthorities']
+        assert bound['approvedOutcomes']['hear']['files'] == original['outcomes']['hear']['files']
+        assert bound['approvedOutcomes']['watch']['id'] == original['outcomes']['watch']['id']
+        assert bound['approvedOutcomes']['request']['prompt'] == original['outcomes']['request']['prompt']
+    assert snapshot['state']['shots'] == before['shots']
+    assert snapshot['state']['budget'] == before['budget'] and len(t.calls) == calls
+    assert p.snapshot('second','1')['state']['shots'] == []
+
+
+def test_post_handoff_rejects_foreign_audio_even_when_video_is_approved(setup):
+    from studio_post_contract import project_brief
+    p,ws,t,_ = setup; finish(p)
+    snapshot = p.snapshot('first','1')
+    state = snapshot['state']
+    state['shots'][0]['outcomes']['hear']['files'][0]['path'] = 'projects/second/assets/hero.png'
+    with pytest.raises(StudioError, match='selected project'):
+        project_brief(p, ws.context('first','1'), state, snapshot['review']['timeline'])
+
+
+def test_post_handoff_rejects_changed_candidate_ids(setup):
+    from studio_post_contract import project_brief
+    p,ws,t,_ = setup; finish(p)
+    snapshot = p.snapshot('first','1')
+    snapshot['review']['timeline']['clips'][0]['candidateId'] = 'outdated-render'
+    with pytest.raises(StudioError, match='footage changed'):
+        project_brief(p, ws.context('first','1'), snapshot['state'], snapshot['review']['timeline'])
+
+
 def test_existing_render_cannot_be_resubmitted_without_a_review_or_revision(setup):
     p,ws,t,_=setup;command(p,'budget',amountUsd=10);approve(p,'see');approve(p,'hear');approve(p,'request')
     request=p.snapshot('first','1')['state']['shots'][0]['outcomes']['request']

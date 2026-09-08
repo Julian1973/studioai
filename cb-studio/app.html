@@ -5972,6 +5972,14 @@ function renderContinuityStage(){
 
 // ── FINAL — the assembled scene ──
 function renderFinalStage(){
+  let finishLink=document.getElementById('episode-finishing-link');
+  if(!finishLink){
+    finishLink=document.createElement('a');finishLink.id='episode-finishing-link';finishLink.className='btn ghost';
+    document.getElementById('wartefact').parentElement.insertBefore(finishLink,document.getElementById('wartefact'));
+  }
+  finishLink.href='finishing.html?episode='+encodeURIComponent(SH_EP||'Ep2');
+  finishLink.textContent='Episode final cut · DaVinci review and sign-off';
+
   const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
   const has=SH_MEDIA&&SH_MEDIA.picture;
   const post=(SH_MEDIA&&SH_MEDIA.post)||{};

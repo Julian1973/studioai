@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 import pathlib
+import fcntl
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Any
 
@@ -17,6 +19,20 @@ STATE_ROOT = ROOT / "cb-output" / "state"
 
 class PostWorkspaceError(ValueError):
     pass
+
+
+def require_legacy_project(project_id=None):
+    if project_id not in (None, "", "crystal-bears"):
+        raise PostWorkspaceError("This is the legacy Crystal Bears finishing desk. Use the selected project's finishing handoff.")
+
+
+@contextmanager
+def review_lock(episode):
+    """Serialize candidate registration and verdict writes, not remote processing."""
+    STATE_ROOT.mkdir(parents=True, exist_ok=True)
+    with (STATE_ROOT / f"{episode}_post_review.lock").open("a") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        yield
 
 
 def _sha256(path: pathlib.Path) -> str:
@@ -99,6 +115,9 @@ def workspace(episode: str = "Ep1") -> dict[str, Any]:
 
     return {
         "episode": episode,
+        "projectId": "crystal-bears",
+        "ledger": "legacy-post",
+        "finishingWorkflow": manifest.get("finishingWorkflow"),
         "available": True,
         "stage": manifest.get("stage") or manifest.get("status") or "post-review-human-signoff-required",
         "status": "approved" if verdict and verdict.get("verdict") == "approved" else "review-required",
@@ -124,13 +143,24 @@ def workspace(episode: str = "Ep1") -> dict[str, Any]:
     }
 
 
-def record_verdict(episode: str, verdict: str, note: str = "", reviewer: str = "Julian") -> dict[str, Any]:
+def record_verdict(episode: str, verdict: str, note: str = "", reviewer: str = "Julian", expected_hash: str = "") -> dict[str, Any]:
+    with review_lock(episode):
+        return _record_verdict(episode, verdict, note, reviewer, expected_hash)
+
+
+def _record_verdict(episode, verdict, note, reviewer, expected_hash):
+    verdict = str(verdict).strip().lower()
+    if verdict not in {"approved", "rejected"}:
+        raise PostWorkspaceError("verdict must be approved or rejected")
     current = workspace(episode)
     if not current.get("available"):
         raise PostWorkspaceError("There is no post candidate to review.")
-    verdict = verdict.strip().lower()
-    if verdict not in {"approved", "rejected"}:
-        raise PostWorkspaceError("verdict must be approved or rejected")
+    if current.get("finishingWorkflow"):
+        if not expected_hash or expected_hash != current["masterSha256"]:
+            raise PostWorkspaceError("The review version changed. Reload before signing off.")
+        drive = current["finishingWorkflow"].get("drive") or {}
+        if verdict == "approved" and (not drive.get("verified") or drive.get("masterSha256") != expected_hash):
+            raise PostWorkspaceError("The matching Google Drive review upload must be verified before sign-off.")
     note = note.strip()
     if verdict == "rejected" and not note:
         raise PostWorkspaceError("Return-to-post notes are required.")

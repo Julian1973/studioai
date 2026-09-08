@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resolve Animation Post Supervisor"
+  short_description: "Animation editing, sound, colour and verified delivery"
+  default_prompt: "Use $resolve-animation-post-supervisor to review and repair the current episode in AI Studio, preserving approved sources and documenting verified results."

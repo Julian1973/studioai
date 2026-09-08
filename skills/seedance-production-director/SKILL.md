@@ -290,3 +290,7 @@ Read `references/revision-and-learning.md` for corrections and feedback. Record 
 against the actual artifact. Retrieve only relevant observations, preserve opposing evidence,
 and explain useful application in an existing rationale field. Observations may guide craft;
 they do not become canon, numerical gates or permission to reopen approved work.
+
+## DaVinci post-production handoff
+
+For existing animation cuts, Resolve editing, continuity repair, colour, sound or delivery, use [Resolve Animation Post Supervisor](../resolve-animation-post-supervisor/SKILL.md). Preserve this Director skill as the authority for approved story, canon and performance. Post findings return exact failed gates and source-bound repair briefs; they do not silently rewrite approved production intent.

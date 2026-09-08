@@ -181,13 +181,15 @@ def handle(production, db, context, state, shot, payload):
                 raise StudioError("Resolve the flagged media, joins and review notes before approving this assembly.")
             assembly["review"] = {"decision": "approved", "fingerprint": timeline["fingerprint"], "at": time.time()}
             return "Episode assembly approved against these exact clips and timings."
-        assembly["export"] = export_cut(production, pid, str(payload["episode"]), timeline)
+        assembly["export"] = export_cut(production, pid, str(payload["episode"]), timeline, context=context, state=state)
         return "Finishing handoff created from verified approved clips. Open its timeline and source manifest."
     raise StudioError("Choose a supported review action.")
 
 
-def export_cut(production, pid, episode, timeline):
+def export_cut(production, pid, episode, timeline, *, context, state):
     """FCPXML plus a hash manifest. Originals are referenced without re-encoding."""
+    from studio_post_contract import project_brief
+    post_brief = project_brief(production, context, state, timeline)
     folder = production.ws.project_path(pid, f"projects/{pid}/exports/{uuid.uuid4().hex}")
     folder.mkdir(parents=True)
     root = ET.Element("fcpxml", version="1.8")
@@ -200,7 +202,8 @@ def export_cut(production, pid, episode, timeline):
     spine = ET.SubElement(sequence, "spine")
     offset = 0
     manifest = {"projectId": pid, "episode": episode, "fingerprint": timeline["fingerprint"], "clips": [],
-                "meaning": "Approved-shot assembly, 24 fps interchange timeline. Finish colour, sound and delivery checks in the finishing application.", "notes": timeline["notes"]}
+                "meaning": "Approved-shot assembly, 24 fps interchange timeline. Finish colour, sound and delivery checks in the finishing application.", "notes": timeline["notes"],
+                "postSupervisor": post_brief}
     for index, clip in enumerate(timeline["clips"]):
         production.assert_artifact(pid, {"files": [clip["file"]]})
         path = production.ws.project_path(pid, clip["file"]["path"])

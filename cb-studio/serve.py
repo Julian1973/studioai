@@ -2544,6 +2544,7 @@ def _storyboard_approval(d):
 # Approved EXACT files the UI fetches by name (case-insensitive):
 _APPROVED_FILES = {
     "/cb-studio/app.html",                # the SPA entry
+    "/cb-studio/finishing.html",          # exact-cut review and vCube handoff
     "/cb-studio/director.html",           # outcome-first creative entry
     "/cb-studio/room.html",               # Studio room assistant entry
     "/cb-studio/board.html",              # Studio board / rough-cut entry
@@ -4319,10 +4320,40 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
+        if self.path == "/api/finishing":
+            try:
+                import cb_finishing
+                d = self._body()
+                cb_finishing.post.require_legacy_project(d.get("projectId"))
+                ep = str(d.get("episode") or "Ep2")
+                if not _SHOT_TOKEN.match(ep):
+                    raise ValueError("episode must be a plain token")
+                action = d.get("action")
+                expected = str(d.get("masterSha256") or "")
+                if action == "status":
+                    payload = cb_finishing.status(ep)
+                elif action == "resolve":
+                    payload = cb_finishing.resolve_snapshot(ep, expected)
+                elif action == "director-brief":
+                    payload = cb_finishing.director_brief(ep, expected)
+                elif action == "upscale":
+                    job = cb_finishing.reserve(ep, expected, d.get("maxCostUsd", 0))
+                    if job["status"] == "reserved":
+                        _start(_jid(f"vcube_{ep}"), "post:vcube", "post", ["cb_finishing.py", ep, expected])
+                    payload = cb_finishing.status(ep)
+                elif action == "poll":
+                    payload = cb_finishing.poll(ep, expected)
+                else:
+                    raise ValueError("Unknown finishing action")
+                self._json(200, payload)
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
         if self.path == "/api/post-workspace":
             try:
                 import cb_post_workspace
                 d = self._body()
+                cb_post_workspace.require_legacy_project(d.get("projectId"))
                 episode = str(d.get("episode") or "Ep1").strip()
                 action = str(d.get("action") or "").strip()
                 if not _SHOT_TOKEN.match(episode):
@@ -4333,6 +4364,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                         "approved" if action == "approve" else "rejected",
                         str(d.get("note") or ""),
                         str(d.get("reviewer") or "Julian"),
+                        expected_hash=str(d.get("masterSha256") or ""),
                     )
                     self._json(200, payload)
                     return

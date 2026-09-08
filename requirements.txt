@@ -7,3 +7,7 @@ numpy>=2.0,<3
 scipy>=1.14,<2
 pytest>=8,<10
 keyring>=25,<26
+
+# BytePlus VOD upload and signed vCube requests
+byteplus-sdk==1.0.53
+retry==0.9.2

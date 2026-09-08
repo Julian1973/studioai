@@ -6,3 +6,4 @@ pillow>=10,<13
 numpy>=2.0,<3
 scipy>=1.14,<2
 pytest>=8,<10
+keyring>=25,<26

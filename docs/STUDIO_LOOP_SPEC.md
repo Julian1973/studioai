@@ -3,6 +3,10 @@
 This local copy records the implemented Studio loop contract when the upstream PR artifact
 is not available to the checkout.
 
+The project-aware agent and BYOK workspace use the shared command contract documented
+in [Project production agent](PROJECT_AGENT.md). The storage paths and APIs below describe
+the original production desk, retained as the compatibility path for established projects.
+
 ## Emission readiness
 
 `cb_emission_standard.preflight` checks the request contract. Craft scores are advisory;

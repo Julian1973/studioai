@@ -243,7 +243,8 @@ def _freshness_watch():
     while True:
         time.sleep(3)
         try:
-            if _is_stale() and not PROCS and _INFLIGHT == 0:
+            project_workers = getattr(sys.modules.get("studio_production"), "_RUNNING", ())
+            if _is_stale() and not PROCS and not project_workers and _INFLIGHT == 0:
                 print("⟳ studio source changed — reloading with the latest code…", flush=True)
                 _reexec()
         except Exception:
@@ -2810,6 +2811,27 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if _legacy_gone(self):
             return
+        if urlsplit(self.path).path in {"/api/workspace/connections", "/api/project-services", "/api/project-production", "/api/project-library"}:
+            from urllib.parse import parse_qs
+            from studio_workspace import Workspace, PROVIDERS, StudioError
+            from studio_production import Production
+            try:
+                workspace = Workspace(ROOT)
+                query = parse_qs(urlsplit(self.path).query)
+                project = (query.get("projectId") or [""])[0]
+                if urlsplit(self.path).path == "/api/workspace/connections":
+                    result = {"connections": workspace.connections(), "providers": PROVIDERS}
+                elif urlsplit(self.path).path == "/api/project-services":
+                    result = {"services": workspace.services(project)}
+                elif urlsplit(self.path).path == "/api/project-library":
+                    result = {"context": workspace.context(project)}
+                else:
+                    result = Production(workspace).snapshot(project, (query.get("episode") or [None])[0])
+                return self._json(200, result)
+            except StudioError as exc:
+                return self._json(400, {"error": str(exc), "code": exc.code})
+            except Exception:
+                return self._json(500, {"error": "The project workspace could not be loaded. Your saved work is preserved."})
         if self.path == "/" or self.path == "":
             self.send_response(302)
             self.send_header("Location", "/cb-studio/app.html")
@@ -3731,14 +3753,18 @@ class H(http.server.SimpleHTTPRequestHandler):
         return self._serve_static()       # range-aware (video streams + seeks), not the no-Range super().do_GET()
 
     def _body(self):
+        if getattr(self, "_parsed_request_body", None) is not None:
+            return self._parsed_request_body
         n = _validated_content_length(self.headers)
         payload = self.rfile.read(n)
         if len(payload) != n:
             raise ValueError("request body ended before Content-Length bytes were received")
-        return json.loads(payload or b"{}")
+        self._parsed_request_body = json.loads(payload or b"{}")
+        return self._parsed_request_body
 
     @_tracked
     def do_POST(self):
+        self._parsed_request_body = None
         if not self._authorize():
             return
         if not self._valid_post_origin():
@@ -3754,6 +3780,40 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if _legacy_gone(self):
             return
+        if self.path.startswith(("/api/director-", "/api/shot-", "/api/scene-", "/api/gate-", "/api/creative-")):
+            try:
+                scope = self._body()
+                if scope.get("projectId") not in (None, "", "crystal-bears"):
+                    return self._json(409, {"error": "Use the selected project's production agent for this action.", "code": "scope_mismatch"})
+            except Exception:
+                return self._json(400, {"error": "A valid production command is required."})
+        if self.path in {"/api/workspace/connections", "/api/project-services", "/api/project-command", "/api/project-library", "/api/project-script-extract"}:
+            from studio_workspace import Workspace, StudioError
+            from studio_production import Production
+            try:
+                d = self._body()
+                workspace = Workspace(ROOT)
+                if self.path == "/api/workspace/connections":
+                    if d.get("action") in {"check", "disable"}:
+                        result = workspace.connection_action(d.get("id"), d["action"])
+                    else:
+                        result = workspace.save_connection(d)
+                elif self.path == "/api/project-services":
+                    result = {"services": workspace.save_services(d.get("projectId"), d.get("services") or {})}
+                elif self.path == "/api/project-library":
+                    result = workspace.update_library(d, decode_image_upload)
+                elif self.path == "/api/project-script-extract":
+                    workspace.project(d.get("projectId"))
+                    result = {"script": extract_doc_text(d.get("docData"), d.get("docName", ""))}
+                else:
+                    result = Production(workspace).command(d)
+                return self._json(200, result)
+            except StudioError as exc:
+                return self._json(409 if exc.code in {"stale", "source_changed", "job_active"} else 400,
+                                  {"error": str(exc), "code": exc.code})
+            except Exception:
+                # Never serialize provider exceptions, request bodies or credentials.
+                return self._json(500, {"error": "The operation could not finish. Your saved outcomes are preserved."})
         if self.path == "/api/credits":
             try:
                 credits = _canonical_engine_module("cb_credits")

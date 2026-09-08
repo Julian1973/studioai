@@ -1345,6 +1345,7 @@ function renderProjects(){
       <div class="projcard-actions">
         <button type="button" class="btn" onclick='enterProject(${JSON.stringify(p.id)})'>${p.archived?"Open archive":"Open project"}</button>
         ${p.archived||p.setupVersion===1?"":`<button type="button" class="btn ghost" onclick='continueProject(${JSON.stringify(p.id)})'>Continue latest episode</button><button type="button" class="btn ghost" onclick='StudioProduction.migration(${JSON.stringify(p.id)})'>Upgrade workspace</button>`}
+        ${p.archived?'':`<button type="button" class="btn ghost" onclick='addProjectEpisode(${JSON.stringify(p.id)})'>＋ Add ${p.projectType==='film'?'sequence':'episode'}</button>`}
       </div>
     </div>
   </article>`;};
@@ -1397,6 +1398,20 @@ async function continueProject(id){
   if(p.archived||p.setupVersion===1)return;
   const episode=EPISODES.filter(e=>e&&e.script).sort((a,b)=>Number(b.number)-Number(a.number))[0]||EPISODES[0];
   if(episode)await openEpisode(episode.number); else addForm();
+}
+async function addProjectEpisode(id){
+  const project=PROJECTS.find(p=>p.id===id);
+  if(!project||project.archived)return;
+  await enterProject(id);
+  if(CURRENT_PROJECT?.id!==id)return;
+  if(project.setupVersion===1){
+    const input=document.getElementById('projectPartTitle');
+    if(input){input.closest('details').open=true;input.scrollIntoView({block:'center'});input.focus();}
+  }else{
+    addForm();
+    document.getElementById('f-num').value=Math.max(0,...EPISODES.map(e=>Number(e.number)||0))+1;
+    document.getElementById('f-title').focus();
+  }
 }
 function exitProject(){ bootProjects(); }
 /* ---- New Project wizard ---- */

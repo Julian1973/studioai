@@ -3,7 +3,7 @@
   'use strict';
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const usd = value => '$' + (Number(value || 0) / 1e6).toFixed(2);
-  const roles = ['direction', 'keyframes', 'voices', 'animation'];
+  const roles = ['direction', 'keyframes', 'voices', 'animation', 'review'];
   let active = null;
   async function api(path, body) {
     const response = await fetch(BASE + path, body === undefined ? {cache:'no-store'} : {
@@ -41,6 +41,7 @@
       if(CURRENT_PROJECT?.id!==projectId||!field.isConnected)return;
       field.value=script;
       const title=document.getElementById('projectPartTitle');if(!title.value)title.value=file.name.replace(/\.[^.]+$/,'');
+      window.StudioDrafts?.save(field);window.StudioDrafts?.save(title);
     } catch(error){if(field.isConnected)showError(field.parentElement,error.message);}
     finally{field.removeAttribute('aria-busy');}
   }
@@ -87,13 +88,14 @@
       root.innerHTML = `<p>These choices apply only to ${esc(project.name)}. Connect only the services needed for your next outcome.</p><button class="btn ghost" id="sp-manage-connections">Manage workspace connections</button>
         <form class="sp-form">${roles.map(role => {
           const setting = settings.services[role] || {}, options = data.connections.filter(c => c.enabled && data.providers[c.provider].roles.includes(role));
-          return `<fieldset><legend>${esc(role[0].toUpperCase()+role.slice(1))}</legend><label>Account<select name="${role}-connection"><option value="">Connect later</option>${options.map(c=>`<option value="${esc(c.id)}" ${setting.connectionId===c.id?'selected':''}>${esc(c.label)} · ${esc(c.status)}</option>`).join('')}</select></label><label>Provider model ID<input name="${role}-model" value="${esc(setting.model||'')}" placeholder="${esc({direction:'Your OpenAI model ID',keyframes:'dola-seedream-5-0-pro-260628',voices:'eleven_v3',animation:'dreamina-seedance-2-5-260628'}[role])}"></label><label>Estimated maximum USD per request<input name="${role}-cost" type="number" min="0.000001" step="0.000001" value="${esc(setting.estimateUsd||'')}" placeholder="Check your provider pricing"></label>${role==='voices'?`<label>Voice casting — one Character name = Voice ID per line<textarea name="casting" placeholder="Hero = yourVoiceId">${esc(Object.entries(setting.casting||{}).map(([name,id])=>name+' = '+id).join('\n'))}</textarea></label>`:''}</fieldset>`;
+          return `<fieldset><legend>${esc(role[0].toUpperCase()+role.slice(1))}</legend><label>Account<select name="${role}-connection"><option value="">Connect later</option>${options.map(c=>`<option value="${esc(c.id)}" ${setting.connectionId===c.id?'selected':''}>${esc(c.label)} · ${esc(c.status)}</option>`).join('')}</select></label><label>Provider model ID<input name="${role}-model" value="${esc(setting.model||'')}" placeholder="${esc({direction:'Your OpenAI model ID',keyframes:'dola-seedream-5-0-pro-260628',voices:'eleven_v3',animation:'dreamina-seedance-2-5-260628',review:'Your vision model with structured output'}[role])}"></label><label>Estimated maximum USD per request<input name="${role}-cost" type="number" min="0.000001" step="0.000001" value="${esc(setting.estimateUsd||'')}" placeholder="Check your provider pricing"></label>${role==='review'?`<label>Audio-input model ID<input name="review-audio-model" value="${esc(setting.audioModel||'')}" placeholder="Your audio-input Chat Completions model"></label><p>Optional. Reviews sampled render frames and actual audio. Estimate must cover both model calls; approvals stay with you.</p>`:''}${role==='voices'?`<label>Voice casting — one Character name = Voice ID per line<textarea name="casting" placeholder="Hero = yourVoiceId">${esc(Object.entries(setting.casting||{}).map(([name,id])=>name+' = '+id).join('\n'))}</textarea></label>`:''}</fieldset>`;
         }).join('')}<p>Budget reservations use these estimates, including failed or uncertain work. They are studio spending controls, not a hard cap on your provider invoice. Animation currently uses the qualified 480p Seedance adapter.</p><button class="btn" type="submit">Save project services</button><p data-error role="alert"></p></form>`;
       root.querySelector('#sp-manage-connections').onclick = connections;
       root.querySelector('form').onsubmit = async event => {
         event.preventDefault(); const form = event.currentTarget, values = {};
         for (const role of roles) {
           values[role] = {connectionId:form.elements[role+'-connection'].value,model:form.elements[role+'-model'].value,estimateUsd:form.elements[role+'-cost'].value};
+          if (role === 'review') values[role].audioModel=form.elements['review-audio-model'].value;
           if (role === 'voices') {
             values[role].casting = {};
             for (const line of form.elements.casting.value.split('\n').filter(line=>line.trim())) {
@@ -123,7 +125,8 @@
       const entries=()=>form.elements.group.value==='characters'?Object.entries(context.assets.characters).map(([name,item])=>({name,...item})):context.assets[form.elements.group.value]||[];
       const selectAsset=()=>{const item=entries().find(a=>a.name===form.elements.existing.value);form.elements.name.value=item?.name||'';form.elements.notes.value=item?.notes||item?.key_features||'';form.elements.image.value='';form.elements.traits.value=Object.entries(item?.identityTraits||{}).map(([k,v])=>k+' = '+v).join('\n');form.elements.approve.checked=false;};
       const chooseGroup=()=>{const bible=form.elements.group.value==='bible';for(const id of ['sp-existing','sp-asset-name','sp-asset-image','sp-approve-asset'])root.querySelector('#'+id).hidden=bible;root.querySelector('#sp-traits').hidden=form.elements.group.value!=='characters';form.elements.existing.innerHTML='<option value="">Add an asset</option>'+entries().map(a=>`<option value="${esc(a.name)}">${esc(a.name)}</option>`).join('');selectAsset();if(bible)form.elements.notes.value=context.bible;};
-      form.elements.group.onchange=chooseGroup;form.elements.existing.onchange=selectAsset;chooseGroup();
+      const draftLibrary=()=>window.StudioDrafts?.form(form,[project.id,'library',form.elements.group.value,form.elements.existing.value],['name','notes','traits'],context.sourceHash);
+      form.elements.group.onchange=()=>{chooseGroup();draftLibrary();};form.elements.existing.onchange=()=>{selectAsset();draftLibrary();};chooseGroup();draftLibrary();
       form.onsubmit=async event=>{
         event.preventDefault();const button=form.querySelector('button');button.disabled=true;
         try {
@@ -131,6 +134,7 @@
           if(file)imageData=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});
           const identityTraits=Object.fromEntries(form.elements.traits.value.split('\n').filter(s=>s.trim()).map(line=>{const at=line.indexOf('=');if(at<1)throw new Error('Use trait = value on each identity line.');return [line.slice(0,at).trim(),line.slice(at+1).trim()];}));
           await api('/api/project-library',{projectId:project.id,sourceHash:context.sourceHash,group:form.elements.group.value,name:form.elements.name.value,notes:form.elements.notes.value,imageData,approve:form.elements.approve.checked,...(form.elements.group.value==='characters'?{identityTraits}:{})});
+          for(const name of ['name','notes','traits'])window.StudioDrafts?.clear(form.elements[name]);
           document.getElementById('modal').classList.remove('show');
           if(CURRENT_PROJECT?.id===project.id)await renderProjectWorkspace();
         } catch(error){showError(root,error.message);button.disabled=false;}
@@ -145,8 +149,10 @@
       root.innerHTML=`<p>Keep character identity fixed while approving changes such as costume, wetness or damage. Each state has its own image and scope.</p><form class="sp-form"><label>State<select name="existing"><option value="">Add a character state</option>${context.characterStates.map(s=>`<option value="${esc(s.id)}">${esc(s.character)} · ${esc(s.name)} · ${esc(s.approvalStatus)}</option>`).join('')}</select></label><label>Character<select name="character">${Object.keys(context.assets.characters).map(c=>`<option>${esc(c)}</option>`).join('')}</select></label><label>State name<input name="name" placeholder="Soaked after the storm" required></label><label>What changes, and what stays consistent<textarea name="notes"></textarea></label><label>Episode scope<select name="episode"><option value="">All episodes</option>${context.episodes.map(e=>`<option value="${e.number}">${e.number} · ${esc(e.title)}</option>`).join('')}</select></label><label>Scene numbers (optional, comma separated)<input name="scenes" placeholder="2, 3"></label><img id="sp-state-image" class="sp-media" hidden alt="Character state reference"><label>Reference image<input name="image" type="file" accept="image/png,image/jpeg,image/webp"></label><label><input name="approve" type="checkbox" style="width:auto"> I approve this state for its selected scenes</label><button class="btn" type="submit">Save character state</button><p data-error role="alert"></p></form>`;
       const form=root.querySelector('form'),preview=root.querySelector('#sp-state-image');let imageData;
       form.elements.existing.onchange=()=>{const s=context.characterStates.find(s=>s.id===form.elements.existing.value);form.elements.character.value=s?.character||Object.keys(context.assets.characters)[0]||'';form.elements.name.value=s?.name||'';form.elements.notes.value=s?.notes||'';form.elements.episode.value=s?.episode||'';form.elements.scenes.value=s?.scenes.join(', ')||'';form.elements.approve.checked=false;form.elements.image.value='';imageData=undefined;preview.hidden=!s?.image;if(s?.image)preview.src=BASE+'/'+s.image;};
+      const draftState=()=>window.StudioDrafts?.form(form,[project.id,'state',form.elements.existing.value],['character','name','notes','episode','scenes'],context.sourceHash);
+      const chooseState=form.elements.existing.onchange;form.elements.existing.onchange=()=>{chooseState();draftState();};draftState();
       form.elements.image.onchange=async()=>{const file=form.elements.image.files[0];if(!file)return;imageData=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});preview.src=imageData;preview.hidden=false;};
-      form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('button');button.disabled=true;try{await api('/api/project-library',{projectId:project.id,sourceHash:context.sourceHash,group:'states',id:form.elements.existing.value||undefined,character:form.elements.character.value,name:form.elements.name.value,notes:form.elements.notes.value,episode:form.elements.episode.value,scenes:form.elements.scenes.value.split(',').map(s=>s.trim()).filter(Boolean).map(Number),imageData,approve:form.elements.approve.checked});document.getElementById('modal').classList.remove('show');if(CURRENT_PROJECT?.id===project.id)await renderProjectWorkspace();}catch(error){showError(root,error.message);button.disabled=false;}};
+      form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('button');button.disabled=true;try{await api('/api/project-library',{projectId:project.id,sourceHash:context.sourceHash,group:'states',id:form.elements.existing.value||undefined,character:form.elements.character.value,name:form.elements.name.value,notes:form.elements.notes.value,episode:form.elements.episode.value,scenes:form.elements.scenes.value.split(',').map(s=>s.trim()).filter(Boolean).map(Number),imageData,approve:form.elements.approve.checked});for(const name of ['character','name','notes','episode','scenes'])window.StudioDrafts?.clear(form.elements[name]);document.getElementById('modal').classList.remove('show');if(CURRENT_PROJECT?.id===project.id)await renderProjectWorkspace();}catch(error){showError(root,error.message);button.disabled=false;}};
     } catch(error){showError(root,error.message);}
   }
   async function mount(project, episodes) {
@@ -165,15 +171,17 @@
     root.querySelector('#sp-budget-form').onsubmit = event=>{event.preventDefault();send(ctx,'budget',{amountUsd:root.querySelector('#sp-budget-amount').value});};
     root.querySelector('#sp-chat').onsubmit = async event => {
       event.preventDefault();const input=root.querySelector('#sp-direction'), message=input.value;
-      if(await send(ctx,'chat',{message,stage:root.querySelector('#sp-direction-stage').value})&&input.value===message)input.value='';
+      const clearDraft=window.StudioDrafts?.capture(input);
+      if(await send(ctx,'chat',{message,stage:root.querySelector('#sp-direction-stage').value}))clearDraft?.();
     };
-    root.querySelector('#sp-direction-stage').onchange=()=>{ctx.directionManual=true;};
+    root.querySelector('#sp-direction-stage').onchange=()=>{ctx.directionManual=true;window.StudioDrafts?.save(root.querySelector('#sp-direction'));};
     root.querySelector('#sp-source-update').onclick=event=>{if(event.target.closest('[data-refresh-sources]'))send(ctx,'refresh_sources',{sourceHash:ctx.snapshot.sourceHash});};
     root.querySelector('#sp-shot-list').onclick = event=>{const button=event.target.closest('[data-shot]');if(button){ctx.shotId=button.dataset.shot;ctx.signature='';draw(ctx);}};
     root.querySelector('#sp-outcome').onclick = event=>{
       const button=event.target.closest('[data-command]');if(!button)return;
       const note=root.querySelector('#sp-review-note')?.value||'';
-      send(ctx,button.dataset.command,{note});
+      const clearDraft=window.StudioDrafts?.capture(root.querySelector('#sp-review-note'));
+      send(ctx,button.dataset.command,{note}).then(ok=>{if(ok&&['approve','reject'].includes(button.dataset.command))clearDraft?.();});
     };
     root.querySelector('#sp-jobs').onclick=event=>{const button=event.target.closest('button');if(button?.dataset.resume)send(ctx,'resume',{jobId:button.dataset.resume});if(button?.dataset.reconcile)send(ctx,'reconcile',{jobId:button.dataset.reconcile,providerChecked:true,taskId:root.querySelector('#sp-recovery-task')?.value||undefined});};
     window.StudioReview?.mount(ctx,send,draw);
@@ -196,7 +204,8 @@
     const shot=ctx.snapshot.state.shots.find(s=>s.id===ctx.shotId);
     const target=shot?.outcomes?.[stage(shot)];
     const episodeAtSend=ctx.episode, nextShot=shot&&stage(shot)==='watch'&&(action==='approve'||action==='chat'&&/^approve(?: watch)?[.!]?$/i.test(extra.message?.trim()||''))?ctx.snapshot.state.shots[ctx.snapshot.state.shots.indexOf(shot)+1]:null;
-    const reviewId = action==='continue'&&shot&&stage(shot)==='watch'||action==='watch'||(action==='chat'&&/^(fire|render)$/i.test(extra.message?.trim()||'')) ? shot?.outcomes?.request?.id : target?.id;
+    const mediaReview=action==='media_review'||action==='chat'&&/^review (footage|render)[.!]?$/i.test(extra.message?.trim()||'');
+    const reviewId = mediaReview?shot?.outcomes?.watch?.id:action==='continue'&&shot&&stage(shot)==='watch'||action==='watch'||(action==='chat'&&/^(fire|render)$/i.test(extra.message?.trim()||'')) ? shot?.outcomes?.request?.id : target?.id;
     ctx.busy=true;ctx.root.querySelector('#sp-error').textContent='';setBusy(ctx,true);
     if(action==='approve'||(action==='chat'&&/^approve(?: (?:see|hear|watch|request))?[.!]?$/i.test(extra.message?.trim()||'')))ctx.directionManual=false;
     try {
@@ -221,12 +230,21 @@
     root.querySelector('#sp-budget-form button').textContent=budget.allowance?'Update allowance':'Approve allowance & prepare';
     root.querySelector('#sp-budget-status').textContent=`Allowance ${usd(budget.allowance)} · committed estimates ${usd(budget.committed)} · in progress ${usd(budget.reserved)} · remaining ${usd(budget.allowance-budget.committed-budget.reserved)}`;
     const last=jobs[0]?.status!=='completed'?jobs[0]:null;
-    root.querySelector('#sp-jobs').innerHTML=last?`<div class="sp-box"><b>${esc(last.kind.toUpperCase())} · ${esc(last.status)}</b><p>${esc(last.message||'Working on your outcome…')}</p>${last.taskId?`<small>Provider task ${esc(last.taskId)}</small>`:''}${['pending','interrupted'].includes(last.status)?`<button class="btn ghost" data-resume="${esc(last.id)}">Resume job</button>`:''}${last.status==='unknown'?`<details><summary>Recover an uncertain request</summary><p>Check your provider account first. If a render task exists, enter its ID to resume it. Otherwise close this request; its estimate stays counted.</p>${last.kind==='watch'?'<label>Provider task ID (optional)<input id="sp-recovery-task"></label>':''}<button class="btn ghost" data-reconcile="${esc(last.id)}">I checked the provider — reconcile this request</button></details>`:''}</div>`:'';
+    const jobRoot=root.querySelector('#sp-jobs'),jobSignature=JSON.stringify(last);
+    if(jobRoot.dataset.signature!==jobSignature){jobRoot.dataset.signature=jobSignature;jobRoot.innerHTML=last?`<div class="sp-box"><b>${esc(last.kind==='media_review'?'Media review':last.kind.toUpperCase())} · ${esc(last.status)}</b><p>${esc(last.message||'Working on your outcome…')}</p>${last.progress?`<p class="sp-job-progress">${['failed','unknown','interrupted'].includes(last.status)?'Last recorded step: ':''}${esc(last.progress.label)}${last.progress.total!=null?` · ${last.progress.completed} / ${last.progress.total} clips checked`:''}</p>`:''}${last.audioReview?`<details><summary>Saved audio review</summary><p>${esc(last.audioReview)}</p></details>`:''}${last.taskId?`<small>Provider task ${esc(last.taskId)}</small>`:''}${['pending','interrupted'].includes(last.status)?`<button class="btn ghost" data-resume="${esc(last.id)}">Resume job</button>`:''}${last.status==='unknown'?`<details><summary>Recover an uncertain request</summary><p>Check your provider account first. If a render task exists, enter its ID to resume it. Otherwise close this request; its estimate stays counted.</p>${last.kind==='watch'?'<label>Provider task ID (optional)<input id="sp-recovery-task"></label>':''}<button class="btn ghost" data-reconcile="${esc(last.id)}">I checked the provider — reconcile this request</button></details>`:''}</div>`:'';
+    }
     root.querySelector('#sp-shot-list').innerHTML=state.shots.map(s=>`<button class="btn ${s.id===ctx.shotId?'':'ghost'}" data-shot="${esc(s.id)}" aria-pressed="${s.id===ctx.shotId}">Scene ${s.scene} · ${esc(s.id)}<small>${esc(stage(s)==='done'?'Approved':stage(s).toUpperCase())}</small></button>`).join('');
     root.querySelector('#sp-scope').textContent=shot?`Scene ${shot.scene} · ${shot.id} · ${shot.title}`:'Episode preparation';
     const feed=root.querySelector('#sp-feed'),messages=state.messages.filter(m=>!m.shotId||m.shotId===ctx.shotId);
     const feedSignature=JSON.stringify(messages);
     if(feed.dataset.signature!==feedSignature){feed.innerHTML=messages.map(m=>`<div class="sp-message ${m.role==='user'?'sp-user':''}"><b>${m.role==='user'?'You':'Production agent'}</b><p>${esc(m.text)}</p></div>`).join('')||'<p>Ready when you are. Set your services and episode allowance to begin.</p>';feed.dataset.signature=feedSignature;feed.scrollTop=feed.scrollHeight;}
+    if(shot){
+      if(ctx.directionShot!==shot.id){ctx.directionManual=false;ctx.directionShot=shot.id;}
+      window.StudioDrafts?.bind(root.querySelector('#sp-direction'),[ctx.project.id,ctx.episode,shot.id,'direction'],{
+        reset:true,revision:JSON.stringify([shot.sourceSignature,shot.camera,shot.performance,shot.dialogue,Object.values(shot.outcomes||{}).map(o=>[o.id,o.status])]),meta:()=>({stage:root.querySelector('#sp-direction-stage').value,manual:ctx.directionManual}),
+        restore:meta=>{if(meta.manual&&['see','hear','watch'].includes(meta.stage)){ctx.directionManual=true;root.querySelector('#sp-direction-stage').value=meta.stage;}}});
+      if(!ctx.directionManual)root.querySelector('#sp-direction-stage').value=stage(shot)==='hear'?'hear':['request','watch','done'].includes(stage(shot))?'watch':'see';
+    }
     const signature=JSON.stringify(shot||state.shots);
     window.StudioReview?.paint(ctx);
     if(ctx.signature===signature){setBusy(ctx,ctx.busy);return;}
@@ -252,6 +270,7 @@
       ${s!=='done'?'<label>Review note (optional)<textarea id="sp-review-note" placeholder="What should improve?"></textarea></label>':''}
       <details class="sp-box"><summary>Direction, source and shot history</summary><p><b>Acting:</b> ${esc(shot.performance)}</p><p><b>Camera:</b> ${esc(shot.camera)}</p><p><b>Geography:</b> ${esc(shot.geography)}</p><p><b>Handoff:</b> ${esc(shot.transition)}</p><p><b>Opening state:</b> ${esc(shot.openingState||shot.geography)}</p><p><b>Ending state:</b> ${esc(shot.endingState||'See the recorded handoff direction.')}</p>${shot.beatPlan?.length?`<h4>Performance beats</h4><ol>${shot.beatPlan.map(b=>`<li>${b.at}s · ${esc(b.action)} — ${esc(b.audienceFeeling)}</li>`).join('')}</ol>`:''}<h4>SEE prompt</h4><pre>${esc(shot.seePrompt)}</pre><h4>WATCH prompt</h4><pre>${esc(shot.watchPrompt)}</pre><h4>Exact dialogue</h4><pre>${esc(shot.dialogue.map(d=>d.speaker+': '+d.text).join('\n'))}</pre><p>${shot.versions?.length||0} previous outcome versions retained.</p>${(shot.versions||[]).map(v=>`<details><summary>${esc(v.stage.toUpperCase())} · ${esc(v.status)}</summary>${media(v,v.stage)}</details>`).join('')}</details>`;
     setBusy(ctx,ctx.busy);
+    window.StudioDrafts?.bind(root.querySelector('#sp-review-note'),[ctx.project.id,ctx.episode,shot.id,candidate?.id||s,'review-note'],{revision:candidate?.id||s,reset:true});
     if(!shot.importedArchive)outcome.querySelector('.sp-actions').insertAdjacentHTML('afterend',`<p class="sp-next-cost">${esc(nextCost)}</p>`);
     root.querySelector('#sp-chat').hidden=!!shot.importedArchive;
     if(shot.importedArchive){outcome.querySelector('.sp-step-labels').innerHTML='<span>Preserved production archive</span>';outcome.querySelector('.sp-actions').innerHTML=`<p>Its original approval evidence and files remain available.</p><a class="btn ghost" href="${esc(BASE+'/'+shot.legacy.package.path)}" download>Original production record</a>`;for(const box of outcome.querySelectorAll('details'))if(box.querySelector('video'))box.open=true;}

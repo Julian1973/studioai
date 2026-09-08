@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Animation Studio</title>
 <link rel="stylesheet" href="/cb-studio/project-production.css">
+<script src="/cb-studio/project-drafts.js"></script>
 <script src="/cb-studio/project-production.js"></script>
 <script src="/cb-studio/project-review.js"></script>
 <style>
@@ -1450,7 +1451,7 @@ async function renderProjectWorkspace(){
     await StudioProduction.mount(project,episodes);
   }catch(e){if(CURRENT_PROJECT?.id===project.id)document.getElementById('view').innerHTML=outcomePanelHTML({title:'Project library could not load',body:e.message,actions:[{label:'Retry',onclick:'renderProjectWorkspace()'}]});}
 }
-async function saveProjectPart(){const projectId=CURRENT_PROJECT.id,title=document.getElementById('projectPartTitle').value,script=document.getElementById('projectPartScript').value;const r=await fetch(BASE+'/api/project-episode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({projectId,title,script})}),data=await r.json();if(!r.ok){alert(data.error);return;}if(CURRENT_PROJECT?.id===projectId)renderProjectWorkspace();}
+async function saveProjectPart(){const projectId=CURRENT_PROJECT.id,title=document.getElementById('projectPartTitle').value,script=document.getElementById('projectPartScript').value;const r=await fetch(BASE+'/api/project-episode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({projectId,title,script})}),data=await r.json();if(!r.ok){alert(data.error);return;}if(CURRENT_PROJECT?.id===projectId){StudioDrafts.clear(document.getElementById('projectPartTitle'),title);StudioDrafts.clear(document.getElementById('projectPartScript'),script);renderProjectWorkspace();}}
 function productionPageTitle(){
   return {episodes:"Episodes",characters:"Characters",scenes:"Scenes",houses:"Locations",assets:"Props & references",bible:"Show Bible",sceneboard:"Episode production",pipeline:"Scene production",script:"Script"}[page]||"Production";
 }

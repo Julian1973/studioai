@@ -47,11 +47,75 @@ In **Edit project library**, add named identity traits such as `species = bear` 
 before media generation. This is a structured consistency check; it does not detect
 every contradiction in arbitrary prose or prove visual likeness.
 
+**Suggested camera and scene references** lists verified approved openings from earlier
+shots in the same episode, scene and location. Matching camera setup names (or exactly
+matching camera direction for older records without a setup name) suggest a reusable
+view; the first approved opening offers a geography anchor. Each suggestion explains
+what it controls. A reverse uses its own setup name. Preview the selection, then apply
+it through the normal direction-change preview. The selected candidate ID and file hash
+are carried into SEE inputs and retained in the outcome's actual reference strip.
+Changed, missing, unapproved, future-shot and cross-project sources cannot be selected.
+Character-state matches are never substituted from a nearby scene.
+If an earlier reference gets a newer version after this shot's SEE approval, the
+inspector warns and preserves the approved downstream outcomes. A new SEE must select
+a currently valid reference; an already approved movie does not become an assembly gap.
+
 Use **Character states** to upload and review a variant. Bind it to a character and,
 when appropriate, an episode and scene numbers. Only approved states matching that
 scope can enter a shot. Revisions retain prior files and versions. Adding an unrelated
 state does not reset existing shots. Changing a used reference requires the existing
 source-update flow for affected unfinished work.
+
+## Drafts and job progress
+
+Unsent direction and candidate review notes are recovered on this browser, scoped by
+project, episode and shot/candidate. New-episode title/script drafts, library/state text
+and timeline notes also recover. Each tab retains its draft copy. Restoring a draft
+does not submit it or grant approval; successful submission clears the submitted text
+while preserving text typed during the request. Different-version drafts are labelled
+for review. Files must be selected again and approval checkboxes are never restored.
+API-key-looking text is excluded. A storage failure is shown beside the field. These
+are local browser drafts, not cloud backup or cross-device sync.
+
+Jobs show persisted, observed processing steps: provider-reported queue/running state,
+download/verification, voice conforming, ending-frame extraction and assembly phases.
+Assembly shows the number of clips actually prepared and checked. There is no timer
+driving a percentage or invented provider completion estimate. Restart recovery uses
+the same recorded task and original connection revision.
+
+## Optional actual-media review
+
+In **Project services**, connect **Review** to your own OpenAI connection. Set a vision
+model supporting Responses structured output and an audio-input Chat Completions model.
+Enter a combined per-review estimate covering both calls. No model or account is selected
+implicitly. The optional shot button **Review footage & audio** (or chat command
+`review footage`) reserves that estimate from the existing episode allowance.
+
+The reviewer receives up to twelve timestamped frames from the current WATCH file, up
+to two preceding approved frames for the incoming cut, the approved SEE opening, up to
+five approved library references, and extracted WATCH/approved HEAR soundtracks. Files
+are checked against their saved hashes. The audio adapter receives actual WAV data;
+its returned listening report is supplied to the separate visual reviewer. A silent
+file remains explicitly identified; a missing stream is not claimed as listened to.
+The report exposes its sampled-frame images, audio sources, models, observations,
+confidence and limitations. Reference omissions are recorded in its evidence.
+
+Reports bind the exact render, relevant direction, references and incoming shot. Old
+reports remain visible but are labelled out of date when these change. A source changed
+during analysis makes that report historical. **Add to my direction** adds a finding to
+your unsent chat draft; it never changes a prompt, creates a retake or approves WATCH.
+A completed report for the same inputs is reused rather than charged again. Lost
+provider responses are not automatically resubmitted. Failed optional reviews retain
+their submitted estimate as committed spending and let production continue. Returned
+audio reports survive a later visual failure. Resume attaches a fully received report
+after a restart without another model call; an interrupted incomplete review closes
+without resubmitting. Check the provider before explicitly requesting another review.
+
+This is sampled visual analysis plus listening, not continuous video understanding or
+proof of exact lip sync, emotional impact or broadcast compliance. Review account access
+and artistic usefulness still require a real production trial. API input contracts:
+[OpenAI audio guide](https://developers.openai.com/api/docs/guides/audio) and
+[structured output guide](https://developers.openai.com/api/docs/guides/structured-outputs).
 
 ## Review an episode
 
@@ -102,7 +166,8 @@ unsupported layouts receive a specific report before any copy is made.
 
 Run the full Python suite with `PYTHONPATH=engine:cb-studio python3 -m pytest -q`.
 Focused workflow checks are in `engine/test_studio_review.py`,
-`engine/test_studio_production.py` and `cb-studio/test_project_agent_api.py`.
+`engine/test_studio_production.py`, `engine/test_studio_improvements.py` and
+`cb-studio/test_project_agent_api.py`.
 
 Run `node cb-studio/project_review_browser.mjs` with Playwright available on NODE_PATH.
 It starts a temporary project/server and drives the actual UI, HTTP handlers and SQLite

@@ -28,6 +28,22 @@
       send(ctx,b.dataset.edit,{proposalId:shot?.proposal?.id,prepare:b.dataset.edit==='apply_revision'});
     };
     ctx.root.querySelector('#sp-continuity').onclick = e => {
+      const reference=e.target.closest('[data-reference-choice]');
+      if(reference){
+        const shot=ctx.snapshot.state.shots.find(s=>s.id===ctx.shotId), choices=ctx.snapshot.review.inspections[shot.id].suggestions;
+        const choice=reference.dataset.referenceChoice;
+        send(ctx,'choose_reference',{reference:choice==='clear'?null:choices[Number(choice)]?.choice,cameraSetupId:ctx.root.querySelector('#sp-camera-setup').value});return;
+      }
+      if(e.target.closest('[data-media-review]')){send(ctx,'media_review');return;}
+      const finding=e.target.closest('[data-review-finding]');
+      if(finding){
+        const report=ctx.snapshot.review.inspections[ctx.shotId].mediaReviews.find(r=>r.id===finding.dataset.report&&r.current);
+        if(!report)return;
+        const item=report.findings[Number(finding.dataset.reviewFinding)],input=ctx.root.querySelector('#sp-direction');
+        const proposal=`At ${item.seconds}s: ${item.observation}\nDirection to consider: ${item.suggestion}`;
+        input.value=input.value.trim()?input.value+'\n\n'+proposal:proposal;
+        window.StudioDrafts?.save(input);input.focus();return;
+      }
       const b=e.target.closest('[data-bind-states]');if(!b)return;
       const bindings=[...ctx.root.querySelectorAll('[data-character-state]')].filter(el=>el.value).map(el=>({character:el.dataset.characterState,stateId:el.value}));
       send(ctx,'bind_states',{characterStates:bindings});
@@ -70,7 +86,7 @@
       node.innerHTML=proposal?`<section class="sp-proposal sp-box"><span class="lab">Proposed direction · ${esc(shot.id)}</span><h3>Review what will change</h3><p>${esc(proposal.message)}</p><p>Replaces: ${esc(proposal.impact.reset.map(s=>s.toUpperCase()).join(', ')||'No outcomes')}. Preserves: ${esc(proposal.impact.preserved.map(s=>s.toUpperCase()).join(', ')||'Existing version history')}.</p>${proposal.impact.diff.map(d=>`<details><summary>${esc(d.field)}</summary><div class="sp-diff"><div><small>Current</small><pre>${esc(typeof d.before==='string'?d.before:JSON.stringify(d.before,null,2))}</pre></div><div><small>Proposed</small><pre>${esc(typeof d.after==='string'?d.after:JSON.stringify(d.after,null,2))}</pre></div></div></details>`).join('')}<p>Other shots retain their approved files. Neighbouring joins will be flagged for review.</p><div class="sp-actions"><button class="btn" data-edit="apply_revision">Apply & prepare</button><button class="btn ghost" data-edit="discard_revision">Keep current version</button></div></section>`:shot.editHistory?.length?'<button class="btn ghost" data-edit="undo_revision">Undo last direction edit</button>':'';
     }
     const inspection=ctx.snapshot.review.inspections[shot.id];
-    const inspector=root.querySelector('#sp-continuity'), signature=JSON.stringify([shot.id,inspection,ctx.snapshot.characterStates,shot.characterStates]);
+    const inspector=root.querySelector('#sp-continuity'), signature=JSON.stringify([shot.id,inspection,ctx.snapshot.characterStates,shot.characterStates,ctx.snapshot.services.review,shot.outcomes?.watch?.id,shot.outcomes?.watch?.status,shot.cameraSetupId,shot.compositionReference]);
     if(inspector.dataset.signature===signature)return;
     inspector.dataset.signature=signature;
     const rawRefs=inspection.actualReferences.length?inspection.actualReferences:inspection.references, unique=new Map();
@@ -83,6 +99,17 @@
       return `<label>${esc(character)}<select data-character-state="${esc(character)}"><option value="">Base character identity</option>${states.map(v=>`<option value="${esc(v.id)}" ${v.id===selected?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label>`;
     }).join('')}<button class="btn ghost" data-bind-states>Preview state change</button><button class="btn ghost" onclick="StudioProduction.library()">Manage project states</button></details><small>${esc(inspection.claim)}</small></div>`;
     if(shot.importedArchive)inspector.querySelector('details').hidden=true;
+    if(!shot.importedArchive){
+      const selected=shot.compositionReference;
+      inspector.insertAdjacentHTML('beforeend',`<details class="sp-box" id="sp-reference-suggestions"><summary>Suggested camera and scene references</summary><p>Suggestions use approved openings from this scene and location. Character states remain explicit; no nearest-scene replacement is made.</p><label>Camera setup name<input id="sp-camera-setup" maxlength="100" value="${esc(shot.cameraSetupId||'')}" placeholder="For example: doorway reverse A"></label><p>${selected?`Selected ${esc(selected.shotId)} · ${esc(selected.role)}`:'No additional composition reference selected.'}</p><div class="sp-references">${inspection.suggestions.map((r,i)=>`<figure><img loading="lazy" src="${esc(url(r))}" alt="${esc(r.name)}"><figcaption><strong>${esc(r.name)}</strong><p>${esc(r.reason)}</p><small>Approved version ${esc(r.choice.candidateId.slice(0,12))}</small><button class="btn ghost" data-reference-choice="${i}">Preview this reference</button></figcaption></figure>`).join('')||'<p>No approved camera or scene match yet. Review an opening in this scene first; the project identity and location references remain visible above.</p>'}</div><button class="btn ghost" data-reference-choice="clear">${selected?'Preview removing extra reference':'Preview camera setup name'}</button></details>`);
+      paintMediaReview(ctx,shot,inspection,inspector);
+    }
+  }
+  function paintMediaReview(ctx,shot,inspection,root){
+    const watch=shot.outcomes?.watch;
+    if(!watch||!['candidate','approved'].includes(watch.status))return;
+    const setting=ctx.snapshot.services.review,reports=inspection.mediaReviews||[],current=reports.find(r=>r.current);
+    root.insertAdjacentHTML('beforeend',`<section class="sp-box sp-media-review"><h3>Review the actual footage</h3><p>Optional advice from sampled render frames, the incoming cut and actual audio. It uses this project’s review account and episode allowance. You still decide whether to approve WATCH.</p>${current?'':setting?`<p>Visual model: ${esc(setting.model)} · audio model: ${esc(setting.audioModel)}</p><button class="btn ghost" data-media-review>Review footage & audio · ${cost(setting.estimateUsd)}</button>`:'<button class="btn ghost" data-services onclick="StudioProduction.services()">Connect optional media review</button>'}${reports.slice().reverse().map(r=>`<details ${r.current?'open':''}><summary>${r.current?'Current render review':'Earlier version — report is out of date'}</summary><p>${esc(r.summary)}</p><small>Visual model: ${esc(r.binding.model)} · Audio model: ${esc(r.binding.audioModel)}</small><p>${esc(r.meaning)}</p>${r.findings.map((f,i)=>`<article class="sp-review-finding"><b>${f.seconds.toFixed(2)}s · ${esc(f.category)} · ${esc(f.confidence)} confidence</b><p>${esc(f.observation)}</p><p>${esc(f.suggestion)}</p>${r.current?`<button class="btn ghost" data-review-finding="${i}" data-report="${esc(r.id)}">Add to my direction</button>`:''}</article>`).join('')||'<p>No specific issue was reported in the sampled evidence. Watch the full render before deciding.</p>'}<details><summary>Audio report</summary><p>${esc(r.audioReview)}</p></details><details><summary>Evidence examined</summary><p>${esc(r.evidence.scope)}</p><ul>${r.evidence.references.map(ref=>`<li><a href="${esc(url(ref))}">${esc(ref.label)}</a> · version ${esc((ref.candidateId||ref.version||ref.hash).slice(0,12))}</li>`).join('')}</ul>${r.evidence.omittedApprovedReferences?.length?`<p>Outside this sample: ${esc(r.evidence.omittedApprovedReferences.join(', '))}</p>`:''}<p>${r.evidence.audio.length} audio source(s); WATCH ${r.evidence.watchHasAudio?'contains an audio stream':'has no audio stream'}.</p><div class="sp-references">${r.evidence.frames.map(f=>`<figure><a href="${esc(url(f))}" target="_blank" rel="noopener"><img loading="lazy" src="${esc(url(f))}" alt="${esc(f.label)}"></a><figcaption>${esc(f.label)}</figcaption></figure>`).join('')}</div><ul>${r.evidence.audio.map(a=>`<li><a href="${esc(url(a))}">${esc(a.label)}</a> · ${a.duration.toFixed(2)}s</li>`).join('')}</ul></details><ul>${r.limitations.map(l=>`<li>${esc(l)}</li>`).join('')}</ul></details>`).join('')}</section>`);
   }
   function paintTimeline(ctx){
     const root=ctx.root.querySelector('#sp-timeline'),timeline=ctx.snapshot.review.timeline;
@@ -106,6 +133,7 @@
       };
     }
     root.querySelector('#sp-scrub').max=timeline.duration;
+    window.StudioDrafts?.bind(root.querySelector('#sp-moment-note'),[ctx.project.id,ctx.episode,'timeline',timeline.fingerprint],{reset:true,revision:timeline.fingerprint});
     const playbackSignature=JSON.stringify([timeline.clips,timeline.preview?.files]);
     if(ctx.timelineSignature!==playbackSignature){
       ctx.timelineSignature=playbackSignature;
@@ -146,8 +174,8 @@
     const send=(command,extra={})=>ctx.reviewSend(ctx,command,{shotId:clip.shotId,timelineFingerprint:fingerprint,...extra});
     if(action==='previous'||action==='next')playClip(ctx,ctx.clipIndex+(action==='next'?1:-1));
     if(action==='play')playClip(ctx,ctx.clipIndex||0,true);
-    if(action==='direct'){select(ctx,clip.shotId);const input=ctx.root.querySelector('#sp-direction');const note=root.querySelector('#sp-moment-note').value;if(note)input.value=`At ${clock(ctx.playhead)} in the episode: ${note}`;input.focus();}
-    if(action==='note')send('timeline_note',{note:root.querySelector('#sp-moment-note').value,seconds:ctx.playhead}).then(ok=>{if(ok)root.querySelector('#sp-moment-note').value='';});
+    if(action==='direct'){select(ctx,clip.shotId);const input=ctx.root.querySelector('#sp-direction');const note=root.querySelector('#sp-moment-note').value;if(note)input.value+=(input.value?'\n\n':'')+`At ${clock(ctx.playhead)} in the episode: ${note}`;window.StudioDrafts?.save(input);input.focus();}
+    if(action==='note'){const input=root.querySelector('#sp-moment-note'),clearDraft=window.StudioDrafts?.capture(input);send('timeline_note',{note:input.value,seconds:ctx.playhead}).then(ok=>{if(ok)clearDraft?.();});}
     if(action==='join')send('review_join');
     if(action==='trim')send('trim_clip',{in:Number(root.querySelector('#sp-trim-in').value),out:Number(root.querySelector('#sp-trim-out').value)});
     if(action==='reset')send('reset_trim');
@@ -157,7 +185,7 @@
   }
   function busy(ctx,value){
     const working=ctx.snapshot?.jobs?.some(j=>['queued','running','pending','unknown','interrupted'].includes(j.status));
-    for(const button of ctx.root.querySelectorAll('[data-edit],[data-bind-states],[data-resolve-note]'))button.disabled=value||working||ctx.snapshot?.sourceChanged;
+    for(const button of ctx.root.querySelectorAll('[data-edit],[data-bind-states],[data-resolve-note],[data-reference-choice],[data-media-review]'))button.disabled=value||working||ctx.snapshot?.sourceChanged;
     for(const button of ctx.root.querySelectorAll('[data-timeline]')){
       const action=button.dataset.timeline;
       if(['play','previous','next','direct'].includes(action))continue;

@@ -49,11 +49,25 @@ class FakeTransport(ProviderTransport):
         self.calls.append(("video",key,prompt))
         if self.error: raise self.error
         return 'provider-task-1'
-    def video_poll(self, connection, key, task_id, output):
+    def video_poll(self, connection, key, task_id, output, *, progress=None):
         self.calls.append(("poll",key,task_id))
+        if progress: progress('provider', 'Provider reports the render is running' if self.pending else 'Provider reports completion; downloading and verifying the render')
         if self.pending: return False
         subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','color=c=blue:s=32x18:r=5','-t','2','-c:v','libx264','-pix_fmt','yuv420p','-y',str(output)],check=True,capture_output=True)
         return True
+
+    def review_audio(self, connection, key, model, context, audio):
+        self.calls.append(('review_audio', key, {'context':context, 'audio':audio}))
+        if self.error: raise self.error
+        return 'Test audio evidence: the attached soundtrack contains silence. Listen before deciding.'
+
+    def review_frames(self, connection, key, model, context, images):
+        self.calls.append(('review_frames', key, {'context':context, 'images':images}))
+        if self.error: raise self.error
+        return {'summary':'Test review of supplied render frames.', 'findings':[{
+            'seconds':.5, 'category':'composition', 'observation':'The supplied test frames are blue.',
+            'suggestion':'Review the opening composition.', 'confidence':'high'}],
+            'limitations':['Synthetic provider response for workflow testing.']}
 
 
 @pytest.fixture

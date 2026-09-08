@@ -19,12 +19,12 @@ from contextlib import contextmanager
 
 
 PROVIDERS = {
-    "openai": {"label": "OpenAI", "base": "https://api.openai.com/v1", "check": "/models", "roles": ["direction"]},
+    "openai": {"label": "OpenAI", "base": "https://api.openai.com/v1", "check": "/models", "roles": ["direction", "review"]},
     "byteplus": {"label": "BytePlus ModelArk · Asia Pacific", "base": "https://ark.ap-southeast.bytepluses.com/api/v3", "check": "/contents/generations/tasks?page_size=1", "roles": ["keyframes", "animation"]},
     "byteplus-eu": {"label": "BytePlus ModelArk · Europe", "base": "https://ark.eu-west.bytepluses.com/api/v3", "check": "/contents/generations/tasks?page_size=1", "roles": ["keyframes", "animation"]},
     "elevenlabs": {"label": "ElevenLabs", "base": "https://api.elevenlabs.io", "check": "/v2/voices?page_size=1", "roles": ["voices"]},
 }
-ROLES = ("direction", "keyframes", "voices", "animation")
+ROLES = ("direction", "keyframes", "voices", "animation", "review")
 
 
 class StudioError(ValueError):
@@ -339,7 +339,7 @@ class Workspace:
         connections = {c["id"]: c for c in self.connections()}
         for role, value in values.items():
             if role not in ROLES or not isinstance(value, dict):
-                raise StudioError("Choose direction, keyframes, voices or animation.")
+                raise StudioError("Choose direction, keyframes, voices, animation or review.")
             if not value.get("connectionId"):
                 continue
             connection = connections.get(value["connectionId"])
@@ -358,6 +358,11 @@ class Workspace:
             if role == "voices" and model != "eleven_v3":
                 raise StudioError("The voice adapter currently supports ElevenLabs v3.")
             clean[role] = {"connectionId": connection["id"], "model": model, "estimateUsd": float(cost)}
+            if role == 'review':
+                audio_model = str(value.get('audioModel') or '').strip()
+                if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.:/-]{0,149}', audio_model):
+                    raise StudioError('Enter an audio-input Chat Completions model ID for media review.')
+                clean[role]['audioModel'] = audio_model
             if role == "voices":
                 casting = value.get("casting") or {}
                 if not isinstance(casting, dict) or any(not re.fullmatch(r"[A-Za-z0-9]{12,64}", str(v)) for v in casting.values()):

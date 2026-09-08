@@ -6,6 +6,7 @@ from studio_workspace import StudioError
 
 
 def execute(production, job):
+    production.progress(job, 'sources', 'Checking approved source clips')
     pid, timeline = job['projectId'], job['timeline']
     folder = production.ws.project_path(pid, f"projects/{pid}/exports/{job['id']}")
     folder.mkdir(parents=True, exist_ok=True)
@@ -23,6 +24,7 @@ def execute(production, job):
     width, height = int(video['width'])//2*2, int(video['height'])//2*2
     segments=[]
     for index,(clip,path) in enumerate(zip(clips,paths)):
+        production.progress(job, 'normalise', f'Preparing clip {index + 1} of {len(clips)}', completed=index, total=len(clips))
         streams=json.loads(run(['ffprobe','-v','error','-show_streams','-of','json',str(path)]).stdout)['streams']
         audio=any(s['codec_type']=='audio' for s in streams)
         output=folder/f'segment-{index:04}.mkv'
@@ -32,10 +34,13 @@ def execute(production, job):
                '-vf',f'scale={width}:{height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=24',
                '-c:v','libx264','-preset','fast','-crf','18','-pix_fmt','yuv420p','-af','apad','-ar','48000','-ac','2','-c:a','pcm_s16le','-y',str(output)]
         run(args);production.transport.verify_media(output,'video');segments.append(output)
+        production.progress(job, 'normalise', f'{index + 1} clips prepared and checked', completed=index + 1, total=len(clips))
     listing=folder/'segments.txt'
     listing.write_text('\n'.join("file '"+path.name+"'" for path in segments)+'\n')
     target=folder/'episode-review.mp4'
+    production.progress(job, 'assemble', 'Joining prepared clips and encoding the soundtrack')
     run(['ffmpeg','-v','error','-f','concat','-safe','1','-i',str(listing),'-c:v','copy','-c:a','aac','-movflags','+faststart','-y',str(target)])
+    production.progress(job, 'verify', 'Checking the assembled movie and its running time')
     duration=production.transport.verify_media(target,'video')
     if abs(duration-timeline['duration'])>max(.2,len(clips)/24+.05):
         raise StudioError('The assembled duration differs from the approved cut. Review the timing before retrying.','assembly_timing')

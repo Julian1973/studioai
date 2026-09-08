@@ -93,7 +93,22 @@ def inspect(production, context, state, shot):
         outcome = shot.get("outcomes", {}).get(name, {})
         for ref in outcome.get("references", outcome.get("images", [])):
             actual.append({**ref, "usedFor": name, "candidateId": outcome.get("id")})
-    return {"issues": problems, "references": references, "actualReferences": actual,
+    from studio_references import suggestions, resolve
+    from studio_media_review import current_reports
+    choices = suggestions(production, context, state, shot) if not shot.get('importedArchive') else []
+    try:
+        selected = resolve(production, context, state, shot)
+        if selected:
+            references.append(selected)
+    except StudioError as exc:
+        # Once SEE was approved, its recorded image is the downstream authority.
+        # A newer source reference requires review before a new SEE, not destruction
+        # of the already reviewed picture/voice/render or an assembly dead end.
+        locked_opening = shot.get('outcomes', {}).get('see', {}).get('status') == 'approved'
+        problems.append(issue(exc.code, str(exc) + (' The approved opening and its downstream outcomes are retained.' if locked_opening else ''),
+                              'warning' if locked_opening else 'blocker'))
+    return {"issues": problems, "references": references, "actualReferences": actual, "suggestions": choices,
+            "mediaReviews": current_reports(production, context, state, shot) if shot.get('mediaReviews') else [],
             "claim": "Checks cover recorded identity traits, reference versions and handoffs. Visual likeness and performance require viewing."}
 
 

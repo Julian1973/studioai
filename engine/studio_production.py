@@ -70,6 +70,7 @@ class Production:
         db.execute("INSERT OR REPLACE INTO production VALUES(?,?,?,?)", (pid, ep, state["revision"], json.dumps(state)))
 
     def _job(self, db, job):
+        job.setdefault('progress', {'phase': 'queued', 'label': 'Waiting to start', 'updatedAt': time.time()})
         db.execute("INSERT OR REPLACE INTO jobs VALUES(?,?,?,?,?)", (job["id"], job["projectId"], job["episode"], job["status"], json.dumps(job)))
 
     def snapshot(self, pid, ep=None):
@@ -81,7 +82,7 @@ class Production:
             state = self._load(db, pid, str(ep)) if ep is not None else initial()
             jobs = [json.loads(r[0]) for r in db.execute("SELECT data FROM jobs WHERE project=? AND episode=? ORDER BY rowid DESC LIMIT 30", (pid, str(ep)))]
         # Job inputs contain source context, but no keys. Expose only useful status.
-        public_jobs = [{k: j.get(k) for k in ("id", "kind", "shotId", "status", "taskId", "message", "code", "binding", "createdAt")} for j in jobs]
+        public_jobs = [{k: j.get(k) for k in ("id", "kind", "shotId", "status", "taskId", "message", "code", "binding", "createdAt", "progress", "audioReview")} for j in jobs]
         for item, job in zip(public_jobs, jobs):
             if job["status"] in {"queued", "running"} and job.get("pid") != os.getpid():
                 item.update(status="interrupted", message="Studio restarted. Resume this job to recover its recorded progress.")
@@ -98,6 +99,17 @@ class Production:
         if not shot:
             raise StudioError("Select a shot in this episode.", "scope_mismatch")
         return shot
+
+    def progress(self, job, phase, label, *, completed=None, total=None):
+        """Persist observed work, never elapsed-time percentages. Does not edit approvals."""
+        value = {'phase': phase, 'label': label, 'updatedAt': time.time()}
+        if completed is not None and total is not None:
+            value.update(completed=completed, total=total)
+        job['progress'] = value
+        job.setdefault('progressEvents', []).append(value)
+        job['progressEvents'] = job['progressEvents'][-60:]
+        with self.ws.db() as db:
+            self._job(db, job)
 
     def source_signature(self, context, shot):
         assets = context["assets"]
@@ -217,7 +229,7 @@ class Production:
         return shots
 
     def _prompt(self, context, shot, stage, refs):
-        direction = {k: shot.get(k) for k in ("intent", "emotion", "performance", "camera", "geography", "transition", "openingState", "endingState", "beatPlan")}
+        direction = {k: shot.get(k) for k in ("intent", "emotion", "performance", "camera", "cameraSetupId", "geography", "transition", "openingState", "endingState", "beatPlan")}
         labels = "\n".join(f"@Image{i + 1}: {r['name']} — {r.get('role', 'reference')}; {r.get('description', '')}; identity traits: {json.dumps(r.get('traits', {}), ensure_ascii=False)}" for i, r in enumerate(refs))
         return (f"Project: {context['project']['name']}\nFrame aspect: {context['project'].get('aspectRatio', '16:9')}\nVisual style: {context['project'].get('style', '')}\n"
                 f"Project bible:\n{context['bible']}\nShot direction:\n{json.dumps(direction, ensure_ascii=False)}\n"
@@ -276,6 +288,7 @@ class Production:
                 normalized = message.lower().strip(" .!")
                 action = {"approve": "approve", "reject": "reject", "continue": "continue", "next": "continue",
                           "status": "status", "help": "status", "prepare": "prepare",
+                          "review footage": "media_review", "review render": "media_review",
                           "fire": "watch", "render": "watch", "resume": "resume"}.get(normalized, "chat")
                 match = re.fullmatch(r"approve (?:episode )?budget \$?([0-9]+(?:\.[0-9]{1,2})?)", normalized)
                 if match:
@@ -288,7 +301,11 @@ class Production:
             from studio_editing import COMMANDS, handle
             if shot and shot.get("importedArchive") and action not in {"status", "timeline_note", "resolve_note", "trim_clip", "reset_trim", "review_join", "review_cut", "export_cut", "assemble_cut"}:
                 raise StudioError("This is a preserved production archive. Create a new sequence to direct new work.", "archive_read_only")
-            if action == "assemble_cut":
+            if action == 'media_review':
+                from studio_media_review import reserve
+                launch = reserve(self, db, context, state, shot, payload)
+                self._message(state, 'agent', 'Reviewing the actual render samples and audio within the episode allowance. This produces advice, not approval.', shotId=shot_id)
+            elif action == "assemble_cut":
                 from studio_review import projection
                 view = projection(self, context, state, [])
                 if not view["summary"]["assemblyReady"] or payload.get("timelineFingerprint") != view["timeline"]["fingerprint"]:
@@ -388,7 +405,16 @@ class Production:
                 job = json.loads(row[0])
                 if job["status"] == "completed":
                     self._message(state, "agent", "This job is already complete. Review its outcome below.")
-                elif job.get("taskId") or job.get("imageUrl") or job.get("kind") == "assembly":
+                elif job['status'] == 'failed' and job['kind'] == 'media_review':
+                    raise StudioError('This media review is closed. Its saved evidence remains in job history; request a new review only when ready.', 'job_closed')
+                elif job['kind'] == 'media_review' and job['status'] == 'running' and job.get('pid') != os.getpid() and not job.get('reviewResult'):
+                    state['budget']['reserved'] -= job['estimate']
+                    if job.get('reviewSubmitted'):
+                        state['budget']['committed'] += job['estimate']
+                    job.update(status='failed', code='review_interrupted', message='Interrupted media review closed without another model request. Submitted work remains counted; you can continue reviewing this shot.')
+                    self._job(db, job)
+                    self._message(state, 'agent', job['message'], shotId=job['shotId'])
+                elif job.get("taskId") or job.get("imageUrl") or job.get("kind") == "assembly" or job.get('reviewResult'):
                     launch = job
                 elif job["status"] == "queued":
                     launch = job
@@ -574,6 +600,10 @@ class Production:
                "direction": message, "stage": payload.get("stage", "see"), "reviews": self.review_learning(db, pid, state),
                "messages": state["messages"][-12:], "standard": STANDARD_PATH.read_text(), "standardHash": file_hash(STANDARD_PATH), "status": "queued", "createdAt": time.time(), "pid": os.getpid()}
         if kind == "see":
+            from studio_references import resolve
+            composition = resolve(self, context, state, shot)
+            if composition:
+                job['references'].append(composition)
             index = next(i for i, s in enumerate(state["shots"]) if s["id"] == shot["id"])
             if index and state["shots"][index - 1]["scene"] == shot["scene"]:
                 previous = state["shots"][index - 1]
@@ -616,7 +646,9 @@ class Production:
                 job = json.loads(db.execute("SELECT data FROM jobs WHERE id=?", (job_id,)).fetchone()[0])
                 if job["status"] == "completed":
                     return
-                if job["status"] != "queued" and not (job.get("taskId") or job.get("imageUrl")) and job["kind"] != "assembly":
+                if job['status'] == 'failed' and job['kind'] == 'media_review':
+                    return
+                if job["status"] != "queued" and not (job.get("taskId") or job.get("imageUrl") or job.get('reviewResult')) and job["kind"] != "assembly":
                     raise StudioError("No provider task ID was confirmed. Check the provider account before resubmitting.", "submission_unknown")
                 job.update(status="running", pid=os.getpid())
                 self._job(db, job)
@@ -624,7 +656,21 @@ class Production:
                 from studio_assembly import execute
                 self.complete(job, execute(self, job))
                 return
+            if job['kind'] == 'media_review':
+                from studio_media_review import execute, manifest
+                if job.get('reviewResult'):
+                    self.complete(job, job['reviewResult'])
+                else:
+                    current = self.ws.context(job['projectId'], job['episode'])
+                    with self.ws.db() as db:
+                        state = self._load(db, job['projectId'], job['episode'])
+                    shot = self.selected(state, job['shotId'])
+                    if manifest(self, current, state, shot)['fingerprint'] != job['reviewInputs']['fingerprint']:
+                        raise StudioError('The review inputs changed before submission. Request a review of the current render.', 'stale')
+                    self.complete(job, execute(self, job))
+                return
             binding, pid = job["binding"], job["projectId"]
+            self.progress(job, 'checking', 'Checking the saved inputs and provider connection')
             connection, key = self.ws.credential(binding["connectionId"], binding["revision"])
             context, kind = job["context"], job["kind"]
             if not job.get("taskId") and not job.get("imageUrl"):
@@ -636,6 +682,7 @@ class Production:
             out_dir = self.ws.project_path(pid, f"projects/{pid}/media")
             out_dir.mkdir(exist_ok=True)
             if kind in {"plan", "chat", "revise"}:
+                self.progress(job, 'direction', 'Director is preparing a structured proposal')
                 data = {"project": context["project"], "bible": context["bible"], "assets": context["assets"],
                         "scriptLines": list(enumerate(context["script"].splitlines(), 1)),
                         "selectedShot": job["shot"], "direction": job["direction"], "stage": job["stage"],
@@ -673,18 +720,20 @@ class Production:
                 if job.get("previousState"):
                     prompt += "\nIncoming continuity state:\n" + json.dumps(job["previousState"])
                 if job.get("imageUrl"):
+                    self.progress(job, 'download', 'Recovering the saved keyframe download')
                     self.transport.download(job["imageUrl"], output)
                     self.transport.verify_media(output, "image")
                 else:
                     def received(url):
                         job["imageUrl"] = url
-                        with self.ws.db() as db:
-                            self._job(db, job)
+                        self.progress(job, 'download', 'Keyframe returned; downloading and checking the image')
+                    self.progress(job, 'keyframe', 'Keyframe request sent; awaiting the provider')
                     self.transport.image(connection, key, binding["model"], prompt,
                                          [self.ws.project_path(pid, r["path"]) for r in job["references"]], output, received=received)
                 result = self.media_result(pid, output, prompt)
                 result["references"] = job["references"]
             elif kind == "hear":
+                self.progress(job, 'voice', 'Voice request sent; awaiting the performance')
                 output = out_dir / f"{job_id}.mp3"
                 self.transport.voice(connection, key, binding["model"], job["inputs"]["dialogue"], output)
                 result = self.media_result(pid, output, json.dumps(job["inputs"]["dialogue"], ensure_ascii=False))
@@ -692,13 +741,15 @@ class Production:
                 output = out_dir / f"{job_id}.mp4"
                 request = job["inputs"]["request"]
                 if not job.get("taskId"):
+                    self.progress(job, 'submit', 'Submitting the approved render request')
                     job["taskId"] = self.transport.video_submit(connection, key, binding["model"], request["prompt"],
                         [self.ws.project_path(pid, r["path"]) for r in request["images"]],
                         [self.ws.project_path(pid, r["path"]) for r in request["audio"]], request["duration"], ratio=request["ratio"])
                     with self.ws.db() as db:
                         job["status"] = "pending"
                         self._job(db, job)
-                ready = self.transport.video_poll(connection, key, job["taskId"], output)
+                self.progress(job, 'provider', 'Checking the saved provider task; no completion percentage is available')
+                ready = self.transport.video_poll(connection, key, job["taskId"], output, progress=lambda phase, label: self.progress(job, phase, label))
                 if not ready:
                     # A persisted task can be polled by the UI or after a restart.
                     with self.ws.db() as db:
@@ -706,8 +757,10 @@ class Production:
                         self._job(db, job)
                     return
                 result = self.media_result(pid, output, request["prompt"])
+                self.progress(job, 'validate', 'Render downloaded; checking media and preparing the review copy')
                 result["requestId"] = request["id"]
                 if request["audio"]:
+                    self.progress(job, 'conform', 'Adding the exact approved voice performance to the review copy')
                     # HEAR is the speech authority. Preserve the generated source,
                     # then replace its speech track with the exact approved audio.
                     import subprocess
@@ -723,6 +776,7 @@ class Production:
                     result["files"].insert(0, self.file_record(pid, conformed))
                     result["audioAuthority"] = {"source": request["audio"][0], "note": "Approved HEAR track conformed; review lip sync. Native music and effects are retained only in the original provider render."}
                 ending = out_dir / f"{job_id}-ending.png"
+                self.progress(job, 'ending', 'Extracting the ending frame for continuity')
                 import subprocess
                 try:
                     subprocess.run(["ffmpeg", "-v", "error", "-sseof", "-1", "-i", str(output), "-update", "1", "-y", str(ending)],
@@ -754,7 +808,11 @@ class Production:
             if current["status"] == "completed":
                 return
             state = self._load(db, pid, ep)
-            if self.ws.context(pid, ep)["sourceHash"] != job["sourceHash"]:
+            if kind == 'media_review':
+                shot = self.selected(state, job['shotId'])
+                shot.setdefault('mediaReviews', []).append(result)
+                self._message(state, 'agent', 'Media review saved with its frame and audio evidence. Read the report and make your WATCH decision.', shotId=shot['id'])
+            elif self.ws.context(pid, ep)["sourceHash"] != job["sourceHash"]:
                 state["history"].append({"jobId": job["id"], "reason": "Source changed while generating", "result": result})
                 self._message(state, "agent", "The source changed during generation. I kept the result in history without replacing current work.")
             elif kind == "assembly":
@@ -794,6 +852,7 @@ class Production:
             state["budget"]["reserved"] -= job["estimate"]
             state["budget"]["committed"] += job["estimate"]
             job.update(status="completed", completedAt=time.time(), message="Outcome ready for review.")
+            job['progress'] = {'phase': 'completed', 'label': 'Verified outcome saved for review', 'updatedAt': time.time()}
             self._job(db, job)
             self._save(db, pid, ep, state)
         if kind == "plan":
@@ -808,11 +867,17 @@ class Production:
                 return
             # A known task remains recoverable with its original connection revision.
             unknown = (error.code in {"submission_unknown", "download_failed", "provider_offline"} or bool(job.get("taskId") or job.get("imageUrl"))) and error.code != "generation_failed"
+            if job['kind'] == 'media_review':
+                # An optional adviser must not strand production. Conservatively
+                # settle its submitted estimate, retain any audio report, never retry.
+                unknown = False
             job.update(status=("pending" if job.get("taskId") or job.get("imageUrl") else "unknown") if unknown else "failed", code=error.code, message=str(error))
+            if job['kind'] == 'media_review':
+                job['message'] += ' The optional review is closed; your shot remains available for human review. Submitted estimates stay counted.'
             state = self._load(db, job["projectId"], job["episode"])
             if not unknown:
                 state["budget"]["reserved"] -= job["estimate"]
-                if error.code not in {"authentication_failed", "permission_required", "model_unavailable", "missing_key", "vault_unavailable"}:
+                if (job.get('reviewSubmitted') if job['kind'] == 'media_review' else error.code not in {"authentication_failed", "permission_required", "model_unavailable", "missing_key", "vault_unavailable"}):
                     state["budget"]["committed"] += job["estimate"]
             self._message(state, "agent", str(error), jobId=job["id"])
             self._job(db, job)

@@ -36,6 +36,8 @@ def main():
                     self.reply = {'message':'Give the hesitation a clear breath while retaining voice and geography.', 'revisedShot':new}
                 return super().direct(connection,key,model,system,context,planning=planning,images=images)
         p.transport=Transport()
+        ws.save_services('first', {**ws.services('first'), 'review': {
+            'connectionId': accounts['openai']['id'], 'model': 'test-vision', 'audioModel': 'test-audio', 'estimateUsd': .2}})
         for source in (ROOT/'cb-studio').iterdir():
             if source.suffix in {'.html','.css','.js'}:
                 shutil.copyfile(source,ws.root/'cb-studio'/source.name)

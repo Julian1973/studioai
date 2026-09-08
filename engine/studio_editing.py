@@ -11,7 +11,7 @@ from studio_workspace import StudioError, digest
 from studio_transport import Shot
 
 
-COMMANDS = {"apply_revision", "discard_revision", "undo_revision", "bind_states", "review_join",
+COMMANDS = {"apply_revision", "discard_revision", "undo_revision", "bind_states", "choose_reference", "review_join",
             "timeline_note", "resolve_note", "trim_clip", "reset_trim", "review_cut", "export_cut"}
 
 
@@ -64,11 +64,11 @@ def mark_joins(state, shot):
 
 def handle(production, db, context, state, shot, payload):
     action, pid = payload["action"], context["project"]["id"]
-    if action in {"apply_revision", "undo_revision", "bind_states", "trim_clip", "reset_trim", "export_cut"}:
+    if action in {"apply_revision", "undo_revision", "bind_states", "choose_reference", "trim_clip", "reset_trim", "export_cut"}:
         active = db.execute("SELECT id FROM jobs WHERE project=? AND episode=? AND state IN ('queued','running','pending','unknown')", (pid, str(payload["episode"]))).fetchone()
         if active:
             raise StudioError("Finish or recover the current job before changing its inputs.", "job_active")
-    if action in {"apply_revision", "discard_revision", "undo_revision", "bind_states", "review_join", "trim_clip", "reset_trim"} and not shot:
+    if action in {"apply_revision", "discard_revision", "undo_revision", "bind_states", "choose_reference", "review_join", "trim_clip", "reset_trim"} and not shot:
         raise StudioError("Select the shot for this change.")
     if action in {"apply_revision", "discard_revision"}:
         proposal = shot.get("proposal")
@@ -80,6 +80,8 @@ def handle(production, db, context, state, shot, payload):
         if proposal["beforeHash"] != digest(fields(shot)) or proposal.get("outcomeHash") != digest(shot.get("outcomes", {})) or proposal["sourceSignature"] != production.source_signature(context, shot):
             raise StudioError("The direction or references changed. Prepare a new proposal.", "stale")
         new = production.validate_shot(context, proposal["shot"])
+        from studio_references import resolve
+        resolve(production, context, {**state, 'shots': [new if s['id'] == shot['id'] else s for s in state['shots']]}, new)
         apply_edit(production, context, state, shot, new, proposal["message"])
         return "Direction applied. Prepare the updated outcome when ready; earlier versions remain available."
     if action == "undo_revision":
@@ -93,24 +95,33 @@ def handle(production, db, context, state, shot, payload):
             production.assert_artifact(pid, artifact)
         retained = [{"stage": k, **v} for k, v in shot["outcomes"].items()]
         versions = shot.get("versions", []) + retained
+        media_reviews = {r['id']: r for r in before.get('mediaReviews', []) + shot.get('mediaReviews', [])}
         undo_log = state.setdefault("editAudit", [])
         undo_log.append({"shotId": shot["id"], "action": "undo", "editId": history[-1]["id"], "at": time.time()})
         shot.clear()
         shot.update(before)
         shot["versions"] = versions
         shot["editHistory"] = history[:-1]
+        if media_reviews:
+            shot['mediaReviews'] = list(media_reviews.values())
         mark_joins(state, shot)
         return "Previous direction and its recorded outcomes restored. Spending and job history are retained."
-    if action == "bind_states":
+    if action in {"bind_states", "choose_reference"}:
         new = fields(shot)
-        new["characterStates"] = payload.get("characterStates", [])
+        if action == 'bind_states':
+            new["characterStates"] = payload.get("characterStates", [])
+        else:
+            new['compositionReference'] = payload.get('reference')
+            new['cameraSetupId'] = str(payload.get('cameraSetupId', new['cameraSetupId'])).strip()[:100]
         new = production.validate_shot(context, new)
         production.assets(context, new)
+        from studio_references import resolve
+        resolve(production, context, {**state, 'shots': [new if s['id'] == shot['id'] else s for s in state['shots']]}, new)
         change = impact(shot, new)
         shot["proposal"] = {"id": uuid.uuid4().hex, "shot": new, "beforeHash": digest(fields(shot)), "outcomeHash": digest(shot.get("outcomes", {})),
                             "sourceSignature": production.source_signature(context, shot), "impact": change,
-                            "message": "Use the selected approved character states.", "createdAt": time.time()}
-        return "Character-state change ready to review."
+                            "message": "Use the selected approved character states." if action == 'bind_states' else "Use the selected camera setup and approved composition reference.", "createdAt": time.time()}
+        return "Reference change ready to review."
     from studio_review import projection
     view = projection(production, context, state, [])
     timeline = view["timeline"]

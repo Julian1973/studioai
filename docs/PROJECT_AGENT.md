@@ -7,6 +7,8 @@ different account, increase the allowance, execute code or create an independent
 
 The [director workspace](DIRECTOR_WORKSPACE.md) adds the visual episode board,
 continuity inspector, character states, proposed edits/undo and episode review timeline.
+It also provides approved camera-reference suggestions, local text-draft recovery,
+observed job progress and optional sampled-frame/audio review.
 
 ## Using the project workspace
 
@@ -17,6 +19,7 @@ continuity inspector, character states, proposed edits/undo and episode review t
    animation to workspace connections, select models and enter conservative per-request
    estimates from the provider account. Voice casting accepts one `Character = Voice ID`
    per line. A project can connect services incrementally.
+   Optional **Review** uses a vision model, an audio-input model and one combined estimate.
 4. Paste or import an episode/sequence script (text, Fountain, DOCX, PDF or RTF). Approve its total USD allowance once. Direction
    prepares the shot records and then the first SEE candidate when its service is ready.
 5. Review SEE. Approval prepares HEAR, or the WATCH request for a silent shot. HEAR
@@ -45,7 +48,7 @@ production records are not converted into newly approved shot plans.
 ## Creative handoff and review
 
 `skills/project-production-standard.md` is the runtime creative standard, snapshotted and
-hashed into every job. The director receives only the selected project's bible, source
+hashed into direction and generation jobs. The director receives only the selected project's bible, source
 lines, asset descriptions, available reference images and recent human review evidence.
 It returns typed shot records with emotion, performance, camera, geography, transition,
 exact source coverage, dialogue/delivery cues and matching SEE/WATCH prompts.
@@ -96,6 +99,8 @@ estimates, including uncertain requests. They are not a guarantee of the provide
 invoice total. Known task IDs and returned image URLs survive restart and can be resumed
 without another generation POST. If submission was not confirmed, the agent stops and
 asks for account reconciliation; closing that request retains its estimated cost.
+Optional media-review failures settle submitted estimates conservatively and let normal
+production continue. They retain returned evidence and never retry a model call by themselves.
 
 ## Supported adapters and limits
 
@@ -106,6 +111,10 @@ asks for account reconciliation; closing that request retains its estimated cost
 - ElevenLabs v3 text-to-dialogue: exact words and project casting, with bounded delivery cues.
 - ModelArk Seedance `dreamina-seedance-2-5-260628`: the existing qualified 480p route,
   4–30 seconds, explicit reference images/audio and asynchronous task recovery.
+- Optional media review: up to twelve actual render frames, two incoming-cut frames,
+  approved reference images and extracted WATCH/HEAR audio. Responses handles the visual
+  report; audio-input Chat Completions handles listening. Both use explicitly configured
+  models on the project's review connection. Reports have no approval or retake powers.
 
 Model/account access and pricing must be checked for the selected provider region. A
 connection check proves read access, not generation permission or artistic performance.

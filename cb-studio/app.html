@@ -4,6 +4,10 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Animation Studio</title>
+<script>
+// Opening app.html from Finder must enter the connected Studio, not an empty file page.
+if(location.protocol==='file:')location.replace('http://127.0.0.1:8899/cb-studio/app.html'+location.search+(location.hash||'#pg=projects'));
+</script>
 <link rel="stylesheet" href="/cb-studio/project-production.css">
 <script src="/cb-studio/project-drafts.js"></script>
 <script src="/cb-studio/project-production.js"></script>
@@ -1309,8 +1313,17 @@ let PRODUCTION_FILTER="active",PRODUCTION_QUERY="";
 function setProductionFilter(filter){PRODUCTION_FILTER=filter;renderProjects();}
 function searchProductions(value){PRODUCTION_QUERY=String(value||"").trim().toLowerCase();renderProjects();const input=document.getElementById("production-search");if(input){input.focus();input.setSelectionRange(input.value.length,input.value.length);}}
 async function bootProjects(){
-  try{PROJECTS=(((await fetch(BASE+"/api/projects",{cache:"no-store"}).then(r=>r.json()))||{}).projects)||[];}catch(e){PROJECTS=[];}
-  CURRENT_PROJECT=null; CUR=null; SHOTS=[]; page="projects"; applyProjectPresentation(null); renderTop(); renderNav(); renderProjects();
+  CURRENT_PROJECT=null; CUR=null; SHOTS=[]; page="projects"; applyProjectPresentation(null); renderTop(); renderNav();
+  document.getElementById('view').innerHTML=outcomePanelHTML({title:'Loading projects',body:'Connecting to your Studio workspace.'});
+  try{
+    const response=await fetch(BASE+"/api/projects",{cache:"no-store"});
+    if(!response.ok)throw new Error('Project list unavailable');
+    const data=await response.json();
+    if(!Array.isArray(data.projects))throw new Error('Invalid project list');
+    PROJECTS=data.projects;renderProjects();
+  }catch(e){
+    document.getElementById('view').innerHTML=outcomePanelHTML({tone:'blocked',title:'Projects could not load',body:'The Studio could not read your project list. Check the connection and retry.',actions:[{label:'Retry connection',onclick:'bootProjects()'},{label:'Reload Studio',onclick:'location.reload()',kind:'secondary'}]});
+  }
 }
 function renderProjects(){
   const initial=p=>_esc((p.name||"?").trim().charAt(0).toUpperCase());

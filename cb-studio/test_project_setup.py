@@ -1,6 +1,25 @@
 """Project setup writes only isolated project assets and scripts; no provider work."""
 import json
+import pytest
 from test_local_auth import studio, _request
+
+
+@pytest.mark.parametrize('contents', ['{broken', '[]', '{"projects": {}}'])
+def test_invalid_registry_is_not_reported_as_an_empty_workspace(studio, monkeypatch, tmp_path, contents):
+    module, port = studio
+    _, headers, _ = _request(port, 'GET', '/cb-studio/app.html')
+    auth = {'Cookie': headers['Set-Cookie'].split(';', 1)[0]}
+    registry = tmp_path/'cb-studio/data/projects.json'
+    registry.parent.mkdir(parents=True)
+    registry.write_text(contents)
+    monkeypatch.setattr(module, 'ROOT', tmp_path)
+    status, _, body = _request(port, 'GET', '/api/projects', auth)
+    assert status == 503 and 'error' in json.loads(body)
+    assert 'projects' not in json.loads(body)
+    assert registry.read_text() == contents
+    registry.write_text('{"projects": []}')
+    status, _, body = _request(port, 'GET', '/api/projects', auth)
+    assert status == 200 and json.loads(body)['projects'] == []
 
 
 def test_two_projects_keep_bibles_assets_and_scripts_separate(studio, monkeypatch, tmp_path):

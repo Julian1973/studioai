@@ -2,13 +2,32 @@
 // Complete project review flow with real HTTP/state/media and no external generation.
 import {createRequire} from 'node:module';
 import {spawn} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import path from 'node:path';
 import {mkdir} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const require=createRequire(import.meta.url),{chromium}=require('playwright');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=process.env.STUDIO_REVIEW_SCREENSHOTS||'/tmp/studio-review-browser';
+async function verifyFileLaunch(browser){
+  const context=await browser.newContext();
+  try{
+    // Never contact the real production server while verifying the local-file front door.
+    await context.route('**/*',route=>{
+      const url=new URL(route.request().url());
+      if(url.protocol==='file:')return route.continue();
+      if(url.origin==='http://127.0.0.1:8899'&&url.pathname==='/cb-studio/app.html')return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><title>Connected Studio fixture</title><p>Connected</p>'});
+      return route.abort();
+    });
+    const page=await context.newPage();
+    for(const suffix of ['', '?restore=production#p=crystal-bears&pg=pipeline&ep=2&sc=8&shot=S8.SH1']){
+      await page.goto(pathToFileURL(path.join(root,'cb-studio/app.html')).href+suffix).catch(error=>{if(!String(error).includes('interrupted'))throw error;});
+      await page.waitForURL('http://127.0.0.1:8899/cb-studio/app.html*');
+      assert.equal(page.url(),'http://127.0.0.1:8899/cb-studio/app.html'+(suffix||'#pg=projects'));
+      assert.equal(await page.title(),'Connected Studio fixture');
+    }
+  }finally{await context.close();}
+}
 await mkdir(output,{recursive:true});
 const child=spawn('python3',['-u','cb-studio/project_review_fixture.py'],{cwd:root,stdio:['ignore','pipe','pipe']});
 let browser,log='';
@@ -20,12 +39,18 @@ try {
     child.on('exit',code=>{clearTimeout(timer);reject(new Error('Test server exited '+code+': '+log));});
   });
   browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
+  await verifyFileLaunch(browser);
   const context=await browser.newContext({viewport:{width:1440,height:1100}});
   const origin=new URL(address).origin;
   await context.route('**/*',route=>new URL(route.request().url()).origin===origin?route.continue():route.abort());
   const page=await context.newPage(),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
+  await page.route('**/api/projects',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:'Temporary connection failure'})}));
   await page.goto(address);
+  await page.getByText('Projects could not load',{exact:true}).waitFor();
+  assert.equal(await page.locator('.projcard').count(),0);
+  await page.unroute('**/api/projects');
+  await page.getByRole('button',{name:'Retry connection',exact:true}).click();
   await page.locator('#pc_first').getByRole('button',{name:'Open project',exact:true}).click();
   // Script drafts survive reload without saving or starting an episode.
   await page.getByText('Add episode',{exact:true}).click();
@@ -172,6 +197,7 @@ try {
   console.log('PASS: script and per-shot draft recovery, two-tab isolation, typing during submission, preserved manual scope, reference preview/application, actual-media review report, and draft direction from a finding.');
   console.log('Screenshots: '+output);
   console.log('PASS: character-state upload, human approval, scoped binding preview/discard and project isolation.');
+  console.log('PASS: direct file launches reconnect with navigation preserved; a failed project request shows recovery controls and retry restores the existing projects.');
 } catch(error){
   if(browser){const pages=browser.contexts()[0]?.pages();if(pages?.[0])await pages[0].screenshot({path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});}
   console.error(error);process.exitCode=1;

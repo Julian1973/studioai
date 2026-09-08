@@ -3026,7 +3026,10 @@ class H(http.server.SimpleHTTPRequestHandler):
             try:
                 pf = ROOT / "cb-studio" / "data" / "projects.json"
                 if pf.exists():
-                    d = json.loads(pf.read_text()); projs = d.get("projects", []) if isinstance(d, dict) else []
+                    d = json.loads(pf.read_text())
+                    if not isinstance(d, dict) or not isinstance(d.get("projects"), list):
+                        raise ValueError("Invalid project registry")
+                    projs = d["projects"]
                 for p in projs:
                     pid = p.get("id", "")
                     cfgbase = p.get("configBase") or ("projects/" + pid)
@@ -3044,7 +3047,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     except Exception:
                         p["characterCount"] = 0
             except Exception:
-                projs = []
+                return self._json(503, {"error": "The project registry could not be read. Existing project files have not been changed."})
             return self._json(200, {"projects": projs})
         if urlsplit(self.path).path == "/api/project-workbench-state":
             from urllib.parse import urlparse, parse_qs

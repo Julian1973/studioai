@@ -163,13 +163,14 @@ class ProviderTransport:
             content = [{"type": "input_text", "text": json.dumps(context, ensure_ascii=False)}]
             content += [{"type": "input_image", "image_url": self.inline(path), "detail": "auto"} for path in (images or [])]
             response = client.responses.parse(
-                model=model, store=False, max_output_tokens=16000 if planning else 5000,
+                model=model, store=False, service_tier="default", max_output_tokens=16000 if planning else 5000,
                 input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},
                        {"role": "user", "content": content}],
                 text_format=EpisodePlan if planning else AgentReply)
             if response.output_parsed is None:
                 raise StudioError("The director did not return a complete proposal. Your existing shots are unchanged.", "invalid_output")
-            return response.output_parsed.model_dump()
+            from studio_model_policy import usage_record
+            return {**response.output_parsed.model_dump(), "_usage": usage_record(response, model)}
         except StudioError:
             raise
         except Exception as exc:

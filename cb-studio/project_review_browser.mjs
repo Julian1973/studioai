@@ -121,6 +121,11 @@ try {
   // Upgrade a sampled review to full-file Gemini review through the real service form.
   await page.locator('.sp-heading [data-services]').click();
   const reviewForm=page.locator('#workspace-dialog form');
+  await reviewForm.getByText('Automatic model routing',{exact:true}).click();
+  await reviewForm.locator('[name="direction-routing"]').check();
+  assert.equal(await reviewForm.locator('[name="route-creative-model"]').inputValue(),'gpt-6-astra');
+  assert.equal(await reviewForm.locator('[name="route-routine-model"]').inputValue(),'gpt-5.6-terra');
+  assert.equal(await reviewForm.locator('[name="route-assistant-model"]').inputValue(),'gpt-5.6-luna');
   const googleOption=reviewForm.locator('[name="review-connection"] option').filter({hasText:'Gemini review fixture'});
   await reviewForm.locator('[name="review-connection"]').selectOption(await googleOption.getAttribute('value'));
   assert.equal(await reviewForm.locator('[data-review-audio]').isVisible(),false);
@@ -129,6 +134,8 @@ try {
   await reviewForm.locator('[name="review-fps"]').selectOption('4');
   await reviewForm.getByRole('button',{name:'Save project services',exact:true}).click();
   await page.locator('#modal.show').waitFor({state:'hidden'});
+  assert.match(await page.locator('#sp-readiness').innerText(),/4\/4 configured/);
+  assert.equal(await page.locator('#sp-cost-evidence').count(),1);
   await page.locator('[data-media-review]').click();
   await page.getByText('Test Gemini review of the complete video.',{exact:true}).waitFor();
   assert.match(await page.locator('.sp-media-review').innerText(),/Gemini video model: test-gemini-video/);

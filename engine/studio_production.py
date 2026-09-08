@@ -81,15 +81,20 @@ class Production:
         with self.ws.db() as db:
             state = self._load(db, pid, str(ep)) if ep is not None else initial()
             jobs = [json.loads(r[0]) for r in db.execute("SELECT data FROM jobs WHERE project=? AND episode=? ORDER BY rowid DESC LIMIT 30", (pid, str(ep)))]
+            usage_jobs = [{'kind': r[0], 'usage': json.loads(r[1]) if r[1] else None}
+                          for r in db.execute("SELECT json_extract(data, '$.kind'), json_extract(data, '$.usage') FROM jobs WHERE project=? AND episode=?", (pid, str(ep)))]
         # Job inputs contain source context, but no keys. Expose only useful status.
-        public_jobs = [{k: j.get(k) for k in ("id", "kind", "shotId", "status", "taskId", "message", "code", "binding", "createdAt", "progress", "audioReview", "cleanupPending", "uploadUnconfirmed")} for j in jobs]
+        public_jobs = [{k: j.get(k) for k in ("id", "kind", "shotId", "status", "taskId", "message", "code", "binding", "createdAt", "progress", "audioReview", "cleanupPending", "uploadUnconfirmed", "usage", "estimate")} for j in jobs[:30]]
+        from studio_model_policy import summary, readiness
+        costs = summary(usage_jobs)
+        setup = readiness(self.ws, context)
         for item, job in zip(public_jobs, jobs):
             if job["status"] in {"queued", "running"} and job.get("pid") != os.getpid():
                 item.update(status="interrupted", message="Studio restarted. Resume this job to recover its recorded progress.")
         from studio_review import projection
         review = projection(self, context, state, public_jobs)
         return {"project": context["project"], "episodes": context["episodes"], "episode": ep,
-                "services": self.ws.services(pid), "state": state, "jobs": public_jobs,
+                "services": self.ws.services(pid), "state": state, "jobs": public_jobs, "costs": costs, "readiness": setup,
                 "review": review, "characterStates": context.get("characterStates", []),
                 "sourceChanged": bool(state["sourceHash"] and state["sourceHash"] != context["sourceHash"] and self.source_impact(state, context)),
                 "sourceHash": context["sourceHash"]}
@@ -573,7 +578,8 @@ class Production:
                 raise StudioError(f"Review the current {required.upper()} outcome or direct a revision first.")
         if shot and shot.get("proposal") and kind in {"see", "hear", "watch"}:
             raise StudioError("Apply or discard the proposed direction before preparing another outcome.", "proposal_pending")
-        binding = self.ws.binding(pid, ROLE[kind])
+        from studio_model_policy import route
+        binding = route(self.ws.binding(pid, ROLE[kind]), kind, shot, message)
         refs = self.assets(context, shot) if kind == "see" else []
         inputs = {}
         if kind == "hear":
@@ -602,14 +608,15 @@ class Production:
             if any((self.artifact(shot, s) or {}).get("id") != request["dependencies"][s] for s in ("see", "hear")):
                 raise StudioError("The WATCH inputs changed. Review an updated request.", "stale")
             inputs["request"] = request
-        cost = money(binding["estimateUsd"])
+        request_count = len(inputs["dialogue"]) if kind == "hear" else 1
+        cost = money(binding["estimateUsd"]) * request_count
         budget = state["budget"]
         if budget["allowance"] - budget["committed"] - budget["reserved"] < cost:
             raise StudioError("The episode allowance does not cover this request. Increase it or adjust the project service estimate.", "budget_required")
         budget["reserved"] += cost
         job = {"id": uuid.uuid4().hex, "projectId": pid, "episode": ep, "kind": kind,
                "shotId": shot["id"] if shot else None, "shot": shot, "context": context, "sourceHash": context["sourceHash"],
-               "binding": binding, "estimate": cost, "references": refs, "inputs": inputs,
+               "binding": binding, "estimate": cost, "requestCount": request_count, "references": refs, "inputs": inputs,
                "direction": message, "stage": payload.get("stage", "see"), "reviews": self.review_learning(db, pid, state),
                "messages": state["messages"][-12:], "standard": STANDARD_PATH.read_text(), "standardHash": file_hash(STANDARD_PATH), "status": "queued", "createdAt": time.time(), "pid": os.getpid()}
         if kind == "see":
@@ -698,9 +705,18 @@ class Production:
                 self.progress(job, 'direction', 'Director is preparing a structured proposal')
                 data = {"project": context["project"], "bible": context["bible"], "assets": context["assets"],
                         "scriptLines": list(enumerate(context["script"].splitlines(), 1)),
-                        "selectedShot": job["shot"], "direction": job["direction"], "stage": job["stage"],
+                        "selectedShot": ({k: job["shot"].get(k) for k in Shot.model_fields} if job["shot"] else None), "direction": job["direction"], "stage": job["stage"],
                         "reviewLearning": job["reviews"], "conversation": job["messages"]}
                 data["characterStates"] = context.get("characterStates", [])
+                if binding.get('route'):
+                    data['taskBoundary'] = binding['routeReason']
+                if job['shot'] and kind != 'plan':
+                    # Preserve the full script and canon; supply neighbouring direction for geography.
+                    with self.ws.db() as db:
+                        current_state = self._load(db, pid, job['episode'])
+                    scene = [s for s in current_state['shots'] if s['scene'] == job['shot']['scene']]
+                    data['sceneDirection'] = [{k: s.get(k) for k in ('id', 'intent', 'camera', 'geography', 'openingState', 'endingState', 'transition')} for s in scene]
+
                 if len(json.dumps(data)) > 200000:
                     raise StudioError("This script exceeds the current director context limit. Split it into production sequences.", "context_limit")
                 visual = [{"name": name, "path": item["anchor"]} for name, item in context["assets"]["characters"].items()
@@ -711,6 +727,17 @@ class Production:
                 data["attachedReferenceNames"] = [item["name"] for item in visual]
                 result = self.transport.direct(connection, key, binding["model"], job["standard"], data, planning=kind == "plan",
                                                images=[self.ws.project_path(pid, item["path"]) for item in visual])
+                usage = result.pop('_usage', None)
+                if usage:
+                    job['usage'] = usage
+                    self.progress(job, 'validating', 'Provider response received; checking the proposal')
+                if binding.get('route') == 'assistant' and result.get('revisedShot'):
+                    raise StudioError('The workflow assistant cannot revise shots. Select the shot and send your direction.', 'invalid_output')
+                if binding.get('route') == 'routine' and result.get('revisedShot'):
+                    from studio_editing import fields
+                    old, new = fields(job['shot']), fields(result['revisedShot'])
+                    if any(old.get(k) != new.get(k) for k in set(old) | set(new) if k not in {'seePrompt', 'watchPrompt'}):
+                        raise StudioError('Prompt maintenance changed a creative decision. Existing work is preserved; send a creative revision instead.', 'invalid_output')
                 if kind == "plan":
                     result["shots"] = self.validate_plan(context, result)
                 else:
@@ -863,7 +890,8 @@ class Production:
                 self._replace(shot, kind, result)
                 self._message(state, "agent", f"{kind.upper()} is ready for {shot['id']}. Review it below before approving.")
             state["budget"]["reserved"] -= job["estimate"]
-            state["budget"]["committed"] += job["estimate"]
+            from studio_model_policy import commitment
+            state["budget"]["committed"] += commitment(job)
             job.update(status="completed", completedAt=time.time(), message="Outcome ready for review.")
             job['progress'] = {'phase': 'completed', 'label': 'Verified outcome saved for review', 'updatedAt': time.time()}
             self._job(db, job)
@@ -891,7 +919,8 @@ class Production:
             if not unknown:
                 state["budget"]["reserved"] -= job["estimate"]
                 if (job.get('reviewSubmitted') if job['kind'] == 'media_review' else error.code not in {"authentication_failed", "permission_required", "model_unavailable", "missing_key", "vault_unavailable"}):
-                    state["budget"]["committed"] += job["estimate"]
+                    from studio_model_policy import commitment
+                    state["budget"]["committed"] += commitment(job)
             self._message(state, "agent", str(error), jobId=job["id"])
             self._job(db, job)
             self._save(db, job["projectId"], job["episode"], state)

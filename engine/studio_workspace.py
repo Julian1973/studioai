@@ -359,6 +359,9 @@ class Workspace:
             if role == "voices" and model != "eleven_v3":
                 raise StudioError("The voice adapter currently supports ElevenLabs v3.")
             clean[role] = {"connectionId": connection["id"], "model": model, "estimateUsd": float(cost)}
+            if role == 'direction' and value.get('routing'):
+                from studio_model_policy import validate_routes
+                clean[role]['routing'] = validate_routes(value['routing'])
             if role == 'review' and connection['provider'] == 'gemini':
                 fps = value.get('videoFps', 4)
                 if isinstance(fps, bool) or str(fps) not in {'1', '4', '8'}:

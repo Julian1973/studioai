@@ -11,7 +11,7 @@ from studio_workspace import StudioError, digest
 from studio_transport import Shot
 
 
-COMMANDS = {"apply_revision", "discard_revision", "undo_revision", "bind_states", "choose_reference", "review_join",
+COMMANDS = {"register_finish", "approve_finish", "reject_finish","apply_revision", "discard_revision", "undo_revision", "bind_states", "choose_reference", "review_join",
             "timeline_note", "resolve_note", "trim_clip", "reset_trim", "review_cut", "export_cut"}
 
 
@@ -64,7 +64,7 @@ def mark_joins(state, shot):
 
 def handle(production, db, context, state, shot, payload):
     action, pid = payload["action"], context["project"]["id"]
-    if action in {"apply_revision", "undo_revision", "bind_states", "choose_reference", "trim_clip", "reset_trim", "export_cut"}:
+    if action in {"register_finish", "approve_finish", "reject_finish", "apply_revision", "undo_revision", "bind_states", "choose_reference", "trim_clip", "reset_trim", "export_cut"}:
         active = db.execute("SELECT id FROM jobs WHERE project=? AND episode=? AND state IN ('queued','running','pending','unknown')", (pid, str(payload["episode"]))).fetchone()
         if active:
             raise StudioError("Finish or recover the current job before changing its inputs.", "job_active")
@@ -127,6 +127,9 @@ def handle(production, db, context, state, shot, payload):
     timeline = view["timeline"]
     if payload.get("timelineFingerprint") != timeline["fingerprint"]:
         raise StudioError("The episode assembly changed. Review its current version before saving.", "stale")
+    if action in {'register_finish','approve_finish','reject_finish'}:
+        from studio_finish_return import handle as finish_return
+        return finish_return(production, context, state, timeline, payload)
     assembly = state.setdefault("assembly", {})
     if action == "review_join":
         index = state["shots"].index(shot)

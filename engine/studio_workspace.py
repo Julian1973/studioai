@@ -359,6 +359,13 @@ class Workspace:
             if role == "voices" and model != "eleven_v3":
                 raise StudioError("The voice adapter currently supports ElevenLabs v3.")
             clean[role] = {"connectionId": connection["id"], "model": model, "estimateUsd": float(cost)}
+            if role in {'keyframes','voices','animation'} and value.get('unitUsd') not in (None, ''):
+                try:
+                    rate = Decimal(str(value['unitUsd']))
+                    if not rate.is_finite() or not 0 < rate <= 1000: raise ValueError()
+                except Exception:
+                    raise StudioError('Enter a positive unit price from your provider account.') from None
+                clean[role]['unitUsd'] = float(rate)
             if role == 'direction' and value.get('routing'):
                 from studio_model_policy import validate_routes
                 clean[role]['routing'] = validate_routes(value['routing'])

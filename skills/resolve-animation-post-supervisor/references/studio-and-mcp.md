@@ -12,7 +12,7 @@ Locate the selected Studio project and episode first. Approved screenplay, shot 
 - The accompanying FCPXML references original approved media. Inspect its declared timebase and actual source rates before conforming; it is interchange data, not a verified Resolve edit.
 - Return findings against the recorded project/episode/shot and assembly version. Missing action or voice changes return to the selected shot's existing proposal/review path. Preserve other approved shots and inspect affected joins. Do not write generic project results into the legacy episode-only ledger.
 
-This is a manual, source-bound handoff. The Studio does not yet dispatch durable Resolve editing jobs or import their returned candidates into the project ledger. Use available Codex Resolve tools for explicitly requested work and report this boundary; do not invent completed jobs or additional approval records.
+This remains a manual, source-bound editor dispatch. Studio now accepts a returned project-local movie through `register_finish`, bound to the current handoff ID, assembly fingerprint, file SHA-256, Resolve project/timeline IDs, inspection evidence and unresolved work. `approve_finish` and `reject_finish` record human decisions against the exact imported file. Save the returned movie inside `projects/<projectId>/media/`; import copies it to a separate candidate. This does not prove Resolve execution or launch durable editing jobs. Use available Codex Resolve tools for requested editor work and state that execution boundary.
 
 ## Legacy Crystal Bears finishing desk
 

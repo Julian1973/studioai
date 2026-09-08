@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "purpose": "Repeatable project-agnostic creative comparison. No model is scored until its actual output has been reviewed.",
+  "scoring": "Human review: unclear, partially achieved, achieved. Record model, contract version, prompt, references, output hashes, attempts and cost evidence. A continuity or dialogue failure cannot be averaged away.",
+  "cases": [
+    {"id":"quiet-reassurance", "script":"INT. WORKSHOP - EVENING\nMira hides a broken wooden bird behind her back.\nMIRA: I thought I could fix it.\nOren notices her shaking hand before looking at the bird.\nOREN: Show me where it hurts.\nMira brings the bird forward.", "review":["Listener reacts before speaking", "Pause communicates vulnerability without exaggerated sadness", "Bird stays in the same hand", "Exact dialogue and speaker order", "Opening frames depict single instants"]},
+    {"id":"comic-delay", "script":"EXT. COURTYARD - DAY\nPip balances a tall stack of empty cups.\nPIP: Perfectly steady.\nThe top cup slips. Pip catches it with a foot.\nPip looks pleased. The bottom cup starts to tilt.", "review":["Readable setup, anticipation and delayed payoff", "Audience can see the unstable cup", "No extra spoken punchline", "One clear action focus per beat", "Cups and foot contact remain consistent"]},
+    {"id":"reverse-geography", "script":"INT. GREENHOUSE - MORNING\nMira stands left of the doorway, facing Oren beside the red bench.\nMIRA: Did you leave this for me?\nShe holds up the wooden bird.\nOREN: I hoped you would find it.\nMira looks from the bird to Oren.", "review":["Establish scene axis and prop ownership", "Motivated reverse angle has its own camera setup", "Reverse opening retains eyelines without mirroring the world", "Opening and ending state recorded", "Approved scene anchor distinguished from camera-match reference"]}
+  ],
+  "generation": "Use the regular project workflow and an explicitly approved test allowance. This file starts no generation and provides no artistic certification."
+}

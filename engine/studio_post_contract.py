@@ -69,4 +69,7 @@ def project_brief(production, context, state, timeline):
             "returnContract": {"projectId": pid, "episode": str(context["episode"]["number"]),
                                "assemblyFingerprint": timeline["fingerprint"],
                                "requiredEvidence": ["candidate file hash", "source shot and approved outcome IDs", "Resolve project and timeline IDs", "frame rate and inspected ranges", "repair and verification evidence", "unresolved or uninspected work"],
-                               "status": "manual-handoff", "approval": "Human review of the returned candidate is still required."}}
+                               "status": "manual-handoff",
+                               "returnAction": "register_finish",
+                               "fileLocation": f"projects/{pid}/media/ (save the returned movie inside this project)",
+                               "returnFields": ["handoffId from the current Studio snapshot", "path", "hash (SHA-256)", "resolveProjectId", "resolveTimelineId", "inspection", "unresolved"], "approval": "Human review of the returned candidate is still required."}}

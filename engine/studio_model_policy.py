@@ -91,7 +91,8 @@ def commitment(job):
 def summary(jobs):
     records = [j['usage'] for j in jobs if j.get('usage')]
     priced = [r for r in records if r.get('estimatedUsd') is not None]
-    return {'measuredRequests': len(records), 'pricedRequests': len(priced),
+    generations = [(j.get('shotId'),j.get('kind')) for j in jobs if j.get('kind') in {'see','hear','watch'}]
+    return {'generationJobs': len(generations), 'repeatGenerationJobs': len(generations)-len(set(generations)), 'measuredRequests': len(records), 'pricedRequests': len(priced),
             'estimatedUsd': round(sum(r['estimatedUsd'] for r in priced), 6),
             'unpricedRequests': sum(1 for j in jobs if j.get('kind') != 'assembly' and
                                    (j.get('usage') or {}).get('estimatedUsd') is None),

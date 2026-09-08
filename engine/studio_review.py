@@ -11,6 +11,7 @@ from pathlib import Path
 import subprocess
 
 from studio_workspace import StudioError, asset_digest, digest
+from studio_workflow import estimate as forecast
 
 
 STAGES = ("see", "hear", "request", "watch")
@@ -164,7 +165,7 @@ def projection(production, context, state, jobs):
             if value is None:
                 known = False
             else:
-                estimate += value
+                estimate += forecast(services[role], outcome_stage, shot, duration=outcomes.get("request", {}).get("duration"))
         see = outcomes.get("see", {})
         thumbnail = (see.get("files") or [None])[0]
         if not verified_file(ws, pid, thumbnail):
@@ -173,7 +174,8 @@ def projection(production, context, state, jobs):
                "thumbnail": thumbnail, "approved": accepted, "plannedSeconds": shot.get("duration", 0),
                "approvedSeconds": measured if accepted else 0, "remainingEstimateUsd": round(estimate, 4) if known else None,
                "issueCount": len(inspection["issues"]), "job": job,
-               "nextEstimateUsd": services.get(ROLES.get(current), {}).get("estimateUsd")}
+               "stageEstimates": {name:forecast(services.get(role), name, shot, duration=outcomes.get("request", {}).get("duration")) for name,role in ROLES.items()},
+               "nextEstimateUsd": forecast(services.get(ROLES.get(current)), current, shot)}
         rows.append(row)
         scene = scenes.setdefault(shot["scene"], {"number": shot["scene"], "shots": [], "approved": 0, "approvedSeconds": 0, "remainingEstimateUsd": 0})
         scene["shots"].append(row)
@@ -184,12 +186,15 @@ def projection(production, context, state, jobs):
     notes = state.get("assembly", {}).get("notes", [])
     timeline = {"clips": clips, "duration": round(total, 3), "fingerprint": fingerprint,
                 "notes": notes, "gaps": sum(c["gap"] for c in clips), "export": state.get("assembly", {}).get("export"),
-                "review": state.get("assembly", {}).get("review")}
+                "review": state.get("assembly", {}).get("review"),
+                "handoffId": digest(state["assembly"]["export"]) if state.get("assembly", {}).get("export") else None,
+                "finishedCandidates": [{**c, "current": c.get("fingerprint")==fingerprint and c.get("handoffId")==digest(state.get("assembly", {}).get("export")) and bool(verified_file(ws,pid,(c.get("files") or [None])[0]))} for c in state.get("assembly", {}).get("finishedCandidates", [])]}
     preview = state.get("assembly", {}).get("preview")
     timeline["preview"] = preview if preview and preview.get("fingerprint") == fingerprint and verified_file(ws, pid, (preview.get("files") or [None])[0]) else None
     issues = [i for v in inspections.values() for i in v["issues"]]
     return {"scenes": list(scenes.values()), "shots": rows, "inspections": inspections, "timeline": timeline,
-            "summary": {"shots": len(rows), "generatedShots": generated_count, "approvedShots": approved_count,
+            "summary": {"remainingEstimateUsd": round(sum(r["remainingEstimateUsd"] for r in rows),4) if all(r["remainingEstimateUsd"] is not None for r in rows) else None,
+                        "forecastMeaning": "One candidate per missing stage, at configured rates and reservation floors. Excludes optional review, future revisions, failed attempts and unknown provider charges.", "shots": len(rows), "generatedShots": generated_count, "approvedShots": approved_count,
                         "approvedSeconds": round(approved_duration, 3), "approvedVoices": int(approved_voice), "voiceShots": voice_total,
                         "joinReviews": sum(s.get("continuityReview") is not None for s in state["shots"]),
                         "blockers": sum(i["severity"] == "blocker" for i in issues),

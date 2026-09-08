@@ -81,8 +81,8 @@ class Production:
         with self.ws.db() as db:
             state = self._load(db, pid, str(ep)) if ep is not None else initial()
             jobs = [json.loads(r[0]) for r in db.execute("SELECT data FROM jobs WHERE project=? AND episode=? ORDER BY rowid DESC LIMIT 30", (pid, str(ep)))]
-            usage_jobs = [{'kind': r[0], 'usage': json.loads(r[1]) if r[1] else None}
-                          for r in db.execute("SELECT json_extract(data, '$.kind'), json_extract(data, '$.usage') FROM jobs WHERE project=? AND episode=?", (pid, str(ep)))]
+            usage_jobs = [{'kind': r[0], 'usage': json.loads(r[1]) if r[1] else None, 'shotId': r[2]}
+                          for r in db.execute("SELECT json_extract(data, '$.kind'), json_extract(data, '$.usage'), json_extract(data, '$.shotId') FROM jobs WHERE project=? AND episode=?", (pid, str(ep)))]
         # Job inputs contain source context, but no keys. Expose only useful status.
         public_jobs = [{k: j.get(k) for k in ("id", "kind", "shotId", "status", "taskId", "message", "code", "binding", "createdAt", "progress", "audioReview", "cleanupPending", "uploadUnconfirmed", "usage", "estimate")} for j in jobs[:30]]
         from studio_model_policy import summary, readiness
@@ -234,11 +234,13 @@ class Production:
         return shots
 
     def _prompt(self, context, shot, stage, refs):
-        direction = {k: shot.get(k) for k in ("intent", "emotion", "performance", "camera", "cameraSetupId", "geography", "transition", "openingState", "endingState", "beatPlan")}
+        from studio_workflow import handoff
+        contract = handoff(shot, stage, refs)
         labels = "\n".join(f"@Image{i + 1}: {r['name']} — {r.get('role', 'reference')}; {r.get('description', '')}; identity traits: {json.dumps(r.get('traits', {}), ensure_ascii=False)}" for i, r in enumerate(refs))
         return (f"Project: {context['project']['name']}\nFrame aspect: {context['project'].get('aspectRatio', '16:9')}\nVisual style: {context['project'].get('style', '')}\n"
-                f"Project bible:\n{context['bible']}\nShot direction:\n{json.dumps(direction, ensure_ascii=False)}\n"
+                f"Project bible:\n{context['bible']}\nShot direction:\n{json.dumps(contract, ensure_ascii=False)}\n"
                 f"References:\n{labels}\n{shot['seePrompt' if stage == 'see' else 'watchPrompt']}\n"
+                "The structured direction and approved reference roles above are authoritative if this prose conflicts. "
                 "Preserve referenced identities, scale, prop ownership and screen geography. Use the stated camera view; do not mirror the scene.")
 
     def _stage(self, shot):
@@ -296,6 +298,10 @@ class Production:
                           "status": "status", "help": "status", "prepare": "prepare",
                           "review footage": "media_review", "review render": "media_review",
                           "fire": "watch", "render": "watch", "resume": "resume"}.get(normalized, "chat")
+                from studio_workflow import chat_command
+                action = chat_command(message, shot, payload) or action
+                if action == "apply_revision":
+                    payload = {**payload, "prepare": True}
                 match = re.fullmatch(r"approve (?:episode )?budget \$?([0-9]+(?:\.[0-9]{1,2})?)", normalized)
                 if match:
                     action = "budget"
@@ -307,7 +313,10 @@ class Production:
             from studio_editing import COMMANDS, handle
             if shot and shot.get("importedArchive") and action not in {"status", "timeline_note", "resolve_note", "trim_clip", "reset_trim", "review_join", "review_cut", "export_cut", "assemble_cut", "cleanup_review_uploads"}:
                 raise StudioError("This is a preserved production archive. Create a new sequence to direct new work.", "archive_read_only")
-            if action == 'cleanup_review_uploads':
+            if action in {'save_learning', 'retire_learning'}:
+                from studio_workflow import learning_command
+                self._message(state, 'agent', learning_command(self, db, context, state, shot, {**payload, 'action':action}))
+            elif action == 'cleanup_review_uploads':
                 row = db.execute('SELECT data FROM jobs WHERE id=? AND project=? AND episode=?',
                                  (token(payload.get('jobId')), pid, ep)).fetchone()
                 if not row:
@@ -563,7 +572,8 @@ class Production:
         ratio = context["project"].get("aspectRatio") or "16:9"
         if ratio not in {"16:9", "9:16", "1:1", "4:3", "3:4", "21:9"}:
             raise StudioError("Choose a supported project aspect ratio before animation.", "unsupported_format")
-        return {"id": uuid.uuid4().hex, "status": "candidate", "files": files, "prompt": prompt,
+        from studio_workflow import estimate
+        return {"estimateUsd": estimate(binding, "watch", shot, duration=duration), "id": uuid.uuid4().hex, "status": "candidate", "files": files, "prompt": prompt,
                 "images": refs, "audio": audio, "duration": duration, "ratio": ratio, "resolution": "480p", "binding": binding,
                 "source": source, "shotHash": digest(Shot.model_validate({k: shot[k] for k in Shot.model_fields if k in shot}).model_dump()),
                 "dependencies": {s: (self.artifact(shot, s) or {}).get("id") for s in ("see", "hear")}}
@@ -609,7 +619,8 @@ class Production:
                 raise StudioError("The WATCH inputs changed. Review an updated request.", "stale")
             inputs["request"] = request
         request_count = len(inputs["dialogue"]) if kind == "hear" else 1
-        cost = money(binding["estimateUsd"]) * request_count
+        from studio_workflow import estimate
+        cost = money(estimate(binding, kind, shot, duration=inputs.get("request", {}).get("duration")))
         budget = state["budget"]
         if budget["allowance"] - budget["committed"] - budget["reserved"] < cost:
             raise StudioError("The episode allowance does not cover this request. Increase it or adjust the project service estimate.", "budget_required")
@@ -647,7 +658,9 @@ class Production:
             records += [{"episode": row["episode"], "shotId": note["shotId"], "stage": "watch", "decision": "review_note",
                          "note": note["note"], "resolved": note.get("resolved", False), "source": "episode_review"}
                         for note in episode_state.get("assembly", {}).get("notes", [])[-10:]]
-        return (records + state["reviews"][-10:])[-60:]
+        from studio_workflow import approved_learning
+        feedback = (records + state["reviews"][-10:])[-60:]
+        return [{**r, "authority": "review feedback, including rejections; not a rule"} for r in feedback] + approved_learning(self, db, pid)
 
     def launch(self, job):
         with _RUNNING_LOCK:
@@ -715,6 +728,8 @@ class Production:
                     with self.ws.db() as db:
                         current_state = self._load(db, pid, job['episode'])
                     scene = [s for s in current_state['shots'] if s['scene'] == job['shot']['scene']]
+                    from studio_references import suggestions
+                    data['approvedReferenceChoices'] = suggestions(self, context, current_state, job['shot'])
                     data['sceneDirection'] = [{k: s.get(k) for k in ('id', 'intent', 'camera', 'geography', 'openingState', 'endingState', 'transition')} for s in scene]
 
                 if len(json.dumps(data)) > 200000:
@@ -723,6 +738,7 @@ class Production:
                           if item.get("anchor") and (not job["shot"] or name in job["shot"]["characters"])]
                 visual += [{"name": item["name"], "path": item["image"]} for item in context["assets"]["locations"]
                            if item.get("image") and (not job["shot"] or item["name"] == job["shot"]["location"])]
+                visual += [{"name": item["name"], "path": item["path"]} for item in data.get("approvedReferenceChoices", [])[:2] if item["path"] not in {v["path"] for v in visual}]
                 visual = [item for item in visual if self.ws.project_path(pid, item["path"]).is_file()][:8]
                 data["attachedReferenceNames"] = [item["name"] for item in visual]
                 result = self.transport.direct(connection, key, binding["model"], job["standard"], data, planning=kind == "plan",
@@ -884,6 +900,9 @@ class Production:
                     self._message(state, "agent", result["message"])
             else:
                 shot = self.selected(state, job["shotId"])
+                if kind in {"see", "watch"}:
+                    from studio_workflow import handoff
+                    result["directionTrace"] = handoff(job["shot"], kind, job["references"] if kind == "see" else job["inputs"]["request"]["images"])
                 result.update(binding=job["binding"], sourceHash=job["sourceHash"], standardHash=job["standardHash"], jobId=job["id"])
                 if kind in {"hear", "watch"}:
                     result["duration"] = self.transport.verify_media(self.ws.project_path(pid, result["files"][0]["path"]), "audio" if kind == "hear" else "video")

@@ -101,6 +101,7 @@ class Workspace:
                 CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY, project TEXT, episode TEXT, state TEXT, data TEXT);
                 CREATE TABLE IF NOT EXISTS commands(project TEXT, episode TEXT, id TEXT, result TEXT, PRIMARY KEY(project,episode,id));
                 CREATE TABLE IF NOT EXISTS library_versions(id TEXT PRIMARY KEY, project TEXT, data TEXT);
+                CREATE TABLE IF NOT EXISTS character_states(project TEXT, id TEXT, data TEXT, PRIMARY KEY(project,id));
             """)
         os.chmod(self.db_path, 0o600)
 
@@ -142,8 +143,10 @@ class Workspace:
                   "locations": json.loads(read("locations.json")), "props": json.loads(read("props.json"))}
         episodes = json.loads(read("episodes.json"))
         context = {"project": meta, "bible": read("show_bible.md"), "assets": assets, "episodes": episodes}
+        with self.db() as db:
+            context["characterStates"] = [json.loads(r[0]) for r in db.execute("SELECT data FROM character_states WHERE project=? ORDER BY id", (pid,))]
         context["assetDigests"] = {}
-        for item in list(assets["characters"].values()) + assets["locations"] + assets["props"]:
+        for item in list(assets["characters"].values()) + assets["locations"] + assets["props"] + context["characterStates"]:
             relative = item.get("anchor") or item.get("image")
             if relative:
                 path = self.project_path(pid, relative)
@@ -244,6 +247,8 @@ class Workspace:
             if payload.get("sourceHash") != context["sourceHash"]:
                 raise StudioError("The library changed. Reopen it before saving this edit.", "stale")
             group = payload.get("group")
+            if group == "states":
+                return self.update_character_state(db, context, payload, decode_image)
             if group not in {"bible", "characters", "locations", "props"}:
                 raise StudioError("Choose the bible, characters, locations or props.")
             text = str(payload.get("notes") or "").strip()
@@ -271,7 +276,13 @@ class Workspace:
                     entry = {"name": name}
                     values.append(entry)
                 entry["key_features" if group == "characters" else "notes"] = text
-                entry["approvalStatus"] = "draft"
+                entry["approvalStatus"] = "approved" if payload.get("approve") is True else "draft"
+                entry["version"] = uuid.uuid4().hex
+                if group == "characters" and "identityTraits" in payload:
+                    traits = payload["identityTraits"]
+                    if not isinstance(traits, dict) or len(traits) > 30 or any(not isinstance(k, str) or not isinstance(v, str) or len(k) > 80 or len(v) > 300 for k, v in traits.items()):
+                        raise StudioError("Use short named identity traits and values.")
+                    entry["identityTraits"] = traits
                 if image:
                     entry["anchor" if group == "characters" else "image"] = image
                     if group == "characters":
@@ -288,6 +299,39 @@ class Workspace:
                 os.fsync(stream.fileno())
             temporary.replace(file)
         return {"ok": True, "context": self.context(pid)}
+
+    def update_character_state(self, db, context, payload, decode_image):
+        pid = context["project"]["id"]
+        sid = token(payload.get("id") or uuid.uuid4().hex)
+        old = next((v for v in context["characterStates"] if v["id"] == sid), None)
+        character, name = str(payload.get("character") or ""), str(payload.get("name") or "").strip()
+        if character not in context["assets"]["characters"] or not name or len(name) > 100:
+            raise StudioError("Choose this project's character and name the state.")
+        if old and old["character"] != character:
+            raise StudioError("Create a separate state for another character.")
+        scenes = payload.get("scenes") or []
+        if not isinstance(scenes, list) or any(type(n) is not int or n < 1 for n in scenes):
+            raise StudioError("Scene numbers must be positive whole numbers.")
+        episode = str(payload.get("episode") or "")
+        if episode and not any(str(e["number"]) == episode for e in context["episodes"]):
+            raise StudioError("Select an episode from this project.", "scope_mismatch")
+        if scenes and not episode:
+            raise StudioError("Choose the episode for these scene numbers.")
+        image = (old or {}).get("image")
+        if payload.get("imageData"):
+            blob, ext = decode_image(payload["imageData"])
+            image = f"projects/{pid}/assets/state-{uuid.uuid4().hex}{ext}"
+            self.project_path(pid, image).write_bytes(blob)
+        if not image:
+            raise StudioError("Add a reference image for this character state.")
+        value = {"id": sid, "character": character, "name": name, "notes": str(payload.get("notes") or "")[:12000],
+                 "episode": episode, "scenes": scenes, "image": image, "version": uuid.uuid4().hex,
+                 "approvalStatus": "approved" if payload.get("approve") is True else "draft", "updatedAt": time.time()}
+        if old:
+            db.execute("INSERT INTO library_versions VALUES(?,?,?)", (uuid.uuid4().hex, pid, json.dumps({"state": old, "at": time.time()})))
+        db.execute("INSERT OR REPLACE INTO character_states VALUES(?,?,?)", (pid, sid, json.dumps(value)))
+        # Return the saved record; the caller fetches context after the transaction commits.
+        return {"ok": True, "characterState": value}
 
     def save_services(self, pid, values):
         self.project(pid)

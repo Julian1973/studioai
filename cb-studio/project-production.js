@@ -13,6 +13,7 @@
     return result;
   }
   function stage(shot) {
+    if(shot?.importedArchive)return 'archive';
     return ['see','hear','request','watch'].find(s => !(s === 'hear' && !shot.dialogue.length) && shot.outcomes?.[s]?.status !== 'approved') || 'done';
   }
   function modal(title) {
@@ -116,20 +117,36 @@
       if(!root.isConnected)return;
       root.innerHTML=`<p>Update the bible or add and revise references. Earlier source versions and original image files are retained. Production will identify which unfinished shots need refreshing.</p><form class="sp-form"><label>Library section<select name="group"><option value="bible">Show bible</option><option value="characters">Characters</option><option value="locations">Locations & scene plates</option><option value="props">Props</option></select></label><label id="sp-existing">Existing asset<select name="existing"></select></label><label id="sp-asset-name">Asset name<input name="name" maxlength="100"></label><label>Notes / bible<textarea name="notes" style="min-height:200px"></textarea></label><label id="sp-asset-image">New reference image (optional)<input name="image" type="file" accept="image/png,image/jpeg,image/webp"></label><button class="btn" type="submit">Save library revision</button><p data-error role="alert"></p></form>`;
       const form=root.querySelector('form');
+      root.insertAdjacentHTML('afterbegin','<button class="btn ghost" data-manage-states>Character states</button>');
+      root.querySelector('[data-manage-states]').onclick=()=>states(project);
+      form.querySelector('button[type=submit]').insertAdjacentHTML('beforebegin','<label id="sp-traits">Identity traits — one trait = value per line<textarea name="traits" placeholder="species = bear\ncolour = lavender\nwings = none"></textarea></label><label id="sp-approve-asset"><input type="checkbox" name="approve" style="width:auto"> I approve this reference and its identity information</label>');
       const entries=()=>form.elements.group.value==='characters'?Object.entries(context.assets.characters).map(([name,item])=>({name,...item})):context.assets[form.elements.group.value]||[];
-      const selectAsset=()=>{const item=entries().find(a=>a.name===form.elements.existing.value);form.elements.name.value=item?.name||'';form.elements.notes.value=item?.notes||item?.key_features||'';form.elements.image.value='';};
-      const chooseGroup=()=>{const bible=form.elements.group.value==='bible';for(const id of ['sp-existing','sp-asset-name','sp-asset-image'])root.querySelector('#'+id).hidden=bible;form.elements.existing.innerHTML='<option value="">Add an asset</option>'+entries().map(a=>`<option value="${esc(a.name)}">${esc(a.name)}</option>`).join('');selectAsset();if(bible)form.elements.notes.value=context.bible;};
+      const selectAsset=()=>{const item=entries().find(a=>a.name===form.elements.existing.value);form.elements.name.value=item?.name||'';form.elements.notes.value=item?.notes||item?.key_features||'';form.elements.image.value='';form.elements.traits.value=Object.entries(item?.identityTraits||{}).map(([k,v])=>k+' = '+v).join('\n');form.elements.approve.checked=false;};
+      const chooseGroup=()=>{const bible=form.elements.group.value==='bible';for(const id of ['sp-existing','sp-asset-name','sp-asset-image','sp-approve-asset'])root.querySelector('#'+id).hidden=bible;root.querySelector('#sp-traits').hidden=form.elements.group.value!=='characters';form.elements.existing.innerHTML='<option value="">Add an asset</option>'+entries().map(a=>`<option value="${esc(a.name)}">${esc(a.name)}</option>`).join('');selectAsset();if(bible)form.elements.notes.value=context.bible;};
       form.elements.group.onchange=chooseGroup;form.elements.existing.onchange=selectAsset;chooseGroup();
       form.onsubmit=async event=>{
         event.preventDefault();const button=form.querySelector('button');button.disabled=true;
         try {
           const file=form.elements.image.files[0];let imageData;
           if(file)imageData=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});
-          await api('/api/project-library',{projectId:project.id,sourceHash:context.sourceHash,group:form.elements.group.value,name:form.elements.name.value,notes:form.elements.notes.value,imageData});
+          const identityTraits=Object.fromEntries(form.elements.traits.value.split('\n').filter(s=>s.trim()).map(line=>{const at=line.indexOf('=');if(at<1)throw new Error('Use trait = value on each identity line.');return [line.slice(0,at).trim(),line.slice(at+1).trim()];}));
+          await api('/api/project-library',{projectId:project.id,sourceHash:context.sourceHash,group:form.elements.group.value,name:form.elements.name.value,notes:form.elements.notes.value,imageData,approve:form.elements.approve.checked,...(form.elements.group.value==='characters'?{identityTraits}:{})});
           document.getElementById('modal').classList.remove('show');
           if(CURRENT_PROJECT?.id===project.id)await renderProjectWorkspace();
         } catch(error){showError(root,error.message);button.disabled=false;}
       };
+    } catch(error){showError(root,error.message);}
+  }
+  async function states(project = CURRENT_PROJECT) {
+    const root=modal(project.name+' · Character states');root.textContent='Loading project states…';
+    try {
+      const {context}=await api('/api/project-library?projectId='+encodeURIComponent(project.id));
+      if(!root.isConnected)return;
+      root.innerHTML=`<p>Keep character identity fixed while approving changes such as costume, wetness or damage. Each state has its own image and scope.</p><form class="sp-form"><label>State<select name="existing"><option value="">Add a character state</option>${context.characterStates.map(s=>`<option value="${esc(s.id)}">${esc(s.character)} · ${esc(s.name)} · ${esc(s.approvalStatus)}</option>`).join('')}</select></label><label>Character<select name="character">${Object.keys(context.assets.characters).map(c=>`<option>${esc(c)}</option>`).join('')}</select></label><label>State name<input name="name" placeholder="Soaked after the storm" required></label><label>What changes, and what stays consistent<textarea name="notes"></textarea></label><label>Episode scope<select name="episode"><option value="">All episodes</option>${context.episodes.map(e=>`<option value="${e.number}">${e.number} · ${esc(e.title)}</option>`).join('')}</select></label><label>Scene numbers (optional, comma separated)<input name="scenes" placeholder="2, 3"></label><img id="sp-state-image" class="sp-media" hidden alt="Character state reference"><label>Reference image<input name="image" type="file" accept="image/png,image/jpeg,image/webp"></label><label><input name="approve" type="checkbox" style="width:auto"> I approve this state for its selected scenes</label><button class="btn" type="submit">Save character state</button><p data-error role="alert"></p></form>`;
+      const form=root.querySelector('form'),preview=root.querySelector('#sp-state-image');let imageData;
+      form.elements.existing.onchange=()=>{const s=context.characterStates.find(s=>s.id===form.elements.existing.value);form.elements.character.value=s?.character||Object.keys(context.assets.characters)[0]||'';form.elements.name.value=s?.name||'';form.elements.notes.value=s?.notes||'';form.elements.episode.value=s?.episode||'';form.elements.scenes.value=s?.scenes.join(', ')||'';form.elements.approve.checked=false;form.elements.image.value='';imageData=undefined;preview.hidden=!s?.image;if(s?.image)preview.src=BASE+'/'+s.image;};
+      form.elements.image.onchange=async()=>{const file=form.elements.image.files[0];if(!file)return;imageData=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});preview.src=imageData;preview.hidden=false;};
+      form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('button');button.disabled=true;try{await api('/api/project-library',{projectId:project.id,sourceHash:context.sourceHash,group:'states',id:form.elements.existing.value||undefined,character:form.elements.character.value,name:form.elements.name.value,notes:form.elements.notes.value,episode:form.elements.episode.value,scenes:form.elements.scenes.value.split(',').map(s=>s.trim()).filter(Boolean).map(Number),imageData,approve:form.elements.approve.checked});document.getElementById('modal').classList.remove('show');if(CURRENT_PROJECT?.id===project.id)await renderProjectWorkspace();}catch(error){showError(root,error.message);button.disabled=false;}};
     } catch(error){showError(root,error.message);}
   }
   async function mount(project, episodes) {
@@ -138,9 +155,9 @@
     let saved = {}; try { saved=JSON.parse(localStorage.getItem('studio.selection.'+project.id)||'{}'); } catch{}
     const episode = episodes.find(e=>String(e.number)===String(saved.episode)) || episodes[0];
     const ctx = active = {project,root,episode:episode?String(episode.number):null,shotId:saved.shotId||'',busy:false,timer:null,signature:''};
-    root.innerHTML = `<div class="sp-heading"><div><span class="lab">Production agent</span><h2>You direct the film.</h2><p>Describe the change. Review the outcome. Keep moving.</p></div><button class="btn ghost" data-services>Project services</button></div>${episodes.length?`
+    root.innerHTML = `<div class="sp-heading"><div><span class="lab">Production agent</span><h2>Direct your episode.</h2></div><button class="btn ghost" data-services>Project services</button></div>${episodes.length?`
       <label>Episode / sequence<select id="sp-episode">${episodes.map(e=>`<option value="${e.number}" ${String(e.number)===ctx.episode?'selected':''}>${e.number} · ${esc(e.title)}</option>`).join('')}</select></label>
-      <div class="sp-budget"><p id="sp-budget-status"></p><form id="sp-budget-form"><label>Episode allowance (USD)<input type="number" min="0.01" step="0.01" id="sp-budget-amount" required></label><button class="btn ghost" type="submit">Approve allowance & prepare</button></form></div>
+      <div class="sp-budget"><p id="sp-budget-status"></p><details id="sp-budget-edit" open><summary>Episode allowance</summary><form id="sp-budget-form"><label>Episode allowance (USD)<input type="number" min="0.01" step="0.01" id="sp-budget-amount" required></label><button class="btn ghost" type="submit">Approve allowance & prepare</button></form></details></div>
       <p id="sp-error" role="alert"></p><div id="sp-source-update"></div><div id="sp-jobs" aria-live="polite"></div><div class="sp-desk"><div class="sp-stage"><div id="sp-shot-list" class="sp-shot-list"></div><div id="sp-outcome"></div></div><aside class="sp-agent"><h3>Direct this shot</h3><div id="sp-scope"></div><div id="sp-feed" role="log" aria-live="polite"></div><form id="sp-chat"><label>Directing<select id="sp-direction-stage"><option value="see">Picture and staging</option><option value="hear">Voice performance</option><option value="watch">Animation and timing</option></select></label><label for="sp-direction">Your direction</label><textarea id="sp-direction" placeholder="Make the reaction more hesitant. Keep the voice and geography." required></textarea><button class="btn" type="submit">Send direction</button></form><p>Your agent uses this project’s bible, references and review notes. Approvals always come from you.</p></aside></div>`:'<p>Save your first script below. The production agent will prepare its shots after you connect direction and approve an episode allowance.</p>'}`;
     root.querySelector('[data-services]').onclick = ()=>services(project);
     if(!episode)return;
@@ -150,6 +167,7 @@
       event.preventDefault();const input=root.querySelector('#sp-direction'), message=input.value;
       if(await send(ctx,'chat',{message,stage:root.querySelector('#sp-direction-stage').value})&&input.value===message)input.value='';
     };
+    root.querySelector('#sp-direction-stage').onchange=()=>{ctx.directionManual=true;};
     root.querySelector('#sp-source-update').onclick=event=>{if(event.target.closest('[data-refresh-sources]'))send(ctx,'refresh_sources',{sourceHash:ctx.snapshot.sourceHash});};
     root.querySelector('#sp-shot-list').onclick = event=>{const button=event.target.closest('[data-shot]');if(button){ctx.shotId=button.dataset.shot;ctx.signature='';draw(ctx);}};
     root.querySelector('#sp-outcome').onclick = event=>{
@@ -158,6 +176,7 @@
       send(ctx,button.dataset.command,{note});
     };
     root.querySelector('#sp-jobs').onclick=event=>{const button=event.target.closest('button');if(button?.dataset.resume)send(ctx,'resume',{jobId:button.dataset.resume});if(button?.dataset.reconcile)send(ctx,'reconcile',{jobId:button.dataset.reconcile,providerChecked:true,taskId:root.querySelector('#sp-recovery-task')?.value||undefined});};
+    window.StudioReview?.mount(ctx,send,draw);
     await refresh(ctx);
   }
   function current(ctx) {return active===ctx&&ctx.root.isConnected&&CURRENT_PROJECT?.id===ctx.project.id;}
@@ -179,6 +198,7 @@
     const episodeAtSend=ctx.episode, nextShot=shot&&stage(shot)==='watch'&&(action==='approve'||action==='chat'&&/^approve(?: watch)?[.!]?$/i.test(extra.message?.trim()||''))?ctx.snapshot.state.shots[ctx.snapshot.state.shots.indexOf(shot)+1]:null;
     const reviewId = action==='continue'&&shot&&stage(shot)==='watch'||action==='watch'||(action==='chat'&&/^(fire|render)$/i.test(extra.message?.trim()||'')) ? shot?.outcomes?.request?.id : target?.id;
     ctx.busy=true;ctx.root.querySelector('#sp-error').textContent='';setBusy(ctx,true);
+    if(action==='approve'||(action==='chat'&&/^approve(?: (?:see|hear|watch|request))?[.!]?$/i.test(extra.message?.trim()||'')))ctx.directionManual=false;
     try {
       await api('/api/project-command',{projectId:ctx.project.id,episode:ctx.episode,shotId:ctx.shotId,
         action,commandId:crypto.randomUUID(),expectedRevision:ctx.snapshot.state.revision,reviewId,...extra});
@@ -188,7 +208,7 @@
       if(current(ctx)){await refresh(ctx);ctx.root.querySelector('#sp-error').textContent=error.message;}return false;
     } finally {ctx.busy=false;if(current(ctx))setBusy(ctx,false);}
   }
-  function setBusy(ctx,busy){const working=['queued','running','pending','unknown'].includes(ctx.snapshot?.jobs?.[0]?.status);ctx.root.querySelectorAll('button[type=submit],[data-command]').forEach(button=>{button.disabled=busy||((working||ctx.snapshot?.sourceChanged)&&!button.closest('#sp-budget-form'));button.title=ctx.snapshot?.sourceChanged?'Review the updated project sources first':working?'Preparing or recovering the current outcome':'';});}
+  function setBusy(ctx,busy){const working=['queued','running','pending','unknown'].includes(ctx.snapshot?.jobs?.[0]?.status);ctx.root.querySelectorAll('button[type=submit],[data-command]').forEach(button=>{button.disabled=busy||((working||ctx.snapshot?.sourceChanged)&&!button.closest('#sp-budget-form'));button.title=ctx.snapshot?.sourceChanged?'Review the updated project sources first':working?'Preparing or recovering the current outcome':'';});window.StudioReview?.busy(ctx,busy);}
   function draw(ctx) {
     const {state,jobs}=ctx.snapshot,root=ctx.root;
     let shot=state.shots.find(s=>s.id===ctx.shotId);
@@ -196,6 +216,9 @@
     try{localStorage.setItem('studio.selection.'+ctx.project.id,JSON.stringify({episode:ctx.episode,shotId:ctx.shotId}));}catch{}
     root.querySelector('#sp-source-update').innerHTML=ctx.snapshot.sourceChanged?'<div class="sp-box"><h3>Project sources changed</h3><p>Review the updated bible and references in your library. Apply them to unfinished pictures while preserving finished shots and approved voices. A changed screenplay needs its own new episode or sequence version.</p><button class="btn ghost" data-refresh-sources>Use updated project sources</button></div>':'';
     const budget=state.budget;
+    const allowanceEditor=root.querySelector('#sp-budget-edit');
+    if(allowanceEditor.dataset.allowance!==String(budget.allowance)){allowanceEditor.open=!budget.allowance;allowanceEditor.dataset.allowance=String(budget.allowance);}
+    root.querySelector('#sp-budget-form button').textContent=budget.allowance?'Update allowance':'Approve allowance & prepare';
     root.querySelector('#sp-budget-status').textContent=`Allowance ${usd(budget.allowance)} · committed estimates ${usd(budget.committed)} · in progress ${usd(budget.reserved)} · remaining ${usd(budget.allowance-budget.committed-budget.reserved)}`;
     const last=jobs[0]?.status!=='completed'?jobs[0]:null;
     root.querySelector('#sp-jobs').innerHTML=last?`<div class="sp-box"><b>${esc(last.kind.toUpperCase())} · ${esc(last.status)}</b><p>${esc(last.message||'Working on your outcome…')}</p>${last.taskId?`<small>Provider task ${esc(last.taskId)}</small>`:''}${['pending','interrupted'].includes(last.status)?`<button class="btn ghost" data-resume="${esc(last.id)}">Resume job</button>`:''}${last.status==='unknown'?`<details><summary>Recover an uncertain request</summary><p>Check your provider account first. If a render task exists, enter its ID to resume it. Otherwise close this request; its estimate stays counted.</p>${last.kind==='watch'?'<label>Provider task ID (optional)<input id="sp-recovery-task"></label>':''}<button class="btn ghost" data-reconcile="${esc(last.id)}">I checked the provider — reconcile this request</button></details>`:''}</div>`:'';
@@ -205,24 +228,41 @@
     const feedSignature=JSON.stringify(messages);
     if(feed.dataset.signature!==feedSignature){feed.innerHTML=messages.map(m=>`<div class="sp-message ${m.role==='user'?'sp-user':''}"><b>${m.role==='user'?'You':'Production agent'}</b><p>${esc(m.text)}</p></div>`).join('')||'<p>Ready when you are. Set your services and episode allowance to begin.</p>';feed.dataset.signature=feedSignature;feed.scrollTop=feed.scrollHeight;}
     const signature=JSON.stringify(shot||state.shots);
+    window.StudioReview?.paint(ctx);
     if(ctx.signature===signature){setBusy(ctx,ctx.busy);return;}
     ctx.signature=signature;
     const outcome=root.querySelector('#sp-outcome');
     if(!shot){outcome.innerHTML='<div class="sp-box"><h3>Your script becomes directed shots</h3><p>The director prepares emotional beats, camera coverage, performance and matched generation prompts. Your first review is the SEE keyframe.</p><button class="btn" data-command="prepare">Prepare my episode</button></div>';return;}
     const s=stage(shot), candidate=shot.outcomes?.[s];
-    if(!root.querySelector('#sp-direction').value)root.querySelector('#sp-direction-stage').value=s==='hear'?'hear':['request','watch','done'].includes(s)?'watch':'see';
+    let next=s;
+    if(candidate?.status==='candidate')next=s==='see'?(shot.dialogue.length?'hear':'request'):s==='hear'?'request':s==='request'?'watch':state.shots.indexOf(shot)<state.shots.length-1?'see':'done';
+    const nextRole={see:'keyframes',hear:'voices',watch:'animation'}[next],estimate=ctx.snapshot.services[nextRole]?.estimateUsd;
+    const nextCost=nextRole?`${candidate?.status==='candidate'?'Approval prepares':'Prepare'} ${next.toUpperCase()} · ${estimate==null?'choose service estimates first':'$'+Number(estimate).toFixed(2)+' estimated'}`:next==='request'?'Next: review the render prompt and references. No generation cost for preparing the request.':'No further generation is needed for this shot.';
+    if(ctx.directionShot!==shot.id){ctx.directionManual=false;ctx.directionShot=shot.id;}
+    if(!ctx.directionManual)root.querySelector('#sp-direction-stage').value=s==='hear'?'hear':['request','watch','done'].includes(s)?'watch':'see';
     const media=(item,kind)=>{
       if(!item?.files?.length)return '';
       const url=BASE+'/'+item.files[0].path.split('/').map(encodeURIComponent).join('/');
       return kind==='see'?`<img class="sp-media" src="${esc(url)}" alt="${esc(shot.id)} opening keyframe">`:kind==='hear'?`<audio class="sp-media" controls preload="metadata" src="${esc(url)}"></audio>`:`<video class="sp-media" controls preload="metadata" src="${esc(url)}"></video>`;
     };
-    outcome.innerHTML=`<h3>${esc(shot.title)}</h3><p>${esc(shot.emotion)}</p>${shot.continuityReview?`<p class="sp-notice">${esc(shot.continuityReview)}</p>`:''}<div class="sp-step-labels">${['see','hear','request','watch'].map(k=>`<span class="${s===k?'current':''}">${k==='request'?'Render request':k.toUpperCase()} · ${esc(shot.outcomes?.[k]?.status||(k==='hear'&&!shot.dialogue.length?'No dialogue':'Next'))}</span>`).join('')}</div>
+    outcome.innerHTML=`<div class="sp-shot-heading"><span class="lab">Scene ${shot.scene} · ${esc(shot.id)}</span><h3>${esc(shot.title)}</h3><p>${esc(shot.emotion)}</p>${shot.intent?`<p><b>Character wants:</b> ${esc(shot.intent)}</p>`:''}</div>${shot.continuityReview?`<p class="sp-notice">${esc(shot.continuityReview)}</p>`:''}<div class="sp-step-labels">${['see','hear','request','watch'].map(k=>`<span class="${s===k?'current':''}">${k==='request'?'Render request':k.toUpperCase()} · ${esc(shot.outcomes?.[k]?.status||(k==='hear'&&!shot.dialogue.length?'No dialogue':'Next'))}</span>`).join('')}</div>
       ${['see','hear','watch'].filter(k=>shot.outcomes?.[k]).map(k=>`<details class="sp-box" ${(k===s||s==='done'&&k==='watch')?'open':''}><summary>${k.toUpperCase()} · ${esc(shot.outcomes[k].status)}</summary>${k==='see'&&(shot.outcomes[k].references||[]).find(r=>r.name.startsWith('Previous approved ending'))?`<figure><figcaption>Incoming approved ending · continuity reference</figcaption><img class="sp-media" src="${esc(BASE+'/'+shot.outcomes[k].references.find(r=>r.name.startsWith('Previous approved ending')).path)}" alt="Previous approved ending"></figure>`:''}${media(shot.outcomes[k],k)}${shot.outcomes[k].audioAuthority?`<p>${esc(shot.outcomes[k].audioAuthority.note)}</p>`:''}</details>`).join('')}
       ${shot.outcomes?.request?`<details class="sp-box" ${s==='request'?'open':''}><summary>WATCH request · ${shot.outcomes.request.duration}s · ${esc(shot.outcomes.request.resolution)} · $${Number(shot.outcomes.request.binding.estimateUsd).toFixed(2)} estimated</summary><p>Model: ${esc(shot.outcomes.request.binding.model)}</p><h4>Prompt</h4><pre>${esc(shot.outcomes.request.prompt)}</pre><h4>Script</h4><pre>${esc(shot.outcomes.request.source)}</pre><button class="btn ghost" data-command="request">Refresh request for review</button><h4>References</h4><div class="sp-references">${shot.outcomes.request.images.map(r=>`<figure><img src="${esc(BASE+'/'+r.path)}" alt="${esc(r.name)}"><figcaption>${esc(r.name)}</figcaption></figure>`).join('')}</div></details>`:''}
       <div class="sp-actions">${s==='done'?'<p>Render approved. Select the next shot.</p>':candidate?.status==='candidate'?`<button class="btn" data-command="approve">${s==='request'?'Approve request & render':'Approve '+s.toUpperCase()+' & continue'}</button><button class="btn ghost" data-command="reject">Reject ${s==='request'?'request':s.toUpperCase()}</button>`:`<button class="btn" data-command="${s==='watch'?'watch':'continue'}">${s==='watch'?'Render approved request':'Prepare '+(s==='request'?'WATCH request':s.toUpperCase())}</button>`}</div>
       ${s!=='done'?'<label>Review note (optional)<textarea id="sp-review-note" placeholder="What should improve?"></textarea></label>':''}
-      <details class="sp-box"><summary>Direction, source and shot history</summary><p><b>Acting:</b> ${esc(shot.performance)}</p><p><b>Camera:</b> ${esc(shot.camera)}</p><p><b>Geography:</b> ${esc(shot.geography)}</p><p><b>Handoff:</b> ${esc(shot.transition)}</p><h4>SEE prompt</h4><pre>${esc(shot.seePrompt)}</pre><h4>WATCH prompt</h4><pre>${esc(shot.watchPrompt)}</pre><h4>Exact dialogue</h4><pre>${esc(shot.dialogue.map(d=>d.speaker+': '+d.text).join('\n'))}</pre><p>${shot.versions?.length||0} previous outcome versions retained.</p>${(shot.versions||[]).map(v=>`<details><summary>${esc(v.stage.toUpperCase())} · ${esc(v.status)}</summary>${media(v,v.stage)}</details>`).join('')}</details>`;
+      <details class="sp-box"><summary>Direction, source and shot history</summary><p><b>Acting:</b> ${esc(shot.performance)}</p><p><b>Camera:</b> ${esc(shot.camera)}</p><p><b>Geography:</b> ${esc(shot.geography)}</p><p><b>Handoff:</b> ${esc(shot.transition)}</p><p><b>Opening state:</b> ${esc(shot.openingState||shot.geography)}</p><p><b>Ending state:</b> ${esc(shot.endingState||'See the recorded handoff direction.')}</p>${shot.beatPlan?.length?`<h4>Performance beats</h4><ol>${shot.beatPlan.map(b=>`<li>${b.at}s · ${esc(b.action)} — ${esc(b.audienceFeeling)}</li>`).join('')}</ol>`:''}<h4>SEE prompt</h4><pre>${esc(shot.seePrompt)}</pre><h4>WATCH prompt</h4><pre>${esc(shot.watchPrompt)}</pre><h4>Exact dialogue</h4><pre>${esc(shot.dialogue.map(d=>d.speaker+': '+d.text).join('\n'))}</pre><p>${shot.versions?.length||0} previous outcome versions retained.</p>${(shot.versions||[]).map(v=>`<details><summary>${esc(v.stage.toUpperCase())} · ${esc(v.status)}</summary>${media(v,v.stage)}</details>`).join('')}</details>`;
     setBusy(ctx,ctx.busy);
+    if(!shot.importedArchive)outcome.querySelector('.sp-actions').insertAdjacentHTML('afterend',`<p class="sp-next-cost">${esc(nextCost)}</p>`);
+    root.querySelector('#sp-chat').hidden=!!shot.importedArchive;
+    if(shot.importedArchive){outcome.querySelector('.sp-step-labels').innerHTML='<span>Preserved production archive</span>';outcome.querySelector('.sp-actions').innerHTML=`<p>Its original approval evidence and files remain available.</p><a class="btn ghost" href="${esc(BASE+'/'+shot.legacy.package.path)}" download>Original production record</a>`;for(const box of outcome.querySelectorAll('details'))if(box.querySelector('video'))box.open=true;}
   }
-  window.StudioProduction={mount,connections,services,library,importScript};
+  async function migration(projectId) {
+    const root=modal('Move into the director workspace');root.textContent='Checking source records and approval evidence…';
+    try {
+      const report=await api('/api/project-migration?projectId='+encodeURIComponent(projectId));if(!root.isConnected)return;
+      root.innerHTML=`<p>${esc(report.meaning)}</p><p>${report.characters} characters · ${report.files} files · ${(report.bytes/1024/1024).toFixed(0)} MB to copy</p><ul>${report.episodes.map(e=>`<li>Episode ${e.number}: ${esc(e.title)} · ${e.approvedShots} verified approved shots / ${e.shots} records</li>`).join('')}</ul>${report.warnings.length?`<details open><summary>${report.warnings.length} items to review</summary><ul>${report.warnings.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></details>`:''}<p>Imported episodes stay as production archives. New episodes use the project agent. Choose services in the new workspace; API credentials are not copied.</p><form class="sp-form"><label>New workspace ID<input name="target" value="${esc(report.suggestedId)}" required></label><label><input type="checkbox" name="reviewed" required style="width:auto"> I have reviewed what will be copied and the items needing attention</label><button class="btn" type="submit">Create upgraded workspace</button><p data-error role="alert"></p></form>`;
+      const form=root.querySelector('form');form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('button');button.disabled=true;button.textContent='Copying and verifying…';try{await api('/api/project-migration',{projectId,targetId:form.elements.target.value,fingerprint:report.fingerprint,reviewed:form.elements.reviewed.checked});document.getElementById('modal').classList.remove('show');await bootProjects();}catch(error){showError(root,error.message);button.disabled=false;button.textContent='Create upgraded workspace';}};
+    } catch(error){showError(root,error.message);}
+  }
+  window.StudioProduction={mount,connections,services,library,states,importScript,migration};
 })();

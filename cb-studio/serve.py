@@ -2563,7 +2563,7 @@ _APPROVED_ROOTS = (
     ("/cb-output/",      {".json"}),                # output packages — FURTHER limited to *_beat_package.json (below)
     ("/cb-studio/data/", {".json", ".txt"}),        # registries (episodes/media-index/projects) + scripts the UI reads
     ("/cb-studio/",      {".css", ".js", ".ico"}),  # frontend assets, if any (app.html is an exact-approved file above)
-    ("/projects/",       {".json", ".md", ".txt"} | _MEDIA_EXT),  # per-project scaffold (meta/characters/bible/episodes + its own assets/media)
+    ("/projects/",       {".json", ".md", ".txt", ".fcpxml"} | _MEDIA_EXT),  # project assets and finishing handoffs
 )
 # "projects-index.json" is retired/dead data (kept in the deny list defensively, costs nothing). "projects.json"
 # is the LIVE project-registry filename (see the two real call sites reading it under cb-studio/data/) — it was
@@ -2811,7 +2811,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if _legacy_gone(self):
             return
-        if urlsplit(self.path).path in {"/api/workspace/connections", "/api/project-services", "/api/project-production", "/api/project-library"}:
+        if urlsplit(self.path).path in {"/api/workspace/connections", "/api/project-services", "/api/project-production", "/api/project-library", "/api/project-migration"}:
             from urllib.parse import parse_qs
             from studio_workspace import Workspace, PROVIDERS, StudioError
             from studio_production import Production
@@ -2825,6 +2825,9 @@ class H(http.server.SimpleHTTPRequestHandler):
                     result = {"services": workspace.services(project)}
                 elif urlsplit(self.path).path == "/api/project-library":
                     result = {"context": workspace.context(project)}
+                elif urlsplit(self.path).path == "/api/project-migration":
+                    from studio_migration import Migration
+                    result = Migration(workspace).preview(project)
                 else:
                     result = Production(workspace).snapshot(project, (query.get("episode") or [None])[0])
                 return self._json(200, result)
@@ -3787,7 +3790,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     return self._json(409, {"error": "Use the selected project's production agent for this action.", "code": "scope_mismatch"})
             except Exception:
                 return self._json(400, {"error": "A valid production command is required."})
-        if self.path in {"/api/workspace/connections", "/api/project-services", "/api/project-command", "/api/project-library", "/api/project-script-extract"}:
+        if self.path in {"/api/workspace/connections", "/api/project-services", "/api/project-command", "/api/project-library", "/api/project-script-extract", "/api/project-migration"}:
             from studio_workspace import Workspace, StudioError
             from studio_production import Production
             try:
@@ -3802,6 +3805,9 @@ class H(http.server.SimpleHTTPRequestHandler):
                     result = {"services": workspace.save_services(d.get("projectId"), d.get("services") or {})}
                 elif self.path == "/api/project-library":
                     result = workspace.update_library(d, decode_image_upload)
+                elif self.path == "/api/project-migration":
+                    from studio_migration import Migration
+                    result = Migration(workspace).apply(d)
                 elif self.path == "/api/project-script-extract":
                     workspace.project(d.get("projectId"))
                     result = {"script": extract_doc_text(d.get("docData"), d.get("docName", ""))}

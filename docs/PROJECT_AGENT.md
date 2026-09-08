@@ -5,6 +5,9 @@ records, then prepares SEE, HEAR and WATCH outcomes. Chat and buttons call the s
 `POST /api/project-command` dispatcher. Model output cannot approve work, select a
 different account, increase the allowance, execute code or create an independent job trail.
 
+The [director workspace](DIRECTOR_WORKSPACE.md) adds the visual episode board,
+continuity inspector, character states, proposed edits/undo and episode review timeline.
+
 ## Using the project workspace
 
 1. Create a project with its own bible and character, location and prop references.
@@ -20,7 +23,8 @@ different account, increase the allowance, execute code or create an independent
    approval prepares a request showing its prompt, source text, references, duration,
    account/model revision and estimate. Approving that request submits one render.
 6. Review the returned WATCH candidate. Its approval prepares the next shot. Rejection
-   retains the candidate and its review note; the agent can revise the selected shot.
+   retains the candidate and its review note. Agent revisions appear as proposals;
+   Apply & prepare updates the selected shot and prepares its next outcome.
 
 Use **Edit project library** to add or revise references and bible text. Files get new
 names; prior metadata and bible versions are retained. A source update shows its effect
@@ -34,7 +38,9 @@ predate project onboarding. Its current records and approvals are not copied int
 ledger. Explicit foreign project IDs are refused by legacy shot/director mutation routes.
 The new BYOK selections are consumed by the project workspace engine; they do not silently
 override legacy environment credentials. Migrating an established project requires a
-separate, reviewed adapter for its existing production records.
+reviewed copy through Upgrade workspace. It preserves historical episodes as read-only
+archives in a separate project workspace; new episodes use the project agent. Existing
+production records are not converted into newly approved shot plans.
 
 ## Creative handoff and review
 

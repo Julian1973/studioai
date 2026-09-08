@@ -159,6 +159,9 @@ def test_revision_reaches_prompts_preserves_voice_and_other_shots(setup):
     updated['seePrompt']='A fragile smile after hesitation.'
     t.reply={'message':'The reaction now hesitates.','revisedShot':updated}
     command(p,'chat',shotId='S1.SH1',message='Make the reaction more hesitant. Keep the voice and geography.')
+    preview=p.snapshot('first','1')['state']['shots'][0]
+    assert preview['performance']==old['performance'] and preview['outcomes']==old['outcomes']
+    command(p,'apply_revision',shotId='S1.SH1',proposalId=preview['proposal']['id'],prepare=True)
     state=p.snapshot('first','1')['state'];new=state['shots'][0]
     assert new['performance']==updated['performance']
     assert new['outcomes']['hear']==old['outcomes']['hear']
@@ -271,6 +274,9 @@ def test_voice_delivery_revision_preserves_picture(setup):
     revised['dialogue'][0]['delivery']='whispering'
     t.reply={'message':'A quieter performance.','revisedShot':revised}
     command(p,'chat',shotId='S1.SH1',message='Whisper the line',stage='hear')
+    preview=p.snapshot('first','1')['state']['shots'][0]
+    assert preview['outcomes']==old['outcomes']
+    command(p,'apply_revision',shotId='S1.SH1',proposalId=preview['proposal']['id'],prepare=True)
     new=p.snapshot('first','1')['state']['shots'][0]
     assert new['outcomes']['see']==old['outcomes']['see']
     assert new['outcomes']['hear']['id']!=old['outcomes']['hear']['id']

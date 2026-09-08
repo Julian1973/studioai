@@ -32,6 +32,23 @@ class Dialogue(StrictModel):
     delivery: Literal["neutral", "whispering", "laughs", "sighs", "crying", "excited", "sad", "curious"]
 
 
+class StateBinding(StrictModel):
+    character: str
+    stateId: str
+
+
+class IdentityClaim(StrictModel):
+    character: str
+    trait: str
+    value: str
+
+
+class PerformanceBeat(StrictModel):
+    at: float
+    action: str
+    audienceFeeling: str
+
+
 class Shot(StrictModel):
     id: str
     scene: int
@@ -50,6 +67,12 @@ class Shot(StrictModel):
     dialogue: list[Dialogue]
     seePrompt: str
     watchPrompt: str
+    intent: str = ""
+    openingState: str = ""
+    endingState: str = ""
+    beatPlan: list[PerformanceBeat] = Field(default_factory=list)
+    characterStates: list[StateBinding] = Field(default_factory=list)
+    identityClaims: list[IdentityClaim] = Field(default_factory=list)
 
 
 class EpisodePlan(StrictModel):

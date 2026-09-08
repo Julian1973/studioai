@@ -2812,7 +2812,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if _legacy_gone(self):
             return
-        if urlsplit(self.path).path in {"/api/workspace/connections", "/api/project-services", "/api/project-production", "/api/project-library", "/api/project-migration"}:
+        if urlsplit(self.path).path in {"/api/episode-covers", "/api/workspace/connections", "/api/project-services", "/api/project-production", "/api/project-library", "/api/project-migration"}:
             from urllib.parse import parse_qs
             from studio_workspace import Workspace, PROVIDERS, StudioError
             from studio_production import Production
@@ -2820,7 +2820,10 @@ class H(http.server.SimpleHTTPRequestHandler):
                 workspace = Workspace(ROOT)
                 query = parse_qs(urlsplit(self.path).query)
                 project = (query.get("projectId") or [""])[0]
-                if urlsplit(self.path).path == "/api/workspace/connections":
+                if urlsplit(self.path).path == "/api/episode-covers":
+                    from studio_episode_covers import covers
+                    result = covers(workspace, project, shot_media_map)
+                elif urlsplit(self.path).path == "/api/workspace/connections":
                     result = {"connections": workspace.connections(), "providers": PROVIDERS}
                 elif urlsplit(self.path).path == "/api/project-services":
                     result = {"services": workspace.services(project)}

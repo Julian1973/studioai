@@ -1908,9 +1908,9 @@ function renderEpisodes(){
       ?`Proposed: ${_esc(e.proposedTitle||"Story & Direction")} — ${_esc(e.proposedLogline||"review the episode direction and beats")}`
       :_esc(e.logline||"(script uploaded — not yet broken into beats)");
     const actionLabel=navigable?"Open scenes":awaiting?"Review Story & Direction":e.script?"Run Story & Direction":"Add script";
-    const episodeArt=assetSrc(e.coverImage||(CURRENT_PROJECT&&CURRENT_PROJECT.episodeCoverImage)||(CURRENT_PROJECT&&CURRENT_PROJECT.coverImage));
+    const episodeArt="";
     return `<article class="epcard">
-      <div class="epthumb">${episodeArt?`<img src="${_attr(episodeArt)}" alt="" loading="lazy"/>`:''}<span class="epthumb-label">Episode ${String(e.number).padStart(2,'0')}</span></div>
+      <div class="epthumb" data-episode-cover="${_attr(e.number)}" title="Scene 1 Shot 1 keyframe not available">${episodeArt?`<img src="${_attr(episodeArt)}" alt="" loading="lazy"/>`:''}<span class="epthumb-label">Episode ${String(e.number).padStart(2,'0')}</span></div>
       <div class="epbody"><div class="n">EPISODE ${e.number}${e.leadBear?" · "+_esc(e.leadBear):""}</div>
       <div class="t">${_esc(e.title||"(unnamed)")} <button type="button" class="iconbtn" onclick="renameEp(${e.number})" title="Rename episode" aria-label="Rename Episode ${e.number}">✎</button></div><div class="l">${summary}</div>
       <span class="stat" style="color:${v(st[0])};background:${v(st[1])}">${_esc(st[2])}${ct?" · "+ct+(ready&&!isB?" shots":" beats"):""}${awaiting&&e.proposalSceneCount?" · "+e.proposalSceneCount+" scenes":""}</span>
@@ -1925,6 +1925,11 @@ function renderEpisodes(){
     ||EPISODES[0];
   const title=(CURRENT_PROJECT&&CURRENT_PROJECT.name)||"Production";
   document.getElementById("view").innerHTML=`${productionSectionHeaderHTML(title,(CURRENT_PROJECT&&CURRENT_PROJECT.premise)||`${EPISODES.length} episodes in this production.`)}${productionLibraryHTML("episodes")}<div class="production-section-head"><div><h2>Episodes</h2><span>${EPISODES.length} episode${EPISODES.length===1?'':'s'} · open one to enter its scene pipeline</span></div>${next?`<button type="button" class="btn" onclick="openEpisode(${next.number})">Continue Episode ${next.number}</button>`:`<button type="button" class="btn" onclick="addForm()">＋ Add episode</button>`}</div><div class="epgrid">${cards}<button type="button" class="addcard" onclick="addForm()"><span style="font-size:26px">＋</span><span>Add episode</span></button></div>`;
+  const coverProject=CURRENT_PROJECT?.id, coverRoot=document.getElementById("view");
+  fetch(BASE+"/api/episode-covers?projectId="+encodeURIComponent(coverProject),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(data=>{
+    if(CURRENT_PROJECT?.id!==coverProject||page!=="episodes"||!data)return;
+    coverRoot.querySelectorAll('[data-episode-cover]').forEach(node=>{const cover=data.covers?.[node.dataset.episodeCover];node.title=cover?.meaning||'Scene 1 Shot 1 keyframe not available';if(cover?.url){const img=document.createElement('img');img.src=assetSrc(cover.url);img.alt='Episode '+node.dataset.episodeCover+' · '+cover.shotId+' keyframe';img.loading='lazy';img.onerror=()=>img.remove();node.prepend(img);}});
+  }).catch(()=>{});
 }
 async function openEpisodeScript(num){if(await openEpisode(num))go("script");}
 

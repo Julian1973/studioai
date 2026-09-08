@@ -5,7 +5,7 @@
   // A duplicated browser tab clones sessionStorage. A new writer ID per document
   // plus per-field recovery pointers prevents those tabs overwriting one another.
   const tab=crypto.randomUUID();
-  const secret=value=>/\b(?:sk-[A-Za-z0-9_-]{12,}|ark-[A-Za-z0-9_-]{16,})/.test(value);
+  const secret=value=>/\b(?:sk-[A-Za-z0-9_-]{12,}|ark-[A-Za-z0-9_-]{16,}|AIza[A-Za-z0-9_-]{20,})/.test(value);
   function bind(element,scope,{revision='',meta=()=>({}),restore=()=>{},reset=false}={}){
     if(!element||element.type==='password'||element.type==='file'||element.type==='checkbox')return;
     const base=prefix+JSON.stringify(scope)+'.',key=base+tab,old=bindings.get(element);
@@ -19,7 +19,7 @@
       return Object.keys(localStorage).filter(k=>k.startsWith(base)).map(k=>{try{return JSON.parse(localStorage.getItem(k));}catch{return null;}}).filter(Boolean).sort((a,b)=>b.at-a.at)[0];
     }catch{return null;}};
     const draft=read();
-    if(draft){try{localStorage.setItem(key,JSON.stringify(draft));sessionStorage.setItem(base+'owner',tab);}catch{}}
+    if(draft&&!secret(String(draft.value||''))){try{localStorage.setItem(key,JSON.stringify(draft));sessionStorage.setItem(base+'owner',tab);}catch{}}
     if(old&&reset)element.value='';
     if(draft&&typeof draft.value==='string'&&draft.value&&!secret(draft.value)){
       element.value=draft.value;if(draft.value)restore(draft.meta||{});

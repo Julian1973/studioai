@@ -131,6 +131,8 @@ class ProviderTransport:
     def request(self, connection, key, path, *, body=None):
         provider = PROVIDERS[connection["provider"]]
         headers = {"xi-api-key": key} if connection["provider"] == "elevenlabs" else {"Authorization": "Bearer " + key}
+        if connection['provider'] == 'gemini':
+            headers = {'x-goog-api-key': key}
         try:
             response = requests.request("GET" if body is None else "POST", provider["base"] + path,
                                         headers=headers, json=body, timeout=(15, 180), allow_redirects=False)
@@ -197,6 +199,15 @@ class ProviderTransport:
             return value[:12000]
         except (ValueError, KeyError, IndexError, TypeError):
             raise StudioError('Audio review returned no complete report. Existing approvals are unchanged.', 'invalid_output') from None
+
+    def review_video(self, connection, key, model, context, sources, *, fps, contract, uploads, progress):
+        from studio_video_review import GeminiVideoClient
+        return GeminiVideoClient(key).review(model, context, sources, fps=fps, contract=contract,
+                                             uploads=uploads, progress=progress)
+
+    def cleanup_video_uploads(self, connection, key, uploads, progress):
+        from studio_video_review import GeminiVideoClient
+        GeminiVideoClient(key).cleanup(uploads, progress)
 
     def review_frames(self, connection, key, model, context, images):
         from openai import OpenAI

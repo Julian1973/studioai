@@ -118,6 +118,32 @@ try {
   await page.locator('[data-review-finding]').click();
   assert.match(await page.locator('#sp-direction').inputValue(),/At 0.5s/);
   await page.locator('#sp-direction').fill('');
+  // Upgrade a sampled review to full-file Gemini review through the real service form.
+  await page.locator('.sp-heading [data-services]').click();
+  const reviewForm=page.locator('#workspace-dialog form');
+  const googleOption=reviewForm.locator('[name="review-connection"] option').filter({hasText:'Gemini review fixture'});
+  await reviewForm.locator('[name="review-connection"]').selectOption(await googleOption.getAttribute('value'));
+  assert.equal(await reviewForm.locator('[data-review-audio]').isVisible(),false);
+  assert.equal(await reviewForm.locator('[data-review-video]').isVisible(),true);
+  await reviewForm.locator('[name="review-model"]').fill('test-gemini-video');
+  await reviewForm.locator('[name="review-fps"]').selectOption('4');
+  await reviewForm.getByRole('button',{name:'Save project services',exact:true}).click();
+  await page.locator('#modal.show').waitFor({state:'hidden'});
+  await page.locator('[data-media-review]').click();
+  await page.getByText('Test Gemini review of the complete video.',{exact:true}).waitFor();
+  assert.match(await page.locator('.sp-media-review').innerText(),/Gemini video model: test-gemini-video/);
+  assert.match(await page.locator('.sp-media-review').innerText(),/4 sampled frames\/second/);
+  assert.equal(await page.locator('[data-media-review]').count(),0);
+  await page.locator('[data-cleanup]').click();
+  await page.locator('[data-cleanup]').waitFor({state:'hidden'});
+  assert.equal(await page.locator('[data-media-review]').count(),0,'Cleanup must not repeat analysis');
+  const fakeGoogleKey='AIza'+'x'.repeat(35);
+  await page.locator('#sp-direction').fill(fakeGoogleKey);
+  assert.equal(await page.evaluate(key=>Object.values(localStorage).some(value=>value.includes(key)),fakeGoogleKey),false,'Google keys must not enter saved drafts');
+  await page.locator('#sp-direction').fill('');
+  await page.locator('[data-review-finding]').first().click();
+  assert.match(await page.locator('#sp-direction').inputValue(),/hesitation/);
+  await page.locator('#sp-direction').fill('');
   await page.screenshot({path:path.join(output,'05-media-review.png'),fullPage:true});
   await page.getByRole('button',{name:'Approve WATCH & continue',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('#sp-scope')?.textContent.includes('S1.SH2'));
@@ -198,6 +224,7 @@ try {
   console.log('Screenshots: '+output);
   console.log('PASS: character-state upload, human approval, scoped binding preview/discard and project isolation.');
   console.log('PASS: direct file launches reconnect with navigation preserved; a failed project request shows recovery controls and retry restores the existing projects.');
+  console.log('PASS: Gemini service selection, provider-specific controls, upgrading an existing sampled review, saved video evidence and direction from its finding.');
 } catch(error){
   if(browser){const pages=browser.contexts()[0]?.pages();if(pages?.[0])await pages[0].screenshot({path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});}
   console.error(error);process.exitCode=1;

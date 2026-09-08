@@ -20,6 +20,7 @@ from contextlib import contextmanager
 
 PROVIDERS = {
     "openai": {"label": "OpenAI", "base": "https://api.openai.com/v1", "check": "/models", "roles": ["direction", "review"]},
+    "gemini": {"label": "Google Gemini · video review", "base": "https://generativelanguage.googleapis.com/v1beta", "check": "/models", "roles": ["review"]},
     "byteplus": {"label": "BytePlus ModelArk · Asia Pacific", "base": "https://ark.ap-southeast.bytepluses.com/api/v3", "check": "/contents/generations/tasks?page_size=1", "roles": ["keyframes", "animation"]},
     "byteplus-eu": {"label": "BytePlus ModelArk · Europe", "base": "https://ark.eu-west.bytepluses.com/api/v3", "check": "/contents/generations/tasks?page_size=1", "roles": ["keyframes", "animation"]},
     "elevenlabs": {"label": "ElevenLabs", "base": "https://api.elevenlabs.io", "check": "/v2/voices?page_size=1", "roles": ["voices"]},
@@ -358,7 +359,12 @@ class Workspace:
             if role == "voices" and model != "eleven_v3":
                 raise StudioError("The voice adapter currently supports ElevenLabs v3.")
             clean[role] = {"connectionId": connection["id"], "model": model, "estimateUsd": float(cost)}
-            if role == 'review':
+            if role == 'review' and connection['provider'] == 'gemini':
+                fps = value.get('videoFps', 4)
+                if isinstance(fps, bool) or str(fps) not in {'1', '4', '8'}:
+                    raise StudioError('Choose standard, detailed or close motion inspection for video review.')
+                clean[role]['videoFps'] = int(fps)
+            elif role == 'review':
                 audio_model = str(value.get('audioModel') or '').strip()
                 if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.:/-]{0,149}', audio_model):
                     raise StudioError('Enter an audio-input Chat Completions model ID for media review.')

@@ -29,6 +29,23 @@ def main():
         from studio_editing import fields
         p, ws, old_transport, accounts = setup.__wrapped__(temporary)
         class Transport(FakeTransport):
+            def review_video(self, connection, key, model, context, sources, *, fps, contract, uploads, progress):
+                assert context['evidence']['videos'] and any(s['type'] == 'video' for s in sources)
+                assert all(s['path'].is_file() for s in sources)
+                uploads.append({'name': 'files/browser-fixture', 'deleted': False})
+                progress('uploaded', 'Synthetic upload recorded')
+                progress('video_analysis', 'Reviewing synthetic video fixture')
+                progress('cleanup', 'Synthetic deletion failure for recovery testing')
+                return {'report': {'summary': 'Test Gemini review of the complete video.',
+                    'audioReview': 'Synthetic audio review.', 'findings': [{'seconds': .5, 'category': 'performance',
+                    'observation': 'The synthetic clip stays blue.', 'suggestion': 'Inspect the intended hesitation.', 'confidence': 'high'}],
+                    'limitations': ['Synthetic provider response.']}, 'usage': {'total_tokens': 42}}
+
+            def cleanup_video_uploads(self, connection, key, uploads, progress):
+                for item in uploads:
+                    item['deleted'] = True
+                progress('cleanup', 'Synthetic upload deleted')
+
             def direct(self, connection, key, model, system, context, *, planning=False, images=None):
                 if not planning and context.get('selectedShot'):
                     new = fields(context['selectedShot'])
@@ -36,6 +53,7 @@ def main():
                     self.reply = {'message':'Give the hesitation a clear breath while retaining voice and geography.', 'revisedShot':new}
                 return super().direct(connection,key,model,system,context,planning=planning,images=images)
         p.transport=Transport()
+        ws.save_connection({'provider': 'gemini', 'label': 'Gemini review fixture', 'key': 'gemini-synthetic-private-key'})
         ws.save_services('first', {**ws.services('first'), 'review': {
             'connectionId': accounts['openai']['id'], 'model': 'test-vision', 'audioModel': 'test-audio', 'estimateUsd': .2}})
         for source in (ROOT/'cb-studio').iterdir():

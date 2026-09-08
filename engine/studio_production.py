@@ -82,7 +82,7 @@ class Production:
             state = self._load(db, pid, str(ep)) if ep is not None else initial()
             jobs = [json.loads(r[0]) for r in db.execute("SELECT data FROM jobs WHERE project=? AND episode=? ORDER BY rowid DESC LIMIT 30", (pid, str(ep)))]
         # Job inputs contain source context, but no keys. Expose only useful status.
-        public_jobs = [{k: j.get(k) for k in ("id", "kind", "shotId", "status", "taskId", "message", "code", "binding", "createdAt", "progress", "audioReview")} for j in jobs]
+        public_jobs = [{k: j.get(k) for k in ("id", "kind", "shotId", "status", "taskId", "message", "code", "binding", "createdAt", "progress", "audioReview", "cleanupPending", "uploadUnconfirmed")} for j in jobs]
         for item, job in zip(public_jobs, jobs):
             if job["status"] in {"queued", "running"} and job.get("pid") != os.getpid():
                 item.update(status="interrupted", message="Studio restarted. Resume this job to recover its recorded progress.")
@@ -260,6 +260,7 @@ class Production:
         action = str(payload.get("action") or "")
         launch = None
         advance = None
+        cleanup = None
         with self.ws.db() as db:
             db.execute("BEGIN IMMEDIATE")
             previous = db.execute("SELECT result FROM commands WHERE project=? AND episode=? AND id=?", (pid, ep, command_id)).fetchone()
@@ -268,12 +269,12 @@ class Production:
             state = self._load(db, pid, ep)
             # Polling a pinned job does not approve or edit an outcome. A provider
             # completion racing a poll must not create a false stale-review error.
-            if action not in {"resume", "status"} and payload.get("expectedRevision") != state["revision"]:
+            if action not in {"resume", "status", "cleanup_review_uploads"} and payload.get("expectedRevision") != state["revision"]:
                 raise StudioError("This shot changed in another window. The studio will reload the current outcome for review.", "stale")
             if state["sourceHash"] and state["sourceHash"] != context["sourceHash"]:
                 if not self.source_impact(state, context):
                     state["sourceHash"] = context["sourceHash"]
-                elif action not in {"status", "resume", "refresh_sources", "reconcile", "budget"}:
+                elif action not in {"status", "resume", "refresh_sources", "reconcile", "budget", "cleanup_review_uploads"}:
                     raise StudioError("The project source changed. Review the source update notice before continuing.", "source_changed")
             shot_id = str(payload.get("shotId") or "")
             shot = self.selected(state, shot_id) if shot_id else None
@@ -281,7 +282,7 @@ class Production:
             if len(message) > 12000:
                 raise StudioError("Keep this direction under 12,000 characters.")
             # Credentials belong in the password input, never in the persisted chat.
-            if re.search(r"\b(?:sk-[A-Za-z0-9_-]{12,}|ark-[A-Za-z0-9_-]{16,})", message):
+            if re.search(r"\b(?:sk-[A-Za-z0-9_-]{12,}|ark-[A-Za-z0-9_-]{16,}|AIza[A-Za-z0-9_-]{20,})", message):
                 raise StudioError("Put API keys in Workspace connections, then remove the key from this message.", "secret_in_chat")
             if action == "chat":
                 self._message(state, "user", message, shotId=shot_id)
@@ -299,12 +300,21 @@ class Production:
                     if not shot or self._stage(shot) != normalized.split()[1]:
                         raise StudioError("Open the outcome named in your approval first.", "stale")
             from studio_editing import COMMANDS, handle
-            if shot and shot.get("importedArchive") and action not in {"status", "timeline_note", "resolve_note", "trim_clip", "reset_trim", "review_join", "review_cut", "export_cut", "assemble_cut"}:
+            if shot and shot.get("importedArchive") and action not in {"status", "timeline_note", "resolve_note", "trim_clip", "reset_trim", "review_join", "review_cut", "export_cut", "assemble_cut", "cleanup_review_uploads"}:
                 raise StudioError("This is a preserved production archive. Create a new sequence to direct new work.", "archive_read_only")
-            if action == 'media_review':
+            if action == 'cleanup_review_uploads':
+                row = db.execute('SELECT data FROM jobs WHERE id=? AND project=? AND episode=?',
+                                 (token(payload.get('jobId')), pid, ep)).fetchone()
+                if not row:
+                    raise StudioError('That review is not in the selected episode.', 'scope_mismatch')
+                cleanup = json.loads(row[0])
+                if (cleanup.get('kind') != 'media_review' or cleanup.get('binding', {}).get('provider') != 'gemini'
+                        or cleanup['status'] not in {'completed', 'failed'}):
+                    raise StudioError('Finish or close the review before retrying upload cleanup.', 'job_active')
+            elif action == 'media_review':
                 from studio_media_review import reserve
                 launch = reserve(self, db, context, state, shot, payload)
-                self._message(state, 'agent', 'Reviewing the actual render samples and audio within the episode allowance. This produces advice, not approval.', shotId=shot_id)
+                self._message(state, 'agent', 'Reviewing the render and audio within the episode allowance. Read the evidence and make your WATCH decision.', shotId=shot_id)
             elif action == "assemble_cut":
                 from studio_review import projection
                 view = projection(self, context, state, [])
@@ -464,6 +474,9 @@ class Production:
             self.launch(launch)
         elif advance is not None:
             self.advance(pid, ep, advance)
+        if cleanup:
+            from studio_video_review import cleanup_job
+            cleanup_job(self, cleanup)
         return result
 
     def advance(self, pid, ep, shot_id):
@@ -811,7 +824,7 @@ class Production:
             if kind == 'media_review':
                 shot = self.selected(state, job['shotId'])
                 shot.setdefault('mediaReviews', []).append(result)
-                self._message(state, 'agent', 'Media review saved with its frame and audio evidence. Read the report and make your WATCH decision.', shotId=shot['id'])
+                self._message(state, 'agent', 'Media review saved against this render version. Read the report and make your WATCH decision.', shotId=shot['id'])
             elif self.ws.context(pid, ep)["sourceHash"] != job["sourceHash"]:
                 state["history"].append({"jobId": job["id"], "reason": "Source changed while generating", "result": result})
                 self._message(state, "agent", "The source changed during generation. I kept the result in history without replacing current work.")

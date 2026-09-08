@@ -50,8 +50,12 @@ def project_brief(production, context, state, timeline):
             production.assert_artifact(pid, artifact)
             authorities[stage] = {k: artifact[k] for k in
                                  ("id", "status", "files", "ending", "prompt", "approvedAt", "sourceSignature") if k in artifact}
+        from studio_media_review import current_reports
+        reports = current_reports(production, context, state, shot)
         bound.append({"shotId": shot["id"], "direction": fields(shot),
                       "sourceSignature": shot.get("sourceSignature"), "approvedOutcomes": authorities,
+                      "mediaReviews": [r for r in reports if r['current']],
+                      "historicalReviewIds": [r['id'] for r in reports if not r['current']],
                       "missingAuthorities": [stage for stage in ("see", "hear", "request")
                                              if stage not in authorities and (stage != "hear" or shot.get("dialogue"))]})
     context_data = {key: context[key] for key in ("project", "episode", "script", "bible", "assets", "assetDigests", "characterStates", "sourceHash") if key in context}

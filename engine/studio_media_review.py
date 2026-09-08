@@ -61,9 +61,11 @@ def reserve(production, db, context, state, shot, payload):
     inputs = manifest(production, context, state, shot)
     if payload.get('reviewId') != inputs['watch']['candidateId']:
         raise StudioError('Review the current render before requesting analysis.', 'stale')
-    if any(r['fingerprint'] == inputs['fingerprint'] and r.get('sourceIntegrity') == 'verified' for r in shot.get('mediaReviews', [])):
-        raise StudioError('This version already has a media review. Read its report below.', 'review_exists')
     binding = production.ws.binding(pid, 'review')
+    if any(r['fingerprint'] == inputs['fingerprint'] and r.get('sourceIntegrity') == 'verified'
+           and all(r.get('binding', {}).get(k) == binding.get(k) for k in ('provider', 'model', 'audioModel', 'videoFps', 'connectionId'))
+           for r in shot.get('mediaReviews', [])):
+        raise StudioError('This version already has a media review. Read its report below.', 'review_exists')
     cost = money(binding['estimateUsd'])
     budget = state['budget']
     if budget['allowance'] - budget['committed'] - budget['reserved'] < cost:
@@ -73,6 +75,10 @@ def reserve(production, db, context, state, shot, payload):
            'kind': 'media_review', 'status': 'queued', 'binding': binding, 'estimate': cost,
            'sourceHash': context['sourceHash'], 'context': context, 'reviewInputs': inputs,
            'createdAt': time.time(), 'progress': {'phase': 'queued', 'label': 'Media review queued', 'updatedAt': time.time()}}
+    if binding['provider'] == 'gemini':
+        from studio_video_review import review_contract
+        job['videoReviewContract'] = review_contract()
+        job['videoReviewContractHash'] = digest(job['videoReviewContract'])
     import os
     job['pid'] = os.getpid()
     production._job(db, job)
@@ -80,6 +86,9 @@ def reserve(production, db, context, state, shot, payload):
 
 
 def execute(production, job):
+    if job['binding']['provider'] == 'gemini':
+        from studio_video_review import execute
+        return execute(production, job)
     pid, inputs = job['projectId'], job['reviewInputs']
     ws, transport = production.ws, production.transport
     production.progress(job, 'review_sources', 'Checking the exact render, approved references and voice')

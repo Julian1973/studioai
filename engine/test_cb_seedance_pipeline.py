@@ -186,7 +186,8 @@ def test_first_last_storyboard_and_blockout_templates_are_distinct():
         "audio": "Quiet gallery ambience only, no music.",
         "consistency": ["Keep the guide, display, gallery axis, and light direction stable."],
     }).build()
-    assert "provides the storyboard grid" in storyboard
+    assert "defines the storyboard grid" in storyboard
+    assert "Follow it panel by panel" in storyboard
     assert "Shot 2:" in storyboard
 
     blockout = S.SeedancePromptBuilder({
@@ -261,6 +262,21 @@ def test_long_form_authoring_can_be_ready_while_provider_route_remains_blocked()
     assert result["readyForPrompt"] is True
     assert result["readyForProvider"] is False
     assert "No enabled provider route" in result["providerQualification"]["reason"]
+
+
+def test_storyboard_grid_uses_verified_reference_route_without_changing_limits():
+    task = {"type": "storyboard_grid", "goal": "Animate the authored coverage.",
+            "duration_seconds": 30, "resolution": "480p",
+            "references": [_image_ref("@Image 1", "Coverage board")],
+            "assets": {"images": [{}]}, "stages": [_stage("")],
+            "consistency": ["Preserve identity and world geography."]}
+    result = S.qualify_provider_request(task)
+    assert result["ready"] is True
+    assert result["providerCalled"] is False
+    assert result["mode"] == "reference-to-video"
+    assert S.qualify_provider_request({**task, "duration_seconds": 31})["ready"] is False
+    assert S.qualify_provider_request({**task, "references": []})["ready"] is False
+    assert S.qualify_provider_request({**task, "assets": {"images": [{}] * 31}})["ready"] is False
 
 
 def test_seedance_25_reference_authoring_uses_default_byteplus_route():

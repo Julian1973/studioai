@@ -68,6 +68,22 @@ def test_compiler_emits_nine_stable_v3_requests_with_canon_settings():
     assert "does not accept previous_text" in first[0]["transportNotes"][0]
 
 
+def test_directed_acting_reaches_primary_provider_recipe_without_changing_alternates():
+    line = direction()
+    line['performedText'] = '[casual] Nailed it.'
+    line['takeRecipes'][0]['performedText'] = 'Nailed it.'
+    compiled = V.compile_line(line, LOCKED)
+    requests = V.emit_v3_requests(compiled)
+    assert requests[0]['body']['text'] == '[casual] Nailed it.'
+    assert compiled['takeRecipes'][1] == line['takeRecipes'][1]
+    assert line['takeRecipes'][0]['performedText'] == 'Nailed it.'  # no mutation of history
+
+
+def test_explicit_plain_performance_override_does_not_regrow_old_acting_tags():
+    compiled = V.compile_line(direction(), {**LOCKED, 'performanceOverride': 'Nailed it.'})
+    assert V.emit_v3_requests(compiled)[0]['body']['text'] == 'Nailed it.'
+
+
 @pytest.mark.parametrize("mutation,match", [
     (lambda item: item["performanceQuestions"].pop("thoughtBefore"),
      "Missing performance questions"),

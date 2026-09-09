@@ -21,7 +21,8 @@ def manifest(production, context, state, shot):
         if not verified_file(production.ws, pid, file):
             raise StudioError('A media-review source changed or is missing. Review its current version.', 'stale')
         return {'candidateId': artifact['id'], **file}
-    result = {'watch': record(watch), 'shot': fields(shot),
+    result = {'watch': record(watch), 'shot': watch.get('originatingShot') or fields(shot),
+              'currentDirection': fields(shot), 'directorCardRevision': watch.get('directorCardRevision'),
               'sourceSignature': production.source_signature(context, shot), 'references': []}
     for name in ('see', 'hear'):
         value = shot.get('outcomes', {}).get(name, {})
@@ -39,6 +40,16 @@ def manifest(production, context, state, shot):
         if artifact.get('status') == 'approved':
             result['previous'] = {**record(artifact), 'shotId': previous['id'],
                                   'scene': previous['scene'], 'camera': previous['camera'], 'geography': previous['geography']}
+    if index + 1 < len(state['shots']):
+        following = state['shots'][index + 1]
+        artifact = following.get('outcomes', {}).get('watch', {})
+        if artifact.get('status') == 'approved':
+            result['next'] = {**record(artifact), 'shotId': following['id'],
+                              'scene': following['scene'], 'camera': following['camera'], 'geography': following['geography']}
+    trims = state.get('assembly', {}).get('trims', {})
+    result['editTrims'] = {name: trims.get(sid, {}) for name, sid in
+                          [('watch', shot['id']), ('previous', result.get('previous', {}).get('shotId')),
+                           ('next', result.get('next', {}).get('shotId'))] if sid}
     result['fingerprint'] = digest(result)
     return result
 
@@ -49,6 +60,62 @@ def current_reports(production, context, state, shot):
     except StudioError:
         fingerprint = None
     return [{**r, 'current': fingerprint == r['fingerprint'] and r.get('sourceIntegrity') == 'verified'} for r in shot.get('mediaReviews', [])]
+
+
+def prepare_join_evidence(production, job):
+    """Make bounded hard-cut auditions from exact sources and saved edit trims.
+
+    This is review media only: no retiming, fades, repair or replacement of masters.
+    Both picture and sound use the same source intervals.
+    """
+    inputs, pid = job['reviewInputs'], job['projectId']
+    joins = []
+    folder = production.ws.project_path(pid, f"projects/{pid}/media/reviews/{job['id']}")
+    for label, names in [('incoming', ('previous', 'watch')), ('outgoing', ('watch', 'next'))]:
+        if any(not inputs.get(name) for name in names):
+            continue
+        ranges, filters, args = [], [], ['ffmpeg', '-v', 'error', '-y']
+        for index, name in enumerate(names):
+            record = inputs[name]
+            production.assert_artifact(pid, {'files': [record]})
+            path = production.ws.project_path(pid, record['path'])
+            try:
+                probe = json.loads(subprocess.run(['ffprobe', '-v', 'error', '-show_streams', '-show_format', '-of', 'json', str(path)],
+                                                 check=True, capture_output=True, timeout=30).stdout)
+                duration = float(probe['format']['duration'])
+                has_audio = any(s['codec_type'] == 'audio' for s in probe['streams'])
+                if not math.isfinite(duration) or not 0 < duration <= 35:
+                    raise ValueError()
+            except (OSError, subprocess.SubprocessError, ValueError, KeyError):
+                raise StudioError('The adjacent source cannot be measured for cut review.', 'review_duration') from None
+            trim = inputs.get('editTrims', {}).get(name, {})
+            if trim.get('candidateId') != record['candidateId']:
+                trim = {}
+            start, end = float(trim.get('in', 0)), float(trim.get('out', duration))
+            if not (math.isfinite(start) and math.isfinite(end) and 0 <= start < end <= duration):
+                raise StudioError('The cut review has stale or invalid edit trims.', 'stale')
+            start, end = (max(start, end - 2), end) if index == 0 else (start, min(end, start + 2))
+            length = end - start
+            args += ['-i', str(path)]
+            filters.append(f'[{index}:v:0]trim=start={start}:end={end},setpts=PTS-STARTPTS,scale=960:540:force_original_aspect_ratio=decrease,pad=960:540:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=24,format=yuv420p[v{index}]')
+            audio = (f'[{index}:a:0]atrim=start={start}:end={end},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo' if has_audio else
+                     f'anullsrc=r=48000:cl=stereo,atrim=duration={length},asetpts=PTS-STARTPTS')
+            filters.append(audio + f'[a{index}]')
+            ranges.append({'source': name, **record, 'start': start, 'end': end, 'hasAudio': has_audio})
+        filters.append('[v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]')
+        folder.mkdir(parents=True, exist_ok=True)
+        output = folder / (label + '-cut.mp4')
+        try:
+            subprocess.run(args + ['-filter_complex', ';'.join(filters), '-map', '[v]', '-map', '[a]',
+                                  '-c:v', 'libx264', '-preset', 'fast', '-crf', '20', '-c:a', 'aac', str(output)],
+                           check=True, capture_output=True, timeout=60)
+            production.transport.verify_media(output, 'video')
+        except (OSError, subprocess.SubprocessError):
+            raise StudioError('The adjacent picture-and-sound audition could not be prepared. Existing footage is preserved.', 'review_media_failed') from None
+        joins.append({**production.file_record(pid, output), 'label': label + ' hard-cut audition',
+                      'ranges': ranges, 'cutAt': ranges[0]['end'] - ranges[0]['start'],
+                      'meaning': 'Exact saved trims with a hard cut; no post effects. Missing source audio remains silence.'})
+    return joins
 
 
 def reserve(production, db, context, state, shot, payload):
@@ -92,7 +159,7 @@ def execute(production, job):
     pid, inputs = job['projectId'], job['reviewInputs']
     ws, transport = production.ws, production.transport
     production.progress(job, 'review_sources', 'Checking the exact render, approved references and voice')
-    records = [inputs[k] for k in ('watch', 'see', 'hear', 'previous') if inputs.get(k)] + inputs['references']
+    records = [inputs[k] for k in ('watch', 'see', 'hear', 'previous', 'next') if inputs.get(k)] + inputs['references']
     for record in records:
         production.assert_artifact(pid, {'files': [record]})
     folder = ws.project_path(pid, f"projects/{pid}/media/reviews/{job['id']}")
@@ -138,6 +205,13 @@ def execute(production, job):
     for label, ref in ([('Approved SEE opening', inputs['see'])] if inputs.get('see') else []) + [(r['name'] + ' — ' + r['role'], r) for r in inputs['references']]:
         images.append((label, ws.project_path(pid, ref['path'])));evidence['references'].append({'label': label, **ref})
     production.progress(job, 'extract_audio', 'Extracting the actual render soundtrack and approved HEAR')
+    join_evidence = prepare_join_evidence(production, job)
+    records += join_evidence
+    evidence['joins'] = join_evidence
+    for join in join_evidence:
+        source = ws.project_path(pid, join['path'])
+        for seconds in (max(0, join['cutAt'] - .1), join['cutAt'] + .1):
+            frame(source, seconds, join['label'] + f' at {seconds:.3f}s')
     for name, label in (('watch', 'Actual WATCH soundtrack'), ('hear', 'Approved HEAR performance')):
         if name not in inputs:
             continue
@@ -148,9 +222,16 @@ def execute(production, job):
         run(['ffmpeg', '-v', 'error', '-i', str(source), '-vn', '-ac', '1', '-ar', '24000', '-c:a', 'pcm_s16le', '-y', str(output)])
         transport.verify_media(output, 'audio')
         audio.append((label, output));evidence['audio'].append({'label': label, 'duration': length, **production.file_record(pid, output)})
+    for index, join in enumerate(join_evidence):
+        output = folder / f'join-{index}.wav'
+        run(['ffmpeg', '-v', 'error', '-i', str(ws.project_path(pid, join['path'])), '-vn', '-ac', '1', '-ar', '24000', '-c:a', 'pcm_s16le', '-y', str(output)])
+        audio.append((join['label'], output))
+        evidence['audio'].append({'label': join['label'], 'ranges': join['ranges'], **production.file_record(pid, output)})
     evidence['watchHasAudio'] = has_audio
     evidence['omittedApprovedReferences'] = inputs['omittedApprovedReferences']
-    context = {'shot': inputs['shot'], 'previousShot': inputs.get('previous'),
+    from studio_director_card import REVIEW_CRITERIA
+    context = {'creativeReviewCriteria': REVIEW_CRITERIA, 'shot': inputs['shot'], 'previousShot': inputs.get('previous'),
+               'nextShot': inputs.get('next'), 'directorCardRevision': inputs.get('directorCardRevision'),
                'projectBible': job['context']['bible'], 'evidence': evidence}
     if len(json.dumps(context)) > 200000:
         raise StudioError('The review context exceeds the current limit. Use a smaller production sequence or reference brief.', 'context_limit')
@@ -170,6 +251,7 @@ def execute(production, job):
     if any(not math.isfinite(f['seconds']) or f['seconds'] > duration for f in visual['findings']):
         raise StudioError('The reviewer returned a timestamp outside this render. The report was not applied.', 'invalid_output')
     result = {'id': uuid.uuid4().hex, 'fingerprint': inputs['fingerprint'], 'candidateId': inputs['watch']['candidateId'],
+              'directorCardRevision': inputs.get('directorCardRevision'),
               'binding': job['binding'], 'at': time.time(), 'evidence': evidence, 'audioReview': job['audioReview'], **visual,
               'sourceIntegrity': 'verified',
               'meaning': 'Advisory media review. Sampling can miss motion faults and cannot certify exact lip sync, emotional success or broadcast readiness.'}

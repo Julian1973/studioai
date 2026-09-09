@@ -177,6 +177,12 @@ class Production:
             if not path.is_file():
                 raise StudioError("A selected project reference is missing.", "missing_reference")
             ref["hash"] = file_hash(path)
+            ref['requiredState'] = (shot.get('requiredReferenceStates') or {}).get(ref['name'], {})
+            source = (assets['characters'].get(ref['name']) if ref['role'] == 'character identity' else
+                      next((v for group in ('locations', 'props') for v in assets[group] if v['name'] == ref['name']), None)) or {}
+            # State observations belong to the inspected file, not a mutable filename.
+            if source.get('stateEvidenceHash') == ref['hash']:
+                ref['depictedState'] = source.get('depictedState') or {}
         return refs
 
     def validate_shot(self, context, shot):
@@ -196,9 +202,11 @@ class Production:
         cursor = 0
         for line in shot["dialogue"]:
             position = source.find(line["text"], cursor)
-            if not line["text"].strip() or position < 0 or line["speaker"] not in context["assets"]["characters"]:
+            if not line["text"].strip() or position < 0 or line["speaker"] not in shot['characters']:
                 raise StudioError("The proposed dialogue does not match its script occurrence and cast.", "invalid_plan")
             cursor = position + len(line["text"])
+            from studio_workflow import voice_performance_text
+            voice_performance_text(line)
         for field in ("emotion", "performance", "camera", "geography", "seePrompt", "watchPrompt"):
             if not shot[field].strip() or len(shot[field]) > 12000:
                 raise StudioError("The director returned incomplete shot direction.", "invalid_plan")
@@ -215,6 +223,12 @@ class Production:
                 raise StudioError(f"{claim['character']}: the proposed {claim['trait']} conflicts with the project identity ({traits[claim['trait']]}).", "identity_conflict")
         if shot["characterStates"]:
             self.assets(context, shot)
+        direction = shot.get("directorCard") or {}
+        playability = direction.get('playability') or {}
+        if playability and (playability['decision'] != 'playable' or playability['minimumDurationSec'] > shot['duration']):
+            raise StudioError('The directed acting needs more time than this unit provides. Restructure the shot before generation.', 'invalid_plan')
+        if any(a["character"] not in shot["characters"] for a in direction.get("acting", [])):
+            raise StudioError("Acting direction names a character outside this shot.", "invalid_plan")
         return shot
 
     def validate_plan(self, context, plan):
@@ -231,17 +245,42 @@ class Production:
             scene = shot["scene"]
         if cursor != len(context["script"].splitlines()) + 1:
             raise StudioError("The director did not cover the whole script. Existing work is preserved.", "invalid_plan")
+        from studio_director_card import validate_coverage
+        try:
+            validate_coverage(plan.get('sceneCoverage', []), shots)
+        except ValueError as error:
+            raise StudioError(str(error), 'invalid_plan') from None
         return shots
 
     def _prompt(self, context, shot, stage, refs):
         from studio_workflow import handoff
+        from studio_prompt_contract import reference_state_report
         contract = handoff(shot, stage, refs)
-        labels = "\n".join(f"@Image{i + 1}: {r['name']} — {r.get('role', 'reference')}; {r.get('description', '')}; identity traits: {json.dumps(r.get('traits', {}), ensure_ascii=False)}" for i, r in enumerate(refs))
-        return (f"Project: {context['project']['name']}\nFrame aspect: {context['project'].get('aspectRatio', '16:9')}\nVisual style: {context['project'].get('style', '')}\n"
-                f"Project bible:\n{context['bible']}\nShot direction:\n{json.dumps(contract, ensure_ascii=False)}\n"
-                f"References:\n{labels}\n{shot['seePrompt' if stage == 'see' else 'watchPrompt']}\n"
-                "The structured direction and approved reference roles above are authoritative if this prose conflicts. "
-                "Preserve referenced identities, scale, prop ownership and screen geography. Use the stated camera view; do not mirror the scene.")
+        agreement = reference_state_report(refs)
+        if not agreement['ok']:
+            conflict = agreement['conflicts'][0]
+            raise StudioError(f"Reference {conflict['tag']} depicts {conflict['field']}={conflict['depicted']}; this shot requires {conflict['required']}. Replace or correct that reference.", 'reference_state_conflict')
+        labels = "\n".join(f"@Image{i + 1}: {r['name']} — {r.get('role', 'reference')}; {r.get('description', '')}; identity traits: {json.dumps(r.get('traits', {}), ensure_ascii=False)}; required state: {json.dumps(r.get('requiredState', {}), ensure_ascii=False)}" for i, r in enumerate(refs))
+        # The review trace keeps full provenance; provider prose emits each decision group once.
+        direction = dict(contract['direction'])
+        opening = direction.pop('openingState', '')
+        ending = direction.pop('endingState', '')
+        supplemental = shot['seePrompt' if stage == 'see' else 'watchPrompt']
+        sections = ['[Reference Roles]', labels,
+                    'Opening references control composition; identity references control design and scale; location references control fixed geography; current state references control marks and prop state. A previous ending is continuity only for a planned camera cut.',
+                    '[Opening State]', opening or 'Use the authored opening view and assigned reference state.',
+                    contract['instruction'], contract['visualHandoff'],
+                    '[Scene and Canon Context]', f"Project: {context['project']['name']}\nFrame aspect: {context['project'].get('aspectRatio', '16:9')}\nVisual style: {context['project'].get('style', '')}\n{context['bible']}",
+                    '[Directed Beats and Acting]', json.dumps(direction, ensure_ascii=False),
+                    '[Director Decisions]', json.dumps(contract['directorDecisions'], ensure_ascii=False),
+                    '[Additional Direction]', supplemental,
+                    'Structured direction and approved reference roles are authoritative. Do not treat a conflicting reference image as resolved merely by this instruction.',
+                    '[Direction Trace]', contract['fingerprint']]
+        if stage == 'see' and shot.get('performance'):
+            sections += ['[Performance Context — depict only its opening pose, not later actions]', shot['performance']]
+        if stage != 'see':
+            sections += ['[Ending State]', ending, '[Sound Handoff]', contract['soundInstruction']]
+        return '\n'.join(str(v) for v in sections if v)
 
     def _stage(self, shot):
         for stage in STAGES:
@@ -394,6 +433,9 @@ class Production:
                 self.assert_artifact(pid, item)
                 if item["id"] != payload.get("reviewId") or item["status"] != "candidate":
                     raise StudioError("Review the current candidate before deciding.", "stale")
+                if action == "approve" and stage == "see":
+                    from studio_shot_remix import validate
+                    validate(self, pid, state, item.get("shotRemix"))
                 item["status"] = "approved" if action == "approve" else "rejected"
                 item["reviewedAt"] = time.time()
                 item["note"] = str(payload.get("note") or message)[:3000]
@@ -539,6 +581,8 @@ class Production:
 
     def watch_request(self, context, state, shot):
         pid = context["project"]["id"]
+        from studio_shot_remix import validate
+        validate(self, pid, state, (self.artifact(shot, "see") or {}).get("shotRemix"))
         for stage in ("see", "hear"):
             if stage == "hear" and not shot["dialogue"]:
                 continue
@@ -556,19 +600,28 @@ class Production:
         audio = []
         duration = shot["duration"]
         if shot["dialogue"]:
-            audio = shot["outcomes"]["hear"]["files"]
+            audio = shot["outcomes"]["hear"]["files"][:1]
             files += audio
             length = self.transport.verify_media(self.ws.project_path(pid, audio[0]["path"]), "audio")
-            duration = max(duration, math.ceil(length))
+            from studio_delivery_contract import require_aligned_timing
+            try:
+                require_aligned_timing(duration, audio_duration=length)
+            except ValueError as exc:
+                raise StudioError(str(exc), "timing_mismatch") from exc
             if duration > 30:
                 raise StudioError("This voice performance exceeds 30 seconds. Split the source into shorter shots before rendering.", "timing_limit")
         source = "\n".join(context["script"].splitlines()[shot["startLine"] - 1:shot["endLine"]])
         prompt = self._prompt(context, shot, "watch", refs)
         if audio:
             prompt += "\n@Audio1 is the approved voice performance. Match its exact words, speaker timing and lip sync. No extra dialogue."
+            from studio_voice_timing import dialogue_cues
+            cues = dialogue_cues(shot['outcomes']['hear'].get('voiceTiming'), shot['dialogue'], audio[0]['hash'])
+            if cues:
+                prompt += '\nMeasured dialogue ownership from @Audio1:\n' + json.dumps(cues, ensure_ascii=False)
         else:
             prompt += "\nNo spoken dialogue."
-        prompt += "\nExact source:\n" + source
+        # Keep source text in the review record, not as a second competing action/dialogue script.
+        # Approved voice cues above remain the provider's spoken-word authority.
         ratio = context["project"].get("aspectRatio") or "16:9"
         if ratio not in {"16:9", "9:16", "1:1", "4:3", "3:4", "21:9"}:
             raise StudioError("Choose a supported project aspect ratio before animation.", "unsupported_format")
@@ -601,11 +654,13 @@ class Production:
                             context["assets"]["characters"][line["speaker"]].get("voiceId", ""))
                 if not re.fullmatch(r"[A-Za-z0-9]{12,64}", voice_id):
                     raise StudioError(f"Set a valid ElevenLabs voice ID for {line['speaker']} in the project library.", "missing_voice")
-                delivery = line.get("delivery", "neutral")
-                spoken = line["text"] if delivery == "neutral" else f"[{delivery}] " + line["text"]
+                from studio_workflow import voice_performance_text
+                spoken = voice_performance_text(line)
                 dialogue.append({"text": spoken, "voice_id": voice_id})
             inputs["dialogue"] = dialogue
         if kind == "watch":
+            from studio_shot_remix import validate
+            validate(self, pid, state, (self.artifact(shot, "see") or {}).get("shotRemix"))
             existing = self.artifact(shot, "watch")
             if existing and existing.get("status") in {"candidate", "approved"}:
                 raise StudioError("Review the returned render or direct a revision before creating another.", "approval_required")
@@ -629,24 +684,50 @@ class Production:
                "shotId": shot["id"] if shot else None, "shot": shot, "context": context, "sourceHash": context["sourceHash"],
                "binding": binding, "estimate": cost, "requestCount": request_count, "references": refs, "inputs": inputs,
                "direction": message, "stage": payload.get("stage", "see"), "reviews": self.review_learning(db, pid, state),
-               "messages": state["messages"][-12:], "standard": STANDARD_PATH.read_text(), "standardHash": file_hash(STANDARD_PATH), "status": "queued", "createdAt": time.time(), "pid": os.getpid()}
+               "messages": state["messages"][-12:], "standard": STANDARD_PATH.read_text() + "\n\n" + __import__("studio_director_card").CONTRACT, "status": "queued", "createdAt": time.time(), "pid": os.getpid()}
+        job['standardHash'] = digest(job['standard'])
         if kind == "see":
             from studio_references import resolve
             composition = resolve(self, context, state, shot)
             if composition:
                 job['references'].append(composition)
+            else:
+                from studio_references import suggestions
+                anchor = next((r for r in suggestions(self, context, state, shot)
+                               if r['choice']['role'] == 'scene geography'), None)
+                if anchor and anchor['path'] not in {r['path'] for r in job['references']}:
+                    job['references'].append({k: anchor[k] for k in ('name', 'path', 'hash')})
+                    job['references'][-1].update(role='scene geography', approvalStatus='approved',
+                        version=anchor['choice']['candidateId'], sourceShotId=anchor['choice']['shotId'])
             index = next(i for i, s in enumerate(state["shots"]) if s["id"] == shot["id"])
-            if index and state["shots"][index - 1]["scene"] == shot["scene"]:
+            from studio_director_card import inherits_previous_state
+            if index and state["shots"][index - 1]["scene"] == shot["scene"] and inherits_previous_state(shot):
                 previous = state["shots"][index - 1]
-                job["previousState"] = {k: previous[k] for k in ("id", "geography", "camera", "performance")}
+                job["previousState"] = {k: previous.get(k) for k in ("id", "geography", "camera", "performance", "endingState", "soundHandoff")}
                 ending = (self.artifact(previous, "watch") or {}).get("ending")
                 if ending and self.artifact(previous, "watch")["status"] == "approved":
                     self.assert_artifact(pid, {"files": [ending]})
                     job["references"].append({"name": "Previous approved ending — continuity state; use the NEW camera view for a cut", "role": "previous state", "approvalStatus": "approved", "version": self.artifact(previous, "watch")["id"], **ending})
                 elif shot["transition"] == "continuation":
                     raise StudioError("A continuation needs the previous approved render's ending frame. Approve that shot or direct this opening as a cut.", "handoff_required")
+            from studio_shot_remix import build
+            job["shotRemix"] = build(context, state, shot, job["references"])
             if len(job["references"]) > 10:
                 raise StudioError("The opening needs more than ten references including its handoff. Consolidate the selected reference plates before generating.", "reference_limit")
+        from studio_reference_contract import receipt
+        job['referenceContract'] = receipt((inputs.get('request') or {}).get('images') or job.get('references') or [])
+        if shot:
+            from studio_director_card import card, stage_decisions
+            request = inputs.get('request') or {}
+            job['directorCardRevision'] = card(shot, {
+                'projectId': pid, 'episode': ep, 'sourceHash': context['sourceHash'],
+                'sourceSignature': self.source_signature(context, shot),
+                'references': request.get('images', job['references']),
+                'dependencies': request.get('dependencies', {}),
+                'audio': request.get('audio'), 'provider': binding,
+            })
+            if kind == 'hear':
+                job['voiceDirectionContext'] = stage_decisions(shot, 'hear')
         self._job(db, job)
         return job
 
@@ -710,6 +791,12 @@ class Production:
                 if self.ws.context(pid, job["episode"])["sourceHash"] != job["sourceHash"]:
                     raise StudioError("The project source changed before submission. Prepare from its current version.", "source_changed")
                 self.assert_artifact(pid, {"files": job["references"]})
+                if kind in {"see", "watch"}:
+                    from studio_shot_remix import validate
+                    with self.ws.db() as db:
+                        current_state = self._load(db, pid, job["episode"])
+                    remix = job.get("shotRemix") if kind == "see" else (self.artifact(job["shot"], "see") or {}).get("shotRemix")
+                    validate(self, pid, current_state, remix)
                 if kind == "watch":
                     self.assert_artifact(pid, job["inputs"]["request"])
             out_dir = self.ws.project_path(pid, f"projects/{pid}/media")
@@ -721,6 +808,12 @@ class Production:
                         "selectedShot": ({k: job["shot"].get(k) for k in Shot.model_fields} if job["shot"] else None), "direction": job["direction"], "stage": job["stage"],
                         "reviewLearning": job["reviews"], "conversation": job["messages"]}
                 data["characterStates"] = context.get("characterStates", [])
+                from studio_coverage import unit_board, panel_brief
+                if job['shot']:
+                    from studio_director_card import stage_decisions
+                    data['stageDirection'] = stage_decisions(job['shot'], job['stage'])
+                    data['coverageBoard'] = unit_board(job['shot'])
+                    data['storyboardImageBrief'] = panel_brief(job['shot'])
                 if binding.get('route'):
                     data['taskBoundary'] = binding['routeReason']
                 if job['shot'] and kind != 'plan':
@@ -730,7 +823,8 @@ class Production:
                     scene = [s for s in current_state['shots'] if s['scene'] == job['shot']['scene']]
                     from studio_references import suggestions
                     data['approvedReferenceChoices'] = suggestions(self, context, current_state, job['shot'])
-                    data['sceneDirection'] = [{k: s.get(k) for k in ('id', 'intent', 'camera', 'geography', 'openingState', 'endingState', 'transition')} for s in scene]
+                    data['sceneCoverage'] = current_state.get('sceneCoverage', [])
+                    data['sceneDirection'] = [{k: s.get(k) for k in ('id', 'intent', 'camera', 'geography', 'openingState', 'endingState', 'transition', 'soundHandoff', 'directorCard')} for s in scene]
 
                 if len(json.dumps(data)) > 200000:
                     raise StudioError("This script exceeds the current director context limit. Split it into production sequences.", "context_limit")
@@ -773,6 +867,9 @@ class Production:
             elif kind == "see":
                 output = out_dir / f"{job_id}.png"
                 prompt = self._prompt(context, job["shot"], "see", job["references"])
+                if job.get("shotRemix"):
+                    from studio_shot_remix import prompt as remix_prompt
+                    prompt += remix_prompt(job["shotRemix"])
                 if job.get("previousState"):
                     prompt += "\nIncoming continuity state:\n" + json.dumps(job["previousState"])
                 if job.get("imageUrl"):
@@ -788,11 +885,13 @@ class Production:
                                          [self.ws.project_path(pid, r["path"]) for r in job["references"]], output, received=received)
                 result = self.media_result(pid, output, prompt)
                 result["references"] = job["references"]
+                result["shotRemix"] = job.get("shotRemix")
             elif kind == "hear":
                 self.progress(job, 'voice', 'Voice request sent; awaiting the performance')
                 output = out_dir / f"{job_id}.mp3"
-                self.transport.voice(connection, key, binding["model"], job["inputs"]["dialogue"], output)
+                timing = self.transport.voice(connection, key, binding["model"], job["inputs"]["dialogue"], output)
                 result = self.media_result(pid, output, json.dumps(job["inputs"]["dialogue"], ensure_ascii=False))
+                result['voiceTiming'] = timing
             else:
                 output = out_dir / f"{job_id}.mp4"
                 request = job["inputs"]["request"]
@@ -829,8 +928,17 @@ class Production:
                         self.transport.verify_media(conformed, "video")
                     except Exception:
                         raise StudioError("The render returned but its approved voice could not be conformed. Resume this task to recover it.", "download_failed") from None
-                    result["files"].insert(0, self.file_record(pid, conformed))
-                    result["audioAuthority"] = {"source": request["audio"][0], "note": "Approved HEAR track conformed; review lip sync. Native music and effects are retained only in the original provider render."}
+                    generated_sound = [cue for cue in (job['shot'].get('directorCard') or {}).get('soundCues', [])
+                                       if cue.get('destination') == 'watch']
+                    if generated_sound:
+                        # A flattened mix cannot lose its speech without losing its SFX.
+                        # Retain both versions; the source mix is the outcome to audition.
+                        result['files'].append(self.file_record(pid, conformed))
+                        result['audioAuthority'] = {'source': request['audio'][0], 'mode': 'provider-mix',
+                            'note': 'Provider soundtrack retained for directed SFX/music. Approved HEAR remains the input authority; returned speech and sync need review. Voice-only conform is retained as an alternate, not an isolated stem.'}
+                    else:
+                        result["files"].insert(0, self.file_record(pid, conformed))
+                        result["audioAuthority"] = {"source": request["audio"][0], 'mode': 'approved-voice', "note": "Approved HEAR track conformed; review lip sync. Native music and effects are retained only in the original provider render."}
                 ending = out_dir / f"{job_id}-ending.png"
                 self.progress(job, 'ending', 'Extracting the ending frame for continuity')
                 import subprocess
@@ -879,7 +987,9 @@ class Production:
                     state.setdefault("assembly", {})["preview"] = result
                     self._message(state, "agent", "Continuous episode preview ready. Watch the cut and review its joins.")
             elif kind == "plan":
-                state["shots"] = [{**shot, "outcomes": {}, "versions": [], "sourceSignature": self.source_signature(job["context"], shot)} for shot in result["shots"]]
+                state["sceneCoverage"] = result.get("sceneCoverage", [])
+                state["shots"] = [{**shot, "outcomes": {}, "versions": [], "sourceSignature": self.source_signature(job["context"], shot),
+                                   "directionPreparation": {'jobId': job['id'], 'kind': 'creative', 'standardHash': job['standardHash'], 'binding': job['binding']}} for shot in result["shots"]]
                 state["sourceHash"] = job["sourceHash"]
                 state["scriptHash"] = digest(job["context"]["script"])
                 self._message(state, "agent", result["message"] + " Your shot plan is in the pipeline. The next outcome is SEE.")
@@ -894,7 +1004,9 @@ class Production:
                     if change["changed"]:
                         shot["proposal"] = {"id": uuid.uuid4().hex, "shot": new, "beforeHash": digest(fields(shot)), "outcomeHash": digest(shot.get("outcomes", {})),
                                             "sourceSignature": self.source_signature(job["context"], shot), "impact": change,
-                                            "message": result["message"], "createdAt": time.time()}
+                                            "message": result["message"], "createdAt": time.time(),
+                                            "preparation": {'jobId': job['id'], 'kind': 'creative' if job['binding'].get('route') != 'routine' else 'prompt-maintenance',
+                                                            'standardHash': job['standardHash'], 'binding': job['binding']}}
                     self._message(state, "agent", result["message"] + (" Review the proposed changes below before applying them." if change["changed"] else " Current outcomes are unchanged."), shotId=job["shotId"])
                 else:
                     self._message(state, "agent", result["message"])
@@ -903,6 +1015,12 @@ class Production:
                 if kind in {"see", "watch"}:
                     from studio_workflow import handoff
                     result["directionTrace"] = handoff(job["shot"], kind, job["references"] if kind == "see" else job["inputs"]["request"]["images"])
+                result["directorCardRevision"] = job.get("directorCardRevision")
+                result['originatingShot'] = {k: job['shot'].get(k) for k in Shot.model_fields}
+                result['executionReceipt'] = {'kind': 'provider_generation', 'jobId': job['id'],
+                    'directionPreparation': (job.get('shot') or {}).get('directionPreparation'),
+                    'requestHash': digest(result.get('prompt', '')), 'referenceContract': job.get('referenceContract'),
+                    'voiceDirection': job.get('voiceDirectionContext')}
                 result.update(binding=job["binding"], sourceHash=job["sourceHash"], standardHash=job["standardHash"], jobId=job["id"])
                 if kind in {"hear", "watch"}:
                     result["duration"] = self.transport.verify_media(self.ws.project_path(pid, result["files"][0]["path"]), "audio" if kind == "hear" else "video")

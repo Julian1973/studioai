@@ -10,7 +10,7 @@ ENVIRONMENT only (engine/.env) — never hardcoded in source, never sent to app.
 Configuration (env, with safe defaults):
     OPENAI_API_KEY          required — clean failure (SystemExit) if missing
     OPENAI_DIRECTOR_MODEL   default gpt-5.5        — premium Story & Direction only
-    OPENAI_VALIDATOR_MODEL  default gpt-5.4-mini   — every shot department and repair
+    OPENAI_VALIDATOR_MODEL  default gpt-5.4-mini   — routine departments, formatting and validation
     OPENAI_MAX_CALL_USD     default 1.00           — conservative pre-call ceiling
     OPENAI_DAILY_BUDGET_USD default 5.00           — hard daily text-direction budget
     DIRECTOR_GEMINI_MODEL   default gemini-3.1-pro-preview — the FALLBACK model id
@@ -185,11 +185,11 @@ def _cost_guard_lock():
 def cost_policy():
     """Read-only policy summary for the Studio cost surface."""
     return {
-        "premium": {"model": DIRECTOR_MODEL, "use": "Story & Direction only",
+        "premium": {"model": DIRECTOR_MODEL, "use": "episode and scene story, coverage, acting, voice direction and creative review",
                     "maxOutputTokens": PREMIUM_MAX_OUTPUT_TOKENS,
                     "reasoningEffort": "medium"},
         "standard": {"model": VALIDATOR_MODEL,
-                     "use": "scene, shot, keyframe, voice, animation and review direction",
+                     "use": "routine department execution, production formatting and validation",
                      "maxOutputTokens": STANDARD_MAX_OUTPUT_TOKENS,
                      "reasoningEffort": "low"},
         "perCallLimitUsd": OPENAI_MAX_CALL_USD,
@@ -223,13 +223,40 @@ def _cache_load(digest, schema):
     try:
         return schema.model_validate_json(path.read_text())
     except FileNotFoundError:
-        return None
+        pass
     except Exception:
+        # A changed validator must not erase the evidence from an earlier call.
+        pass
+    # A completed paid response may become locally valid after a compiler repair.
+    # Only the identical request digest is eligible; never reuse another shot,
+    # schema, model, skill version or reference bundle.
+    for failure in sorted((OPENAI_CACHE_DIR / 'failures').glob(f'{digest}_*.json'), reverse=True):
         try:
-            path.unlink()
-        except OSError:
-            pass
-        return None
+            record = json.loads(failure.read_text())
+            if record.get('requestDigest') != digest or record.get('status') != 'completed':
+                continue
+            return schema.model_validate_json(record['outputText'])
+        except (OSError, ValueError, KeyError):
+            continue
+    return None
+
+
+def _record_response_failure(digest, response, model, label, error):
+    """Keep returned evidence without ever treating failed validation as approval."""
+    import uuid
+    directory = OPENAI_CACHE_DIR / 'failures'
+    directory.mkdir(parents=True, exist_ok=True)
+    record = {
+        'requestDigest': digest, 'responseId': getattr(response, 'id', None),
+        'model': model, 'label': label, 'status': getattr(response, 'status', None),
+        'outputText': getattr(response, 'output_text', '') or '',
+        'errorType': type(error).__name__, 'validated': False,
+        'errors': (error.errors(include_input=False, include_context=False, include_url=False)
+                   if isinstance(error, ValidationError) else [{'message': str(error)[:1000]}]),
+    }
+    path = directory / f'{digest}_{time.time_ns()}_{uuid.uuid4().hex[:8]}.json'
+    path.write_text(json.dumps(record, ensure_ascii=False, indent=2) + '\n')
+    return path
 
 
 def _cache_store(digest, obj):
@@ -240,6 +267,11 @@ def _cache_store(digest, obj):
         path = OPENAI_CACHE_DIR / f"{digest}.json"
         tmp = OPENAI_CACHE_DIR / f".{digest}.{os.getpid()}.tmp"
         tmp.write_text(obj.model_dump_json())
+        if path.exists() and path.read_bytes() != tmp.read_bytes():
+            previous = path.read_bytes()
+            history = OPENAI_CACHE_DIR / 'history'
+            history.mkdir(exist_ok=True)
+            (history / f'{digest}_{hashlib.sha256(previous).hexdigest()}.json').write_bytes(previous)
         os.replace(tmp, path)
     except Exception:
         pass
@@ -299,20 +331,26 @@ def _openai_call(model, system, user, schema, images=None, *, max_output_tokens,
     prompt_cache_key = "crystal-bears-" + hashlib.sha256(
         f"{model}\0{schema.__module__}.{schema.__qualname__}\0{system}".encode("utf-8")
     ).hexdigest()[:40]
-    resp = _client_get().responses.parse(
+    from openai.lib._parsing._responses import type_to_text_format_param
+    # Receive usage and output before local Pydantic validation. SDK parse() raises
+    # inside response decoding and loses that evidence on a custom-validator error.
+    resp = _client_get().responses.create(
         model=model,
         input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},
                {"role": "user", "content": user_parts}],
-        text_format=schema,
-        text={"verbosity": "low"},
+        text={"verbosity": "low", "format": type_to_text_format_param(schema)},
         max_output_tokens=max_output_tokens,
         reasoning={"effort": reasoning_effort},
         prompt_cache_key=prompt_cache_key,
-        prompt_cache_retention="24h",
+        extra_body={"prompt_cache_retention": "24h"},
     )
-    obj = resp.output_parsed
-    if obj is None:
-        raise RuntimeError(f"no parsed output (status={getattr(resp, 'status', '?')}, possible refusal)")
+    try:
+        if getattr(resp, 'status', None) != 'completed' or not resp.output_text:
+            raise RuntimeError(f"No complete structured output (status={getattr(resp, 'status', '?')})")
+        obj = schema.model_validate_json(resp.output_text)
+    except Exception as exc:
+        exc.provider_response = resp
+        raise
     return obj, resp
 
 def repair_truncated(s):
@@ -421,12 +459,22 @@ def _gemini_call(system, user, schema, images=None):
     payload = _normalize_single_list_model(_loads(text), schema)
     return schema.model_validate(payload)
 
+def direction_handoff_receipt(system, user, result, *, label, model, reused=False):
+    """Evidence of the actual worker input and output, without storing source prose."""
+    def sha(value):
+        return hashlib.sha256(str(value).encode('utf-8')).hexdigest()
+    return {"schemaVersion": 1, "worker": label, "model": model,
+            "reused": bool(reused), "systemHash": sha(system), "contextHash": sha(user),
+            "outputHash": sha(json.dumps(result.model_dump(), sort_keys=True, ensure_ascii=False))}
+
+
 def structured(system, user, schema, *, model=None, tier="standard", label="director", log=print,
                images=None, max_output_tokens=None, reasoning_effort=None, reuse=True):
     """One bounded structured call.
 
     Standard is deliberately the default, so a new department cannot silently inherit the
-    premium model. Only the episode Story & Direction entry points pass tier="premium".
+    premium model. Episode and scene Story & Direction explicitly use premium;
+    deterministic packing/formatting work and routine departments remain standard.
     """
     if tier not in ("standard", "premium"):
         raise ValueError(f"unknown OpenAI cost tier: {tier!r}")
@@ -435,11 +483,15 @@ def structured(system, user, schema, *, model=None, tier="standard", label="dire
         PREMIUM_MAX_OUTPUT_TOKENS if tier == "premium" else STANDARD_MAX_OUTPUT_TOKENS))
     reasoning_effort = reasoning_effort or ("medium" if tier == "premium" else "low")
     digest = _cache_digest(model, system, user, schema, images, max_output_tokens, reasoning_effort)
+    def received(result, *, reused=False, actual_model=model):
+        log("DIRECTION_HANDOFF " + json.dumps(direction_handoff_receipt(
+            system, user, result, label=label, model=actual_model, reused=reused)), flush=True)
+        return result
     if reuse:
         cached = _cache_load(digest, schema)
         if cached is not None:
             log(f"  [director] {label}: reused identical signed direction locally — no API call, $0", flush=True)
-            return cached
+            return received(cached, reused=True)
     openai_error = None
     with _cost_guard_lock():
         # Another Studio worker may have completed this exact request while this
@@ -449,7 +501,7 @@ def structured(system, user, schema, *, model=None, tier="standard", label="dire
             if cached is not None:
                 log(f"  [director] {label}: reused identical signed direction locally — no API call, $0",
                     flush=True)
-                return cached
+                return received(cached, reused=True)
         estimated_max_cost, _ = _assert_cost_budget(
             model, system, user, schema, images, max_output_tokens)
         for attempt in range(1, PROVIDER_ATTEMPTS + 1):
@@ -467,12 +519,26 @@ def structured(system, user, schema, *, model=None, tier="standard", label="dire
                 _cache_store(digest, obj)
                 log(f"  [director] {label}: OpenAI {model} completed — logged ${actual_cost:.4f}",
                     flush=True)
-                return obj
-            except ValidationError:
-                if reservation:
+                return received(obj)
+            except ValidationError as exc:
+                response = getattr(exc, 'provider_response', None)
+                if response is not None:
+                    actual_cost = _log_openai_usage(response, model, label, estimated_max_cost)
+                    if reservation:
+                        episode_budget.finish(budget_episode, reservation, 'committed', actual_cost)
+                    _record_response_failure(digest, response, model, label, exc)
+                    log(f'  [director] {label}: response retained after local validation failure; logged ${actual_cost:.4f}', flush=True)
+                elif reservation:
                     episode_budget.finish(budget_episode, reservation, "unknown")
                 raise
             except Exception as exc:
+                response = getattr(exc, 'provider_response', None)
+                if response is not None:
+                    actual_cost = _log_openai_usage(response, model, label, estimated_max_cost)
+                    if reservation:
+                        episode_budget.finish(budget_episode, reservation, 'committed', actual_cost)
+                    _record_response_failure(digest, response, model, label, exc)
+                    raise
                 if reservation:
                     episode_budget.finish(budget_episode, reservation, "unknown")
                     raise
@@ -497,7 +563,7 @@ def structured(system, user, schema, *, model=None, tier="standard", label="dire
     try:
         obj = _gemini_call(system, user, schema, images=images)
         log(f"  [director] {label}: served by Gemini fallback ({GEMINI_MODEL})", flush=True)
-        return obj
+        return received(obj, actual_model=GEMINI_MODEL)
     except ValidationError:
         raise
     except Exception as e2:
@@ -525,8 +591,11 @@ def structured_with_repair(system, user, schema, *, model=None, tier="standard",
                           max_output_tokens=max_output_tokens,
                           reasoning_effort=reasoning_effort, reuse=reuse)
 
-def repair_call(system, user, schema, errors, *, label="validator", log=print):
-    """A single repair call on the VALIDATOR model (OPENAI_VALIDATOR_MODEL), seeded with externally-found
-    business-rule errors — used by validate_scene_beats."""
-    return structured(system, _repair_user(user, errors), schema, model=VALIDATOR_MODEL,
+def repair_call(system, user, schema, errors, *, label="validator", log=print, tier="standard"):
+    """One bounded repair, retaining an explicitly selected creative tier.
+
+    Routine validation still defaults to the validator. A creative conference
+    repair must not silently downgrade the director who owns the decision.
+    """
+    return structured(system, _repair_user(user, errors), schema, tier=tier,
                       label=label + "/repair", log=log)

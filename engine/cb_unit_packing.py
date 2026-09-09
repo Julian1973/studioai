@@ -6,8 +6,8 @@ import json
 
 MAX_UNIT_SECONDS = 30
 NEAR_FULL_SECONDS = 24
-MAX_STAGES_PER_UNIT = 3
-MAX_INTERNAL_SHOTS_PER_UNIT = 3
+MAX_STAGES_PER_UNIT = 5
+MAX_INTERNAL_SHOTS_PER_UNIT = 6
 HANDOFF_HOLD_SECONDS = 1.0
 
 COMPLEXITY_KEYWORDS = (
@@ -105,8 +105,8 @@ def audit_units(units):
     An internal camera cut is not a provider boundary. Two adjacent units whose combined
     natural duration fits in 30 seconds therefore need either a hard production boundary or
     an explicit Director/Showrunner judgement that merging would damage the scene. Duration
-    capacity is not complexity capacity: a standard unit carries at most three causal stages
-    and three motivated camera views.
+    capacity is not complexity capacity. These are the typed route's structural bounds,
+    not evidence that the performance will fit or a target number of camera views.
     """
     rows = [_unit_row(unit) for unit in units]
     blocking = []
@@ -144,7 +144,7 @@ def audit_units(units):
 
         is_last = index == len(rows) - 1
         if (row["complexitySignals"] and row["targetDurationSec"] > 15 and
-                reason == "scene_end" and row["stageCount"] >= MAX_STAGES_PER_UNIT):
+                reason == "scene_end" and row["stageCount"] >= 3):
             merge_reviews.append({
                 "fromUnit": shot_id,
                 "toUnit": None,
@@ -201,14 +201,14 @@ def audit_units(units):
                     not row["complexitySignals"] and
                     not next_row["complexitySignals"])
                 if emotional_pair and not _has_merge_loss_explanation(boundary):
-                    blocking.append({
+                    merge_reviews.append({**boundary, 'status': 'showrunner-review',
                         "code": "AVOIDABLE_EMOTIONAL_SPLIT",
                         "shotId": shot_id,
                         "message": (
                             f"{shot_id} and {boundary['toUnit']} total {combined}s, share "
                             "emotional-continuity signals and fit inside one Seedance request. "
-                            "Merge them unless the boundary explanation names a concrete loss "
-                            "from remaining continuous."),
+                            "Review whether this boundary helps the performance. Keyword "
+                            "matches cannot decide the edit or force a merge."),
                     })
                 else:
                     merge_reviews.append({**boundary, "status": "showrunner-review"})
@@ -263,19 +263,19 @@ def audit_units(units):
                 "Split protected units for dense physical comedy, exact reveals, route-sensitive "
                 "causality, major geography changes, or more than one competing camera job."),
             "emotionalContinuity": (
-                "Quiet emotional beats in the same place with the same cast should stay in one "
-                "longer unit up to 30s unless the cut protects a concrete new reference, "
-                "geography, object handoff, point of view or complexity boundary."),
+                "Choose holds and cuts for the audience's reading of thought, reaction and relationship; "
+                "shared cast or available duration is not a reason to suppress a motivated reverse."),
             "continuity": (
-                f"Every unit must end on a usable held handoff frame of about "
-                f"{HANDOFF_HOLD_SECONDS:g}s; the next unit starts from that approved frame."),
+                "Plan a usable edit out and incoming state. Continuation uses relevant approved ending evidence; "
+                "a cut can start from a new keyframe. Do not force a hold or carry state across a declared time jump."),
             "music": (
-                "For split production units, render Seedance with dialogue/foley only and generate "
-                "one ElevenLabs scene-level music cue after stitch so score continuity does not drift."),
+                "Follow the approved shot and scene sound ownership. Preserve authorised Seedance music and character SFX; "
+                "audition adjacent sound before repair. Never assume an isolated stem exists inside a mixed render."),
         },
         "protectedSplits": protected,
         "mergeReviewRequired": merge_reviews,
         "blockingIssues": blocking,
         "ready": not blocking,
-        "needsHumanMergeReview": bool(merge_reviews),
+        "needsHumanMergeReview": False,
+        "needsDirectorReview": bool(merge_reviews),
     }

@@ -150,19 +150,24 @@ class GeminiVideoClient:
 def execute(production, job):
     pid, inputs = job['projectId'], job['reviewInputs']
     ws, transport = production.ws, production.transport
-    records = [inputs[k] for k in ('watch', 'see', 'hear', 'previous') if inputs.get(k)] + inputs['references']
+    records = [inputs[k] for k in ('watch', 'see', 'hear', 'previous', 'next') if inputs.get(k)] + inputs['references']
     for record in records:
         production.assert_artifact(pid, {'files': [record]})
     fps = job['binding'].get('videoFps', 4)
-    evidence = {'kind': 'video', 'processing': 'static', 'fps': fps, 'frames': [], 'audio': [], 'references': [], 'videos': [],
-                'scope': f'Complete current render and supplied incoming shot, with audio. Gemini samples video at {fps} frames per second; this is not every-frame certification.',
+    evidence = {'kind': 'video', 'processing': 'static', 'fps': fps, 'frames': [], 'audio': [], 'references': [], 'videos': [], 'joins': [],
+                'scope': f'Complete current render, available neighbours and bounded hard-cut auditions, with source audio where present. Gemini samples video at {fps} frames per second; this is not every-frame certification.',
                 'omittedApprovedReferences': inputs['omittedApprovedReferences']}
     sources = []
     for name, label, kind in [('watch', 'Current WATCH render', 'video'), ('previous', 'Previous approved shot — incoming cut context', 'video'),
+                              ('next', 'Next approved shot — outgoing cut context', 'video'),
                               ('hear', 'Approved HEAR — voice authority', 'audio'), ('see', 'Approved SEE opening', 'image')]:
         if inputs.get(name):
             sources.append((inputs[name], label, kind))
     sources += [(r, r['name'] + ' — ' + r['role'], 'image') for r in inputs['references']]
+    from studio_media_review import prepare_join_evidence
+    join_evidence = prepare_join_evidence(production, job)
+    sources += [(r, r['label'], 'video') for r in join_evidence]
+    records += join_evidence
     prepared = []
     production.progress(job, 'review_sources', 'Checking exact video, voice and reference files')
     for record, label, kind in sources:
@@ -183,7 +188,7 @@ def execute(production, job):
             if kind == 'video':
                 has_audio = any(s['codec_type'] == 'audio' for s in probe['streams'])
                 entry.update(hasAudio=has_audio, start=0, end=duration)
-                evidence['videos'].append(entry)
+                evidence['joins' if record in join_evidence else 'videos'].append(entry)
                 if record == inputs['watch']:
                     evidence.update(duration=duration, watchHasAudio=has_audio)
             else:
@@ -197,8 +202,10 @@ def execute(production, job):
         if mime not in {'video/mp4', 'video/mov', 'video/webm', 'audio/wav', 'audio/mpeg', 'image/png', 'image/jpeg', 'image/webp'}:
             raise StudioError('Convert this unsupported review source to MP4, WAV or PNG before reviewing it.', 'invalid_media')
         prepared.append({'path': path, 'type': kind, 'mimeType': mime, 'label': label})
-    context = {'project': job['context']['project'], 'projectBible': job['context']['bible'],
-               'script': job['context']['script'], 'shot': inputs['shot'], 'previousShot': inputs.get('previous'), 'evidence': evidence}
+    from studio_director_card import REVIEW_CRITERIA
+    context = {'creativeReviewCriteria': REVIEW_CRITERIA, 'project': job['context']['project'], 'projectBible': job['context']['bible'],
+               'script': job['context']['script'], 'shot': inputs['shot'], 'directorCardRevision': inputs.get('directorCardRevision'),
+               'previousShot': inputs.get('previous'), 'nextShot': inputs.get('next'), 'evidence': evidence}
     if len(json.dumps(context)) > 200000:
         raise StudioError('The review context exceeds the current limit. Use a smaller reference brief.', 'context_limit')
     connection, key = ws.credential(job['binding']['connectionId'], job['binding']['revision'])
@@ -219,6 +226,7 @@ def execute(production, job):
         raise StudioError('The video reviewer returned a time outside this shot. No report was applied.', 'invalid_output')
     job['audioReview'] = report['audioReview']
     result = {'id': uuid.uuid4().hex, 'jobId': job['id'], 'fingerprint': inputs['fingerprint'], 'candidateId': inputs['watch']['candidateId'],
+              'directorCardRevision': inputs.get('directorCardRevision'),
               'binding': job['binding'], 'at': time.time(), 'evidence': evidence, **report, 'sourceIntegrity': 'verified',
               'reviewContractHash': job['videoReviewContractHash'], 'interactionId': response.get('interactionId'),
               'usage': response.get('usage', {}), 'cleanupPending': job.get('cleanupPending', False),

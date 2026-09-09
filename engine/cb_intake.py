@@ -250,7 +250,7 @@ def scene_roster(episode="Ep1"):
 
 
 # ── mechanical script parser — scene order, dialogue and cast are LOCKED evidence ───────
-_SCENE_RE = re.compile(r"^\s*(INT\.?\s*/\s*EXT\.?|INT\.?|EXT\.?)\s+(.+?)\s+(\d+)\s*$")
+_SCENE_RE = re.compile(r"^\s*(INT\.?\s*/\s*EXT\.?|INT\.?|EXT\.?)\s+(.+?)(?:\s+(\d+))?\s*$")
 _TRANSITION_RE = re.compile(
     r"^\s*(FADE IN|FADE OUT|CUT TO|DISSOLVE TO|SMASH CUT TO|MATCH CUT TO)\.?:?\s*$",
     re.IGNORECASE)
@@ -385,7 +385,7 @@ def parse_script(text, roster=None, log=print):
         m = _SCENE_RE.match(raw.rstrip())
         if m:
             flush_action()
-            cur_scene = int(m.group(3))
+            cur_scene = int(m.group(3)) if m.group(3) else max([s["sceneNumber"] for s in scenes], default=0) + 1
             loc_time = re.sub(r"\s+", " ", m.group(2)).strip()
             parts = re.split(r"\s*[–—-]\s*", loc_time)
             location = parts[0].strip() if parts else loc_time
@@ -420,7 +420,7 @@ def parse_script(text, roster=None, log=print):
                     r"BEAT\.\s*$)", cand, re.IGNORECASE) if text_lines else None)
                 third_person_action_bleed = (re.match(
                     r"^(?:He|She|They)\s+(?:slowly|gently|quickly|smiles?|glances?|"
-                    r"looks?|sits?|stands?|walks?|moves?|turns?|places?|gives?|takes?|"
+                    r"looks?|sits?|stands?|walks?|moves?|turns?|places?|gives?|takes?|rushes?|rises?|"
                     r"stares?|freezes?|softens?|nods?|shrugs?|reaches?|leans?|steps?|"
                     r"continues?|holds?|grips?)\b", cand, re.IGNORECASE)
                     if text_lines else None)
@@ -432,7 +432,11 @@ def parse_script(text, roster=None, log=print):
                     r"^The\s+groups?\s+(?:giggles?|laughs?|smiles?|cheers?|gasps?|"
                     r"reacts?|settles?|gathers?|watches?|looks?|turns?|moves?)\b",
                     cand, re.IGNORECASE) if text_lines else None)
-                if (bleed or stage_bleed or third_person_action_bleed or
+                spatial_action_bleed = (re.match(
+                    r"^(?:(?:Above|Below|Behind|Nearby)\s+[—–]|"
+                    r"Behind\s+[A-Z][a-z]+\s+[—–]|It\s+(?:smacks|bounces|rolls|crashes)\b)",
+                    cand) if text_lines else None)
+                if (spatial_action_bleed or bleed or stage_bleed or third_person_action_bleed or
                         possessive_action_bleed or group_action_bleed):
                     log(f"ACTION-BLEED GUARD fired — stopped {speaker}'s dialogue before "
                         f"a directly-following, no-blank-line action sentence: {cand!r}")
@@ -467,7 +471,7 @@ def parse_script(text, roster=None, log=print):
     dialogue_count = sum(1 for e in events if e["type"] == "dialogue")
     if not scenes:
         raise Refused("mechanical script parse found no scene headers (expects "
-                      "'INT./EXT. LOCATION - TIME  <number>') — nothing generated")
+                      "'INT./EXT. LOCATION - TIME', with an optional scene number) — nothing generated")
     if dialogue_count == 0:
         raise Refused("mechanical script parse found no dialogue cues against the canon "
                       "character roster — check the script's format before proceeding")

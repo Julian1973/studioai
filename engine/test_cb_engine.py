@@ -630,7 +630,8 @@ def test_keyframe_prompt_omits_continuity_paragraph_when_nothing_inherited():
     shot = shot.model_copy(update={"continuityIn": None})
     kf, wc, _ = E.compile_keyframe_prompt(shot, {}, CFG)
     assert "continuity in" not in kf.lower()
-    assert "never composition or geography" in kf.lower()   # the plate's job line still prints
+    assert "world-space geography" in kf.lower()
+    assert "without copying its camera composition" in kf.lower()
     assert wc == len(kf.split())
 
 
@@ -651,11 +652,12 @@ def test_keyframe_prompt_is_reference_first_and_appearance_free():
     keyframe): the universal 'frame a touch wider... room to breathe' compiler nudge is
     REMOVED — it was a real, confirmed root cause of a compiled brief drifting to a wide
     scenic vista instead of the approved composition. Framing now comes solely from
-    shot.openingPose (openingImage); the plate is explicitly barred from claiming
-    composition or geography, only palette/materials/lighting."""
+    shot.openingPose (openingImage); the plate preserves the world's geography,
+    palette/materials/lighting without dictating the new camera composition."""
     kf, wc, _ = E.compile_keyframe_prompt(_clean_design().shots[0], {}, CFG)
     assert "wider" not in kf.lower()                  # the room-to-breathe law is GONE
-    assert "never composition or geography" in kf.lower()   # the plate's job is explicitly scoped
+    assert "world-space geography" in kf.lower()
+    assert "without copying its camera composition" in kf.lower()
     assert wc == len(kf.split())
     # rule 5: the compiler's own fixed text never describes appearance
     for banned in ("yellow", "stripe", "spectacles", "glasses", "fur", "fuzzy"):

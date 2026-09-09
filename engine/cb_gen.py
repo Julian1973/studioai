@@ -522,6 +522,22 @@ def _generate_image_seedream(prompt, refs=None, aspect="16:9", out="keyframe.png
         endpoint=SEEDREAM_ENDPOINT, aspect=aspect, size=image_size,
         output_format="png", response_format="url", prompt_optimization="standard",
         num_image_refs=len(refs), output_url_retention_hours=24)
+    import hashlib
+    from studio_reference_contract import VERSION
+    reference_evidence = []
+    for index, ref in enumerate(refs, start=1):
+        local = pathlib.Path(str(ref)) if not str(ref).startswith(("http:", "https:", "data:")) else None
+        is_local = local is not None and local.is_file()
+        reference_evidence.append({"slot": index,
+            "path": str(ref) if is_local else None,
+            "sha256": hashlib.sha256(local.read_bytes()).hexdigest() if is_local else None,
+            "sourceType": "local" if is_local else "remote"})
+    pathlib.Path(str(outp) + ".reference-contract.json").write_text(json.dumps({
+        "workflowVersion": VERSION, "model": SEEDREAM_MODEL_ID,
+        "prompt": str(prompt), "references": reference_evidence,
+        "outputSha256": hashlib.sha256(outp.read_bytes()).hexdigest(),
+        "approvalStatus": "unapproved", "visualFidelity": "requires-human-review",
+    }, indent=2), encoding="utf-8")
     return str(outp)
 
 @episode_budget.provider("keyframe-comparison", lambda a: cb_costs.estimate_image_cost(provider="nanobanana2"))

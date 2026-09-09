@@ -1,0 +1,17 @@
+"""Provider-independent timing invariants for every production route."""
+import math
+
+
+def require_aligned_timing(shot_duration, *, direction_duration=None, audio_duration=None):
+    duration = float(shot_duration)
+    if not math.isfinite(duration) or duration <= 0:
+        raise ValueError('Shot duration must be a positive finite number.')
+    if direction_duration is not None and abs(float(direction_duration) - duration) > .02:
+        raise ValueError('Shot card and animation direction have different durations. Revise the shot before preparing delivery.')
+    if audio_duration is not None:
+        audio = float(audio_duration)
+        if not math.isfinite(audio) or audio <= 0:
+            raise ValueError('The approved HEAR duration could not be verified.')
+        if audio > duration + .02:
+            raise ValueError('Approved HEAR exceeds the shot duration. Update the upstream shot timing and recompile before Fire; audio will not be cropped or squeezed.')
+    return duration

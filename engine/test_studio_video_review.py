@@ -71,6 +71,27 @@ def google_setup(setup, monkeypatch):
     return p, ws, t, accounts, google
 
 
+def test_cut_audition_uses_saved_trims_and_both_neighbours(google_setup):
+    p, ws, _, _, _ = google_setup
+    finish(p)
+    snapshot = p.snapshot('first', '1')
+    command(p, 'trim_clip', shotId='S1.SH1', timelineFingerprint=snapshot['review']['timeline']['fingerprint'], **{'in': .25, 'out': 1.75})
+    before = p.snapshot('first', '1')['state']
+    review(p, 'S1.SH2')
+    report = p.snapshot('first', '1')['state']['shots'][1]['mediaReviews'][0]
+    join = report['evidence']['joins'][0]
+    assert join['cutAt'] == 1.5
+    assert (join['ranges'][0]['start'], join['ranges'][0]['end']) == (.25, 1.75)
+    assert join['ranges'][0]['hash'] == before['shots'][0]['outcomes']['watch']['files'][0]['hash']
+    assert join['hasAudio'] and join['duration'] == pytest.approx(3.5, abs=.1)
+    review(p, 'S1.SH1')
+    state = p.snapshot('first', '1')['state']
+    outgoing = state['shots'][0]['mediaReviews'][0]['evidence']['joins'][0]
+    assert outgoing['label'] == 'outgoing hard-cut audition'
+    assert state['shots'][0]['outcomes'] == before['shots'][0]['outcomes']
+    assert state['shots'][1]['outcomes'] == before['shots'][1]['outcomes']
+
+
 def test_whole_video_audio_contract_and_references_reach_google_and_stay_version_bound(google_setup):
     p, ws, t, accounts, google = google_setup
     finish(p)
@@ -95,7 +116,9 @@ def test_whole_video_audio_contract_and_references_reach_google_and_stay_version
     assert 'tools' not in posted
     assert posted['response_format']['schema'] == VideoReport.model_json_schema()
     videos = [part for part in posted['input'] if part['type'] == 'video']
-    assert len(videos) == 2 and all(v['processing'] == {'type': 'static', 'fps': 4} for v in videos)
+    assert len(videos) == 3 and all(v['processing'] == {'type': 'static', 'fps': 4} for v in videos)
+    assert len(report['evidence']['joins']) == 1
+    assert report['directorCardRevision'] == state['shots'][1]['outcomes']['watch']['directorCardRevision']
     assert any(part['type'] == 'audio' for part in posted['input'])
     assert any(part['type'] == 'image' for part in posted['input'])
     assert 'second world only' not in json.dumps(posted)

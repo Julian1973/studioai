@@ -583,6 +583,21 @@ def test_composition_and_scale_controls_remain_local_while_locked_assets_own_pro
         shot, "1", "Ep1", characters) is None
 
 
+def test_prop_binding_prefers_approved_shot_state_to_generic_design(monkeypatch, tmp_path):
+    generic = _write(tmp_path / 'loaded.png')
+    selected = _write(tmp_path / 'empty.png')
+    draft = _write(tmp_path / 'draft.png')
+    common = {'role':'prop:machine', 'metadata':{'assetUse':'prop_reference','propId':'machine'}}
+    assets = [{**common, 'path':str(generic), 'status':'approved','scene':'1','shotId':None},
+              {**common, 'path':str(draft), 'status':'candidate','scene':'1','shotId':'S1.SH2'},
+              {**common, 'path':str(selected), 'status':'approved','scene':'1','shotId':'S1.SH2'}]
+    monkeypatch.setattr(cb_render.cb_asset_registry, 'resolve_assets', lambda *a,**k:assets)
+    monkeypatch.setattr(cb_render, '_reference_path_is_approved', lambda *_:True)
+    actual = cb_render._slot_path_for_role('prop:machine',None,'1','EpT',{},
+                                           {'shotId':'S1.SH2'})
+    assert actual == str(selected)
+
+
 def test_cut_keyframe_attaches_accepted_state_without_using_it_as_opening(monkeypatch, tmp_path):
     frame = _write(tmp_path / "landing.png")
     source = {"shotId": "S1.SH1", "status": "approved", "harvestFrame": str(frame),

@@ -329,7 +329,7 @@ def action_unit_report(shot, direction, prompt=""):
             }
     prompt_shots = {
         int(number): body for number, body in re.findall(
-            r"(?:Shot|Phase)\s+(\d+):\s*(.*?)(?=\n(?:Shot|Phase)\s+\d+:|\nWitness staging:|\n\[|\Z)",
+            r"\b(?:Shot|Phase)\s+(\d+):\s*(.*?)(?=\b(?:Shot|Phase)\s+\d+:|\nWitness staging:|\n\[|\Z)",
             raw_prompt, re.I | re.S)
     }
     for fallback_number, line in enumerate(dialogue, start=1):

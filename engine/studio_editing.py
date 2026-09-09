@@ -21,13 +21,20 @@ def fields(shot):
 
 def impact(old, new):
     before = fields(old)
+    new = fields(new)
     changed = [k for k in Shot.model_fields if before[k] != new[k]]
     reset = set()
-    if changed:
+    if set(changed) - {'directorCard'}:
         reset = {"request", "watch"}
         if "dialogue" in changed:
             reset.add("hear")
-        if set(changed) - {"watchPrompt", "duration", "dialogue", "beatPlan", "endingState"}:
+        if set(changed) - {"watchPrompt", "duration", "dialogue", "beatPlan", "endingState", "soundHandoff", "directorCard"}:
+            reset.add("see")
+    if "directorCard" in changed:
+        from studio_director_card import stage_decisions
+        if stage_decisions(before, "watch") != stage_decisions(new, "watch"):
+            reset.update({"request", "watch"})
+        if stage_decisions(before, "see") != stage_decisions(new, "see"):
             reset.add("see")
     return {"changed": changed, "reset": sorted(reset),
             "preserved": [s for s in old.get("outcomes", {}) if s not in reset],
@@ -39,6 +46,7 @@ def apply_edit(production, context, state, shot, new, reason):
     change = impact(shot, new)
     if not change["changed"]:
         return change
+    coverage = revised_scene_coverage(state, shot, new)
     original = json.loads(json.dumps(shot))
     original.pop("proposal", None)
     original.pop("editHistory", None)
@@ -48,10 +56,40 @@ def apply_edit(production, context, state, shot, new, reason):
         if name in shot["outcomes"]:
             shot.setdefault("versions", []).append({"stage": name, **shot["outcomes"].pop(name)})
     shot.update(new)
+    from studio_director_card import card
+    shot['directionRevision'] = card(shot, {'projectId': context['project']['id'],
+                                          'sourceSignature': production.source_signature(context, shot)})
+    if coverage != state.get('sceneCoverage', []):
+        state.setdefault('sceneCoverageHistory', []).append({'at': time.time(), 'shotId': shot['id'],
+            'reason': reason, 'before': state.get('sceneCoverage', []), 'after': coverage})
+        state['sceneCoverage'] = coverage
     shot["sourceSignature"] = production.source_signature(context, shot)
     shot.pop("proposal", None)
     mark_joins(state, shot)
     return change
+
+
+def revised_scene_coverage(state, old, new):
+    """A shot revision updates its upstream view allocation, not other units."""
+    before = (old.get('directorCard') or {}).get('views', [])
+    after = (new.get('directorCard') or {}).get('views', [])
+    scenes = json.loads(json.dumps(state.get('sceneCoverage', [])))
+    if before == after or not scenes:
+        return scenes
+    other_ids = {view['viewId'] for shot in state['shots'] if shot['id'] != old['id'] and shot['scene'] == old['scene']
+                 for view in (shot.get('directorCard') or {}).get('views', [])}
+    if len({v['viewId'] for v in after}) != len(after) or any(v['viewId'] in other_ids for v in after):
+        raise StudioError('This camera view is already allocated to another shot. Keep view ownership distinct.', 'invalid_plan')
+    scene = next((scene for scene in scenes if scene['scene'] == old['scene']), None)
+    if not scene:
+        raise StudioError('This shot no longer belongs to its planned scene coverage.', 'invalid_plan')
+    owned = {v['viewId'] for v in before}
+    remaining = [v for v in scene['views'] if v['viewId'] not in owned]
+    if any(v['viewId'] in {r['viewId'] for r in remaining} for v in after):
+        raise StudioError('The view ID belongs to other scene work. Keep its existing allocation.', 'invalid_plan')
+    position = next((i for i, v in enumerate(scene['views']) if v['viewId'] in owned), len(remaining))
+    scene['views'] = remaining[:position] + after + remaining[position:]
+    return scenes
 
 
 def mark_joins(state, shot):
@@ -83,12 +121,15 @@ def handle(production, db, context, state, shot, payload):
         from studio_references import resolve
         resolve(production, context, {**state, 'shots': [new if s['id'] == shot['id'] else s for s in state['shots']]}, new)
         apply_edit(production, context, state, shot, new, proposal["message"])
+        if proposal.get('preparation'):
+            shot['directionPreparation'] = proposal['preparation']
         return "Direction applied. Prepare the updated outcome when ready; earlier versions remain available."
     if action == "undo_revision":
         history = shot.get("editHistory", [])
         if not history:
             raise StudioError("There is no direction edit to undo.")
         before = history[-1]["before"]
+        coverage = revised_scene_coverage(state, shot, before)
         if before.get("sourceSignature") != production.source_signature(context, before):
             raise StudioError("Project references changed since this edit. Prepare a new revision against current references.", "source_changed")
         for artifact in before.get("outcomes", {}).values():
@@ -100,6 +141,10 @@ def handle(production, db, context, state, shot, payload):
         undo_log.append({"shotId": shot["id"], "action": "undo", "editId": history[-1]["id"], "at": time.time()})
         shot.clear()
         shot.update(before)
+        if coverage != state.get('sceneCoverage', []):
+            state.setdefault('sceneCoverageHistory', []).append({'at': time.time(), 'shotId': shot['id'], 'reason': 'Undo shot revision',
+                'before': state.get('sceneCoverage', []), 'after': coverage})
+            state['sceneCoverage'] = coverage
         shot["versions"] = versions
         shot["editHistory"] = history[:-1]
         if media_reviews:

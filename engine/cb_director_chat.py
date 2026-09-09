@@ -20,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field
 import cb_llm
 import cb_audio_authority
 import cb_render
+from studio_director_card import CONTRACT, card, stage_decisions
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -88,6 +89,11 @@ def _scope_context(episode, scene, shot_id, stage, issue):
     shot = next((x for x in (pkg.get("shots") or []) if x.get("shotId") == shot_id), {})
     ledger = next((x for x in (pkg.get("continuityLedger") or [])
                    if x.get("shotId") == shot_id), {})
+    shot = cb_render._with_effective_dialogue_timing(
+        cb_render._shot_creative_contract_view(pkg, shot, scene, episode), ledger)
+    direction_stage = {"scenelook": "see", "keyframe": "see", "voice": "hear",
+                       "animation": "watch", "animation-edit": "watch",
+                       "animation-refire": "watch"}.get(stage, "post")
     department = (ledger.get("departmentWork") or {}).get(
         {"keyframe": "cinematography", "voice": "voice", "animation": "animation",
          "animation-edit": "animation", "animation-refire": "animation"}.get(stage, stage), {})
@@ -116,14 +122,24 @@ def _scope_context(episode, scene, shot_id, stage, issue):
                 "characters": closing_characters,
             },
         },
-        "singleCameraTreatment": shot.get("camera"),
+        "cameraTreatment": shot.get("camera"),
+        "directorCardRevision": card(shot, {
+            "episode": episode, "scene": str(scene),
+            "sourceStoryboard": pkg.get("sourceStoryboard"),
+            "keyframeApproval": ledger.get("keyframeApproval"),
+            "voiceApproval": ledger.get("voiceApproval"),
+        }),
+        "stageDirection": stage_decisions(shot, direction_stage),
         "referenceRoles": shot.get("referenceSlots") or shot.get("keyframeReferenceSlots"),
         "exactDialogue": [
             {"speaker": x.get("speaker"), "exactText": x.get("exactText"),
-             "delivery": x.get("delivery")}
+             "delivery": x.get("delivery"),
+             **{k: x[k] for k in ("dialogueOccurrenceId", "startSec", "endSec",
+                                  "startsAtSec", "estimatedDurationSec") if k in x}}
             for x in routed_audio["spokenDialogue"]
         ],
         "seedanceSfxCues": routed_audio["seedanceSfxCues"],
+        "timingScope": "Preserve recorded timing fields. Estimated duration is planning, not measured audio evidence.",
         "currentStatus": ledger.get("status"),
         "durationSec": shot.get("durationSec"),
         "approvedTake": ledger.get("approvedTake"),
@@ -215,13 +231,16 @@ def chat(episode, scene, shot_id, stage, message, issue="", reviewer="Julian"):
         "shot. Discuss the visible creative result plainly and specifically. Protect "
         "the immutable script, canon, character identity, geography, approved continuity and "
         "existing approvals. Preserve the ordered opening, action and landing states unless the "
-        "note explicitly targets one of them. Keep one coherent camera treatment. Diagnose the "
+        "note explicitly targets one of them. Preserve planned camera views and cut reasons; "
+        "when a note changes coverage, keep world geography and action state coherent across "
+        "angles rather than forcing one camera composition. Diagnose the "
         "first failed production layer and propose the smallest bounded correction. Fill "
         "changeSummary with what will visibly change and protectedElements with the successful "
         "things that must remain unchanged. Never claim to approve, reject, generate, refire or "
         "spend. Never rewrite exact dialogue. Keep the response under 220 words. Set readyToApply "
         "true only when the correction is precise enough to become a rejection/iteration brief."
     )
+    system += "\nShared production direction:\n" + CONTRACT
     if stage == "animation-edit":
         system += (
             " This is a bounded edit of an approved take. If the reviewer has not supplied an "

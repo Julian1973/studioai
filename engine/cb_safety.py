@@ -260,6 +260,7 @@ def create_policy(m):
         return {
             "model": m.cb_departments.cb_llm.DIRECTOR_MODEL,
             "productionStandardHash": file_sha256(m.ROOT / "skills/production-standard.md"),
+            "directingContractHash": file_sha256(m.ROOT / "engine/studio_director_card.py"),
             "skillHashes": {
                 key: file_sha256(m.cb_departments.SKILLS[key]) for key in keys
             },
@@ -405,6 +406,14 @@ def create_policy(m):
                  record.get("inputSignature"), expected, stage)),
             (None, None),
         )
+        if not current_record and stage in direction_stages:
+            # A shared implementation update alone does not rewrite authored work.
+            # All creative inputs and runtime skills still compare exactly, and
+            # the current voice/animation validators below remain compulsory.
+            current_source, current_record = next(
+                ((source, record) for source, record in existing
+                 if set(m._signature_diff(record.get('inputSignature'), expected))
+                    == {'directingContractHash'}), (None, None))
         if not current_record and stage == "look":
             # A Director model upgrade does not alter an already prepared visual brief.
             # Canon, scene context and the Look skill must still match exactly.
@@ -792,6 +801,10 @@ def create_policy(m):
         return prompt
 
     def voice_lines(pkg, shot):
+        from cb_voice_reuse import current_requests
+        reused = current_requests(m._ledger(pkg, shot["shotId"]), shot)
+        if reused is not None:
+            return reused
         output = current_direction_output(pkg, shot["shotId"], "voice")
         output, locked = cb_audio_authority.route_voice_direction(
             output, shot.get("dialogueLines") or [])
@@ -1286,6 +1299,8 @@ def create_policy(m):
             raise m.Refused(
                 f"REFUSED - {shot_id}'s complete voice track is already approved; "
                 "auditions may be heard, but reject the approved track before replacing it")
+        # An explicit new voice generation ends any earlier sample-reuse choice.
+        ledger.pop("voicePerformanceReuse", None)
         lines, turns = voice_lines(pkg, shot), []
         for performance in lines:
             turns.append({"text": performance["text"], "voice_id": performance["voiceId"]})
@@ -1466,7 +1481,16 @@ def create_policy(m):
             voice_provider_projection(current_lines))
         if generated_signature != signature and not (
                 same_nonperformance_inputs and same_provider_request):
-            raise m.Refused(f"REFUSED — {shot_id}'s voice was not generated from current signed direction")
+            # A local timing edit reuses the paid performance. Verify its source and
+            # reproduce the reviewed WAV before accepting the new timing signature.
+            from cb_voice_retime import verify_reviewed_retime
+            previous = (ledger.get("voicePrevious") or {}).get("approval") or {}
+            if not verify_reviewed_retime(
+                    ledger, shot, generated_signature, signature,
+                    same_provider_request, previous):
+                raise m.Refused(f"REFUSED — {shot_id}'s voice was not generated from current signed direction")
+            ledger["voInputSignature"] = signature
+            m._save(pkg, path)
         for field in ("voPath", "voRawPath", "voTimingPath", "voPlacementPath"):
             value = ledger.get(field)
             if not value or not os.path.exists(value):

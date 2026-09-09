@@ -219,6 +219,7 @@ class Shot(BaseModel):
     openingPose: str = Field(min_length=1)        # the ANTICIPATION instant (§4) — the keyframe truth
     sourceType: Literal["opener", "relay"]        # opener = generated keyframe; relay = harvested frame
     sourceShotId: Optional[str] = None            # relay: the EARLIER shot whose final frame anchors this one
+    stateSourceShotId: Optional[str] = None       # cut: prior ending is state evidence, not opening composition
     motionContinuityRequired: bool = False
     # True when the outgoing movement itself is continuity-critical (for example a vehicle,
     # vessel, moving camera or travelling character). These relays require @Video1 rather
@@ -1079,6 +1080,8 @@ def reference_slots(shot, characters_cfg, for_keyframe=False):
         slots[f"@图{n}"] = f"prop:{prop_id}"
         n += 1
     slots[f"@图{n}"] = "scene plate"
+    if shot.sourceType == "opener" and shot.stateSourceShotId:
+        slots[f"@图{n + 1}"] = "previous shot final frame"
     if not for_keyframe and shot.dialogueLines:
         slots["@Audio1"] = "voice track"
     return slots
@@ -1415,7 +1418,11 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
         f"The literal OPENING FRAME of the shot, exactly as approved: {pose}.",
         " ".join(prop_lines),
         f"{continuity_clause}@图{scene_plate_slot} scene plate anchors palette, materials and "
-        f"lighting only — never composition or geography.",
+        f"lighting and world-space geography; preserve landmarks without copying its camera composition.",
+        (f"@图{scene_plate_slot + 1} is the exact ending of {shot.stateSourceShotId}. "
+         "Use it for current character, prop and effect state and the same story moment. "
+         "Compose the new camera angle described by the opening pose; do not copy the prior framing."
+         if shot.stateSourceShotId else ""),
         cb_engine_rules.living_performance_boilerplate(
             {"charactersInFrame": list(opening_cast)}, medium="still"),
         ("Negative: character redesign, appearance drift from the references, extra "

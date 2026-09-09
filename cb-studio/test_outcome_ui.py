@@ -368,7 +368,7 @@ def test_fire_prepares_internal_direction_then_returns_to_the_visible_outcome():
 def test_hear_keeps_the_audio_outcome_prominent_before_and_after_generation():
     assert "stage-audio-empty" in APP
     assert "Your performance direction is ready" in APP
-    assert "Step 1 of 2: confirm the exact words below. Step 2: review cost and press Fire voice." in APP
+    assert "Step 1 of 2: confirm the exact words above. Step 2: review cost and press Fire voice." in APP
     assert "Save corrected words" in APP
     assert "data-hear-fire" in APP
     assert "A provider job starts only after the final Fire voice confirmation." in APP
@@ -707,10 +707,28 @@ def test_fire_is_acknowledged_in_watch_before_the_first_job_poll():
 def test_spend_disclosure_is_a_decision_not_a_failed_job():
     assert 'job["status"] = "done" if (p.returncode == 0 or spend_decision) else "failed"' in SERVER
     assert 'job["step"] = "Cost ready for approval"' in SERVER
-    assert 'const disclosure=j.step==="Cost ready for approval"' in APP
+    assert 'const disclosure=shIsSpendDecision(j);' in APP
     assert '${disclosure?"WATCH cost review":failureCopy?_esc(failureCopy.title):_esc(String(j.gate))}' in APP
-    assert 'No provider was called and nothing was charged.' in APP
+    assert 'This cost-review step did not submit a generation.' in APP
     assert 'This REFUSED run is the designed disclosure step' not in APP
+
+
+def test_watch_banner_uses_terminal_outcome_not_old_spend_text():
+    import subprocess
+    functions = APP[APP.index('function shFailureCopy('):APP.index('function closeM(')]
+    program = 'const _esc=s=>String(s);\n' + functions + '''
+const audit="SPEND DISCLOSURE — spend token issued; BYTEPLUS SUBMITTING";
+for (const status of ["running","finalizing","done","failed"]) {
+  const outcome=status==="failed"?"failed":status==="done"?"completed":undefined;
+  const html=shJobHTML({status,outcome,log:audit,gate:"shot:fire:S1.SH1"});
+  if(html.includes("Ready for your approval"))throw Error(status+" mislabelled as cost review");
+}
+const cost=shJobHTML({status:"done",outcome:"needs_spend_approval",log:audit});
+if(!cost.includes("Ready for your approval"))throw Error("real cost review missing");
+const failed=shJobHTML({status:"failed",outcome:"failed",step:"Cost ready for approval",log:audit});
+if(failed.includes("Ready for your approval"))throw Error("stale step overrides failure");
+'''
+    subprocess.run(['node','-e',program],check=True,capture_output=True,text=True)
 
 
 def test_watch_readiness_repairs_stale_direction_before_fire():

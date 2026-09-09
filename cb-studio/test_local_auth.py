@@ -58,6 +58,22 @@ def test_episode_script_registry_sync_refuses_unpublished_pointer(monkeypatch):
         module.synchronize_episode_script_registry("Ep2", expected)
 
 
+def test_prepared_storyboard_does_not_hide_failed_production_handover(monkeypatch, tmp_path):
+    module = _load_server_module('cb_studio_handover_failure_test')
+    monkeypatch.setattr(module, 'ROOT', tmp_path)
+    path = tmp_path / 'cb-output/creative/TestEp_scene1_storyboard.json'
+    path.parent.mkdir(parents=True)
+    original = json.dumps({'approvalState': 'approved', 'shots': []})
+    path.write_text(original)
+    monkeypatch.setattr(module, '_carry_forward_unchanged_approved_scene', lambda *a: None)
+    def fail(*args):
+        raise RuntimeError('required reference missing from handover')
+    monkeypatch.setattr(module, '_promote_approved_storyboard', fail)
+    with pytest.raises(RuntimeError, match='required reference missing'):
+        module._prepare_scene_direction_for_production('TestEp', '1')
+    assert path.read_text() == original
+
+
 def test_render_upload_decoder_accepts_bounded_mp4_and_webm_only():
     module = _load_server_module("cb_studio_render_decode_test")
     mp4 = b"\x00\x00\x00\x18ftypisom" + b"\x00" * 24

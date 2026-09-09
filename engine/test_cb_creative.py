@@ -87,7 +87,7 @@ def _card(shot_id="S1.SH1", transition="PLANNED_CUT"):
             cameraAndTransition="Pursue through the approach, then hold the recoil plane",
             observableEndState="Fuzzby hangs beside the trembling leaf")],
         internalShotPlan=[C.StoryboardInternalShot(
-            shotNumber=1, purpose="Carry one uninterrupted cause-and-effect gag",
+            shotNumber=1, viewId="scene1-view1", transitionType="opening", purpose="Carry one uninterrupted cause-and-effect gag",
             framingAndCamera="Eye-level medium-wide pursuit through the stems",
             storyAction="The late turn creates the collision and recoil",
             performanceFocus="Fuzzby restores his social pose after his balance",
@@ -321,8 +321,12 @@ def _fake_llm(record, review_script=None):
             return _heart_contract()
         if schema is C.TreatmentSelection:
             return _selection()
-        if schema is C.SceneDirection:
-            return C.SceneDirection(scene=_scene(), beats=[_beat()])
+        if schema is C.PlannedSceneDirection:
+            return C.PlannedSceneDirection(scene=_scene(), beats=[_beat()], sceneCoverage=[{
+                'scene': 1, 'audienceJourney': 'Confidence becomes embarrassment', 'views': [{
+                    'viewId': 'scene1-view1', 'audienceNeed': 'Read the recoil', 'framing': 'Medium pursuit',
+                    'cameraPurpose': 'Discover loss of control', 'cutReason': 'Hold the cause and reaction',
+                    'continuity': 'Same route and leaf', 'productionChoice': 'current clip', 'entry': 'opening'}]}])
         if schema is C.ShotConference:
             return C.ShotConference(shots=[_card()])
         if schema is C.PerformancePass:
@@ -376,6 +380,7 @@ def _set_source(monkeypatch, source_beats, source_pkg):
 
 
 def _isolated(monkeypatch, record, review_script=None):
+    monkeypatch.setattr(C, 'refresh_source_extraction', lambda *a, **k: {'changed':False})
     monkeypatch.setattr(cb_llm, "structured", _fake_llm(record, review_script))
     monkeypatch.setattr(C, "load_canon_envelope", lambda *a, **k: {
         "sources": {}, "canonLock": {"profileDigest": CANON_DIGEST}})
@@ -397,7 +402,60 @@ def test_treatment_selection_precedes_beat_architecture(monkeypatch):
     order = [schema for _, schema, _ in record]
     assert order.index("EmotionalStoryToScreenContract") < order.index("TreatmentSet") \
            < order.index("TreatmentSelection") \
-           < order.index("SceneDirection") < order.index("ShotConference")
+           < order.index("PlannedSceneDirection") < order.index("ShotConference")
+
+
+def test_scene_creative_roles_use_director_not_routine_validator(monkeypatch):
+    record = []
+    _isolated(monkeypatch, record)
+    dispatch = cb_llm.structured
+    calls = {}
+    def observe(system, user, schema, **kwargs):
+        calls[schema.__name__] = kwargs.get('tier', 'standard')
+        return dispatch(system, user, schema, **kwargs)
+    monkeypatch.setattr(cb_llm, 'structured', observe)
+    C.run_scene(1, 'Ep1', log=lambda *a, **k: None)
+    for schema in ('EmotionalStoryToScreenContract', 'TreatmentSet',
+                   'TreatmentSelection', 'PlannedSceneDirection', 'ShotConference',
+                   'PerformancePass', 'ShowrunnerReview'):
+        assert calls[schema] == 'premium', schema
+    assert calls['ProductionPass'] == 'standard'
+
+
+@pytest.mark.parametrize('repair_succeeds', [True, False])
+def test_unallocatable_coverage_returns_upstream_once(monkeypatch, repair_succeeds):
+    from types import SimpleNamespace
+    old = SimpleNamespace(sceneCoverage=[])
+    revised = SimpleNamespace(sceneCoverage=[])
+    attempts, revisions = [], []
+    def allocate(*args, **kwargs):
+        attempts.append(args[4])
+        assert kwargs['ambition_brief'] == 'Two clips; preserve the performance'
+        if len(attempts) == 1 or not repair_succeeds:
+            raise C.CoverageAllocationError('Planned scene views were lost: listener-reverse')
+        return ['allocated']
+    def redraft(*args, **kwargs):
+        revisions.append(kwargs['review_notes'])
+        return revised
+    monkeypatch.setattr(C, 'gate4_shot_conference', allocate)
+    monkeypatch.setattr(C, 'gate3_beats', redraft)
+    def run():
+        return C.plan_camera_allocation('Ep1', 1, {}, None, None,
+            {'brief':'Two clips; preserve the performance'}, old, log=lambda *_: None)
+    if repair_succeeds:
+        assert run() == (revised, ['allocated'])
+    else:
+        with pytest.raises(C.CoverageAllocationError): run()
+    assert attempts == [old, revised]
+    assert len(revisions) == 1 and 'listener-reverse' in revisions[0]
+
+
+def test_provider_failure_is_not_treated_as_permission_to_repeat_direction(monkeypatch):
+    def fail(*args, **kwargs): raise RuntimeError('Provider result unknown')
+    monkeypatch.setattr(C, 'gate4_shot_conference', fail)
+    monkeypatch.setattr(C, 'gate3_beats', lambda *a, **k: pytest.fail('Unexpected retry'))
+    with pytest.raises(RuntimeError, match='unknown'):
+        C.plan_camera_allocation('Ep1', 1, {}, None, None, {'brief':'Current revision'}, None)
 
 
 def test_scene_direction_provider_schema_excludes_mechanically_restored_lineage_dicts():
@@ -795,7 +853,7 @@ def test_review_caps_at_two_complete_revisions_then_escalates(monkeypatch):
     assert len(pkg["internalRevisions"]) == C.MAX_INTERNAL_REVISIONS
     assert all(r["returnTo"] == "gate3" for r in pkg["internalRevisions"])
     # a gate3 return re-architects: SceneDirection called again, never a wording patch
-    assert sum(1 for _, s, _ in record if s == "SceneDirection") == 3
+    assert sum(1 for _, s, _ in record if s == "PlannedSceneDirection") == 3
     assert "escalated for human direction" in pkg["escalation"]
     assert pkg["approvalState"] == "awaiting-human-storyboard-approval"
 
@@ -855,8 +913,10 @@ def test_canonical_voice_occurrence_restores_exact_words_after_acting_pass(monke
         physicalActionRelationship="body remains asleep", expectedTiming="1s")
     monkeypatch.setattr(C, "_script_beats", lambda *_args: ([{}], {}))
     monkeypatch.setattr(C, "_locked_dialogue", lambda _beats: [locked])
-    monkeypatch.setattr(C.cb_llm, "structured",
-                        lambda *_args, **_kwargs: C.VoiceScript(performances=[voice]))
+    def direct_voice(*_args, **kwargs):
+        assert kwargs.get('tier') == 'premium'
+        return C.VoiceScript(performances=[voice])
+    monkeypatch.setattr(C.cb_llm, "structured", direct_voice)
 
     result = C.gate5_voice("Ep2", 1, None, [_card()], log=lambda *_: None)
 
@@ -993,3 +1053,31 @@ def test_no_fixed_lane_or_mandatory_coverage_language_in_contract():
 if __name__ == "__main__":
     import subprocess
     raise SystemExit(subprocess.call([sys.executable, "-m", "pytest", __file__, "-q"]))
+
+
+@pytest.mark.parametrize('repair_succeeds', [True, False])
+def test_gate4_packing_repair_is_bounded_and_revalidated(monkeypatch, repair_succeeds):
+    conference = C.ShotConference(shots=[_card()])
+    monkeypatch.setattr(cb_llm, 'structured_with_repair', lambda *a, **k: conference)
+    repairs = []
+    def repair(*args, **kwargs):
+        repairs.append(args)
+        return conference
+    monkeypatch.setattr(cb_llm, 'repair_call', repair)
+    validations = []
+    original = C._validate_gate4_production_units
+    def validate(shots, beats):
+        validations.append(True)
+        if len(validations) == 1 or not repair_succeeds:
+            raise RuntimeError('FALSE_DURATION_SPLIT: two units fit in one request')
+        return original(shots, beats)
+    monkeypatch.setattr(C, '_validate_gate4_production_units', validate)
+    def run():
+        return C.gate4_shot_conference('Ep1', 1, _selection(), _treatment('A'),
+            C.SceneDirection(scene=_scene(), beats=[_beat()]), log=lambda *a: None)
+    if repair_succeeds:
+        assert run()[0].shotId == conference.shots[0].shotId
+    else:
+        with pytest.raises(RuntimeError, match='FALSE_DURATION_SPLIT'):
+            run()
+    assert len(repairs) == 1 and len(validations) == 2

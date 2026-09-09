@@ -16,6 +16,7 @@ let DIRECTOR_CHAT_CACHE={},DIRECTOR_CHAT_OPEN_KEY=null,events=[];
 const pShots=()=>[{shotId:'S1.SH1'},{shotId:'S1.SH2'}];
 const directorChatKey=scope=>scope.stage;
 const openDirectorAgent=async scope=>{DIRECTOR_CHAT_OPEN_KEY=scope.stage;events.push(['chat',scope.stage]);};
+const directorPollChatJob=()=>{};
 const shRememberJob=()=>{},shPollStart=()=>{},renderControl=()=>{};
 const openShotOutcome=(stage,index)=>events.push([stage,index]);
 const openStageOutcome=stage=>events.push(stage);
@@ -33,3 +34,20 @@ const shLedger=()=>scenario==='request-ready'?{pendingSpendAuth:{token:'test'}}:
 })().catch(e=>{console.error(e);process.exitCode=1});
 '''
     subprocess.run(['node','-e','const scenario='+json.dumps(scenario)+';\n'+FOLLOW+harness], check=True, capture_output=True, text=True)
+
+
+@pytest.mark.parametrize('status', ['running', 'failed', 'done'])
+def test_chat_job_feedback_works_outside_pipeline(status):
+    source = APP[APP.index('async function directorPollChatJob('):APP.index('function closeDirectorAgent()', APP.index('async function directorPollChatJob('))]
+    harness = r'''
+const assert=require('node:assert/strict');
+let DIRECTOR_JOB_POLL=null,DIRECTOR_CHAT_OPEN_KEY='episode',DIRECTOR_CHAT_CACHE={episode:{}},renders=0,timers=0;
+const BASE='',renderDirectorChatHost=()=>renders++,clearTimeout=()=>{},setTimeout=()=>++timers;
+const fetch=async()=>({ok:true,json:async()=>({jobs:{test:{status,step:'Reading script',error:'Cannot parse heading'}}})});
+(async()=>{await directorPollChatJob('episode','test');
+assert.equal(renders,1);
+assert.equal(timers,status==='running'?1:0);
+assert.match(DIRECTOR_CHAT_CACHE.episode.jobProgress,status==='failed'?/Production paused: Cannot parse heading/:status==='done'?/completed/:/Reading script/);
+})().catch(e=>{console.error(e);process.exitCode=1});
+'''
+    subprocess.run(['node','-e','const status='+json.dumps(status)+';\n'+source+harness],check=True,capture_output=True,text=True)

@@ -1335,3 +1335,26 @@ def test_declared_join_controls_frame_source_despite_stale_keyframe_flag(transit
                                for item in expected["characters"]]
     assert shot.continuityIn.model_dump() == expected
     assert R._shot_uses_own_keyframe(shot.model_dump()) == (source_type == "opener")
+
+
+def test_cut_keeps_separate_ending_reference_and_explicit_shot_prop(monkeypatch):
+    import cb_asset_registry as registry
+    entries = [dict(episode='TestEp', scene='1', shotId='1.SH2',
+                    kind='reference_image', role='prop:empty-machine', status='approved',
+                    path='/not-downloaded-yet.png')]
+    entries += [{**entries[0], 'episode': 'Other'},
+                {**entries[0], 'shotId': '1.SH3', 'role': 'prop:other'},
+                {**entries[0], 'status': 'candidate', 'role': 'prop:unapproved'}]
+    monkeypatch.setattr(registry, '_read', lambda: {'assets': entries})
+    shot, retained = H.distil_shot(
+        _sb_shot('1.SH2', ['1.B1'], 'PLANNED_CUT'),
+        _pd('1.SH2', False, names_speaker=False), ['Fuzzby', 'Zenny'], [], '1.SH1', {},
+        reference_context={'episodeId': 'TestEp', 'sceneNumber': '1'})
+    compiled = H._compile_one(shot, retained, {}, {})
+    for name in ('referenceSlots', 'keyframeReferenceSlots'):
+        roles = list(compiled[name].values())
+        assert roles.count('previous shot final frame') == 1
+        assert 'prop:empty-machine' in roles
+        assert 'prop:other' not in roles and 'prop:unapproved' not in roles
+    assert compiled['referenceSlots']['@图1'] == 'opening keyframe'
+    assert 'do not copy the prior framing' in compiled['keyframePrompt']

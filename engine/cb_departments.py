@@ -22,6 +22,7 @@ import cb_engine_rules
 import cb_voice_director
 import cb_audio_authority
 from cb_production_contracts import visual_event_text, validate_timeline, shot_handoff_instruction
+from studio_scene_handoff import SoundHandoff, sound_instruction
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -306,6 +307,7 @@ class VoiceDirection(BaseModel):
 
 class InternalShotDirection(BaseModel):
     shotNumber: int = Field(ge=1, le=6)
+    transitionType: Literal['opening', 'cut', 'move', 'hold', 'auto'] = 'auto'
     purpose: str = Field(min_length=1)
     framingLensAndCamera: str = Field(min_length=1)
     causalAction: str = Field(min_length=1)
@@ -392,7 +394,7 @@ class GagClockDirection(BaseModel):
     reaction: str = Field(min_length=1)
     recoveryHold: str = Field(min_length=1)
     recoveryHoldSec: float = Field(
-        gt=0, le=3.0,
+        gt=0, le=30.0,
         description="Numeric landing hold. BIG arcs and any arc that ends the unit need "
                     ">= 2.0s for the pose to read; SMALL mid-chain arcs may run 0.6-1.5s.")
     button: str = Field(min_length=1)
@@ -473,6 +475,7 @@ class TimelineEvent(BaseModel):
 
 
 class AnimationDirection(BaseModel):
+    soundHandoff: SoundHandoff | None = None
     shotId: str
     durationSec: int = Field(
         ge=4, le=30,
@@ -587,6 +590,14 @@ class AnimationDirection(BaseModel):
             value["motionVocabulary"] = [
                 item.model_dump() for item in canonical_motion_vocabulary()
             ]
+            # Preserve supplied stage clocks and validate them as timestamp pacing.
+            # A mislabeled short unit is a format mismatch, not a reason to discard
+            # its authored timing or ask the provider to invent the direction again.
+            stages = value.get('stagePlan') or []
+            if value.get('pacingMode', 'storyline') == 'storyline' and stages and all(
+                    isinstance(stage, dict) and stage.get('startSec') is not None
+                    and stage.get('endSec') is not None for stage in stages):
+                value['pacingMode'] = 'timestamp'
         return value
 
     @model_validator(mode="after")
@@ -795,7 +806,8 @@ class KeyframeConformanceReview(BaseModel):
 
 
 def _system(worker, job, standard_version=0):
-    return (load_runtime_skill(worker, standard_version) + "\n\nTHIS RUN:\n" + job +
+    from studio_director_card import CONTRACT
+    return (CONTRACT + "\n\n" + load_runtime_skill(worker, standard_version) + "\n\nTHIS RUN:\n" + job +
             "\n\nYou are preparing a candidate for human approval. Do not claim it is "
             "approved. Do not call or simulate a media provider. Return only the requested "
             "structured result.")
@@ -806,10 +818,12 @@ def _j(value, limit=22000):
 
 
 def _creative_context(context):
-    # Keep bounded review observations visible even when a large shot context is truncated.
+    # Preserve the whole creative handoff; never cut JSON or tail decisions silently.
     clean = dict(context)
+    from studio_director_card import REVIEW_CRITERIA
+    clean["creativeReviewCriteria"] = REVIEW_CRITERIA
     observations = clean.pop("reviewObservations", "")
-    return observations + "\n\n" + _j(clean)
+    return observations + "\n\n" + json.dumps(clean, ensure_ascii=False, indent=1)
 
 
 class BeatSplit(BaseModel):
@@ -988,6 +1002,8 @@ def prepare_look(context, *, log=print):
 
 def prepare_cinematography(context, images, *, log=print):
     context = dict(context)
+    from studio_director_card import stage_decisions
+    context['directorDecisions'] = stage_decisions(context.get('shot') or context, 'see')
     from cb_learning_context import brief
     context.setdefault("reviewObservations", brief(context))
     standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
@@ -1106,6 +1122,9 @@ def validate_voice_direction(result, locked_lines):
         if performance_override and out.performedText.strip() != performance_override:
             raise RuntimeError(
                 f"Voice Director ignored the human performance override on line {idx}")
+        bound = cb_voice_director.bind_primary_performance(out.model_dump(), locked)
+        for recipe, compiled_recipe in zip(out.takeRecipes, bound.get("takeRecipes") or []):
+            recipe.performedText = compiled_recipe["performedText"]
         if out.archetypeId not in registers:
             raise RuntimeError(
                 f"Voice Director selected unregistered archetype {out.archetypeId!r} "
@@ -1206,21 +1225,11 @@ def animation_story_lock_report(shot, provider_prompt, stage_plan=None, shot_pla
     locked = animation_locked_visual_events(shot)
     prompt = visual_event_text(provider_prompt)
     actual_stages = list(stage_plan or [])
-    internal_shots = list(shot_plan or [])
-    shot_actions = []
-    for item in internal_shots:
-        get = (lambda key, row=item: getattr(row, key, "")) if not isinstance(item, dict) else item.get
-        value = visual_event_text(get("causalAction"))
-        if value:
-            shot_actions.append(value)
-    decomposed_story_is_emitted = bool(shot_actions) and all(
-        action in prompt for action in shot_actions)
     errors = []
     for index, event in enumerate(locked):
         primary = event["primaryEvent"]
         ending = event["observableEndState"]
-        if (primary and visual_event_text(primary) not in prompt
-                and not decomposed_story_is_emitted):
+        if primary and visual_event_text(primary) not in prompt:
             errors.append(
                 f"stage {event['stageNumber']} approved visual event is absent from providerPrompt")
         if actual_stages:
@@ -1317,6 +1326,9 @@ def creative_translation_report(shot, direction, provider_prompt=None):
             errors.append(
                 f"{actual_clock.get('beatCode') or '?'} gag button has no numeric hold")
         else:
+            duration = float(data.get('durationSec') or shot.get('durationSec') or 30)
+            if float(hold_sec) > duration:
+                errors.append(f"{actual_clock.get('beatCode') or '?'} landing hold exceeds the shot duration")
             hold_line = f"Hold: {float(hold_sec):.1f}s"
             if hold_line.casefold() not in prompt:
                 errors.append(
@@ -1458,8 +1470,7 @@ def carry_approved_gag_clock_text(shot, direction):
                              if owner == shot_index)
             internal_shot.dialogueLineIndexes = indexes
             internal_shot.dialogueDirections = [
-                str((source_lines[index - 1].get("delivery") or
-                     "Perform exactly as approved in @Audio1.")).strip()
+                _animation_dialogue_direction(shot, source_lines[index - 1])
                 for index in indexes
             ]
     for clock in clocks:
@@ -1472,6 +1483,15 @@ def carry_approved_gag_clock_text(shot, direction):
         clock.recoveryHold = approved["hold"]
         clock.button = approved["button"]
     return direction
+
+
+def _animation_dialogue_direction(shot, line):
+    """WATCH uses the approved physical delivery; HEAR keeps its V3 instruction."""
+    occurrence = line.get('dialogueOccurrenceId')
+    brief = next((item for item in shot.get('voiceDirectorBrief', [])
+                  if occurrence and item.get('dialogueOccurrenceId') == occurrence), {})
+    return str(brief.get('physicalActionRelationship') or line.get('delivery') or
+               'Perform exactly as approved in @Audio1.').strip()
 
 
 def carry_approved_dialogue_ownership(shot, direction):
@@ -1532,7 +1552,7 @@ def carry_approved_dialogue_ownership(shot, direction):
         if len(internal_shots[owner_index].dialogueLineIndexes) >= 8:
             continue
         line = source_lines[line_index - 1] if 0 < line_index <= len(source_lines) else {}
-        delivery = str(line.get("delivery") or "").strip()
+        delivery = _animation_dialogue_direction(shot, line)
         if not delivery:
             speaker = str(line.get("speaker") or "").strip()
             exact = str(line.get("exactText") or line.get("text") or "").strip()
@@ -1548,6 +1568,8 @@ def carry_approved_dialogue_ownership(shot, direction):
 
 def prepare_voice(context, locked_lines, *, log=print):
     context = dict(context)
+    from studio_director_card import stage_decisions
+    context['directorDecisions'] = stage_decisions(context.get('shot') or context, 'hear')
     from cb_learning_context import brief
     context.setdefault("reviewObservations", brief(context))
     locked_lines = cb_audio_authority.route_lines(locked_lines)["spokenDialogue"]
@@ -1579,6 +1601,11 @@ def prepare_voice(context, locked_lines, *, log=print):
         "APPROVED SHOT CONTEXT:\n" + _creative_context(context) +
         "\n\nREGISTERED VOICE ARCHETYPES (archetypeId must be one exact key; "
         "use only its allowedTags):\n" + _j(register_contract) +
+        "\n\nPROVIDER HANDOFF: ElevenLabs receives takeRecipes.performedText and voice settings, "
+        "not cadenceAndBreath, subtext, or other prose notes. Express the selected acting "
+        "and cadence in each recipe using purposeful allowed v3 tags and faithful punctuation. "
+        "Do not leave a direction solely in prose metadata. Plain delivery is valid when "
+        "intentional; do not add arbitrary tags or speak action notes.\n" +
         "\n\nTAG PURPOSE LAW: every bracketed audio tag used in performedText or in any "
         "takeRecipes.performedText must have one matching tagPurposes row. The tag value "
         "must omit brackets and its purpose must explain the dramatic job of that tag.\n" +
@@ -2405,6 +2432,10 @@ def compile_animation_provider_prompt(shot, direction):
         if cue.get("sourceDialogueIndex") is not None
     }
     internal_shots = list(data.get("shotPlan") or [])
+    planned_views = list(shot.get('storyboardInternalShotPlanApproved') or [])
+    for index, item in enumerate(internal_shots):
+        if index < len(planned_views) and planned_views[index].get('transitionType') in {'opening', 'cut', 'move', 'hold'}:
+            item['transitionType'] = planned_views[index]['transitionType']
     multi_shot = len(internal_shots) > 1
     # Prefer the approved structured edit scope. Falling back to camera prose made a
     # valid plan such as "three internal shots and two intentional cuts" collapse into
@@ -2413,7 +2444,8 @@ def compile_animation_provider_prompt(shot, direction):
     structured_cut_scope = bool(re.search(
         r"\b(?:\d+\s+)?(?:intentional|motivated|planned)?\s*cuts?\b",
         edit_scope, re.I))
-    explicit_cut_sequence = structured_cut_scope or any(
+    declared_entries = [item.get('transitionType', 'auto') for item in internal_shots]
+    explicit_cut_sequence = structured_cut_scope or any(entry == 'cut' for entry in declared_entries) or any(
         re.search(
             r"\b(?:cut to|hard cut|smash cut|match cut|intercut)\b",
             " ".join(str(value or "") for value in (
@@ -2422,6 +2454,8 @@ def compile_animation_provider_prompt(shot, direction):
             )),
             re.I)
         for item in internal_shots)
+    if declared_entries and all(entry != 'auto' for entry in declared_entries):
+        explicit_cut_sequence = 'cut' in declared_entries
     emitted_holds = set()
     emitted_dialogue = []
     sailing_causality_injected = False
@@ -2458,6 +2492,11 @@ def compile_animation_provider_prompt(shot, direction):
                 if landing_value else "")
             unit_label = "Shot" if explicit_cut_sequence else "Phase"
             parts = [f"{unit_label} {number}: Camera: {camera}", f"Action: {action}"]
+            entry = item.get('transitionType', 'auto')
+            if entry == 'cut':
+                parts.insert(0, 'Cut to the planned view. Preserve world positions, eyelines, action phase and story time across this edit.')
+            elif entry in {'move', 'hold'}:
+                parts.insert(0, 'Continue within the current camera shot; ' + ('hold this motivated view.' if entry == 'hold' else 'make the directed camera move.'))
             if performance:
                 parts.append(f"Performance: {performance}")
             if landing:
@@ -2913,6 +2952,21 @@ def compile_animation_provider_prompt(shot, direction):
     handoff = shot_handoff_instruction(shot)
     if handoff:
         prompt += "\n\n[EDITORIAL HANDOFF]\n" + handoff
+    prompt += "\n\n[SOUND HANDOFF]\n" + sound_instruction(
+        data.get("soundHandoff"), continuation=split_unit or (shot.get("shotTransition") or {}).get("type") == "continuation",
+        exact_audio=exact_audio_only)
+    # Camera decomposition cannot replace the screenplay's causal events. Carry any
+    # event omitted by the authored coverage into the emitted request automatically.
+    missing_events = [event for event in animation_locked_visual_events(shot)
+                      if event['primaryEvent'] and
+                      visual_event_text(event['primaryEvent']) not in visual_event_text(prompt)]
+    if missing_events:
+        prompt += "\n\n[APPROVED STORY ACTION]\n" + "\n".join(
+            f"Stage {event['stageNumber']}: {event['primaryEvent']}" for event in missing_events)
+    from studio_coverage import staging_instruction
+    staging = staging_instruction(shot)
+    if staging:
+        prompt += '\n\n[COVERAGE STAGING]\n' + staging
     prompt_sections(prompt)
     for line in prompt.splitlines():
         if re.match(r"^(?:Initial state|Continue from the previous stage|Cause|Physics|Emotion/Camera Analysis|Audio cues|Dialogue performance|End state):", line):
@@ -2926,6 +2980,10 @@ def compile_animation_provider_prompt(shot, direction):
 
 def prepare_animation(context, images, *, log=print):
     context = dict(context)
+    from studio_director_card import stage_decisions
+    context['directorDecisions'] = stage_decisions(context.get('shot') or context, 'watch')
+    from studio_coverage import unit_board
+    context['coverageBoard'] = unit_board(context.get('shot') or context)
     from cb_learning_context import brief
     context.setdefault("reviewObservations", brief(context))
     shot = context.get("shot") or {}
@@ -2945,8 +3003,8 @@ def prepare_animation(context, images, *, log=print):
                 "Turn the approved dramatic beat into one playable Seedance generation unit. "
                 "The first attached image is the approved opening frame; remaining attachments "
                 "follow the exact reference order in the context. Continuous relay may use one "
-                "shot; action units use two to four internal shots, each with one clean motion "
-                "idea and a real story, performance or reaction purpose.", standard_version),
+                "shot; use the authored scene coverage, with each view serving a clean action, "
+                "thought, relationship or reaction. There is no compulsory cut count.", standard_version),
         "APPROVED SHOT, VOICE DIRECTION AND ORDERED ATTACHMENTS:\n" + _creative_context(context) +
         "\n\nDIRECTORIAL FREEDOM CONTRACT:\n"
         "When humanWorkingAnimationPrompt or watchDirectorFeedback is present, treat it as "
@@ -3009,8 +3067,9 @@ def prepare_animation(context, images, *, log=print):
         "the separate reference "
         "contract, consistencyContract, audioContract, the exact continuity landing, no more "
         "than three surgical safeguards, and one paste-ready Seedance shooting script in "
-        "providerPrompt. Use pacingMode='storyline' for units up to 15 seconds and "
-        "pacingMode='timestamp' for 16-30 seconds; timestamp mode requires ordered startSec "
+        "providerPrompt. Use pacingMode='timestamp' whenever stage clocks are supplied "
+        "and for all 16-30 second units. Short units without stage clocks may use "
+        "pacingMode='storyline'; timestamp mode requires ordered startSec "
         "and endSec values on every stage as broad budgets, not frame-accurate commands; "
         "storyline mode omits both. "
         "Emit every scripted line exactly once inside the stage that owns it, attributed to the "
@@ -3041,9 +3100,10 @@ def prepare_animation(context, images, *, log=print):
         "Keep duration, aspect ratio, resolution and model "
         "selection out of providerPrompt because the API contract owns them. Prefer stages to "
         "one-second micromanagement; use exact time points only for a critical handoff or "
-        "dialogue cue. For split units, prohibit musical underscore in Seedance and keep only "
-        "dialogue/foley/ambience; scene music is generated once in post after stitching through "
-        "ElevenLabs. The prompt must begin from the approved opening state and end on a usable "
+        "dialogue cue. Populate soundHandoff with a scene-aware entrance, exit and carried sound, "
+        "respecting the selected audio contract. Preserve Seedance's permitted timed score and "
+        "effects; splitting a unit must not reset its music or imply replacement in post. "
+        "The prompt must begin from the approved opening state and end on a usable "
         "held handoff frame, with causal "
         "physical action, observable performance, motivated camera, readable composition, and "
         "established light/material behaviour. Preserve all direction required to deliver "
@@ -3124,9 +3184,16 @@ def prepare_animation(context, images, *, log=print):
 def review_media(artifact_type, context, images, *, log=print):
     if artifact_type not in ("keyframe", "animation", "final"):
         raise ValueError("artifact_type must be keyframe|animation|final")
+    from studio_director_card import REVIEW_CRITERIA
+    context = {**context, 'creativeReviewCriteria': REVIEW_CRITERIA,
+               'reviewEvidenceScope': {'method': 'sampled still images', 'imageCount': len(images),
+                                      'audio': 'not supplied to this reviewer', 'continuousMotion': 'unverified',
+                                      'adjoiningPictureAndSound': 'unverified'}}
     return cb_llm.structured(
         _system("post" if artifact_type == "final" else "review",
-                "Run dailies review on visible evidence. Findings are advice for Julian, "
+                "Run dailies review on visible evidence. This call receives still images, not video or audio. "
+                "Do not claim to have listened, verified lip sync, assessed continuous movement or auditioned an edit. "
+                "Leave those dimensions unverified and keep inference separate from observations. Findings are advice for Julian, "
                 "never an automatic approval, rewrite or generation instruction. Judge "
                 "whether the intended dramatic or comic beat is actually felt. Compare the "
                 "approved emotional entry, pressure, visible turn, exit and held-after-beat "

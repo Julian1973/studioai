@@ -20,6 +20,7 @@ import urllib3
 from pydantic import BaseModel, ConfigDict, Field
 
 from studio_workspace import PROVIDERS, StudioError
+from studio_scene_handoff import SoundHandoff
 
 
 class StrictModel(BaseModel):
@@ -30,6 +31,11 @@ class Dialogue(StrictModel):
     speaker: str
     text: str
     delivery: Literal["neutral", "whispering", "laughs", "sighs", "crying", "excited", "sad", "curious"]
+    performedText: str = Field(default="", description=(
+        "Exact script words with purposeful ElevenLabs v3 acting tags and performance punctuation. "
+        "Translate the shot's acting and cadence into this text: this is the actual spoken provider input, "
+        "not a place for prose stage directions. Preserve every spoken word in order. "
+        "Use the exact plain text when neutral delivery is intentional."))
 
 
 class StateBinding(StrictModel):
@@ -56,6 +62,9 @@ class CompositionReference(StrictModel):
     role: Literal["camera setup", "scene geography"]
 
 
+from studio_director_card import ShotDirection, SceneCoverage, CoverageView, Playability
+
+
 class Shot(StrictModel):
     id: str
     scene: int
@@ -71,27 +80,52 @@ class Shot(StrictModel):
     characters: list[str]
     location: str
     props: list[str]
+    requiredReferenceStates: dict[str, dict[str, str]] = Field(default_factory=dict)
     dialogue: list[Dialogue]
     seePrompt: str
     watchPrompt: str
     intent: str = ""
     openingState: str = ""
+    seeCutType: Literal["auto", "same_moment_camera_cut", "next_beat_opening", "continuous_movement_handoff"] = "auto"
     endingState: str = ""
     beatPlan: list[PerformanceBeat] = Field(default_factory=list)
     characterStates: list[StateBinding] = Field(default_factory=list)
     identityClaims: list[IdentityClaim] = Field(default_factory=list)
     cameraSetupId: str = ""
     compositionReference: CompositionReference | None = None
+    soundHandoff: SoundHandoff | None = None
+    directorCard: ShotDirection | None = None
 
 
 class EpisodePlan(StrictModel):
     message: str
+    sceneCoverage: list[SceneCoverage] = Field(default_factory=list, description="Plan audience journey and motivated coverage BEFORE allocating the following generation shots.")
     shots: list[Shot] = Field(min_length=1, max_length=120)
 
 
 class AgentReply(StrictModel):
     message: str
     revisedShot: Shot | None
+
+
+class PlannedShotDirection(ShotDirection):
+    views: list[CoverageView] = Field(min_length=1)
+    playability: Playability
+
+
+class DirectedDialogue(Dialogue):
+    performedText: str = Field(min_length=1, description='The exact approved words with playable ElevenLabs v3 acting tags and punctuation, or the unchanged exact words for intentionally neutral delivery.')
+
+
+class DirectedShot(Shot):
+    directorCard: PlannedShotDirection
+    dialogue: list[DirectedDialogue]
+
+
+class DirectedEpisodePlan(EpisodePlan):
+    """New specialist plans require coverage; old stored plans remain readable."""
+    sceneCoverage: list[SceneCoverage] = Field(min_length=1)
+    shots: list[DirectedShot] = Field(min_length=1, max_length=120)
 
 
 class ReviewFinding(StrictModel):
@@ -166,7 +200,7 @@ class ProviderTransport:
                 model=model, store=False, service_tier="default", max_output_tokens=16000 if planning else 5000,
                 input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},
                        {"role": "user", "content": content}],
-                text_format=EpisodePlan if planning else AgentReply)
+                text_format=DirectedEpisodePlan if planning else AgentReply)
             if response.output_parsed is None:
                 raise StudioError("The director did not return a complete proposal. Your existing shots are unchanged.", "invalid_output")
             from studio_model_policy import usage_record
@@ -271,9 +305,18 @@ class ProviderTransport:
         self.verify_media(output, "image")
 
     def voice(self, connection, key, model, dialogue, output):
-        response = self.request(connection, key, "/v1/text-to-dialogue", body={"model_id": model, "inputs": dialogue})
-        Path(output).write_bytes(response.content)
-        self.verify_media(output, "audio")
+        # One directed conversation, including its actual provider timing. Never
+        # infer lip-sync timestamps from text length or an authored shot estimate.
+        response = self.request(connection, key, "/v1/text-to-dialogue/with-timestamps", body={"model_id": model, "inputs": dialogue})
+        try:
+            data = response.json()
+            audio = base64.b64decode(data['audio_base64'], validate=True)
+        except (ValueError, KeyError, TypeError):
+            raise StudioError('The voice provider did not return its timestamped recording.', 'invalid_output') from None
+        Path(output).write_bytes(audio)
+        duration = self.verify_media(output, "audio")
+        from studio_voice_timing import measured_timing
+        return measured_timing(data, dialogue, duration, audio)
 
     def video_submit(self, connection, key, model, prompt, images, audio, duration, *, ratio="16:9"):
         content = [{"type": "text", "text": prompt}]

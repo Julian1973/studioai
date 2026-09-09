@@ -142,6 +142,8 @@ def test_timed_direction_reaches_both_generation_prompts(setup):
     request=p.snapshot('first','1')['state']['shots'][0]['outcomes']['request']
     for prompt in ([c[2] for c in t.calls if c[0]=='image'][-1],request['prompt']):
         assert 'Ask for forgiveness' in prompt and 'Hold the breath' in prompt and 'letter in left paw' in prompt
+    assert 'Let the smile arrive' not in [c[2] for c in t.calls if c[0]=='image'][-1]
+    assert 'Let the smile arrive' in request['prompt']
 
 
 def test_timeline_notes_trims_join_signoff_and_export_are_version_bound(setup):

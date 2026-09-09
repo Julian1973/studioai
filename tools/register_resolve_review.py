@@ -21,6 +21,7 @@ def main():
     p.add_argument('--export', dest='export_path',required=True,type=pathlib.Path)
     p.add_argument('--timeline',required=True)
     p.add_argument('--drive-folder',type=pathlib.Path)
+    p.add_argument('--source-manifest',type=pathlib.Path,help='Approved Studio episode.json used to build this Resolve timeline')
     args=p.parse_args()
     if not re.fullmatch(r'Ep\d+',args.episode) or not re.fullmatch(r'[A-Za-z0-9_-]+',args.version):
         p.error('Use Ep<number> and a plain version token.')
@@ -36,6 +37,19 @@ def main():
     if frames != snapshot['endFrame']-snapshot['startFrame']:
         p.error('Export frame count differs from the active timeline. Finish and verify the full render first.')
     digest=post._sha256(source)
+    sources = None
+    if args.source_manifest:
+        source_manifest = args.source_manifest.resolve(strict=True)
+        sources = json.loads(source_manifest.read_text())
+        if sources.get('episode') != args.episode:
+            p.error('The source manifest belongs to another episode.')
+        for shot in sources.get('shots', []):
+            render = (source_manifest.parent / shot['render']).resolve(strict=True)
+            if post._sha256(render) != shot.get('approvedTakeSha256'):
+                p.error('A source render changed since its approved post export.')
+        sources = {'path':str(source_manifest),'sha256':post._sha256(source_manifest),
+                   'shots':sources.get('shots',[]),
+                   'meaning':'Supplied approved source records; timeline correspondence still requires inspection.'}
     folder=post.POST_ROOT/f'{args.episode}_episode';folder.mkdir(parents=True,exist_ok=True)
     dest=folder/f'{args.episode}_{args.version}_{digest[:12]}.mp4'
     if not dest.exists():shutil.copy2(source,dest)
@@ -46,7 +60,7 @@ def main():
         if not cloud.exists():shutil.copy2(dest,cloud)
         if post._sha256(cloud)!=digest:raise RuntimeError('Drive staging checksum differs.')
     manifest={'stage':'davinci-final-cut-review','durationSec':float(probe['format']['duration']),
-        'masterSha256':digest,'outputs':{'master':str(dest)},
+        'masterSha256':digest,'outputs':{'master':str(dest)},'sourceRecords':sources,
         'approvalContract':{'approvalMeaning':'Approval of this exact pre-enhancement cut; enhancement spending is separate.'},
         'finishingWorkflow':{'version':args.version,'resolveProject':snapshot['project'],
             'resolveTimeline':snapshot['timeline'],'resolveSnapshot':snapshot,

@@ -119,3 +119,47 @@ def test_repeat_jobs_do_not_count_other_shots_as_retakes():
     costs=summary([{'kind':'see','shotId':'A'},{'kind':'see','shotId':'A'},{'kind':'see','shotId':'B'},{'kind':'hear','shotId':'A'}])
     assert costs['generationJobs']==4
     assert costs['repeatGenerationJobs']==1
+
+
+def test_project_performance_rejects_action_prose_as_dialogue():
+    from studio_workflow import voice_performance_text
+    with pytest.raises(StudioError, match='changed the script words'):
+        voice_performance_text({'text':'Hello.','performedText':'[whispering] He takes a breath. Hello.'})
+    assert voice_performance_text({'text':'Hello.','delivery':'neutral'}) == 'Hello.'
+
+
+def test_reference_state_conflict_reaches_project_request_without_provider_call(setup):
+    p,ws,t,_=setup
+    context=ws.context('first','1')
+    from test_studio_production import shot
+    s=shot(1,'Hero: Hello.')
+    refs=[{'name':'fuel gauge','role':'prop continuity','requiredState':{'level':'empty'},'depictedState':{'level':'full'}}]
+    before=len(t.calls)
+    with pytest.raises(StudioError,match='fuel gauge.*full.*empty'):
+        p._prompt(context,s,'watch',refs)
+    assert len(t.calls)==before
+
+
+def test_generic_prompt_sections_keep_director_performance_and_source_separate(setup):
+    p,ws,t,_=setup;command(p,'budget',amountUsd=5);approve(p,'see');approve(p,'hear')
+    req=p.snapshot('first','1')['state']['shots'][0]['outcomes']['request']
+    text=req['prompt']
+    assert text.index('[Reference Roles]') < text.index('[Opening State]') < text.index('[Directed Beats and Acting]') < text.index('[Ending State]')
+    assert 'Exact source:' not in text
+    assert req['source']
+
+
+def test_reference_observation_is_bound_to_actual_asset_hash(setup):
+    from test_studio_production import shot
+    from studio_production import file_hash
+    p,ws,t,_=setup;context=ws.context('first','1');s=shot(1,'Hero: Hello.')
+    anchor=context['assets']['characters']['Hero']['anchor']
+    h=file_hash(ws.project_path('first',anchor))
+    context['assets']['props'].append({'name':'launcher','image':anchor,'depictedState':{'load':'loaded'},'stateEvidenceHash':h})
+    s['props']=['launcher'];s['requiredReferenceStates']={'launcher':{'load':'empty'}}
+    refs=p.assets(context,s)
+    with pytest.raises(StudioError,match='loaded.*empty'):p._prompt(context,s,'watch',refs)
+    context['assets']['props'][-1]['stateEvidenceHash']='outdated'
+    refs=p.assets(context,s)
+    assert not refs[-1].get('depictedState')
+    assert p._prompt(context,s,'watch',refs)  # unknown is not another approval gate

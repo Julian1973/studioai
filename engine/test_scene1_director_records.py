@@ -63,8 +63,11 @@ def test_s1s4_corrected_emission_fixture_and_regressions():
     target = (RECORDS / "S1.SH2_user_prompt_target_20260811.txt").read_text().rstrip("\n")
 
     assert golden == target
-    assert "A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses" not in prompt
-    assert "Fuzzby answers the warning, accelerates as if proving it" not in prompt
+    # The compact camera prose cannot silently lose the signed story events.
+    # Historical grammar targets remain unchanged; current emission carries the
+    # approved causes even when a specialist omits them from its camera fields.
+    assert "A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses" in prompt
+    assert "Fuzzby answers the warning, accelerates as if proving it" in prompt
     assert "@图1 is the first frame and the previous shot's approved final frame." in prompt
     assert "Fuzzby is frame-left, coated in golden pollen" in prompt
     assert "with exhales delivery" not in prompt

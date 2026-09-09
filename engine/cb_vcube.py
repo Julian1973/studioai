@@ -74,7 +74,18 @@ def payload(vid, cut_hash):
             'Operation':operation,'Control':{'ClientToken':token}}
 
 def start(body):
-    return _result(service().json('StartExecution', {}, json.dumps(body)))
+    # SDK v1 json() signs a string, then serializes that string again on send.
+    # Send exactly the UTF-8 JSON bytes covered by the signature.
+    from byteplus_sdk.auth.SignerV4 import SignerV4
+    sdk = service()
+    request = sdk.prepare_request(sdk.api_info['StartExecution'], {})
+    request.headers['Content-Type'] = 'application/json'
+    request.body = json.dumps(body, ensure_ascii=True)
+    SignerV4.sign(request, sdk.service_info.credentials)
+    response = sdk.session.post(request.build(), headers=request.headers,
+        data=request.body.encode('utf-8'),
+        timeout=(sdk.service_info.connection_timeout, sdk.service_info.socket_timeout))
+    return _result(response.text)
 
 def poll(run_id):
     return _result(service().get('GetExecution', {'RunId':run_id}))
@@ -82,5 +93,6 @@ def poll(run_id):
 def _result(raw):
     result = json.loads(raw)
     if (result.get('ResponseMetadata') or {}).get('Error'):
-        raise RuntimeError('BytePlus rejected the request; inspect the account configuration before retrying.')
+        error = result['ResponseMetadata']['Error']
+        raise RuntimeError('BytePlus rejected request: ' + str(error.get('Code')) + ': ' + str(error.get('Message')))
     return result.get('Result') or {}

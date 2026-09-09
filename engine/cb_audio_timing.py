@@ -463,8 +463,11 @@ def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
     mixed_labels = ["[silence]"]
     for index, placement in enumerate(placements):
         delay_ms = int(round(placement["targetStartSec"] * 1000))
-        source_start = max(0.0, placement["sourceStartSec"] - LINE_HANDLE_SEC)
-        source_end = placement["sourceEndSec"] + LINE_HANDLE_SEC
+        # Isolated parts are adjacent in the source container: a handle would
+        # borrow another speaker's audio, not room tone or this line's breath.
+        handle = 0.0 if timing.get("separatedDialogueAssembly") or timing.get("isolatedDialogueAssembly") else LINE_HANDLE_SEC
+        source_start = max(0.0, placement["sourceStartSec"] - handle)
+        source_end = placement["sourceEndSec"] + handle
         line_duration = source_end - source_start
         fade = min(EDGE_FADE_SEC, line_duration / 4)
         fade_out_start = max(0.0, line_duration - fade)
@@ -477,7 +480,7 @@ def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
             f"adelay={delay_ms}|{delay_ms}[line{index}]"
         )
         placement["edgeFadeSec"] = fade
-        placement["sourceHandleSec"] = LINE_HANDLE_SEC
+        placement["sourceHandleSec"] = handle
         mixed_labels.append(f"[line{index}]")
     filters.append(
         "".join(mixed_labels) +

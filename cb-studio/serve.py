@@ -1260,14 +1260,11 @@ def _prepare_scene_direction_for_production(episode, scene):
     with cb_db.scene_lease(ROOT, episode, scene, "serve.automatic-direction-handover"):
         package, digest = cb_db.read_json_document(ROOT, path)
         if package.get("approvalState") == "approved":
-            try:
-                handover = _carry_forward_unchanged_approved_scene(
+            handover = _carry_forward_unchanged_approved_scene(
+                path, episode, scene, package)
+            if handover is None:
+                handover = _promote_approved_storyboard(
                     path, episode, scene, package)
-                if handover is None:
-                    handover = _promote_approved_storyboard(
-                        path, episode, scene, package)
-            except Exception:
-                handover = None
             return {"alreadyPrepared": True, "handover": handover}
         if package.get("approvalState") != "awaiting-human-storyboard-approval":
             raise StoryboardApprovalRefused(

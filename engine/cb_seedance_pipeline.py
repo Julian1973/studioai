@@ -15,6 +15,7 @@ from typing import Any, Literal, Optional
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
 import cb_providers
+from studio_prompt_contract import canonical_tag, reference_state_report
 
 
 SeedanceTaskType = Literal[
@@ -155,6 +156,10 @@ class ReferenceBinding(BaseModel):
         min_length=1,
     )
 
+    authority: Literal["", "opening", "identity", "geography", "continuity", "coverage", "audio", "motion", "style", "prop"] = ""
+    requiredState: dict[str, str] = Field(default_factory=dict)
+    depictedState: dict[str, str] = Field(default_factory=dict)
+
     @field_validator("tag")
     @classmethod
     def valid_tag(cls, value):
@@ -254,6 +259,7 @@ class SeedanceTask(BaseModel):
         default="",
         validation_alias=AliasChoices("scene_style", "sceneStyle"),
     )
+    opening_state: str = Field(default="", validation_alias=AliasChoices("opening_state", "openingState"))
     camera: str = ""
     audio: str = (
         "Natural ambience, foley, designed non-dialogue sound effects, and low supportive "
@@ -512,7 +518,12 @@ def _tag_kind(tag: str) -> str:
 def format_reference_binding(reference: ReferenceBinding | dict[str, Any]) -> str:
     ref = reference if isinstance(reference, ReferenceBinding) else ReferenceBinding.model_validate(reference)
     subject = ref.subject if ref.subject.startswith("<") else f"<{ref.subject}>"
-    return f"{ref.tag} defines {subject}'s {ref.defines}. Do not use {ref.exclude}."
+    exclusion = ref.exclude.strip().rstrip('.')
+    if not re.match(r"(?i)^(do not|never|no |exclude|ignore)", exclusion):
+        exclusion = "Do not use " + exclusion
+    authority = f" Authority: {ref.authority}." if ref.authority else ""
+    state = (" Required source state: " + "; ".join(f"{k}={v}" for k,v in ref.requiredState.items()) + ".") if ref.requiredState else ""
+    return f"{ref.tag} defines {subject}'s {ref.defines.rstrip('.')}.{authority} {exclusion}.{state}"
 
 
 def build_character_profile(character: CharacterProfile | dict[str, Any]) -> str:
@@ -666,9 +677,7 @@ def _strip_request_parameters(value: str) -> str:
 
 
 def _consistency_text(task: SeedanceTask) -> str:
-    values = task.consistency or [
-        "Keep character identity, count, clothing, prop ownership, scene geography, lighting logic, camera axis, and audio relationships consistent."
-    ]
+    values = _unique(task.consistency)
     return " ".join(value.rstrip(".") + "." for value in values)
 
 
@@ -702,7 +711,7 @@ def _style_camera_timeline(task: SeedanceTask) -> list[str]:
                 sections.append("Continue from the previous stage: preserve the preceding visible end state.")
             sections.append(f"Primary event: {stage.event}")
             if stage.emotion_or_camera:
-                sections.append(f"Emotion / camera analysis: {stage.emotion_or_camera}")
+                sections.append(f"Acting / camera: {stage.emotion_or_camera}")
             sections.append(f"End state: {stage.end_state}")
     return sections
 
@@ -732,7 +741,7 @@ def build_seedance_prompt(task: SeedanceTask | dict[str, Any]) -> str:
                 sections.append(f"Initial state: {stage.initial_state}")
             sections.append(f"Primary event: {stage.event}")
             if stage.emotion_or_camera:
-                sections.append(f"Emotion / camera analysis: {stage.emotion_or_camera}")
+                sections.append(f"Acting / camera: {stage.emotion_or_camera}")
             sections.append(f"End state: {stage.end_state}")
         sections.extend(("[Maintain Consistency]", _consistency_text(item)))
     elif item.type == "video_extension":
@@ -790,15 +799,23 @@ def build_seedance_prompt(task: SeedanceTask | dict[str, Any]) -> str:
         ))
         sections.extend(_style_camera_timeline(item))
     elif item.type == "storyboard_grid":
+        sections.extend(_reference_section(item))
         sections.extend((
             "[Storyboard Role]",
-            f"{item.storyboard_tag} provides the storyboard grid for shot order and approximate composition. Read it {item.storyboard_reading_order}. Do not use its line-art style, text labels, or placeholder characters.",
+            f"{item.storyboard_tag} defines the storyboard grid for shot order and approximate composition. Follow it panel by panel, {item.storyboard_reading_order}. Do not use its gutters, line-art style, text labels, or placeholder characters; render full-screen moving scenes.",
         ))
-        sections.extend(_reference_section(item))
         sections.extend(_profile_section(item))
         sections.extend(("[Generation Goal]", goal, "[Shot Plan]"))
         for index, stage in enumerate(item.stages, start=1):
-            sections.append(f"Shot {index}: {stage.event} End state: {stage.end_state}")
+            sections.append(f"Shot {index}" + (f" | {stage.time}" if stage.time else "") + ":")
+            if stage.purpose:
+                sections.append(f"Purpose: {stage.purpose}")
+            if stage.initial_state:
+                sections.append(f"Initial state: {stage.initial_state}")
+            sections.append(f"Primary event: {stage.event}")
+            if stage.emotion_or_camera:
+                sections.append(f"Acting / camera: {stage.emotion_or_camera}")
+            sections.append(f"End state: {stage.end_state}")
         if item.scene_style:
             sections.extend(("[Scene and Visual Style]", item.scene_style))
         if item.camera:
@@ -827,6 +844,16 @@ def build_seedance_prompt(task: SeedanceTask | dict[str, Any]) -> str:
         sections.extend(_style_camera_timeline(item))
         sections.extend(("[Maintain Consistency]", _consistency_text(item)))
 
+    opening = item.opening_state or (item.stages[0].initial_state if item.stages else "")
+    if opening:
+        for index, value in enumerate(sections):
+            if value in {"[Generation Goal]", "[Extension Goal]", "[Edit Goal]"}:
+                sections[index:index] = ["[Opening State]", opening]
+                break
+        # The first stage need not repeat the identical opening; later state recurrences matter.
+        first = f"Initial state: {opening}"
+        if first in sections:
+            sections[sections.index(first)] = "Initial state: use the Opening State above."
     if item.type not in {"seamless_transition"}:
         sections.extend(("[Audio]", item.audio))
     forbidden_text = build_forbidden_list(item)
@@ -852,7 +879,7 @@ def validate_seedance_task(task: SeedanceTask | dict[str, Any]) -> dict[str, Any
     errors.extend(assets["errors"])
     warnings.extend(assets["warnings"])
 
-    tags = [ref.tag.lower().replace(" ", "") for ref in item.references]
+    tags = [canonical_tag(ref.tag) for ref in item.references]
     if len(tags) != len(set(tags)):
         errors.append("Every reference tag must be unique.")
     required_refs = item.type not in {"text_to_video", "thirty_second_video", "ultra_long_video"}
@@ -892,18 +919,39 @@ def validate_seedance_task(task: SeedanceTask | dict[str, Any]) -> dict[str, Any
             if not value:
                 errors.append(f"Seamless transition requires a {label}.")
     if item.type == "first_last_frame":
-        normalised = {tag.lower().replace(" ", "") for tag in tags}
+        normalised = set(tags)
         for tag, label in ((item.first_frame_tag, "first frame"),
                            (item.last_frame_tag, "last frame")):
-            if tag.lower().replace(" ", "") not in normalised:
+            if canonical_tag(tag) not in normalised:
                 errors.append(f"The {label} tag {tag} must have an explicit reference binding.")
-    if item.type == "storyboard_grid" and item.storyboard_tag.lower().replace(" ", "") not in tags:
+    if item.type == "storyboard_grid" and canonical_tag(item.storyboard_tag) not in tags:
         errors.append("The storyboard grid must have an explicit reference binding.")
     if item.type == "blockout_render":
-        if item.source_video_tag.lower().replace(" ", "") not in tags:
+        if canonical_tag(item.source_video_tag) not in tags:
             errors.append("The blockout source video must have an explicit reference binding.")
         if not item.blockout_mappings:
             warnings.append("Map every blockout subject or primitive to its final subject.")
+
+    state_report = reference_state_report([r.model_dump() for r in item.references])
+    for conflict in state_report['conflicts']:
+        errors.append(f"{conflict['tag']} depicts {conflict['field']}={conflict['depicted']}, but this shot requires {conflict['required']}. Replace or correct that reference before submission.")
+    if state_report['unverified']:
+        warnings.append("Some required reference states have no reviewed image evidence; visual agreement is unverified.")
+    if sum(r.authority == 'opening' for r in item.references) > 1:
+        errors.append("Assign one exact opening authority; previous-frame continuity is a separate role.")
+    # Inspect the actual upload order, not merely the list of named references.
+    uploaded = []
+    for kind, prefix in (("images", "Image"), ("audio", "Audio"), ("videos", "Video")):
+        for index, asset in enumerate(item.assets.get(kind) or [], 1):
+            tag = canonical_tag(asset.get('tag') or f'@{prefix} {index}') if isinstance(asset, dict) else canonical_tag(f'@{prefix} {index}')
+            uploaded.append(tag)
+            if tag != canonical_tag(f'@{prefix} {index}'):
+                errors.append(f"{kind} upload {index} has a tag that does not match its provider position.")
+    if uploaded:
+        if set(tags) - set(uploaded):
+            errors.append("A bound reference is absent from the actual upload list: " + ', '.join(sorted(set(tags)-set(uploaded))))
+        if set(uploaded) - set(tags):
+            errors.append("An uploaded reference has no assigned role: " + ', '.join(sorted(set(uploaded)-set(tags))))
 
     names = [character.name.strip().lower() for character in item.characters]
     if len(names) != len(set(names)):
@@ -914,14 +962,17 @@ def validate_seedance_task(task: SeedanceTask | dict[str, Any]) -> dict[str, Any
         warnings.append("State the no-music sound directive explicitly in the audio contract.")
 
     return {"ok": not errors, "errors": _unique(errors), "warnings": _unique(warnings),
-            "assets": assets, "timeline": timeline}
+            "assets": assets, "timeline": timeline, "referenceState": state_report}
 
 
 def qualify_provider_request(task: SeedanceTask | dict[str, Any]) -> dict[str, Any]:
     """Check the executable registry only; this function performs no network or provider call."""
     item = _task_model(task)
     counts = _reference_counts(item)
-    if item.type != "reference_based_generation":
+    # A storyboard grid is an ordinary reference image with a coverage role in
+    # the prompt (sd25-pe, Storyboard Grids), not a separate provider operation.
+    # Retain every image/audio/duration/model check of reference-to-video below.
+    if item.type not in {"reference_based_generation", "storyboard_grid"}:
         return {
             "checked": True,
             "ready": False,
@@ -929,6 +980,11 @@ def qualify_provider_request(task: SeedanceTask | dict[str, Any]) -> dict[str, A
             "reason": f"No enabled provider route is qualified for {item.type}.",
             "mode": None,
         }
+    if item.type == "storyboard_grid":
+        authoring = validate_seedance_task(item)
+        if not authoring["ok"]:
+            return {"checked": True, "ready": False, "providerCalled": False,
+                    "reason": "; ".join(authoring["errors"]), "mode": "reference-to-video"}
     if item.duration_seconds is None:
         return {"checked": True, "ready": False, "providerCalled": False,
                 "reason": "Provider qualification needs a duration.", "mode": "reference-to-video"}

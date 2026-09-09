@@ -379,3 +379,31 @@ def test_credit_errors_are_not_misreported_as_bad_keys():
     from studio_transport import provider_error
     error=provider_error(401,'quota_exceeded')
     assert error.code=='balance_required' and 'allowance or credit' in str(error)
+
+
+def test_project_performed_text_survives_review_and_voice_submission(setup):
+    p,ws,t,_=setup;command(p,'budget',amountUsd=4);approve(p,'see');approve(p,'hear')
+    old=p.snapshot('first','1')['state']['shots'][0]
+    revised={k:copy.deepcopy(old[k]) for k in shot(1,'Hero: Hello.')}
+    revised['dialogue'][0]['performedText']='[whispering] Hello.'
+    t.reply={'message':'A hesitant greeting.','revisedShot':revised}
+    command(p,'chat',shotId='S1.SH1',message='Quietly greet them',stage='hear')
+    preview=p.snapshot('first','1')['state']['shots'][0]
+    command(p,'apply_revision',shotId='S1.SH1',proposalId=preview['proposal']['id'],prepare=True)
+    assert [c[2] for c in t.calls if c[0]=='voice'][-1][0]['text']=='[whispering] Hello.'
+    assert p.snapshot('first','1')['state']['shots'][0]['outcomes']['see']==old['outcomes']['see']
+
+
+def test_watch_cannot_silently_outgrow_upstream_shot(setup, monkeypatch):
+    p, ws, t, _ = setup
+    command(p, 'budget', amountUsd=4)
+    approve(p, 'see'); approve(p, 'hear')
+    state = p.snapshot('first', '1')['state']
+    current = state['shots'][0]
+    before = copy.deepcopy(current)
+    calls = len(t.calls)
+    monkeypatch.setattr(t, 'verify_media', lambda *args: 30)
+    with pytest.raises(StudioError, match='HEAR exceeds'):
+        p.watch_request(ws.context('first', '1'), state, current)
+    assert current == before
+    assert len(t.calls) == calls

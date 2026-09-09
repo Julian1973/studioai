@@ -75,8 +75,18 @@ def test_post_brief_is_candidate_bound_and_has_no_side_effects(candidate, monkey
     assert path.read_bytes() == before
     assert post.workspace('Ep2')['status'] != 'approved'
     assert not finish.job_path('Ep2').exists()
+    assert brief['sourceRecords'] is None and 'not registered' in brief['sourceEvidence']
     with pytest.raises(ValueError, match='version changed'):
         finish.director_brief('Ep2', 'stale')
+
+
+def test_registered_source_direction_reaches_post_without_reinterpreting_it(candidate):
+    sha,path,manifest=candidate
+    manifest['sourceRecords']={'sha256':'source-record-hash','shots':[{'id':'S1.SH1',
+        'directionContext':{'storyboardInternalShotPlanApproved':[{'performanceFocus':'Listen before answering'}]},
+        'directionEvidence':'Current context, not historical render proof'}]}
+    path.write_text(json.dumps(manifest))
+    assert finish.director_brief('Ep2',sha)['sourceRecords']==manifest['sourceRecords']
 
 
 @pytest.mark.parametrize('verdict', ['approved', 'APPROVED', ' Approved '])

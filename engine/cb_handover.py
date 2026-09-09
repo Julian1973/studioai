@@ -716,7 +716,7 @@ def _opening_cast_for_shot(sb_shot, beats, characters_cfg):
     return _characters_in_frame(opening_shot, participants, characters_cfg)
 
 
-def _required_prop_references(sb_shot, pd, cast, characters_cfg):
+def _required_prop_references(sb_shot, pd, cast, characters_cfg, reference_context=None):
     """Bind canon prop plates when an approved packed shot visibly uses the prop."""
     approved = json.dumps({
         "shot": sb_shot,
@@ -724,6 +724,10 @@ def _required_prop_references(sb_shot, pd, cast, characters_cfg):
         "continuityOutState": pd.get("continuityOutState"),
     }, ensure_ascii=False).casefold()
     required = []
+    if reference_context and reference_context.get('episodeId') and reference_context.get('sceneNumber'):
+        import cb_asset_registry
+        required.extend(cb_asset_registry.required_prop_ids(
+            reference_context['episodeId'], reference_context['sceneNumber'], sb_shot['shotId']))
     for prop_id in (sb_shot.get("requiredPropReferences") or []):
         prop_id = str(prop_id).strip().casefold()
         if prop_id and prop_id not in required:
@@ -979,7 +983,7 @@ def _cinematography_instruction(contract, shot_id):
 
 def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
                 comedy_stagings=None, comedy_contracts=None, emotion_contracts=None,
-                opening_cast=None):
+                opening_cast=None, reference_context=None):
     """Map one approved storyboard shot into cb_engine's production contract. Executable
     performance, continuity and dialogue timing come only from typed fields; approved prose
     is retained for provenance and review, never treated as a substitute."""
@@ -1046,6 +1050,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
         openingPose=sb_shot["openingImage"],
         sourceType="opener" if opener else "relay",
         sourceShotId=None if opener else prev,
+        stateSourceShotId=prev if opener else None,
         cutInMotivation=sb_shot.get("transitionReason"),
         dialogueBinding=(f"{shot_voices[0]['speaker']}'s vocal beat performs per the "
                          f"approved voice design.") if shot_voices else None,
@@ -1057,7 +1062,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
         openingCharactersInFrame=opening_cast,
         offscreenSpeakers=_offscreen_speakers(shot_voices, characters_cfg),
         requiredPropReferences=_required_prop_references(
-            sb_shot, pd, characters_in_frame, characters_cfg),
+            sb_shot, pd, characters_in_frame, characters_cfg, reference_context),
         continuityIn=continuity_in,
         continuityOut=continuity_out)
     retained = {"shotTransition": {
@@ -1191,7 +1196,7 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
             characters_cfg, _owned_big_comedy_stagings(sb, sb_shot),
             _owned_beat_contracts(sb, sb_shot, "comedyContract"),
             _owned_beat_contracts(sb, sb_shot, "emotionContract"),
-            opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg))
+            opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg), reference_context=sb)
         rec = _compile_one(shot, retained, scene, characters_cfg)
         line_count += len(shot.dialogueLines)
         shots_out.append(rec)
@@ -1318,7 +1323,7 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
         _owned_big_comedy_stagings(sb, sb_shot),
         _owned_beat_contracts(sb, sb_shot, "comedyContract"),
         _owned_beat_contracts(sb, sb_shot, "emotionContract"),
-        opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg))
+        opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg), reference_context=sb)
     rec = _compile_one(shot, retained, scene, characters_cfg)
     _assert_no_internal_leak([rec])
 
@@ -1417,7 +1422,7 @@ def _scoped_shot(storyboard, shot_id, characters_cfg, prev):
         _owned_big_comedy_stagings(storyboard, sb_shot),
         _owned_beat_contracts(storyboard, sb_shot, "comedyContract"),
         _owned_beat_contracts(storyboard, sb_shot, "emotionContract"),
-        opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg))
+        opening_cast=_opening_cast_for_shot(sb_shot, beats, characters_cfg), reference_context=storyboard)
     return shot, retained, card_hash
 
 

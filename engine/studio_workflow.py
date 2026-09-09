@@ -7,6 +7,19 @@ from decimal import Decimal
 from studio_workspace import StudioError, digest
 
 
+def voice_performance_text(line):
+    """One provider-facing performance, shared by validation, review and submission."""
+    from cb_emission_conformance import dialogue_words
+    text = str(line.get('performedText') or '').strip()
+    if not text:
+        delivery = line.get('delivery', 'neutral')
+        text = line['text'] if delivery == 'neutral' else f'[{delivery}] ' + line['text']
+    spoken = re.sub(r'\[[^\]]*\]', '', text)
+    if dialogue_words(spoken) != dialogue_words(line['text']):
+        raise StudioError('Voice direction changed the script words. Existing approved audio is preserved.', 'invalid_performance')
+    return text
+
+
 def clean_note(value):
     value = str(value or '').strip()
     if not value or len(value) > 2000:
@@ -26,7 +39,7 @@ def estimate(binding, kind, shot, *, duration=None):
     rate = binding.get('unitUsd')
     if rate is None:
         return float(floor)
-    units = (sum(len(d['text']) + (len(d.get('delivery','')) + 3 if d.get('delivery') not in {'neutral',None} else 0) for d in lines) / 1000
+    units = (sum(len(voice_performance_text(d)) for d in lines) / 1000
              if kind == 'hear' else (duration or shot.get('duration', 0)) if kind == 'watch' else 1)
     return float(max(floor, Decimal(str(rate)) * Decimal(str(units))))
 
@@ -34,12 +47,22 @@ def estimate(binding, kind, shot, *, duration=None):
 def handoff(shot, stage, refs):
     common = ('intent', 'emotion', 'camera', 'cameraSetupId', 'geography', 'transition', 'openingState')
     fields = common if stage == 'see' else common + ('performance', 'endingState', 'beatPlan')
-    result = {'stage': stage, 'direction': {k:shot.get(k) for k in fields},
+    result = {'stage': stage, 'durationSec': shot.get('duration'), 'direction': {k:shot.get(k) for k in fields},
               'references': [{'slot':f'@Image{i+1}', **{k:r.get(k) for k in ('name','role','hash','version')}} for i,r in enumerate(refs)],
               'instruction': ('Depict ONE opening instant. The openingState and camera define this frame. Do not illustrate later beats, ending poses, montage or multiple panels.' if stage == 'see'
                               else 'Animate from the approved opening through the timed beats to endingState. Preserve approved audio performance and reference authority.')}
+    from cb_production_contracts import shot_handoff_instruction
+    result['visualHandoff'] = shot_handoff_instruction(
+        {'shotTransition': {'type': shot.get('transition')}}, still=stage == 'see')
     if stage == 'see':
         result['performanceContextNotDepicted'] = {k:shot.get(k) for k in ('performance','endingState','beatPlan')}
+        result['direction']['openingBeat'] = [beat for beat in shot.get('beatPlan', []) if beat.get('at') == 0]
+    if stage != 'see':
+        from studio_scene_handoff import sound_instruction
+        result['soundHandoff'] = shot.get('soundHandoff')
+        result['soundInstruction'] = sound_instruction(shot.get('soundHandoff'), continuation=shot.get('transition') == 'continuation')
+    from studio_director_card import stage_decisions
+    result['directorDecisions'] = stage_decisions(shot, stage)
     result['fingerprint'] = digest(result)
     return result
 

@@ -65,6 +65,14 @@ def test_seedream_5_pro_uses_official_modelark_contract(monkeypatch, tmp_path):
 
     assert result == str(output)
     assert output.read_bytes() == b"seedream-image"
+    import hashlib, json
+    from pathlib import Path
+    receipt = json.loads(Path(str(output) + ".reference-contract.json").read_text())
+    assert receipt["prompt"] == "Approved production brief."
+    assert receipt["references"][0]["sha256"] == hashlib.sha256(b"fuzzby").hexdigest()
+    assert receipt["outputSha256"] == hashlib.sha256(b"seedream-image").hexdigest()
+    assert receipt["approvalStatus"] == "unapproved"
+
     assert submitted["url"] == (
         "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations")
     assert submitted["headers"]["Authorization"] == "Bearer test-modelark-key"

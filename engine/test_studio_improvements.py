@@ -127,8 +127,9 @@ def test_review_currentness_tracks_version_and_actual_file_integrity(setup):
 def test_review_samples_the_incoming_approved_shot(setup):
     p,ws,t,accounts=setup;configure(p,ws,accounts);finish(p);review(p,'S1.SH2')
     report=p.snapshot('first','1')['state']['shots'][1]['mediaReviews'][0]
-    assert len(report['evidence']['frames'])==12
-    assert 'S1.SH1' in report['evidence']['frames'][-1]['label']
+    assert len(report['evidence']['frames'])==14
+    assert len(report['evidence']['joins']) == 1
+    assert any('S1.SH1' in f['label'] for f in report['evidence']['frames'])
 
 
 def test_unknown_review_submission_is_not_retried_and_partial_audio_is_saved(setup):

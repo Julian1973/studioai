@@ -53,11 +53,12 @@ def test_short_dramatic_split_is_visible_for_showrunner_merge_review():
         _unit("S1.SH2", 14, "scene_end"),
     ])
     assert audit["ready"] is True
-    assert audit["needsHumanMergeReview"] is True
+    assert audit["needsDirectorReview"] is True
+    assert audit["needsHumanMergeReview"] is False
     assert audit["mergeReviewRequired"][0]["combinedDurationSec"] == 27
 
 
-def test_emotional_continuity_split_under_thirty_seconds_blocks_without_real_loss():
+def test_emotional_keyword_matches_request_director_review_without_blocking_a_cut():
     first = _unit("S1.SH1", 16, "dramatic_editorial_break", ["1.B1"])
     first["purpose"] = "A quiet leaving home goodbye: child packs while Mum hides worry."
     first["providerBoundaryExplanation"] = "Cut here because this is the next paragraph."
@@ -66,9 +67,9 @@ def test_emotional_continuity_split_under_thirty_seconds_blocks_without_real_los
 
     audit = P.audit_units([first, second])
 
-    assert audit["ready"] is False
-    assert audit["blockingIssues"][0]["code"] == "AVOIDABLE_EMOTIONAL_SPLIT"
-    assert "emotional-continuity" in audit["blockingIssues"][0]["message"]
+    assert audit["ready"] is True
+    assert audit["mergeReviewRequired"][0]["code"] == "AVOIDABLE_EMOTIONAL_SPLIT"
+    assert "emotional-continuity" in audit["mergeReviewRequired"][0]["message"]
 
 
 def test_emotional_continuity_split_is_allowed_for_specific_object_handoff():
@@ -82,7 +83,8 @@ def test_emotional_continuity_split_is_allowed_for_specific_object_handoff():
     audit = P.audit_units([first, second])
 
     assert audit["ready"] is True
-    assert audit["needsHumanMergeReview"] is True
+    assert audit["needsDirectorReview"] is True
+    assert audit["needsHumanMergeReview"] is False
     assert audit["mergeReviewRequired"][0]["combinedDurationSec"] == 25
 
 
@@ -108,12 +110,12 @@ def test_only_last_unit_can_close_the_scene():
 def test_thirty_seconds_does_not_excuse_an_overpacked_unit():
     audit = P.audit_units([
         _unit("S1.SH1", 28, "scene_end", ["1.B1", "1.B2", "1.B3"],
-              stages=4, internal_shots=6),
+              stages=6, internal_shots=7),
     ])
     assert audit["ready"] is False
     assert audit["blockingIssues"][0]["code"] == "UNIT_COMPLEXITY_EXCEEDED"
     assert audit["unitComplexity"] == [{
-        "shotId": "S1.SH1", "stageCount": 4, "internalShotCount": 6,
+        "shotId": "S1.SH1", "stageCount": 6, "internalShotCount": 7,
         "complexitySignals": [],
         "withinStandard": False,
     }]
@@ -125,8 +127,8 @@ def test_long_unit_is_valid_when_its_story_grammar_stays_compact():
               stages=3, internal_shots=3),
     ])
     assert audit["ready"] is True
-    assert audit["maxStagesPerUnit"] == 3
-    assert audit["maxInternalShotsPerUnit"] == 3
+    assert audit["maxStagesPerUnit"] == 5
+    assert audit["maxInternalShotsPerUnit"] == 6
 
 
 def test_long_physical_reveal_unit_gets_showrunner_complexity_review():
@@ -136,8 +138,10 @@ def test_long_physical_reveal_unit_gets_showrunner_complexity_review():
     unit["visualPayoff"] = "Fuzzby lands with a flower-caused moustache."
     audit = P.audit_units([unit])
     assert audit["ready"] is True
-    assert audit["needsHumanMergeReview"] is True
+    assert audit["needsDirectorReview"] is True
+    assert audit["needsHumanMergeReview"] is False
     assert audit["mergeReviewRequired"][0]["reason"] == "complexity_review"
     assert "moustache" in audit["unitComplexity"][0]["complexitySignals"]
-    assert "handoff frame" in audit["executionPolicy"]["continuity"]
-    assert "ElevenLabs scene-level music cue after stitch" in audit["executionPolicy"]["music"]
+    assert "new keyframe" in audit["executionPolicy"]["continuity"]
+    assert "ElevenLabs" not in audit["executionPolicy"]["music"]
+    assert "authorised Seedance music" in audit["executionPolicy"]["music"]

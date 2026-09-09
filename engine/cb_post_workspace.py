@@ -132,6 +132,7 @@ def workspace(episode: str = "Ep1") -> dict[str, Any]:
         "audioPolicy": manifest.get("audioPolicy") or {},
         "approvalContract": manifest.get("approvalContract") or {},
         "timeline": manifest.get("timeline") or [],
+        "sourceRecords": manifest.get("sourceRecords"),
         "mixPolicy": manifest.get("mixPolicy") or {},
         "qc": manifest.get("finalQc") or {},
         "stems": [stem for stem in stems if stem["url"]],

@@ -81,7 +81,8 @@ def inspect(production, context, state, shot):
                     break
     index = state["shots"].index(shot)
     previous = state["shots"][index - 1] if index else None
-    if previous and previous["scene"] == shot["scene"]:
+    from studio_director_card import inherits_previous_state, assessment
+    if previous and previous["scene"] == shot["scene"] and inherits_previous_state(shot):
         watch = previous.get("outcomes", {}).get("watch", {})
         ending = watch.get("ending")
         if watch.get("status") == "approved" and verified_file(production.ws, pid, ending):
@@ -89,6 +90,8 @@ def inspect(production, context, state, shot):
                                "approvalStatus": "approved", "version": watch["id"]})
         elif shot.get("transition") == "continuation" and not shot.get("importedArchive"):
             problems.append(issue("handoff_required", "This continuation needs the preceding approved ending frame.", "blocker"))
+    from studio_scene_handoff import join_advisories
+    problems.extend(join_advisories(previous, shot))
     actual = []
     for name in ("see", "request"):
         outcome = shot.get("outcomes", {}).get(name, {})
@@ -108,8 +111,10 @@ def inspect(production, context, state, shot):
         locked_opening = shot.get('outcomes', {}).get('see', {}).get('status') == 'approved'
         problems.append(issue(exc.code, str(exc) + (' The approved opening and its downstream outcomes are retained.' if locked_opening else ''),
                               'warning' if locked_opening else 'blocker'))
+    reports = current_reports(production, context, state, shot) if shot.get('mediaReviews') else []
     return {"issues": problems, "references": references, "actualReferences": actual, "suggestions": choices,
-            "mediaReviews": current_reports(production, context, state, shot) if shot.get('mediaReviews') else [],
+            "creativeAssessment": assessment(shot, candidate=shot.get('outcomes', {}).get('watch'), reports=reports),
+            "mediaReviews": reports,
             "claim": "Checks cover recorded identity traits, reference versions and handoffs. Visual likeness and performance require viewing."}
 
 
@@ -192,7 +197,9 @@ def projection(production, context, state, jobs):
     preview = state.get("assembly", {}).get("preview")
     timeline["preview"] = preview if preview and preview.get("fingerprint") == fingerprint and verified_file(ws, pid, (preview.get("files") or [None])[0]) else None
     issues = [i for v in inspections.values() for i in v["issues"]]
+    from studio_coverage import scene_boards
     return {"scenes": list(scenes.values()), "shots": rows, "inspections": inspections, "timeline": timeline,
+            "coverageBoards": scene_boards(state['shots'], state.get('sceneCoverage', [])),
             "summary": {"remainingEstimateUsd": round(sum(r["remainingEstimateUsd"] for r in rows),4) if all(r["remainingEstimateUsd"] is not None for r in rows) else None,
                         "forecastMeaning": "One candidate per missing stage, at configured rates and reservation floors. Excludes optional review, future revisions, failed attempts and unknown provider charges.", "shots": len(rows), "generatedShots": generated_count, "approvedShots": approved_count,
                         "approvedSeconds": round(approved_duration, 3), "approvedVoices": int(approved_voice), "voiceShots": voice_total,

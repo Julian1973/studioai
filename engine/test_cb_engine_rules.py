@@ -392,3 +392,9 @@ def test_r15_suppresses_hold_when_immediate_action_is_typed():
               "No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or "
               "generic camera-facing expression.\n[Audio]\nNatural sound.")
     assert rules.action_unit_report(shot, direction, prompt)["ready"]
+    # The production compiler prefixes a motivated cut before its numbered view.
+    # That prefix must not make a correctly emitted line disappear from its owner.
+    prefixed = 'Shot 1: Establish the scene.\nCut to the planned view. ' + prompt.replace('Shot 1:', 'Shot 2:')
+    direction['shotPlan'][0]['shotNumber'] = 2
+    assert rules.action_unit_report(shot, direction, prefixed)['ready']
+    assert not rules.action_unit_report(shot, direction, prefixed.replace('{Go!}', '{Wrong.}'))['ready']

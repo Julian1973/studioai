@@ -569,31 +569,26 @@ def validate_script(text: str, policy: dict) -> dict:
                 "action": "Correct the script as a new immutable version or explicitly revise the show canon.",
             })
     for check in checks.get("lockedDialogue") or []:
-        trigger = re.search(check["triggerPattern"], text, re.IGNORECASE)
-        exact_required = normalized_dialogue(check["exactText"])
-        exact = exact_required in normalized_dialogue(text)
-        if trigger and not exact:
-            lines = text.splitlines()
-            line = None
-            cue = re.compile(
-                rf"^\s*(?:\d+\s*)?{re.escape(check.get('speaker') or '')}"
-                rf"(?:\s+\(CONT[’']?D\))?\s*$", re.IGNORECASE)
-            for index, raw in enumerate(lines):
-                if not cue.match(raw):
-                    continue
-                spoken = []
-                for following in lines[index + 1:]:
-                    if not following.strip():
-                        break
-                    spoken.append(following.strip())
-                candidate = " ".join(spoken)
-                if re.search(check["triggerPattern"], candidate, re.IGNORECASE):
-                    line = candidate
+        # A crystal mentioned in action is not a spoken Crystal Call. Scope the
+        # exact-word check to the named speaker and stop at the next cue/scene.
+        lines = text.splitlines()
+        cue = re.compile(rf"^\s*(?:\d+\s*)?{re.escape(check.get('speaker') or '')}(?:\s+\(CONT[’']?D\))?\s*$", re.IGNORECASE)
+        next_cue = re.compile(r"^\s*(?:\d+\s*)?[A-Z][A-Z '’/.-]*(?:\s+\(CONT[’']?D\))?\s*$")
+        candidates = []
+        for index, raw in enumerate(lines):
+            if not cue.match(raw):
+                continue
+            spoken = []
+            for following in lines[index + 1:]:
+                if not following.strip() or next_cue.match(following) or re.match(r"^\s*(?:INT|EXT)\.", following):
                     break
-            line = line or next((raw.strip() for raw in lines
-                                 if re.search(check["triggerPattern"], raw, re.IGNORECASE)),
-                                trigger.group(0))
-            if normalized_dialogue(line) == exact_required:
+                spoken.append(following.strip())
+            candidate = " ".join(spoken)
+            if re.search(check["triggerPattern"], candidate, re.IGNORECASE):
+                candidates.append(candidate)
+        exact_required = normalized_dialogue(check["exactText"])
+        for line in candidates:
+            if exact_required in normalized_dialogue(line):
                 continue
             blockers.append({
                 "code": "LOCKED_DIALOGUE_CONFLICT",

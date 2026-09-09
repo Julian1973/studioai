@@ -183,7 +183,9 @@ def shot_handoff_instruction(shot, *, still=False):
         instruction = (
             f"EDITORIAL HANDOFF — continuous action from {source}. Use its approved "
             "landing frame as the opening anchor and carry positions, facing, movement "
-            "direction, action phase, props and emotion forward without replaying the action."
+            "direction, action phase, props, eyelines, camera height and movement, light direction "
+            "and emotion forward without replaying the action. Use the actual approved "
+            "landing state; a matching pose alone does not establish matching motion."
         )
     reason = str(transition.get("reason") or "").strip()
     return instruction + (" Editorial purpose: " + reason if reason else "")

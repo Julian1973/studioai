@@ -43,6 +43,8 @@ def test_director_chat_uses_small_context_and_persists(monkeypatch, tmp_path):
     assert captured["user"]["productionContext"]["orderedShotStates"]["opening"] == "Bo holds the conker at the satchel."
     assert "accept ONE plain creative note" in captured["system"]
     assert "Never rewrite exact dialogue" in captured["system"]
+    assert "Scene coverage precedes generation planning" in captured["system"]
+    assert "Keep one coherent camera treatment" not in captured["system"]
     assert chat.history("Ep2", "1", "S1.SH1", "keyframe")["messages"][-1]["role"] == "director"
 
 
@@ -65,6 +67,38 @@ def test_director_agent_sees_spoken_and_seedance_sfx_as_separate_lanes(monkeypat
     assert context["exactDialogue"] == []
     assert context["seedanceSfxCues"][0]["kinds"] == ["snore"]
     assert "never enter @Audio1" in context["audioAuthority"]
+
+
+def test_chat_preserves_acting_coverage_and_dialogue_timing_authorities(monkeypatch, tmp_path):
+    import copy
+    package = _package()
+    shot = package["shots"][0]
+    shot.update({
+        "durationSec": 30,
+        "performanceContractApproved": {"listener": "Keep attention on the held conker; settle weight before looking up."},
+        "cinematographyContractApproved": {"purpose": "Reveal the friend's understanding."},
+        "comedyContractsApproved": [{"payoff": "The listener notices the hidden conker."}],
+        "emotionContractsApproved": [{"change": "Concern softens into understanding."}],
+        "storyboardInternalShotPlanApproved": [{"viewId": "reaction", "transitionType": "cut", "subject": "listening friend"}],
+    })
+    shot["dialogueLines"][0].update(dialogueOccurrenceId="line-1", startSec=7.2, endSec=9.1)
+    package["sourceStoryboard"] = {"sha256": "approved-storyboard"}
+    package["continuityLedger"][0]["voiceApproval"] = {"approved": True, "path": "/approved/voice.wav"}
+    original = copy.deepcopy(package)
+    monkeypatch.setattr(chat.cb_render, "load_pkg", lambda scene, episode: (package, tmp_path / "pkg.json"))
+
+    context = chat._scope_context("Ep2", "1", "S1.SH1", "animation", "Make the listener's thought readable.")
+
+    assert context["stageDirection"]["performanceContractApproved"] == shot["performanceContractApproved"]
+    assert context["stageDirection"]["emotionContractsApproved"] == shot["emotionContractsApproved"]
+    assert context["stageDirection"]["comedyContractsApproved"] == shot["comedyContractsApproved"]
+    assert context["stageDirection"]["storyboardInternalShotPlanApproved"][0]["transitionType"] == "cut"
+    assert context["directorCardRevision"]["sourceBindings"]["voiceApproval"]["path"] == "/approved/voice.wav"
+    assert context["exactDialogue"][0]["startSec"] == 7.2
+    assert context["exactDialogue"][0]["endSec"] == 9.1
+    assert context["exactDialogue"][0]["exactText"] == "Today could be OK."
+    assert "singleCameraTreatment" not in context
+    assert package == original
 
 
 def test_animation_edit_requires_explicit_valid_time_window():

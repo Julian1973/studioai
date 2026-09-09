@@ -142,6 +142,27 @@ def _digest(value):
     ).encode("utf-8")).hexdigest()
 
 
+def bind_primary_performance(line, locked_line):
+    """Keep the primary provider recipe on the directed performance, not a stale copy.
+
+    Alternate audition recipes remain intentional alternatives. This does not invent
+    acting tags: it carries the existing explicit human or Voice Director performance.
+    """
+    result = deepcopy(line)
+    text = str(locked_line.get("performanceOverride") or
+               result.get("performedText") or "").strip()
+    if not text:
+        return result
+    if _words(text) != _words(_locked_text(locked_line)):
+        raise VoiceContractError("Directed performance changed the locked spoken words")
+    recipes = result.get("takeRecipes") or []
+    primary = [recipe for recipe in recipes if recipe.get("primary")]
+    if len(primary) == 1:
+        primary[0]["performedText"] = text
+    result["performedText"] = text
+    return result
+
+
 def _check(checks, code, passed, message):
     checks.append({"code": code, "passed": bool(passed), "message": message})
 
@@ -275,6 +296,7 @@ def post_direction_audit(line, locked_line, card, register):
 
 
 def compile_line(line, locked_line, *, cards=None, registers=None):
+    line = bind_primary_performance(line, locked_line)
     cards = cards or voice_cards()
     registers = registers or archetype_registers()
     character = str(line.get("character") or "")

@@ -286,3 +286,9 @@ def test_story_context_excludes_retired_workflow_without_rewriting_canon(tmp_pat
     assert 'RETIRED WORKFLOW' not in context['studioBible']
     assert context['studioBible'] == (ROOT/'skills/production-standard.md').read_text()
     assert historical.read_text() == 'RETIRED WORKFLOW: approve every planning gate before SEE.'
+
+
+def test_visual_crystal_mention_does_not_require_spoken_call(tmp_path):
+    policy = _workspace(tmp_path)
+    report = cb_canon.validate_script('EXT. POOL — MORNING\nHer ROSE QUARTZ PENDANT glows.\nAIDA\nSomeone’s day might be dampened.\nSUNNY\nHello.\n', policy)
+    assert not any(b['code'] == 'LOCKED_DIALOGUE_CONFLICT' for b in report['blockers'])

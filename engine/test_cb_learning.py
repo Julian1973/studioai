@@ -177,15 +177,25 @@ def test_ex005_remains_linked_to_7d5762e():
         assert next(p for p in pats if p["patternId"] == pid)["maturity"] != "approved-principle"
 
 
-def test_creative_room_2_execution_order_unchanged():
+def test_creative_room_2_execution_order_unchanged(monkeypatch):
     import cb_creative as C
+    from test_cb_creative import _isolated
     assert C.ENGINE_VERSION.startswith("creative-room-2.2")
-    body = (HERE / "cb_creative.py").read_text().split("def run_scene", 1)[1]
-    order = [body.index(s) for s in ("gate0_readiness(", "gate1_treatments(",
-                                       "gate2_select(", "gate3_beats(",
-                                       "gate4_shot_conference(", "gate5_performance(",
-                                       "gate5_voice(", "gate6_adversarial_review(")]
-    assert order == sorted(order)                        # treatments -> selection -> beats...
+    record = []
+    _isolated(monkeypatch, record)
+    entered = []
+    for name in ('gate0_readiness', 'gate1_treatments', 'gate2_select', 'gate3_beats',
+                 'gate4_shot_conference', 'gate5_performance', 'gate5_voice',
+                 'gate6_adversarial_review'):
+        original = getattr(C, name)
+        def observed(*args, _name=name, _original=original, **kwargs):
+            entered.append(_name)
+            return _original(*args, **kwargs)
+        monkeypatch.setattr(C, name, observed)
+    C.run_scene(1, 'Ep1', log=lambda *a, **k: None)
+    assert entered == ['gate0_readiness', 'gate1_treatments', 'gate2_select',
+                       'gate3_beats', 'gate4_shot_conference', 'gate5_performance',
+                       'gate5_voice', 'gate6_adversarial_review']
 
 
 if __name__ == "__main__":

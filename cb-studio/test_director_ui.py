@@ -378,11 +378,9 @@ def test_keyframe_refire_is_one_visible_replacement_job():
     assert 'f"director:refire-keyframe:{target}"' in SERVER
 
 
-def test_hear_keeps_dialogue_above_returned_voice_media():
-    dialogue = APP.index("${dialogueEditor}${voiceMedia}${performanceEditor}")
-    legacy = "${voiceMedia}${dialogueEditor}${performanceEditor}"
-    assert dialogue >= 0
-    assert legacy not in APP
+def test_hear_keeps_words_and_performance_adjacent_with_returned_player_first():
+    assert "body=m.vo ? `${voiceMedia}${dialogueEditor}${performanceEditor}${sfxPanel}${slatePanel}`" in APP
+    assert "`${dialogueEditor}${performanceEditor}${voiceMedia}${sfxPanel}${slatePanel}`" in APP
 
 
 def test_director_action_area_explains_current_outcome_before_button():

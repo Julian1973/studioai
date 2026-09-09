@@ -444,6 +444,21 @@ def migrate_existing(episode: str = "Ep1") -> dict[str, Any]:
             "registeredOrUpdated": len(created)}
 
 
+def required_prop_ids(episode: str, scene: str | int, shot_id: str) -> list[str]:
+    """Explicit approved shot bindings survive handover, including missing files.
+
+    Readiness is checked by the upload resolver; a missing file must remain a
+    visible requirement rather than silently disappearing from the prompt.
+    """
+    return sorted({str(item['role']).split(':', 1)[1].strip().casefold()
+        for item in _read().get('assets', [])
+        if item.get('episode') == str(episode) and item.get('scene') == str(scene)
+        and item.get('shotId') == shot_id and item.get('status') == 'approved'
+        and item.get('kind') == 'reference_image'
+        and str(item.get('role', '')).startswith('prop:')
+        and str(item['role']).split(':', 1)[1].strip()})
+
+
 def resolve_assets(episode: str, scene: str | int, shot_id: str | None = None,
                    kinds: set[str] | None = None, include_global: bool = True) -> list[dict[str, Any]]:
     data = _read()

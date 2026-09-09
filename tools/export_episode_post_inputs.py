@@ -13,6 +13,7 @@ import hashlib
 import json
 import pathlib
 import shutil
+import re
 from datetime import datetime, timezone
 
 
@@ -65,12 +66,21 @@ def _approved_shots(episode: str, scene_numbers: list[int]) -> list[dict]:
             voice_approval = ledger.get("voiceApproval") or {}
             voice = _path(voice_approval.get("path"))
             shot = shot_details.get(shot_id) or {}
+            take_hash = sha256(take)
+            recorded_hash = (ledger.get('approval') or {}).get('contentHash')
+            if recorded_hash and recorded_hash != take_hash:
+                raise ExportError(f'approved take changed after approval: {shot_id}')
             item = {
                 "sceneNumber": scene_number,
                 "shotId": shot_id,
                 "status": "approved",
                 "approvedTake": str(take),
-                "approvedTakeSha256": sha256(take),
+                "approvedTakeSha256": take_hash,
+                "directionContext": shot,
+                "directionEvidence": "current authored context at post export; not proof of the historical provider request",
+                "approvalReceipt": ledger.get('approval') or {},
+                "sourcePackage": str(package_path),
+                "sourcePackageSha256": sha256(package_path),
                 "harvestFrame": str(frame) if frame else None,
                 "harvestFrameSha256": sha256(frame) if frame else None,
                 "dialogueLines": shot.get("dialogueLines") or [],
@@ -80,7 +90,7 @@ def _approved_shots(episode: str, scene_numbers: list[int]) -> list[dict]:
                 "continuityMode": ledger.get("continuityMode") or ledger.get("sourceType"),
             }
             result.append(item)
-    result.sort(key=lambda item: (item["sceneNumber"], item["shotId"]))
+    result.sort(key=lambda item: (item["sceneNumber"], [int(t) if t.isdigit() else t for t in re.split(r'(\d+)', item["shotId"])]))
     return result
 
 
@@ -120,6 +130,11 @@ def export_episode(episode: str = "Ep2", output: pathlib.Path | None = None) -> 
             "voice": f"voice/{voice_target.name}" if voice_target else None,
             "plate": f"plates/{shot_id}_final_frame.png" if item["harvestFrame"] else None,
             "approvedTakeSha256": item["approvedTakeSha256"],
+            "directionContext": item["directionContext"],
+            "directionEvidence": item["directionEvidence"],
+            "approvalReceipt": item["approvalReceipt"],
+            "sourcePackage": item["sourcePackage"],
+            "sourcePackageSha256": item["sourcePackageSha256"],
             "dialogueLines": item["dialogueLines"],
             "continuityMode": item["continuityMode"],
         })
@@ -127,7 +142,7 @@ def export_episode(episode: str = "Ep2", output: pathlib.Path | None = None) -> 
     manifest = {
         "schemaVersion": "crystal-bears-post-inputs-v1",
         "episode": episode,
-        "title": "Crystal Bears Episode 2",
+        "title": f"Crystal Bears {episode}",
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "source": "Studio approved continuity ledgers",
         "approvalRule": "Only continuityLedger entries with status=approved are exported; pending, rejected and superseded entries are excluded.",

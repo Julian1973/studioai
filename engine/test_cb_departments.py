@@ -628,6 +628,16 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
     assert out.durationSec == 8
     assert story_lock_args["shotPlan"] == out.shotPlan
     assert out.referenceContract[0].assetTag == "@Image1"
+    # A real short-shot response supplied valid clocks with the storyline label.
+    # Preserve and validate those clocks instead of spending again to remove them.
+    clocked = out.model_dump()
+    clocked['stagePlan'][0].update(startSec=0, endSec=8)
+    normalized = D.AnimationDirection.model_validate(clocked)
+    assert normalized.pacingMode == 'timestamp'
+    assert normalized.stagePlan[0].endSec == 8
+    clocked['stagePlan'][0]['startSec'] = 1
+    with pytest.raises(ValueError, match='begin at 0'):
+        D.AnimationDirection.model_validate(clocked)
     assert "Runtime worker contract — Seedance Production Director" in seen["system"]
     assert "Emit every scripted line exactly once inside the stage that owns it" in seen["user"]
     assert "[Multimodal Reference Layer]" in seen["user"]
@@ -901,8 +911,11 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
         "audioContract": "Use @Audio1 unchanged; retain wing, leaf and pollen foley; no music.",
     }
 
+    direction['soundHandoff'] = {'entry': 'Carry the soft garden pulse', 'exit': 'Settle into garden ambience'}
     prompt = D.compile_animation_provider_prompt(shot, direction)
 
+    assert 'Carry the soft garden pulse' in prompt
+    assert 'Settle into garden ambience' in prompt
     assert "Make a nice cinematic bee video" not in prompt
     assert primary in prompt
     assert provider_action in prompt
@@ -941,6 +954,8 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
 
     exact_prompt = D.compile_animation_provider_prompt(shot, exact_audio_direction)
 
+    assert 'Carry the soft garden pulse' not in exact_prompt
+    assert 'Settle into garden ambience' not in exact_prompt
     assert "Preserve the complete @Audio1 bed unchanged." in exact_prompt
     assert "During approved laughter or giggling in @Audio1" in exact_prompt
     assert "all listeners remain silent and non-articulating" in exact_prompt
@@ -1266,6 +1281,18 @@ def test_animation_compiler_emits_continuous_internal_units_as_timed_phases():
     assert "[Shot Sequence]" in cut_prompt
     assert "Shot 1:" in cut_prompt
     assert "One continuous Seedance render" not in cut_prompt
+
+    # Typed cuts survive without magic words in camera prose. Declared moves do
+    # not become cuts merely because a stale summary mentions them.
+    planned = {**shot, 'storyboardInternalShotPlanApproved': [
+        {'transitionType': 'opening'}, {'transitionType': 'cut'}, {'transitionType': 'hold'}]}
+    typed = D.compile_animation_provider_prompt(planned, direction)
+    assert 'Cut to the planned view.' in typed
+    assert '[Shot Sequence]' in typed and 'One continuous Seedance render' not in typed
+    planned['storyboardInternalShotPlanApproved'][1]['transitionType'] = 'move'
+    continuous = D.compile_animation_provider_prompt(planned, {**direction, 'editScope': 'two intentional cuts'})
+    assert '[Timed Action Phases' in continuous
+    assert 'Cut to the planned view.' not in continuous
 
 
 def test_animation_compiler_normalizes_seedance_ready_watch_prompt():
@@ -2452,3 +2479,21 @@ def test_animation_reads_missing_beat_contracts_only_from_exact_approved_storybo
 
     pkg["sourceStoryboard"]["md5"] = "stale"
     assert R._shot_creative_contract_view(pkg, shot, "1", "Ep1") is shot
+
+
+def test_camera_decomposition_cannot_hide_a_missing_story_event():
+    shot = {'storyboardStagePlanApproved': [{'stageNumber': 1, 'primaryEvent':
+            'Keen snatches the honeycomb and Fuzzby drops.'}]}
+    report = D.animation_story_lock_report(shot, 'Camera follows the berry.',
+        shot_plan=[{'causalAction': 'Camera follows the berry.'}])
+    assert not report['ready']
+    assert 'approved visual event is absent' in report['errors'][0]
+
+
+def test_primary_voice_recipe_carries_directed_tags():
+    line = _voice_line(performedText='[nervous] Nailed it.')
+    line.takeRecipes[0].performedText = 'Nailed it.'
+    result = D.validate_voice_direction(D.VoiceDirection(
+        shotId='S1.SH1', sceneIntention='Hide embarrassment.', lines=[line]),
+        [{'speaker':line.speaker,'text':'Nailed it.'}])
+    assert result.lines[0].takeRecipes[0].performedText == '[nervous] Nailed it.'

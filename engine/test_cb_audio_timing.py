@@ -397,3 +397,28 @@ def test_one_dialogue_segment_can_be_replaced_without_changing_master_duration(t
     assert result["targetEndSec"] == 6
     assert result["durationSec"] == pytest.approx(10, abs=.05)
     assert pathlib.Path(result["contractPath"]).is_file()
+
+
+def test_isolated_lines_do_not_borrow_neighbour_audio(tmp_path):
+    import wave
+    import numpy as np
+    rate = 48000
+    # First part silent; second has tone right from its first sample.
+    samples = np.concatenate([np.zeros(rate), .4 * np.sin(2*np.pi*440*np.arange(rate)/rate)])
+    raw = tmp_path / 'parts.wav'
+    with wave.open(str(raw), 'wb') as f:
+        f.setparams((1, 2, rate, 0, 'NONE', 'not compressed'))
+        f.writeframes((samples*32767).astype('<i2').tobytes())
+    timing = cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({'audioSha256':cb_audio_timing.file_sha256(raw),
+        'separatedDialogueAssembly':True, 'voiceSegments':[
+            {'dialogueInputIndex':0,'startTimeSec':0,'endTimeSec':1},
+            {'dialogueInputIndex':1,'startTimeSec':1,'endTimeSec':2}]}))
+    out = tmp_path / 'bed.wav'
+    result = cb_audio_timing.render_timed_dialogue_master(raw,timing,
+        [{'startSec':0,'endSec':1},{'startSec':2,'endSec':3}],4,out)
+    decoded = subprocess.run(['ffmpeg','-v','error','-i',str(out),'-f','f32le','-ac','1','-'],capture_output=True,check=True)
+    audio = np.frombuffer(decoded.stdout,dtype='<f4')
+    assert np.max(np.abs(audio[:int(1.5*rate)])) < 0.0001
+    assert np.max(np.abs(audio[int(2.1*rate):int(2.8*rate)])) > .1
+    assert all(p['sourceHandleSec']==0 for p in result['placements'])

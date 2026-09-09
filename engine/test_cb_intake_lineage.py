@@ -414,3 +414,11 @@ def test_possessive_character_action_after_dialogue_is_not_spoken_text():
         {"i": 1, "scene": 7, "type": "action", "speaker": None,
          "text": "Bo’s tail suddenly POOFS twice its size. Bo and Keen giggle."},
     ]
+
+
+def test_standard_unnumbered_scene_headings_end_dialogue():
+    text = 'FADE IN:\nEXT. GARDEN — MORNING\nBO\nHello.\nINT. CAVE — CONTINUOUS\nBO\nGoodbye.\n'
+    result = cb_intake.parse_script(text, ['Bo'])
+    assert [s['sceneNumber'] for s in result['scenes']] == [1, 2]
+    assert [s['location'] for s in result['scenes']] == ['GARDEN', 'CAVE']
+    assert [e['text'] for e in result['events'] if e['type'] == 'dialogue'] == ['Hello.', 'Goodbye.']

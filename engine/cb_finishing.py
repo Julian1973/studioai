@@ -57,6 +57,8 @@ def director_brief(ep, expected):
         'postSupervisorSkill':str(POST_SKILL),
         'instruction': 'Assess the actual rendered cut and approved Studio sources. Report timecode, first failed gate, visible/audible evidence and smallest repair. Do not approve media or submit providers. Keep uninspected items pending.',
         'candidate':w['masterUrl'],
+        'sourceRecords':w.get('sourceRecords'),
+        'sourceEvidence': 'Source records were captured at registration; inspect timeline correspondence.' if w.get('sourceRecords') else 'Historical source records were not registered. Reconcile exact approved footage before editing; current plans alone cannot establish lineage.',
         'knownFindings':w['finishingWorkflow'].get('findings', []),
         'dimensions':['story and reactions','cut in/out frames','identity and scale','geography and motion phase','colour and lighting','dialogue, music and sound','ending and next-shot handoff'],
         'capabilityPolicy':'Verify each operation against the installed edition and bridge before use; no tool capability is asserted by this brief.',

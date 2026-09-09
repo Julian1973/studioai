@@ -495,12 +495,40 @@ def playable_stage_report(shot, cinematography):
         r"\b(chase|travel|route|flight|fly|barrel|pursu|toward frame|toward screen)\w*\b",
         _norm(shot.get("purpose")) + " " + geography, re.I))
     if travelling:
-        if not re.search(r"\b(depth|ahead|corridor|lane|mid-depth|background)\b", geography, re.I):
+        depth_planes = {
+            str(item.get("depthPlane") or "").strip()
+            for item in placements if item.get("depthPlane") is not None
+        }
+        spatial_depth = bool(re.search(
+            r"\b(depth|ahead|corridor|lane|mid-depth|background)\b", geography, re.I))
+        # A production direction may demonstrate readable depth structurally with
+        # distinct depth planes and a named between/across travel axis.  Do not
+        # reject that playable layout simply because it did not repeat the word
+        # "depth" in prose.
+        structural_depth = (len(depth_planes) > 1 and bool(re.search(
+            r"\b(between|across|cross(?:ing)?|from .* to|runs? between)\b",
+            geography, re.I)))
+        if not (spatial_depth or structural_depth):
             errors.append("opening geography does not provide visible depth ahead")
         if not re.search(r"\b(lead room|open|clear|reserve|lane|corridor)\b", negative, re.I):
             errors.append("opening frame does not reserve lead room for travel")
         for item in placements:
             facing = _norm(item.get("facing"))
+            # "toward camera" describes a held reaction, not travel.  It must
+            # not make a stationary witness look like the moving character.
+            facing_for_motion = "" if re.search(
+                r"\b(toward|faces?) (?:the )?camera\b|\bfront[- ]facing\b",
+                facing, re.I) else facing
+            motion_evidence = facing_for_motion + " " + _norm(item.get("pose"))
+            # A travelling scene can contain a stationary witness.  Only the
+            # character whose opening pose actually commits to the route must be
+            # oriented for travel; applying the check to Zenny's held reaction
+            # would confuse a valid cut with an invalid stage.
+            is_traveller = bool(re.search(
+                r"\b(travel|route|run|walk|cross|chase|pursu|head(?:ing)?|"
+                r"move|pass(?:ing)?|approach|depart|toward)\b", motion_evidence, re.I))
+            if not is_traveller:
+                continue
             camera_facing = re.search(
                 r"\b(toward|faces?) (?:the )?camera\b|\bfront[- ]facing\b",
                 facing, re.I)
@@ -526,8 +554,13 @@ def playable_stage_report(shot, cinematography):
     if missing:
         errors.append("required route elements are absent from geography: " + ", ".join(missing))
     if travelling and re.search(r"\b(follow|chase|behind|drone|slightly late)\b", camera, re.I):
-        if any(re.search(r"\b(toward|faces?) (?:the )?camera\b", _norm(item.get("facing")), re.I)
-               for item in placements):
+        if any(
+            re.search(r"\b(toward|faces?) (?:the )?camera\b", _norm(item.get("facing")), re.I)
+            and re.search(r"\b(travel|route|run|walk|cross|chase|pursu|head(?:ing)?|"
+                          r"move|pass(?:ing)?|approach|depart)\b",
+                          _norm(item.get("pose")), re.I)
+            for item in placements
+        ):
             errors.append("opening pose contradicts the ruled follow-camera relationship")
     return {"ready": not errors, "errors": errors, "rulesVersion": RULES_VERSION}
 

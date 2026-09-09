@@ -132,6 +132,7 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
     assert "omitted reference features" in prompt
     assert "[DELIVERABLE]" in prompt
     assert "[REFERENCE AUTHORITY]" in prompt
+    assert "[CAMERA CONSCIOUSNESS]" in prompt
     assert "[ACCEPTANCE TEST]" in prompt
     assert tuple(cb_render.cb_departments.prompt_sections(prompt)) == \
         cb_render.SEEDREAM_KEYFRAME_PROMPT_SECTIONS

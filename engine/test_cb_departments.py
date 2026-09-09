@@ -5,6 +5,55 @@ from types import SimpleNamespace
 
 import pytest
 
+
+def test_directed_laughter_can_act_under_dialogue_without_changing_transcript():
+    from cb_departments import _directed_nonverbal_performance
+    source = ('Only the character currently speaking in @Audio1 may move their mouth. '
+              'Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. '
+              'no mouth movement from silent listeners. {OK, Fuzzby, calm down. It’s not that funny.}')
+    cues = [{'channel': 'sfx', 'event': 'Fuzzby laughter under Zenny’s dialogue',
+             'startSec': 5, 'endSec': 9.68}]
+    result = _directed_nonverbal_performance(source, cues)
+    assert 'may move their mouth' not in result
+    assert 'closed-mouth except during their explicitly timed nonverbal SFX' in result
+    assert 'natural laughing mouth and body' in result
+    assert '{OK, Fuzzby, calm down. It’s not that funny.}' in result
+    assert _directed_nonverbal_performance(source, cues, exact_audio_only=True) == source
+    assert _directed_nonverbal_performance(source, []) == source
+    action = [{**cues[0], 'channel': 'action'}]
+    assert _directed_nonverbal_performance(source, action) == source
+    assert '[DIRECTED NONVERBAL PERFORMANCE]' in _directed_nonverbal_performance(
+        source, action, audio_contract='Fuzzby laughter is authorised nonverbal Seedance SFX only.')
+
+
+def test_camera_consciousness_preserves_authored_hold_and_backfills_legacy_direction():
+    from cb_render import _camera_consciousness
+
+    directed = _camera_consciousness({
+        'audienceRead': 'Zenny remains calm while the laugh tests her.',
+        'lensAndCameraRelationship': 'Intimate 50mm three-quarter view.',
+        'cameraConsciousness': {
+            'dramaticOwner': 'Zenny',
+            'emotionalAction': 'Keep composure under offscreen pressure.',
+            'cameraState': 'controlled',
+            'viewpoint': 'Zenny eye-level three-quarter medium close-up.',
+            'lensFamily': '50 to 75mm natural intimate lens.',
+            'movementTrigger': 'Hold by design.',
+            'movementFinish': 'Hold through Zenny settling back into calm.',
+            'focusPlan': 'Hold focus on Zenny eyes.',
+            'exitCondition': 'Zenny closes her eyes; clean editorial button.',
+        },
+    }, {'shotId': 'S1.SH2', 'charactersInFrame': ['Zenny']})
+    assert directed['cameraState'] == 'controlled'
+    assert directed['movementFinish'] == 'Hold through Zenny settling back into calm.'
+
+    legacy = _camera_consciousness({
+        'audienceRead': 'Keen crosses the creek to the comb.',
+        'lensAndCameraRelationship': 'Observational camera follows Keen across the creek.',
+    }, {'shotId': 'S1.SH3', 'charactersInFrame': ['Keen']})
+    assert legacy['dramaticOwner'] == 'Keen'
+    assert legacy['cameraState'] == 'observational'
+
 import cb_departments as D
 import cb_render as R
 import cb_safety
@@ -407,6 +456,17 @@ def test_relay_opening_frame_contract_overrides_stale_first_frame_wording():
         performanceArc="Keen swallows fear into a brave posture.",
         physicalCauseAndEffect="The sea fills the frame, so Keen has to steady himself.",
         cameraBehaviour="Child-height medium two-shot.",
+        cinematographyHandoff={
+            "dramaticOwner": "Keen's effort to look brave",
+            "emotionalAction": "Let the swallow register before the open water takes over.",
+            "cameraState": "controlled",
+            "viewpoint": "Child-height beside Keen and Mum.",
+            "lensFamily": "Gentle medium two-shot.",
+            "movementTrigger": "Hold until Keen turns toward the water.",
+            "movementFinish": "Settle on Keen's braced profile.",
+            "focusPlan": "Stay with Keen; Mum remains a soft reassurance.",
+            "exitCondition": "Hold the braced expression for the next cut.",
+        },
         timingAndRhythm="Slow enough for the swallow to read.",
         landingBreath="Hold the braced expression.",
         directionDensity="guided",
@@ -467,6 +527,10 @@ def test_relay_opening_frame_contract_overrides_stale_first_frame_wording():
     assert "boat-position" not in compiled
     assert compiled.count("图1 is the first frame") == 1
     assert "It defines opening composition and state" not in compiled
+    assert "[Camera Consciousness]" in compiled
+    assert "Dramatic owner: Keen's effort to look brave." in compiled
+    assert "Camera state: controlled." in compiled
+    assert "Exit condition: Hold the braced expression for the next cut." in compiled
 
     extension_data = direction.model_dump()
     extension_data["taskMode"] = "extend-forward"
@@ -1096,6 +1160,17 @@ def test_exact_audio_multishot_uses_seedance_team_structure_and_live_slot_order(
             "observableEndState": "Bo remains happy and included.",
         }],
         "editScope": "Two internal shots with one intentional cut.",
+        "cinematographyHandoff": {
+            "dramaticOwner": "Bo's turn from embarrassment to belonging",
+            "emotionalAction": "Stay with Bo until the group receives the final poof.",
+            "cameraState": "observational",
+            "viewpoint": "Child-height inside the circle.",
+            "lensFamily": "Warm medium close coverage.",
+            "movementTrigger": "Move only when the group reaction shifts attention.",
+            "movementFinish": "Settle on Bo included in the circle.",
+            "focusPlan": "Hold Bo's face, then transfer to the group response.",
+            "exitCondition": "Leave Bo readable and included for the next scene.",
+        },
         "geography": ["The Learning Circle remains fixed around Bo."],
         "consistencyContract": ["Keep Bo seated and Misty opposite him."],
         "surgicalSafeguards": ["Bo's tail remains anatomically attached."],
@@ -1119,6 +1194,8 @@ def test_exact_audio_multishot_uses_seedance_team_structure_and_live_slot_order(
         "Negative Prompt (Negative):",
     ):
         assert heading in prompt
+    assert "Dramatic owner: Bo's turn from embarrassment to belonging." in prompt
+    assert "Camera state: observational." in prompt
     assert "[One-Sentence Summary]" not in prompt
     assert "[Global Supplement]" not in prompt
     assert R.cb_prompt_lab.uses_enhanced_seedance_structure(prompt)
@@ -1492,6 +1569,38 @@ def test_previous_final_frame_role_resolves_from_approved_source_shot(monkeypatc
     assert path == str(harvest)
 
 
+def test_planned_cut_resolves_previous_final_frame_from_transition_state(monkeypatch, tmp_path):
+    """A new-angle cut has a separate SEE frame but still needs approved state."""
+    harvest = tmp_path / "S4.SH1_final_frame.png"
+    harvest.write_bytes(b"png")
+    pkg = {
+        "continuityLedger": [{
+            "shotId": "S4.SH1",
+            "status": "approved",
+            "harvestFrame": str(harvest),
+        }]
+    }
+
+    monkeypatch.setattr(R, "load_pkg", lambda scene, episode: (pkg, tmp_path / "pkg.json"))
+    monkeypatch.setattr(R, "_reference_path_is_approved", lambda path: True)
+
+    path = R._slot_path_for_role(
+        "previous shot final frame",
+        None,
+        "4",
+        "Ep2",
+        {},
+        shot={
+            "shotId": "S4.SH2",
+            "sourceType": "opener",
+            "sourceShotId": None,
+            "shotTransition": {"type": "cut", "stateSourceShotId": "S4.SH1"},
+        },
+    )
+
+    assert path == str(harvest)
+
+
 def test_animation_slots_append_all_required_continuity_props(monkeypatch):
     shot = {
         "shotId": "6.B3.S1",
@@ -1724,7 +1833,8 @@ def test_scene_continuity_locks_are_emitted_into_animation_prompt():
     assert "[Scene Continuity State]" in prompt
     assert "open satchel, rolled blanket, folded map, and small food pouch" in prompt
     assert "No crystal baskets" in prompt
-    assert "their stillness and the hold length carry the emotional truth" in prompt
+    assert "Preserve each witness’s authored attention and reaction" in prompt
+    assert "Hold on the non-acting witness" not in prompt
     assert "carry the joke" not in prompt
     assert "[Opening Motion Bridge]" in prompt
     assert "[ACTION OWNERSHIP]" in prompt

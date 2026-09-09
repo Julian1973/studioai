@@ -102,6 +102,27 @@ def test_front_facing_opening_allows_a_later_motivated_follow_camera():
     assert rules.geometry_agreement(cine, animation)["ready"] is True
 
 
+def test_playable_stage_allows_stationary_witness_in_a_cross_bank_travel_setup():
+    shot = {"purpose": "Keen's route crosses the creek toward the comb."}
+    cinematography = {
+        "geography": [
+            "The creek runs between banks as the travel axis.",
+            "Keen's path crosses from the near-bank machine to the far-tree comb.",
+        ],
+        "negativeSpace": ["Keep the creek corridor clear for Keen's route."],
+        "openingFrameLayout": {"placements": [
+            {"character": "Keen", "depthPlane": 1,
+             "facing": "across the creek toward the comb",
+             "pose": "starting with a committed route"},
+            {"character": "Zenny", "depthPlane": 2,
+             "facing": "toward camera and scene",
+             "pose": "seated still on her leaf"},
+        ]},
+    }
+
+    assert rules.playable_stage_report(shot, cinematography)["ready"] is True
+
+
 def test_provider_dialogue_uses_character_name_casing_without_changing_words():
     lines = cb_departments.provider_dialogue_lines({
         "charactersInFrame": ["Bo"],

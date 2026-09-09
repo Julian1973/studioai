@@ -207,6 +207,23 @@ class OpeningFrameLayout(BaseModel):
         return self
 
 
+class CameraConsciousness(BaseModel):
+    """Positive camera choices carried from DP through WATCH.
+
+    Optional fields preserve historical approved direction; current DP work is asked
+    to author them so camera craft reaches the provider instead of becoming a note.
+    """
+    dramaticOwner: str = ""
+    emotionalAction: str = ""
+    cameraState: Literal["controlled", "observational", "flowing"] | None = None
+    viewpoint: str = ""
+    lensFamily: str = ""
+    movementTrigger: str = ""
+    movementFinish: str = ""
+    focusPlan: str = ""
+    exitCondition: str = ""
+
+
 class CinematographyDirection(BaseModel):
     shotId: str
     audienceRead: str
@@ -227,6 +244,7 @@ class CinematographyDirection(BaseModel):
         description="Visible empty-space reservations for later entrances, travel or reveals.")
     referenceUse: List[str] = Field(default_factory=list, max_length=6)
     continuityProtections: List[str] = Field(default_factory=list, max_length=4)
+    cameraConsciousness: CameraConsciousness = Field(default_factory=CameraConsciousness)
     providerPrompt: str = Field(min_length=40)
 
     @field_validator(
@@ -476,6 +494,10 @@ class TimelineEvent(BaseModel):
 
 class AnimationDirection(BaseModel):
     soundHandoff: SoundHandoff | None = None
+    cinematographyHandoff: CameraConsciousness = Field(
+        default_factory=CameraConsciousness,
+        description="The approved Director of Photography decisions carried verbatim into "
+                    "the animation request. This is a handoff, not a second camera plan.")
     shotId: str
     durationSec: int = Field(
         ge=4, le=30,
@@ -1037,7 +1059,12 @@ def prepare_cinematography(context, images, *, log=print):
         "locked turnarounds and Scene Look in providerReferencePlan order. Never assign an "
         "opening composition, sizing board or generated pose plate to an @图 label: those "
         "remain local advisory evidence. Bind references by the labels stated in context; "
-        "do not describe character identity from memory.",
+        "do not describe character identity from memory. Author cameraConsciousness as the "
+        "positive creative authority for this shot: dramaticOwner, emotionalAction, cameraState "
+        "(controlled, observational or flowing), viewpoint, lensFamily, movementTrigger, "
+        "movementFinish, focusPlan and exitCondition. A deliberate hold is a complete "
+        "cinematic choice: set cameraState=controlled and state that it holds by design; "
+        "never add decorative movement.",
         CinematographyDirection, label="department_cinematography", log=log,
         images=images)
     shot = context.get("shot") or {}
@@ -1710,6 +1737,28 @@ def _seedance_nonverbal_audio_policy():
     )
 
 
+def _directed_nonverbal_performance(prompt, timeline, *, exact_audio_only=False, audio_contract=''):
+    """A timed, authorised character SFX must not conflict with a speech-only mouth lock."""
+    explicit_sfx = bool(re.search(r'authori[sz]ed[^.]*\bSFX\b|\bSFX\b[^.]*authori[sz]ed', audio_contract, re.I))
+    cues = [item for item in timeline if (item.get('channel') == 'sfx' or
+                                        explicit_sfx and item.get('channel') == 'action') and
+            re.search(r'\b(?:laugh\w*|giggl\w*|chuckl\w*)\b', str(item.get('event', '')), re.I)]
+    if exact_audio_only or not cues:
+        return prompt
+    prompt = re.sub(r'Only the character currently speaking in @Audio1 may move their mouth\.',
+                    'Only the active @Audio1 speaker articulates dialogue.', prompt)
+    prompt = re.sub(r'[Ll]isteners remain silent and closed-mouth(?: unless[^.]+)?',
+                    'Listeners remain silent and closed-mouth except during their explicitly timed '
+                    'nonverbal SFX; only the active @Audio1 speaker articulates dialogue', prompt)
+    prompt = prompt.replace('no mouth movement from silent listeners',
+                            'no dialogue articulation from nonspeakers')
+    return prompt + ('\n\n[DIRECTED NONVERBAL PERFORMANCE]\n'
+                     'During the named laughter SFX cues, animate the assigned character’s natural '
+                     'laughing mouth and body, including overlap with another character’s dialogue. '
+                     'This permits no extra words or laughter outside the directed cue. '
+                     'Preserve @Audio1 and its speaker timing unchanged.')
+
+
 _SEEDANCE25_RENDER_ARTIFACTS = re.compile(
     r"\b(?:4k(?:\s+ultra\s+hd)?|8k|60\s*fps|120\s*fps|hdr)\b|"
     r"\{\s*(?:0?\.\d+|1(?:\.\d+)?)\s*\}", re.I)
@@ -2068,6 +2117,29 @@ def compile_animation_provider_prompt(shot, direction):
     role and handoff once, in the shape expected by the Seedance prompt preflight.
     """
     data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
+    camera_handoff = dict(data.get("cinematographyHandoff") or {})
+
+    def camera_consciousness_lines():
+        """Emit one compact, positive camera brief from the approved DP handoff.
+
+        This belongs in the deterministic compiler, so a specialist cannot leave the
+        camera craft stranded in its own department output or replace it with generic
+        prose in ``providerPrompt``.
+        """
+        labels = (
+            ("Dramatic owner", "dramaticOwner"),
+            ("Emotional action", "emotionalAction"),
+            ("Camera state", "cameraState"),
+            ("Viewpoint", "viewpoint"),
+            ("Lens family", "lensFamily"),
+            ("Movement trigger", "movementTrigger"),
+            ("Movement finish", "movementFinish"),
+            ("Focus plan", "focusPlan"),
+            ("Exit condition", "exitCondition"),
+        )
+        return [f"{label}: {complete(camera_handoff.get(key), context=label.casefold())}"
+                for label, key in labels if str(camera_handoff.get(key) or "").strip()]
+
     audio_contract = str(data.get("audioContract") or "").strip()
     exact_audio_only = _preserves_exact_audio_bed(audio_contract)
     character_state_locks = dict(shot.get("characterStateLocks") or {})
@@ -2096,6 +2168,8 @@ def compile_animation_provider_prompt(shot, direction):
     def complete(value, *, context="render direction"):
         """Preserve the complete approved direction without length-based rewriting."""
         return emission.ensure_complete_sentence(value, context=context)
+
+    camera_handoff_lines = camera_consciousness_lines()
 
     def consistency_clause(value):
         text = " ".join(str(value or "").split()).strip().rstrip(".")
@@ -2413,6 +2487,8 @@ def compile_animation_provider_prompt(shot, direction):
         if value:
             global_lines.append(f"{label}: {value}")
     sections.append("[Global Settings]\n" + "\n".join(global_lines))
+    if camera_handoff_lines:
+        sections.append("[Camera Consciousness]\n" + "\n".join(camera_handoff_lines))
     sections.append("[Crystal Energy Law]\n" + crystal_energy_law())
 
     # Keep every generated take physically alive at the held beat: the provider needs
@@ -2462,6 +2538,9 @@ def compile_animation_provider_prompt(shot, direction):
     camera_movement_lines = []
     if internal_shots:
         shot_lines = []
+        last_gag_view = {str(beat): index for index, view in enumerate(internal_shots)
+                         for beat in ((view.model_dump() if hasattr(view, 'model_dump') else view)
+                                      .get('gagBeatIds') or [])}
         for index, internal_shot in enumerate(internal_shots):
             item = (internal_shot.model_dump() if hasattr(internal_shot, "model_dump")
                     else dict(internal_shot))
@@ -2532,6 +2611,8 @@ def compile_animation_provider_prompt(shot, direction):
                     hold_after=bool(item.get("holdAfterDialogue", True))))
                 emitted_dialogue.append(source_index)
             for beat_id in item.get("gagBeatIds") or []:
+                if last_gag_view.get(str(beat_id)) != index:
+                    continue  # One recovery hold, after the gag's final authored view.
                 clock = gag_clocks.get(str(beat_id))
                 if not clock:
                     # A specialist may inherit a legacy gag marker even when the
@@ -2560,12 +2641,10 @@ def compile_animation_provider_prompt(shot, direction):
         sides = [str(item).strip() for item in data.get("witnessStagingSides") or []
                  if str(item).strip()]
         if sides:
-            witness_payoff = (
-                "carry the joke" if gag_clocks else "carry the emotional truth")
             shot_lines.append(
                 "Witness staging: " + " ".join(sides) +
-                " Hold on the non-acting witness; their stillness and the hold length " +
-                witness_payoff + ".")
+                " Preserve each witness’s authored attention and reaction. Use stillness only "
+                "where directed; do not freeze an active reaction or laughter cue.")
         # The shot plan already owns story, gag action and physics. Re-emitting the
         # source fields here makes the provider parse competing versions of the same
         # action and violates the emission standard's state-each-action-once rule.
@@ -2918,6 +2997,7 @@ def compile_animation_provider_prompt(shot, direction):
             "only be revealed by the planned camera move.",
         ]
 
+        team_camera_lines = [*camera_handoff_lines, *camera_movement_lines]
         team_sections = [
             "[GENERATED VIDEO PROMPT]",
             team_authority,
@@ -2934,7 +3014,7 @@ def compile_animation_provider_prompt(shot, direction):
             "Character Reference Authority:\nBind each "
             "character exclusively to the identity reference assigned above.",
             "Audio Hierarchy and Music Policy:\n" + "\n".join(audio_hierarchy),
-            "Camera Movement Description:\n" + "\n".join(camera_movement_lines),
+            "Camera Movement Description:\n" + "\n".join(team_camera_lines),
             "Landing State:\n" + "\n".join(landing),
             "Negative Prompt (Negative):\n" + ". ".join(negative_items) + ".",
         ]
@@ -2967,6 +3047,8 @@ def compile_animation_provider_prompt(shot, direction):
     staging = staging_instruction(shot)
     if staging:
         prompt += '\n\n[COVERAGE STAGING]\n' + staging
+    prompt = _directed_nonverbal_performance(prompt, timeline, exact_audio_only=exact_audio_only,
+                                           audio_contract=str(data.get('audioContract') or ''))
     prompt_sections(prompt)
     for line in prompt.splitlines():
         if re.match(r"^(?:Initial state|Continue from the previous stage|Cause|Physics|Emotion/Camera Analysis|Audio cues|Dialogue performance|End state):", line):
@@ -3036,6 +3118,13 @@ def prepare_animation(context, images, *, log=print):
         "the matching stagePlan.observableEndState. Never move an event to another stage.\n\n"
         "LOCKED VISUAL EVENT CONTRACT (spoken words already removed):\n" +
         _j(locked_visual_events) + "\n\n"
+        "CINEMATOGRAPHY HANDOFF CONTRACT:\n"
+        "When currentCinematographyDirection contains cameraConsciousness, copy those "
+        "decisions into cinematographyHandoff without weakening or replacing them. Make "
+        "shotPlan, stagePlan and the compiled provider direction enact the same dramatic "
+        "owner, emotional action, camera state, movement trigger/finish, focus plan and "
+        "exit condition. A controlled hold is a valid camera decision; never add movement "
+        "for decoration.\n\n"
         "CREATIVE TRANSLATION CONTRACT:\n"
         "Before compiling provider prose, return creativeTranslation.interpretation with "
         "the joke or ache, its mechanism, status before/after, exactly three audience "
@@ -3057,7 +3146,7 @@ def prepare_animation(context, images, *, log=print):
         "grammar. Dense physical comedy, exact reveal geography, route-sensitive causality or "
         "competing camera jobs require a protected split with a held handoff frame, even when "
         "the combined duration fits inside 30 seconds.\n\n"
-        "Return taskMode='reference-to-video', the exact durationSec, pacingMode, generationGoal, deliveryPlan, creativeTranslation, audienceBefore, "
+        "Return taskMode='reference-to-video', the exact durationSec, pacingMode, generationGoal, deliveryPlan, creativeTranslation, cinematographyHandoff, audienceBefore, "
         "audienceAfter, beatOwner, performanceFreedom, landingBreath, directionDensity, a "
         "numbered one-to-four-shot directing plan, typed timingBeats, canonical witnessStagingSides "
         "for two-character gags, and a consecutive stagePlan in which every "
@@ -3114,6 +3203,17 @@ def prepare_animation(context, images, *, log=print):
         "It should feel like confident direction to an "
         "exceptional actor and camera crew, not an animation checklist.",
         AnimationDirection, label="department_animation", log=log, images=images)
+
+    # Cinematography is an approved upstream decision. Preserve it as typed data so
+    # the deterministic Seedance compiler carries the same camera owner, movement and
+    # exit condition even when the Animation specialist phrases its own plan differently.
+    approved_cinematography = context.get("currentCinematographyDirection") or {}
+    if isinstance(approved_cinematography, dict):
+        approved_cinematography = approved_cinematography.get("output") or approved_cinematography
+    if isinstance(approved_cinematography, dict):
+        authored_camera = approved_cinematography.get("cameraConsciousness") or {}
+        if any(str(value or "").strip() for value in authored_camera.values()):
+            result.cinematographyHandoff = CameraConsciousness.model_validate(authored_camera)
 
     result = enforce_aerial_camera_contract(result)
     result = carry_approved_gag_clock_text(shot, result)

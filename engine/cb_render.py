@@ -2198,6 +2198,25 @@ def keyframe_build_status(scene, shot_id, episode="Ep1"):
             "noAutomaticRetries": True,
         }
     if ledger.get("keyframeCandidate") or ledger.get("keyframeCandidates"):
+        pending = ledger.get("keyframeCandidate") or (ledger.get("keyframeCandidates") or [{}])[0]
+        try:
+            current_signature = _keyframe_input_signature(pkg, shot, scene, episode)
+            current = pending.get("inputSignature") == current_signature
+        except (Refused, OSError, ValueError):
+            current = False
+        if not current:
+            return {
+                "state": "buildable", "buildable": True,
+                "reason": (
+                    "The visible SEE candidate was made against an older prompt or "
+                    "reference contract. It cannot be approved; Build will preserve it as "
+                    "superseded evidence and create a new A/B pair from the current contract."),
+                "mediaCallsRequired": 2, "maxMediaCalls": 2,
+                "estimatedMaxUsd": None, "poseCallsRequired": 0,
+                "humanDecision": "Build current SEE candidates, then compare A and B.",
+                "noAutomaticRetries": True,
+                "staleCandidate": True,
+            }
         return {
             "state": "ready-for-review", "buildable": False,
             "reason": "The Seedream and Nano Banana SEE candidates are waiting for selection.",
@@ -2286,7 +2305,7 @@ def build_keyframe(scene, shot_id, episode="Ep1", log=print):
             # An old layout can be too malformed to sign against the current cast.
             # That is stale state, not a reason to keep the shot locked.
             candidate_current = False
-        candidate_integrity = pending.get("contentHash") == file_sha256(pending.get("path"))
+        candidate_integrity = pending.get("contentHash") == _sha256_file(pending.get("path"))
         if not candidate_current or not candidate_integrity:
             ledger.setdefault("keyframeSuperseded", []).extend(
                 ledger.get("keyframeCandidates") or [pending])
@@ -2683,7 +2702,7 @@ def _animation_reference_contract(attachment_plan, shot, audio_path=None):
         role = str(item.get("role") or "").strip()
         if not tag or not role:
             continue
-        if role == "previous shot state reference":
+        if role in ("previous shot state reference", "previous shot final frame"):
             typed_role = "location"
             controls = "preceding accepted world, prop and action state only; recompose the new view without copying camera framing"
             scope = "continuity"
@@ -2901,7 +2920,15 @@ def _slot_path_for_role(role, anchor_path, scene, episode, characters_cfg, shot=
             raise Refused("REFUSED — preceding landing frame is outside the approved Studio library")
         return str(candidate)
     if role == "previous shot final frame" and not anchor_path and shot:
-        source_id = str(shot.get("sourceShotId") or "").strip()
+        # A continuous relay carries its predecessor in sourceShotId.  A planned
+        # editorial cut deliberately owns a new opening composition, so it has no
+        # sourceShotId; its predecessor is instead recorded as the transition's
+        # state source.  Both must resolve the same approved harvested frame, but
+        # only as a continuity reference -- never as the cut's opening keyframe.
+        transition = shot.get("shotTransition") or {}
+        source_id = str(
+            shot.get("sourceShotId") or transition.get("stateSourceShotId") or ""
+        ).strip()
         if source_id:
             source_pkg, _ = load_pkg(scene, episode)
             source = _ledger(source_pkg, source_id)
@@ -3412,6 +3439,8 @@ def _shot_context(pkg, shot, led, scene, episode):
             "approvedSceneLook": scenelook_status(scene, episode).get("approved"),
             "currentVoiceDirection": (led.get("departmentWork", {}).get("voice", {})
                                       .get("approved")),
+            "currentCinematographyDirection": (led.get("departmentWork", {}).get(
+                "cinematography", {}).get("approved")),
             "humanWorkingVoice": led.get("workingVoice"),
             "humanWorkingAnimationPrompt": led.get("workingSeedancePrompt"),
             "watchDirectorFeedback": led.get("watchDirectorFeedback"),
@@ -4745,6 +4774,48 @@ def _keyframe_direction_contract(direction, shot):
     }
 
 
+def _camera_consciousness(direction, shot):
+    """Return one positive camera contract for SEE and WATCH handoff.
+
+    Current DP outputs author the full record. Historical approved direction is
+    projected from its existing camera and story fields rather than invalidated or
+    silently replaced. This carries creative intent; it is not a new approval gate.
+    """
+    authored = dict(direction.get("cameraConsciousness") or {})
+    cast = [str(name).strip() for name in shot.get("charactersInFrame") or []
+            if str(name).strip()]
+    owner = (str(authored.get("dramaticOwner") or "").strip() or
+             str(shot.get("beatOwner") or shot.get("audienceFocus") or
+                 (cast[0] if cast else "the featured character")).strip())
+    action = (str(authored.get("emotionalAction") or "").strip() or
+              str(shot.get("dramaticBeat") or direction.get("audienceRead") or
+                  "Make the intended audience turn readable through behaviour and relationship.").strip())
+    camera = str(direction.get("lensAndCameraRelationship") or "").strip()
+    state = str(authored.get("cameraState") or "").strip()
+    if not state:
+        state = ("flowing" if re.search(r"\b(orbit|flow|sweep|release)\b", camera, re.I)
+                 else "observational" if re.search(r"\b(follow\w*|react\w*|search\w*|recover\w*|late)\b", camera, re.I)
+                 else "controlled")
+    return {
+        "dramaticOwner": owner,
+        "emotionalAction": action,
+        "cameraState": state,
+        "viewpoint": str(authored.get("viewpoint") or camera).strip(),
+        "lensFamily": str(authored.get("lensFamily") or camera).strip(),
+        "movementTrigger": str(authored.get("movementTrigger") or
+                               ("Hold by design until the story state changes." if state == "controlled"
+                                else "Move only when the authored action changes the audience's attention.")).strip(),
+        "movementFinish": str(authored.get("movementFinish") or
+                               ("Hold the resolved composition; do not continue after the beat lands."
+                                if state == "controlled" else "Settle on the resolved composition once the beat lands.")).strip(),
+        "focusPlan": str(authored.get("focusPlan") or
+                         f"Keep focus with {owner}; transfer only when the authored reveal changes the audience's allegiance.").strip(),
+        "exitCondition": str(authored.get("exitCondition") or shot.get("continuityFinish") or
+                             shot.get("landingImage") or
+                             "Land on a clean, readable composition that can cut to the next planned view.").strip(),
+    }
+
+
 def _keyframe_frame_section(direction, characters_cfg):
     """Render the approved typed opening layout without shortening authored pose/facing."""
     layout = direction["openingFrameLayout"]
@@ -4811,7 +4882,7 @@ def _keyframe_same_depth_scale_protection(direction, characters_cfg):
             "the camera; preserve their canonical relative heights.")
 
 
-SEEDREAM_KEYFRAME_PROMPT_STANDARD = "crystal-bears-seedream-keyframes@1.0.0"
+SEEDREAM_KEYFRAME_PROMPT_STANDARD = "crystal-bears-seedream-keyframes@1.1.0"
 SEEDREAM_KEYFRAME_PROMPT_SECTIONS = (
     "DELIVERABLE",
     "UPSTREAM DELIVERY",
@@ -4820,6 +4891,7 @@ SEEDREAM_KEYFRAME_PROMPT_SECTIONS = (
     "IDENTITY, COUNT AND STATE",
     "COMPOSITION AND DECISIVE INSTANT",
     "CAMERA",
+    "CAMERA CONSCIOUSNESS",
     "MOTION READINESS",
     "ART DIRECTION",
     "PHYSICAL INTEGRATION",
@@ -4862,7 +4934,7 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             grouped[-1][1].append(attachment)
     for _source_slot, attachments in grouped:
         role = attachments[0]["role"]
-        if role == "previous shot state reference":
+        if role in ("previous shot state reference", "previous shot final frame"):
             slot = attachments[0]["slot"]
             instruction = (f"- {slot}: preceding accepted landing frame; continuity evidence for world positions, "
                            "props, action phase, lighting and emotion only. Compose the new authored camera view; "
@@ -4976,6 +5048,7 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
         "\n".join(compact_reference_lines) + compact_separation_line).strip()
 
     intended_read = re.sub(r"\s+", " ", str(direction["audienceRead"])).strip()
+    camera_contract = _camera_consciousness(direction, shot)
     frame = _keyframe_frame_section(direction, characters_cfg)
     geography = "\n".join(contract["geography"])
     negative_space = "\n".join(contract["negativeSpace"])
@@ -5013,6 +5086,16 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             ("CAMERA", emission.ensure_complete_sentence(
                 direction["lensAndCameraRelationship"],
                 context="keyframe camera direction")),
+            ("CAMERA CONSCIOUSNESS",
+             f"Dramatic owner: {camera_contract['dramaticOwner']}\n"
+             f"Emotional action: {camera_contract['emotionalAction']}\n"
+             f"Camera state: {camera_contract['cameraState']}\n"
+             f"Viewpoint: {camera_contract['viewpoint']}\n"
+             f"Lens family: {camera_contract['lensFamily']}\n"
+             f"Movement trigger: {camera_contract['movementTrigger']}\n"
+             f"Movement finish: {camera_contract['movementFinish']}\n"
+             f"Focus: {camera_contract['focusPlan']}\n"
+             f"Exit condition: {camera_contract['exitCondition']}"),
             ("MOTION READINESS",
              "This is frame one only. Animation owns all later performance, movement, recovery "
              "and camera evolution. Preserve readable anticipation, grounded weight, clean "
@@ -5932,6 +6015,10 @@ def _keyframe_input_signature(pkg, shot, scene, episode="Ep1"):
             "sceneLookHash": scenelook_hash,
             "referenceHashes": {os.path.basename(p): _file_md5(p) for p in refs},
             "briefHash": hashlib.sha256(prompt.encode()).hexdigest(),
+            # The prompt compiler is a material production input. A candidate made
+            # before a reference-role or camera-handoff correction must be rebuilt,
+            # never quietly approved against a different request contract.
+            "promptCompilerStandard": SEEDREAM_KEYFRAME_PROMPT_STANDARD,
             "model": (f"{cb_gen.IMAGE_PROVIDER}:{cb_gen.SEEDREAM_MODEL_ID}:"
                       f"{cb_gen.SEEDREAM_ENDPOINT}:2K")}
 
@@ -5967,6 +6054,12 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
             raise Refused(
                 f"REFUSED — keyframe prompt [{section_name}] does not contain the approved "
                 "Cinematography direction verbatim")
+    camera_contract = _camera_consciousness(specialist, shot)
+    for label, value in camera_contract.items():
+        if str(value).strip() not in sections["CAMERA CONSCIOUSNESS"]:
+            raise Refused(
+                "REFUSED — keyframe prompt [CAMERA CONSCIOUSNESS] does not carry the "
+                f"approved camera {label} verbatim")
     plan = _expanded_reference_blueprint(
         shot, "keyframeReferenceSlots", _characters_cfg())
     scene_slot = next((item["slot"] for item in plan
@@ -6272,6 +6365,7 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
             "provider": provider,
             "model": model_id,
             "path": str(out),
+            "contentHash": _sha256_file(out),
             "generatedAt": _now(),
             "source": "generated",
             "inputSignature": signature,

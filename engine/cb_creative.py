@@ -678,9 +678,7 @@ class StoryTruthFormula(BaseModel):
 class TransformationMovement(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    movement: Literal[
-        "opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
-        "low-point", "climax-choice", "new-normal"]
+    movement: str = Field(min_length=1, description="An event or movement actually present in the approved screenplay, in screenplay order.")
     believes: str = Field(min_length=1)
     feels: str = Field(min_length=1)
     does: str = Field(min_length=1)
@@ -721,18 +719,10 @@ class EpisodeStoryArchitecture(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     storyTruth: StoryTruthFormula
-    transformationMap: List[TransformationMovement] = Field(min_length=7, max_length=7)
+    transformationMap: List[TransformationMovement] = Field(default_factory=list)
     tapestryMap: EpisodeTapestryMap
     sequenceBlueprint: List[SequenceBlueprintItem] = Field(min_length=1, max_length=12)
 
-    @model_validator(mode="after")
-    def transformation_movements_are_complete_and_ordered(self):
-        expected = ["opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
-                    "low-point", "climax-choice", "new-normal"]
-        actual = [item.movement for item in self.transformationMap]
-        if actual != expected:
-            raise ValueError(f"transformationMap must follow {expected}")
-        return self
 
 
 class EpisodeVision(BaseModel):
@@ -1226,16 +1216,16 @@ def episode_vision(episode="Ep1", log=print):
               "episode is really about beneath the plot, what changes, which relationship "
               "carries its heart, where the audience laughs, leans forward, becomes still, "
               "and what remains after it ends. Include storyArchitecture: one action-based "
-              "story truth; exactly seven ordered transformation movements; a restrained "
+              "story truth; only the movements present in the approved screenplay, in screenplay order; a restrained "
               "episode tapestry across physical and visual motif, colour/light, source sound, "
               "music and environment; and a sequence blueprint covering the supplied scenes "
-              "in story order. The climax must require transformed action, not only spectacle."),
-        f"THE COMPLETE APPROVED SCRIPT (dialogue verbatim-locked):\n{script[:24000]}",
+              "in story order. Preserve the screenplay’s actual structure, including quiet observation, unresolved feeling or no transformation; do not invent a climax."),
+        f"THE COMPLETE APPROVED SCRIPT (dialogue verbatim-locked):\n{script}",
         EpisodeVision, tier="premium", label="creative_vision")
     if v.storyArchitecture is None:
         raise RuntimeError(
             "EPISODE STORY ARCHITECTURE MISSING — newly authored Story & Direction must "
-            "define the action truth, seven transformation movements, episode tapestry "
+            "define the action truth, screenplay-supported movements without a fixed count, episode tapestry "
             "and sequence blueprint before scene direction begins")
     beat_signature = cb_lineage.beat_package_signature(d)
     script_version = (d.get("sourceScript") or {}).get("scriptVersionId")

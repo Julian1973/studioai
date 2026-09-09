@@ -48,6 +48,8 @@ def unit_board(shot):
             'framing': view.get('framing', view.get('framingAndCamera', '')),
             'purpose': view.get('audienceNeed', view.get('purpose', '')),
             'cameraPurpose': view.get('cameraPurpose', ''),
+            'sourceBeat': view.get('sourceBeat'), 'viewpointOwner': view.get('viewpointOwner'),
+            'listenerReaction': view.get('listenerReaction'), 'cinematography': view.get('cinematography', {}),
             'staging': view.get('staging') or '',
             'action': view.get('action') or view.get('storyAction', ''),
             'performance': view.get('performance') or view.get('performanceFocus', ''),
@@ -73,7 +75,10 @@ def scene_boards(shots, coverage=()):
         scene = shot.get('scene', 1)
         row = scenes.setdefault(scene, {'scene': scene, 'audienceJourney': journeys.get(scene, ''), 'units': []})
         row['units'].append(unit_board(shot))
+    from studio_scene_handoff import episode_sound_plan
+    sound = episode_sound_plan(shots)['scenes']
     for row in scenes.values():
+        row['soundPlan'] = sound.get(str(row['scene']), [])
         row['revision'] = fingerprint(row)
     return list(scenes.values())
 
@@ -85,7 +90,7 @@ def staging_instruction(shot, *, opening_only=False):
         views = views[:1]
     lines = []
     for panel in views:
-        fields = ('staging', 'startState') if opening_only else ('staging', 'startState', 'endState', 'cutTo')
+        fields = ('staging', 'startState', 'viewpointOwner', 'cinematography') if opening_only else ('staging', 'startState', 'endState', 'cutTo', 'viewpointOwner', 'cinematography', 'performance', 'listenerReaction')
         details = [f'{key}: {panel[key]}' for key in fields if panel.get(key)]
         if details:
             lines.append(f"View {panel.get('viewId') or panel.get('shotNumber')}: " + '; '.join(details))

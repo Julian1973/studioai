@@ -3,6 +3,7 @@ import hashlib
 import json
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Literal
+from studio_creative_authority import Instruction
 
 # Persisted content-address format: additive optional fields must not invalidate
 # every historical approval by changing this envelope version.
@@ -17,6 +18,25 @@ When the output schema exposes sceneCoverage and directorCard, populate them for
 
 from studio_coverage import CONTRACT as COVERAGE_BOARD_CONTRACT
 CONTRACT += '\n' + COVERAGE_BOARD_CONTRACT
+CONTRACT += '''\nProduction begins with an approved screenplay; writing is outside this run.
+Read the entire screenplay first. Describe only its actual movements; quiet observation,
+play, unresolved feeling and no transformation are valid. Never invent a low point or lesson.
+For each coverage view author sourceBeat, viewpointOwner, listenerReaction when relevant,
+and cinematography: owner, emotional action, camera state, state-change trigger, viewpoint,
+lens relationship, composition, movement/hold, focus, light, cut-in reason and exit frame.
+Voice has two stages: direct exact words before HEAR approval; after approval interpret the
+measured performance for picture, never replace words, delivery or timing.
+Author scoped instructions with stable id, source, kind, scope, decisionKey and value when
+an explicit precedence decision is needed. Classify hard_truth, creative_direction,
+contextual_guardrail, default_behaviour, historic_residue and provider_syntax. Defaults
+never suppress current creative direction. Do not copy stale instructions from prior shots.
+Every authorised character sound cue identifies character, dramaticPurpose,
+providerDependency, timing, instruction and watch/post destination. Offscreen characters
+have no visible pose or mouth restriction. Listeners may act; only the named speaker
+articulates their dialogue. Preserve approved audio and permit only directed generated SFX.
+Resolve comedy, emotion and editorial recommendations in the same shared decisions.
+No separate department story, extra user gates, decorative camera moves or forced jokes.
+'''
 
 class Decision(BaseModel):
     model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
@@ -39,6 +59,10 @@ class ActingBeat(Decision):
     listening: str
 
 class CoverageView(Decision):
+    sourceBeat: str | None = None
+    viewpointOwner: str | None = None
+    listenerReaction: str | None = None
+    cinematography: dict = Field(default_factory=dict, description="Per-view dramatic owner, emotional action, camera state, trigger, viewpoint, lens, composition, movement, focus, light and exit; no quotas.")
     viewId: str = Field(description='Unique scene-wide ID for one continuous camera setup or move. A distinct cut or reverse needs a different ID, even within the same story beat or provider clip.')
     audienceNeed: str
     framing: str
@@ -65,6 +89,9 @@ class StateChange(Decision):
 
 
 class SoundCue(Decision):
+    character: str | None = None
+    dramaticPurpose: str | None = None
+    providerDependency: str | None = None
     kind: Literal['character-sfx', 'effects', 'ambience', 'music']
     instruction: str
     timing: str
@@ -82,6 +109,7 @@ class SceneCoverage(Decision):
     views: list[CoverageView] = Field(description='Complete ordered camera coverage through the final landing, not a list of macro story phases. A story beat may need several views; clip allocation follows this plan.')
 
 class ShotDirection(Decision):
+    instructions: list[Instruction] = Field(default_factory=list)
     audienceFocus: str
     cameraPurpose: str
     editIn: str
@@ -115,9 +143,10 @@ def stage_decisions(shot, stage):
         return {**{k:d.get(k) for k in ('audienceFocus','cameraPurpose','handoff','storyTime')},
                 'openingState': shot.get('openingState', shot.get('openingImageApproved', '')),
                 'openingView': ({k:v for k,v in d['views'][0].items() if k in
-                                ('viewId', 'framing', 'cameraPurpose', 'staging', 'startState', 'entry')}
+                                ('viewId', 'framing', 'cameraPurpose', 'staging', 'startState', 'entry', 'viewpointOwner', 'cinematography')}
                                 if d.get('views') else None),
                 'openingActing': [{k:a.get(k) for k in ('character','attention','startingPose')} for a in d.get('acting',[])],
+                'instructions': [i for i in d.get('instructions', []) if i.get('scope', {}).get('stage', 'see') == 'see'],
                 'instruction':'Depict only the opening state. Later performance and views are not a montage.'}
     if stage == 'hear':
         # These decisions inform the voice specialist; only validated performedText

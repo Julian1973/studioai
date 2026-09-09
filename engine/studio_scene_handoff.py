@@ -52,3 +52,19 @@ POST_JOIN_REVIEW = (
     'Use overlap handles only when actual matching action and usable sound exist; a handle does not prove continuity. '
     'Record source outcome IDs/hashes, inspected ranges, actual findings and unresolved work. Uninspected joins remain unverified, never automatically approved.'
 )
+
+
+def episode_sound_plan(shots):
+    """Project existing cue ownership into scene sheets; do not author new score."""
+    scenes = {}
+    for shot in shots:
+        scene = shot.get('scene', shot.get('sceneNumber'))
+        scenes.setdefault(str(scene), []).append({
+            'shotId': shot.get('id', shot.get('shotId')),
+            'handoff': shot.get('soundHandoff'),
+            'dialogue': shot.get('dialogue', shot.get('dialogueLines', [])),
+            'cues': (shot.get('directorCard') or {}).get('soundCues', []),
+            'approval': ((shot.get('outcomes') or {}).get('hear') or {}).get('status', 'not-projected'),
+            'audioInspection': 'unverified'})
+    return {'source': 'current shot records', 'scenes': scenes,
+            'authority': 'read-only projection; approved audio remains in its source record'}

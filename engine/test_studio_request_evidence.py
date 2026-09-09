@@ -205,3 +205,15 @@ def test_receipt_storage_failure_never_discards_paid_response(tmp_path, monkeypa
             with pytest.raises(RequestEvidenceError, match='no provider was called'):
                 observe(lambda: calls.append(True), 'https://provider.test/tasks', {'prompt': 'Act.'})
             assert not calls
+
+
+def test_required_direction_omitted_before_sealing_is_blocked(tmp_path):
+    instruction = dict(id='reaction', text='She notices the empty cup.', source='director/r2',
+                       kind='creative_direction', scope={'stage':'watch'}, required=True)
+    calls=[]
+    with capture(tmp_path, {'stage':'watch'}, expected_prompt='Incomplete but sealed.',
+                 direction={'instructions':[instruction]}):
+        with pytest.raises(RequestEvidenceError, match='required instruction reaction'):
+            observe(lambda: calls.append(True), 'https://provider.test', {'prompt':'Incomplete but sealed.'})
+    assert calls == []
+    assert records(tmp_path)[0]['deliveryPackage']['cost']['actual'] is None

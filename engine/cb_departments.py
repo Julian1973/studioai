@@ -878,9 +878,7 @@ class StoryTruthDirection(BaseModel):
 
 
 class TransformationMovementDirection(BaseModel):
-    movement: Literal[
-        "opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
-        "low-point", "climax-choice", "new-normal"]
+    movement: str = Field(min_length=1, description="An event or movement actually present in the approved screenplay, in screenplay order.")
     believes: str
     feels: str
     does: str
@@ -915,17 +913,10 @@ class SequenceBlueprintDirection(BaseModel):
 
 class EpisodeStoryArchitectureDirection(BaseModel):
     storyTruth: StoryTruthDirection
-    transformationMap: List[TransformationMovementDirection] = Field(min_length=7, max_length=7)
+    transformationMap: List[TransformationMovementDirection] = Field(default_factory=list)
     tapestryMap: EpisodeTapestryDirection
     sequenceBlueprint: List[SequenceBlueprintDirection] = Field(min_length=1, max_length=12)
 
-    @model_validator(mode="after")
-    def transformation_movements_are_complete_and_ordered(self):
-        expected = ["opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
-                    "low-point", "climax-choice", "new-normal"]
-        if [item.movement for item in self.transformationMap] != expected:
-            raise ValueError("transformationMap movements are incomplete or out of order")
-        return self
 
 
 class EpisodeVisionDirection(BaseModel):
@@ -983,7 +974,7 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
                 "emotional need), kidRead and adultRead (the two co-viewing layers this "
                 "show is built on), and emotionalIntent. Also suggest the episode's title, "
                 "logline and lead bear. episodeVision.storyArchitecture must contain one "
-                "action-based story truth; exactly seven ordered transformation movements; "
+                "action-based story truth; only the movements present in the approved screenplay, in screenplay order; "
                 "a restrained physical, visual, colour/light, source-sound, music and "
                 "environment tapestry; and a sequence blueprint covering the supplied scenes "
                 "in story order. For every beat, list the exact canon character names physically "
@@ -1742,7 +1733,7 @@ def _directed_nonverbal_performance(prompt, timeline, *, exact_audio_only=False,
     explicit_sfx = bool(re.search(r'authori[sz]ed[^.]*\bSFX\b|\bSFX\b[^.]*authori[sz]ed', audio_contract, re.I))
     cues = [item for item in timeline if (item.get('channel') == 'sfx' or
                                         explicit_sfx and item.get('channel') == 'action') and
-            re.search(r'\b(?:laugh\w*|giggl\w*|chuckl\w*)\b', str(item.get('event', '')), re.I)]
+            re.search(r'\b(?:laugh\w*|giggl\w*|chuckl\w*|gasp\w*|sigh\w*|sob\w*|cry\w*|breath\w*|effort)\b', str(item.get('event', '')), re.I)]
     if exact_audio_only or not cues:
         return prompt
     prompt = re.sub(r'Only the character currently speaking in @Audio1 may move their mouth\.',
@@ -1753,9 +1744,9 @@ def _directed_nonverbal_performance(prompt, timeline, *, exact_audio_only=False,
     prompt = prompt.replace('no mouth movement from silent listeners',
                             'no dialogue articulation from nonspeakers')
     return prompt + ('\n\n[DIRECTED NONVERBAL PERFORMANCE]\n'
-                     'During the named laughter SFX cues, animate the assigned character’s natural '
-                     'laughing mouth and body, including overlap with another character’s dialogue. '
-                     'This permits no extra words or laughter outside the directed cue. '
+                     'During the named nonverbal SFX cues, animate the assigned character’s natural '
+                     'sound-specific mouth and body performance, including overlap with another character’s dialogue. '
+                     'This permits no extra words or vocal events outside the directed cue. '
                      'Preserve @Audio1 and its speaker timing unchanged.')
 
 
@@ -2820,6 +2811,8 @@ def compile_animation_provider_prompt(shot, direction):
                   *(f"Maintain {item}." for item in consistency[:1]),
                   *(f"Safeguard: {item}." for item in safeguards[:2])]
     traversal = cb_engine_rules.travel_traversal_boilerplate(shot, data)
+    if camera_handoff_lines:
+        traversal = ""  # Authored camera choices supersede generic travelling-camera defaults.
     if traversal:
         supplement.append(traversal)
     repeated_contacts = cb_engine_rules.repeated_contact_boilerplate(shot, data)
@@ -3049,6 +3042,8 @@ def compile_animation_provider_prompt(shot, direction):
         prompt += '\n\n[COVERAGE STAGING]\n' + staging
     prompt = _directed_nonverbal_performance(prompt, timeline, exact_audio_only=exact_audio_only,
                                            audio_contract=str(data.get('audioContract') or ''))
+    from studio_creative_authority import compile_instructions, listener_scope
+    prompt = compile_instructions(listener_scope(prompt), shot, "watch")
     prompt_sections(prompt)
     for line in prompt.splitlines():
         if re.match(r"^(?:Initial state|Continue from the previous stage|Cause|Physics|Emotion/Camera Analysis|Audio cues|Dialogue performance|End state):", line):
@@ -3167,11 +3162,11 @@ def prepare_animation(context, images, *, log=print):
         "when the approved action begins immediately with or after the line, such as a launch, impact "
         "or interruption; name that immediate action in the same stage instead. In a dialogue-rich "
         "shot, at least one non-immediate recognition or reaction line must retain readable air. "
-        "R8 is mandatory: when timingBeats contains travel, dodge, impact, load_release, tumble "
-        "or aerial action, return two to four motivated internal shots, one clean motion or "
+        "When timingBeats contains travel, dodge, impact, load_release, tumble "
+        "or aerial action, preserve the approved coverage: choose views for one clean motion or "
         "story idea per shot. Place any cut deliberately at a change of story job or maximum "
         "stored energy; a continuous camera intention may connect those phases but may not "
-        "collapse them into one undifferentiated internal shot. "
+        "lose their readable cause and consequence. An intentional continuous view is valid. "
         "Classify ordinary locomotion by a character whose normal movement is flight as travel, "
         "not aerial. Use timing beat type aerial only for an explicitly approved compound, "
         "multi-rotation or multi-stage airborne manoeuvre that needs its own tracked arc. "

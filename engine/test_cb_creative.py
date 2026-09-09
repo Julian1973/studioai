@@ -221,12 +221,13 @@ def _performance_contract(beat_id="1.B1"):
             substitutionTest="Zenny would acknowledge the evidence instead of performing past it")])
 
 
-def test_episode_story_architecture_requires_the_seven_movements_in_order():
+def test_episode_story_architecture_accepts_quiet_screenplay_without_forced_arc():
     architecture = _episode_architecture().model_dump()
-    architecture["transformationMap"][0], architecture["transformationMap"][1] = (
-        architecture["transformationMap"][1], architecture["transformationMap"][0])
-    with pytest.raises(ValueError, match="transformationMap must follow"):
-        C.EpisodeStoryArchitecture.model_validate(architecture)
+    architecture["transformationMap"] = [dict(architecture["transformationMap"][0], movement="quiet observation")]
+    result = C.EpisodeStoryArchitecture.model_validate(architecture)
+    assert [m.movement for m in result.transformationMap] == ["quiet observation"]
+    architecture["transformationMap"] = []
+    assert C.EpisodeStoryArchitecture.model_validate(architecture).transformationMap == []
 
 
 def _boundary(closing=False):

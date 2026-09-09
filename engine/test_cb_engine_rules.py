@@ -376,7 +376,7 @@ def test_action_grammar_blocks_flat_single_shot_travel_and_repeated_contacts():
     report = rules.action_unit_report(
         {"charactersInFrame": ["Actor"], "dialogueLines": []}, direction)
     assert report["ready"] is False
-    assert any("R8" in error for error in report["errors"])
+    assert not any("R8" in error for error in report["errors"])
     assert any("R10" in error for error in report["errors"])
 
 

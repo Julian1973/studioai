@@ -128,3 +128,18 @@ the transport contract and human media review pass. Keep the previous qualified 
 An offline schema test qualifies software integration, not artistic performance or account access.
 
 Provider evidence and the next review procedure are in `provider-evidence.md` beside this file.
+
+## Creative production scope · integration 1.1.0
+
+Production begins from the approved screenplay. Interpret only the movements actually
+present; a quiet scene or an unchanged relationship needs no invented transformation.
+Use the shared Director Card and coverage records. For a specific precedence decision,
+provide a scoped instruction with source, stable ID, class and decision key. Historic
+residue never belongs in a provider request; current direction supersedes generic defaults.
+
+Plan camera and listener performance per editorial view. Author sound cues with performer,
+purpose, timing and WATCH/post destination. A camera-only correction preserves approved
+voice. An approved spoken recording is interpreted for picture, never silently re-performed.
+Keep actual billing unknown until evidenced. Review scope, human approval and eligibility
+for the assembled episode are separate. The submitted delivery snapshot is evidence of
+source revisions and payload, not a new editable plan or a quality verdict.

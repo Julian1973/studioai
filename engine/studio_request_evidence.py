@@ -116,6 +116,19 @@ def observe(send, endpoint, body):
               'requestFieldMismatches': mismatches, 'mediaCounts': counts,
               'directionTrace': inclusion_map(scope['direction'], prompt),
               'state': 'prepared-at-http-boundary', 'providerCalled': False}
+    from studio_delivery_contract import delivery_snapshot
+    from studio_creative_authority import resolve
+    source = scope['direction'] or {}
+    instructions = source.get('instructions', [])
+    if not instructions:
+        instructions = (source.get('directorDecisions') or {}).get('instructions', [])
+    resolution = resolve(instructions, scope['metadata']) if instructions else None
+    if resolution:
+        missing = [r['id'] for r in resolution['instructions']
+                   if r['resolution'] == 'emitted' and r['required'] and r['text'] not in prompt]
+        mismatches.extend('required instruction ' + key for key in missing)
+        mismatches.extend(c['reason'] for c in resolution['conflicts'])
+    record['deliveryPackage'] = delivery_snapshot(scope['metadata'], source, prompt, body, resolution)
     path = scope['folder'] / (record['id'] + '.json')
 
     def save():

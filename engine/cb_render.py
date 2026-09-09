@@ -5153,11 +5153,13 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
         # Keep the existing provider section contract and frame-one scope.
         marker = '[COMPOSITION AND DECISIVE INSTANT]\n'
         prompt = prompt.replace(marker, marker + staging + '\n', 1)
+    from studio_creative_authority import compile_instructions
+    prompt = compile_instructions(prompt, shot, "see")
     try:
         parsed = cb_departments.prompt_sections(prompt)
     except ValueError as exc:
         raise Refused(f"REFUSED — invalid keyframe prompt for {shot.get('shotId')}: {exc}")
-    if tuple(parsed) != SEEDREAM_KEYFRAME_PROMPT_SECTIONS:
+    if tuple(k for k in parsed if k != "SCOPED CREATIVE DIRECTION") != SEEDREAM_KEYFRAME_PROMPT_SECTIONS:
         raise Refused(
             f"REFUSED — keyframe prompt for {shot.get('shotId')} does not follow "
             f"{SEEDREAM_KEYFRAME_PROMPT_STANDARD}")
@@ -6032,7 +6034,7 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
         sections = cb_departments.prompt_sections(prompt)
     except ValueError as exc:
         raise Refused(f"REFUSED — invalid keyframe prompt contract: {exc}")
-    if tuple(sections) != SEEDREAM_KEYFRAME_PROMPT_SECTIONS:
+    if tuple(k for k in sections if k != "SCOPED CREATIVE DIRECTION") != SEEDREAM_KEYFRAME_PROMPT_SECTIONS:
         raise Refused(
             "REFUSED — keyframe prompt does not use the complete ordered Seedream 5 Pro "
             f"production brief required by {SEEDREAM_KEYFRAME_PROMPT_STANDARD}")

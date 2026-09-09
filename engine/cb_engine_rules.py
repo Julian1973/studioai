@@ -216,14 +216,15 @@ def action_unit_report(shot, direction, prompt=""):
 
     action_unit = any(counts.get(kind) for kind in
                       ("travel", "dodge", "impact", "load_release", "tumble", "aerial"))
-    if action_unit and not 2 <= len(internal) <= 4:
-        errors.append("R8 action unit requires 2-4 motivated internal shots")
+    if action_unit and not internal:
+        errors.append("R8 action unit requires authored camera coverage")
     if len(internal) > 1:
         ideas = [_norm(item.get("purpose") or item.get("causalAction")) for item in internal]
         if len(set(value.casefold() for value in ideas)) != len(ideas):
             errors.append("R8 internal shots repeat a motion idea instead of giving each cut one job")
 
-    if counts.get("travel"):
+    directed_camera = bool(data.get("cinematographyHandoff") or (shot.get("directorCard") or {}).get("views"))
+    if counts.get("travel") and not directed_camera:
         traversal_checks = {
             "three parallax speeds": r"three (?:parallax )?speeds|foreground.+midground.+distant",
             "landmarks pass and vanish": r"landmarks?.+pass.+(?:vanish|disappear|fall behind)|pass(?:es|ing)?.+camera.+(?:vanish|behind)",
@@ -252,11 +253,11 @@ def action_unit_report(shot, direction, prompt=""):
             if not re.search(pattern, sailing_text, re.I):
                 errors.append(f"R16 sailing departure is missing {label}")
 
-    if raw_prompt and not re.search(
+    if raw_prompt and not directed_camera and not re.search(
             r"Living performance lock:.+motivated eyeline target.+active thought", raw_prompt,
             re.I | re.S):
         errors.append("R17 prompt is missing the living-performance eyeline and inner-life lock")
-    if raw_prompt and not re.search(
+    if raw_prompt and not directed_camera and not re.search(
             r"no vacant forward stare.+unfocused eyes.+frozen smile", raw_prompt, re.I | re.S):
         errors.append("R17 prompt does not forbid vacant landing performance")
 

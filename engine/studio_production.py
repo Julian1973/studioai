@@ -272,7 +272,7 @@ class Production:
                     contract['instruction'], contract['visualHandoff'],
                     '[Scene and Canon Context]', f"Project: {context['project']['name']}\nFrame aspect: {context['project'].get('aspectRatio', '16:9')}\nVisual style: {context['project'].get('style', '')}\n{context['bible']}",
                     '[Directed Beats and Acting]', json.dumps(direction, ensure_ascii=False),
-                    '[Director Decisions]', json.dumps(contract['directorDecisions'], ensure_ascii=False),
+                    '[Director Decisions]', json.dumps({k:v for k,v in contract['directorDecisions'].items() if k != 'instructions'}, ensure_ascii=False),
                     '[Additional Direction]', supplemental,
                     'Structured direction and approved reference roles are authoritative. Do not treat a conflicting reference image as resolved merely by this instruction.',
                     '[Direction Trace]', contract['fingerprint']]
@@ -280,7 +280,8 @@ class Production:
             sections += ['[Performance Context — depict only its opening pose, not later actions]', shot['performance']]
         if stage != 'see':
             sections += ['[Ending State]', ending, '[Sound Handoff]', contract['soundInstruction']]
-        return '\n'.join(str(v) for v in sections if v)
+        from studio_creative_authority import compile_instructions
+        return compile_instructions('\n'.join(str(v) for v in sections if v), shot, stage)
 
     def _stage(self, shot):
         for stage in STAGES:

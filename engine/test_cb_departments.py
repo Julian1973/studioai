@@ -16,7 +16,7 @@ def test_directed_laughter_can_act_under_dialogue_without_changing_transcript():
     result = _directed_nonverbal_performance(source, cues)
     assert 'may move their mouth' not in result
     assert 'closed-mouth except during their explicitly timed nonverbal SFX' in result
-    assert 'natural laughing mouth and body' in result
+    assert 'natural sound-specific mouth and body performance' in result
     assert '{OK, Fuzzby, calm down. It’s not that funny.}' in result
     assert _directed_nonverbal_performance(source, cues, exact_audio_only=True) == source
     assert _directed_nonverbal_performance(source, []) == source

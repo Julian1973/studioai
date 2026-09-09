@@ -753,6 +753,40 @@ class Production:
         else:
             self.run(job["id"])
 
+    def _provider_call(self, job, function, *args, expected_prompt=None, **kwargs):
+        from studio_request_evidence import capture, RequestEvidenceError
+        from studio_director_card import stage_decisions
+        def received(receipt):
+            records = job.setdefault('providerRequests', [])
+            records[:] = [r for r in records if r['id'] != receipt['id']] + [receipt]
+            with self.ws.db() as db:
+                self._job(db, job)
+        metadata = {'route': 'project-command', 'projectId': job['projectId'],
+                    'episode': job['episode'], 'shotId': job['shotId'], 'jobId': job['id'],
+                    'stage': job['kind'], 'directorCardRevision': job.get('directorCardRevision'),
+                    'referenceContract': job.get('referenceContract')}
+        request = job['inputs'].get('request') or {}
+        counts = ({'image': len(request['images']), 'audio': len(request['audio']), 'video': 0}
+                  if job['kind'] == 'watch' else {'image': len(job['references'])}
+                  if job['kind'] == 'see' else {})
+        expected_fields = ({'model_id': job['binding']['model'], 'inputs': job['inputs']['dialogue']}
+                           if job['kind'] == 'hear' else {'model': job['binding']['model']})
+        if job['kind'] == 'watch':
+            expected_fields.update(duration=request['duration'], ratio=request['ratio'])
+        direction = stage_decisions(job['shot'], job['kind'])
+        if job['kind'] in {'see', 'watch'}:
+            from studio_workflow import handoff
+            source = handoff(job['shot'], job['kind'], request.get('images', job['references']))
+            direction = {'direction': source['direction'], 'directorDecisions': source['directorDecisions']}
+        with capture(self.ws.root / 'cb-output/state/provider-requests', metadata,
+                     expected_prompt=expected_prompt,
+                     expected_fields=expected_fields, expected_media_counts=counts,
+                     direction=direction, received=received):
+            try:
+                return function(*args, **kwargs)
+            except RequestEvidenceError as exc:
+                raise StudioError(str(exc), 'production_direction_lost') from exc
+
     def run(self, job_id):
         try:
             with self.ws.db() as db:
@@ -881,15 +915,16 @@ class Production:
                         job["imageUrl"] = url
                         self.progress(job, 'download', 'Keyframe returned; downloading and checking the image')
                     self.progress(job, 'keyframe', 'Keyframe request sent; awaiting the provider')
-                    self.transport.image(connection, key, binding["model"], prompt,
-                                         [self.ws.project_path(pid, r["path"]) for r in job["references"]], output, received=received)
+                    self._provider_call(job, self.transport.image, connection, key, binding["model"], prompt,
+                                         [self.ws.project_path(pid, r["path"]) for r in job["references"]], output,
+                                         received=received, expected_prompt=prompt)
                 result = self.media_result(pid, output, prompt)
                 result["references"] = job["references"]
                 result["shotRemix"] = job.get("shotRemix")
             elif kind == "hear":
                 self.progress(job, 'voice', 'Voice request sent; awaiting the performance')
                 output = out_dir / f"{job_id}.mp3"
-                timing = self.transport.voice(connection, key, binding["model"], job["inputs"]["dialogue"], output)
+                timing = self._provider_call(job, self.transport.voice, connection, key, binding["model"], job["inputs"]["dialogue"], output)
                 result = self.media_result(pid, output, json.dumps(job["inputs"]["dialogue"], ensure_ascii=False))
                 result['voiceTiming'] = timing
             else:
@@ -897,9 +932,9 @@ class Production:
                 request = job["inputs"]["request"]
                 if not job.get("taskId"):
                     self.progress(job, 'submit', 'Submitting the approved render request')
-                    job["taskId"] = self.transport.video_submit(connection, key, binding["model"], request["prompt"],
+                    job["taskId"] = self._provider_call(job, self.transport.video_submit, connection, key, binding["model"], request["prompt"],
                         [self.ws.project_path(pid, r["path"]) for r in request["images"]],
-                        [self.ws.project_path(pid, r["path"]) for r in request["audio"]], request["duration"], ratio=request["ratio"])
+                        [self.ws.project_path(pid, r["path"]) for r in request["audio"]], request["duration"], ratio=request["ratio"], expected_prompt=request['prompt'])
                     with self.ws.db() as db:
                         job["status"] = "pending"
                         self._job(db, job)
@@ -912,6 +947,7 @@ class Production:
                         self._job(db, job)
                     return
                 result = self.media_result(pid, output, request["prompt"])
+                result['providerReturnedFile'] = dict(result['files'][0])
                 self.progress(job, 'validate', 'Render downloaded; checking media and preparing the review copy')
                 result["requestId"] = request["id"]
                 if request["audio"]:
@@ -1021,6 +1057,10 @@ class Production:
                     'directionPreparation': (job.get('shot') or {}).get('directionPreparation'),
                     'requestHash': digest(result.get('prompt', '')), 'referenceContract': job.get('referenceContract'),
                     'voiceDirection': job.get('voiceDirectionContext')}
+                result['executionReceipt']['providerRequests'] = job.get('providerRequests', [])
+                result['executionReceipt']['providerTaskId'] = job.get('taskId')
+                result['executionReceipt']['requestEvidenceScope'] = (
+                    'http-json-body' if job.get('providerRequests') else 'provider-boundary-unverified')
                 result.update(binding=job["binding"], sourceHash=job["sourceHash"], standardHash=job["standardHash"], jobId=job["id"])
                 if kind in {"hear", "watch"}:
                     result["duration"] = self.transport.verify_media(self.ws.project_path(pid, result["files"][0]["path"]), "audio" if kind == "hear" else "video")
@@ -1055,7 +1095,7 @@ class Production:
             state = self._load(db, job["projectId"], job["episode"])
             if not unknown:
                 state["budget"]["reserved"] -= job["estimate"]
-                if (job.get('reviewSubmitted') if job['kind'] == 'media_review' else error.code not in {"authentication_failed", "permission_required", "model_unavailable", "missing_key", "vault_unavailable"}):
+                if (job.get('reviewSubmitted') if job['kind'] == 'media_review' else error.code not in {"authentication_failed", "permission_required", "model_unavailable", "missing_key", "vault_unavailable", "production_direction_lost"}):
                     from studio_model_policy import commitment
                     state["budget"]["committed"] += commitment(job)
             self._message(state, "agent", str(error), jobId=job["id"])

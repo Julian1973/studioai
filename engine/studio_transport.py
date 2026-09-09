@@ -167,9 +167,11 @@ class ProviderTransport:
         headers = {"xi-api-key": key} if connection["provider"] == "elevenlabs" else {"Authorization": "Bearer " + key}
         if connection['provider'] == 'gemini':
             headers = {'x-goog-api-key': key}
+        from studio_request_evidence import observe
         try:
-            response = requests.request("GET" if body is None else "POST", provider["base"] + path,
-                                        headers=headers, json=body, timeout=(15, 180), allow_redirects=False)
+            response = observe(lambda: requests.request("GET" if body is None else "POST", provider["base"] + path,
+                                        headers=headers, json=body, timeout=(15, 180), allow_redirects=False),
+                               provider["base"] + path, body)
         except requests.RequestException:
             raise StudioError("The provider response was interrupted. Check the account before resubmitting a generation.",
                               "submission_unknown" if body is not None else "provider_offline") from None

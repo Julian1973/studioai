@@ -136,7 +136,17 @@ def _submit_seedance_provider(prompt, image_inputs, **kwargs):
         parent = parent.parent
     if shutil.disk_usage(parent).free < 256 * 1024 * 1024:
         raise Refused("REFUSED — free at least 256 MB of storage before starting or recovering a render")
-    return cb_gen.generate_video_seedance_ref(prompt, image_inputs, **kwargs)
+    from studio_request_evidence import capture
+    evidence = kwargs.pop('direction_evidence', {})
+    metadata = {'route': 'cb_render', 'stage': 'watch', 'output': str(output),
+                'requestId': kwargs.get('request_id'), **evidence}
+    direction = (evidence.get('directorCardRevision') or {}).get('decisions', {})
+    with capture(ROOT / 'cb-output/state/provider-requests', metadata,
+                 expected_prompt=prompt, direction=direction,
+                 expected_media_counts={'image': len(image_inputs),
+                                        'audio': len(kwargs.get('audio_urls') or []),
+                                        'video': len(kwargs.get('video_urls') or [])}):
+        return cb_gen.generate_video_seedance_ref(prompt, image_inputs, **kwargs)
 DUR_TOLERANCE_SEC = 1.5          # rendered clip may differ from designed duration by this much
 CHARACTER_SCALE_CONTROL_ROLE = "character scale control"
 CHARACTER_SCALE_CONTROL_MARKER = "[CANONICAL CHARACTER SCALE CONTROL]"
@@ -6225,7 +6235,16 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
         out = MEDIA / (
             f"{episode}_{shot_id}_keyframe_{candidate_id}_{uuid.uuid4().hex[:8]}.png")
         try:
-            generator(prompt, refs=refs, out=str(out), production_route="cb_render")
+            from studio_request_evidence import capture
+            from studio_director_card import card, stage_decisions
+            with capture(ROOT / 'cb-output/state/provider-requests',
+                         {'route': 'cb_render', 'stage': 'see', 'episode': episode,
+                          'scene': str(scene), 'shotId': shot_id, 'candidateId': candidate_id,
+                          'output': str(out), 'inputSignature': signature,
+                          'directorCardRevision': card(shot), 'references': refs},
+                         expected_prompt=prompt, direction=stage_decisions(shot, 'see'),
+                         expected_media_counts={'image': len(refs)}):
+                generator(prompt, refs=refs, out=str(out), production_route="cb_render")
         except BaseException as exc:
             led["keyframeCandidates"] = candidates
             led["keyframeCandidate"] = candidates[0] if candidates else None
@@ -9796,7 +9815,11 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                     if video_inputs:
                         generate_kwargs["video_urls"] = video_inputs
                     _submit_seedance_provider(
-                        segment["prompt"], image_inputs, **generate_kwargs)
+                        segment["prompt"], image_inputs,
+                        direction_evidence={'directorCardRevision': envelope.get('directorCardRevision'),
+                                            'envelopeHash': batch.get('envelopeHash'),
+                                            'segmentIndex': segment_index},
+                        **generate_kwargs)
                     if segment_count > 1:
                         cb_db.complete_candidate_segment(
                             HERE.parent, batch["token"], i, segment_index, segment_out)

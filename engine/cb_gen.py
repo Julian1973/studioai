@@ -151,13 +151,16 @@ def _checked(r):
         ) from exc
     return r
 def _rpost(url, _retry_request=True, **kw):
+    from studio_request_evidence import observe
+    def send():
+        return observe(lambda: _checked(requests.post(url, **kw)), url, kw.get('json'))
     if episode_budget.active():
         kw.setdefault("timeout", 120)
-        return episode_budget.call(lambda: _checked(requests.post(url, **kw)))
+        return episode_budget.call(send)
     if not _retry_request:
-        return _checked(requests.post(url, **kw))
+        return send()
     kw.setdefault("timeout", 120)
-    return _retry(lambda: _checked(requests.post(url, **kw)), what="POST " + str(url).rsplit("/", 1)[-1][:24])
+    return _retry(send, what="POST " + str(url).rsplit("/", 1)[-1][:24])
 def _rget(url, **kw):
     kw.setdefault("timeout", 120)
     return _retry(lambda: _checked(requests.get(url, **kw)), what="GET " + str(url).rsplit("/", 1)[-1][:24])

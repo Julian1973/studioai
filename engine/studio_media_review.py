@@ -23,6 +23,8 @@ def manifest(production, context, state, shot):
         return {'candidateId': artifact['id'], **file}
     result = {'watch': record(watch), 'shot': watch.get('originatingShot') or fields(shot),
               'currentDirection': fields(shot), 'directorCardRevision': watch.get('directorCardRevision'),
+              'executionReceipt': watch.get('executionReceipt'),
+              'providerReturnedFile': watch.get('providerReturnedFile'),
               'sourceSignature': production.source_signature(context, shot), 'references': []}
     for name in ('see', 'hear'):
         value = shot.get('outcomes', {}).get(name, {})

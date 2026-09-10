@@ -14,7 +14,7 @@ def inherits_previous_state(shot):
     return (shot.get('directorCard') or {}).get('storyTime') not in {'time_jump', 'new_location', 'independent'}
 
 CONTRACT = '''Scene coverage precedes generation planning. Plan audience understanding, featured character acting, reactions, reverses, inserts, reveals and cut reasons before choosing provider clips. A keyframe establishes an opening, not a fixed camera for the scene. Assign each view to a current clip, controlled multi-shot clip, new keyframe/clip, existing edit material, or remove it for a stated story reason. Preserve world geography, identity, eyelines, action phase and prop/effect state across views, not identical composition. Static, centred, quiet and simultaneous choices are valid when intentional; never add variety or motion for its own sake.
-When the output schema exposes sceneCoverage and directorCard, populate them for new creative plans; link views by stable viewId. Acting drives framing. For featured speakers and listeners direct intention, attention, readable behaviour, starting/ending pose and timing where relevant. Show thought and physical cause, grounded weight/contact and natural settling; do not prescribe a gesture per word or force all body parts to move. Canon protects identity and established personality while allowing local acting invention. Preserve approved words/audio and measured timing. Populate stateChanges for meaningful prop, mark, effect or environmental changes with before, cause and after. Put each authorised generated character SFX, ambience, effect or music instruction in soundCues with its timing and WATCH or post destination; do not bury generation sound only in soundOwnership prose. Generated character SFX are explicit sound instructions, not imaginary assets. Distinguish direction specified from performance observed. Review actual outputs and adjoining cuts; absent evidence remains unverified.'''
+When the output schema exposes sceneCoverage and directorCard, populate them for new creative plans; link views by stable viewId. Acting drives framing. For featured speakers and listeners direct intention, attention, readable behaviour, starting/ending pose and timing where relevant. Show thought and physical cause, grounded weight/contact and natural settling; do not prescribe a gesture per word or force all body parts to move. Canon protects identity and established personality while allowing local acting invention. Preserve approved words/audio and measured timing. Populate stateChanges for meaningful prop, mark, effect or environmental changes with before, cause and after. Also populate stable entityId, atSec and structured beforeValues/afterValues; track attachment and support occupancy as separate entities when detaching a unique object. For each view declare atSec and visibleEntities, including changed backgrounds. Mark criticalStateEntities when a reset would break the story. Represent time jumps/dreams/restorations explicitly with stateAtEntry; never copy a prior observed state as an approved intended state. Put each authorised generated character SFX, ambience, effect or music instruction in soundCues with its timing and WATCH or post destination; do not bury generation sound only in soundOwnership prose. Generated character SFX are explicit sound instructions, not imaginary assets. Distinguish direction specified from performance observed. Review actual outputs and adjoining cuts; absent evidence remains unverified.'''
 
 from studio_coverage import CONTRACT as COVERAGE_BOARD_CONTRACT
 CONTRACT += '\n' + COVERAGE_BOARD_CONTRACT
@@ -59,6 +59,11 @@ class ActingBeat(Decision):
     listening: str
 
 class CoverageView(Decision):
+    atSec: float | None = Field(default=None, ge=0, description='Story time within this clip for current-state resolution.')
+    visibleEntities: list[str] | None = Field(default=None, description='Stable entity IDs exposed by this view; include changed background elements.')
+    criticalStateEntities: list[str] = Field(default_factory=list)
+    storyRelationship: str | None = None
+    stateAtEntry: dict = Field(default_factory=dict, description='Explicit intended entry state for resets, dreams or time jumps.')
     sourceBeat: str | None = None
     viewpointOwner: str | None = None
     listenerReaction: str | None = None
@@ -81,6 +86,13 @@ class CoverageView(Decision):
 
 
 class StateChange(Decision):
+    entityId: str | None = None
+    entityCount: int = Field(default=1, ge=1)
+    unique: bool = True
+    atSec: float | None = Field(default=None, ge=0)
+    beforeValues: dict = Field(default_factory=dict)
+    afterValues: dict = Field(default_factory=dict)
+    storyRelationship: str = 'continuous'
     subject: str
     before: str
     cause: str

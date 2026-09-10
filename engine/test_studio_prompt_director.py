@@ -95,3 +95,36 @@ def test_obsolete_opening_blocks_but_identity_reference_is_scoped():
     final,report=run(source,lambda *a:review())
     verify(final,report)
     assert 'identity/design only' in final['prompt']
+
+
+def test_mixed_visual_section_protects_audio_not_unrelated_geography():
+    from studio_prompt_director import protected
+    prompt = '[Environment]\nThe comb stays fixed. Preserve dialogue timing.\n[Audio]\nKeen at 8s: "Uh-oh".\nKeep all pauses.'
+    guards = protected(prompt)
+    changed = prompt.replace('The comb stays fixed.', 'The comb travels with Keen.')
+    assert all(changed.count(s) == prompt.count(s) for s in guards)
+    assert any(prompt.replace('8s', '9s').count(s) != prompt.count(s) for s in guards)
+    assert any(prompt.replace('Preserve dialogue timing.', 'Change dialogue timing.').count(s) != prompt.count(s) for s in guards)
+
+
+def test_composite_evidence_requires_every_quoted_span_in_payload():
+    item = review()
+    item['findings'] = [dict(category='story/state contradiction', reason='Incompatible locations', evidence='"Object is here." vs "Object is there."', correction='Resolve location')]
+    _, report = run(snapshot('Object is here. Object is there.'), lambda *a: item)
+    assert report['verdict'] != 'READY TO FIRE'
+    with pytest.raises(ValueError, match='ungrounded'):
+        run(snapshot('Object is here.'), lambda *a: item)
+
+
+def test_watch_authorities_exclude_other_stage_provider_slot_text(monkeypatch, tmp_path):
+    import json, cb_llm
+    from studio_prompt_director import review_legacy_envelope
+    seen=[]
+    def worker(system, text, *args, **kwargs):
+        seen.append(json.loads(text)); return review()
+    monkeypatch.setattr(cb_llm, 'structured_with_repair', worker)
+    env=dict(prompt='Current WATCH',durationSec=12,references=[],audio={},executionPlan={'segments':[{'prompt':'Current WATCH','contract':{}}]})
+    shot=dict(shotId='generic',keyframePrompt='Old SEE slots',seedreamPrompt='Old still prompt',seedancePrompt='Old video prompt',dramaticBeat='Retain this story')
+    review_legacy_envelope(env,shot,{},archive_folder=tmp_path)
+    assert seen[0]['authorities']['shot']==dict(shotId='generic',dramaticBeat='Retain this story')
+    assert shot['keyframePrompt']=='Old SEE slots'

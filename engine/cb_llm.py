@@ -334,6 +334,8 @@ def _openai_call(model, system, user, schema, images=None, *, max_output_tokens,
     from openai.lib._parsing._responses import type_to_text_format_param
     # Receive usage and output before local Pydantic validation. SDK parse() raises
     # inside response decoding and loses that evidence on a custom-validator error.
+    from studio_preflight_evidence import review_submission
+    review_submission()
     resp = _client_get().responses.create(
         model=model,
         input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},

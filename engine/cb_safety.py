@@ -274,6 +274,7 @@ def create_policy(m):
             shot, slots_key, anchor, scene, episode, characters)
         return [{"slot": item["slot"], "sourceSlot": item["sourceSlot"],
                  "role": item["role"], "view": item.get("view"),
+                 "stateBinding": item.get("stateBinding", {}),
                  "sameCharacterGroup": ((item.get("identity") or {}).get(
                      "turnaroundGroupHash")),
                  "hash": file_sha256(item["path"])}
@@ -355,6 +356,11 @@ def create_policy(m):
             )
             if not paths and ledger.get("approvedTake"):
                 paths = [ledger["approvedTake"]]
+            origin = m._returned_origin(ledger)
+            if origin.get("segments"):
+                return {"stage": stage, **runtime, "mediaHashes": [file_sha256(path) for path in paths],
+                        "originatingProductionHash": json_sha256(origin),
+                        "generationSignature": None}
             approval = ledger.get("approval") or {}
             if approval.get("source") == "external-director-accepted":
                 return {**common, "mediaHashes": [file_sha256(path) for path in paths],

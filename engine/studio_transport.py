@@ -198,6 +198,8 @@ class ProviderTransport:
                             timeout=180, organization="", project="")
             content = [{"type": "input_text", "text": json.dumps(context, ensure_ascii=False)}]
             content += [{"type": "input_image", "image_url": self.inline(path), "detail": "auto"} for path in (images or [])]
+            from studio_preflight_evidence import review_submission
+            review_submission()
             response = client.responses.parse(
                 model=model, store=False, service_tier="default", max_output_tokens=16000 if planning else 5000,
                 input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},

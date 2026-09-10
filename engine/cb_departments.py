@@ -3052,7 +3052,8 @@ def compile_animation_provider_prompt(shot, direction):
     if not dialogue_check["ready"]:
         raise ValueError("dialogue synthesis contract failed: " +
                          "; ".join(dialogue_check["errors"]))
-    return prompt
+    from studio_prompt_order import compile_order
+    return compile_order(prompt, data)
 
 
 def prepare_animation(context, images, *, log=print):

@@ -84,7 +84,7 @@ class Production:
             usage_jobs = [{'kind': r[0], 'usage': json.loads(r[1]) if r[1] else None, 'shotId': r[2]}
                           for r in db.execute("SELECT json_extract(data, '$.kind'), json_extract(data, '$.usage'), json_extract(data, '$.shotId') FROM jobs WHERE project=? AND episode=?", (pid, str(ep)))]
         # Job inputs contain source context, but no keys. Expose only useful status.
-        public_jobs = [{k: j.get(k) for k in ("id", "kind", "shotId", "status", "taskId", "message", "code", "binding", "createdAt", "progress", "audioReview", "cleanupPending", "uploadUnconfirmed", "usage", "estimate")} for j in jobs[:30]]
+        public_jobs = [{k: j.get(k) for k in ("id", "kind", "shotId", "status", "taskId", "message", "code", "binding", "createdAt", "progress", "audioReview", "cleanupPending", "uploadUnconfirmed", "usage", "estimate", "keyframeDirector")} for j in jobs[:30]]
         from studio_model_policy import summary, readiness
         costs = summary(usage_jobs)
         setup = readiness(self.ws, context)
@@ -180,6 +180,8 @@ class Production:
             ref['requiredState'] = (shot.get('requiredReferenceStates') or {}).get(ref['name'], {})
             source = (assets['characters'].get(ref['name']) if ref['role'] == 'character identity' else
                       next((v for group in ('locations', 'props') for v in assets[group] if v['name'] == ref['name']), None)) or {}
+            from studio_dynamic_state import bound_metadata
+            ref.update(bound_metadata(source, ref['hash']))
             # State observations belong to the inspected file, not a mutable filename.
             if source.get('stateEvidenceHash') == ref['hash']:
                 ref['depictedState'] = source.get('depictedState') or {}
@@ -296,6 +298,8 @@ class Production:
         state["messages"].append({"role": role, "text": str(message)[:12000], "at": time.time(), **extra})
         state["messages"] = state["messages"][-80:]
 
+    from studio_preflight_evidence import project_command
+    @project_command
     def command(self, payload):
         pid, ep = token(payload.get("projectId")), token(payload.get("episode"))
         context = self.ws.context(pid, ep)
@@ -675,6 +679,13 @@ class Production:
             if any((self.artifact(shot, s) or {}).get("id") != request["dependencies"][s] for s in ("see", "hear")):
                 raise StudioError("The WATCH inputs changed. Review an updated request.", "stale")
             from studio_prompt_director import verify, request_snapshot, project_authorities
+            from studio_keyframe_director import snapshot as see_snapshot, require as require_see
+            from studio_editing import fields
+            opening = self.artifact(shot, 'see')
+            try:
+                require_see(see_snapshot(fields(shot), {}, opening['files'][0], request['images']), request.get('keyframeDirector'))
+            except ValueError as exc:
+                raise StudioError(str(exc), 'stale') from exc
             current_authorities = project_authorities(context, shot, request['source'])
             try:
                 verify(request_snapshot(request['prompt'], current_authorities, request['images'], request['audio'], request['duration'], request['binding']), request.get('promptDirector'))
@@ -685,7 +696,7 @@ class Production:
         from studio_workflow import estimate
         cost = money(estimate(binding, kind, shot, duration=inputs.get("request", {}).get("duration")))
         if kind == "prompt_review":
-            cost *= 2  # bounded initial review plus one correction review
+            cost *= 3  # SEE readiness plus bounded WATCH initial/correction review
         budget = state["budget"]
         if budget["allowance"] - budget["committed"] - budget["reserved"] < cost:
             raise StudioError("The episode allowance does not cover this request. Increase it or adjust the project service estimate.", "budget_required")
@@ -793,6 +804,9 @@ class Production:
                      expected_fields=expected_fields, expected_media_counts=counts,
                      direction=direction, received=received):
             try:
+                from studio_preflight_evidence import media_submission
+                media_submission()
+                job["mediaSubmissionAttempted"] = True
                 return function(*args, **kwargs)
             except RequestEvidenceError as exc:
                 raise StudioError(str(exc), 'production_direction_lost') from exc
@@ -850,6 +864,21 @@ class Production:
                 request = job["inputs"]["request"]
                 authorities = project_authorities(context, job['shot'], request['source'])
                 source = request_snapshot(request["prompt"], authorities, request["images"], request["audio"], request["duration"], request["binding"])
+                from studio_keyframe_director import snapshot as see_snapshot, assess as assess_see, require as require_see, Assessment
+                from studio_editing import fields
+                opening = self.artifact(job['shot'], 'see')
+                see_source = see_snapshot(fields(job['shot']), {}, opening['files'][0], request['images'])
+                job["reviewSubmissionAttempted"] = True
+                readiness = assess_see(see_source, lambda system, data: self.transport.direct(
+                    connection, key, binding['model'], system, data,
+                    images=[self.ws.project_path(pid, opening['files'][0]['path'])] +
+                           [self.ws.project_path(pid, r['path']) for r in request['images'] if r.get('path')], schema=Assessment))
+                job['keyframeDirector'] = readiness
+                self.progress(job, 'see_readiness', readiness['summary'])
+                try:
+                    require_see(see_source, readiness)
+                except ValueError as exc:
+                    raise StudioError(str(exc), 'see_action_readiness') from exc
                 self.progress(job, 'prompt_review', 'Prompt Director is checking the compiled story and current-state handoffs')
                 def reviewer(system, data):
                     response = self.transport.direct(connection, key, binding["model"], system, data, schema=Review)
@@ -859,7 +888,10 @@ class Production:
                     final, report = review_prompt(source, reviewer)
                 except ValueError as exc:
                     raise StudioError(str(exc), 'prompt_coherence') from exc
-                result = {**request, 'prompt': final['prompt'], 'promptDirector': report, 'promptDirectorSnapshot': final}
+                if report['verdict'] != 'READY TO FIRE':
+                    from studio_preflight_evidence import project_failure
+                    job['preflightEvidence'] = project_failure(self, job, ValueError(report['verdict'] + ': ' + report['summary']), job)
+                result = {**request, 'prompt': final['prompt'], 'promptDirector': report, 'promptDirectorSnapshot': final, 'keyframeDirector': readiness, 'keyframeDirectorSnapshot': see_source}
                 self.complete(job, result)
                 return
             if kind in {"plan", "chat", "revise"}:
@@ -1120,6 +1152,8 @@ class Production:
             self.advance(pid, ep, result["shots"][0]["id"])
 
     def fail(self, job, exc):
+        from studio_preflight_evidence import project_failure
+        job["preflightEvidence"] = project_failure(self, job, exc, job)
         error = exc if isinstance(exc, StudioError) else StudioError("The operation could not finish. Your current outcomes are preserved; check the job before retrying.", "operation_failed")
         with self.ws.db() as db:
             db.execute("BEGIN IMMEDIATE")

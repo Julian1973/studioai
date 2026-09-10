@@ -2859,6 +2859,7 @@ def _expanded_reference_blueprint(shot, slots_key, characters_cfg, scene=None,
                 "sourceSlot": source_slot,
                 "role": role,
                 "usage": usage,
+                "stateBinding": (shot.get("referenceStateBindings") or {}).get(source_slot, {}),
                 "view": (identity or {}).get("view"),
                 "identity": identity,
             })
@@ -4088,6 +4089,8 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
             _require_forward_directing_source(pkg, shot, scene, episode)
         context = _shot_context(pkg, shot, led, scene, episode)
         context["reviewObservations"] = review_observations(context)
+        if stage == "review-animation":
+            context["originatingProduction"] = _returned_origin(led)
         if stage == "cinematography":
             chars = _characters_cfg()
             attachment_plan = _provider_attachment_plan(
@@ -4285,6 +4288,21 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                 attachment_plan = _provider_attachment_plan(
                     animation_shot, "referenceSlots", anchor, scene, episode,
                     _characters_cfg())
+                originating_refs = [r for segment in context.get("originatingProduction", {}).get("segments", [])
+                                    for r in segment.get("references", [])]
+                if originating_refs:
+                    attachment_plan = []
+                    for ref in originating_refs:
+                        ref_path = ref.get("path")
+                        if not ref_path or not os.path.isfile(ref_path):
+                            raise Refused("Originating review reference is missing; restore its exact source before review")
+                        if ref.get("md5") and _file_md5(ref_path) != ref["md5"]:
+                            raise Refused("Originating review reference changed; current assets cannot substitute for fired evidence")
+                        attachment_plan.append({**ref, "slot": ref.get("slot"), "view": ref.get("view")})
+                context["originatingProduction"]["reviewScope"].update(
+                    method="sampled still frames", samplesPerCandidate=per_candidate,
+                    inspectedMedia=[{"path": m, "sha256": _sha256_file(pathlib.Path(m))} for m in media_paths],
+                    audioLipSync="unverified; no audio attached", adjoiningCuts="unverified; no neighbouring footage attached")
                 refs = [item["path"] for item in attachment_plan]
                 images = frames + refs
                 context["orderedReviewImages"] = (
@@ -4302,6 +4320,8 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
     # prepared direction and must follow the same review path.
     result_data = (result.model_dump() if hasattr(result, "model_dump") else result)
     work["candidate"] = _department_candidate(stage, result_data, context)
+    if stage == "review-animation":
+        work["candidate"]["originatingProduction"] = context.get("originatingProduction")
     save_extra()
     _save(pkg, path)
     disposition = ("awaiting human review" if stage.startswith("review-")
@@ -6641,6 +6661,39 @@ def select_keyframe_source(scene, shot_id, mode, episode="Ep1", upload_path=None
     return cand_path
 
 
+def _see_readiness_source(pkg, shot, ledger, image_path, scene, episode):
+    from studio_keyframe_director import snapshot
+    references = _provider_attachment_plan(shot, "keyframeReferenceSlots", None, scene, episode, _characters_cfg())
+    from studio_dynamic_state import bound_metadata
+    references = [{**r, **bound_metadata(r.get("stateBinding"), _file_md5(r["path"])),
+                   "sha256": _sha256_file(pathlib.Path(r["path"]))} for r in references]
+    direction = _approved_department_output(pkg, shot["shotId"], "cinematography") or {}
+    return snapshot(shot, direction, {"path": str(image_path), "sha256": _sha256_file(pathlib.Path(image_path))}, references)
+
+
+def review_see_action_readiness(pkg, shot, ledger, image_path, scene, episode):
+    from studio_keyframe_director import assess, require, Assessment
+    import cb_llm
+    source = _see_readiness_source(pkg, shot, ledger, image_path, scene, episode)
+    existing = ledger.get("seeActionReadiness")
+    try:
+        require(source, existing)
+        return existing
+    except ValueError:
+        pass
+    images = [str(image_path)] + [r["path"] for r in source["references"]]
+    report = assess(source, lambda system, data: cb_llm.structured_with_repair(
+        system, json.dumps(data, ensure_ascii=False), Assessment, images=images, label="keyframe_action_readiness"))
+    ledger["seeActionReadiness"] = report
+    _, package_path = load_pkg(scene, episode)
+    _save(pkg, package_path)  # retain BLOCKED/UNVERIFIED evidence as well as READY
+    try:
+        require(source, report)
+    except ValueError as exc:
+        raise Refused(str(exc)) from exc
+    return report
+
+
 def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
     """Promotes the pending candidate to approved. A GENERATED candidate's validity is
     checked against the shot's OWN direct inputs at approval time (its own card hash, the
@@ -6682,6 +6735,7 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
                           f"was generated ({', '.join(diff)}); a candidate can never be approved "
                           f"against inputs it wasn't actually generated from. Regenerate against "
                           f"the current inputs.")
+    review_see_action_readiness(pkg, shot, led, cand["path"], scene, episode)
     old = led.get("keyframeApproval")
     if old and old.get("path") and os.path.exists(old["path"]):
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
@@ -7030,8 +7084,10 @@ def _reference_records(shot, imgs):
         raise Refused(
             "REFUSED — intact turnaround reference count does not match the sealed "
             "provider attachments")
+    from studio_dynamic_state import bound_metadata
     return [
-        {"slot": item["slot"], "sourceSlot": item["sourceSlot"],
+        {**bound_metadata(item.get("stateBinding"), _file_md5(path)),
+         "slot": item["slot"], "sourceSlot": item["sourceSlot"],
          "role": item["role"], "view": item.get("view"), "path": path,
          "intactTurnaround": bool((item.get("identity") or {}).get(
              "intactTurnaround")),
@@ -7792,6 +7848,9 @@ def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per,
                       "md5": _file_md5(led["voPath"]) if led.get("voPath") else None},
            "executionPlan": execution_plan,
            "comparisonRunId": execution_plan.get("comparisonRunId")}
+    from studio_prompt_order import compile_order
+    for segment in env["executionPlan"]["segments"]:
+        segment["prompt"] = compile_order(segment["prompt"], specialist)
     from studio_prompt_director import review_legacy_envelope
     try:
         review_legacy_envelope(env, shot, specialist)
@@ -9201,6 +9260,22 @@ def _prompt_lab_feedback(ledger, artifact_type):
     return items
 
 
+def _returned_origin(ledger):
+    batch = ledger.get("batch") or {}
+    envelope = batch.get("envelope") or {}
+    return {"batchId": batch.get("batchId") or ledger.get("batchId"),
+            "envelopeHash": batch.get("envelopeHash"),
+            "directorCardRevision": envelope.get("directorCardRevision"),
+            "segments": [{"segmentIndex": s.get("segmentIndex"),
+                          "promptDirector": s.get("promptDirector"),
+                          "sourceSnapshot": s.get("promptDirectorSnapshot"),
+                          "references": s.get("references", envelope.get("references", []))}
+                         for s in (envelope.get("executionPlan") or {}).get("segments", [])],
+            "reviewScope": {"planned": "originating sealed request", "observed": "only attached review samples",
+                            "audioLipSync": "unverified unless audio actually inspected", "adjoiningCuts": "unverified unless neighbours inspected",
+                            "approval": "not granted by automated review", "deliveryEligible": False}}
+
+
 def _latest_media_review(ledger, artifact_type):
     stage = "review-keyframe" if artifact_type == "keyframe" else "review-animation"
     work = ((ledger.get("departmentWork") or {}).get(stage) or {})
@@ -9518,6 +9593,14 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         raise Refused(f"REFUSED — {shot_id} is MODEL-LIMITED after {MAX_BATCH_ATTEMPTS} failed "
                       f"candidate batches; the ladder requires human redesign or an alternative "
                       f"production method, never more prompt-patching.\n{DECISION_LADDER}")
+    from studio_keyframe_director import require as require_see_readiness
+    opening = (led.get("keyframeApproval") or {}).get("path") or _anchor_for(pkg, shot)
+    if not opening:
+        raise Refused("SEE action readiness requires the actual opening image")
+    try:
+        require_see_readiness(_see_readiness_source(pkg, shot, led, opening, scene, episode), led.get("seeActionReadiness"))
+    except ValueError as exc:
+        raise Refused(str(exc)) from exc
     animation_direction = _approved_department_output(pkg, shot_id, "animation") or {}
     budget = _performance_budget_report(
         _shot_creative_contract_view(pkg, shot, scene, episode), led)
@@ -9959,6 +10042,8 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                     "promptHash": segment["promptHash"],
                     "outputPath": str(segment_out),
                     "outputHash": _sha256_file(segment_out),
+                    "originatingPromptDirector": segment.get("promptDirector"),
+                    "originatingSnapshot": segment.get("promptDirectorSnapshot"),
                     "audioHash": ((segment.get("audio") or {}).get("md5")),
                     "openingRelayPath": str(opening_relay) if opening_relay else None,
                     "openingRelayHash": (_sha256_file(opening_relay)
@@ -10245,6 +10330,22 @@ def edit_shot(scene, shot_id, correction, start_sec, end_sec, episode="Ep1",
         "audioSha256": _sha256_file(audio_path) if audio_path else None,
         "contract": contract, "costUsd": cost,
     }
+    from studio_prompt_director import run as review_edit, verify as verify_edit, request_snapshot, Review
+    import cb_llm
+    edit_scope = {"startSec": start_sec, "endSec": end_sec, "correction": correction,
+                  "outsideWindow": "preserve approved source", "audio": "immutable",
+                  "sourceSha256": source_hash}
+    review_source = request_snapshot(prompt, {"shot": shot, "revision": pkg.get("revision"), "editScope": edit_scope},
+        [{"role": "approved source video; preserve outside declared edit window", "path": str(source), "sha256": source_hash}],
+        {"path": str(audio_path) if audio_path else None, "sha256": binding_payload["audioSha256"]}, duration, contract)
+    final, coherence = review_edit(review_source, lambda system, data: cb_llm.structured_with_repair(
+        system + "\nThis is a bounded edit. Only the declared window/correction may change; preserve outside-window state and exact approved audio. Block scope conflicts.",
+        json.dumps(data, ensure_ascii=False), Review, label="prompt_director_edit"))
+    from studio_request_evidence import _write
+    _write(HERE.parent / "cb-output/state/prompt-director" / (coherence["payloadHash"] + ".json"), {"snapshot": final, "review": coherence})
+    verify_edit(final, coherence)
+    prompt = final["prompt"]
+    binding_payload.update(prompt=prompt, editScope=edit_scope, promptDirector=coherence, promptDirectorSnapshot=final)
     binding_hash = hashlib.sha256(json.dumps(
         binding_payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     envelope = {**binding_payload, "candidateCount": 1}
@@ -10298,6 +10399,7 @@ def edit_shot(scene, shot_id, correction, start_sec, end_sec, episode="Ep1",
         "sourcePath": str(source), "sourceSha256": source_hash,
         "prompt": prompt, "promptSha256": hashlib.sha256(prompt.encode()).hexdigest(),
         "correction": correction, "startSec": start_sec, "endSec": end_sec,
+        "promptDirector": coherence, "promptDirectorSnapshot": final, "editScope": edit_scope,
         "disclosure": disclosure, "startedAt": _now(),
     }
     _save(pkg, package_path)
@@ -11587,6 +11689,11 @@ recover_approved_shot = _cb_transactions.protect(_runtime, "recover_approved_sho
 set_continuity_mode = _cb_transactions.protect(_runtime, "set_continuity_mode", set_continuity_mode)
 bind_animation_location_reference = _cb_transactions.protect(_runtime, "bind_animation_location_reference", bind_animation_location_reference)
 
+
+# Outermost attempt guard captures early validation failures, including wrapper refusals.
+import studio_preflight_evidence as _preflight_evidence
+for _operation in ("fire_shot", "edit_shot", "keyframe_shot", "approve_keyframe", "prepare_department"):
+    globals()[_operation] = _preflight_evidence.protect(_runtime, _operation, globals()[_operation])
 
 if __name__ == "__main__":
     os.chdir(HERE)

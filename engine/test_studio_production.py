@@ -34,6 +34,8 @@ class FakeTransport(ProviderTransport):
     def direct(self, connection, key, model, system, context, *, planning=False, images=None, schema=None):
         self.calls.append(("direction",key,context))
         if self.error: raise self.error
+        if schema is not None and schema.__name__ == 'Assessment':
+            return dict(verdict='READY',summary='Synthetic SEE fixture',camera='supported',geography='supported',pose='supported',propsEffects='supported',actionFeasibility='supported',findings=[],correctiveAction='none')
         if schema is not None:
             return {'summary':'The fixture story is coherent.', 'audienceBeat':'Trust', 'camera':'Purposeful hold', 'audio':'Unchanged', 'locked':['voice'], 'directed':['hesitation'], 'open':['micro-expression'], 'lifecycle':[], 'findings':[], 'edits':[]}
         if planning:

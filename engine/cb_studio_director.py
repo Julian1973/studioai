@@ -1362,6 +1362,13 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
     if not _direction_current(scene, shot_id, "animation", episode):
         log("DIRECTOR — preparing current animation direction")
         cb_render.prepare_department(scene, "animation", shot_id, episode, log)
+    package, _ = cb_render.load_pkg(scene, episode)
+    shot = cb_render._shot(package, shot_id)
+    ledger = cb_render._ledger(package, shot_id)
+    opening = (ledger.get("keyframeApproval") or {}).get("path") or cb_render._anchor_for(package, shot)
+    if not opening:
+        raise cb_render.Refused("Prepare the opening image before SEE action-readiness review")
+    cb_render.review_see_action_readiness(package, shot, ledger, opening, scene, episode)
     try:
         cb_render.fire_shot(scene, shot_id, episode, candidates=1, spend_token=None, log=log)
     except cb_render.Refused as exc:
@@ -1478,6 +1485,11 @@ def main(argv: list[str] | None = None) -> int:
         print(str(exc), file=sys.stderr)
         return 1
 
+
+import studio_preflight_evidence as _attempt_evidence
+import cb_render as _attempt_runtime
+prepare_render = _attempt_evidence.protect(_attempt_runtime, "prepare_render", prepare_render)
+retake_render = _attempt_evidence.protect(_attempt_runtime, "retake_render", retake_render)
 
 if __name__ == "__main__":
     raise SystemExit(main())

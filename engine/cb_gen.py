@@ -151,6 +151,8 @@ def _checked(r):
         ) from exc
     return r
 def _rpost(url, _retry_request=True, **kw):
+    from studio_preflight_evidence import media_submission
+    media_submission()
     from studio_request_evidence import observe
     def send():
         return observe(lambda: _checked(requests.post(url, **kw)), url, kw.get('json'))

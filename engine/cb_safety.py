@@ -406,6 +406,11 @@ def create_policy(m):
                  record.get("inputSignature"), expected, stage)),
             (None, None),
         )
+        if not current_record and stage == "voice":
+            current_source, current_record = next(
+                ((source, record) for source, record in existing
+                 if production_contracts.voice_direction_signature_matches(
+                     record.get("inputSignature"), expected)), (None, None))
         if not current_record and stage in direction_stages:
             # A shared implementation update alone does not rewrite authored work.
             # All creative inputs and runtime skills still compare exactly, and

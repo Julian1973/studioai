@@ -137,3 +137,12 @@ def test_previous_database_upgrades_without_losing_jobs(tmp_path):
     assert cb_db.load_jobs(tmp_path)['old']['status'] == 'done'
     cb_db.persist_job(tmp_path, {'jobId': 'new', 'status': 'done', 'outcome': 'completed'})
     assert cb_db.load_jobs(tmp_path)['new']['outcome'] == 'completed'
+
+
+def test_voice_override_does_not_stale_source_direction():
+    old = {"dialogueHash": "words", "voiceIds": ["voice"], "workingPerformanceHash": "old", "skillHashes": {"voice": "a"}}
+    new = {**old, "workingPerformanceHash": "edited"}
+    assert contracts.voice_direction_signature_matches(old, new)
+    for key, value in [("dialogueHash", "changed"), ("voiceIds", ["other"]), ("skillHashes", {"voice": "b"})]:
+        assert not contracts.voice_direction_signature_matches(old, {**new, key: value})
+    assert not contracts.voice_direction_signature_matches(None, new)

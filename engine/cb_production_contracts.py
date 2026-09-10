@@ -38,6 +38,18 @@ def working_signature_matches(recorded, expected):
     return bool(recorded) and project(recorded) == project(expected)
 
 
+def voice_direction_signature_matches(recorded, expected):
+    """Human provider-text overrides are applied after specialist compilation.
+
+    They change generation/spend signatures, not the specialist's source direction.
+    Every other dependency remains exact, including dialogue and voice identity.
+    """
+    if not recorded or not expected:
+        return False
+    return ({k: v for k, v in recorded.items() if k != "workingPerformanceHash"}
+            == {k: v for k, v in expected.items() if k != "workingPerformanceHash"})
+
+
 def active_shots(pkg):
     def retired(shot):
         status = str(shot.get("status") or "").strip().lower()

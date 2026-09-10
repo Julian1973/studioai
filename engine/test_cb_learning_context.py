@@ -82,3 +82,9 @@ def test_successful_media_decision_records_evidence_failed_decision_does_not(tmp
     with pytest.raises(RuntimeError):
         wrapped("1", "S1.SH1", "fail")
     assert len(L.evidence()) == 1
+
+def test_observed_feedback_does_not_grant_approval_or_cross_projects():
+    row=L.capture_evidence('observed','Audio and lip sync worked; visual state reset.',episode='Ep3',scene='1',shot='S1.SH2',project='other')
+    assert C.observations({'episode':'Ep3','scene':'1'})==[]
+    records=C.observations({'projectId':'other','episode':'Ep3','scene':'1'})
+    assert records[0]['outcome']=='observed' and records[0]['evidenceId']==row['evidenceId']

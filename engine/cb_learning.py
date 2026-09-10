@@ -54,7 +54,7 @@ SOURCES = ("show canon", "character-performance canon", "relationship canon",
            "showrunner canon", "director canon", "cinematography canon",
            "voice director canon", "creative-room workflow", "storyboard schema",
            "production handover", "provider capability profile")
-OUTCOMES = ("approved", "rejected", "selected", "retaken", "model-limited")
+OUTCOMES = ("approved", "rejected", "selected", "retaken", "model-limited", "observed")
 MATURITY = ("observation", "emerging-pattern", "approved-principle")
 SCOPES = ("shot", "beat", "scene", "character", "relationship", "episode", "show",
           "role process", "provider")

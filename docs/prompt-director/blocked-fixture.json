@@ -1,0 +1,145 @@
+{
+  "qualification": "mocked reviewer",
+  "review": {
+    "summary": "One honeycomb moves from its support to the near-bank aftermath.",
+    "audienceBeat": "Action leads to an embarrassed reaction.",
+    "camera": "Follow the carry, then hold the reaction.",
+    "audio": "Approved Audio1 remains unchanged.",
+    "locked": [
+      "audio",
+      "one object identity"
+    ],
+    "directed": [
+      "remove, carry, land"
+    ],
+    "open": [
+      "micro-expression"
+    ],
+    "lifecycle": [
+      {
+        "entity": "comb-1",
+        "view": "1",
+        "at": 0.0,
+        "values": [
+          {
+            "field": "holder",
+            "value": "support"
+          }
+        ],
+        "cause": "",
+        "source": "fixture shot"
+      },
+      {
+        "entity": "comb-1",
+        "view": "2",
+        "at": 5.0,
+        "values": [
+          {
+            "field": "holder",
+            "value": "Keen"
+          }
+        ],
+        "cause": "Keen visibly detaches it",
+        "source": "fixture shot"
+      }
+    ],
+    "findings": [
+      {
+        "category": "story/state contradiction",
+        "reason": "One comb is both fixed at the tree and carried away.",
+        "evidence": "The far-bank leaf, far-tree honeycomb and near-bank machine keep fixed world positions.",
+        "correction": "Remove the obsolete fixed-object clause; preserve the detached object history."
+      }
+    ],
+    "edits": [],
+    "emissionTrace": {
+      "sourceCoverage": "source-available",
+      "requirements": [
+        {
+          "requirementId": "direction/stateChanges",
+          "sourceHash": "7e1b4e74a15f16093865e93525db971a47111a82344d2847824a5100a13b17d6",
+          "requiredText": "Keen removes and carries the one honeycomb; its support becomes empty.",
+          "status": "unverified",
+          "providerRange": null
+        }
+      ],
+      "unverified": [
+        "direction/stateChanges"
+      ],
+      "semanticCompleteness": "not-assessed",
+      "screenPerformance": "unverified"
+    },
+    "version": "prompt-director-1.0.0",
+    "rounds": [
+      {
+        "summary": "One honeycomb moves from its support to the near-bank aftermath.",
+        "audienceBeat": "Action leads to an embarrassed reaction.",
+        "camera": "Follow the carry, then hold the reaction.",
+        "audio": "Approved Audio1 remains unchanged.",
+        "locked": [
+          "audio",
+          "one object identity"
+        ],
+        "directed": [
+          "remove, carry, land"
+        ],
+        "open": [
+          "micro-expression"
+        ],
+        "lifecycle": [
+          {
+            "entity": "comb-1",
+            "view": "1",
+            "at": 0.0,
+            "values": [
+              {
+                "field": "holder",
+                "value": "support"
+              }
+            ],
+            "cause": "",
+            "source": "fixture shot"
+          },
+          {
+            "entity": "comb-1",
+            "view": "2",
+            "at": 5.0,
+            "values": [
+              {
+                "field": "holder",
+                "value": "Keen"
+              }
+            ],
+            "cause": "Keen visibly detaches it",
+            "source": "fixture shot"
+          }
+        ],
+        "findings": [
+          {
+            "category": "story/state contradiction",
+            "reason": "One comb is both fixed at the tree and carried away.",
+            "evidence": "The far-bank leaf, far-tree honeycomb and near-bank machine keep fixed world positions.",
+            "correction": "Remove the obsolete fixed-object clause; preserve the detached object history."
+          }
+        ],
+        "edits": []
+      }
+    ],
+    "trace": [],
+    "inputHash": "3e124751eee82138f5efb6866bcedb37e44b45309677d849510cee3c4e314b92",
+    "payloadHash": "a7471fe88737499f8de88fc106ea8e7691a224f22c9dbe49cc54b5c6e7f22155",
+    "sourceHash": "f99d16c0fad0b533f4614c87f19877d56c319aa8cd5d32abd4bec24160b58758",
+    "errors": [],
+    "references": [
+      {
+        "role": "scene plate",
+        "resetRisk": {},
+        "coherenceAuthority": "fixed environment only; dynamic state follows the current view"
+      }
+    ],
+    "verdict": "BLOCKED: STORY/STATE CONTRADICTION",
+    "creativeOutcome": "unverified",
+    "visualEvidence": "metadata only unless explicitly supplied",
+    "finalPrompt": "[DIRECTED]\nFollow the carried honeycomb to the near bank, then hold for the reaction. Keen removes the whole honeycomb and carries it to the machine.\n[ENVIRONMENT]\nThe far-bank leaf, far-tree honeycomb and near-bank machine keep fixed world positions.\n[Audio]\n@Audio1: preserve approved dialogue and measured lip-sync timing.\n[REFERENCE STATE AUTHORITY]\nReference 1: fixed environment only; dynamic state follows the current view."
+  }
+}

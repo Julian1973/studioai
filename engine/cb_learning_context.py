@@ -14,6 +14,9 @@ def observations(context, limit=4):
     Never infer a reusable rule from a verdict, provider failure or unrelated episode.
     Read-only retrieval does not alter signatures, prompts, approvals or source canon.
     """
+    project = context.get("projectId", context.get("project", "crystal-bears"))
+    if isinstance(project, dict):
+        project = project.get("id")
     episode = context.get("episode")
     scene = str(context.get("scene") or "")
     shot = context.get("shot") or {}
@@ -27,7 +30,7 @@ def observations(context, limit=4):
     selected = []
     for record in cb_learning.evidence():
         feedback = str(record.get("userFeedbackVerbatim") or "").strip()
-        if (record.get("episode") != episode or not feedback or
+        if (record.get("project", "crystal-bears") != project or record.get("episode") != episode or not feedback or
                 record.get("category") in {"provider", "technical"} or
                 record.get("outcome") == "model-limited"):
             continue

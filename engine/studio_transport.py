@@ -190,7 +190,7 @@ class ProviderTransport:
     def check(self, connection, key):
         self.request(connection, key, PROVIDERS[connection["provider"]]["check"])
 
-    def direct(self, connection, key, model, system, context, *, planning=False, images=None):
+    def direct(self, connection, key, model, system, context, *, planning=False, images=None, schema=None):
         from openai import OpenAI
         try:
             # Do not inherit SDK retries, project headers, custom base URLs or env keys.
@@ -202,7 +202,7 @@ class ProviderTransport:
                 model=model, store=False, service_tier="default", max_output_tokens=16000 if planning else 5000,
                 input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},
                        {"role": "user", "content": content}],
-                text_format=DirectedEpisodePlan if planning else AgentReply)
+                text_format=schema or (DirectedEpisodePlan if planning else AgentReply))
             if response.output_parsed is None:
                 raise StudioError("The director did not return a complete proposal. Your existing shots are unchanged.", "invalid_output")
             from studio_model_policy import usage_record

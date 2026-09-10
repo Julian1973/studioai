@@ -1,0 +1,6 @@
+[DIRECTED]
+Follow the carried honeycomb to the near bank, then hold for the reaction. Keen removes the whole honeycomb and carries it to the machine.
+[ENVIRONMENT]
+The far-bank leaf, far-tree honeycomb and near-bank machine keep fixed world positions.
+[Audio]
+@Audio1: preserve approved dialogue and measured lip-sync timing.

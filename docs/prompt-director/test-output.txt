@@ -1,0 +1,8 @@
+PYTHONPATH=engine python3 -m pytest engine/test_studio_prompt_director.py engine/test_studio_production.py engine/test_studio_video_review.py engine/test_studio_review.py engine/test_studio_request_evidence.py engine/test_cb_handover.py engine/test_cb_learning.py engine/test_cb_learning_context.py engine/test_studio_director_card.py engine/test_studio_workflow.py engine/test_studio_creative_authority.py -q
+
+........................................................................ [ 36%]
+.............................s.......................................... [ 72%]
+.......................................................                  [100%]
+198 passed, 1 skipped in 21.12s
+
+JavaScript syntax: node --check project-production.js and extracted app.html scripts passed.

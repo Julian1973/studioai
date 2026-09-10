@@ -24,6 +24,7 @@ def manifest(production, context, state, shot):
     result = {'watch': record(watch), 'shot': watch.get('originatingShot') or fields(shot),
               'currentDirection': fields(shot), 'directorCardRevision': watch.get('directorCardRevision'),
               'executionReceipt': watch.get('executionReceipt'),
+              'promptDirector': watch.get('promptDirector'),
               'providerReturnedFile': watch.get('providerReturnedFile'),
               'sourceSignature': production.source_signature(context, shot), 'references': []}
     for name in ('see', 'hear'):
@@ -234,6 +235,7 @@ def execute(production, job):
     from studio_director_card import REVIEW_CRITERIA
     context = {'creativeReviewCriteria': REVIEW_CRITERIA, 'shot': inputs['shot'], 'previousShot': inputs.get('previous'),
                'nextShot': inputs.get('next'), 'directorCardRevision': inputs.get('directorCardRevision'),
+              'promptDirector': inputs.get('promptDirector'),
                'projectBible': job['context']['bible'], 'evidence': evidence}
     if len(json.dumps(context)) > 200000:
         raise StudioError('The review context exceeds the current limit. Use a smaller production sequence or reference brief.', 'context_limit')
@@ -254,6 +256,7 @@ def execute(production, job):
         raise StudioError('The reviewer returned a timestamp outside this render. The report was not applied.', 'invalid_output')
     result = {'id': uuid.uuid4().hex, 'fingerprint': inputs['fingerprint'], 'candidateId': inputs['watch']['candidateId'],
               'directorCardRevision': inputs.get('directorCardRevision'),
+              'promptDirector': inputs.get('promptDirector'),
               'binding': job['binding'], 'at': time.time(), 'evidence': evidence, 'audioReview': job['audioReview'], **visual,
               'sourceIntegrity': 'verified',
               'meaning': 'Advisory media review. Sampling can miss motion faults and cannot certify exact lip sync, emotional success or broadcast readiness.'}

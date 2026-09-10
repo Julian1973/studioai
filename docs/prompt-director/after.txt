@@ -1,0 +1,8 @@
+[DIRECTED]
+Follow the carried honeycomb to the near bank, then hold for the reaction. Keen removes the whole honeycomb and carries it to the machine.
+[ENVIRONMENT]
+The far-bank leaf and near-bank machine keep fixed world positions. The same honeycomb detaches, leaving the support empty, travels with Keen and lands beside the machine. The support stays empty.
+[Audio]
+@Audio1: preserve approved dialogue and measured lip-sync timing.
+[REFERENCE STATE AUTHORITY]
+Reference 1: fixed environment only; dynamic state follows the current view.

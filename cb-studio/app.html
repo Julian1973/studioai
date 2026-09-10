@@ -5944,6 +5944,7 @@ function openAnimationConfirmModal(shotId,protectedComparison){
   const referenceStrip=fireReferenceStripHTML(shotId,auth);
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
     <h3>${protectedComparison?"Generate one protected comparison":"Generate animation candidates"}</h3>
+    ${d.promptDirector ? `<section class="fire-scorecard"><b>Prompt Director · ${_esc(d.promptDirector.verdict)}</b><p>${_esc(d.promptDirector.summary)}</p><p>${_esc(d.promptDirector.camera)}</p><p>${_esc(d.promptDirector.audio)}</p><details><summary>Continuity and correction evidence</summary><pre>${_esc(JSON.stringify({lifecycle:d.promptDirector.lifecycle, corrections:d.promptDirector.trace, risks:d.promptDirector.findings},null,2))}</pre></details><small>Prompt coherence reviewed. Render outcome remains unverified.</small></section>` : ''}
     ${scorecard}
     ${referenceStrip}
     <details open><summary>Exact animation prompt</summary>${((auth.envelope||{}).executionPlan?.segments||[]).map((segment,index)=>`<h4>Part ${index+1}</h4><pre style="white-space:pre-wrap">${_esc(segment.prompt||"")}</pre>`).join("")}</details>

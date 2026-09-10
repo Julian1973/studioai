@@ -520,10 +520,13 @@ def _require_current_lineage(pkg, scene, episode):
     """HARD REFUSAL, same tier as _require_valid: a package bound to a superseded storyboard
     version can generate nothing new. Fixing this requires recompiling the package from the
     current approved storyboard — a deliberate, separate action, never silently done here."""
-    # Downstream corrections are scoped changes. Older approved shots and media remain
-    # valid; callers refresh only the unit being prepared. Lineage is retained as audit
-    # metadata and must not force the reviewer back through the whole episode.
-    return lineage_status(pkg, scene, episode)
+    # lineage_status already accounts for unchanged scenes and scoped amendments.
+    # Returning a false result here silently allowed stale production requests to fire.
+    report = lineage_status(pkg, scene, episode)
+    if not report["current"]:
+        raise Refused("REFUSED — production handover is stale: " +
+                      "; ".join(report.get("reasonCodes") or ["unknown-source-mismatch"]))
+    return report
 
 
 # ── reference resolution — identity/plate refusals are keeper law (never fire blind) ────
@@ -7789,6 +7792,28 @@ def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per,
                       "md5": _file_md5(led["voPath"]) if led.get("voPath") else None},
            "executionPlan": execution_plan,
            "comparisonRunId": execution_plan.get("comparisonRunId")}
+    from studio_prompt_director import review_legacy_envelope
+    try:
+        review_legacy_envelope(env, shot, specialist)
+        for segment in env["executionPlan"]["segments"]:
+            audit = cb_prompt_lab.analyze_seedance_prompt_contract(
+                segment["prompt"], task_mode="reference-to-video",
+                reference_contract=segment.get("referenceContract", []),
+                duration_sec=segment.get("durationSec", shot["durationSec"]),
+                dialogue_lines=[shot["dialogueLines"][i] for i in segment["dialogueLineIndexes"]]
+                    if "dialogueLineIndexes" in segment else cb_departments.provider_dialogue_lines(shot),
+                stage_plan=segment.get("compiledStages", specialist.get("stagePlan", [])))
+            score = _seedance_authoring_score(audit)
+            if not audit.get("productionReady", audit.get("status") == "ready") or score < SEEDANCE_AUTHORING_FLOOR:
+                raise ValueError("Prompt Director correction needs provider-syntax repair before Fire")
+            audit.update(authoringScore10=score, authoringMaximum=10, firingFloor10=SEEDANCE_AUTHORING_FLOOR)
+            quality = _prompt_contract_completeness(shot, segment['prompt'], specialist)
+            audit['contractCompleteness'] = {k: quality[k] for k in ('score', 'maximum', 'threshold', 'criticalFailures')}
+            audit['contractCompleteness']['ready'] = not quality['needsRevision']
+            audit['creativeGate'] = dict(audit['contractCompleteness'])
+            segment["promptAudit"] = audit
+    except ValueError as exc:
+        raise Refused(str(exc)) from exc
     from studio_director_card import card
     import hashlib
     env['directorCardRevision'] = card(shot, {'sourceStoryboard': pkg.get('sourceStoryboard'),
@@ -7821,6 +7846,11 @@ def _verify_envelope(auth):
     if env["audio"]["path"] and _file_md5(env["audio"]["path"]) != env["audio"]["md5"]:
         raise Refused("REFUSED — the audio asset changed after the disclosure; the token is "
                       "STALE. Request a new disclosure.")
+    from studio_prompt_director import verify_legacy_envelope
+    try:
+        verify_legacy_envelope(env)
+    except ValueError as exc:
+        raise Refused(str(exc)) from exc
     plan = env.get("executionPlan") or {}
     segments = plan.get("segments") or []
     if not segments:
@@ -9649,6 +9679,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                        "providerModelId": envelope["providerModelId"],
                        "modelVersion": envelope["modelVersion"],
                        "resolution": envelope["executionPlan"]["segments"][0]["contract"]["resolution"],
+                       "promptDirector": envelope["executionPlan"]["segments"][0].get("promptDirector"),
                        "promptScores": {
                            "contractCompleteness": envelope["executionPlan"]["segments"][0]
                            .get("promptAudit", {}).get("contractCompleteness"),

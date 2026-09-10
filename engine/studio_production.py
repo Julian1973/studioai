@@ -25,7 +25,7 @@ STANDARD_PATH = Path(__file__).resolve().parent.parent / "skills/project-product
 _RUNNING = set()
 _RUNNING_LOCK = threading.Lock()
 STAGES = ("see", "hear", "request", "watch")
-ROLE = {"plan": "direction", "chat": "direction", "revise": "direction", "see": "keyframes", "hear": "voices", "watch": "animation"}
+ROLE = {"prompt_review": "direction", "plan": "direction", "chat": "direction", "revise": "direction", "see": "keyframes", "hear": "voices", "watch": "animation"}
 
 
 def money(value):
@@ -508,9 +508,8 @@ class Production:
                 elif action == "request":
                     if not shot:
                         raise StudioError("Choose a shot first.")
-                    item = self.watch_request(context, state, shot)
-                    self._replace(shot, "request", item)
-                    self._message(state, "agent", "WATCH request ready. Review the prompt, script, references, duration and estimate before approving.")
+                    launch = self.reserve(db, context, state, pid, ep, "prompt_review", shot, message, payload)
+                    self._message(state, "agent", "Prompt Director is reviewing the final story and continuity before WATCH cost review.", jobId=launch["id"])
                 else:
                     kind = "plan" if action == "prepare" else action
                     if kind not in ROLE:
@@ -646,6 +645,8 @@ class Production:
         binding = route(self.ws.binding(pid, ROLE[kind]), kind, shot, message)
         refs = self.assets(context, shot) if kind == "see" else []
         inputs = {}
+        if kind == "prompt_review":
+            inputs["request"] = self.watch_request(context, state, shot)
         if kind == "hear":
             if not shot["dialogue"]:
                 raise StudioError("This shot has no dialogue; continue to the WATCH request.")
@@ -673,10 +674,18 @@ class Production:
                 raise StudioError("The service or key changed. Prepare and review an updated WATCH request.", "stale")
             if any((self.artifact(shot, s) or {}).get("id") != request["dependencies"][s] for s in ("see", "hear")):
                 raise StudioError("The WATCH inputs changed. Review an updated request.", "stale")
+            from studio_prompt_director import verify, request_snapshot, project_authorities
+            current_authorities = project_authorities(context, shot, request['source'])
+            try:
+                verify(request_snapshot(request['prompt'], current_authorities, request['images'], request['audio'], request['duration'], request['binding']), request.get('promptDirector'))
+            except ValueError as exc:
+                raise StudioError(str(exc), 'stale') from exc
             inputs["request"] = request
         request_count = len(inputs["dialogue"]) if kind == "hear" else 1
         from studio_workflow import estimate
         cost = money(estimate(binding, kind, shot, duration=inputs.get("request", {}).get("duration")))
+        if kind == "prompt_review":
+            cost *= 2  # bounded initial review plus one correction review
         budget = state["budget"]
         if budget["allowance"] - budget["committed"] - budget["reserved"] < cost:
             raise StudioError("The episode allowance does not cover this request. Increase it or adjust the project service estimate.", "budget_required")
@@ -836,6 +845,23 @@ class Production:
                     self.assert_artifact(pid, job["inputs"]["request"])
             out_dir = self.ws.project_path(pid, f"projects/{pid}/media")
             out_dir.mkdir(exist_ok=True)
+            if kind == "prompt_review":
+                from studio_prompt_director import run as review_prompt, Review, request_snapshot, project_authorities
+                request = job["inputs"]["request"]
+                authorities = project_authorities(context, job['shot'], request['source'])
+                source = request_snapshot(request["prompt"], authorities, request["images"], request["audio"], request["duration"], request["binding"])
+                self.progress(job, 'prompt_review', 'Prompt Director is checking the compiled story and current-state handoffs')
+                def reviewer(system, data):
+                    response = self.transport.direct(connection, key, binding["model"], system, data, schema=Review)
+                    response.pop('_usage', None)
+                    return response
+                try:
+                    final, report = review_prompt(source, reviewer)
+                except ValueError as exc:
+                    raise StudioError(str(exc), 'prompt_coherence') from exc
+                result = {**request, 'prompt': final['prompt'], 'promptDirector': report, 'promptDirectorSnapshot': final}
+                self.complete(job, result)
+                return
             if kind in {"plan", "chat", "revise"}:
                 self.progress(job, 'direction', 'Director is preparing a structured proposal')
                 data = {"project": context["project"], "bible": context["bible"], "assets": context["assets"],
@@ -932,6 +958,11 @@ class Production:
                 output = out_dir / f"{job_id}.mp4"
                 request = job["inputs"]["request"]
                 if not job.get("taskId"):
+                    from studio_prompt_director import verify, request_snapshot, project_authorities
+                    with self.ws.db() as db:
+                        current_state = self._load(db, pid, job['episode'])
+                    live_shot = self.selected(current_state, job['shotId'])
+                    verify(request_snapshot(request['prompt'], project_authorities(self.ws.context(pid, job['episode']), live_shot, request['source']), request['images'], request['audio'], request['duration'], request['binding']), request.get('promptDirector'))
                     self.progress(job, 'submit', 'Submitting the approved render request')
                     job["taskId"] = self._provider_call(job, self.transport.video_submit, connection, key, binding["model"], request["prompt"],
                         [self.ws.project_path(pid, r["path"]) for r in request["images"]],
@@ -1023,6 +1054,15 @@ class Production:
                 else:
                     state.setdefault("assembly", {})["preview"] = result
                     self._message(state, "agent", "Continuous episode preview ready. Watch the cut and review its joins.")
+            elif kind == "prompt_review":
+                shot = self.selected(state, job['shotId'])
+                current_hash = digest(Shot.model_validate({k: shot[k] for k in Shot.model_fields if k in shot}).model_dump())
+                if current_hash != result['shotHash']:
+                    state['history'].append({'jobId': job['id'], 'reason': 'Direction changed during Prompt Director review', 'result': result})
+                else:
+                    result['status'] = 'candidate' if result['promptDirector']['verdict'] == 'READY TO FIRE' else 'blocked'
+                    self._replace(shot, 'request', result)
+                    self._message(state, 'agent', result['promptDirector']['verdict'] + ' — ' + result['promptDirector']['summary'])
             elif kind == "plan":
                 state["sceneCoverage"] = result.get("sceneCoverage", [])
                 state["shots"] = [{**shot, "outcomes": {}, "versions": [], "sourceSignature": self.source_signature(job["context"], shot),
@@ -1052,6 +1092,8 @@ class Production:
                 if kind in {"see", "watch"}:
                     from studio_workflow import handoff
                     result["directionTrace"] = handoff(job["shot"], kind, job["references"] if kind == "see" else job["inputs"]["request"]["images"])
+                if kind == 'watch':
+                    result['promptDirector'] = job['inputs']['request'].get('promptDirector')
                 result["directorCardRevision"] = job.get("directorCardRevision")
                 result['originatingShot'] = {k: job['shot'].get(k) for k in Shot.model_fields}
                 result['executionReceipt'] = {'kind': 'provider_generation', 'jobId': job['id'],

@@ -204,7 +204,7 @@ def execute(production, job):
         prepared.append({'path': path, 'type': kind, 'mimeType': mime, 'label': label})
     from studio_director_card import REVIEW_CRITERIA
     context = {'creativeReviewCriteria': REVIEW_CRITERIA, 'project': job['context']['project'], 'projectBible': job['context']['bible'],
-               'script': job['context']['script'], 'shot': inputs['shot'], 'directorCardRevision': inputs.get('directorCardRevision'),
+               'script': job['context']['script'], 'shot': inputs['shot'], 'directorCardRevision': inputs.get('directorCardRevision'), 'promptDirector': inputs.get('promptDirector'),
                'previousShot': inputs.get('previous'), 'nextShot': inputs.get('next'), 'evidence': evidence}
     if len(json.dumps(context)) > 200000:
         raise StudioError('The review context exceeds the current limit. Use a smaller reference brief.', 'context_limit')
@@ -226,7 +226,7 @@ def execute(production, job):
         raise StudioError('The video reviewer returned a time outside this shot. No report was applied.', 'invalid_output')
     job['audioReview'] = report['audioReview']
     result = {'id': uuid.uuid4().hex, 'jobId': job['id'], 'fingerprint': inputs['fingerprint'], 'candidateId': inputs['watch']['candidateId'],
-              'directorCardRevision': inputs.get('directorCardRevision'),
+              'directorCardRevision': inputs.get('directorCardRevision'), 'promptDirector': inputs.get('promptDirector'),
               'binding': job['binding'], 'at': time.time(), 'evidence': evidence, **report, 'sourceIntegrity': 'verified',
               'reviewContractHash': job['videoReviewContractHash'], 'interactionId': response.get('interactionId'),
               'usage': response.get('usage', {}), 'cleanupPending': job.get('cleanupPending', False),

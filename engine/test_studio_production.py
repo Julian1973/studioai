@@ -31,9 +31,11 @@ def shot(index, line):
 
 class FakeTransport(ProviderTransport):
     def __init__(self): self.calls=[]; self.reply=None; self.error=None; self.pending=False
-    def direct(self, connection, key, model, system, context, *, planning=False, images=None):
+    def direct(self, connection, key, model, system, context, *, planning=False, images=None, schema=None):
         self.calls.append(("direction",key,context))
         if self.error: raise self.error
+        if schema is not None:
+            return {'summary':'The fixture story is coherent.', 'audienceBeat':'Trust', 'camera':'Purposeful hold', 'audio':'Unchanged', 'locked':['voice'], 'directed':['hesitation'], 'open':['micro-expression'], 'lifecycle':[], 'findings':[], 'edits':[]}
         if planning:
             return {"message":"Prepared from your script.","shots":[shot(i,line) for i,line in context['scriptLines']]}
         return copy.deepcopy(self.reply or {"message":"The selected shot keeps its geography.","revisedShot":None})
@@ -131,10 +133,14 @@ def test_see_hear_request_render_approvals_use_one_pipeline(setup,via_chat):
     approve(p,'hear',via_chat)
     state=p.snapshot('first','1')['state'];request=state['shots'][0]['outcomes']['request']
     assert request['status']=='candidate' and 'Hero: Hello.' in request['source']
+    assert request['promptDirector']['verdict']=='READY TO FIRE'
+    assert request['promptDirectorSnapshot']['prompt']==request['prompt']
     assert not any(c[0]=='video' for c in t.calls)
     approve(p,'request',via_chat)
     state=p.snapshot('first','1')['state'];render=state['shots'][0]['outcomes']['watch']
     assert render['status']=='candidate'
+    assert render['promptDirector']['payloadHash']==request['promptDirector']['payloadHash']
+    assert [c[2] for c in t.calls if c[0]=='video'][-1]==request['prompt']
     assert render['audioAuthority']['source']['hash']==state['shots'][0]['outcomes']['hear']['files'][0]['hash']
     assert ws.project_path('first',render['files'][0]['path']).is_file()
     approve(p,'watch',via_chat)
@@ -407,3 +413,16 @@ def test_watch_cannot_silently_outgrow_upstream_shot(setup, monkeypatch):
         p.watch_request(ws.context('first', '1'), state, current)
     assert current == before
     assert len(t.calls) == calls
+
+def test_prompt_director_blocks_tampered_request_before_video(setup):
+    p,ws,t,_=setup
+    command(p,'budget',amountUsd=5);approve(p,'see');approve(p,'hear')
+    with ws.db() as db:
+        state=p._load(db,'first','1')
+        original_audio=copy.deepcopy(state['shots'][0]['outcomes']['hear'])
+        state['shots'][0]['outcomes']['request']['prompt'] += '\nAn unreviewed event.'
+        p._save(db,'first','1',state)
+    approve(p,'request')
+    assert any('STALE PACKAGE' in message['text'] for message in p.snapshot('first','1')['state']['messages'])
+    assert not any(c[0]=='video' for c in t.calls)
+    assert p.snapshot('first','1')['state']['shots'][0]['outcomes']['hear']==original_audio

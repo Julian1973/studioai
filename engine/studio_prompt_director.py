@@ -11,7 +11,7 @@ import re
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-VERSION = 'prompt-director-1.1.1'
+VERSION = 'prompt-director-1.4.1'
 
 class Record(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -84,7 +84,32 @@ its authoritative source in each edit. Never edit audio/speech/lip-sync instruct
 quoted dialogue, reference tags, settings or approved events. Preserve cinematic intent.
 If a source itself contradicts another authority, report it, do not decide a new story.
 A later review sees the corrected payload and must independently check all requirements.
-No numeric score and no promise of creative success.'''
+No numeric score and no promise of creative success.
+Read characterRoleIntegrity before reviewing any character action. It binds the actual
+upload order, canonical character IDs, identities, acting, state transitions, visible
+views and approved dialogue ownership. Explicit role/tag/ownership conflicts block.
+Compare all current prompt actions with those source owners; do not transfer a role,
+prop, mark, pose, line or ending to a different character. Similar appearances are a
+render risk, not a proven tag error. Never invent distinguishing anatomy or prohibit
+a shared canonical trait. Missing visual recognition remains unverified.
+Historical sourceSlot/referenceSlots values are authoring provenance only; the resolved
+upload manifest and characterRoleIntegrity own the provider tags.
+When characterRoleIntegrity.sourcePreservation is present, this is a bounded edit of
+an approved source video, not a new canonical identity replacement route. Preserve
+source character identity throughout. If the correction requests replacement of a
+character identity without canonical image bindings, report provider infeasibility;
+do not infer new image tags or treat source preservation as identity-edit qualification.
+When providerPromptCompilation.applied is true, the provider sees the compact
+prompt only. Its sourcePrompt and the dynamic/role records remain internal evidence.
+Check that the compact views still express every required cause, state transition,
+performance, sound and ending from those authorities. Never reinsert raw state
+ledgers or repeated bibles. Visible cast follows the current coverage view, not
+every name mentioned in background continuity. Do not activate an offscreen
+character to illustrate a reminder. Keep the supplied Audio1 blocks verbatim.
+currentPromptViews indexes the actual compact payload by view header and visible cast.
+Ground a view-specific cast finding in that view, not in an identical line from an
+earlier view. reviewValidationErrors means a proposed edit was NOT applied. Re-read
+the unchanged payload and resolve that error; do not assume the proposal was correct.'''
 
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False, allow_nan=False).encode()).hexdigest()
@@ -124,15 +149,16 @@ def protected(prompt):
     return spans
 
 def resolve_references(refs, states):
+    from studio_dynamic_state import scope
     resolved = deepcopy(refs)
     for ref in resolved:
-        role = str(ref.get('role', ref.get('name', ''))).lower()
+        authority = scope(ref)['authority']
         ref['resetRisk'] = {key: {'depicted': (ref.get('depictedState') or {}).get(key), 'required': value}
             for key, value in (ref.get('requiredState') or {}).items()
             if (ref.get('depictedState') or {}).get(key) != value}
-        ref['coherenceAuthority'] = ('fixed environment only; dynamic state follows the current view' if 'plate' in role or 'geography' in role else
-            'identity/design only; not pose, position, owner or current condition' if 'character' in role or 'prop' in role or 'identity' in role else
-            'opening composition only; subsequent states follow the directed events' if 'opening' in role else
+        ref['coherenceAuthority'] = ('fixed environment only; dynamic state follows the current view' if authority == 'fixed_geography' else
+            'identity/design only; not pose, position, owner or current condition' if authority == 'identity_only' else
+            'opening composition only; subsequent states follow the directed events' if authority == 'opening_state' else
             'declared continuation state only; not independent location or time jumps')
     return resolved
 
@@ -140,6 +166,19 @@ def run(snapshot, reviewer):
     """reviewer(system, immutable input) -> Review. Maximum two review calls."""
     original = deepcopy(snapshot)
     working = deepcopy(snapshot)
+    from studio_character_roles import audit as audit_roles, emit as emit_roles, bind_visual_names
+    roles = audit_roles(working)
+    if roles['status'] == 'BLOCKED':
+        return working, {'version': VERSION, 'inputHash': digest(original),
+            'payloadHash': digest(working), 'sourceHash': digest(working.get('authorities')),
+            'characterRoleIntegrity': roles, 'verdict': 'BLOCKED: CHARACTER ROLE INTEGRITY',
+            'summary': '; '.join(e['code'] for e in roles['errors']),
+            'errors': [json.dumps(e, ensure_ascii=False) for e in roles['errors']],
+            'lifecycle': [], 'findings': [], 'rounds': [], 'trace': [],
+            'providerCalled': False, 'spendOccurred': False,
+            'correctiveAction': 'Correct the named identity or role binding against the current source; preserve approved audio.',
+            'creativeOutcome': 'unverified', 'finalPrompt': working['prompt']}
+    working['prompt'] = emit_roles(working['prompt'], roles)
     from studio_dynamic_state import resolve as resolve_dynamic
     dynamic = resolve_dynamic(working.get('authorities', {}), working.get('references', []))
     scoped = resolve_references(dynamic['referencePackage'], [])
@@ -150,33 +189,115 @@ def run(snapshot, reviewer):
             f'Reference {i + 1}: {ref["coherenceAuthority"]}.' for i, ref in enumerate(scoped))
     if dynamic['clauses']:
         working['prompt'] += '\nReference scope: earlier images establish appearance and geography; later views use CURRENT DYNAMIC STATE.\n'
-    trace, rounds = [], []
+    from studio_seedance_execution import compile_prompt, final_check
+    try:
+        working['prompt'], execution = compile_prompt(working, roles)
+        execution_budget, execution_errors = final_check(working, execution)
+        execution['budget'] = execution_budget
+    except ValueError as exc:
+        execution = {'applied': False, 'sourcePrompt': working['prompt'], 'error': str(exc)}
+        execution_errors = [str(exc)]
+    if execution_errors:
+        return working, {'version': VERSION, 'inputHash': digest(original),
+            'payloadHash': digest(working), 'sourceHash': digest(working.get('authorities')),
+            'characterRoleIntegrity': roles, 'dynamicStateResolution': dynamic,
+            'providerPromptCompilation': execution, 'verdict': 'BLOCKED: PROVIDER PROMPT COMPILATION',
+            'summary': '; '.join(execution_errors), 'errors': execution_errors,
+            'lifecycle': [], 'findings': [], 'rounds': [], 'trace': [],
+            'providerCalled': False, 'spendOccurred': False,
+            'correctiveAction': 'Repair the current execution direction without changing approved audio or story events.',
+            'creativeOutcome': 'unverified', 'finalPrompt': working['prompt']}
+    trace, rounds, validation_errors = [], [], []
     for attempt in range(2):
         review_input = deepcopy(working)
         review_input['dynamicStateResolution'] = deepcopy(dynamic)
+        review_input['characterRoleIntegrity'] = deepcopy(roles)
+        review_input['providerPromptCompilation'] = deepcopy(execution)
+        review_input['currentPromptViews'] = [
+            {'header': match[1], 'visibleCast': cast.group(1) if cast else None}
+            for match in re.finditer(r'^(Shot \d+:[^\n]*)\n(.*?)(?=^Shot \d+:|^\[|\Z)',
+                                     working['prompt'], re.M | re.S)
+            for cast in [re.search(r'^Visible cast:\s*(.*)$', match[2], re.M)]]
+        if validation_errors:
+            review_input['reviewValidationErrors'] = deepcopy(validation_errors)
         result = Review.model_validate(reviewer(SYSTEM, review_input)).model_dump()
         rounds.append(result)
         prompt = working['prompt']
+        invalid_edits = [dict(old=edit['old'], matches=prompt.count(edit['old']),
+            sourcePresent=bool(edit['source'].strip()),
+            reason='Edit requires an exact unique current-payload span and source; no edit was applied.')
+            for edit in result['edits']
+            if not edit['source'].strip() or prompt.count(edit['old']) != 1]
+        if invalid_edits:
+            validation_errors = invalid_edits
+            trace.append({'status': 'rejected-invalid-edit', 'errors': deepcopy(invalid_edits)})
+            if attempt == 0:
+                continue
+            # An ungrounded/non-unique edit is not itself authority to change the
+            # provider payload, and it should not kill an otherwise coherent request
+            # before durable evidence is written. Reject the edit, continue with the
+            # unchanged prompt, and let grounded findings/dynamic-state/execution
+            # errors decide whether the request can fire.
+            result['edits'] = []
+        grounded_findings = []
+        ungrounded_findings = []
         for finding in result['findings']:
             quotes = re.findall(r'[\"“]([^\"”]+)[\"”]', finding['evidence'])
             grounded = bool(finding['evidence']) and (finding['evidence'] in prompt or (bool(quotes) and all(quote in prompt for quote in quotes)))
             if finding['category'] != 'risk' and not grounded:
-                raise ValueError('Prompt Director returned an ungrounded conflict; no payload is authorised')
-        if result['edits'] and attempt == 0:
+                ungrounded_findings.append({
+                    'category': finding.get('category'),
+                    'reason': finding.get('reason'),
+                    'evidence': finding.get('evidence'),
+                    'recommendation': finding.get('recommendation'),
+                    'status': 'rejected-ungrounded-finding',
+                })
+            else:
+                grounded_findings.append(finding)
+        if ungrounded_findings:
+            validation_errors = ungrounded_findings
+            trace.append({'status': 'rejected-ungrounded-finding', 'errors': deepcopy(ungrounded_findings)})
+            if attempt == 0:
+                continue
+            result['findings'] = grounded_findings
+        if result['edits']:
             guards = protected(prompt)
+            accepted_edits = []
+            protected_errors = []
+            remaining_edits = []
             for edit in result['edits']:
                 if not edit['source'].strip() or prompt.count(edit['old']) != 1:
-                    raise ValueError('Prompt Director repair has no unique source span')
+                    protected_errors.append({**edit, 'reason': 'Edit requires an exact unique current-payload span and source; no edit was applied.'})
+                    continue
                 updated = prompt.replace(edit['old'], edit['new'], 1)
                 if any(updated.count(span) != prompt.count(span) for span in guards):
-                    raise ValueError('Prompt Director repair touches protected audio/dialogue')
+                    protected_errors.append({**edit, 'reason': 'Edit touches protected audio/dialogue; no edit was applied.'})
+                    continue
                 if re.findall(r'@(?:图|Image|Audio|Video)\d+', prompt) != re.findall(r'@(?:图|Image|Audio|Video)\d+', updated):
-                    raise ValueError('Prompt Director repair changes reference bindings')
-                trace.append({**edit, 'status': 'replaced', 'class': 'DIRECTED'})
-                prompt = updated
-            working['prompt'] = prompt
-            continue
-        errors = lifecycle_errors(result['lifecycle']) + dynamic['errors']
+                    protected_errors.append({**edit, 'reason': 'Edit changes reference bindings; no edit was applied.'})
+                    continue
+                if attempt == 0:
+                    accepted_edits.append(edit)
+                    trace.append({**edit, 'status': 'replaced', 'class': 'DIRECTED'})
+                    prompt = updated
+                else:
+                    remaining_edits.append(edit)
+            if protected_errors:
+                validation_errors = protected_errors
+                trace.append({'status': 'rejected-protected-edit', 'errors': deepcopy(protected_errors)})
+            if attempt == 0 and accepted_edits:
+                # A reviewer may add a new visual name while preserving every existing
+                # tag. Bind that new mention before the second review, not after sealing.
+                working['prompt'] = bind_visual_names(prompt, roles)
+                continue
+            if attempt == 0 and protected_errors and not accepted_edits:
+                continue
+            result['edits'] = remaining_edits
+        roles = audit_roles(working)
+        execution_budget, execution_errors = final_check(working, execution)
+        execution.update(budget=execution_budget, promptHash=digest(working['prompt']))
+        errors = lifecycle_errors(result['lifecycle']) + dynamic['errors'] + [
+            json.dumps(e, ensure_ascii=False) for e in roles['errors']] + execution_errors
         for ref in scoped:
             if ref.get('resetRisk') and ('opening' in str(ref.get('role', '')).lower() or ref.get('authority') == 'current_state'):
                 errors.append('Current-state reference conflicts with required state: ' + str(ref.get('slot', ref.get('name', 'reference'))) + '. Replace or correct the source; old state cannot govern this opening.')
@@ -188,6 +309,8 @@ def run(snapshot, reviewer):
                   'inputHash': digest(original), 'payloadHash': digest(working),
                   'sourceHash': digest(working.get('authorities')), 'errors': errors,
                   'references': scoped, 'dynamicStateResolution': dynamic,
+                  'characterRoleIntegrity': roles,
+                  'providerPromptCompilation': execution,
                   'verdict': 'BLOCKED: ' + (hard[0]['category'].upper() if hard else 'STORY/STATE CONTRADICTION') if hard or errors else 'READY TO FIRE',
                   'creativeOutcome': 'unverified', 'visualEvidence': 'metadata only unless explicitly supplied',
                   'finalPrompt': working['prompt']}
@@ -199,6 +322,26 @@ def verify(snapshot, report):
         raise ValueError('BLOCKED: STALE PACKAGE — Prompt Director evidence does not match this request')
     if report.get('verdict') != 'READY TO FIRE':
         raise ValueError(report.get('verdict', 'Prompt Director review incomplete'))
+    from studio_tracked_objects import audit_prompt
+    current_objects = audit_prompt(
+        snapshot.get('prompt') or '',
+        (snapshot.get('authorities') or {}).get('shot') or {},
+        snapshot.get('references') or [])
+    if current_objects.get('status') == 'BLOCKED':
+        reasons = '; '.join(item.get('reason', 'tracked object failure')
+                            for item in current_objects.get('errors') or [])
+        raise ValueError('BLOCKED: TRACKED PRODUCTION OBJECTS — ' + reasons)
+    sealed_objects = report.get('trackedProductionObjects') or {}
+    if sealed_objects and sealed_objects.get('objectResolutionHash') != current_objects.get('objectResolutionHash'):
+        raise ValueError('BLOCKED: TRACKED PRODUCTION OBJECTS — object evidence does not match this request')
+    from studio_character_roles import audit as audit_roles
+    current = audit_roles(snapshot)
+    if current['status'] == 'BLOCKED' or current['matrixHash'] != (report.get('characterRoleIntegrity') or {}).get('matrixHash'):
+        raise ValueError('BLOCKED: CHARACTER ROLE INTEGRITY — identity, ownership or source files changed; prepare a current request')
+    from studio_seedance_execution import final_check
+    _, execution_errors = final_check(snapshot, report.get('providerPromptCompilation') or {})
+    if execution_errors:
+        raise ValueError('BLOCKED: PROVIDER PROMPT COMPILATION — ' + '; '.join(execution_errors))
 
 def return_review(report, candidate, observations, *, method, ranges, audio_reviewed=False, limitations=''):
     if not candidate or not method or not ranges:
@@ -207,6 +350,7 @@ def return_review(report, candidate, observations, *, method, ranges, audio_revi
             'intended': report['lifecycle'], 'observations': deepcopy(observations),
             'method': method, 'ranges': ranges, 'limitations': limitations,
             'audioLipSync': 'reviewed' if audio_reviewed else 'unverified',
+            'characterRoleIntegrity': deepcopy(report.get('characterRoleIntegrity')),
             'approval': 'not-granted', 'adjoiningCuts': 'unverified'}
 
 def request_snapshot(prompt, authorities, references, audio, duration, settings=None):
@@ -218,7 +362,8 @@ def review_legacy_envelope(env, shot, specialist, *, archive_folder=None):
     import cb_llm
     authorities = {'shot': deepcopy(shot), 'specialist': deepcopy(specialist)}
     # Do not let historical provider prose compete with authored source decisions.
-    for prompt_field in ('seedancePrompt', 'keyframePrompt', 'seedreamPrompt'):
+    for prompt_field in ('seedancePrompt', 'keyframePrompt', 'seedreamPrompt',
+                         'referenceSlots', 'keyframeReferenceSlots'):
         authorities['shot'].pop(prompt_field, None)
     authorities['specialist'].pop('providerPrompt', None)
     for segment in env['executionPlan']['segments']:
@@ -233,6 +378,14 @@ def review_legacy_envelope(env, shot, specialist, *, archive_folder=None):
         destination = archive / (report['payloadHash'] + '.json')
         if not destination.exists():
             _write(destination, {'snapshot': final, 'review': report})
+        from studio_tracked_objects import audit_prompt, compact_report
+        object_report = audit_prompt(final.get('prompt') or '', authorities.get('shot') or {},
+                                     segment.get('references', env['references']))
+        report['trackedProductionObjects'] = compact_report(object_report)
+        if object_report.get('status') == 'BLOCKED':
+            reasons = [item.get('reason', 'tracked object failure')
+                       for item in object_report.get('errors') or []]
+            raise ValueError('BLOCKED: TRACKED PRODUCTION OBJECTS: ' + '; '.join(reasons) + ' (review: ' + str(destination) + ')')
         if report['verdict'] != 'READY TO FIRE':
             reasons = [f['reason'] for f in report['findings'] if f['category'] != 'risk'] + report['errors']
             raise ValueError(report['verdict'] + ': ' + '; '.join(reasons) + ' (review: ' + str(destination) + ')')

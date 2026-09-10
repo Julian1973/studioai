@@ -23,6 +23,7 @@ import cb_audio_authority
 import cb_canon
 import cb_providers
 import cb_production_contracts as production_contracts
+import studio_prompt_aliases
 
 
 def selected_voice_recipe(recipes, selected, candidates, current_compiled_hash=None):
@@ -191,6 +192,19 @@ def create_policy(m):
                 "continuityConstraints",
             )
             return {key: shot.get(key) for key in voice_fields if key in shot}
+        if stage == "animation":
+            # seedancePrompt/provider sync metadata are derived payload bytes, not
+            # source direction. Hashing them as animation inputs makes the
+            # department stale itself whenever the compiler repairs or re-emits
+            # the provider prompt. Source authority remains the Director Card,
+            # shot fields, approved corrections, references, SEE/HEAR state and
+            # specialist/runtime hashes.
+            excluded = {
+                "seedancePrompt", "seedancePromptSyncedFromDepartment",
+                "promptDirector", "promptDirectorSnapshot",
+                "animationPreflight", "seedanceScore",
+            }
+            return {key: value for key, value in shot.items() if key not in excluded}
         return shot
 
     def scoped_shot_signature(shot, stage):
@@ -662,6 +676,9 @@ def create_policy(m):
         return result
 
     def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
+        if stage in ("cinematography", "animation") and shot_id:
+            from studio_director_handoff import prepare_native
+            prepare_native(m, scene, shot_id, episode, log)
         pkg, path = current_package(scene, episode)
         if stage in direction_stages:
             current = department_record_status(
@@ -728,7 +745,25 @@ def create_policy(m):
                     compiled = m.cb_departments.compile_animation_provider_prompt(
                         creative_shot, direction)
                     if compiled != output.get("providerPrompt"):
-                        invalidation_reason = "deterministic animation compiler changed"
+                        # Same signed creative inputs: regenerate derived bytes locally.
+                        # A formatting/compiler revision must not call the director again
+                        # or replace its acting decisions. Fresh spend/review is still
+                        # required for the new payload; media approvals are untouched.
+                        import copy
+                        work.setdefault('history', []).append({
+                            **copy.deepcopy(existing), 'outcome': 'recompiled',
+                            'supersededAt': m._now(),
+                            'supersededBy': 'current deterministic animation compiler'})
+                        updated = copy.deepcopy(existing)
+                        updated['output']['providerPrompt'] = compiled
+                        updated['recompiledAt'] = m._now()
+                        updated['recompileKind'] = 'same signed direction; new derived prompt'
+                        work['candidate'] = updated
+                        m._ledger(pkg, shot_id)['pendingSpendAuth'] = None
+                        save_extra(); m._save(pkg, path)
+                        log('WATCH PREPARATION — recompiled the current direction locally; '
+                            'the next request receives a fresh pre-fire review (no provider call)')
+                        return updated
                 except (KeyError, TypeError, ValueError, RuntimeError) as exc:
                     invalidation_reason = f"animation compiler contract failed: {exc}"
             if invalidation_reason:
@@ -809,7 +844,7 @@ def create_policy(m):
                 "geography, lighting, reference-role and continuity decision from the "
                 "current signed direction."
             )
-        return prompt
+        return studio_prompt_aliases.protect_honeycomb_aliases(prompt, shot)
 
     def voice_lines(pkg, shot):
         from cb_voice_reuse import current_requests
@@ -994,12 +1029,17 @@ def create_policy(m):
         voice_approval = voice["record"]
         opening_contract = (((ledger.get("keyframeApproval") or {}).get("promptContract") or {})
                             .get("directionContract") or {})
+        cinematography = department_record_status(
+            pkg, shot["shotId"], "cinematography", scene, episode)
         return {
             "canonProfileDigest": require_canon(pkg, episode, "animation"),
             "shotHash": hashlib.sha256(json.dumps(
                 shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
             "openingFrameHash": file_sha256(anchor),
             "openingStageContractHash": json_sha256(opening_contract),
+            "cinematographyDirectionHash": json_sha256(
+                (cinematography.get("record") or {}).get("output") or {}),
+            "cinematographySourceHash": json_sha256(cinematography.get("expectedInputSignature")),
             "sceneLookHash": ((look.get("active") or {}).get("hash")
                               if look.get("current") else None),
             "referenceOrder": [item["slot"] for item in plan],
@@ -1064,6 +1104,12 @@ def create_policy(m):
                 m.cb_seedance_transport.TransportPlanError) as exc:
             raise m.Refused(f"REFUSED — provider capability: {exc}") from exc
         provider = plan["segments"][0]["contract"]
+        import studio_tracked_objects
+        object_report = studio_tracked_objects.audit_prompt(prompt, shot, refs)
+        if object_report.get("status") != "READY":
+            reasons = "; ".join(item.get("reason", "tracked object failure")
+                                for item in object_report.get("errors") or [])
+            raise m.Refused("REFUSED — tracked production objects need repair before approval/currentness: " + reasons)
         return {
             "canonProfileDigest": require_canon(pkg, episode, "animation"),
             "shotContractHash": json_sha256(shot),
@@ -1079,6 +1125,8 @@ def create_policy(m):
             "comparisonModelId": comparison_model_id,
             "comparisonRunId": comparison_run_id,
             "executionPlanHash": json_sha256(plan),
+            "trackedProductionObjects": studio_tracked_objects.compact_report(object_report),
+            "trackedProductionObjectHash": object_report.get("objectResolutionHash"),
             "provider": provider["provider"],
             "providerModelId": provider["providerModelId"],
             "modelVersion": provider["modelVersion"],
@@ -1572,11 +1620,12 @@ def create_policy(m):
                 "selectedAssetHash": m._file_md5(candidate.get("path")),
                 "source": candidate.get("source")}
 
-    def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
+    def keyframe_shot(scene, shot_id, episode="Ep1", log=print, *, compare=True):
         pkg, _ = current_package(scene, episode)
         failure = None
         try:
-            result = original["keyframe_shot"](scene, shot_id, episode, log)
+            result = (original["keyframe_shot"](scene, shot_id, episode, log) if compare else
+                      original["keyframe_shot"](scene, shot_id, episode, log, compare=False))
         except BaseException as exc:
             # An A/B provider failure must not strand a completed paid candidate as
             # apparently stale. Finalize any candidate already persisted, then surface
@@ -1973,6 +2022,7 @@ def create_policy(m):
                     "SEE/HEAR/reference inputs. Restore it or save it again after preparing "
                     "the current Animation direction."
                 )
+        prompt = studio_prompt_aliases.protect_honeycomb_aliases(prompt, shot)
         return (m._with_character_scale_control(
             prompt, shot, "referenceSlots", str(scene or pkg.get("sceneNumber")),
             episode or pkg.get("episode") or "Ep1"), bool(working.get("text")))
@@ -1983,6 +2033,7 @@ def create_policy(m):
         if not prompt:
             raise m.Refused(
                 f"REFUSED — Prepare current Animation direction for {shot['shotId']} first")
+        prompt = studio_prompt_aliases.protect_honeycomb_aliases(prompt, shot)
         return m._with_character_scale_control(
             prompt, shot, "referenceSlots", str(pkg.get("sceneNumber")),
             pkg.get("episode") or "Ep1")
@@ -2001,6 +2052,15 @@ def create_policy(m):
                   generate_audio=True, protected_comparison=False):
         pkg, _ = current_package(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
+        production_block = ledger.get("productionBlock") or shot.get("productionBlock") or {}
+        if str(production_block.get("status") or "").upper().startswith("BLOCKED"):
+            reason = (f"{shot_id} is {production_block.get('status')}: "
+                      f"{production_block.get('reason', 'production recovery gate has not been cleared')}")
+            block_path = m._write_prefire_block_evidence(
+                shot, reason, package=pkg,
+                corrective_action='Complete and record the clean SEE opening qualification, then clear the production recovery gate before WATCH Fire.',
+                source_bindings={'productionBlock': production_block})
+            raise m.Refused(f"REFUSED — {reason} (pre-fire block: {block_path})")
         if ledger.get("status") == "model-limited":
             raise m.Refused(
                 f"REFUSED — {shot_id} is MODEL-LIMITED after {m.MAX_BATCH_ATTEMPTS} failed "

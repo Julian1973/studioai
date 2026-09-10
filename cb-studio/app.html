@@ -4196,6 +4196,33 @@ async function sendDirectorMessage(suppliedMessage,decisionOptions={}){
   }catch(e){DIRECTOR_CHAT_CACHE[key]={error:"Director unavailable",messages:(DIRECTOR_CHAT_CACHE[key].messages||[])};}
   renderDirectorChatHost();
 }
+async function approveWatchTake(tok,candidate,button){
+  const batch=(shLedger(tok)||{}).batchId;
+  if(button){button.disabled=true;button.textContent='Recording approval…';}
+  const scope=directorChatScope('animation',tok),key=directorChatKey(scope);
+  try{
+    const q=new URLSearchParams({episode:scope.episode,scene:scope.scene,stage:'animation',shotId:tok});
+    const response=await fetch(BASE+'/api/director-chat?'+q,{cache:'no-store'}),data=await response.json();
+    if(!response.ok)throw new Error(data.error||'Could not load this review');
+    if(!batch||data.reviewTarget?.kind!=='render'||data.reviewTarget.batchId!==batch)throw new Error('The take changed. Refresh WATCH before approving.');
+    DIRECTOR_CHAT_CACHE[key]=data;DIRECTOR_CHAT_OPEN_SCOPE=scope;DIRECTOR_CHAT_OPEN_KEY=key;
+    await sendDirectorMessage('approve render',{candidateId:candidate});
+    closeDirectorAgent();
+  }catch(error){showToast(error.message,false);}
+  finally{if(button&&button.isConnected){button.disabled=false;button.textContent='Approve take';}}
+}
+function openWatchRetake(tok){
+  const episode=SH_EP,scene=String(SH_SC),batch=(shLedger(tok)||{}).batchId||((shLedger(tok)||{}).watchRetake||{}).sourceBatchId;
+  const key='watch-retake:'+episode+':'+scene+':'+tok;
+  let draft='';try{draft=localStorage.getItem(key)||'';}catch(e){}
+  const saved=(shLedger(tok)||{}).watchRetake||{};
+  document.getElementById('sheet').innerHTML=`<button class="x" onclick="closeM()">×</button><h3>Reject &amp; retake · ${_esc(tok)}</h3><p>What should change? Tell us what worked and should stay, too.</p><label for="watch-retake-note">Your direction</label><textarea id="watch-retake-note" class="ccta" rows="6" maxlength="5000" placeholder="Change… Keep…">${_esc(draft||saved.note||'')}</textarea><p class="dec-caption">Retake archives this take, rebuilds the affected direction and checks the complete request again. Approved assets stay protected. You review the cost before firing.</p><div id="watch-retake-status" role="status"></div><button class="btn" id="watch-retake-submit">Prepare retake</button><button class="btn ghost" onclick="closeM()">Keep reviewing</button>`;
+  document.getElementById('modal').classList.add('show');
+  const input=document.getElementById('watch-retake-note'),button=document.getElementById('watch-retake-submit');
+  const update=()=>{button.disabled=!input.value.trim();try{localStorage.setItem(key,input.value);}catch(e){}};
+  input.addEventListener('input',update);update();input.focus();
+  button.onclick=()=>{const correction=input.value.trim();if(!correction)return;if(SH_EP!==episode||String(SH_SC)!==scene){showToast('The selected shot changed. Reopen its retake form.',false);return;}button.disabled=true;closeM();shRun('retake',tok,{correction,expectedBatchId:batch,preserveView:true,progressLabel:'Retake · saving direction, rebuilding and checking',afterJob:async job=>{if(job&&job.status==='done'){try{localStorage.removeItem(key);}catch(e){}showToast('Retake checked · review cost and fire',true);}await pLoadAll();renderWorkspaceBody();}});};
+}
 function directorStartRejection(stage,shotId,reason){
   openDirectorAgent({stage,shotId,seed:reason?`The current review says: ${reason}\n\nHelp me define the smallest correction before I reject and refire.`:"Help me define the smallest correction before I reject and refire."});
 }
@@ -4253,6 +4280,10 @@ async function directorApplyCorrection(){
       else{clearInlineSourceProgress();renderWorkspaceBody();}
     }catch(e){clearInlineSourceProgress();alert("Can't reach the studio server. Reload and try again.");}
     return;
+  }
+  if(scope.stage==="animation"&&(shLedger(tok)||{}).status==="candidates-pending"){
+    DIRECTOR_CHAT_OPEN_KEY=null;DIRECTOR_CHAT_OPEN_SCOPE=null;
+    return shRun('retake',tok,{correction:productionInstruction,expectedBatchId:(shLedger(tok)||{}).batchId,preserveView:true,progressLabel:'Retake · rebuilding and checking'});
   }
   if(scope.stage==="animation"){
     let status=SH_SEEDANCE_CACHE[tok];
@@ -5541,9 +5572,12 @@ function renderShotStage(mode){
       body=`<div class="candgrid watch-candidate-grid">${cands.map(c=>`<article class="cand"><div class="cand-head"><b>Take C${c.n}</b><span>${_esc(Number(s.durationSec||0))}s · 480p</span></div><video controls playsinline preload="metadata" src="${BASE}${c.url}?v=${MEDIA_V}"></video>
         <div class="cand-summary">Same approved opening frame · ${refCount} pinned references · Seedance 2.5 SFX and ambience</div><div class="cand-pick"><b>Revision ${watchRevision}</b><span>Choose in Your Decision →</span></div></article>`).join("")}</div>${lastWatchCorrection?`<div class="kf-revision watch-change-below"><div class="kf-revision-head"><div class="kf-revision-title">What changed for watch revision ${watchRevision}</div><div class="kf-revision-count">Previous revision rejected</div></div><div class="kf-change"><b>Your requested correction</b>${_esc(lastWatchCorrection.correction||"")}</div></div>`:""}`;
       decVersion=`Watch revision ${watchRevision} · ${cands.length} candidate${cands.length==1?"":"s"} awaiting a decision`;
-      decActions=[...cands.map(c=>`<button class="btn" onclick="shRun('approve','${tok}',{candidate:${c.n}})">✓ Approve take C${c.n}</button>`),
-        `<label class="dec-caption" for="shCat_${tok}">Reason for changing all ${cands.length} takes</label><select id="shCat_${tok}" class="reject-cat">${REJECT_CATS.map(c=>`<option${c=="other"?" selected":""}>${c}</option>`).join("")}</select>
-        <button class="btn ghost" onclick="directorStartRejection('animation','${_esc(s.shotId)}','')">Reject takes and discuss correction</button>`];
+      decActions=[...cands.map(c=>`<button class="btn" onclick="approveWatchTake('${tok}',${c.n},this)">✓ Approve take C${c.n}</button>`),
+        `<button class="btn ghost" onclick="openWatchRetake('${tok}')">Reject &amp; retake</button>`];
+    } else if((led.watchRetake||{}).status==='needs-attention'){
+      body=`<div class="kf-change"><b>Retake saved</b><p>${_esc(led.watchRetake.note)}</p><p role="status">${_esc(led.watchRetake.stage)}</p></div>`;
+      decVersion='Retake needs attention';
+      decActions=[`<button class="btn" onclick="openWatchRetake('${tok}')">Resume retake</button>`];
     } else if(stLabel==="approved"&&(m.clip||m.finalFrame)){
       resultFirst=true;
       body=`${m.clip?`<video controls src="${BASE}${m.clip}?v=${MEDIA_V}"></video>`:`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/>`}`;
@@ -6488,6 +6522,7 @@ async function shRun(cmd,shotId,opts){
   if(opts.candidates!=null)body.candidates=opts.candidates;   // fire/next: batch size 1-4
   if(opts.spendToken)body.spendToken=opts.spendToken;         // fire/next: the SERVER-ISSUED single-use token from the shot's ledger pendingSpendAuth — without it the engine validates, prints the SPEND DISCLOSURE, stores the token and REFUSES (the designed step 1); the same token also resumes an interrupted batch
   if(opts.comparisonModelId)body.comparisonModelId=opts.comparisonModelId;
+  if(opts.expectedBatchId)body.expectedBatchId=opts.expectedBatchId;
   if(opts.comparisonRunId)body.comparisonRunId=opts.comparisonRunId;
   if(opts.candidate!=null)body.candidate=opts.candidate;      // approve: which candidate wins (C1..CN)
   if(opts.category)body.category=opts.category;               // reject: failure category (REJECT_CATS)

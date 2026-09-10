@@ -1373,6 +1373,57 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
         raise
 
 
+def retake_render(scene: str, shot_id: str, correction: str, episode: str = "Ep1", log=print, *, expected_batch_id=None):
+    """Archive, rebuild and review a retake; never submit media or approve an outcome."""
+    import cb_render
+    note = str(correction or '').strip()
+    if not note:
+        raise cb_render.Refused('Describe what should change before preparing a retake.')
+    pkg, path = cb_render.load_pkg(scene, episode)
+    led = cb_render._ledger(pkg, shot_id)
+    existing = led.get('watchRetake') or {}
+    if expected_batch_id != (led.get('batchId') or existing.get('sourceBatchId')) or not expected_batch_id:
+        raise cb_render.Refused('The reviewed take changed. Reload WATCH before preparing its retake.')
+    if led.get('status') != 'candidates-pending' and not (existing.get('status') in {'preparing', 'needs-attention'}):
+        raise cb_render.Refused('Select the current returned take to reject, or resume its saved retake.')
+    if existing and existing.get('note') != note:
+        led.setdefault('watchRetakeHistory', []).append(existing)
+    led['watchRetake'] = {'note': note, 'status': 'preparing', 'sourceBatchId': led.get('batchId') or existing.get('sourceBatchId'), 'stage': 'Saving your direction'}
+    led['pendingSpendAuth'] = None
+    cb_render._save(pkg, path)
+    try:
+        log('RETAKE 1/4 — saving correction and archiving the rejected take')
+        cb_render.save_watch_director_feedback(scene, shot_id, note, episode, log=log)
+        if led.get('status') == 'candidates-pending':
+            cb_render.reject_shot(scene, shot_id, note, episode=episode, log=log)
+        # A fresh specialist translation replaces old appended prompt overrides.
+        cb_render.restore_seedance_working(scene, shot_id, episode, log)
+        log('RETAKE 2/4 — rebuilding camera and animation direction from the saved correction')
+        cb_render.prepare_department(scene, 'cinematography', shot_id, episode, log)
+        cb_render.prepare_department(scene, 'animation', shot_id, episode, log)
+        pkg, path = cb_render.load_pkg(scene, episode)
+        led = cb_render._ledger(pkg, shot_id)
+        if led.get('status') == 'model-limited':
+            cb_render.override_model_limited(scene, shot_id,
+                'Director requested a revised retake; specialist direction has been rebuilt: ' + note,
+                episode, log=log)
+        log('RETAKE 3/4 — checking approved inputs, references, timing and Prompt Director')
+        prepare_render(scene, shot_id, episode, log)
+        pkg, path = cb_render.load_pkg(scene, episode)
+        led = cb_render._ledger(pkg, shot_id)
+        if not led.get('pendingSpendAuth'):
+            raise cb_render.Refused('Retake preparation did not produce a current cost review.')
+        led['watchRetake'].update(status='ready', stage='Review cost & fire')
+        cb_render._save(pkg, path)
+        log('RETAKE 4/4 — ready for cost approval and Fire; no render submitted')
+    except Exception as exc:
+        pkg, path = cb_render.load_pkg(scene, episode)
+        cb_render._ledger(pkg, shot_id).setdefault('watchRetake', {'note': note}).update(
+            status='needs-attention', stage=str(exc))
+        cb_render._save(pkg, path)
+        raise
+
+
 def _usage() -> str:
     return (
         "usage: cb_studio_director.py <build-keyframe|build-voice|prepare-render> "
@@ -1384,6 +1435,16 @@ def _usage() -> str:
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == 'retake-render':
+        if len(argv) != 6:
+            print('retake-render needs scene, shot, correction, episode and reviewed batch ID', file=sys.stderr)
+            return 2
+        try:
+            retake_render(argv[1], argv[2], argv[3], argv[4], expected_batch_id=argv[5])
+            return 0
+        except Exception as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
     if argv and argv[0] == "refire-keyframe":
         if len(argv) not in (4, 5):
             print(_usage(), file=sys.stderr)

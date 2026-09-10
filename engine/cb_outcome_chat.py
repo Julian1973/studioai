@@ -69,6 +69,7 @@ def target(episode, scene, shot_id, stage):
               "kind": kind, "artifact": artifact, "shot": shot}
     digest = hashlib.sha256(json.dumps(record, sort_keys=True, default=str).encode()).hexdigest()
     return {"kind": kind, "hash": digest, "shotId": shot_id,
+            "batchId": led.get("batchId") if kind == "render" else None,
             "label": {"keyframe": "keyframe", "voice": "voice performance",
                       "request": "WATCH prompt, references and script", "render": "finished render"}[kind]}
 

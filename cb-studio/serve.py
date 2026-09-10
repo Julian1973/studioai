@@ -1509,7 +1509,7 @@ SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "approve-timing-s
              "select-render-upload",
              "select-scenelook-upload", "select-scenelook-library",
              "approve-voice", "reject-voice",
-             "fire", "next", "approve", "reject", "override-model-limited",
+             "fire", "next", "approve", "reject", "retake", "override-model-limited",
              "compare-fire", "approve-comparison", "reject-comparison",
              "edit", "approve-edit", "reject-edit", "stitch")
 # THE OPENING-FRAME SOURCE CHOICE (2026-07-18, Julian's directive): select-upload/select-library/
@@ -2267,7 +2267,7 @@ def _legacy_gone(handler):
 def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
                  candidates=None, spend_token=None, category=None, candidate=None,
                  dry_run=False, source_path=None, character=None, comparison_model_id=None,
-                 comparison_run_id=None, start_sec=None, end_sec=None):
+                 comparison_run_id=None, start_sec=None, end_sec=None, expected_batch_id=None):
     """Map one validated shot-pipeline command onto the job runner. Argument order per cb_engine.py /
     cb_render.py's own CLIs (2026-07-16 spend-token contract — the approve-spend boolean is GONE):
       fire    -> cb_render.py fire <scene> <shotId> [episode] [--candidates N] [--spend-token <token>]
@@ -2280,6 +2280,11 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
     stop to a completed "Cost ready for approval" decision. Re-posting with a mid-batch
     token resumes: only the missing candidates generate (ledger batch.status == "generating").
     Every value travels as its own argv element — never a shell string."""
+    if cmd == 'retake':
+        if not shot_id or not str(correction or '').strip() or not expected_batch_id:
+            raise ValueError('Retake needs a shot and a written correction')
+        return _start(_jid(f'shotretake_s{scene}'), 'shot:retake:' + str(shot_id), scene,
+                      ['cb_studio_director.py', 'retake-render', str(scene), str(shot_id), str(correction), str(episode), str(expected_batch_id)])
     args = ["cb_render.py", cmd, str(scene)]
     if cmd in ("fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe", "recompile-animation",
                "pose", "approve-pose", "reject-pose", "select-pose-upload",
@@ -5468,7 +5473,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 correction = str(d.get("correction")).strip() if d.get("correction") not in (None, "") else None
                 if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(episode):
                     self._json(400, {"error": "scene and episode must be plain tokens (e.g. 1, Ep1)"}); return
-                if cmd in ("fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+                if cmd in ("retake", "fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
                            "pose", "approve-pose", "reject-pose", "select-pose-upload",
                            "select-upload", "select-library", "select-previous", "select-render-upload",
                            "approve-voice", "reject-voice", "regen-voice",
@@ -5478,7 +5483,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if cmd in ("pose", "approve-pose", "reject-pose", "select-pose-upload") and (
                         not character or not _CHARACTER_NAME.match(character)):
                     self._json(400, {"error": f"{cmd} needs a valid character name"}); return
-                if cmd == "reject" and not correction:
+                if cmd in ("reject", "retake") and not correction:
                     self._json(400, {"error": "reject needs a one-sentence correction"}); return
                 if cmd in ("edit", "reject-edit") and not correction:
                     self._json(400, {"error": f"{cmd} needs a written correction"}); return
@@ -5636,7 +5641,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                                                                     comparison_model_id=comparison_model_id,
                                                                     comparison_run_id=comparison_run_id,
                                                                     start_sec=start_sec,
-                                                                    end_sec=end_sec)})
+                                                                    end_sec=end_sec, expected_batch_id=d.get("expectedBatchId"))})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

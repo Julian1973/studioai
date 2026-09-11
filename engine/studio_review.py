@@ -153,6 +153,8 @@ def projection(production, context, state, jobs):
                 "duration": round(end - start, 3), "in": start, "out": end, "sourceDuration": duration,
                 "gap": not accepted, "file": file if accepted else None,
                 "candidateId": watch.get("id") if accepted else None, "joinReview": bool(shot.get("continuityReview"))}
+        from studio_shot_request import origin
+        clip['requestLineage'] = origin(watch) if accepted else {'status': 'not-approved'}
         clips.append(clip)
         total += end - start
         job = next((j for j in jobs if j.get("shotId") == sid and j["status"] in {"queued", "running", "pending", "unknown", "interrupted"}), None)

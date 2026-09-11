@@ -12,7 +12,7 @@ Configuration (env, with safe defaults):
     OPENAI_DIRECTOR_MODEL   default gpt-5.5        — premium Story & Direction only
     OPENAI_VALIDATOR_MODEL  default gpt-5.4-mini   — routine departments, formatting and validation
     OPENAI_MAX_CALL_USD     default 1.00           — conservative pre-call ceiling
-    OPENAI_DAILY_BUDGET_USD default 5.00           — hard daily text-direction budget
+    OPENAI_DAILY_BUDGET_USD default 5.00           — daily text-direction budget; 0 disables cap
     DIRECTOR_GEMINI_MODEL   default gemini-3.1-pro-preview — the FALLBACK model id
     DIRECTOR_ENABLE_GEMINI_FALLBACK  default false — Gemini fallback OFF; an OpenAI failure STOPS with the exact error
 
@@ -52,6 +52,11 @@ OPENAI_COST_LOCK_PATH = pathlib.Path(__file__).resolve().parent / ".openai_cost_
 # Published OpenAI API text-token prices, USD per one million tokens (2026-09-02).
 # Unknown models are refused because their spend cannot be bounded honestly.
 OPENAI_TEXT_RATES = {
+    # https://developers.openai.com/api/docs/models/gpt-5.6-sol (2026-09-11)
+    "gpt-5.6-sol": {"input": 4.00, "cached_input": 0.40, "output": 20.00},
+    # https://developers.openai.com/api/docs/models/gpt-5.6-luna (2026-09-11)
+    "gpt-5.6-luna": {"input": 0.20, "cached_input": 0.02, "output": 1.20},
+    "gpt-6-astra": {"input": 10.00, "cached_input": 1.00, "output": 50.00},
     "gpt-5.5": {"input": 5.00, "cached_input": 0.50, "output": 30.00},
     "gpt-5.4": {"input": 2.50, "cached_input": 0.25, "output": 15.00},
     "gpt-5.4-mini": {"input": 0.75, "cached_input": 0.075, "output": 4.50},
@@ -132,6 +137,8 @@ def _estimated_input_tokens(system, user, schema, images=None):
 def _estimated_call_cost(model, system, user, schema, images, max_output_tokens):
     rates = _model_rates(model)
     input_tokens = _estimated_input_tokens(system, user, schema, images)
+    if str(model).startswith("gpt-6-astra") and input_tokens > 272000:
+        rates = {"input": rates["input"] * 2, "output": rates["output"] * 1.5}
     return ((input_tokens * rates["input"] + max_output_tokens * rates["output"]) / 1_000_000.0,
             input_tokens)
 
@@ -163,7 +170,7 @@ def _assert_cost_budget(model, system, user, schema, images, max_output_tokens):
             f"OPENAI COST GUARD — estimated maximum ${estimate:.4f} exceeds the "
             f"${OPENAI_MAX_CALL_USD:.2f} per-call limit; no provider call was made.")
     spent = _daily_openai_spend()
-    if spent + estimate > OPENAI_DAILY_BUDGET_USD:
+    if OPENAI_DAILY_BUDGET_USD > 0 and spent + estimate > OPENAI_DAILY_BUDGET_USD:
         raise SystemExit(
             f"OPENAI COST GUARD — ${spent:.4f} is already logged today and this call could cost "
             f"up to ${estimate:.4f}, exceeding the ${OPENAI_DAILY_BUDGET_USD:.2f} daily limit; "
@@ -193,7 +200,7 @@ def cost_policy():
                      "maxOutputTokens": STANDARD_MAX_OUTPUT_TOKENS,
                      "reasoningEffort": "low"},
         "perCallLimitUsd": OPENAI_MAX_CALL_USD,
-        "dailyLimitUsd": OPENAI_DAILY_BUDGET_USD,
+        "dailyLimitUsd": OPENAI_DAILY_BUDGET_USD if OPENAI_DAILY_BUDGET_USD > 0 else None,
         "spentTodayUsd": round(_daily_openai_spend(), 6),
         "identicalResponseReuse": OPENAI_RESPONSE_CACHE,
         "providerAttempts": PROVIDER_ATTEMPTS,
@@ -293,6 +300,9 @@ def _log_openai_usage(resp, model, label, estimated_max_cost):
         usage, "input_tokens_details", None)
     cached_tokens = min(input_tokens, _usage_value(details, "cached_tokens"))
     rates = _model_rates(model)
+    if str(model).startswith("gpt-6-astra") and input_tokens > 272000:
+        rates = {"input": rates["input"] * 2, "cached_input": rates["cached_input"] * 2,
+                 "output": rates["output"] * 1.5}
     cost = (((input_tokens - cached_tokens) * rates["input"] +
              cached_tokens * rates["cached_input"] + output_tokens * rates["output"]) /
             1_000_000.0)
@@ -300,7 +310,7 @@ def _log_openai_usage(resp, model, label, estimated_max_cost):
         "model": model, "label": label, "inputTokens": input_tokens,
         "cachedInputTokens": cached_tokens, "outputTokens": output_tokens,
         "estimatedMaximumCostUsd": round(estimated_max_cost, 6),
-        "pricingAsOf": "2026-09-02",
+        "pricingAsOf": "2026-09-11" if str(model).startswith("gpt-6-astra") else "2026-09-02",
     })
     return cost
 
@@ -331,7 +341,7 @@ def _openai_call(model, system, user, schema, images=None, *, max_output_tokens,
     prompt_cache_key = "crystal-bears-" + hashlib.sha256(
         f"{model}\0{schema.__module__}.{schema.__qualname__}\0{system}".encode("utf-8")
     ).hexdigest()[:40]
-    from openai.lib._parsing._responses import type_to_text_format_param
+    from studio_structured_output import format_for, parse
     # Receive usage and output before local Pydantic validation. SDK parse() raises
     # inside response decoding and loses that evidence on a custom-validator error.
     from studio_preflight_evidence import review_submission
@@ -340,7 +350,7 @@ def _openai_call(model, system, user, schema, images=None, *, max_output_tokens,
         model=model,
         input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},
                {"role": "user", "content": user_parts}],
-        text={"verbosity": "low", "format": type_to_text_format_param(schema)},
+        text={"verbosity": "low", "format": format_for(schema)},
         max_output_tokens=max_output_tokens,
         reasoning={"effort": reasoning_effort},
         prompt_cache_key=prompt_cache_key,
@@ -349,7 +359,7 @@ def _openai_call(model, system, user, schema, images=None, *, max_output_tokens,
     try:
         if getattr(resp, 'status', None) != 'completed' or not resp.output_text:
             raise RuntimeError(f"No complete structured output (status={getattr(resp, 'status', '?')})")
-        obj = schema.model_validate_json(resp.output_text)
+        obj = parse(schema, resp.output_text)
     except Exception as exc:
         exc.provider_response = resp
         raise

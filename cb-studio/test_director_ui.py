@@ -180,7 +180,9 @@ def test_studio_jobs_force_current_engine_env_over_parent_env():
     assert "def _engine_env_overrides()" in SERVER
     assert 'env_file = CBGEN / ".env"' in SERVER
     assert "env.update(_engine_env_overrides())" in SERVER
-    assert "env=_engine_subprocess_env(args)" in SERVER
+    assert "env = _engine_subprocess_env(args)" in SERVER
+    assert "env=env" in SERVER
+    assert 'env["CB_PRODUCTION_OPERATION_ID"] = operation_id' in SERVER
 
 
 def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
@@ -379,8 +381,8 @@ def test_keyframe_refire_is_one_visible_replacement_job():
 
 
 def test_hear_keeps_words_and_performance_adjacent_with_returned_player_first():
-    assert "body=m.vo ? `${voiceMedia}${dialogueEditor}${performanceEditor}${sfxPanel}${slatePanel}`" in APP
-    assert "`${dialogueEditor}${performanceEditor}${voiceMedia}${sfxPanel}${slatePanel}`" in APP
+    assert 'body=`${voiceMedia}${dialogueEditor}${performanceEditor}' in APP
+    assert '<summary>Sound effects &amp; timing details</summary>${sfxPanel}${slatePanel}</details>' in APP
 
 
 def test_director_action_area_explains_current_outcome_before_button():

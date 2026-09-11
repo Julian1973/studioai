@@ -37,6 +37,17 @@ def test_ready_command_to_fake_transport_and_return_link(setup,monkeypatch):
     before=p.snapshot('first','1')['state']['shots'][0]
     request=before['outcomes']['request']
     assert request['promptDirector']['verdict']=='READY TO FIRE'
+    snapshot = request['promptDirectorSnapshot']
+    line = snapshot['authorities']['shot']['dialogueLines'][0]
+    measured = before['outcomes']['hear']['voiceTiming']['lines'][0]
+    assert (line['speaker'], line['exactText'], line['startSec'], line['endSec']) == ('Hero', 'Hello.', measured['startSec'], measured['endSec'])
+    assert request['prompt'].count('{Hello.}') == 1
+    assert 'Hero: 0.15–0.85s.' in request['prompt']
+    assert '[Audio]\n@Audio1 is the approved voice performance. Match its exact words, speaker timing and lip sync. No extra dialogue.' in request['prompt']
+    assert 'Measured dialogue ownership' not in request['prompt'] and '"startSec"' not in request['prompt']
+    from studio_prompt_director import project_authorities, request_snapshot, verify
+    reconstructed = request_snapshot(request['prompt'], project_authorities(p.ws.context('first', '1'), before, request['source']), request['images'], request['audio'], request['duration'], request['binding'])
+    verify(reconstructed, request['promptDirector'])
     assert not any(c[0]=='video' for c in t.calls)
     approve(p,'request')
     state=p.snapshot('first','1')['state'];watch=state['shots'][0]['outcomes']['watch']
@@ -76,6 +87,7 @@ def test_authority_amendment_refuses_old_request_without_media_mutation(setup,mo
     state=p.snapshot('first','1')['state'];original=copy.deepcopy(state['shots'][0]);old=original['outcomes']['request']
     with w.db() as db:
         s=p._load(db,'first','1');s['shots'][0]['camera']='Hold on the listener while the prop moves.'
+        s['shots'][0]['directorCard']['views'][0]['framing'] = s['shots'][0]['camera']
         p._save(db,'first','1',s)
     approve(p,'request')  # follow-up Fire errors are recorded by the command orchestrator
     assert not any(c[0]=='video' for c in t.calls)
@@ -91,17 +103,30 @@ def test_authority_amendment_refuses_old_request_without_media_mutation(setup,mo
 @pytest.mark.parametrize('visible',[True,False])
 def test_laugh_overlap_and_hold_survive_actual_request_route(setup,monkeypatch,visible):
     p,w,t,_=setup
+    from PIL import Image
+    base = w.root / 'projects' / 'first'
+    Image.new('RGB', (24, 24), 'green').save(base / 'assets' / 'b.png')
+    characters = json.loads((base / 'characters.json').read_text())
+    characters['B'] = {'anchor': 'projects/first/assets/b.png', 'voiceId': 'voice987654321012'}
+    (base / 'characters.json').write_text(json.dumps(characters))
     command(p,'budget',amountUsd=5);approve(p,'see')
     with w.db() as db:
         state=p._load(db,'first','1');s=state['shots'][0]
+        s['characters'].append('B')
         s['camera']='Hold on Hero: restraint is the audience beat.'
+        s['directorCard']['views'][0]['framing'] = s['camera']
         s['watchPrompt']='B laughs nonverbally from 0.2 to 0.8 seconds during Hero dialogue. B is '+('visible; allow natural laugh-related mouth and body movement.' if visible else 'offscreen; keep the camera on Hero.')+' No new intelligible speech.'
+        view = s['directorCard']['views'][0]
+        view['performance'] += ' ' + s['watchPrompt']
+        view['visibleEntities'] = ['character:Hero'] + (['character:B'] if visible else [])
+        s['directorCard']['soundCues'] = [dict(kind='character-sfx', character='B', instruction='B laughs nonverbally. No new intelligible speech.', timing='0.2–0.8s', destination='watch')]
+        s['directorCard']['soundOwnership'] = 'Preserve exact Hero speech from HEAR; generate the authored nonverbal B laugh only.'
         p._save(db,'first','1',state)
     approve(p,'hear')
     s=p.snapshot('first','1')['state']['shots'][0];request=s['outcomes']['request']
     assert request['status']=='candidate'
-    assert 'B laughs nonverbally' in request['prompt']
-    assert 'Hold on Hero' in request['prompt']
+    assert 'B @Image3 laughs nonverbally' in request['prompt']
+    assert 'Hold on Hero @Image2' in request['prompt']
     assert 'No new intelligible speech.' in request['prompt']
     assert 'B remains still' not in request['prompt'] and 'B must keep mouth closed' not in request['prompt']
     assert request['audio']
@@ -117,7 +142,7 @@ def test_new_speech_conflict_blocks_real_request(setup,monkeypatch):
     monkeypatch.setattr(t,'direct',direct)
     command(p,'budget',amountUsd=5);approve(p,'see')
     with w.db() as db:
-        state=p._load(db,'first','1');state['shots'][0]['watchPrompt']='B says an unapproved new line over Hero.';p._save(db,'first','1',state)
+        state=p._load(db,'first','1');state['shots'][0]['directorCard']['views'][0]['action']='B says an unapproved new line over Hero.';p._save(db,'first','1',state)
     approve(p,'hear');request=p.snapshot('first','1')['state']['shots'][0]['outcomes']['request']
     assert request['status']=='blocked'
     with pytest.raises(StudioError):approve(p,'request')

@@ -44,31 +44,21 @@ def test_good_prompt_passes_with_stable_hash():
     assert first["objectResolutionHash"] == second["objectResolutionHash"]
 
 
-def test_standalone_comb_alias_blocks_when_honeycomb_is_tracked():
-    report = objects.audit_prompt(
-        "Keen runs with a comb and Fuzzby chases him. No duplicate honeycomb, no hair comb, no honeycomb-shaped house.",
-        honeycomb_shot(),
-    )
-    assert report["status"] == "BLOCKED"
-    assert any("standalone comb" in error["reason"] for error in report["errors"])
+@pytest.mark.parametrize('text', [
+    'Keen runs with a comb.',
+    'Keen carries the whole honeycomb to Fuzzby.',
+    'Keen carries the original single whole golden honeycomb.',
+])
+def test_prose_requires_semantic_review_instead_of_keyword_verdict(text):
+    report = objects.audit_prompt(text, honeycomb_shot())
+    assert report['status'] == 'READY'  # Registry structure only, not Fire or visual approval.
+    assert any('unverified' in row['reason'] for row in report['warnings'])
 
 
-def test_honeycomb_without_original_authority_blocks():
-    report = objects.audit_prompt(
-        "Keen carries the whole honeycomb to Fuzzby. No duplicate honeycomb, no hair comb, no honeycomb-shaped house.",
-        honeycomb_shot(),
-    )
-    assert report["status"] == "BLOCKED"
-    assert any("without original-object authority" in error["reason"] for error in report["errors"])
-
-
-def test_missing_substitution_exclusions_block():
-    report = objects.audit_prompt(
-        "Keen carries the original single whole golden honeycomb to Fuzzby.",
-        honeycomb_shot(),
-    )
-    assert report["status"] == "BLOCKED"
-    assert any("missing substitution exclusions" in error["reason"] for error in report["errors"])
+def test_invalid_count_blocks_for_any_object_name():
+    report = objects.audit_prompt('Carry the parcel.', {'trackedProductionObjects':[
+        {'id':'P1','name':'parcel','count':0}]})
+    assert report['status'] == 'BLOCKED'
 
 
 def test_negative_substitution_terms_do_not_count_as_positive_failures():
@@ -94,6 +84,31 @@ def test_apply_provider_clauses_adds_missing_authority():
     assert "H01 original single whole golden honeycomb" in prompt
 
 
+def test_recompile_replaces_stale_lifecycle_and_preserves_audio():
+    source = ('[Audio]\nKeep @Audio1 unchanged.\n\n'
+              '[Tracked production objects]\n- H01 original single whole golden honeycomb: still on tree.\n\n'
+              '[Ending]\nPreserve the wink.')
+    result = objects.apply_provider_clauses(source, honeycomb_shot())
+    assert 'still on tree' not in result
+    assert 'lands beside Fuzzby near the catapult' in result
+    assert '[Audio]\nKeep @Audio1 unchanged.' in result
+    assert '[Ending]\nPreserve the wink.' in result
+    assert objects.apply_provider_clauses(result, honeycomb_shot()) == result
+
+
+def test_declared_plural_count_is_not_compiled_as_one_object():
+    shot = {'trackedProductionObjects': [{'id': 'P1', 'name': 'matching parcels', 'count': 2}]}
+    result = objects.apply_provider_clauses('', shot)
+    assert 'total count of 2' in result
+    assert 'same object' not in result
+
+
+def test_removed_registry_does_not_leave_old_compiled_objects():
+    result = objects.apply_provider_clauses(
+        '[Purpose]\nQuiet pause.\n\n[Tracked production objects]\n- OLD object', {})
+    assert result == '[Purpose]\nQuiet pause.'
+
+
 def test_dict_lifecycle_locks_keep_object_id():
     shot = {
         "shotId": "S1.SH2B",
@@ -117,6 +132,7 @@ def test_explicit_h01_deduplicates_legacy_honeycomb_lock():
         "name": "original single whole golden honeycomb",
         "description": "original honeycomb",
         "aliases": ["honeycomb", "comb"],
+        "legacyIds": ["object:honeycomb.whole"],
         "sourceReferences": ["approved state"],
     }])
     shot["objectLifecycleLocks"] = {

@@ -182,6 +182,10 @@ def create_policy(m):
             excluded = {
                 "dialogueLines", "dialogueOccurrenceIds", "sourceEventIds",
                 "voiceDirectorBrief", "audioBrief", "workingVoice",
+                # WATCH feedback directs the animation retake. It does not change
+                # the approved opening image; a SEE change must be authored in
+                # the visual fields rather than invalidating SEE on every retake.
+                "watchDirectorFeedbackApproved",
             }
             return {key: value for key, value in shot.items() if key not in excluded}
         if stage == "voice":
@@ -326,7 +330,7 @@ def create_policy(m):
         common = {"stage": stage, **runtime, "canonProfileDigest": canon_digest,
                   **scoped_shot_signature(shot, stage)}
         if stage == "cinematography":
-            look = scene_status(scene, episode)
+            look = scene_status(scene, episode, pkg=pkg)
             return {**common,
                     "sceneLookHash": ((look.get("active") or {}).get("hash")
                                       if look.get("current") else None),
@@ -371,7 +375,7 @@ def create_policy(m):
             if not paths and ledger.get("approvedTake"):
                 paths = [ledger["approvedTake"]]
             origin = m._returned_origin(ledger)
-            if origin.get("segments"):
+            if origin.get("segments") or origin.get("status") == "origin-integrity-failed":
                 return {"stage": stage, **runtime, "mediaHashes": [file_sha256(path) for path in paths],
                         "originatingProductionHash": json_sha256(origin),
                         "generationSignature": None}
@@ -564,7 +568,7 @@ def create_policy(m):
     def resolve_scenelook_prompt(scene, episode="Ep1"):
         return look_prompt(scene, episode) or m._compile_scenelook_prompt(scene, episode)
 
-    def scene_status(scene, episode="Ep1"):
+    def scene_status(scene, episode="Ep1", *, pkg=None):
         rec = m._load_scenelook_rec(scene, episode)
         approved, candidate = rec.get("approved"), rec.get("candidate")
         def plate_current(record):
@@ -572,7 +576,7 @@ def create_policy(m):
                 return False
             try:
                 current_sig = look_input_signature(
-                    scene, episode, record.get("path"), record.get("referencePath"))
+                    scene, episode, record.get("path"), record.get("referencePath"), pkg=pkg)
                 return bool(
                     os.path.exists(record.get("path") or "") and
                     record.get("hash") == file_sha256(record.get("path")) and
@@ -607,8 +611,9 @@ def create_policy(m):
                 "candidateCurrent": False, "approvedCurrent": False,
                 "history": history}
 
-    def look_prompt(scene, episode="Ep1"):
-        pkg, _ = m.load_pkg(scene, episode)
+    def look_prompt(scene, episode="Ep1", *, pkg=None):
+        if pkg is None:
+            pkg, _ = m.load_pkg(scene, episode)
         state = department_record_status(pkg, None, "look", scene, episode)
         direction = state["record"]
         prompt = ((direction.get("output") or {}).get("providerPrompt") or "").strip()
@@ -620,10 +625,11 @@ def create_policy(m):
         except Exception:
             return None
 
-    def look_input_signature(scene, episode, plate_path=None, reference_path=None):
+    def look_input_signature(scene, episode, plate_path=None, reference_path=None, *, pkg=None):
         """Every direct Scene Look input, including current signed direction and files."""
-        pkg, _ = m.load_pkg(scene, episode)
-        prompt = look_prompt(scene, episode) or ""
+        if pkg is None:
+            pkg, _ = m.load_pkg(scene, episode)
+        prompt = look_prompt(scene, episode, pkg=pkg) or ""
         return {"canonProfileDigest": require_canon(pkg, episode, "look"),
                 "briefHash": hashlib.sha256(prompt.encode()).hexdigest(),
                 "referenceHashes": ({pathlib.Path(reference_path).name: file_sha256(reference_path)}
@@ -647,6 +653,10 @@ def create_policy(m):
         current_package(scene, episode)
         rec = m._load_scenelook_rec(scene, episode)
         candidate = rec.get("candidate") or {}
+        if not candidate and (rec.get('approved') or {}).get('approvalMethod') == 'explicit-upload-selection':
+            status = scene_status(scene, episode)
+            if status.get('approvedCurrent'):
+                return rec['approved']['path']
         expected = look_input_signature(
             scene, episode, candidate.get("path"), candidate.get("referencePath"))
         if candidate.get("inputSignature") != expected:
@@ -672,13 +682,19 @@ def create_policy(m):
         rec["candidate"]["packageRevision"] = pkg.get("revision")
         rec["candidate"]["inputSignature"] = look_input_signature(
             scene, episode, rec["candidate"].get("path"))
+        if mode == 'upload':
+            rec['candidate']['approvalMethod'] = 'explicit-upload-selection'
         m._save_scenelook_rec(rec, scene, episode)
+        if mode == 'upload':
+            # Choosing an uploaded plate is the human approval, not a request
+            # for another AI candidate. All entry points share this behavior.
+            return approve_look(scene, episode, reviewed_by, log)
         return result
 
     def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
         if stage in ("cinematography", "animation") and shot_id:
             from studio_director_handoff import prepare_native
-            prepare_native(m, scene, shot_id, episode, log)
+            prepare_native(m, scene, shot_id, episode, log, stage=stage)
         pkg, path = current_package(scene, episode)
         if stage in direction_stages:
             current = department_record_status(
@@ -694,7 +710,7 @@ def create_policy(m):
                 pkg, shot_id, "cinematography", scene, episode)
             if not cinematography["current"]:
                 log("WATCH PREPARATION — refreshing Cinematography direction first "
-                    "(no media generation or provider spend)")
+                    "(no media generation; AI direction review may incur cost)")
                 prepare_department(
                     scene, "cinematography", shot_id, episode, log)
                 pkg, path = current_package(scene, episode)
@@ -835,15 +851,24 @@ def create_policy(m):
     def keyframe_prompt(pkg, shot):
         direction = current_direction_output(pkg, shot["shotId"], "cinematography")
         prompt = m._compile_keyframe_integration_prompt(direction, shot)
-        pending = (m._ledger(pkg, shot["shotId"]).get("pendingKeyframeCorrection") or {})
-        correction = str(pending.get("reason") or "").strip()
+        ledger = m._ledger(pkg, shot["shotId"])
+        pending = ledger.get("pendingKeyframeCorrection") or (
+            (ledger.get("keyframeRejections") or [])[-1:]
+            or [ledger.get("keyframeRejected") or {}])[0]
+        correction = " ".join(str(pending.get("reason") or "").split())
+        if pending.get("category") == "stale-inputs":
+            # Dependency invalidation is provenance, not creative direction.
+            correction = ""
         if correction:
-            prompt += (
-                "\n\n[Director Iteration]\nCorrect only this observed issue in the next "
+            iteration = (
+                "\n\nDirector iteration: Correct only this observed issue in the next "
                 f"revision: {correction}\nPreserve every successful identity, canon, "
                 "geography, lighting, reference-role and continuity decision from the "
                 "current signed direction."
             )
+            # Keep corrections inside the existing composition section. Adding a
+            # standalone heading violates the provider compiler's ordered contract.
+            prompt = prompt.replace("\n\n[LIGHTING]", iteration + "\n\n[LIGHTING]", 1)
         return studio_prompt_aliases.protect_honeycomb_aliases(prompt, shot)
 
     def voice_lines(pkg, shot):
@@ -1020,7 +1045,7 @@ def create_policy(m):
         plan = m._provider_attachment_plan(
             shot, "referenceSlots", anchor, scene, episode, m._characters_cfg())
         refs = [item["path"] for item in plan]
-        look = scene_status(scene, episode)
+        look = scene_status(scene, episode, pkg=pkg)
         voice = voice_approval_status(pkg, shot, scene, episode)
         has_spoken_dialogue = bool(cb_audio_authority.spoken_dialogue_lines(shot))
         if has_spoken_dialogue and not voice["current"]:
@@ -1620,11 +1645,21 @@ def create_policy(m):
                 "selectedAssetHash": m._file_md5(candidate.get("path")),
                 "source": candidate.get("source")}
 
-    def keyframe_shot(scene, shot_id, episode="Ep1", log=print, *, compare=True):
+    def keyframe_shot(scene, shot_id, episode="Ep1", log=print, *, compare=False):
         pkg, _ = current_package(scene, episode)
+        direction = department_record_status(
+            pkg, shot_id, "cinematography", scene, episode)
+        if not direction["current"]:
+            log("SEE PREPARATION — approved inputs changed; refreshing this shot's "
+                "Cinematography before image generation")
+            prepare_department(scene, "cinematography", shot_id, episode, log)
+            pkg, _ = current_package(scene, episode)
+        # Verify the rebuilt record against the current sources, rather than blessing
+        # the old signature or trusting that preparation necessarily succeeded.
+        current_direction_output(pkg, shot_id, "cinematography")
         failure = None
         try:
-            result = (original["keyframe_shot"](scene, shot_id, episode, log) if compare else
+            result = (original["keyframe_shot"](scene, shot_id, episode, log, compare=True) if compare else
                       original["keyframe_shot"](scene, shot_id, episode, log, compare=False))
         except BaseException as exc:
             # An A/B provider failure must not strand a completed paid candidate as
@@ -1747,6 +1782,11 @@ def create_policy(m):
     def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
         pkg, path = current_package(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
+        from studio_keyframe_selection import retire_comparison
+        # Recover external selections saved before comparison retirement existed.
+        # Generated A/B candidates still require their explicit selected ID.
+        retire_comparison(ledger, source=(ledger.get("keyframeCandidate") or {}).get("source"),
+                          at=m._now(), reviewer=reviewed_by)
         ab_candidates = list(ledger.get("keyframeCandidates") or [])
         selected_id = str(ledger.get("selectedKeyframeCandidateId") or "").strip().upper()
         if len(ab_candidates) > 1 and not selected_id:
@@ -2053,7 +2093,9 @@ def create_policy(m):
         pkg, _ = current_package(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
         production_block = ledger.get("productionBlock") or shot.get("productionBlock") or {}
-        if str(production_block.get("status") or "").upper().startswith("BLOCKED"):
+        from studio_keyframe_director import recovery_ready
+        if (str(production_block.get("status") or "").upper().startswith("BLOCKED") and
+                not recovery_ready(m, pkg, shot, ledger, scene, episode, spend_token=spend_token, protected_comparison=protected_comparison)):
             reason = (f"{shot_id} is {production_block.get('status')}: "
                       f"{production_block.get('reason', 'production recovery gate has not been cleared')}")
             block_path = m._write_prefire_block_evidence(
@@ -2094,7 +2136,11 @@ def create_policy(m):
                 cb_providers.video_model(require_enabled=False).provider)
         except cb_providers.ProviderCapabilityError as exc:
             raise m.Refused(f"REFUSED — provider capability: {exc}") from exc
-        m._require_confirmed_billing(billing_provider)
+        # A no-spend review/disclosure must still reach Prompt Director so the user can
+        # see the exact sealed request and durable block evidence. Billing is mandatory
+        # only when a spend token is presented and the route can actually submit.
+        if spend_token:
+            m._require_confirmed_billing(billing_provider)
         if cb_audio_authority.spoken_dialogue_lines(shot):
             voice = voice_approval_status(pkg, shot, scene, episode)
             if not voice["current"]:

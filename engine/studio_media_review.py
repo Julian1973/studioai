@@ -11,6 +11,34 @@ from studio_transport import MediaReview
 from studio_workspace import StudioError, digest
 
 
+def _verify_originating_inputs(watch, original):
+    """Verify the convenient saved paths against the immutable submitted content.
+
+    A valid replacement file matching altered side metadata is not the originating
+    reference. Paths may relocate; ordered content, roles, opening and audio may not.
+    """
+    if not watch.get('productionRequest'):
+        return
+    from studio_shot_request import ShotProductionRequest, references
+    try:
+        truth = ShotProductionRequest.load(watch['productionRequest']).data['truth']
+        if not isinstance(original, dict) or not original:
+            raise ValueError('Originating review inputs are missing')
+        if not all(isinstance(truth.get(key), list) for key in ('references', 'opening', 'audio')):
+            raise ValueError('The sealed originating input manifest is incomplete')
+        if references(original.get('references') or []) != truth['references']:
+            raise ValueError('Originating reference content, order or roles differ from the submitted request')
+        if references((original.get('see') or {}).get('files') or []) != truth['opening']:
+            raise ValueError('Originating SEE opening differs from the submitted request')
+        # Project WATCH submits the first approved recording, not other retained
+        # alternatives or metadata files belonging to the HEAR candidate.
+        audio = ((original.get('hear') or {}).get('files') or [])[:1]
+        if references(audio) != truth['audio']:
+            raise ValueError('Originating HEAR audio differs from the submitted request')
+    except (ValueError, TypeError, KeyError) as exc:
+        raise StudioError(str(exc) + '. Restore the exact originating inputs for review.', 'stale') from exc
+
+
 def manifest(production, context, state, shot):
     pid = context['project']['id']
     watch = shot.get('outcomes', {}).get('watch', {})
@@ -22,18 +50,39 @@ def manifest(production, context, state, shot):
             raise StudioError('A media-review source changed or is missing. Review its current version.', 'stale')
         return {'candidateId': artifact['id'], **file}
     result = {'watch': record(watch), 'shot': watch.get('originatingShot') or fields(shot),
-              'currentDirection': fields(shot), 'directorCardRevision': watch.get('directorCardRevision'),
+              'directorCardRevision': watch.get('directorCardRevision'),
               'executionReceipt': watch.get('executionReceipt'),
               'promptDirector': watch.get('promptDirector'),
               'providerReturnedFile': watch.get('providerReturnedFile'),
               'sourceSignature': production.source_signature(context, shot), 'references': []}
+    from studio_shot_request import origin, originating_review_context
+    original = watch.get('originatingReviewInputs')
+    _verify_originating_inputs(watch, original)
+    result['requestLineage'] = origin(watch)
+    result['originatingProduction'] = originating_review_context(watch)
+    if original:
+        result['sourceSignature'] = original.get('sourceSignature')
+    else:
+        result['historicalReferenceScope'] = 'legacy-unverified; current references are contextual only'
     for name in ('see', 'hear'):
-        value = shot.get('outcomes', {}).get(name, {})
+        value = (original.get(name) or {}) if original else shot.get('outcomes', {}).get(name, {})
         if value.get('status') == 'approved':
             result[name] = record(value)
-    for ref in production.assets(context, shot):
-        if ref.get('approvalStatus') == 'approved' and verified_file(production.ws, pid, ref):
+    # Review the references that actually informed this render, including supplied
+    # identities. Their approval label is preserved, never promoted by inclusion.
+    source_references = original.get('references', []) if original else production.assets(context, shot)
+    if original:
+        result['originatingReferenceManifest'] = source_references
+    seen = {(r.get('path'), r.get('hash')) for r in (result.get('see'),) if r}
+    for ref in source_references:
+        if original and not verified_file(production.ws, pid, ref):
+            raise StudioError('An originating render reference is missing or changed. Restore that exact version for review.', 'stale')
+        identity = (ref.get('path'), ref.get('hash'))
+        if identity in seen:
+            continue
+        if (original or ref.get('approvalStatus') == 'approved') and verified_file(production.ws, pid, ref):
             result['references'].append(ref)
+            seen.add(identity)
     result['omittedApprovedReferences'] = [r['name'] for r in result['references'][5:]]
     result['references'] = result['references'][:5]
     index = state['shots'].index(shot)

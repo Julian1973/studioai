@@ -42,6 +42,15 @@ def test_parallel_timing_and_visual_notation():
     assert contracts.visual_event_text('Lift') != contracts.visual_event_text('Drop')
 
 
+def test_sound_effect_mix_can_overlap_without_relaxing_bounds_or_camera():
+    sounds = [{'channel': 'sfx', 'startSec': 2, 'endSec': 10},
+              {'channel': 'sfx', 'startSec': 4, 'endSec': 5}]
+    assert contracts.validate_timeline(sounds, 12)['ready']
+    assert not contracts.validate_timeline(sounds, 8)['ready']
+    assert not contracts.validate_timeline(
+        [{**event, 'channel': 'camera'} for event in sounds], 12)['ready']
+
+
 def test_active_graph_and_expected_spend_outcome():
     pkg = {'shots': [{'shotId': 'a'}, {'shotId': 'b', 'status': 'superseded'}]}
     assert [s['shotId'] for s in contracts.active_shots(pkg)] == ['a']
@@ -146,3 +155,11 @@ def test_voice_override_does_not_stale_source_direction():
     for key, value in [("dialogueHash", "changed"), ("voiceIds", ["other"]), ("skillHashes", {"voice": "b"})]:
         assert not contracts.voice_direction_signature_matches(old, {**new, key: value})
     assert not contracts.voice_direction_signature_matches(None, new)
+
+
+def test_action_tracks_are_owned_by_performer():
+    events = [dict(channel="action", performer="Keen", startSec=0, endSec=6),
+              dict(channel="action", performer="Fuzzby", startSec=2, endSec=8)]
+    assert contracts.validate_timeline(events, 10)["ready"]
+    assert not contracts.validate_timeline(events + [dict(channel="action", performer="Keen", startSec=3, endSec=5)], 10)["ready"]
+    assert not contracts.validate_timeline([dict(channel="camera", performer="Keen", startSec=0,endSec=6), dict(channel="camera",performer="Fuzzby",startSec=2,endSec=8)],10)["ready"]

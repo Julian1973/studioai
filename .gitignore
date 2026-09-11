@@ -85,3 +85,5 @@ __pycache__/
 *.wav
 *.mp3
 *.sqlite3
+
+.venv-mcp/

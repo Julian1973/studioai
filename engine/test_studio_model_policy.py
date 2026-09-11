@@ -117,13 +117,13 @@ def test_transport_captures_usage_and_disables_retry(monkeypatch):
     from studio_transport import ProviderTransport
     import openai
     calls=[]
-    r=response();r.output_parsed=SimpleNamespace(model_dump=lambda:{'message':'Ready','revisedShot':None})
+    r=response();r.status='completed';r.output_text=json.dumps({'message':'Ready','revisedShot':None})
     def client(**kwargs):
         assert kwargs['max_retries']==0
         def parse(**body):
             calls.append(body)
             return r
-        return SimpleNamespace(responses=SimpleNamespace(parse=parse))
+        return SimpleNamespace(responses=SimpleNamespace(create=parse))
     monkeypatch.setattr(openai,'OpenAI',client)
     result=ProviderTransport().direct({},'private-test-key','gpt-5.6-terra','standard',{})
     assert len(calls)==1

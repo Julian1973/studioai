@@ -279,44 +279,21 @@ class SceneShotList(BaseModel):
 # Role mind — one integrated design pass (Animation Director + Cinematographer + Continuity)
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def _design_mind():
-    return (
-        "You are an integrated directing unit for a Pixar-calibre 3D CGI children's show (ages 4-8): "
-        "the ANIMATION DIRECTOR (Glen Keane's chair — performance, humour, weight, appeal), the "
-        "CINEMATOGRAPHER (Patrick Lin's chair — shots, lenses, movement, visual progression) and the "
-        "CONTINUITY SUPERVISOR (every persistent visual and spatial state). You photograph an "
-        "already-directed, LOCKED storyboard. The render model must never be asked to decide comedy, "
-        "staging, camera, geography or continuity: you decide all of it here.\n\n"
-        "NON-NEGOTIABLE LAWS:\n"
-        "1. SCRIPT TRUTH: dialogue is locked. Copy each line into dialogueLines EXACTLY as given in "
-        "the beats — same words, same order, every line assigned to exactly one shot, none dropped, "
-        "none invented. delivery is acting direction, never a rewrite.\n"
-        "2. ONE dramatic throughline per production unit: a causal chain such as dive, crash and "
-        "recovery may stay together when each event causes the next and the honest performance fits "
-        "inside 30 seconds. Split competing actions or a genuine editorial boundary.\n"
-        "3. The opening pose is ANTICIPATION, never the payoff: the character begins OUTSIDE the "
-        "flower with the flower positioned for contact — never already buried in the result.\n"
-        "4. Every cut is DESIGNED (matched action, reaction cut, eyeline, sound bridge, foreground "
-        "wipe) — state cutInMotivation for every shot after the first. No arbitrary cuts.\n"
-        "5. Screen direction and geography stay consistent; state who is frame-left/right in every "
-        "continuity state, and keep marks/props identical across each relay join (what leaves a shot "
-        "enters the next unchanged).\n"
-        "6. NEVER describe a character's appearance anywhere — identity comes only from reference "
-        "images. Poses, positions and expressions yes; looks, colours, species features no.\n"
-        "7. Comedy physics: weight, compression, rebound, follow-through — chained cause and "
-        "consequence, never a checklist of verbs. For a BIG-comedy beat, put the full physicalStaging "
-        "contract on the shot that carries the gag's physical event; leave it null everywhere else.\n"
-        "8. Only the named speaker's mouth moves; listeners react silently. Dialogue timing must fit "
-        "inside the shot with breathing room.\n"
-        "9. OBSERVABLE DIRECTION LAW (Julian's ruling, 2026-07-16): performanceAssignment, "
-        "physicalStaging and visualPayoff are RENDER-FACING — they may contain ONLY what a camera "
-        "sees or a microphone hears: movement, pose, expression, timing, camera-visible cause and "
-        "effect, and sound. Abstract intent, judgments, metaphors and inner states ('the pose "
-        "becomes the joke', 'sells it as status', 'mistakes attention for permission') are valid "
-        "creative planning but belong ONLY in purpose — never in the three render-facing fields. "
-        "Translate every intention into visible behaviour without removing direction needed "
-        "to deliver the approved beat and emotional outcome.\n"
-        "Output STRICT JSON matching the schema you are given."
-    )
+    # Use the same maintained directing standard as the Studio specialists. The
+    # former standalone laws froze screen positions across cuts and prohibited
+    # useful canonical identity descriptions, contradicting the current workflow.
+    from cb_departments import load_runtime_skill
+    from studio_prompt_structure import WRITING_BRIEF
+    return (load_runtime_skill("director") + "\n\n" + WRITING_BRIEF +
+        "\nPlan scene coverage before allocating provider clips. Preserve every locked "
+        "dialogue occurrence exactly once. Delivery is acting direction, not spoken text. "
+        "Purpose records audience understanding; performanceAssignment, physicalStaging "
+        "and visualPayoff express it through visible behaviour. An opening state supports "
+        "the first intended action and may begin mid-action when explicitly directed. "
+        "Different camera angles preserve world-space geography, eyelines, action phase "
+        "and prop state, not identical screen-left/right composition. Describe only "
+        "identity attributes grounded in approved canon and assigned references. "
+        "Return strict JSON matching the supplied schema.")
 
 
 def _load_pkg(episode):
@@ -324,7 +301,13 @@ def _load_pkg(episode):
                    key=lambda p: p.stat().st_mtime)
     if not cands:
         raise FileNotFoundError(f"no beat package for {episode} in cb-output/")
-    return json.load(open(cands[-1])), cands[-1]
+    current = SCRIPT_STORE.current(episode, required=True)
+    version = current.get('scriptVersionId')
+    for path in reversed(cands):
+        package = json.loads(path.read_text())
+        if (package.get('sourceScript') or {}).get('scriptVersionId') == version:
+            return package, path
+    raise ValueError('No beat package belongs to the current script. Prepare Story & Direction for this script before scene planning.')
 
 
 def _beat_sort_key(code):
@@ -769,8 +752,13 @@ def validate_scene_design(design, beats, characters_cfg):
             add("ERROR", "BINDING_MISSING", f"{path}.dialogueBinding",
                 "shot carries dialogue lines but no prompt-facing binding sentence")
         if sh.dialogueBinding and not sh.dialogueLines:
-            add("ERROR", "LINES_MISSING", f"{path}.dialogueLines",
-                "shot has a dialogue binding but no typed lines for the voice pass")
+            binding_text = str(sh.dialogueBinding or "").casefold()
+            declared_silent = any(marker in binding_text for marker in (
+                "no spoken", "no elevenlabs dialogue", "no dialogue",
+                "sfx only", "non-verbal", "nonverbal", "silent unit"))
+            if not declared_silent:
+                add("ERROR", "LINES_MISSING", f"{path}.dialogueLines",
+                    "shot has a dialogue binding but no typed lines for the voice pass")
 
         # TYPED ABSENCE (2026-07-17, THE SIMPLIFICATION): continuityIn=None is valid ONLY
         # for the scene's own first shot — every other shot must state what it inherits.
@@ -1419,8 +1407,9 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
         " ".join(prop_lines),
         f"{continuity_clause}@图{scene_plate_slot} scene plate anchors palette, materials and "
         f"lighting and world-space geography; preserve landmarks without copying its camera composition.",
-        (f"@图{scene_plate_slot + 1} is the exact ending of {shot.stateSourceShotId}. "
-         "Use it for current character, prop and effect state and the same story moment. "
+        (f"@图{scene_plate_slot + 1} is the approved continuity-state reference from {shot.stateSourceShotId}. "
+         "Use it for current character, prop and effect state and the same story moment; "
+         "when an editorial relay frame is declared, follow that relay state rather than blindly copying the literal final frame. "
          "Compose the new camera angle described by the opening pose; do not copy the prior framing."
          if shot.stateSourceShotId else ""),
         cb_engine_rules.living_performance_boilerplate(

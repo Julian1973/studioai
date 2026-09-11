@@ -36,6 +36,10 @@ have no visible pose or mouth restriction. Listeners may act; only the named spe
 articulates their dialogue. Preserve approved audio and permit only directed generated SFX.
 Resolve comedy, emotion and editorial recommendations in the same shared decisions.
 No separate department story, extra user gates, decorative camera moves or forced jokes.
+Use characterRoles for concise canonical distinguishing traits and shot-scoped role
+ownership where similar characters could be confused. Use characterRoleEvents for
+explicit event ownership and preserve those IDs through specialist handoff. Never
+invent distinguishing anatomy or turn a local action restriction into global canon.
 '''
 
 class Decision(BaseModel):
@@ -86,6 +90,8 @@ class CoverageView(Decision):
 
 
 class StateChange(Decision):
+    actionId: str | None = Field(default=None, description='Stable occurrence ID; the same occurrence must not execute again after a cut.')
+    repeatAuthorisation: str | None = None
     entityId: str | None = None
     entityCount: int = Field(default=1, ge=1)
     unique: bool = True
@@ -115,6 +121,26 @@ class Playability(Decision):
     reasoning: str = Field(min_length=1)
     decision: Literal['playable', 'restructure']
 
+
+class CharacterRole(Decision):
+    character: str
+    identityTraits: dict[str, str] = Field(default_factory=dict)
+    allowedActions: list[str] = Field(default_factory=list)
+    prohibitedActions: list[str] = Field(default_factory=list)
+    exclusiveActions: list[str] = Field(default_factory=list, description='Exact action clauses owned only by this character in this shot. Not global personality rules.')
+
+
+class CharacterRoleEvent(Decision):
+    eventId: str
+    viewId: str
+    character: str
+    action: str
+
+
+class SharedIdentityException(Decision):
+    characters: list[str]
+    authorisation: str = Field(min_length=1, description='Existing explicit approval for intentionally shared identity, not an inferred exception.')
+
 class SceneCoverage(Decision):
     scene: int
     audienceJourney: str
@@ -135,6 +161,9 @@ class ShotDirection(Decision):
     soundCues: list[SoundCue] = Field(default_factory=list)
     storyTime: Literal['same_moment', 'continuous_motion', 'next_beat', 'time_jump', 'new_location', 'independent'] = 'next_beat'
     playability: Playability | None = None
+    characterRoles: list[CharacterRole] = Field(default_factory=list)
+    characterRoleEvents: list[CharacterRoleEvent] = Field(default_factory=list)
+    sharedIdentityExceptions: list[SharedIdentityException] = Field(default_factory=list)
 
 
 def card(shot, sources=None):

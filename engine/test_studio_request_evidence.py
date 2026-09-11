@@ -31,6 +31,9 @@ def test_project_video_captures_actual_body_and_private_assets(tmp_path, monkeyp
                                                prompt, [image], [audio], 8) == 'task-1'
     [receipt] = records(tmp_path / 'receipts')
     assert receipt['body'] == seen[0]
+    from studio_shot_request import ShotProductionRequest
+    frozen = ShotProductionRequest.load(receipt['productionRequest'])
+    assert frozen.data['execution']['bodyHash'] == digest(seen[0])
     assert receipt['bodyHash'] == digest(seen[0])
     assert receipt['state'] == 'response-received'
     assert receipt['directionTrace']['unverified'] == []
@@ -129,6 +132,11 @@ def test_project_commands_reach_real_image_and_video_http_builders(setup, monkey
         assert saved['origin']['shotId'] == 'S1.SH1'
         assert saved['bodyHash'] == digest(body)
     assert shot['outcomes']['watch']['executionReceipt']['providerTaskId'] == 'task-qualification'
+    from studio_shot_request import ShotProductionRequest
+    watched = shot['outcomes']['watch']
+    sealed = ShotProductionRequest.load(watched['productionRequest'])
+    assert watched['requestLineage']['originatingRequestHash'] == sealed.request_hash
+    assert watched['originatingReviewInputs']['references']
     assert shot['outcomes']['watch']['providerReturnedFile']['hash']
     # Artificial blue frames and a silent test voice do not qualify creative quality.
     assert shot['outcomes']['watch']['status'] == 'candidate'

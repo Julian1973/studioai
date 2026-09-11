@@ -8,8 +8,16 @@ import math
 import re
 from studio_request_evidence import digest
 
-VERSION='dynamic-state-1.1'
+VERSION='dynamic-state-1.3'
 RESET={'time_jump','new_location','independent','flashback','dream','explicit_reset'}
+
+def _state_text(value):
+    """Provider prose: braces are reserved for exact spoken-line markers."""
+    if isinstance(value, dict):
+        return '; '.join(str(key) + ': ' + _state_text(value[key]) for key in sorted(value))
+    if isinstance(value, list):
+        return ', '.join(_state_text(item) for item in value)
+    return str(value)
 
 def bound_metadata(binding, content_hash):
     """Only file-bound observations describe pixels; scope alone describes intent."""
@@ -25,8 +33,9 @@ def scope(ref):
     declared=ref.get('stateScope')
     if declared:return deepcopy(declared)
     role=str(ref.get('role',ref.get('name',''))).lower()
-    kind=('fixed_geography' if 'plate' in role or 'location' in role else
-          'identity_only' if any(x in role for x in ('character','turnaround','prop','identity')) else
+    kind=('fixed_geography' if any(x in role for x in ('plate','location','geography')) else
+          'identity_only' if (ref.get('intactTurnaround') or ref.get('sameCharacterGroup') or
+                              any(x in role for x in ('character','turnaround','prop','identity'))) else
           'opening_state' if 'opening' in role else
           'current_motion_evidence' if 'video' in role else 'historical_context')
     return dict(authority=kind,storyTime='opening' if kind=='opening_state' else 'unspecified',
@@ -50,12 +59,82 @@ def _start_time(record, path, repairs):
                         action='derive start from explicit authored interval'))
     return value
 
+def review_plan(shot):
+    """Review structured Director Card facts, independent of entity names/prose.
+
+    This is not semantic interpretation. Unstructured relations are explicitly
+    unverified. Ellipsis/offscreen/stylised causes are allowed, not inferred.
+    """
+    card = shot.get('directorCard') or {}
+    errors, unverified, repairs, trace = [], [], [], []
+    state, occurrences = {}, set()
+    events = []
+    duration = shot.get('durationSec', shot.get('duration'))
+    for i, event in enumerate(card.get('stateChanges') or []):
+        path = f'directorCard/stateChanges/{i}'
+        at = _start_time(event, path, repairs)
+        if at is None or not event.get('entityId'):
+            unverified.append(path + ': entity/time unavailable')
+            continue
+        events.append((at, i, event))
+    for at, i, event in sorted(events, key=lambda row: (row[0], row[1])):
+        path = f'directorCard/stateChanges/{i}'
+        entity = event['entityId']
+        action = event.get('actionId')
+        if action and action in occurrences and not event.get('repeatAuthorisation'):
+            errors.append(path + ': completed action occurrence replayed: ' + action)
+        if action:
+            occurrences.add(action)
+        before, after = event.get('beforeValues') or {}, event.get('afterValues') or {}
+        current = state.setdefault(entity, deepcopy(before))
+        if event.get('storyRelationship') in RESET:
+            current.clear()
+            current.update(before)
+        conflicts = [key for key, value in before.items() if key in current and current[key] != value]
+        if conflicts:
+            errors.append(path + ': before-state contradicts carried state: ' + ', '.join(conflicts))
+        if not event.get('cause'):
+            errors.append(path + ': state change requires an authored cause')
+        if event.get('unique', True) and event.get('entityCount', 1) != 1:
+            errors.append(path + ': unique entity has conflicting count')
+        if isinstance(duration, (int, float)) and at > duration:
+            errors.append(path + ': state change exceeds generation duration')
+        current.update(after)
+        trace.append(dict(source=path, entity=entity, atSec=at, before=before, after=after, cause=event.get('cause')))
+    for i, view in enumerate(card.get('views') or []):
+        path = f'directorCard/views/{i}'
+        at = _start_time(view, path, repairs)
+        cine = view.get('cinematography') or {}
+        # Explicit enumerated values only. A phrase such as 'steady chase' is not a conflict.
+        if cine.get('cameraState') == 'locked' and cine.get('movement') in ('pan', 'tilt', 'dolly', 'track', 'orbit', 'crane', 'zoom'):
+            errors.append(path + ': locked camera conflicts with declared movement')
+        if at is not None and isinstance(duration, (int, float)) and at > duration:
+            errors.append(path + ': view starts after generation ends')
+        if view.get('criticalStateEntities') and not events:
+            errors.append(path + ': critical action has no structured state plan')
+    for i, line in enumerate(shot.get('dialogueLines') or []):
+        start, end = line.get('startSec'), line.get('endSec')
+        if start is None or end is None:
+            unverified.append(f'dialogueLines/{i}: measured interval unavailable')
+        elif not isinstance(start, (int, float)) or not isinstance(end, (int, float)) or not 0 <= start < end:
+            errors.append(f'dialogueLines/{i}: invalid measured interval')
+        elif isinstance(duration, (int, float)) and end > duration:
+            errors.append(f'dialogueLines/{i}: approved audio exceeds generation duration')
+    if not events:
+        unverified.append('No structured state events; action semantics require the semantic reviewer')
+    return dict(errors=list(dict.fromkeys(errors)), unverified=unverified, trace=trace,
+                sourceHash=digest(shot), closingState=state, repairs=repairs,
+                interpretation='structured validation only; prose and pixels unverified')
+
+
 def resolve(authorities, references):
     shot=authorities.get('shot',authorities)
     card=shot.get('directorCard') or {}
     events=card.get('stateChanges',[])
     views=card.get('views',[])
-    errors=[];unverified=[];history=[];initial={};repairs=[];incomplete=set()
+    from studio_director_handoff import errors as handoff_errors
+    plan_review = review_plan(shot)
+    errors=handoff_errors(shot) + plan_review['errors'];unverified=list(errors) + plan_review['unverified'];history=[];initial={};repairs=[];incomplete=set()
     for index,e in enumerate(events):
         at = _start_time(e, f'directorCard/stateChanges/{index}', repairs)
         if at is None or not e.get('entityId') or not e.get('afterValues'):
@@ -96,8 +175,21 @@ def resolve(authorities, references):
                 current=state.setdefault(e['entity'],{})
                 if e['relationship'] in RESET:current.clear()
                 elif any(k in current and current[k]!=val for k,val in e['before'].items()):
-                    errors.append(e['entity']+': event before-state disagrees with carried state')
+                    differences = {k: {'carried': current[k], 'declaredBefore': val}
+                                   for k, val in e['before'].items() if k in current and current[k] != val}
+                    errors.append(e['entity']+f" at {e['at']:g}s: event before-state disagrees with carried state: " + json.dumps(differences, sort_keys=True))
                 current.update(e['after']);seen.add(e['entity'])
+        for entity, entry_values in (v.get('stateAtEntry') or {}).items():
+            if not isinstance(entry_values, dict):
+                errors.append(v['viewId'] + '/' + entity + ': entry state must be structured')
+                continue
+            carried = state.get(entity, {})
+            mismatch = [key for key, value in entry_values.items() if key in carried and carried[key] != value]
+            if mismatch:
+                errors.append(v['viewId'] + '/' + entity + ': entry state lacks a matching transition: ' + ', '.join(mismatch))
+            missing = [key for key in entry_values if key not in carried]
+            if missing:
+                unverified.append(v['viewId'] + '/' + entity + ': entry fields lack prior state evidence: ' + ', '.join(missing))
         for entity in v['visibleEntities']:
             required=state.get(entity)
             if required is None:
@@ -105,7 +197,7 @@ def resolve(authorities, references):
                     errors.append(v['viewId']+'/'+entity+': critical entry state unavailable')
                 unverified.append(v['viewId']+'/'+entity+': intended state unavailable');continue
             changed=entity in seen
-            current_evidence=[];obsolete=[];unknown=[];conflicts=[];unknown_current=[]
+            current_evidence=[];partial_evidence=[];obsolete=[];unknown=[];conflicts=[];unknown_current=[]
             for n,ref in enumerate(resolved):
                 sc=ref['stateScope'];depicted=(ref.get('depictedStates') or {}).get(entity)
                 valid_time=sc.get('startSec',0)<=at and (sc.get('endSec') is None or at<=sc['endSec'])
@@ -114,9 +206,25 @@ def resolve(authorities, references):
                     unknown.append(n+1)
                     if current: unknown_current.append(n+1)
                     continue
-                matches=all(depicted.get(k)==val for k,val in required.items())
-                if matches and current:current_evidence.append(n+1)
-                elif not matches:
+                # A still cannot observe every intended property (e.g. concealed
+                # spring tension). Missing fields are unknown, not contradictory.
+                observed = set(depicted).intersection(required)
+                missing = sorted(set(required) - set(depicted))
+                mismatches = {k: {'depicted': depicted[k], 'required': required[k]}
+                              for k in observed if depicted[k] != required[k]}
+                if missing:
+                    unverified.append(v['viewId']+'/'+entity+': reference '+str(n+1)+
+                                      ' has no observation for '+', '.join(missing))
+                    unknown.append(n+1)
+                    if current and not observed:
+                        unknown_current.append(n+1)
+                if current and not mismatches and observed:
+                    if missing:
+                        partial_evidence.append(dict(reference=n+1, observedFields=sorted(observed),
+                                                     unverifiedFields=missing))
+                    else:
+                        current_evidence.append(n+1)
+                if mismatches:
                     obsolete.append(n+1)
                     ref.setdefault('stateResolutions',[]).append(dict(viewId=v['viewId'],entity=entity,required=required,
                         depicted=depicted,action='re-scope to '+sc['authority'] if not current else 'conflicting current-state evidence'))
@@ -134,14 +242,20 @@ def resolve(authorities, references):
                 unverified.append(v['viewId']+'/'+entity+': reference contents unverified for slots '+','.join(map(str, unknown)))
             check=dict(viewId=v['viewId'],atSec=at,entity=entity,requiredState=required,revisit=changed,
                        obsoleteReferences=obsolete,currentStateEvidence=current_evidence,unknownReferences=unknown,
+                       partialCurrentStateEvidence=partial_evidence,
                        unresolvedResetRisk=risk,relationship=relationship,
                        stateAuthority='authored intent; not observed outcome',
                        resolution='unresolved current reference' if risk else 'authored state with scoped references')
             checks.append(check)
             if changed or relationship in RESET:
-                clauses.append(v['viewId']+f' at {at:g}s: '+entity+' = '+json.dumps(required,sort_keys=True,ensure_ascii=False)+'.')
+                clauses.append(v['viewId']+f' at {at:g}s: '+entity+' — '+_state_text(required)+'.')
     if history and not checks:unverified.append('No timed visible view could be resolved')
+    # Entry-state checks alone do not communicate a change that happens *inside*
+    # a view. Emit the authored event times as well as the state carried at cuts.
+    transitions = [f"At {e['at']:g}s {e['entity']} changes to " + _state_text(e['after'])
+                   + '. Cause: ' + e['cause'] + '.' for e in history if e['at'] > 0]
+    clauses = transitions + clauses
     return dict(version=VERSION,sourceHash=digest(authorities),kind='intended; not observed or approved output',
-                history=history,referencePackage=resolved,revisitChecks=checks,errors=list(dict.fromkeys(errors)),
+                planReview=plan_review,history=history,referencePackage=resolved,revisitChecks=checks,errors=list(dict.fromkeys(errors)),
                 unverified=list(dict.fromkeys(unverified)),repairs=repairs,clauses=list(dict.fromkeys(clauses)),
                 correctiveAction='; '.join(dict.fromkeys(errors)) if errors else None)

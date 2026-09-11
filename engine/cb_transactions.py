@@ -123,7 +123,9 @@ def protect(module, name, target):
         if scene is None:
             raise module.Refused(f"REFUSED - cannot determine scene scope for {name}")
         try:
-            with cb_db.scene_lease(module.HERE.parent, episode, scene, f"cb_render.{name}"):
+            arguments = signature.bind_partial(*args, **kwargs).arguments
+            with cb_db.scene_lease(module.HERE.parent, episode, scene, f"cb_render.{name}",
+                    wait_seconds=240, on_wait=arguments.get('log', print)):
                 arguments = signature.bind_partial(*args, **kwargs).arguments
                 before = None
                 if name in _MEDIA_DECISIONS:

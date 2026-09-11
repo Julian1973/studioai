@@ -1,0 +1,7 @@
+{
+  "version": "seedance-prompt-budget-1.0",
+  "preferredMinWords": 900,
+  "preferredMaxWords": 1400,
+  "warnWords": 1600,
+  "maxWords": 2200
+}

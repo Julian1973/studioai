@@ -417,9 +417,20 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
 # ── Last-frame extractor (first/last-frame chaining for continuous flow) ──────
 def last_frame(clip, out="lastframe.png"):
     import subprocess
-    subprocess.run(["ffmpeg", "-y", "-sseof", "-0.1", "-i", clip,
-                    "-update", "1", "-frames:v", "1", out],
-                   check=True, capture_output=True)
+    import tempfile
+    destination = pathlib.Path(out)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    # Decode through EOF and repeatedly update one temporary image. Seeking
+    # 0.1s backwards then requesting one frame returned a penultimate frame.
+    # A failed extraction must never overwrite a valid continuity reference.
+    with tempfile.TemporaryDirectory(dir=destination.parent) as folder:
+        temporary = pathlib.Path(folder) / destination.name
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(clip),
+                        "-map", "0:v:0", "-vsync", "0", "-update", "1", str(temporary)],
+                       check=True, capture_output=True)
+        if not temporary.is_file() or not temporary.stat().st_size:
+            raise RuntimeError("No final video frame was decoded")
+        os.replace(temporary, destination)
     return out
 
 # ── DP keyframes — provider dispatch (2026-07-09) ────────────────────────────

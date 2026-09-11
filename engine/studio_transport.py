@@ -65,6 +65,20 @@ class CompositionReference(StrictModel):
 from studio_director_card import ShotDirection, SceneCoverage, CoverageView, Playability
 
 
+class TrackedObject(StrictModel):
+    id: str = Field(description='Stable story-object ID, also used by Director Card stateChanges. Never change ID across views.')
+    name: str
+    description: str
+    aliases: list[str] = Field(default_factory=list)
+    legacyIds: list[str] = Field(default_factory=list)
+    sourceReferences: list[str] = Field(default_factory=list, description='Actual supplied canonical asset/reference IDs; never invent an approval.')
+    count: int = Field(default=1, ge=1)
+    stateIn: str = ''
+    stateDuring: str = ''
+    stateOut: str = ''
+    prohibitedSubstitutions: list[str] = Field(default_factory=list)
+
+
 class Shot(StrictModel):
     id: str
     scene: int
@@ -80,6 +94,8 @@ class Shot(StrictModel):
     characters: list[str]
     location: str
     props: list[str]
+    trackedProductionObjects: list[TrackedObject] = Field(default_factory=list)
+    providerAliases: dict[str, str] = Field(default_factory=dict, description='Explicit ambiguous visual phrase to stable object ID bindings; never rewrite spoken words.')
     requiredReferenceStates: dict[str, dict[str, str]] = Field(default_factory=dict)
     dialogue: list[Dialogue]
     seePrompt: str
@@ -200,15 +216,17 @@ class ProviderTransport:
             content += [{"type": "input_image", "image_url": self.inline(path), "detail": "auto"} for path in (images or [])]
             from studio_preflight_evidence import review_submission
             review_submission()
-            response = client.responses.parse(
+            from studio_structured_output import format_for, parse
+            output_model = schema or (DirectedEpisodePlan if planning else AgentReply)
+            response = client.responses.create(
                 model=model, store=False, service_tier="default", max_output_tokens=16000 if planning else 5000,
                 input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},
                        {"role": "user", "content": content}],
-                text_format=schema or (DirectedEpisodePlan if planning else AgentReply))
-            if response.output_parsed is None:
+                text={'format':format_for(output_model)})
+            if getattr(response, 'status', None) != 'completed' or not response.output_text:
                 raise StudioError("The director did not return a complete proposal. Your existing shots are unchanged.", "invalid_output")
             from studio_model_policy import usage_record
-            return {**response.output_parsed.model_dump(), "_usage": usage_record(response, model)}
+            return {**parse(output_model, response.output_text).model_dump(), "_usage": usage_record(response, model)}
         except StudioError:
             raise
         except Exception as exc:

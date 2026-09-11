@@ -11,6 +11,8 @@ import cb_episode_budget as budget
 
 def intent(message):
     text = re.sub(r"[.!]+$", "", str(message).strip().lower())
+    if text in {"apply and refire", "apply & refire", "apply and refire keyframe"}:
+        return {"kind": "retake-keyframe"}
     match = re.fullmatch(r"approve (?:the )?episode budget (?:of )?\$([0-9]+(?:\.[0-9]{1,2})?)", text)
     if match:
         return {"kind": "budget", "amount": match.group(1)}
@@ -163,9 +165,27 @@ def prepare(episode, scene, shot_id, stage):
         raise ValueError("Unsupported outcome")
 
 
+def retake_keyframe(episode, scene, shot_id, reviewed_hash, correction, reviewer="Julian"):
+    """One explicitly requested SEE retake, bound to the reviewed candidate."""
+    if not str(correction).strip():
+        raise R.Refused("A precise correction is required")
+    if not budget.status(episode)["approved"]:
+        raise budget.BudgetRefused("Approve the episode allowance first")
+    with cb_db.scene_lease(R.ROOT, episode, scene, "chat-keyframe-retake"):
+        current = target(episode, scene, shot_id, "keyframe")
+        if not current or current["hash"] != reviewed_hash:
+            raise R.Refused("The SEE candidate changed. Review the current image before refiring.")
+        R.reject_keyframe(scene, shot_id, correction, episode, reviewed_by=reviewer)
+        # Shared build refreshes affected direction and validates the final prompt.
+        # Keep the approved plate and media approvals; return exactly one candidate.
+        return R.build_keyframe(scene, shot_id, episode, compare=False)
+
+
 if __name__ == "__main__":
     import sys
-    if sys.argv[1] == "prepare":
+    if sys.argv[1] == "retake-keyframe":
+        retake_keyframe(*sys.argv[2:])
+    elif sys.argv[1] == "prepare":
         episode, scene, shot_id, stage = sys.argv[2:]
         prepare(episode, scene, None if shot_id == "scene" else shot_id, stage)
     else:

@@ -386,7 +386,7 @@ def uses_enhanced_seedance_structure(prompt):
     """Return whether a prompt satisfies the current Seedance team handoff format."""
     text = str(prompt or "").strip()
     return bool(
-        text.startswith("[GENERATED VIDEO PROMPT]") and
+        re.search(r"(?m)^\[GENERATED VIDEO PROMPT\]\s*$", text) and
         all(_team_section_body(text, heading) for heading in _TEAM_PROMPT_HEADINGS)
     )
 
@@ -511,7 +511,10 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
     if team_structure and task_mode in staged_generation_modes:
         goal_body, goal_heading = _team_section_body(text, "Scenario Description"), "Scenario Description"
     else:
-        goal_body, goal_heading = _first_section_body(text, goal_headings)
+        # Compact native execution retains the same purpose as one concise block.
+        # This is a heading alias, not a score exemption or lower threshold.
+        compact_goals = goal_headings + (("Audience Purpose", "PURPOSE", "STORY BEAT") if task_mode in staged_generation_modes else ())
+        goal_body, goal_heading = _first_section_body(text, compact_goals)
     expected_goal = " or ".join(f"[{heading}]" for heading in goal_headings)
     add(
         "goal", "One-sentence story summary", bool(goal_body),
@@ -528,7 +531,9 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
         if not any(_REFERENCE_ROLE_WORDS.search(line) for line in matching):
             unmapped_refs.append(entry["assetTag"])
         if not entry["key"].startswith("audio:") and not any(
-                _REFERENCE_EXCLUSION_WORDS.search(line) for line in matching):
+                _REFERENCE_EXCLUSION_WORDS.search(line) or
+                re.search(r'\bis the (?:first|last) frame\.', line, re.I)
+                for line in matching):
             unscoped_visual_refs.append(entry["assetTag"])
     refs_required = task_mode in {
         "reference-to-video", "video-edit", "extend-forward", "extend-backward",
@@ -601,7 +606,7 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             global_heading = "Rendering Mode / Style Description / Character Description and Core Action"
         else:
             global_settings, global_heading = _first_section_body(
-                text, ("Global Settings", "Global Scene Setting", "Global Setting"))
+                text, ("Global Settings", "Global Scene Setting", "Global Setting", "Continuity", "MUST PRESERVE"))
         add(
             "global-settings", "Global world and anti-collapse settings",
             bool(global_settings),
@@ -615,6 +620,7 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
         shot_sequence = (_team_section_body(text, "Camera Movement Description")
                          if team_structure else (
             _section_body(text, "Shot Sequence")
+            or _section_body(text, "TIMED ACTION")
             or _section_body(text, "Timed Action Phases — One Continuous Render")
             or _section_body(text, "Camera and Shot Plan")))
         shot_numbers = [int(value) for value in re.findall(
@@ -708,7 +714,7 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             supplement_heading = "Landing State / Negative Prompt (Negative)"
         else:
             global_supplement, supplement_heading = _first_section_body(
-                text, ("Global Supplement", "Overall Supplement", "Maintain Consistency"))
+                text, ("Global Supplement", "Overall Supplement", "Maintain Consistency", "Continuity", "MUST PRESERVE"))
         consistency_ok = bool(global_supplement and re.search(
             r"\b(keep|maintain|preserve|remain|throughout|must)\b", global_supplement, re.I))
         add(

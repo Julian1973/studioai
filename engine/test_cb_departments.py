@@ -22,8 +22,11 @@ def test_directed_laughter_can_act_under_dialogue_without_changing_transcript():
     assert _directed_nonverbal_performance(source, []) == source
     action = [{**cues[0], 'channel': 'action'}]
     assert _directed_nonverbal_performance(source, action) == source
-    assert '[DIRECTED NONVERBAL PERFORMANCE]' in _directed_nonverbal_performance(
-        source, action, audio_contract='Fuzzby laughter is authorised nonverbal Seedance SFX only.')
+    sfx_only = _directed_nonverbal_performance(
+        'No dialogue in this unit.', action, audio_contract='No ElevenLabs dialogue. Fuzzby laughter is authorised nonverbal Seedance SFX only.')
+    assert '[DIRECTED NONVERBAL PERFORMANCE]' in sfx_only
+    assert 'Preserve @Audio1' not in sfx_only
+    assert 'No approved speech exists in this unit' in sfx_only
 
 
 def test_camera_consciousness_preserves_authored_hold_and_backfills_legacy_direction():
@@ -592,6 +595,7 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
     def fake(system, user, schema, **kwargs):
         seen["system"] = system
         seen["user"] = user
+        seen["schema"] = schema
         return schema(
             shotId="S1.SH1",
             durationSec=8,
@@ -624,10 +628,10 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
             landingBreath="Let the recovered pose register before handing off.",
             directionDensity="guided",
             precisionReasons=[],
-            shotPlan=[D.InternalShotDirection(
-                shotNumber=1, purpose="Reveal the false confidence",
+            shotPlan=[dict(
+                sourceViewId='S1.SH1.V01', shotNumber=1, purpose="Reveal the false confidence",
                 framingLensAndCamera="Medium 40mm, slow motivated push",
-                causalAction="His paw loads the plank and the deck kicks back",
+                causalAction="His planted paw loads the plank and the deck kicks back.",
                 observablePerformance="His smile holds as his eyes flick down",
                 compositionLightAndMaterials="Layered deck depth, warm rim on tactile fur",
                 landingImage="He settles in a readable off-balance silhouette")],
@@ -671,6 +675,7 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
     monkeypatch.setattr(D, "animation_story_lock_report", capture_story_lock)
     out = D.prepare_animation(
         {"shot": {"shotId": "S1.SH1", "durationSec": 8,
+                  "storyboardInternalShotPlanApproved": [{"viewId": "S1.SH1.V01"}],
                   "storyboardStagePlanApproved": [{
                       "stageNumber": 1, "beatIds": ["1.B1"],
                       "primaryEvent": "His planted paw loads the plank and the deck kicks back.",
@@ -679,13 +684,29 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
          "referenceSlots": {"@Image1": "opening frame"}},
         ["opening.png"], log=lambda *a, **k: None)
     assert len(out.shotPlan) == 1
+    shot_schema = seen["schema"].model_json_schema()["properties"]["shotPlan"]
+    assert shot_schema["minItems"] == shot_schema["maxItems"] == 1
+    assert issubclass(seen["schema"], D.AnimationDirection)
+    coverage_schema = D._animation_response_schema({
+        "storyboardInternalShotPlanApproved": [{"viewId": f"V{i}"} for i in range(6)]})
+    constraints = coverage_schema.model_json_schema()["properties"]["shotPlan"]
+    assert constraints["minItems"] == constraints["maxItems"] == 6
+    with pytest.raises(ValueError, match="at least 6"):
+        undersized = out.model_dump()
+        undersized['shotPlan'][0]['sourceViewId'] = 'V0'
+        coverage_schema.model_validate(undersized)
+    assert D._animation_response_schema({}) is D.AnimationDirection
     assert len(out.stagePlan) == 1
     assert out.pacingMode == "storyline"
     compiled = D.compile_animation_provider_prompt(
         {"shotId": "S1.SH1", "durationSec": 8, "dialogueLines": []}, out)
-    assert "[Camera and Shot Plan]" in compiled
-    assert "Phase 1: Camera: Medium 40mm, slow motivated push" in compiled
-    assert "Action: His paw loads the plank and the deck kicks back" in compiled
+    assert "[TIMED ACTION]" in compiled
+    assert "Phase 1:\nCamera: Medium 40mm, slow motivated push" in compiled
+    assert "Action: His planted paw loads the plank and the deck kicks back." in compiled
+    stale = out.model_copy(deep=True)
+    stale.shotPlan[0].causalAction = "The character stands still."
+    with pytest.raises(ValueError, match="needs reconciliation"):
+        D.compile_animation_provider_prompt({"durationSec": 8, "storyboardStagePlanApproved": [{"stageNumber": 1, "primaryEvent": "His planted paw loads the plank and the deck kicks back."}]}, stale)
     assert "Emotion/Camera Analysis:" not in compiled
     assert "Stage 1: 0-8s" not in compiled
     assert "Audio cues:" not in compiled
@@ -1345,7 +1366,7 @@ def test_animation_compiler_emits_continuous_internal_units_as_timed_phases():
         "audioContract": "Natural movement and plant foley only.",
     }
     prompt = D.compile_animation_provider_prompt(shot, direction)
-    assert "[Timed Action Phases" in prompt
+    assert "[TIMED ACTION]" in prompt
     assert "One continuous Seedance render" in prompt
     assert "Shot 1:" not in prompt
     assert prompt.index("Phase 1:") < prompt.index("Phase 2:") < prompt.index("Phase 3:")
@@ -1355,7 +1376,7 @@ def test_animation_compiler_emits_continuous_internal_units_as_timed_phases():
 
     cut_prompt = D.compile_animation_provider_prompt(
         shot, {**direction, "editScope": "One playable unit with three internal shots and two intentional cuts."})
-    assert "[Shot Sequence]" in cut_prompt
+    assert "[TIMED ACTION]" in cut_prompt
     assert "Shot 1:" in cut_prompt
     assert "One continuous Seedance render" not in cut_prompt
 
@@ -1365,10 +1386,10 @@ def test_animation_compiler_emits_continuous_internal_units_as_timed_phases():
         {'transitionType': 'opening'}, {'transitionType': 'cut'}, {'transitionType': 'hold'}]}
     typed = D.compile_animation_provider_prompt(planned, direction)
     assert 'Cut to the planned view.' in typed
-    assert '[Shot Sequence]' in typed and 'One continuous Seedance render' not in typed
+    assert '[TIMED ACTION]' in typed and 'One continuous Seedance render' not in typed
     planned['storyboardInternalShotPlanApproved'][1]['transitionType'] = 'move'
     continuous = D.compile_animation_provider_prompt(planned, {**direction, 'editScope': 'two intentional cuts'})
-    assert '[Timed Action Phases' in continuous
+    assert '[TIMED ACTION]' in continuous
     assert 'Cut to the planned view.' not in continuous
 
 
@@ -1838,8 +1859,8 @@ def test_scene_continuity_locks_are_emitted_into_animation_prompt():
     assert "carry the joke" not in prompt
     assert "[Opening Motion Bridge]" in prompt
     assert "[ACTION OWNERSHIP]" in prompt
-    assert prompt.index("[Opening Motion Bridge]") < prompt.index("[Camera and Shot Plan]")
-    assert prompt.index("[ACTION OWNERSHIP]") < prompt.index("[Camera and Shot Plan]")
+    assert prompt.index("[Opening Motion Bridge]") < prompt.index("[TIMED ACTION]")
+    assert prompt.index("[ACTION OWNERSHIP]") < prompt.index("[TIMED ACTION]")
     assert R._scene_state_prompt_report(shot, prompt)["ok"] is True
 
 
@@ -2448,6 +2469,19 @@ def test_animation_location_controls_line_is_normalized_to_defines():
     assert "@图4 controls" not in prompt
     assert "@图1 defines scene/layout/light only" in prompt
 
+    # The compiler's transition prose must not hide headings from the real scorer.
+    import cb_prompt_lab
+    for transition in ("cut", "move", "hold"):
+        direction["shotPlan"][0]["transitionType"] = transition
+        compiled = D.compile_animation_provider_prompt(shot, direction)
+        audit = cb_prompt_lab.analyze_seedance_prompt_contract(
+            compiled, task_mode="reference-to-video", duration_sec=10)
+        checks = {item["code"]: item for item in audit["checks"]}
+        for code in ("stages", "stage-direction", "stage-end-states"):
+            assert checks[code]["status"] == "pass", (transition, checks[code])
+        assert "Keen looks to the water." in compiled
+        assert "Keen remains beside the water." in compiled
+
 
 def test_animation_department_candidate_persists_watch_preflight():
     preflight = {
@@ -2607,3 +2641,16 @@ def test_primary_voice_recipe_carries_directed_tags():
         shotId='S1.SH1', sceneIntention='Hide embarrassment.', lines=[line]),
         [{'speaker':line.speaker,'text':'Nailed it.'}])
     assert result.lines[0].takeRecipes[0].performedText == '[nervous] Nailed it.'
+
+
+def test_nonverbal_owner_and_visibility_are_explicit():
+    cue = dict(channel='sfx', performer='Character B', visibility='visible',
+               startSec=11, endSec=19, event='Laugh, contain it, then laugh again')
+    prompt = D._directed_nonverbal_performance('Approved audio remains unchanged.', [cue])
+    assert 'Character B alone performs' in prompt
+    assert "Character B's face and body readable" in prompt
+    assert 'No other character performs or lip-syncs this cue.' in prompt
+    offscreen = D._directed_nonverbal_performance('Approved audio remains unchanged.',
+                                                 [{**cue, 'visibility': 'offscreen'}])
+    assert 'do not transfer the sound or mouth movement to a visible listener' in offscreen
+    assert D._directed_nonverbal_performance('Exact audio only.', [cue], exact_audio_only=True) == 'Exact audio only.'

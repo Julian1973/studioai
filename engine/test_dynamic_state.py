@@ -12,6 +12,32 @@ def source(field='location',before='A',after='B',critical=False):
 def refs(field='location',value='A'):
     return [{'role':'opening frame','depictedStates':{'object':{field:value}}}]
 
+def test_native_named_turnaround_has_identity_authority_without_role_keywords(tmp_path):
+    from studio_dynamic_state import scope
+    import hashlib
+    path = tmp_path / 'Ada.jpeg'
+    path.write_bytes(b'synthetic Ada identity')
+    for metadata in ({'intactTurnaround': True}, {'sameCharacterGroup': 'cast-id'}):
+        result = scope({'role': 'Ada', **metadata})
+        assert result['authority'] == 'identity_only'
+        assert not result['controlsDynamicState']
+        final, report = run(request_snapshot('Keep Ada in place.', {},
+                            [{'role': 'Ada', 'path': str(path), 'hash': hashlib.sha256(path.read_bytes()).hexdigest(), **metadata}], {}, 5), lambda *a: review())
+        verify(final, report)
+        assert 'Reference 1: identity/design only;' in final['prompt']
+        assert 'Reference 1: declared continuation state' not in final['prompt']
+
+def test_finished_locomotion_persists_into_dialogue_view():
+    data = {'shot': {'directorCard': {
+        'stateChanges': [
+            {'entityId': 'actor', 'atSec': 0, 'afterValues': {'locomotion': 'running'}, 'cause': 'chase'},
+            {'entityId': 'actor', 'atSec': 10, 'beforeValues': {'locomotion': 'running'},
+             'afterValues': {'locomotion': 'standing after recoil'}, 'cause': 'arrival and contact'}],
+        'views': [{'viewId': 'reply', 'atSec': 15, 'visibleEntities': ['actor']}]}}}
+    result = resolve(data, [])
+    assert not result['errors']
+    assert result['revisitChecks'][0]['requiredState']['locomotion'] == 'standing after recoil'
+
 @pytest.mark.parametrize('field,before,after',[('attachment','attached','detached'),('condition','upright','collapsed'),('holder','A','B'),('mark','clean','mud')])
 def test_changed_state_persists_on_revisit(field,before,after):
     out=resolve(source(field,before,after),refs(field,before))
@@ -33,9 +59,32 @@ def test_current_evidence_resolves_reset_and_is_sealed():
     final,report=run(request_snapshot('Show the return.',source(critical=True),rs,{},5),lambda *a:review())
     verify(final,report)
     assert report['dynamicStateResolution']['revisitChecks'][0]['currentStateEvidence']==[2]
-    assert '"location": "B"' in final['prompt']
+    assert 'location: B' in final['prompt']
     amended=deepcopy(final);amended['authorities']['shot']['directorCard']['stateChanges'][0]['afterValues']['location']='C'
     with pytest.raises(ValueError,match='STALE'):verify(amended,report)
+
+
+def test_partial_opening_observation_does_not_invent_a_conflict_or_a_full_pass():
+    data = {'shot': {'directorCard': {
+        'stateChanges': [{'entityId': 'mechanism', 'atSec': 0,
+            'afterValues': {'position': 'bench', 'springTension': 'loaded'},
+            'cause': 'Approved initial state; concealed tension is intended, not observed.'}],
+        'views': [{'viewId': 'opening', 'atSec': 0, 'visibleEntities': ['mechanism'],
+                   'criticalStateEntities': ['mechanism']}]}}}
+    references = [{'role': 'opening frame', 'depictedStates': {'mechanism': {'position': 'bench'}}}]
+    out = resolve(data, references)
+    assert not out['errors']
+    check = out['revisitChecks'][0]
+    assert check['currentStateEvidence'] == []
+    assert check['obsoleteReferences'] == []
+    assert check['partialCurrentStateEvidence'] == [
+        {'reference': 1, 'observedFields': ['position'], 'unverifiedFields': ['springTension']}]
+    assert any('no observation for springTension' in note for note in out['unverified'])
+    # A real observed mismatch still blocks despite other properties being unknown.
+    references[0]['depictedStates']['mechanism']['position'] = 'floor'
+    assert any('contradicts' in error for error in resolve(data, references)['errors'])
+    references[0]['depictedStates']['mechanism'] = {}
+    assert any('without observed state evidence' in error for error in resolve(data, references)['errors'])
 
 def test_explicit_time_jump_uses_declared_entry_not_prior_state():
     data=source();v=data['shot']['directorCard']['views'][0];v.update(storyRelationship='time_jump',stateAtEntry={'object':{'location':'C'}})
@@ -79,14 +128,14 @@ def test_see_shares_same_state_resolution():
     from studio_keyframe_director import snapshot
     data=source()
     result=snapshot(data['shot'],{}, {'path':'fixture'},refs())
-    assert result['dynamicStateResolution']==resolve(data,refs())
+    assert result['dynamicStateResolution']==resolve(data,[dict(path='fixture',role='opening keyframe'),*refs()])
 
 
 def test_critical_future_state_does_not_require_future_image():
     final,report=run(request_snapshot('Show the return.',source(critical=True),[],{},5),lambda *a:review())
     verify(final,report)
     assert report['creativeOutcome']=='unverified'
-    assert '"location": "B"' in final['prompt']
+    assert 'location: B' in final['prompt']
 
 
 def test_critical_reset_without_entry_state_blocks():
@@ -175,7 +224,7 @@ def test_native_review_adapter_persists_block_or_seals_current_state(mode,monkey
     else:
         review_legacy_envelope(env,data['shot'],{},archive_folder=tmp_path)
         verify_legacy_envelope(env)
-        assert 'return at 4s' in env['prompt'] and '"location": "B"' in env['prompt']
+        assert 'return at 4s' in env['prompt'] and 'location: B' in env['prompt']
     record=json.loads(next(tmp_path.glob('*.json')).read_text())
     assert record['snapshot']['audio']==audio
     assert '[Audio]\n@Audio1: "Exact words" at 1s.' in record['review']['finalPrompt']

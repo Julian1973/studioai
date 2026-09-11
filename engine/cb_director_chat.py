@@ -25,7 +25,9 @@ from studio_director_card import CONTRACT, card, stage_decisions
 
 ROOT = Path(__file__).resolve().parent.parent
 CHAT_DIR = ROOT / "cb-output" / "director-chat"
-CHAT_MODEL = os.environ.get("OPENAI_STUDIO_AGENT_MODEL", cb_llm.VALIDATOR_MODEL)
+CHAT_MODEL = os.environ.get("OPENAI_STUDIO_AGENT_MODEL", "gpt-6-astra")
+CHAT_REASONING = os.environ.get("OPENAI_STUDIO_AGENT_REASONING", "high")
+CHAT_MAX_OUTPUT_TOKENS = int(os.environ.get("OPENAI_STUDIO_AGENT_MAX_OUTPUT_TOKENS", "6000"))
 VALID_STAGES = {
     "script", "storyboard", "scenelook", "keyframe", "voice", "animation",
     "animation-edit", "animation-refire", "continuity", "final",
@@ -206,6 +208,10 @@ def chat(episode, scene, shot_id, stage, message, issue="", reviewer="Julian"):
     saved = history(episode, scene, shot_id, stage)
     prior = list(saved.get("messages") or [])[-8:]
     context = _scope_context(episode, scene, shot_id, stage, issue)
+    review_target = None
+    if stage == "keyframe" and shot_id:
+        import cb_outcome_chat
+        review_target = cb_outcome_chat.target(episode, scene, shot_id, stage)
     import cb_state
     import cb_production_contracts
     if shot_id:
@@ -262,11 +268,13 @@ def chat(episode, scene, shot_id, stage, message, issue="", reviewer="Julian"):
     }, ensure_ascii=False, separators=(",", ":"))
     reply = cb_llm.structured(
         system, user, DirectorChatReply, model=CHAT_MODEL,
+        reasoning_effort=CHAT_REASONING, max_output_tokens=CHAT_MAX_OUTPUT_TOKENS,
         label=f"studio-director-chat-{stage}", log=lambda *args, **kwargs: None,
         images=review_frames or None)
     messages = prior + [
         {"role": "user", "text": message, "at": _now()},
         {"role": "director", "text": reply.response,
+         "reviewTargetHash": (review_target or {}).get("hash"),
          "changeSummary": reply.changeSummary, "correction": reply.correction,
          "protectedElements": reply.protectedElements,
          "readyToApply": reply.readyToApply,

@@ -16,6 +16,17 @@ CASES = {
 }
 
 
+def _linked_test_direction(direction):
+    # Explicit migration of historical test fixtures only. No approved production
+    # record is rewritten: these views already enact the linked source stages.
+    links = {"S1.SH1B": [[2], [2], [2]], "S1.SH1C": [[3], [3], [3]],
+             "S1.SH2": [[1], [1], [2], [2]]}
+    direction = direction.model_copy(deep=True)
+    for view, stages in zip(direction.shotPlan, links[direction.shotId]):
+        view.sourceStageNumbers = stages
+    return direction
+
+
 def _shot_block(prompt, number):
     import re
     match = re.search(
@@ -31,6 +42,7 @@ def test_scene1_director_records_recompile_deterministically_and_pass():
     for shot_id, archetype in CASES.items():
         direction = cb_departments.AnimationDirection.model_validate(
             json.loads((RECORDS / f"{shot_id}.json").read_text()))
+        direction = _linked_test_direction(direction)
         creative_shot = cb_render._shot_creative_contract_view(
             package, shots[shot_id], 1, "Ep1")
         compiled = cb_departments.compile_animation_provider_prompt(
@@ -54,6 +66,7 @@ def test_scene1_director_records_recompile_deterministically_and_pass():
 def test_s1s4_corrected_emission_fixture_and_regressions():
     direction = cb_departments.AnimationDirection.model_validate(
         json.loads((RECORDS / "S1.SH2.json").read_text()))
+    direction = _linked_test_direction(direction)
     package = json.loads(PACKAGE.read_text())
     shot = next(item for item in package["shots"] if item["shotId"] == "S1.SH2")
     prompt = cb_departments.compile_animation_provider_prompt(
@@ -66,8 +79,9 @@ def test_s1s4_corrected_emission_fixture_and_regressions():
     # The compact camera prose cannot silently lose the signed story events.
     # Historical grammar targets remain unchanged; current emission carries the
     # approved causes even when a specialist omits them from its camera fields.
-    assert "A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses" in prompt
-    assert "Fuzzby answers the warning, accelerates as if proving it" in prompt
+    assert "a distant thunder rumble trembles the suspended pollen" in prompt
+    assert "Fuzzby straightens too fast and launches" in prompt
+    assert "[APPROVED STORY ACTION]" not in prompt
     assert "@图1 is the first frame and the previous shot's approved final frame." in prompt
     assert "Fuzzby is frame-left, coated in golden pollen" in prompt
     assert "with exhales delivery" not in prompt

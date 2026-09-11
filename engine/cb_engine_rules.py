@@ -14,7 +14,7 @@ import cb_audio_authority
 
 HERE = pathlib.Path(__file__).resolve().parent
 BEAT_COST_PATH = HERE / "config" / "beat_costs.json"
-RULES_VERSION = "engine-rules-v4"
+RULES_VERSION = "engine-rules-v4.0.2"
 
 
 def _norm(value):
@@ -274,15 +274,23 @@ def action_unit_report(shot, direction, prompt=""):
             errors.append("R10 repeated contacts do not visibly escalate")
 
     if counts.get("aerial"):
-        aerial_shots = [item for item in internal if re.search(
-            r"\b(aerial|leap|dive|breach|half[- ]roll|double back|double backward|"
-            r"triple twist|multi-rotation|biles)\b",
-            _norm(" ".join(str(value or "") for value in item.values())), re.I)]
-        if len(aerial_shots) != 1:
-            errors.append("R11 compound aerial must own exactly one dedicated internal shot")
-        elif not re.search(r"track(?:s|ing)? (?:the )?(?:full|complete) (?:arc|aerial|rotation)",
-                           _norm(aerial_shots[0].get("framingLensAndCamera")), re.I):
-            errors.append("R11 compound aerial camera does not track the full arc")
+        # R11 is for true compound stunt/aerial coverage. Ordinary winged character
+        # motion, hover recovery, or simple flight should not be blocked as if it
+        # were a flip/dive/twist. This keeps bee hover/chase workflow from becoming
+        # a false-positive maze while preserving the hard rule for complex stunts.
+        compound_aerial_pattern = (
+            r"\b(compound aerial|aerial stunt|leap|dive|breach|half[- ]roll|"
+            r"double back|double backward|triple twist|multi-rotation|biles)\b")
+        compound_aerial_required = bool(re.search(compound_aerial_pattern, combined, re.I))
+        if compound_aerial_required:
+            aerial_shots = [item for item in internal if re.search(
+                compound_aerial_pattern,
+                _norm(" ".join(str(value or "") for value in item.values())), re.I)]
+            if len(aerial_shots) != 1:
+                errors.append("R11 compound aerial must own exactly one dedicated internal shot")
+            elif not re.search(r"track(?:s|ing)? (?:the )?(?:full|complete) (?:arc|aerial|rotation)",
+                               _norm(aerial_shots[0].get("framingLensAndCamera")), re.I):
+                errors.append("R11 compound aerial camera does not track the full arc")
 
     clocks = list(((data.get("creativeTranslation") or {}).get("gagClocks") or []))
     retroactive = any(bool(item.get("retroactive")) for item in clocks)
@@ -446,6 +454,18 @@ def apply_compression_verdict(cost_data, verdict):
     return updated, True
 
 
+def _geography_clauses(value):
+    """Compare ordered authored clauses, tolerating sentence/list formatting only.
+
+    Retain words, negation, quantities, commas and spatial order. This is not a
+    semantic equivalence judgement; even a paraphrase must still be reconciled.
+    """
+    return tuple(_norm(clause).casefold()
+                 for item in _text_list(value)
+                 for clause in re.split(r";\s*|(?<!\d)\.(?:\s+|$)", item)
+                 if _norm(clause))
+
+
 def geometry_agreement(cinematography, animation):
     """Block contradictory camera/geography instructions across SEE and WATCH."""
     cine = cinematography or {}
@@ -453,8 +473,8 @@ def geometry_agreement(cinematography, animation):
     errors = []
     cine_geo = _text_list(cine.get("geography"))
     anim_geo = _text_list(anim.get("geography"))
-    if anim_geo and cine_geo != anim_geo:
-        errors.append("keyframe and render geography are not verbatim-identical")
+    if anim_geo and _geography_clauses(cine_geo) != _geography_clauses(anim_geo):
+        errors.append("keyframe and render geography statements differ")
     shot_plan = anim.get("shotPlan") or []
     opening_camera = _norm(
         (shot_plan[0].get("framingLensAndCamera") if shot_plan else "") or
@@ -492,9 +512,14 @@ def playable_stage_report(shot, cinematography):
     negative = " ".join(_norm(item) for item in cine.get("negativeSpace") or [])
     camera = _norm(cine.get("lensAndCameraRelationship"))
     placements = ((cine.get("openingFrameLayout") or {}).get("placements") or [])
+    # Future route provision does not make a stationary opening a travel shot.
+    # Remove only explicitly deferred clauses; current chase/travel clauses remain.
+    opening_motion_text = re.sub(
+        r"\b(?:later|subsequent|next shot(?:'s)?)\b[^.;]*", "",
+        _norm(shot.get("purpose")) + " " + geography, flags=re.I)
     travelling = bool(re.search(
         r"\b(chase|travel|route|flight|fly|barrel|pursu|toward frame|toward screen)\w*\b",
-        _norm(shot.get("purpose")) + " " + geography, re.I))
+        opening_motion_text, re.I))
     if travelling:
         depth_planes = {
             str(item.get("depthPlane") or "").strip()

@@ -7,7 +7,7 @@ import pytest
 
 import cb_canon
 import cb_render as R
-from test_golden_path import (world, _approve_animation_direction,
+from test_golden_path import (world,
                               _approve_director_review,
                               _cinematography_output,
                               _fixture_reference_contract,
@@ -32,6 +32,13 @@ def _approve_specialist_inputs(pkg):
     by_id = {s["shotId"]: s for s in pkg["shots"]}
     for ledger in pkg["continuityLedger"]:
         shot = by_id[ledger["shotId"]]
+        shot['directorCard'] = {'audienceFocus':shot.get('purpose') or 'The comic result is clear.',
+            'views':[{'viewId':shot['shotId']+'.v1', 'atSec':0,
+                'timing':f"0-{shot['durationSec']:g}s", 'entry':'opening',
+                'framing':shot.get('camera') or 'Medium view of the action.',
+                'action':'The visible cause prompts the character to turn, move, and settle.',
+                'performance':'Eyes focus before the move, then posture softens.',
+                'endState':shot.get('visualPayoff') or 'The consequence is readable.'}]}
         for index, line in enumerate(shot.get("dialogueLines") or []):
             occurrence_id = line.get("dialogueOccurrenceId") or (
                 f"{shot['shotId']}.dialogue.{index + 1}")
@@ -98,6 +105,7 @@ def _animation_direction_output(shot):
         "directionDensity": "guided",
         "shotPlan": [{
             "shotNumber": 1,
+            "sourceViewId": ((shot.get('directorCard') or {}).get('views') or [{}])[0].get('viewId'),
             "purpose": "Deliver the approved action.",
             "framingLensAndCamera": shot.get("camera") or "Readable framed camera.",
             "causalAction": (
@@ -195,6 +203,16 @@ def _disclose_and_fire(shot_id):
     token = R._ledger(pkg, shot_id)["pendingSpendAuth"]["token"]
     return R.fire_shot("9", shot_id, "EpT", candidates=1, spend_token=token,
                        log=lambda *a, **k: None)
+
+
+def _approve_animation_direction(shot_id, scene='9', ep='EpT'):
+    # A current structured specialist result, bound before the human test approval.
+    pkg, path = R.load_pkg(scene, ep)
+    shot = R._shot(pkg, shot_id)
+    approved = R._ledger(pkg, shot_id)['departmentWork']['animation']['approved']
+    approved['output'] = _animation_direction_output(shot)
+    approved['inputSignature'] = R._department_input_signature(pkg,'animation',shot_id,scene,ep)
+    R._save(pkg,path)
 
 
 def test_prepare_department_reuses_current_approved_direction_without_provider_call(
@@ -335,7 +353,8 @@ def test_current_path_reaches_an_approved_master_without_provider_spend(
     final_pkg, _ = R.load_pkg("9", "EpT")
     assert R.post_status(final_pkg, "9", "EpT")["approved"]["current"] is True
     assert len(providers.voice_calls) == 2
-    assert len(providers.image_calls) == 2
+    # Production defaults to one candidate; an A/B comparison is explicit opt-in.
+    assert len(providers.image_calls) == 1
     for image_call in providers.image_calls:
         for text in authored_choices.values():
             assert text in image_call["prompt"]
@@ -343,8 +362,17 @@ def test_current_path_reaches_an_approved_master_without_provider_spend(
     persisted = R._ledger(final_pkg, first)["departmentWork"]["cinematography"]["approved"]["output"]
     assert all(persisted[key] == value for key, value in authored_choices.items())
     assert len(providers.fire_calls) == 3
+    # Compare the actual paid boundary with the reviewed, sealed emission. The
+    # specialist's preview is not the final request after Prompt Director review.
+    envelopes = [R._ledger(final_pkg, s["shotId"])["batch"]["envelope"]
+                 for s in final_pkg["shots"]]
     assert [x["prompt"] for x in providers.fire_calls] == [
-        R._approved_seedance_prompt(final_pkg, s) for s in final_pkg["shots"]]
+        segment["prompt"] for envelope in envelopes
+        for segment in envelope["executionPlan"]["segments"]]
+    from studio_shot_request import ShotProductionRequest
+    for envelope in envelopes:
+        request = ShotProductionRequest.load(envelope["productionRequest"])
+        assert request.data["execution"]["prompt"] == envelope["prompt"]
 
     # The provider receives playable performance and landing choices from each saved
     # animation direction, not merely a generic summary or a successful worker status.

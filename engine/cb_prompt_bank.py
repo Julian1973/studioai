@@ -196,6 +196,17 @@ def bank_prompt(*, prompt: str, episode: str, scene: str, shot_id: str,
         "metadata": metadata or {},
     }
     record["recordId"] = _record_id(record)
+    project = (metadata or {}).get('projectId', 'crystal-bears')
+    prior = [r for r in load_records(bank_path)
+             if (r.get('metadata') or {}).get('projectId', 'crystal-bears') == project
+             and r.get('episode') == str(episode) and r.get('scene') == str(scene)
+             and r.get('shotId') == str(shot_id) and r.get('artifactType') == artifact_type
+             and r.get('outcome') == 'rejected']
+    record['outcomeLearning'] = {
+        'priorRejectedRecordIds': [r['recordId'] for r in prior[-4:]],
+        'validation': 'failure-specific-review-required',
+        'sharedPracticePromoted': False,
+    }
     path = pathlib.Path(bank_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
@@ -212,6 +223,33 @@ def load_records(bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> list[dict
         if line.strip():
             records.append(json.loads(line))
     return records
+
+
+def retake_evidence(context, bank_path=None):
+    """Exact-shot outcome evidence for authors and final prompt review; never canon."""
+    shot = context.get('shot') or {}
+    shot_id = shot.get('shotId') if isinstance(shot, dict) else shot
+    shot_id = shot_id or context.get('shotId')
+    project = context.get('projectId', 'crystal-bears')
+    if not shot_id or not context.get('episode') or context.get('scene') is None:
+        return []
+    rows = [r for r in load_records(bank_path or DEFAULT_BANK_PATH)
+            if (r.get('metadata') or {}).get('projectId', 'crystal-bears') == project
+            and r.get('episode') == str(context['episode'])
+            and r.get('scene') == str(context['scene']) and r.get('shotId') == shot_id
+            and r.get('artifactType') == context.get('artifactType', 'animation')]
+    failures = [r for r in rows if r.get('outcome') == 'rejected'][-4:]
+    return [{
+        'recordId': r['recordId'], 'promptHash': r.get('promptHash'),
+        'feedback': r.get('diagnosis'), 'candidatePath': r.get('candidatePath'),
+        'batchId': (r.get('metadata') or {}).get('batchId'),
+        'sourceBindings': (r.get('metadata') or {}).get('sourceBindings'),
+        'laterOutcomes': [{'recordId': n['recordId'], 'outcome': n['outcome'],
+                           'promptHash': n.get('promptHash')}
+                          for n in rows[rows.index(r)+1:]],
+        'validation': 'failure-specific-review-required',
+        'sharedPracticePromoted': False,
+    } for r in failures]
 
 
 def report(bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> dict[str, Any]:

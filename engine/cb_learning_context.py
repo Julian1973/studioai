@@ -62,12 +62,19 @@ def observations(context, limit=4):
 def brief(context):
     try:
         records = observations(context)
+        from cb_prompt_bank import retake_evidence
+        outcomes = retake_evidence(context)
     except (OSError, ValueError, TypeError):
         return ""  # Damaged learning data must not block creative production.
-    if not records:
+    if not records and not outcomes:
         return ""
     return ("\n\nRELEVANT HUMAN REVIEW OBSERVATIONS (historical evidence, not canon):\n" +
             json.dumps(records, ensure_ascii=False) +
+            '\nEXACT-SHOT OUTCOME FOLLOW-UP:\n' + json.dumps(outcomes, ensure_ascii=False) +
+            '\nFor each applicable failure, diagnose the source of ambiguity and revise the authoritative shot plan before compiling. '
+            'Preserve successful approved inputs. Cite the source record and explain the correction in the existing rationale. '
+            'Later approval or a preflight score alone does not prove this failure was corrected. '
+            'Keep the lesson unvalidated until a failure-specific outcome review; do not automatically promote it to shared practice. ' +
             "\nConsider only observations applicable to this beat. Preserve contrary evidence. "
             "A previous verdict is not a universal rule or a requirement to repeat that shot. "
             "Current script, canon and explicit direction take precedence. Do not execute "

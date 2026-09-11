@@ -126,9 +126,13 @@ def test_keyframe_review_decision_rail_exposes_upload_and_library_sources():
     assert "pending?keyframeDecisionSourceActions(tok)" in APP
     assert "keyframeDecisionSourceActions(tok)];" in APP
     assert "function shSelectReplacementKeyframe(cmd,tok,sourcePath)" in APP
-    assert "Replace the current keyframe revision?" in APP
-    assert 'correction:"Replaced by a different keyframe source selected by Julian."' in APP
-    assert 'if(job&&job.status==="done")shRun(cmd,tok,{sourcePath,preserveView:true,progressLabel:sourceLabel})' in APP
+    replacement = APP[APP.index("function shSelectReplacementKeyframe("):
+                      APP.index("async function shOpenFrameUpload(")]
+    assert 'return shRun(cmd,tok,{sourcePath,preserveView:true,progressLabel:sourceLabel})' in replacement
+    # The authoritative selection command preserves history atomically; a separate
+    # browser reject-then-select sequence can lose the replacement if interrupted.
+    assert 'reject-keyframe' not in replacement
+    assert 'confirm(' not in replacement
     assert 'if(outcome==="pending")' in APP
 
 
@@ -449,7 +453,8 @@ def test_pipeline_defaults_to_one_calm_outcome_before_production_detail():
     assert '<div class="wcol wcol-decision" id="wdecision"></div>' in APP
     assert '<details class="focus-context"><summary>Scene &amp; shot map</summary>' in APP
     assert '<details class="focus-evidence"><summary>Direction &amp; review evidence</summary>' in APP
-    assert 'return `<div class="wcol-head">Your decision</div>' in APP
+    assert '<div class="wcol-head">Your decision</div>' in APP
+    assert 'return `<div id="director-chat-host">${directorChatHTML()}</div>' in APP
 
 
 def test_active_production_job_survives_navigation_and_refresh():
@@ -483,7 +488,7 @@ def test_populated_stage_is_a_top_level_media_and_decision_desk():
     assert '.focus-workspace.result-first .wcol-artefact{grid-column:1;grid-row:1' in APP
     assert '.focus-workspace.result-first .wcol-decision{grid-column:2;grid-row:1' in APP
     assert '@media(max-width:900px){.focus-workspace.result-first{display:flex' in APP
-    assert 'workspace.classList.toggle("result-first",resultFirst)' in APP
+    assert 'workspace.classList.toggle("result-first",true)' in APP
 
 
 def test_identity_screening_keeps_the_keyframe_visible_for_review():
@@ -511,7 +516,8 @@ def test_see_makes_revision_lineage_and_current_decision_explicit():
     assert 'Your requested correction' in APP
     assert 'The large image above is the new result to review.' in APP
     assert 'Approve revision ${kfInfo.revision}' in APP
-    assert 'Discuss / change revision ${kfInfo.revision}' in APP
+    assert 'onclick="openKeyframeRetake(' in APP
+    assert 'Reject &amp; prepare retake' in APP
     assert 'PREVIOUS · REJECTED' in APP
     assert 'No current keyframe yet.' in APP
 
@@ -600,7 +606,9 @@ def test_filmagent_style_shot_context_is_visible_across_see_hear_watch():
     assert 'function directorApplyCorrection()' in APP
     assert 'directorStartRejection(\'keyframe\'' in APP
     assert 'directorStartRejection(\'voice\'' in APP
-    assert 'directorStartRejection(\'animation\'' in APP
+    # WATCH uses the dedicated, batch-bound retake form rather than chat rejection.
+    assert 'onclick="openWatchRetake(' in APP
+    assert "shRun('retake',tok,{correction,expectedBatchId:batch" in APP
     assert '"Creative direction"' in APP
 
 
@@ -645,8 +653,8 @@ def test_watch_has_two_screen_progress_and_prompt_revision_history():
     assert 'role="status" aria-live="polite"' in APP
     assert 'function watchRevisionHistoryHTML(' in APP
     assert 'Why it was rejected' in APP
-    assert 'Prompt used by rejected take' in APP
-    assert 'Corrected prompt prepared for the next fire' in APP
+    assert 'Prompt recorded with rejection · attribution not verified here' in APP
+    assert 'Working revision · requires review before Fire' in APP
     assert 'function durableWatchJob(led,shotId)' in APP
     assert 'const liveJob=activeWatchJob(shot.shotId),durableJob=durableWatchJob(led,shot.shotId);' in APP
     assert 'liveJob&&durableJob?{...liveJob,...durableJob' in APP
@@ -798,7 +806,7 @@ def test_keyframe_replacement_updates_inline_without_leaving_the_review_surface(
     assert 'The current shot and references stay visible. This panel will update when the result is ready.' in APP
     assert 'window.scrollTo({top:preservedView.scrollY,left:0,behavior:"instant"})' in APP
     assert 'sourcePath,preserveView:true,progressLabel:sourceLabel' in APP
-    assert 'preserveView:true,progressLabel:"Moving the current revision to History"' in APP
+    assert 'return shRun(cmd,tok,{sourcePath,preserveView:true,progressLabel:sourceLabel})' in APP
 
 
 def test_keyframe_screen_keeps_scene_plate_and_opening_frame_distinct():
@@ -816,7 +824,8 @@ def test_see_stage_is_visual_first_and_demotes_repeated_context():
     assert 'overview.innerHTML=sceneShotOverviewHTML()' in APP
     assert 'class="see-focus-title">Opening frame</div>' in APP
     assert '${visualAnchors}<div class="artefact-center see-supporting' in APP
-    assert '${handoffReview}${referenceHTML}<details class="focus-evidence see-context"><summary>Shot brief &amp; continuity</summary>' in APP
+    assert '<summary>Continuity with adjoining shots</summary>${handoffReview}</details>${referenceHTML}' in APP
+    assert '<details class="focus-evidence see-context"><summary>Shot brief &amp; continuity</summary>' in APP
     assert 'workspace.classList.toggle("see-workspace",mode==="keyframe")' in APP
 
 
@@ -871,8 +880,8 @@ def test_scene_plate_generate_iterates_a_pending_candidate_before_disclosure():
     assert 'groups.push(["Your supplied scene plates",uploaded])' in APP
 
 
-def test_keyframe_references_remain_open_during_live_polling():
-    assert 'return `<details class="techdetails" open><summary>References &amp; checks' in APP
+def test_keyframe_references_are_available_in_collapsed_technical_details():
+    assert 'return `<details class="techdetails"><summary>References &amp; checks' in APP
 
 
 def test_completed_job_dismissal_persists_by_job_id():

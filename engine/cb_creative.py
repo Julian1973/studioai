@@ -1433,9 +1433,11 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
                                if c.get("sourceType") == "dialogue"],
                            "location": b.get("location"), "time": b.get("time")}
                           for b in ready["beats"]], ensure_ascii=False)
-    notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (a COMPLETE re-architecture is required — "
-             f"never a wording patch): {review_notes}" if review_notes else "")
-    sd = cb_llm.structured(
+    notes = (("\n\nVALIDATION REPAIR: preserve the selected treatment, source beats, exact dialogue "
+              "and all valid direction. Correct only these invalid fields: " + review_notes)
+             if review_notes.startswith('Validation repair:') else
+             f"\n\nSHOWRUNNER'S RETURN NOTES: {review_notes}" if review_notes else "")
+    sd = cb_llm.structured_with_repair(
         _mind("DIRECTOR", ["directorTaste"],
               COVERAGE_CONTRACT + "\nStructure the beats INSIDE the selected whole-scene treatment. Every beat "
               "defines: what changes; who drives the change; audience anticipation; the "
@@ -1448,7 +1450,8 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
               "is ahead/with/behind them, and what remains held after the beat. Never invent "
               "hidden psychology: use the selected treatment, established character canon "
               "and visible script event. comedyContract explicitly says NONE, SMALL or BIG. "
-              "For comedy, preserve setup, expectation, disruption, button and the hold that "
+              "For comedy, comicOwner must name a participating character, not a location or prop. "
+              "Keep environmental surprises in staging. Preserve setup, expectation, disruption, button and the hold that "
               "lets the audience catch up. BIG comedy must include one readable physical "
               "staging contract: what stays visible, contact and weight, payoff shape and no "
               "more than three specific staging failures. powerMoment is null unless the "
@@ -1468,6 +1471,19 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
         f"order). Source IDs are immutable facts and will be mechanically restored after "
         f"your creative pass; never merge, drop, duplicate or reorder a source beat.",
         PlannedSceneDirection, tier="premium", label=f"gate3_beats_s{scene_num}")
+    ownership_errors = []
+    for beat in sd.beats:
+        participants = {_norm(name) for name in beat.participatingCharacters}
+        if beat.emotionContract and _norm(beat.emotionContract.owner) not in participants:
+            ownership_errors.append(f'{beat.beatId}.emotionContract.owner must name a participating character')
+        if beat.comedyContract:
+            for field in ('comicOwner', 'straightCharacter'):
+                owner = getattr(beat.comedyContract, field)
+                if owner and _norm(owner) not in participants and str(owner).lower() not in {'none','null','n/a','not applicable'}:
+                    ownership_errors.append(f'{beat.beatId}.comedyContract.{field} names {owner}; use a participating character. SMALL/BIG comedy requires a character owner; null is only valid for NONE comedy or an absent straight character. Keep the selected comic event and environmental staging.')
+    if ownership_errors and not review_notes.startswith('Validation repair:'):
+        return gate3_beats(episode, scene_num, vision, selection, treatment, ready,
+            heart=heart, review_notes='Validation repair: ' + '; '.join(ownership_errors), log=log)
     missing_supervision = [
         beat.beatId for beat in sd.beats
         if not beat.emotionContract or not beat.comedyContract
@@ -1597,8 +1613,9 @@ def _validate_gate4_production_units(shots, beats):
 
 def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
                           heart=None, review_notes="", ambition_brief="", log=print):
-    notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (redesign the SEQUENCE — never patch "
-             f"wording): {review_notes}" if review_notes else "")
+    notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (revise staging and sequence, preserving "
+             f"approved source actions and words even if a review asks to remove them): {review_notes}"
+             if review_notes else "")
     sc = cb_llm.structured_with_repair(
         _mind("DIRECTOR AND CINEMATOGRAPHER, IN SHOT CONFERENCE",
               ["directorTaste", "cinematographyTaste"],
@@ -2003,7 +2020,12 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
     packing = cb_unit_packing.audit_units(shots)
     review = cb_llm.structured(
         _mind("SHOWRUNNER", ["showrunnerTaste"],
-              "ACTIVELY ATTEMPT TO REJECT this storyboard. Judge the COMPLETE scene, not "
+              "Review against the approved source and selected treatment. Accept a clear, "
+              "workable scene; identify material defects, not speculative embellishments. "
+              "Approved source actions and dialogue outrank the treatment and your taste. "
+              "Do not remove a scripted action as unnecessary business, or suppress a scripted "
+              "reveal to strengthen a motif. Improve its staging, timing or camera instead. "
+              "Judge the COMPLETE scene, not "
               "isolated shot quality, for: repeated coverage patterns; repeated reaction-"
               "shot grammar; fixed staging; safe camera behaviour; unnecessary keyframes; "
               "excessive cutting; excessive continuity; overfilled shot cards; decorative "
@@ -2036,11 +2058,14 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
            f"{heart.model_dump_json()}\n\n" if heart else "")
         + f"GOVERNING EXPERIENCE: {selection.governingAudienceExperience}\n\n"
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:3500]}\n\n"
-        f"BEATS:\n" + "\n".join(b.model_dump_json()[:1600] for b in sd.beats)
-        + "\n\nSHOTS:\n" + "\n".join(s.model_dump_json()[:1800] for s in shots)
+        f"APPROVED SOURCE ACTIONS AND WORDS (authority above creative interpretation):\n"
+        + "\n".join(json.dumps({'beatId': b.beatId, 'sourceScript': b.sourceScript,
+                                'exactDialogue': b.exactDialogue}, ensure_ascii=False) for b in sd.beats)
+        + "\nBEATS:\n" + "\n".join(b.model_dump_json() for b in sd.beats)
+        + "\n\nSHOTS:\n" + "\n".join(s.model_dump_json() for s in shots)
         + "\n\nDETERMINISTIC 30-SECOND PACKING AUDIT:\n"
         + json.dumps(packing, ensure_ascii=False, indent=1)
-        + "\n\nVOICE:\n" + "\n".join(v.model_dump_json()[:1100] for v in voices),
+        + "\n\nVOICE:\n" + "\n".join(v.model_dump_json() for v in voices),
         ShowrunnerReview, tier="premium", label="gate6_review")
     if not review.packingPasses:
         review.passes = False

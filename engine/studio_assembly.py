@@ -47,4 +47,6 @@ def execute(production, job):
     for segment in segments:segment.unlink()
     listing.unlink()
     return {'files':[production.file_record(pid,target)],'fingerprint':timeline['fingerprint'],'duration':duration,
+            'sourceLineage': [{'shotId': c['shotId'], 'candidateId': c.get('candidateId'),
+                               'file': c['file'], 'requestLineage': c.get('requestLineage', {'status': 'legacy-unverified'})} for c in clips],
             'width':width,'height':height,'fps':24,'meaning':'Continuous review preview at the first source clip dimensions. Original approved media remains the finishing authority.'}

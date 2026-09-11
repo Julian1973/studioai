@@ -21,12 +21,40 @@ class Vault:
 
 
 def shot(index, line):
-    return {"id": f"S1.SH{index}", "scene": 1, "startLine": index, "endLine": index,
+    value = {"id": f"S1.SH{index}", "scene": 1, "startLine": index, "endLine": index,
             "title": "A thought before the answer", "emotion": "Uncertainty becomes trust", "performance": "Listen, hesitate, then answer.",
             "camera": "Eye-level medium reverse", "geography": "Hero stays screen left; door remains behind.",
             "transition": "cut", "duration": 4, "characters": ["Hero"], "location": "", "props": [],
             "dialogue": [{"speaker": "Hero", "text": line.split(': ', 1)[1], "delivery":"neutral"}] if ': ' in line else [],
             "seePrompt": "Hero hesitates by the door.", "watchPrompt": "A quiet hesitation before the smile."}
+    # A new plan includes real structured coverage. Prose-only legacy shots remain
+    # useful in dedicated compatibility tests, but cannot represent a new WATCH plan.
+    opening = "Hero stands beside the closed door, looking toward the listener."
+    landing = "Hero finishes the reply and holds the listener's eyeline."
+    value.update(intent="Read Hero deciding to connect.", openingState=opening, endingState=landing)
+    value['directorCard'] = {
+        'audienceFocus': value['intent'], 'cameraPurpose': 'Keep the hesitation and reply readable.',
+        'editIn': 'Enter on Hero attending to the listener.', 'editOut': 'Leave after Hero settles.',
+        'handoff': landing, 'intendedState': 'Hero remains beside the closed door.',
+        'soundOwnership': 'Exact approved HEAR speech; no generated dialogue or added sounds.',
+        'acting': [{'character': 'Hero', 'intention': 'Answer the listener.',
+                    'attention': 'The listener beyond camera.',
+                    'observableBehaviour': 'Hero takes a small breath, replies and softens the shoulders.',
+                    'startingPose': opening, 'endingPose': landing,
+                    'timing': 'Use the measured HEAR interval, then allow the reply to settle.',
+                    'listening': 'Hero keeps attention on the listener after speaking.'}],
+        'views': [{'viewId': f'S1.SH{index}.V1', 'atSec': 0, 'timing': '0–4s',
+                   'visibleEntities': ['Hero'], 'sourceBeat': f'script-line-{index}',
+                   'viewpointOwner': 'Hero', 'audienceNeed': 'Read the hesitation before the reply.',
+                   'framing': value['camera'] + '.', 'cameraPurpose': 'Preserve Hero face and shoulder movement.',
+                   'cutReason': 'Hold this view until the reply settles.',
+                   'continuity': value['geography'], 'productionChoice': 'current clip', 'entry': 'opening',
+                   'staging': 'Hero stays beside the closed door with a clear eyeline past camera.',
+                   'action': 'Hero attends to the listener, delivers the approved reply, then settles.',
+                   'performance': value['performance'], 'startState': opening, 'endState': landing,
+                   'cutTo': 'The next scripted beat.'}],
+    }
+    return value
 
 
 class FakeTransport(ProviderTransport):
@@ -39,7 +67,10 @@ class FakeTransport(ProviderTransport):
         if schema is not None:
             return {'summary':'The fixture story is coherent.', 'audienceBeat':'Trust', 'camera':'Purposeful hold', 'audio':'Unchanged', 'locked':['voice'], 'directed':['hesitation'], 'open':['micro-expression'], 'lifecycle':[], 'findings':[], 'edits':[]}
         if planning:
-            return {"message":"Prepared from your script.","shots":[shot(i,line) for i,line in context['scriptLines']]}
+            shots = [shot(i,line) for i,line in context['scriptLines']]
+            return {"message":"Prepared from your script.", "shots": shots,
+                    "sceneCoverage": [{"scene": 1, "audienceJourney": "A greeting becomes an invitation.",
+                                       "views": [copy.deepcopy(s['directorCard']['views'][0]) for s in shots]}]}
         return copy.deepcopy(self.reply or {"message":"The selected shot keeps its geography.","revisedShot":None})
     def image(self, connection, key, model, prompt, references, output, *, received=None):
         self.calls.append(("image",key,prompt))
@@ -47,8 +78,17 @@ class FakeTransport(ProviderTransport):
         Image.new('RGB',(32,18),'blue').save(output)
     def voice(self, connection, key, model, dialogue, output):
         self.calls.append(("voice",key,dialogue))
+        # These are synthetic provider timestamps bound to this exact synthetic
+        # recording, never inferred later by the WATCH adapter from transcript length.
+        duration = float(len(dialogue))
         with wave.open(str(output),'wb') as file:
-            file.setnchannels(1);file.setsampwidth(2);file.setframerate(8000);file.writeframes(b'\0\0'*8000)
+            file.setnchannels(1);file.setsampwidth(2);file.setframerate(8000);file.writeframes(b'\0\0' * int(8000 * duration))
+        from studio_voice_timing import measured_timing
+        payload = {'voice_segments': [
+            {'dialogue_input_index': index, 'voice_id': line['voice_id'],
+             'start_time_seconds': index + .15, 'end_time_seconds': index + .85}
+            for index, line in enumerate(dialogue)]}
+        return measured_timing(payload, dialogue, duration, output.read_bytes())
     def video_submit(self, connection, key, model, prompt, images, audio, duration, *, ratio="16:9"):
         self.calls.append(("video",key,prompt))
         if self.error: raise self.error
@@ -121,7 +161,8 @@ def test_budget_prepares_directed_shots_and_see_without_approving(setup):
     assert not state['shots'][1]['outcomes']
     assert state['budget']['committed']==200000 and state['budget']['reserved']==0
     prompt=next(c[2] for c in t.calls if c[0]=='image')
-    assert 'first world only' in prompt and 'second world only' not in prompt
+    # Bible is planning authority, not a wholesale dump in the image payload.
+    assert 'first world only' not in prompt and 'second world only' not in prompt
     assert 'Eye-level medium reverse' in prompt and 'Listen, hesitate' in prompt
     assert p.snapshot('second','1')['state']['shots']==[]
 
@@ -137,6 +178,13 @@ def test_see_hear_request_render_approvals_use_one_pipeline(setup,via_chat):
     assert request['status']=='candidate' and 'Hero: Hello.' in request['source']
     assert request['promptDirector']['verdict']=='READY TO FIRE'
     assert request['promptDirectorSnapshot']['prompt']==request['prompt']
+    plan = request['promptDirectorSnapshot']['watchPlan']
+    assert [(v['viewId'], v['startSec'], v['endSec']) for v in plan['views']] == [('S1.SH1.V1', 0, 4)]
+    assert plan['views'][0]['action'] == state['shots'][0]['directorCard']['views'][0]['action']
+    authority = request['promptDirectorSnapshot']['authorities']
+    assert authority['measuredHearBinding']['audioHash'] == state['shots'][0]['outcomes']['hear']['files'][0]['hash']
+    assert [(d['speaker'], d['exactText'], d['startSec'], d['endSec']) for d in authority['shot']['dialogueLines']] == [
+        ('Hero', 'Hello.', .15, .85)]
     assert not any(c[0]=='video' for c in t.calls)
     approve(p,'request',via_chat)
     state=p.snapshot('first','1')['state'];render=state['shots'][0]['outcomes']['watch']
@@ -428,3 +476,19 @@ def test_prompt_director_blocks_tampered_request_before_video(setup):
     assert any('STALE PACKAGE' in message['text'] for message in p.snapshot('first','1')['state']['messages'])
     assert not any(c[0]=='video' for c in t.calls)
     assert p.snapshot('first','1')['state']['shots'][0]['outcomes']['hear']==original_audio
+
+
+def test_project_prompt_preserves_registry_and_orders_purpose_before_direction(setup):
+    from studio_transport import Shot
+    p,ws,t,_=setup
+    source=shot(1,'Hero: Hello.')
+    source.update(intent='A small choice builds trust.',trackedProductionObjects=[{
+        'id':'P17','name':'red parcel','description':'one folded paper parcel',
+        'stateIn':'on the shelf','stateOut':'carried by Hero','prohibitedSubstitutions':['a suitcase']}],
+        providerAliases={'the thing':'P17'})
+    typed=Shot.model_validate(source).model_dump()
+    assert typed['trackedProductionObjects'][0]['id']=='P17'
+    assert typed['providerAliases']=={'the thing':'P17'}
+    prompt=p._prompt({'project':{'name':'Fixture'},'bible':'Keep scale consistent.'},typed,'watch',[])
+    assert prompt.index('[Audience Purpose]') < prompt.index('[Directed Beats and Acting]') < prompt.index('[Reference Roles]')
+    assert 'red parcel' in prompt and 'carried by Hero' in prompt

@@ -699,9 +699,10 @@ def production_state(scene, episode="Ep1", intake=None):
             storyboard_current = True
             stages["storyboard"] = _stage(
                 "approved", "this scene is unchanged in the active script")
+        # Use the same declared-source graph as Fire. A scoped approved revision
+        # may intentionally differ from the canonical scene's older storyboard.
         package_current = bool(
-            (pkg.get("validation") or {}).get("passed") and lineage["current"] and
-            storyboard_current)
+            (pkg.get("validation") or {}).get("passed") and lineage["current"])
     except cb_render.Refused:
         pkg = None
         package_exists = False

@@ -58,7 +58,19 @@ def _connect(root):
     if schema_version == SCHEMA_VERSION:
         conn.execute("PRAGMA synchronous = FULL")
         return conn
-    conn.execute("PRAGMA journal_mode = WAL")
+    # Two first requests can both open a brand-new database. journal_mode does
+    # not consistently honour busy_timeout during that schema bootstrap; retry
+    # this local setup operation before either request obtains a mutation lease.
+    deadline = time.monotonic() + 5
+    while True:
+        try:
+            conn.execute("PRAGMA journal_mode = WAL")
+            break
+        except sqlite3.OperationalError as exc:
+            if "locked" not in str(exc).lower() or time.monotonic() >= deadline:
+                conn.close()
+                raise
+            time.sleep(0.025)
     conn.execute("PRAGMA synchronous = FULL")
     conn.executescript(
         """
@@ -538,7 +550,7 @@ def _heartbeat(root, episode, scene, owner, lease_seconds, stop, interval):
 
 @contextlib.contextmanager
 def scene_lease(root, episode, scene, operation, lease_seconds=DEFAULT_LEASE_SECONDS,
-                heartbeat_seconds=DEFAULT_HEARTBEAT_SECONDS):
+                heartbeat_seconds=DEFAULT_HEARTBEAT_SECONDS, wait_seconds=0, on_wait=None):
     """Acquire a renewable, process-safe scene mutation lease.
 
     The lease is re-entrant within one thread so a scene-level action may call shot-level
@@ -558,7 +570,19 @@ def scene_lease(root, episode, scene, operation, lease_seconds=DEFAULT_LEASE_SEC
         return
 
     owner = f"{os.getpid()}:{threading.get_ident()}:{uuid.uuid4().hex}"
-    _acquire_lease(root, episode, scene, owner, operation, lease_seconds)
+    deadline = time.monotonic() + max(0, wait_seconds)
+    announced = False
+    while True:
+        try:
+            _acquire_lease(root, episode, scene, owner, operation, lease_seconds)
+            break
+        except SceneBusy:
+            if time.monotonic() >= deadline:
+                raise
+            if on_wait and not announced:
+                on_wait('Waiting for current scene preparation to finish; no provider request submitted.')
+                announced = True
+            time.sleep(min(1, max(0, deadline - time.monotonic())))
     stop = threading.Event()
     interval = max(0.05, min(float(heartbeat_seconds), float(lease_seconds) / 3.0))
     thread = threading.Thread(

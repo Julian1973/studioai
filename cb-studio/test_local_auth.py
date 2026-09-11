@@ -187,6 +187,43 @@ def _request(port, method, path, headers=None, body=None):
     return result
 
 
+@pytest.mark.parametrize('stage', ['look', 'review-final'])
+@pytest.mark.parametrize('shot_value', [None, ''])
+def test_scene_department_null_target_reaches_scene_scope(studio, monkeypatch, stage, shot_value):
+    from types import SimpleNamespace
+    module, port = studio
+    calls = []
+    monkeypatch.setattr(module, '_canonical_cb_render', lambda: SimpleNamespace(
+        department_status=lambda *a: calls.append(a) or {'directionReady': True}))
+    _, headers, _ = _request(port, 'GET', '/cb-studio/app.html')
+    auth = {'Cookie': headers['Set-Cookie'].split(';', 1)[0],
+            'Origin': f'http://127.0.0.1:{port}', 'Content-Type': 'application/json'}
+    code, _, body = _request(port, 'POST', '/api/department-run', auth,
+        json.dumps({'scene': '2', 'episode': 'Ep3', 'stage': stage, 'shotId': shot_value}))
+    assert code == 200, body
+    assert json.loads(body)['existing']
+    assert calls == [('2', None, 'Ep3', stage)]
+
+
+@pytest.mark.parametrize('route', ['save', 'decide'])
+def test_scene_department_edit_keeps_null_target(studio, monkeypatch, route):
+    import cb_render
+    module, port = studio
+    calls = []
+    def record(*args, **kwargs):
+        calls.append((args, kwargs)); return {'saved': True}
+    monkeypatch.setattr(cb_render, 'save_department_candidate', record)
+    monkeypatch.setattr(cb_render, 'decide_department', record)
+    _, headers, _ = _request(port, 'GET', '/cb-studio/app.html')
+    auth = {'Cookie': headers['Set-Cookie'].split(';', 1)[0],
+            'Origin': f'http://127.0.0.1:{port}', 'Content-Type': 'application/json'}
+    code, _, body = _request(port, 'POST', '/api/department-' + route, auth,
+        json.dumps({'scene':'2', 'episode':'Ep3', 'stage':'look', 'shotId':None,
+                    'text':'Current scene world', 'verdict':'approve'}))
+    assert code == 200, body
+    assert calls[0][1]['shot_id'] is None
+
+
 def test_accept_direction_queues_all_eight_scene_compilers_without_provider_calls(monkeypatch,
                                                                                    tmp_path):
     module = _load_server_module("cb_studio_accept_direction_queue_test")

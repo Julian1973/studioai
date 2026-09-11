@@ -88,7 +88,13 @@ def test_real_media_reaches_review_without_mutating_approvals_or_other_projects(
     assert state['budget']['reserved']==0
     assert len(report['evidence']['frames'])==10 and len(report['evidence']['audio'])==2
     visual=next(c[2] for c in t.calls if c[0]=='review_frames')
-    assert len(visual['images'])==11  # all ten frames of the 5 fps fixture, plus approved SEE
+    # Every originating reference remains part of the review, including identity.
+    assert len(visual['images']) == 10 + len(report['evidence']['references'])
+    assert [path for _, path in visual['images'][10:]] == [
+        ws.project_path('first', source['path']) for source in report['evidence']['references']]
+    assert any(source.get('role') == 'character identity' for source in report['evidence']['references'])
+    identity = next(source for source in report['evidence']['references'] if source.get('role') == 'character identity')
+    assert identity['approvalStatus'] == 'supplied'  # Review inclusion never grants canon approval.
     with Image.open(visual['images'][0][1]) as sample:
         r,g,b=sample.getpixel((0,0));assert b>200 and r<10 and g<10
     audio=next(c[2]['audio'] for c in t.calls if c[0]=='review_audio')

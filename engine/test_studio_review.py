@@ -13,6 +13,92 @@ from studio_migration import Migration
 from studio_production import file_hash
 
 
+def test_returned_review_keeps_original_references_after_new_direction(setup):
+    from studio_media_review import manifest
+    production, ws, _, _ = setup
+    finish(production)
+    context = ws.context('first', '1')
+    state = production.snapshot('first', '1')['state']
+    shot = state['shots'][0]
+    before = manifest(production, context, state, shot)
+    original = copy.deepcopy(shot['outcomes']['watch']['originatingReviewInputs'])
+    identity = next(ref for ref in before['references'] if ref.get('name') == 'Hero')
+    assert identity['approvalStatus'] == 'supplied'
+    shot['geography'] = 'A later revision on a different bank.'
+    shot['outcomes']['see'] = {'status':'candidate', 'id':'new-opening', 'files':[]}
+    from PIL import Image
+    replacement = ws.project_path('first', 'projects/first/assets/replacement-hero.png')
+    Image.new('RGB', (24, 24), 'green').save(replacement)
+    context['assets']['characters']['Hero']['anchor'] = 'projects/first/assets/replacement-hero.png'
+    after = manifest(production, context, state, shot)
+    assert after['references'] == before['references']
+    assert all(ref['path'] != context['assets']['characters']['Hero']['anchor'] for ref in after['references'])
+    assert after['see'] == before['see']
+    assert after['shot'] == before['shot']
+    assert after['requestLineage'] == before['requestLineage']
+    assert shot['outcomes']['watch']['originatingReviewInputs'] == original
+
+
+def test_changed_originating_identity_blocks_review_instead_of_using_current_assets(setup):
+    from studio_media_review import manifest
+    production, ws, _, _ = setup
+    finish(production)
+    context = ws.context('first', '1')
+    state = production.snapshot('first', '1')['state']
+    shot = state['shots'][0]
+    original = shot['outcomes']['watch']['originatingReviewInputs']
+    identity = next(ref for ref in original['references'] if ref.get('name') == 'Hero')
+    assert identity['approvalStatus'] == 'supplied'
+    ws.project_path('first', identity['path']).write_bytes(b'changed identity reference')
+    with pytest.raises(StudioError, match='originating render reference'):
+        manifest(production, context, state, shot)
+
+
+@pytest.mark.parametrize('part', ['identity', 'see', 'hear', 'missing-packet'])
+def test_altered_originating_metadata_cannot_substitute_valid_new_media(setup, part):
+    from studio_media_review import manifest
+    production, ws, _, _ = setup
+    command(production, 'budget', amountUsd=20)
+    for stage in ('see', 'hear', 'request'):
+        approve(production, stage)
+    context = ws.context('first', '1')
+    state = production.snapshot('first', '1')['state']
+    shot = state['shots'][0]
+    watch = shot['outcomes']['watch']
+    original = watch['originatingReviewInputs']
+    if part == 'missing-packet':
+        watch.pop('originatingReviewInputs')
+    else:
+        source = (next(ref for ref in original['references'] if ref.get('name') == 'Hero')
+                  if part == 'identity' else original[part]['files'][0])
+        # A different valid, same-project file and its correct new hash would pass
+        # ordinary file-integrity checks; it must fail the sealed source binding.
+        replacement = ws.project_path('first', 'projects/first/assets/new-valid-reference.png')
+        from PIL import Image
+        Image.new('RGB', (24, 24), 'green').save(replacement)
+        source.update(path='projects/first/assets/new-valid-reference.png', hash=file_hash(replacement))
+    with pytest.raises(StudioError, match='originating inputs'):
+        manifest(production, context, state, shot)
+
+
+def test_originating_reference_path_can_relocate_without_changing_its_content(setup):
+    from studio_media_review import manifest
+    production, ws, _, _ = setup
+    command(production, 'budget', amountUsd=20)
+    for stage in ('see', 'hear', 'request'):
+        approve(production, stage)
+    state = production.snapshot('first', '1')['state']
+    shot = state['shots'][0]
+    source = next(ref for ref in shot['outcomes']['watch']['originatingReviewInputs']['references'] if ref.get('name') == 'Hero')
+    old_path = ws.project_path('first', source['path'])
+    destination = ws.project_path('first', 'projects/first/assets/relocated-hero.png')
+    destination.write_bytes(old_path.read_bytes())
+    source['path'] = 'projects/first/assets/relocated-hero.png'
+    result = manifest(production, ws.context('first', '1'), state, shot)
+    assert result['requestLineage']['status'] == 'origin-verified'
+    assert any(ref['path'] == source['path'] and ref['hash'] == source['hash'] for ref in result['references'])
+
+
 def finish(p):
     command(p, 'budget', amountUsd=20)
     for sid in ('S1.SH1', 'S1.SH2'):
@@ -132,8 +218,18 @@ def test_identity_conflict_is_refused_before_generation(setup):
 def test_timed_direction_reaches_both_generation_prompts(setup):
     p,ws,t,_=setup;command(p,'budget',amountUsd=10)
     old=p.snapshot('first','1')['state']['shots'][0]
-    new=fields(old);new.update(intent='Ask for forgiveness',openingState='Hero looks down, letter in left paw',endingState='Hero meets the listener eyeline',
+    new=fields(old);new.update(intent='Ask for forgiveness',openingState='Hero looks down, left hand against the door',endingState='Hero meets the listener eyeline',
                              beatPlan=[{'at':0,'action':'Hold the breath','audienceFeeling':'Anticipation'},{'at':2,'action':'Let the smile arrive','audienceFeeling':'Relief'}])
+    # Revise the actual shared decisions. Legacy beat prose is not a competing
+    # WATCH authoring channel once a typed Director Card exists.
+    card = new['directorCard']
+    card.update(audienceFocus=new['intent'], handoff=new['endingState'], intendedState=new['endingState'])
+    card['acting'][0].update(intention=new['intent'], startingPose=new['openingState'],
+                            endingPose=new['endingState'], observableBehaviour='Hold the breath; after the reply, let the smile arrive.')
+    card['views'][0].update(startState=new['openingState'], endState=new['endingState'],
+                            staging='Hero stands with the left hand against the door.',
+                            action='Hold the breath. Deliver the exact approved reply. Let the smile arrive after the reply.',
+                            performance='Keep attention on the listener; the held breath releases into a small smile.')
     t.reply={'message':'A clear emotional turn.','revisedShot':new}
     command(p,'chat',shotId=old['id'],message='Build the anticipation')
     proposed=p.snapshot('first','1')['state']['shots'][0]['proposal']
@@ -141,7 +237,7 @@ def test_timed_direction_reaches_both_generation_prompts(setup):
     approve(p,'see');approve(p,'hear')
     request=p.snapshot('first','1')['state']['shots'][0]['outcomes']['request']
     for prompt in ([c[2] for c in t.calls if c[0]=='image'][-1],request['prompt']):
-        assert 'Ask for forgiveness' in prompt and 'Hold the breath' in prompt and 'letter in left paw' in prompt
+        assert 'Ask for forgiveness' in prompt and 'Hold the breath' in prompt and 'left hand against the door' in prompt
     assert 'Let the smile arrive' not in [c[2] for c in t.calls if c[0]=='image'][-1]
     assert 'Let the smile arrive' in request['prompt']
 

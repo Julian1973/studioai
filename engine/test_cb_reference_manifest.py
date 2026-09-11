@@ -124,16 +124,16 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
     assert "no arms held out from the body, T-pose" in prompt
     assert "round glasses" not in prompt
     assert "rosy blush" not in prompt
-    assert "@图3 is the locked Scene Look plate" in prompt
+    assert "@图3: exact approved location authority" in prompt
     assert "Project-stable slots: @图1=Zenny; @图2=Fuzzby; @图3=scene plate." in prompt
     assert ("Multi-angle collapse: @图1=one Zenny; @图2=one Fuzzby; views are angles, "
             "not extra characters.") in prompt
     assert "do not describe, redesign, simplify, beautify" in prompt
     assert "omitted reference features" in prompt
-    assert "[DELIVERABLE]" in prompt
+    assert "[PURPOSE]" in prompt
     assert "[REFERENCE AUTHORITY]" in prompt
-    assert "[CAMERA CONSCIOUSNESS]" in prompt
-    assert "[ACCEPTANCE TEST]" in prompt
+    assert "[COMPOSITION]" in prompt
+    assert "[DO NOT SHOW YET]" in prompt
     assert tuple(cb_render.cb_departments.prompt_sections(prompt)) == \
         cb_render.SEEDREAM_KEYFRAME_PROMPT_SECTIONS
     assert "Hold frame-right open for the later flower reveal." in prompt
@@ -552,8 +552,8 @@ def test_composition_and_scale_controls_remain_local_while_locked_assets_own_pro
     assert "@图1: Zenny's single-subject character anchor is the 100% identity authority" in keyframe_prompt
     assert "@图2: Fuzzby's single-subject character anchor is the 100% identity authority" in keyframe_prompt
     assert "round glasses" not in keyframe_prompt
-    assert "@图3 is the locked Scene Look plate" in keyframe_prompt
-    assert "[MOTION READINESS]" in keyframe_prompt
+    assert "@图3: exact approved location authority" in keyframe_prompt
+    assert "[DO NOT SHOW YET]" in keyframe_prompt
     assert cb_render.OPENING_COMPOSITION_ROLE not in keyframe_prompt
     assert cb_render.CHARACTER_SCALE_CONTROL_MARKER not in keyframe_prompt
     assert cb_render.CHARACTER_SCALE_CONTROL_MARKER not in animation_prompt
@@ -599,6 +599,42 @@ def test_prop_binding_prefers_approved_shot_state_to_generic_design(monkeypatch,
     assert actual == str(selected)
 
 
+def test_cut_keyframe_prefers_approved_editorial_relay_state(monkeypatch, tmp_path):
+    final_frame = _write(tmp_path / "literal_final.png")
+    relay_frame = _write(tmp_path / "editorial_relay.png")
+    source = {
+        "shotId": "S1.SH1",
+        "status": "approved",
+        "harvestFrame": str(final_frame),
+        "approval": {"harvestHash": cb_render._sha256_file(final_frame)},
+        "editorialRelayReview": {
+            "relayFramePath": str(relay_frame),
+            "relayFrameSha256": cb_render._sha256_file(relay_frame),
+            "recommendedCutOutSec": 9.5,
+        },
+    }
+    monkeypatch.setattr(cb_render, "load_pkg", lambda *args: ({"continuityLedger": [source]}, None))
+    monkeypatch.setattr(cb_render, "_reference_path_is_approved", lambda path: True)
+    shot = {
+        "shotId": "S1.SH2",
+        "sourceType": "opener",
+        "keyframeReferenceSlots": {},
+        "shotTransition": {"type": "cut", "stateSourceShotId": "S1.SH1"},
+    }
+
+    plan = cb_render._provider_attachment_plan(
+        shot, "keyframeReferenceSlots", None, "1", "EpT", {})
+
+    assert len(plan) == 1
+    assert plan[0]["role"] == "previous shot state reference"
+    assert plan[0]["path"] == str(relay_frame)
+
+    relay_frame.write_bytes(b"changed-relay")
+    with pytest.raises(cb_render.Refused, match="editorial relay frame changed"):
+        cb_render._provider_attachment_plan(
+            shot, "keyframeReferenceSlots", None, "1", "EpT", {})
+
+
 def test_cut_keyframe_attaches_accepted_state_without_using_it_as_opening(monkeypatch, tmp_path):
     frame = _write(tmp_path / "landing.png")
     source = {"shotId": "S1.SH1", "status": "approved", "harvestFrame": str(frame),
@@ -619,3 +655,57 @@ def test_cut_keyframe_attaches_accepted_state_without_using_it_as_opening(monkey
     source["status"] = "designed"
     with pytest.raises(cb_render.Refused, match="approve the preceding render"):
         cb_render._provider_attachment_plan(shot, "keyframeReferenceSlots", None, "1", "EpT", {})
+
+
+def test_keyframe_location_reference_is_geography_not_character():
+    direction = {
+        **_approved_keyframe_fields(),
+        'audienceRead': 'Return along the established route.',
+        'lensAndCameraRelationship': 'Wide view from the near bank.',
+        'lightingAndDepth': 'Retain morning light.',
+        'openingFrameLayout': {'sameDepth': True, 'placements': [{'character': 'Fuzzby'}, {'character': 'Zenny'}]},
+    }
+    shot = {'shotId': 'test-return', 'sourceType': 'opener', 'charactersInFrame': []}
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, shot, [
+        {'slot': '@图1', 'role': 'location:established wide'},
+    ])
+    assert '@图1: established geography reference only' in prompt
+    assert 'Do not copy historical character positions or restore removed objects' in prompt
+    assert "location:established wide's complete" not in prompt
+    assert 'one location:established wide' not in prompt
+
+
+def test_split_cut_keeps_own_opening_route():
+    assert not cb_render._is_relay_or_split_shot({'sourceType':'opener', 'splitFrom':{'shotId':'parent'}, 'shotTransition':{'type':'cut','stateSourceShotId':'previous'}})
+    assert cb_render._is_relay_or_split_shot({'sourceType':'relay','sourceShotId':'previous'})
+
+
+def test_scene_plate_authority_reaches_emitted_keyframe_prompt():
+    direction = {
+        **_approved_keyframe_fields(),
+        'audienceRead': 'Set the existing table.',
+        'lensAndCameraRelationship': 'Approved opening camera.',
+        'lightingAndDepth': 'Retain morning light.',
+        'openingFrameLayout': {'sameDepth': True, 'placements': [{'character': 'Fuzzby'}, {'character': 'Zenny'}]},
+    }
+    shot = {'shotId': 'plate-authority-test', 'sourceType': 'opener', 'charactersInFrame': []}
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, shot, [
+        {'slot': '@图6', 'role': 'scene plate'},
+    ])
+    assert '@图6: exact approved location authority' in prompt
+    assert 'Use this plate as the opening background' in prompt
+    assert 'never restore a removed object' in prompt
+    shot['shotTransition'] = {'type': 'cut'}
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, shot, [
+        {'slot': '@图6', 'role': 'scene plate'},
+    ])
+    assert 'Reframe only for the authored camera view' in prompt
+
+
+def test_vision_reference_is_content_not_additional_cast():
+    assert cb_render._is_non_identity_image_role('vision:Sunny party reflection')
+    from studio_seedance_execution import _reference_lines
+    lines=_reference_lines({'references':[{'slot':'@图4','role':'vision:Sunny party reflection'}]}, {'characters':[]})
+    assert len(lines)==1 and '@图4' in lines[0]
+    assert 'water surface only' in lines[0]
+    assert 'do not place them physically at the pool' in lines[0]

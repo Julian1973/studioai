@@ -211,3 +211,25 @@ def test_internal_provider_segments_are_individually_idempotent(tmp_path):
     candidate = tmp_path / "candidate.mp4"
     candidate.write_bytes(b"joined")
     cb_db.complete_candidate(tmp_path, auth["token"], 1, candidate)
+
+
+def test_scene_lease_waits_then_enters_once(tmp_path):
+    import threading
+    started = threading.Event()
+    entered = []
+    updates = []
+    def waiting():
+        started.set()
+        with cb_db.scene_lease(tmp_path, 'EpT', '1', 'waiting',
+                               wait_seconds=3, on_wait=updates.append):
+            entered.append('once')
+    with cb_db.scene_lease(tmp_path, 'EpT', '1', 'preparing'):
+        worker = threading.Thread(target=waiting)
+        worker.start()
+        assert started.wait(1)
+        import time
+        time.sleep(.15)
+        assert not entered
+    worker.join(4)
+    assert entered == ['once']
+    assert len(updates) == 1

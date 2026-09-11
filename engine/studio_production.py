@@ -177,6 +177,8 @@ class Production:
             if not path.is_file():
                 raise StudioError("A selected project reference is missing.", "missing_reference")
             ref["hash"] = file_hash(path)
+            if ref['role'] == 'character identity':
+                ref['canonicalIdentity'] = {'character': ref['name'], 'path': ref['path'], 'hash': ref['hash']}
             ref['requiredState'] = (shot.get('requiredReferenceStates') or {}).get(ref['name'], {})
             source = (assets['characters'].get(ref['name']) if ref['role'] == 'character identity' else
                       next((v for group in ('locations', 'props') for v in assets[group] if v['name'] == ref['name']), None)) or {}
@@ -262,7 +264,8 @@ class Production:
         if not agreement['ok']:
             conflict = agreement['conflicts'][0]
             raise StudioError(f"Reference {conflict['tag']} depicts {conflict['field']}={conflict['depicted']}; this shot requires {conflict['required']}. Replace or correct that reference.", 'reference_state_conflict')
-        labels = "\n".join(f"@Image{i + 1}: {r['name']} — {r.get('role', 'reference')}; {r.get('description', '')}; identity traits: {json.dumps(r.get('traits', {}), ensure_ascii=False)}; required state: {json.dumps(r.get('requiredState', {}), ensure_ascii=False)}" for i, r in enumerate(refs))
+        from studio_prompt_structure import prose
+        labels = "\n".join(f"@Image{i + 1}: {r['name']} — {r.get('role', 'reference')}; {r.get('description', '')}\n{prose(r.get('traits', {}), 'Identity')}\n{prose(r.get('requiredState', {}), 'Current state')}" for i, r in enumerate(refs))
         # The review trace keeps full provenance; provider prose emits each decision group once.
         direction = dict(contract['direction'])
         opening = direction.pop('openingState', '')
@@ -272,18 +275,28 @@ class Production:
                     'Opening references control composition; identity references control design and scale; location references control fixed geography; current state references control marks and prop state. A previous ending is continuity only for a planned camera cut.',
                     '[Opening State]', opening or 'Use the authored opening view and assigned reference state.',
                     contract['instruction'], contract['visualHandoff'],
-                    '[Scene and Canon Context]', f"Project: {context['project']['name']}\nFrame aspect: {context['project'].get('aspectRatio', '16:9')}\nVisual style: {context['project'].get('style', '')}\n{context['bible']}",
-                    '[Directed Beats and Acting]', json.dumps(direction, ensure_ascii=False),
-                    '[Director Decisions]', json.dumps({k:v for k,v in contract['directorDecisions'].items() if k != 'instructions'}, ensure_ascii=False),
+                    '[Visual Style]', context['project'].get('style', ''),
+                    '[Directed Beats and Acting]', prose(direction),
+                    '[Director Decisions]', prose({k:v for k,v in contract['directorDecisions'].items() if k != 'instructions'}),
                     '[Additional Direction]', supplemental,
-                    'Structured direction and approved reference roles are authoritative. Do not treat a conflicting reference image as resolved merely by this instruction.',
-                    '[Direction Trace]', contract['fingerprint']]
+                    'Use each reference only for its declared role.']
         if stage == 'see' and shot.get('performance'):
             sections += ['[Performance Context — depict only its opening pose, not later actions]', shot['performance']]
         if stage != 'see':
             sections += ['[Ending State]', ending, '[Sound Handoff]', contract['soundInstruction']]
         from studio_creative_authority import compile_instructions
-        return compile_instructions('\n'.join(str(v) for v in sections if v), shot, stage)
+        prompt = compile_instructions('\n'.join(str(v) for v in sections if v), shot, stage)
+        from studio_prompt_aliases import protect_object_aliases, object_lifecycle_prompt_rules
+        from studio_tracked_objects import apply_provider_clauses
+        if stage == 'see':
+            rules = object_lifecycle_prompt_rules(shot)
+            if rules['preserve'] or rules['exclude']:
+                prompt += '\n[Opening object authority]\n' + '\n'.join(rules['preserve'] + rules['exclude'])
+        else:
+            prompt = apply_provider_clauses(prompt, shot)
+        from studio_prompt_order import compile_order
+        purpose = shot.get('intent') or (shot.get('directorCard') or {}).get('audienceFocus') or shot.get('title')
+        return compile_order(protect_object_aliases(prompt, shot), {'dramaticBeat': purpose})
 
     def _stage(self, shot):
         for stage in STAGES:
@@ -617,13 +630,14 @@ class Production:
         source = "\n".join(context["script"].splitlines()[shot["startLine"] - 1:shot["endLine"]])
         prompt = self._prompt(context, shot, "watch", refs)
         if audio:
-            prompt += "\n@Audio1 is the approved voice performance. Match its exact words, speaker timing and lip sync. No extra dialogue."
+            prompt += "\n[Audio]\n@Audio1 is the approved voice performance. Match its exact words, speaker timing and lip sync. No extra dialogue."
             from studio_voice_timing import dialogue_cues
             cues = dialogue_cues(shot['outcomes']['hear'].get('voiceTiming'), shot['dialogue'], audio[0]['hash'])
-            if cues:
-                prompt += '\nMeasured dialogue ownership from @Audio1:\n' + json.dumps(cues, ensure_ascii=False)
+            # Exact words, speaker ownership and measured intervals enter the
+            # authoritative typed plan through project_authorities. No JSON
+            # control record is appended to the provider's audio block.
         else:
-            prompt += "\nNo spoken dialogue."
+            prompt += "\n[Audio]\nNo spoken dialogue."
         # Keep source text in the review record, not as a second competing action/dialogue script.
         # Approved voice cues above remain the provider's spoken-word authority.
         ratio = context["project"].get("aspectRatio") or "16:9"
@@ -692,6 +706,14 @@ class Production:
             except ValueError as exc:
                 raise StudioError(str(exc), 'stale') from exc
             inputs["request"] = request
+            if request.get('productionRequest'):
+                from studio_shot_request import project_watch, ShotProductionRequest
+                try:
+                    sealed = ShotProductionRequest.load(request['productionRequest'])
+                    if sealed.request_hash != project_watch(context, shot, request).request_hash:
+                        raise ValueError('The current shot differs from the reviewed production request')
+                except ValueError as exc:
+                    raise StudioError(str(exc), 'stale') from exc
         request_count = len(inputs["dialogue"]) if kind == "hear" else 1
         from studio_workflow import estimate
         cost = money(estimate(binding, kind, shot, duration=inputs.get("request", {}).get("duration")))
@@ -706,6 +728,8 @@ class Production:
                "binding": binding, "estimate": cost, "requestCount": request_count, "references": refs, "inputs": inputs,
                "direction": message, "stage": payload.get("stage", "see"), "reviews": self.review_learning(db, pid, state),
                "messages": state["messages"][-12:], "standard": STANDARD_PATH.read_text() + "\n\n" + __import__("studio_director_card").CONTRACT, "status": "queued", "createdAt": time.time(), "pid": os.getpid()}
+        from studio_prompt_structure import WRITING_BRIEF
+        job['standard'] += '\n\n' + WRITING_BRIEF
         job['standardHash'] = digest(job['standard'])
         if kind == "see":
             from studio_references import resolve
@@ -795,6 +819,27 @@ class Production:
         if job['kind'] == 'watch':
             expected_fields.update(duration=request['duration'], ratio=request['ratio'])
         direction = stage_decisions(job['shot'], job['kind'])
+        from studio_shot_request import from_project_job
+        production_request = from_project_job(job, expected_prompt).record()
+        if job['kind'] == 'watch':
+            from studio_shot_request import project_watch, ShotProductionRequest
+            production_request = project_watch(job['context'], job['shot'], request).record()
+            if request.get('productionRequest'):
+                sealed = ShotProductionRequest.load(request['productionRequest'])
+                if sealed.request_hash != production_request['requestHash']:
+                    raise StudioError('The reviewed request changed before submission.', 'stale')
+        job['productionRequest'] = production_request
+        if job['kind'] == 'watch':
+            def source_artifact(stage):
+                artifact = (job['shot'].get('outcomes') or {}).get(stage) or {}
+                return {k:artifact[k] for k in ('id','status','files','voiceTiming') if k in artifact}
+            job['originatingReviewInputs'] = {
+                'references': request.get('images', []),
+                'see': source_artifact('see'),
+                'hear': source_artifact('hear'),
+                'sourceSignature': job.get('sourceHash'),
+            }
+        metadata['productionRequest'] = production_request
         if job['kind'] in {'see', 'watch'}:
             from studio_workflow import handoff
             source = handoff(job['shot'], job['kind'], request.get('images', job['references']))
@@ -805,9 +850,23 @@ class Production:
                      direction=direction, received=received):
             try:
                 from studio_preflight_evidence import media_submission
-                media_submission()
-                job["mediaSubmissionAttempted"] = True
-                return function(*args, **kwargs)
+                from studio_shot_request import pinned_media
+                groups, bindings = {}, {}
+                if job['kind'] in {'see', 'watch'}:
+                    groups['image'] = args[4]
+                    bindings['image'] = request.get('images', job['references'])
+                if job['kind'] == 'watch':
+                    groups['audio'] = args[5]
+                    bindings['audio'] = request['audio']
+                with pinned_media(groups, bindings) as pinned:
+                    submitted_args = list(args)
+                    if 'image' in pinned:
+                        submitted_args[4] = [Path(p) for p in pinned['image']]
+                    if 'audio' in pinned:
+                        submitted_args[5] = [Path(p) for p in pinned['audio']]
+                    media_submission()
+                    job["mediaSubmissionAttempted"] = True
+                    return function(*submitted_args, **kwargs)
             except RequestEvidenceError as exc:
                 raise StudioError(str(exc), 'production_direction_lost') from exc
 
@@ -885,13 +944,15 @@ class Production:
                     response.pop('_usage', None)
                     return response
                 try:
-                    final, report = review_prompt(source, reviewer)
+                    final, report = review_prompt(source, reviewer, review_plan_first=True)
                 except ValueError as exc:
                     raise StudioError(str(exc), 'prompt_coherence') from exc
                 if report['verdict'] != 'READY TO FIRE':
                     from studio_preflight_evidence import project_failure
                     job['preflightEvidence'] = project_failure(self, job, ValueError(report['verdict'] + ': ' + report['summary']), job)
                 result = {**request, 'prompt': final['prompt'], 'promptDirector': report, 'promptDirectorSnapshot': final, 'keyframeDirector': readiness, 'keyframeDirectorSnapshot': see_source}
+                from studio_shot_request import project_watch
+                result['productionRequest'] = project_watch(context, job['shot'], result).record()
                 self.complete(job, result)
                 return
             if kind in {"plan", "chat", "revise"}:
@@ -1066,6 +1127,12 @@ class Production:
 
     def complete(self, job, result):
         pid, ep, kind = job["projectId"], job["episode"], job["kind"]
+        if job.get('productionRequest'):
+            from studio_shot_request import origin
+            result['requestLineage'] = origin(job)
+            result['productionRequest'] = job['productionRequest']
+            if job.get('originatingReviewInputs'):
+                result['originatingReviewInputs'] = job['originatingReviewInputs']
         with self.ws.db() as db:
             db.execute("BEGIN IMMEDIATE")
             current = json.loads(db.execute("SELECT data FROM jobs WHERE id=?", (job["id"],)).fetchone()[0])

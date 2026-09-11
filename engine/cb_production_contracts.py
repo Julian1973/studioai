@@ -153,7 +153,7 @@ def visual_event_text(text):
 
 
 def validate_timeline(events, duration):
-    """Concurrent channels are valid; one channel cannot contain conflicting intervals."""
+    """Validate shot bounds, performer action tracks, and exclusive camera/dialogue tracks."""
     errors, channels = [], {}
     for event in events:
         try:
@@ -161,13 +161,19 @@ def validate_timeline(events, duration):
             channel = str(event["channel"])
             if not channel or not 0 <= start < end <= float(duration):
                 raise ValueError()
-            channels.setdefault(channel, []).append((start, end))
+            track = (channel, str(event.get("performer") or "").strip()) if channel == "action" else (channel, "")
+            channels.setdefault(track, []).append((start, end))
         except (KeyError, TypeError, ValueError):
             errors.append("Timeline event needs a channel and an increasing interval inside the shot.")
-    for channel, intervals in channels.items():
+    for (channel, performer), intervals in channels.items():
+        # SFX is a mix of independent sounds, not one exclusive performer or camera.
+        # A laugh can continue under a splash or wooden clatter without a timing conflict.
+        if channel == "sfx":
+            continue
         ordered = sorted(set(intervals))
         if any(b[0] < a[1] for a, b in zip(ordered, ordered[1:])):
-            errors.append(f"Conflicting intervals on timeline channel {channel}.")
+            owner = f" for performer {performer}" if performer else ""
+            errors.append(f"Conflicting intervals on timeline channel {channel}{owner}.")
     return {"ready": not errors, "errors": errors}
 
 

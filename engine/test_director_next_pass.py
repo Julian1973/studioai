@@ -17,7 +17,7 @@ def test_targeted_edit_blocked_before_token_or_transport(world,monkeypatch):
     led.update(status='approved',approvedTake=str(source));path.write_text(json.dumps(pkg))
     def reject(system,text,schema,**kw):
         data=json.loads(text);assert data['authorities']['editScope']['outsideWindow']=='preserve approved source'
-        out=review();out['findings']=[dict(category='story/state contradiction',reason='Edit resets moved object outside scope',evidence=data['prompt'].splitlines()[0],correction='Keep outside-window state')];return out
+        out=review();out['findings']=[dict(category='story/state contradiction',reason='Edit resets moved object outside scope',evidence=data.get('prompt','Declared edit scope conflicts with current state').splitlines()[0],correction='Keep outside-window state')];return out
     monkeypatch.setattr(cb_llm,'structured_with_repair',reject)
     with pytest.raises((R.Refused,ValueError),match='BLOCKED'):
         R.edit_shot('9',shot['shotId'],'Restore the old position.',0,1,'EpT',log=lambda *a:None)
@@ -51,7 +51,8 @@ def test_unsuitable_see_blocks_project_watch_request(setup,monkeypatch):
 
 def test_origin_is_sealed_batch_not_current_direction():
     envelope={'directorCardRevision':{'revision':3},'executionPlan':{'segments':[{'promptDirector':{'lifecycle':['original expectation']},'promptDirectorSnapshot':{'authorities':{'revision':3}},'references':['original ref']}]}}
-    ledger={'batch':{'envelope':envelope,'envelopeHash':'sealed'},'currentDirection':'changed'}
+    envelope_hash=R.hashlib.sha256(json.dumps(envelope,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+    ledger={'batch':{'envelope':envelope,'envelopeHash':envelope_hash},'currentDirection':'changed'}
     origin=R._returned_origin(ledger)
     assert origin['segments'][0]['promptDirector']['lifecycle']==['original expectation']
     assert origin['reviewScope']['deliveryEligible'] is False
@@ -62,10 +63,10 @@ def test_legacy_returned_review_receives_originating_plan(world,monkeypatch):
     pkg=json.loads(path.read_text());shot=pkg['shots'][0];led=R._ledger(pkg,shot['shotId'])
     media=root/'take.mp4';media.write_bytes(b'synthetic-take');ref=root/'origin.png';ref.write_bytes(b'origin-ref')
     report={'payloadHash':'original','audienceBeat':'surprise','lifecycle':[{'entity':'prop','state':'landed'}]}
-    led.update(status='candidates-pending',candidatePaths=[str(media)],batch={'envelopeHash':'sealed','envelope':{'directorCardRevision':{'revision':1},'executionPlan':{'segments':[{'promptDirector':report,'promptDirectorSnapshot':{'revision':1},'references':[{'path':str(ref),'role':'prop','md5':R._file_md5(str(ref))}]}]}}})
+    led.update(status='candidates-pending',candidatePaths=[str(media)],batch={'envelope':{'directorCardRevision':{'revision':1},'executionPlan':{'segments':[{'promptDirector':report,'promptDirectorSnapshot':{'revision':1},'references':[{'path':str(ref),'role':'prop','md5':R._file_md5(str(ref))}]}]}}})
     path.write_text(json.dumps(pkg))
     monkeypatch.setattr(R,'_anchor_for',lambda *a:None)
-    monkeypatch.setattr(R,'_provider_attachment_plan',lambda *a:[])
+    monkeypatch.setattr(R,'_provider_attachment_plan',lambda *a:pytest.fail('Current refs must not replace historical refs'))
     def frames(*a):
         folder=root/'samples';folder.mkdir(exist_ok=True);frame=folder/'sample.png';frame.write_bytes(b'sample');return str(folder),[str(frame)]
     monkeypatch.setattr(R,'_review_frames',frames)
@@ -77,3 +78,5 @@ def test_legacy_returned_review_receives_originating_plan(world,monkeypatch):
     saved=json.loads(path.read_text());candidate=R._ledger(saved,shot['shotId'])['departmentWork']['review-animation']['candidate']
     assert candidate['originatingProduction']['reviewScope']['audioLipSync'].startswith('unverified')
     assert candidate['originatingProduction']['segments'][0]['sourceSnapshot']=={'revision':1}
+    assert candidate['originatingProduction']['status']=='legacy-unverified'
+    assert candidate['originatingProduction']['originIntegrity']['verified'] is False

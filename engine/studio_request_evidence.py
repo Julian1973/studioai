@@ -39,6 +39,22 @@ def _leaves(value, path='direction'):
         yield path, value
 
 
+def authority_inventory(authorities):
+    """Record exact supplied authorities, not a claim that unprovided files were read."""
+    rows = []
+    for name, value in authorities.items():
+        if value is None:
+            rows.append({'role':name,'status':'unavailable','hash':None})
+        else:
+            rows.append({'role':name,'status':'consumed snapshot','hash':digest(value),
+                         'version':value.get('version', value.get('revision')) if isinstance(value,dict) else None})
+    from studio_creative_authority import resolve
+    shot=authorities.get('shot') or {}
+    resolution=resolve((shot.get('directorCard') or {}).get('instructions') or [], shot.get('instructionContext') or {})
+    return {'sources':rows,'precedence':resolution,
+            'boundary':'Hashes identify supplied content. Absent script, skill or reference observations remain unverified.'}
+
+
 def prompt_text(body):
     if 'prompt' in body:
         return str(body['prompt'])
@@ -116,6 +132,26 @@ def observe(send, endpoint, body):
               'requestFieldMismatches': mismatches, 'mediaCounts': counts,
               'directionTrace': inclusion_map(scope['direction'], prompt),
               'state': 'prepared-at-http-boundary', 'providerCalled': False}
+    from studio_shot_request import build, ShotProductionRequest
+    inherited = scope['metadata'].get('productionRequest')
+    truth = {'direction': scope['direction'], 'authorityStatus': 'legacy-unverified'}
+    stage = str(scope['metadata'].get('stage') or 'WATCH').upper()
+    if stage not in {'SEE', 'HEAR', 'WATCH', 'TARGETED_EDIT', 'REVIEW', 'POST'}:
+        stage = 'WATCH'
+    if inherited:
+        # Independently verify the persisted authority snapshot before any HTTP call.
+        try:
+            authority = ShotProductionRequest.load(inherited)
+            truth = authority.data['truth']
+            stage = authority.data['stage']
+            record['originatingRequestHash'] = authority.request_hash
+        except (ValueError, KeyError, TypeError) as exc:
+            mismatches.append('production request integrity: ' + str(exc))
+    # Bind actual serialized provider content separately from semantic truth.
+    # URI/data inputs are retained only in the existing private request record.
+    boundary = build(stage, truth, {'endpoint': record['endpoint'], 'bodyHash': record['bodyHash']})
+    record['productionRequest'] = boundary.record()
+    record['requestHash'] = boundary.request_hash
     from studio_delivery_contract import delivery_snapshot
     from studio_creative_authority import resolve
     source = scope['direction'] or {}

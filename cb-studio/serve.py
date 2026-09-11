@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Animation Studio local server: projects, episodes, canon and media production."""
 import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile, signal, sys, uuid, hashlib, secrets, hmac, selectors, gc, importlib
+import gzip
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
@@ -48,6 +49,7 @@ def _engine_subprocess_env(args=None):
 
 import cb_scripts
 import cb_db
+import cb_recovery
 import cb_asset_registry
 import cb_lineage
 import cb_production_contracts
@@ -535,6 +537,11 @@ _JOB_LOCK = threading.RLock()
 _DIRECTOR_SESSION_CACHE = {}
 _DIRECTOR_SESSION_CACHE_LOCK = threading.RLock()
 _DIRECTOR_SESSION_BUILD_LOCK = threading.Lock()
+_PRODUCTION_STATE_CACHE = {}
+_PRODUCTION_STATE_CACHE_LOCK = threading.RLock()
+_PRODUCTION_STATE_BUILD_LOCKS = {}
+_PRODUCTION_STATE_CACHE_EPOCH = 0
+_PRODUCTION_STATE_CACHE_TTL_SEC = 300.0
 # Production mutations and completed jobs explicitly invalidate this cache. Keep
 # browser polling on the proven projection instead of rebuilding the full ledger
 # every minute; the freshness guard restarts the server for code/data-file changes.
@@ -557,10 +564,10 @@ DIRECTOR_ACTION_IDS = {
 
 
 def _clear_director_session_cache(scene=None, episode=None):
+    global _PRODUCTION_STATE_CACHE_EPOCH
     with _DIRECTOR_SESSION_CACHE_LOCK:
         if scene is None and episode is None:
             _DIRECTOR_SESSION_CACHE.clear()
-            return
         for key in list(_DIRECTOR_SESSION_CACHE):
             key_episode, key_scene, _ = key
             if scene is not None and key_scene != str(scene):
@@ -568,6 +575,58 @@ def _clear_director_session_cache(scene=None, episode=None):
             if episode is not None and key_episode != str(episode):
                 continue
             _DIRECTOR_SESSION_CACHE.pop(key, None)
+    with _PRODUCTION_STATE_CACHE_LOCK:
+        _PRODUCTION_STATE_CACHE_EPOCH += 1
+        if scene is None and episode is None:
+            _PRODUCTION_STATE_CACHE.clear()
+        else:
+            for key in list(_PRODUCTION_STATE_CACHE):
+                key_episode, key_scene = key
+                if scene is not None and key_scene != str(scene):
+                    continue
+                if episode is not None and key_episode != str(episode):
+                    continue
+                _PRODUCTION_STATE_CACHE.pop(key, None)
+
+
+def _cached_production_state(scene, episode):
+    """Return the validated projection without rebuilding the full ledger per poll.
+
+    The package mtime is part of the key so external/agent writes are picked up, while
+    the short TTL prevents the Studio route from hanging on repeated initial loads.
+    Mutating routes call _clear_director_session_cache, which also clears this cache.
+    """
+    package_path = _shot_pkg_path(scene, episode)
+    try:
+        stamp = (package_path.stat().st_mtime_ns, package_path.stat().st_size)
+    except OSError:
+        stamp = None
+    key = (str(episode), str(scene))
+    now = time.time()
+    with _PRODUCTION_STATE_CACHE_LOCK:
+        cached = _PRODUCTION_STATE_CACHE.get(key)
+        if cached and cached["stamp"] == stamp and now - cached["at"] < _PRODUCTION_STATE_CACHE_TTL_SEC:
+            return cached["state"]
+        build_lock = _PRODUCTION_STATE_BUILD_LOCKS.setdefault(key, threading.Lock())
+    # Tabs/pollers arriving together must share one expensive projection build.
+    # Other scenes have independent locks. Invalidation during a build prevents
+    # that result from being republished as the new cached state.
+    with build_lock:
+        try:
+            info = package_path.stat()
+            stamp = (info.st_mtime_ns, info.st_size)
+        except OSError:
+            stamp = None
+        with _PRODUCTION_STATE_CACHE_LOCK:
+            cached = _PRODUCTION_STATE_CACHE.get(key)
+            if cached and cached["stamp"] == stamp and time.time() - cached["at"] < _PRODUCTION_STATE_CACHE_TTL_SEC:
+                return cached["state"]
+            epoch = _PRODUCTION_STATE_CACHE_EPOCH
+        state = _canonical_cb_state().production_state(scene, episode)
+        with _PRODUCTION_STATE_CACHE_LOCK:
+            if epoch == _PRODUCTION_STATE_CACHE_EPOCH:
+                _PRODUCTION_STATE_CACHE[key] = {"at": time.time(), "stamp": stamp, "state": state}
+        return state
 
 
 def _persist_job(job, required=False):
@@ -584,7 +643,47 @@ def _persist_job(job, required=False):
 
 def _jobs_snapshot():
     with _JOB_LOCK:
-        return {job_id: dict(job) for job_id, job in JOBS.items()}
+        snapshot = {job_id: dict(job) for job_id, job in JOBS.items()}
+    for operation in cb_recovery.all_operations(ROOT):
+        job_id = operation.get("jobId")
+        if not job_id:
+            continue
+        if job_id not in snapshot:
+            # Direct CLI operations own durable progress too. They need no HTTP
+            # launch record to remain visible and resumable in the Studio.
+            snapshot[job_id] = {"jobId": job_id, "scene": operation["scene"],
+                "gate": "director:" + operation["kind"] + ":" + operation["shotId"],
+                "args": operation["args"], "started": operation["createdAt"],
+                "status": "interrupted", "step": operation["message"], "log": ""}
+        job = snapshot[job_id]
+        job["operation"] = cb_recovery.public(operation)
+        state = operation["state"]
+        if state in cb_recovery.ACTIVE_STATES | {"submitting", "rendering"} and cb_recovery.worker_alive(operation):
+            job.update(status="running", step=operation["message"])
+        elif state in {"needs-attention", "reconciling-submission"}:
+            job.update(status="failed", step=operation["message"], error=operation["message"])
+        elif state == "awaiting-spend-approval":
+            job.update(status="done", step="Cost ready for approval", outcome="needs_spend_approval")
+        elif state == "reviewing":
+            job.update(status="done", step="Returned media awaiting review")
+    return snapshot
+
+
+def _recover_production_operations():
+    """Resume only declared preparation; orphaned submissions are evidence reads."""
+    for operation in cb_recovery.recoverable(ROOT):
+        _start(operation.get("jobId") or _jid("recovered_preparation"),
+               "director:" + operation["kind"] + ":" + operation["shotId"],
+               operation["scene"], operation["args"])
+
+
+def _production_recovery_watch():
+    while True:
+        try:
+            _recover_production_operations()
+        except Exception as exc:
+            print(f"Production recovery needs attention: {exc}", flush=True)
+        time.sleep(5)
 
 
 WORKBENCH_STATE_FILE = DATA / "project-workbench-state.json"
@@ -967,7 +1066,7 @@ def _humanise(line, gate=None):
     return l[:90]
 
 
-def _process_lines_until_exit(process, timeout=0.5):
+def _process_lines_until_exit(process, timeout=0.5, deadline=None):
     """Yield live stdout without waiting forever on an inherited pipe.
 
     Provider clients can briefly leave stdout inherited by a helper process. A
@@ -980,6 +1079,16 @@ def _process_lines_until_exit(process, timeout=0.5):
     selector.register(process.stdout, selectors.EVENT_READ)
     try:
         while True:
+            if deadline is not None and time.time() >= deadline and process.poll() is None:
+                # This timeout is only supplied for preparation workers. Their media
+                # authority is false; a deadline never triggers another provider call.
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    process.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.wait(timeout=3)
+                raise TimeoutError("Preparation deadline reached. Saved correction and checkpoints are retained.")
             if selector.select(timeout):
                 line = process.stdout.readline()
                 if line:
@@ -999,20 +1108,34 @@ def _stream(jobId, args):
                 job["status"] = "stopped"
                 job["step"] = "Stopped by user."
                 return
+            env = _engine_subprocess_env(args)
+            operation_id = job.get("productionOperationId")
+            if operation_id:
+                env["CB_PRODUCTION_OPERATION_ID"] = operation_id
+                operation = cb_recovery.get(ROOT, operation_id)
+                if operation["kind"] == "submit-watch":
+                    cb_recovery.change(ROOT, operation_id, "submitting",
+                        "Submitting the explicitly authorized WATCH request", mediaSubmitted=None)
             p = subprocess.Popen([sys.executable, "-u"] + args, cwd=str(CBGEN),
                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  text=True, bufsize=1, stdin=subprocess.DEVNULL,
-                                 env=_engine_subprocess_env(args),
+                                 env=env,
                                  # Own process group, so STOP kills the gate and every
                                  # render child it spawns without inheriting server stdin.
                                  start_new_session=True)
             PROCS[jobId] = p
             job["pid"] = p.pid
+            if operation_id and operation["kind"] == "submit-watch":
+                cb_recovery.change(ROOT, operation_id, "submitting",
+                    "Checking the authorized request and provider submission",
+                    workerPid=p.pid, leaseUntil=time.time() + cb_recovery.DEADLINE_SECONDS)
         _persist_job(job)
         lines = []
         _last_reindex = 0.0
         _last_persist = 0.0
-        for line in _process_lines_until_exit(p):
+        preparation_deadline = (operation["deadlineAt"] if operation_id and
+            operation["kind"] in cb_recovery.PREPARATION else None)
+        for line in _process_lines_until_exit(p, deadline=preparation_deadline):
             line = line.rstrip()
             if not line: continue
             lines.append(line)
@@ -1028,6 +1151,8 @@ def _stream(jobId, args):
                 except Exception: pass
                 _last_reindex = now
             if now - _last_persist > 1:
+                if operation_id and operation["kind"] == "submit-watch":
+                    cb_recovery.reconcile(ROOT, operation_id, worker_running=True)
                 _persist_job(job)
                 _last_persist = now
         p.wait()
@@ -1068,6 +1193,18 @@ def _stream(jobId, args):
     finally:
         with _JOB_LOCK:
             PROCS.pop(jobId, None)
+        operation_id = job.get("productionOperationId")
+        if operation_id:
+            operation = cb_recovery.get(ROOT, operation_id)
+            if operation["kind"] == "submit-watch":
+                cb_recovery.reconcile(ROOT, operation_id)
+            elif operation["state"] in cb_recovery.ACTIVE_STATES:
+                # A killed worker cannot leave the package claiming perpetual preparation.
+                cb_recovery.change(ROOT, operation_id,
+                    "cancelled" if job.get("stopped") else "needs-attention",
+                    "Stopped by user; saved correction retained" if job.get("stopped") else
+                    (job.get("error") or "Preparation worker ended before saving a cost decision. Resume the saved operation."),
+                    owner=None, workerPid=None, leaseUntil=0, mediaSubmitted=False)
         # Script Direction is preparation, not a producer decision.  Successful text-only
         # intake and scene-direction jobs therefore complete their local handover before the
         # browser is told the job is done.  SEE, HEAR and WATCH retain their human gates.
@@ -1076,9 +1213,15 @@ def _stream(jobId, args):
         except Exception as exc:
             with _JOB_LOCK:
                 detail = f"Automatic Direction preparation failed: {exc}"
-                job["status"] = "failed"
-                job["step"] = detail
-                job["error"] = detail
+                if job.get("status") == "finalizing" and job.get("gate") in {
+                        "chat:approve:keyframe", "chat:approve:voice", "chat:approve:render"}:
+                    # The approval process succeeded. A separate preparation error
+                    # cannot turn that saved human decision into a failed approval.
+                    job["nextPreparationError"] = detail
+                else:
+                    job["status"] = "failed"
+                    job["step"] = detail
+                    job["error"] = detail
                 job["log"] = (job.get("log", "") + "\n" + detail).strip()
         # THE central completion point for every gate action fired from the studio (keyframes, clips, voice,
         # retakes, ...) — reindex here regardless of outcome (done/failed/stopped can all have left new files
@@ -1104,11 +1247,22 @@ def _start(jobId, gate, scene, args):
     _clear_director_session_cache(scene=scene, episode=args[-1] if args else None)
     operation_key = cb_db.job_operation_key(gate, scene, args)
     stale = _is_stale()
+    operation = cb_recovery.register(ROOT, args, jobId) if not stale else None
+    if operation:
+        operation, start_worker = cb_recovery.reserve(ROOT, operation["operationId"], jobId, resume=True)
+        jobId = operation.get("jobId") or jobId
+        if not start_worker:
+            with _JOB_LOCK:
+                if jobId not in JOBS:
+                    restored = cb_db.load_jobs(ROOT)
+                    if jobId in restored:
+                        JOBS[jobId] = restored[jobId]
+            return jobId
     with _JOB_LOCK:
         duplicate = next((existing for existing in JOBS.values()
                           if existing.get("status") == "running" and
                           existing.get("operationKey") == operation_key), None)
-        if duplicate:
+        if duplicate and not operation:
             return duplicate["jobId"]
         if stale:
             # NEVER fire on stale code — the studio is reloading itself to the latest;
@@ -1124,6 +1278,8 @@ def _start(jobId, gate, scene, args):
                    "serverKey": SERVER_KEY, "operationKey": operation_key,
                    "status": "running", "step": "Starting...",
                    "log": "", "started": time.time(), "ended": None}
+        if operation:
+            job["productionOperationId"] = operation["operationId"]
         JOBS[jobId] = job
     if stale:
         try:
@@ -1372,6 +1528,29 @@ def _outcome_chat_command(d, ep, scene, shot_id, stage):
         job = _start(_jid("chat_approval"), "chat:approve:" + current["kind"], scene,
                      ["cb_outcome_chat.py", ep, scene, shot_id, stage, current["hash"], str(d.get("by") or "Julian")] + ([action["candidateId"]] if action.get("candidateId") else []))
         message = "Recording your approval of this " + current["label"] + "."
+    elif action["kind"] == "retake-keyframe":
+        if stage != "keyframe" or not shot_id:
+            raise ValueError("Open the SEE candidate to apply and refire its correction.")
+        current = outcomes.target(ep, scene, shot_id, stage)
+        if not current or (d.get("reviewTarget") or {}).get("hash") != current["hash"]:
+            raise ValueError("The SEE candidate changed. Reopen it before refiring.")
+        saved = cb_director_chat.history(ep, scene, shot_id, stage)
+        latest = next((m for m in reversed(saved.get("messages") or [])
+                       if m.get("role") == "director"), {})
+        if not latest.get("readyToApply") or not latest.get("correction"):
+            raise ValueError("Describe the change to the Director first.")
+        if latest.get("reviewTargetHash") != current["hash"]:
+            raise ValueError("That correction belongs to an earlier SEE review. Describe the change against the current image.")
+        if not budget.status(ep)["approved"]:
+            raise ValueError("Approve the episode allowance first.")
+        correction = latest["correction"]
+        if latest.get("protectedElements"):
+            correction += "\nKeep unchanged: " + "; ".join(latest["protectedElements"])
+        job = _start(_jid("chat_keyframe_retake"), "chat:retake:keyframe", scene,
+                     ["cb_outcome_chat.py", "retake-keyframe", ep, scene, shot_id,
+                      current["hash"], correction, str(d.get("by") or "Julian")])
+        navigation = "keyframe"
+        message = "Saving your correction and generating one replacement keyframe through the SEE workflow. It will return here for your approval."
     elif action["kind"] == "continue":
         context = _outcome_chat_context(ep, scene, shot_id, stage)
         next_step = context.get("nextAction") or {}
@@ -2161,6 +2340,7 @@ def _director_board(episode="Ep1"):
         }
         if package_path.exists():
             package, _ = _load_director_package(scene, episode)
+            _CBR = _canonical_cb_render()
             shots = package.get("shots") or []
             shot_ids = [shot.get("shotId") for shot in shots if shot.get("shotId")]
             ledgers = {item.get("shotId"): item for item in package.get("continuityLedger") or []}
@@ -2285,6 +2465,12 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
             raise ValueError('Retake needs a shot and a written correction')
         return _start(_jid(f'shotretake_s{scene}'), 'shot:retake:' + str(shot_id), scene,
                       ['cb_studio_director.py', 'retake-render', str(scene), str(shot_id), str(correction), str(episode), str(expected_batch_id)])
+    if cmd == "fire" and not spend_token and not dry_run and candidates in (None, 1):
+        # The browser's normal single-candidate cost-review path and the Director
+        # facade use the same durable preparation coordinator. No media authority
+        # is supplied to this worker.
+        return _start(_jid(f"watchprepare_s{scene}"), "shot:fire:" + str(shot_id), scene,
+                      ["cb_studio_director.py", "prepare-render", str(scene), str(shot_id), str(episode)])
     args = ["cb_render.py", cmd, str(scene)]
     if cmd in ("fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe", "recompile-animation",
                "pose", "approve-pose", "reject-pose", "select-pose-upload",
@@ -2712,11 +2898,26 @@ class H(http.server.SimpleHTTPRequestHandler):
         return bool(PUBLIC_ORIGIN and origin and hmac.compare_digest(origin, PUBLIC_ORIGIN))
 
     def _json(self, code, obj):
-        body = json.dumps(obj).encode()
+        body = json.dumps(obj, separators=(",", ":")).encode()
+        # Production history is highly repetitive. Compress transport without
+        # dropping evidence, changing the stored package or caching stale state.
+        compressed = False
+        encodings = self.headers.get("Accept-Encoding", "")
+        accepts_gzip = any(
+            part.split(";", 1)[0].strip().lower() == "gzip"
+            and not re.search(r";\s*q\s*=\s*0(?:\.0*)?\s*(?:;|$)", part)
+            for part in encodings.split(","))
+        if len(body) >= 4096 and accepts_gzip:
+            packed = gzip.compress(body, compresslevel=1, mtime=0)
+            if len(packed) < len(body):
+                body, compressed = packed, True
         try:
             self.send_response(code)
             self.send_header("Content-Type", "application/json")
             self.send_header("Cache-Control", "no-store")
+            self.send_header("Vary", "Accept-Encoding")
+            if compressed:
+                self.send_header("Content-Encoding", "gzip")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
@@ -2902,6 +3103,22 @@ class H(http.server.SimpleHTTPRequestHandler):
             # THE SHOT PIPELINE's own job feed (2026-07-16 cutover): the legacy /api/pipeline
             # route that incidentally carried JOBS is GONE; this is the clean replacement.
             self._json(200, {"jobs": _jobs_snapshot()}); return
+        if urlsplit(self.path).path == "/api/production-operations":
+            from urllib.parse import parse_qs
+            query = parse_qs(urlsplit(self.path).query)
+            operation_id = (query.get("operationId") or [None])[0]
+            try:
+                if operation_id:
+                    operation = cb_recovery.get(ROOT, operation_id)
+                    return self._json(200, {"operation": cb_recovery.public(operation),
+                        "evidence": cb_recovery.events(ROOT, operation_id), "zeroSpend": True})
+                episode = (query.get("episode") or [None])[0]
+                scene = (query.get("scene") or [None])[0]
+                operations = [cb_recovery.public(op) for op in cb_recovery.all_operations(ROOT)
+                    if (not episode or op["episode"] == episode) and (not scene or op["scene"] == scene)]
+                return self._json(200, {"operations": operations, "zeroSpend": True})
+            except ValueError as exc:
+                return self._json(404, {"error": str(exc)})
         if self.path == "/api/studio-version":
             self._json(200, {"version": STUDIO_BUILD_VERSION}); return
         if self.path == "/api/health":
@@ -3026,6 +3243,17 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception:
                 houses = []
             return self._json(200, {"houses": houses})
+        if urlsplit(self.path).path == "/api/agent-access":
+            from studio_agent_contract import access_info
+            return self._json(200, access_info(ROOT))
+        if urlsplit(self.path).path == "/api/workflow-incidents":
+            from studio_incidents import Incidents
+            from studio_workspace import Workspace, StudioError
+            try:
+                pid = (parse_qs(urlsplit(self.path).query).get("projectId") or [None])[0]
+                return self._json(200, Incidents(Workspace(ROOT)).list(pid))
+            except StudioError as exc:
+                return self._json(400, {"error": str(exc), "code": exc.code})
         if self.path == "/api/projects":
             projs = []
             try:
@@ -3257,7 +3485,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "scene and episode must be plain tokens"})
             try:
                 cb_state = _canonical_cb_state()
-                return self._json(200, cb_state.production_state(scene, ep))
+                return self._json(200, _cached_production_state(scene, ep))
             except Exception as e:
                 return self._json(400, {"error": str(e), "zeroSpend": True})
         if self.path.startswith("/api/shot-references"):
@@ -3408,7 +3636,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": f"package unreadable: {e}"})
             try:
                 cb_state = _canonical_cb_state()
-                production_state = cb_state.production_state(scene, ep)
+                production_state = _cached_production_state(scene, ep)
             except Exception as exc:
                 production_state = {"error": str(exc)}
             try:
@@ -3792,6 +4020,24 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if _legacy_gone(self):
             return
+        if self.path == "/api/production-operation-resume":
+            try:
+                data = self._body()
+                operation = cb_recovery.get(ROOT, str(data.get("operationId") or ""))
+                if operation["kind"] not in cb_recovery.PREPARATION:
+                    # Reconciliation is an evidence read, never a replay of the Fire command.
+                    operation = cb_recovery.reconcile(ROOT, operation["operationId"])
+                    return self._json(409, {"error": operation["message"],
+                        "operation": cb_recovery.public(operation), "zeroSpend": True})
+                if data.get("retryTextReview") is True:
+                    cb_recovery.authorize_text_retry(ROOT, operation["operationId"])
+                job_id = _start(operation.get("jobId") or _jid("resume_preparation"),
+                    "director:" + operation["kind"] + ":" + operation["shotId"],
+                    operation["scene"], operation["args"])
+                return self._json(200, {"ok": True, "jobId": job_id,
+                    "operation": cb_recovery.public(cb_recovery.get(ROOT, operation["operationId"]))})
+            except (ValueError, RuntimeError) as exc:
+                return self._json(409, {"error": str(exc)})
         if self.path.startswith(("/api/director-", "/api/shot-", "/api/scene-", "/api/gate-", "/api/creative-")):
             try:
                 scope = self._body()
@@ -3829,6 +4075,13 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception:
                 # Never serialize provider exceptions, request bodies or credentials.
                 return self._json(500, {"error": "The operation could not finish. Your saved outcomes are preserved."})
+        if self.path == "/api/workflow-incidents":
+            from studio_incidents import Incidents
+            from studio_workspace import Workspace, StudioError
+            try:
+                return self._json(200, Incidents(Workspace(ROOT)).save(self._body()))
+            except StudioError as exc:
+                return self._json(409 if exc.code == "stale" else 400, {"error": str(exc), "code": exc.code})
         if self.path == "/api/credits":
             try:
                 credits = _canonical_engine_module("cb_credits")
@@ -4397,7 +4650,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 scene = str(d.get("scene", "")).strip()
                 ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
                 stage = str(d.get("stage", "")).strip()
-                sid = str(d.get("shotId", "")).strip() or "-"
+                sid = str(d.get("shotId") or "").strip() or "-"
                 if (not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
                         stage not in DEPARTMENT_STAGES or
                         (sid != "-" and not _SHOT_TOKEN.match(sid))):
@@ -4840,7 +5093,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 scene = str(d.get("scene", "")).strip()
                 ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
                 stage = str(d.get("stage", "")).strip()
-                sid = str(d.get("shotId", "")).strip() or None
+                sid = str(d.get("shotId") or "").strip() or None
                 if (not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
                         stage not in DEPARTMENT_STAGES or
                         (sid and not _SHOT_TOKEN.match(sid))):
@@ -5659,6 +5912,8 @@ def main():
     with _JOB_LOCK:
         JOBS.clear()
         JOBS.update(restored_jobs)
+    _recover_production_operations()
+    threading.Thread(target=_production_recovery_watch, daemon=True).start()
     reindex_media()
     episodes = reindex_episodes()
     http.server.ThreadingHTTPServer.allow_reuse_address = True

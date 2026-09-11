@@ -102,6 +102,28 @@ def test_front_facing_opening_allows_a_later_motivated_follow_camera():
     assert rules.geometry_agreement(cine, animation)["ready"] is True
 
 
+def test_geography_sentence_split_does_not_invalidate_unchanged_direction():
+    cine = {"geography": ["The cup travels to the bench.", "The table stays fixed."]}
+    animation = {"geography": ["The cup travels to the bench; the table stays fixed."]}
+    assert rules.geometry_agreement(cine, animation)["ready"] is True
+
+
+@pytest.mark.parametrize("changed", [
+    ["The cup does not travel to the bench.", "The table stays fixed."],
+    ["The cup travels to the doorway.", "The table stays fixed."],
+    ["The table stays fixed.", "The cup travels to the bench."],
+    ["The cup travels to the bench.", "The table moves."],
+])
+def test_geography_word_or_order_changes_still_require_reconciliation(changed):
+    original = {"geography": ["The cup travels to the bench; the table stays fixed."]}
+    assert rules.geometry_agreement(original, {"geography": changed})["ready"] is False
+
+
+def test_geography_format_normalisation_preserves_distances():
+    cine = {"geography": ["The bench is 1.5 metres from the table."]}
+    assert rules.geometry_agreement(cine, {"geography": ["The bench is 15 metres from the table."]})["ready"] is False
+
+
 def test_playable_stage_allows_stationary_witness_in_a_cross_bank_travel_setup():
     shot = {"purpose": "Keen's route crosses the creek toward the comb."}
     cinematography = {
@@ -419,3 +441,14 @@ def test_r15_suppresses_hold_when_immediate_action_is_typed():
     direction['shotPlan'][0]['shotNumber'] = 2
     assert rules.action_unit_report(shot, direction, prefixed)['ready']
     assert not rules.action_unit_report(shot, direction, prefixed.replace('{Go!}', '{Wrong.}'))['ready']
+
+
+def test_later_travel_space_does_not_make_seated_opening_a_travel_shot():
+    import cb_engine_rules as rules
+    shot={'purpose':'A quiet pool vision.'}
+    cine={'geography':['Aida sits beside open water.','The existing near bank provides the later travel space; do not invent a bridge.'],
+          'negativeSpace':['Keep water clear for the reflection.'],
+          'openingFrameLayout':{'placements':[{'character':'Aida','pose':'seated','facing':'toward the pool'}]}}
+    assert rules.playable_stage_report(shot,cine)['ready']
+    shot['purpose']='A chase crosses the clearing.'
+    assert 'opening geography does not provide visible depth ahead' in rules.playable_stage_report(shot,cine)['errors']

@@ -396,6 +396,26 @@ def _isolated(monkeypatch, record, review_script=None):
 
 
 # ── workflow order: treatments -> selection BEFORE any beat exists ─────────────────────
+def test_showrunner_receives_complete_source_and_performance_without_authority_to_rewrite(monkeypatch):
+    from types import SimpleNamespace
+    captured = {}
+    beat = _beat()
+    beat.sourceScript = 'Source setup. ' * 200 + 'SCRIPTED FINAL ACTION MUST SURVIVE.'
+    shot = _card()
+    shot.physicalPerformance = 'Acting detail. ' * 200 + 'FINAL PERFORMANCE MUST SURVIVE.'
+    def review_call(system, user, schema, **kwargs):
+        captured.update(system=system, user=user)
+        return C.ShowrunnerReview(judgement='Clear', treatmentComparison='Faithful',
+                                  packingJudgement='One unit', packingPasses=True, passes=True)
+    monkeypatch.setattr(C.cb_llm, 'structured', review_call)
+    monkeypatch.setattr(C, '_mind', lambda role, sections, instructions: instructions)
+    C.gate6_adversarial_review({}, _selection(), _treatment('A'),
+        SimpleNamespace(beats=[beat]), [shot], [])
+    assert 'SCRIPTED FINAL ACTION MUST SURVIVE.' in captured['user']
+    assert 'FINAL PERFORMANCE MUST SURVIVE.' in captured['user']
+    assert 'Approved source actions and dialogue outrank' in captured['system']
+
+
 def test_treatment_selection_precedes_beat_architecture(monkeypatch):
     record = []
     _isolated(monkeypatch, record)

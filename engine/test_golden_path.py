@@ -28,6 +28,7 @@ approval. Asserts:
     pytest test_golden_path.py -q
 """
 import hashlib, json, os, pathlib, shutil, threading
+from copy import deepcopy
 import pytest
 
 import cb_engine as E
@@ -364,6 +365,18 @@ class Providers:
         self.voice_calls, self.image_calls, self.fire_calls = [], [], []
 
     def install(self, monkeypatch, tmp):
+        import socket, cb_llm
+        monkeypatch.setattr(socket.socket, 'connect', lambda *a, **k: pytest.fail('Network forbidden in synthetic production tests'))
+        def synthetic_review(system, text, schema, **kwargs):
+            if schema.__name__ == 'Assessment':
+                return dict(verdict='READY',summary='Synthetic still; not real-film qualification',
+                    camera='supported',geography='supported',pose='supported',propsEffects='supported',
+                    actionFeasibility='supported',findings=[],correctiveAction='none')
+            if schema.__name__ == 'Review':
+                from test_studio_prompt_director import review
+                return review()
+            raise AssertionError('Unmocked external review: ' + schema.__name__)
+        monkeypatch.setattr(cb_llm, 'structured_with_repair', synthetic_review)
         import cb_costs
         monkeypatch.setattr(cb_costs, "load_billing_profile", lambda provider=None: {
             "planConfirmed": True, "cadenceConfirmed": True, "plan": "test",
@@ -403,6 +416,7 @@ class Providers:
             return f"url://{path}"
         def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, out="c.mp4", **k):
             self.fire_calls.append({"prompt": prompt, "image_urls": image_urls,
+                                     'imageHashes':[hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in image_urls],
                                      "audio_urls": audio_urls, "out": out, **k})
             pathlib.Path(out).write_bytes(b"MP4:" + os.path.basename(out).encode())
             return out
@@ -540,11 +554,14 @@ def world(monkeypatch, tmp_path):
         "effectiveDate": "2026-07-16"})
     # a real beat package in the tmp world so _fresh_validation re-validates for real
     beatpkg = {"beats": [dict(b, sceneNumber="9") for b in BEATS],
+               "sourceScript": {"scriptVersionId":"fixture-current-script"},
                "scenes": [{"sceneNumber": "9", "name": "test"}]}
     (tmp_path / "cb-output" / "EpT_test_beat_package.json").parent.mkdir(
         parents=True, exist_ok=True)
     json.dump(beatpkg, open(tmp_path / "cb-output" / "EpT_test_beat_package.json", "w"))
     import cb_engine as E2
+    from types import SimpleNamespace
+    monkeypatch.setattr(E2, 'SCRIPT_STORE', SimpleNamespace(current=lambda *a, **k: {'scriptVersionId':'fixture-current-script'}))
     monkeypatch.setattr(E2, "HERE", tmp_path / "engine")
     pkg_path = _build_package(tmp_path)
     # keyframe_shot also hard-refuses without a CURRENT APPROVED Scene Look Plate
@@ -986,13 +1003,13 @@ def test_golden_path_package_to_approved_scene_master(world):
     batch1 = prov.fire_calls[-3:]
     assert len(batch1) == 3
     assert len({c["prompt"] for c in batch1}) == 1                # identical prompt
-    assert len({tuple(c["image_urls"]) for c in batch1}) == 1     # identical references
+    assert len({tuple(c['imageHashes']) for c in batch1}) == 1  # identical bytes despite private per-request paths
     f1 = batch1[0]
     # anchor first: the APPROVED keyframe's own stored path (never renamed to a fixed
     # "_keyframe.png" — approve_keyframe keeps the candidate's own unique-hash filename,
     # matching this codebase's own "never rename an artefact, only what's approved of it
     # changes" convention; a literal ".endswith('_keyframe.png')" was stale against that)
-    assert f1["image_urls"][0].endswith(_led()["1.B1.S1"]["keyframeApproval"]["path"])
+    assert os.path.basename(f1["image_urls"][0]) == os.path.basename(_led()["1.B1.S1"]["keyframeApproval"]["path"])
     assert [os.path.basename(u) for u in f1["image_urls"][1:]] == \
            ["Zenny_provider_front.png", "Fuzzby_provider_front.png",
             "EpT_S9_scenelook.png"]
@@ -1481,6 +1498,7 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
               "FUZZBY\nNailed it.\n")
     store = ScriptStore(
         tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
+    monkeypatch.setattr(cb_engine, 'SCRIPT_STORE', store)
     current = store.store(
         "Ep1", script, "Script To Master", source_name="script.txt",
         activated_by="TestReviewer", activated_at="2026-07-30T00:00:00+00:00")
@@ -1941,11 +1959,47 @@ def test_unconfirmed_billing_profile_hard_blocks_all_paid_generation(world, monk
     with pytest.raises(R.Refused, match="UNCONFIRMED"):
         R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     with pytest.raises(R.Refused, match="UNCONFIRMED"):
-        R.fire_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+        R.fire_shot("9", "1.B1.S1", "EpT", spend_token="unconfirmed-account",
+                    log=lambda *a, **k: None)
 
 
-def test_animation_direction_goes_stale_when_approved_opening_frame_changes(world):
+def test_scene_look_signature_reuses_supplied_package_without_changing_checks(world, monkeypatch):
+    pkg, _ = R.load_pkg("9", "EpT")
+    expected = R._scenelook_record_input_signature("9", "EpT")
+    monkeypatch.setattr(R, "load_pkg", lambda *a, **k: pytest.fail("Repeated package load"))
+    assert R._scenelook_record_input_signature("9", "EpT", pkg=pkg) == expected
+
+
+def test_uploaded_scene_plate_is_approved_on_selection(world, tmp_path):
+    image = tmp_path / 'chosen.png'
+    image.write_bytes(b'human-chosen-scene-plate')
+    path = R.select_scenelook_source('9', 'upload', 'EpT', upload_path=str(image),
+                                    reviewed_by='Julian', log=lambda *a: None)
+    record = R._load_scenelook_rec('9', 'EpT')
+    assert record['candidate'] is None
+    assert record['approved']['path'] == path
+    assert record['approved']['reviewedBy'] == 'Julian'
+    assert record['approved']['approvalMethod'] == 'explicit-upload-selection'
+    assert pathlib.Path(path).read_bytes() == image.read_bytes()
+    assert R.scenelook_status('9', 'EpT')['approvedCurrent']
+    # Older HTTP clients still follow selection with an explicit approve call.
+    assert R.approve_scenelook('9', 'EpT', log=lambda *a: None) == path
+    assert R._load_scenelook_rec('9', 'EpT') == record
+
+
+@pytest.mark.parametrize('compare', [False, True])
+def test_build_keyframe_entrypoint_passes_comparison_choice(world, monkeypatch, compare):
+    calls, billing = [], []
+    monkeypatch.setattr(R, '_require_confirmed_billing', lambda provider: billing.append(provider))
+    monkeypatch.setattr(R, 'keyframe_shot', lambda *a, **kw: calls.append((a,kw)) or 'candidate')
+    assert R.build_keyframe('9', '1.B1.S1', 'EpT', compare=compare, log=lambda *a: None) == 'candidate'
+    assert calls[0][1]['compare'] is compare
+    assert billing == (['byteplus','google'] if compare else ['byteplus'])
+
+
+def test_animation_direction_goes_stale_when_approved_opening_frame_changes(world, monkeypatch):
     """The cinematic prompt is bound to its direct media inputs, not only package text."""
+    monkeypatch.setattr(R, "review_see_action_readiness", lambda *a, **k: {"verdict": "READY"})
     _voice_and_approve()
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     R.select_keyframe_candidate(
@@ -1964,6 +2018,34 @@ def test_animation_direction_goes_stale_when_approved_opening_frame_changes(worl
     pkg, _ = R.load_pkg("9", "EpT")
     with pytest.raises(R.Refused, match="Animation direction is stale"):
         R._approved_seedance_prompt(pkg, R._shot(pkg, "1.B1.S1"))
+
+
+def test_animation_signature_tracks_prepared_cinematography_without_changing_media(world, monkeypatch):
+    monkeypatch.setattr(R, "review_see_action_readiness", lambda *a, **k: {"verdict": "READY"})
+    _voice_and_approve()
+    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a: None)
+    R.select_keyframe_candidate("9", "1.B1.S1", "A", "EpT", log=lambda *a: None)
+    R.approve_keyframe("9", "1.B1.S1", "EpT", reviewed_by="TestReviewer", log=lambda *a: None)
+    pkg, path = R.load_pkg("9", "EpT")
+    # A deliberately selected existing image remains the approved opening during
+    # a visual retake, matching the production case this regression protects.
+    opening = R._ledger(pkg, "1.B1.S1")["keyframePath"]
+    R.select_keyframe_source("9", "1.B1.S1", "upload", "EpT", upload_path=opening, log=lambda *a: None)
+    R.approve_keyframe("9", "1.B1.S1", "EpT", reviewed_by="TestReviewer", log=lambda *a: None)
+    pkg, path = R.load_pkg("9", "EpT")
+    shot = R._shot(pkg, "1.B1.S1")
+    ledger = R._ledger(pkg, shot["shotId"])
+    before_audio = deepcopy(ledger.get("voiceApproval"))
+    before_opening = deepcopy(ledger.get("keyframeApproval"))
+    before = R._animation_input_signature(pkg, shot, "9", "EpT")
+    work = ledger["departmentWork"]["cinematography"]
+    record = deepcopy(work.get("candidate") or work["approved"])
+    record["output"]["geography"] = ["The creek stays fixed; the carried prop crosses it."]
+    work["candidate"] = record
+    after = R._animation_input_signature(pkg, shot, "9", "EpT")
+    assert after["cinematographyDirectionHash"] != before["cinematographyDirectionHash"]
+    assert ledger.get("voiceApproval") == before_audio
+    assert ledger.get("keyframeApproval") == before_opening
 
 
 def test_completed_batch_can_be_approved_after_direction_runtime_changes(world):

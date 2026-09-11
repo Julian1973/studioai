@@ -39,6 +39,8 @@ def test_director_chat_uses_small_context_and_persists(monkeypatch, tmp_path):
     assert result["zeroMediaSpend"] is True
     assert result["reply"]["readyToApply"] is True
     assert captured["kwargs"]["model"] == chat.CHAT_MODEL
+    assert captured["kwargs"]["reasoning_effort"] == chat.CHAT_REASONING
+    assert captured["kwargs"]["max_output_tokens"] == chat.CHAT_MAX_OUTPUT_TOKENS
     assert captured["user"]["productionContext"]["exactDialogue"][0]["exactText"] == "Today could be OK."
     assert captured["user"]["productionContext"]["orderedShotStates"]["opening"] == "Bo holds the conker at the satchel."
     assert "accept ONE plain creative note" in captured["system"]

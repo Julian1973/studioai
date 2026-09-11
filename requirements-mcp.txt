@@ -1,0 +1,4 @@
+# Isolated bridge runtime; it does not change the running production interpreter.
+mcp==1.30.0
+requests>=2.31,<3
+PyJWT[crypto]>=2.10,<3

@@ -218,9 +218,11 @@ def test_prepare_render_refreshes_stale_cinematography_before_sealing(monkeypatc
         "continuityLedger": [{
             "shotId": SHOT_ID,
             "pendingSpendAuth": {"token": "sealed"},
+            "keyframeApproval": {"path": "approved-opening.png"},
         }],
     }
     monkeypatch.setattr(cb_render, "fire_shot", fire)
+    monkeypatch.setattr(cb_render, "review_see_action_readiness", lambda *a: calls.append(("see-review",)))
     monkeypatch.setattr(
         cb_render, "load_pkg", lambda scene, episode: (package, pathlib.Path("pkg.json")))
     monkeypatch.setattr(
@@ -232,6 +234,7 @@ def test_prepare_render_refreshes_stale_cinematography_before_sealing(monkeypatc
     assert calls == [
         ("billing", "fal"),
         ("prepare", "cinematography"),
+        ("see-review",),
         ("fire", 1, None),
     ]
 
@@ -240,7 +243,8 @@ def test_prepare_render_refreshes_stale_cinematography_for_relay_shots(monkeypat
     calls = []
     package = {
         "shots": [{"shotId": SHOT_ID, "sourceType": "relay", "sourceShotId": "S1.PREV"}],
-        "continuityLedger": [{"shotId": SHOT_ID, "pendingSpendAuth": {"token": "sealed"}}],
+        "continuityLedger": [{"shotId": SHOT_ID, "pendingSpendAuth": {"token": "sealed"},
+                              "keyframeApproval": {"path": "approved-relay.png"}}],
     }
     monkeypatch.setattr(
         cb_providers, "video_model",
@@ -259,10 +263,11 @@ def test_prepare_render_refreshes_stale_cinematography_for_relay_shots(monkeypat
         raise cb_render.Refused("SPEND NOT APPROVED")
 
     monkeypatch.setattr(cb_render, "fire_shot", fire)
+    monkeypatch.setattr(cb_render, "review_see_action_readiness", lambda *a: calls.append(("see-review",)))
 
     cb_studio_director.prepare_render("1", SHOT_ID, log=lambda *_: None)
 
-    assert calls == [("prepare", "cinematography")]
+    assert calls == [("prepare", "cinematography"), ("see-review",)]
 
 
 def test_relay_shot_projects_source_harvest_as_its_opening_frame():

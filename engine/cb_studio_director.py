@@ -1383,6 +1383,7 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
 def retake_render(scene: str, shot_id: str, correction: str, episode: str = "Ep1", log=print, *, expected_batch_id=None):
     """Archive, rebuild and review a retake; never submit media or approve an outcome."""
     import cb_render
+    import cb_recovery
     note = str(correction or '').strip()
     if not note:
         raise cb_render.Refused('Describe what should change before preparing a retake.')
@@ -1391,7 +1392,7 @@ def retake_render(scene: str, shot_id: str, correction: str, episode: str = "Ep1
     existing = led.get('watchRetake') or {}
     if expected_batch_id != (led.get('batchId') or existing.get('sourceBatchId')) or not expected_batch_id:
         raise cb_render.Refused('The reviewed take changed. Reload WATCH before preparing its retake.')
-    if led.get('status') != 'candidates-pending' and not (existing.get('status') in {'preparing', 'needs-attention'}):
+    if led.get('status') != 'candidates-pending' and not (existing.get('status') in {'preparing', 'needs-attention', 'ready'}):
         raise cb_render.Refused('Select the current returned take to reject, or resume its saved retake.')
     if existing and existing.get('note') != note:
         led.setdefault('watchRetakeHistory', []).append(existing)
@@ -1400,14 +1401,29 @@ def retake_render(scene: str, shot_id: str, correction: str, episode: str = "Ep1
     cb_render._save(pkg, path)
     try:
         log('RETAKE 1/4 — saving correction and archiving the rejected take')
-        cb_render.save_watch_director_feedback(scene, shot_id, note, episode, log=log)
-        if led.get('status') == 'candidates-pending':
-            cb_render.reject_shot(scene, shot_id, note, episode=episode, log=log)
+        cb_recovery.checkpoint('save-correction', 'Saving your direction',
+            lambda: cb_render.save_watch_director_feedback(scene, shot_id, note, episode, log=log))
+        def archive_current_take():
+            current, _ = cb_render.load_pkg(scene, episode)
+            if cb_render._ledger(current, shot_id).get('status') == 'candidates-pending':
+                cb_render.reject_shot(scene, shot_id, note, episode=episode, log=log)
+        cb_recovery.checkpoint('archive-take', 'Archiving the rejected take', archive_current_take)
         # A fresh specialist translation replaces old appended prompt overrides.
-        cb_render.restore_seedance_working(scene, shot_id, episode, log)
+        cb_recovery.checkpoint('clear-working-prompt', 'Updating the working prompt',
+            lambda: cb_render.restore_seedance_working(scene, shot_id, episode, log))
         log('RETAKE 2/4 — rebuilding camera and animation direction from the saved correction')
-        cb_render.prepare_department(scene, 'cinematography', shot_id, episode, log)
-        cb_render.prepare_department(scene, 'animation', shot_id, episode, log)
+        pkg, path = cb_render.load_pkg(scene, episode)
+        cb_render._ledger(pkg, shot_id)['watchRetake']['stage'] = 'Preparing direction from your saved correction'
+        cb_render._save(pkg, path)
+        cb_recovery.checkpoint('cinematography', 'Preparing camera direction',
+            lambda: cb_render.prepare_department(scene, 'cinematography', shot_id, episode, log))
+        cb_recovery.checkpoint('animation', 'Preparing animation direction',
+            lambda: cb_render.prepare_department(scene, 'animation', shot_id, episode, log))
+        # Rebind the compiled retake to the current approved opening and exact
+        # upload roles even when specialist preparation reused a cached record.
+        # Cached creative direction is not proof of a current provider payload.
+        cb_recovery.checkpoint('compile', 'Checking current opening and reference bindings',
+            lambda: cb_render.recompile_animation_candidate(scene, shot_id, episode, log), repeat=True)
         pkg, path = cb_render.load_pkg(scene, episode)
         led = cb_render._ledger(pkg, shot_id)
         if led.get('status') == 'model-limited':
@@ -1415,7 +1431,11 @@ def retake_render(scene: str, shot_id: str, correction: str, episode: str = "Ep1
                 'Director requested a revised retake; specialist direction has been rebuilt: ' + note,
                 episode, log=log)
         log('RETAKE 3/4 — checking approved inputs, references, timing and Prompt Director')
-        prepare_render(scene, shot_id, episode, log)
+        pkg, path = cb_render.load_pkg(scene, episode)
+        cb_render._ledger(pkg, shot_id)['watchRetake']['stage'] = 'Checking the opening, references, timing and final prompt'
+        cb_render._save(pkg, path)
+        cb_recovery.checkpoint('seal-request', 'Checking the animation request and final Director review',
+            lambda: prepare_render(scene, shot_id, episode, log), retry_timeout=True, repeat=True)
         pkg, path = cb_render.load_pkg(scene, episode)
         led = cb_render._ledger(pkg, shot_id)
         if not led.get('pendingSpendAuth'):
@@ -1488,8 +1508,11 @@ def main(argv: list[str] | None = None) -> int:
 
 import studio_preflight_evidence as _attempt_evidence
 import cb_render as _attempt_runtime
+import cb_recovery as _recovery
 prepare_render = _attempt_evidence.protect(_attempt_runtime, "prepare_render", prepare_render)
 retake_render = _attempt_evidence.protect(_attempt_runtime, "retake_render", retake_render)
+prepare_render = _recovery.protect_preparation(prepare_render)
+retake_render = _recovery.protect_preparation(retake_render)
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -3645,7 +3645,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                     scene, ep, state=production_state)
             except Exception as exc:
                 preflight = {"error": str(exc), "zeroSpend": True}
-            return self._json(200, {"package": pkg, "media": shot_media_map(pkg, scene, ep),
+            media = shot_media_map(pkg, scene, ep)
+            from studio_approved_media_projection import watch_shot
+            ledgers = {item['shotId']: item for item in pkg.get('continuityLedger', [])}
+            for index, shot in enumerate(pkg.get('shots', [])):
+                try:
+                    pkg['shots'][index] = watch_shot(shot, ledgers.get(shot['shotId'], {}))
+                except (ValueError, KeyError, OSError) as exc:
+                    shot['audioTimingIssue'] = str(exc)
+            return self._json(200, {"package": pkg, "media": media,
                                     "productionState": production_state,
                                     "preflight": preflight, "file": p.name})
         if self.path.startswith("/api/shot-fire-readiness"):
@@ -4020,6 +4028,19 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if _legacy_gone(self):
             return
+        if self.path == "/api/production-journey":
+            from studio_journey_http import request
+            from studio_journey import DecisionRequired
+            import types
+            try:
+                services = types.SimpleNamespace(ROOT=ROOT, _start=_start,
+                    _canonical_cb_render=_canonical_cb_render,
+                    _storyboard_approval=_storyboard_approval)
+                return self._json(200, request(services, self._body()))
+            except DecisionRequired as exc:
+                return self._json(409, {"error":str(exc), "decision":exc.detail})
+            except (ValueError, RuntimeError, OSError) as exc:
+                return self._json(409, {"error":str(exc)})
         if self.path == "/api/production-operation-resume":
             try:
                 data = self._body()
@@ -5716,6 +5737,16 @@ class H(http.server.SimpleHTTPRequestHandler):
             try:
                 d = self._body()
                 cmd = str(d.get("cmd", "")).strip()
+                if cmd == "PREPARE_RETAKE":
+                    # Read-only projection: no worker, model, spend token or approval mutation.
+                    from studio_retake_preview import prepare
+                    if d.get('projectId', 'crystal-bears') != 'crystal-bears':
+                        raise ValueError('This native route requires the Crystal Bears project.')
+                    card = prepare(ROOT, str(d.get('episode') or ''),
+                                   str(d.get('scene') or ''), str(d.get('shotId') or ''),
+                                   str(d.get('correction') or ''), d.get('expectedBatchId'))
+                    self._json(200, {'ok': True, 'retakePreparation': card})
+                    return
                 if cmd not in SHOT_CMDS:
                     self._json(400, {"error": "unknown cmd %r — allowed: %s" % (cmd, ", ".join(SHOT_CMDS))}); return
                 scene = str(d.get("scene", "")).strip()

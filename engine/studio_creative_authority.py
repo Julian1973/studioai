@@ -6,6 +6,10 @@ labelled unclassified instead of pretending a keyword scan proved its authority.
 from pydantic import BaseModel, Field
 from typing import Literal
 
+class CreativeConflict(ValueError):
+    """Authored authorities disagree; a creative decision is required."""
+
+
 class Instruction(BaseModel):
     id: str
     text: str
@@ -65,7 +69,7 @@ def compile_instructions(prompt, shot, stage):
                'shotId': shot.get('shotId', shot.get('id'))}
     result = resolve((shot.get('directorCard') or {}).get('instructions', []), context)
     if result['conflicts']:
-        raise ValueError('; '.join(r['reason'] for r in result['conflicts']))
+        raise CreativeConflict('; '.join(r['reason'] for r in result['conflicts']))
     additions = [(('Scope ' + str(r['scope']) + ': ') if r['scope'] else '') + r['text']
                  for r in result['instructions'] if r['resolution'] == 'emitted' and r['text'] not in prompt]
     if additions:

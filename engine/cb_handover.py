@@ -118,6 +118,15 @@ def _require_storyboard_lineage(sb, episode):
     beat_path = ROOT / str(beat_source.get("path") or "")
     if not beat_path.is_file():
         raise HandoverRefused("REFUSED — storyboard's signed source beat package is missing")
+    if sb.get('intakeCandidateDigest'):
+        import cb_intake
+        intake = json.loads(cb_intake.candidate_path(episode).read_text())
+        approval = intake.get('approval') or {}
+        if (intake.get('approvalState') != 'approved'
+                or approval.get('candidateDigest') != sb['intakeCandidateDigest']
+                or beat_path.resolve().parent != (ROOT/'cb-output').resolve()
+                or approval.get('canonicalPackage') != beat_path.name):
+            raise HandoverRefused('REFUSED — this draft Story Intake has not received the producer plan approval')
     beat_pkg = json.loads(beat_path.read_text())
     expected_beat = cb_lineage.beat_package_signature(beat_pkg)
     if beat_record != expected_beat or beat_pkg.get("contentSignature") != expected_beat:
@@ -550,16 +559,7 @@ def _validate_supervision_contracts(storyboard):
         if not eligible:
             raise HandoverRefused(
                 f"REFUSED - {beat_id} BIG comedy has no packed production unit")
-        if len(eligible) == 1:
-            carrier = eligible[0]
-        else:
-            owned = [shot for shot in eligible
-                     if ((shot.get("performanceContract") or {}).get("beatOwner") == beat_id)]
-            if len(owned) != 1:
-                raise HandoverRefused(
-                    f"REFUSED - {beat_id} BIG comedy crosses {len(eligible)} units but has "
-                    f"{len(owned)} explicit performance owners")
-            carrier = owned[0]
+        carrier = _big_comedy_carrier(eligible, beat_id, big_beats[beat_id])
         carrier_by_beat[beat_id] = carrier.get("shotId")
 
     # The legacy singular mirror is optional execution context, never the source of truth.
@@ -584,6 +584,22 @@ def _validate_supervision_contracts(storyboard):
                 f"carrier is {carrier_by_beat[owner]}")
 
 
+def _big_comedy_carrier(eligible, beat_id, staging):
+    """Resolve a payoff consistently during validation and provider handover."""
+    if len(eligible) == 1:
+        return eligible[0]
+    owners = [shot for shot in eligible
+              if (shot.get("performanceContract") or {}).get("beatOwner") == beat_id]
+    if len(owners) > 1:
+        # Gate 5 persists the explicit payoff selection as the exact typed mirror.
+        owners = [shot for shot in owners
+                  if (shot.get("performanceContract") or {}).get("comedyStaging") == staging]
+    if len(owners) != 1:
+        raise HandoverRefused(
+            f"REFUSED - {beat_id} BIG comedy has no unique packed-unit carrier")
+    return owners[0]
+
+
 def _owned_big_comedy_stagings(storyboard, sb_shot):
     """Return every exact BIG-comedy contract carried by this packed provider unit."""
     beats = {beat.get("beatId"): beat for beat in (storyboard.get("beats") or [])}
@@ -598,15 +614,7 @@ def _owned_big_comedy_stagings(storyboard, sb_shot):
             raise HandoverRefused(
                 f"REFUSED - {beat_id} BIG comedy has no physical staging")
         eligible = [shot for shot in shots if beat_id in (shot.get("beatIds") or [])]
-        if len(eligible) == 1:
-            carrier = eligible[0]
-        else:
-            carriers = [shot for shot in eligible
-                        if ((shot.get("performanceContract") or {}).get("beatOwner") == beat_id)]
-            if len(carriers) != 1:
-                raise HandoverRefused(
-                    f"REFUSED - {beat_id} BIG comedy has no unique packed-unit carrier")
-            carrier = carriers[0]
+        carrier = _big_comedy_carrier(eligible, beat_id, staging)
         if carrier.get("shotId") == sb_shot.get("shotId"):
             owned.append({"beatCode": beat_id, **staging})
     return owned

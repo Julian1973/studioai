@@ -11,6 +11,8 @@ if(location.protocol==='file:')location.replace('http://127.0.0.1:8899/cb-studio
 <link rel="stylesheet" href="/cb-studio/project-production.css">
 <script src="/cb-studio/project-drafts.js"></script>
 <script src="/cb-studio/scene-coverage.js"></script>
+<link rel="stylesheet" href="/cb-studio/journey.css">
+<script src="/cb-studio/journey.js"></script>
 <script src="/cb-studio/project-production.js"></script>
 <script src="/cb-studio/project-review.js"></script>
 <style>
@@ -2746,6 +2748,22 @@ async function loadBoard(){
     });
   }finally{ BOARD_LOADING=false; }
 }
+function copyErrorButton(text){
+  return `<button class="btn ghost" data-error-copy="${_attr(text)}" onclick="copyStudioError(this)">Copy error</button>`;
+}
+async function copyStudioError(button){
+  try{
+    await navigator.clipboard.writeText(button.dataset.errorCopy);
+    button.textContent="Copied";
+  }catch(error){
+    button.textContent="Select error text to copy";
+    const area=document.createElement("textarea");
+    area.value=button.dataset.errorCopy;
+    area.readOnly=true;
+    area.setAttribute("aria-label","Error details to copy");
+    button.after(area); area.focus(); area.select();
+  }
+}
 function boardStoryboardProgressHTML(){
   const total=(BOARD_SCENES||[]).length;
   const complete=(BOARD_SCENES||[]).filter(s=>s.bundle&&s.bundle.storyboard).length;
@@ -2762,7 +2780,7 @@ function boardStoryboardProgressHTML(){
       <b>Scene Direction population</b><span style="color:var(--muted)">${complete}/${total} ready · ${stateText}</span>
     </div>
     <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden"><div class="storyboard-progress-fill ${running.length?"running":""}" style="width:${running.length?Math.max(8,pct):pct}%"></div></div>
-    <div style="font-size:11px;color:var(--hint);margin-top:6px">${pct}% ready for review${activity?`<br>${activity}${running.length>4?`<br>+ ${running.length-4} more scene${running.length-4===1?"":"s"} working`:""}`:""}${failed.length?`<br><span style="color:var(--warn)">${failed.map(x=>`Scene ${_esc(x.scene)}: ${_esc(sceneDirectionJobStep(x.job))}`).join("<br>")}</span>`:""}</div>
+    <div style="font-size:11px;color:var(--hint);margin-top:6px">${pct}% ready for review${activity?`<br>${activity}${running.length>4?`<br>+ ${running.length-4} more scene${running.length-4===1?"":"s"} working`:""}`:""}${failed.length?`<br><span style="color:var(--warn)">${failed.map(x=>`Scene ${_esc(x.scene)}: ${_esc(sceneDirectionJobStep(x.job))} ${copyErrorButton(["Episode "+SH_EP+" · Scene "+x.scene,"Status: "+x.job.status,x.job.log||x.job.step||"No further details recorded"].join("\n"))}`).join("<br>")}</span>`:""}</div>
   </div>`;
 }
 function sceneDirectionJobStep(job){
@@ -3476,7 +3494,7 @@ function renderStageRail(){
       <span class="prailsummary-state">Current: ${_esc(currentName)} · ${completed}/${PRODUCER_PHASES.length} complete</span>
       <span class="prailchevron" aria-hidden="true">⌄</span>
       <span class="prailbar" aria-hidden="true"><i style="width:${progress}%"></i></span>
-    </summary><div class="prail">${parts.join("")}</div><div class="qualification-status" role="status" aria-label="Software qualification status"><strong>Software qualification: scoped and tested</strong><span>617 offline checks passed · no provider calls or paid renders</span><span>Live visual quality, model judgement, lip-sync and finished-episode readiness remain unqualified</span><a href="/docs/production/integration-qualification-2026-09-11.md" target="_blank" rel="noopener">View qualification boundary</a></div></details>`;
+    </summary><div class="prail">${parts.join("")}</div><div class="qualification-status" role="status" aria-label="Software qualification status"><span>Software controls are scoped/tested offline. A retake still requires current preflight and your explicit Fire approval; no provider call occurs during preparation.</span><a href="/docs/production/integration-qualification-2026-09-11.md" target="_blank" rel="noopener">View qualification boundary</a></div></details>${retakePreparationHTML()}`;
 }
 
 function sceneShotOverviewHTML(){
@@ -3864,6 +3882,17 @@ async function renderWorkspaceBody(){
     renderPromptReviewWorkspace();
     return;
   }
+  if(window.StudioJourney && ['storyboard','keyframe','voice','animation'].includes(stage) && !window.JOURNEY_INDIVIDUAL_REVIEW){
+    const chosen=pShots()[PSHOT_I]||{}, shotId=chosen.shotId||`S${SH_SC}.SH1`;
+    for(const id of ['studioagent','readiness','director-next-step']){const n=document.getElementById(id);if(n)n.innerHTML='';}
+    StudioJourney.mount(el,{projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},{
+      changes:state=>openDirectorAgent({episode:SH_EP,scene:SH_SC,shotId,stage:({prepare:'storyboard',plan:'storyboard',images:'keyframe',audio:'voice',film:'animation',complete:'animation'})[state?.phase]||stage}),
+      next:scope=>{if(String(SH_SC)!==scope.scene){openScene(scope.scene);return;}const i=pShots().findIndex(s=>s.shotId===scope.unit);if(i>=0){PSHOT_I=i;PSTAGE='keyframe';renderWorkspaceBody();}},
+      advanced:container=>{const b=document.createElement('button');b.className='btn ghost';b.textContent='Open individual review controls';b.onclick=()=>{window.JOURNEY_INDIVIDUAL_REVIEW=true;renderWorkspaceBody();};container.append(b);}
+    });
+    return;
+  }
+  if(window.JOURNEY_INDIVIDUAL_REVIEW){const back=document.createElement('button');back.className='btn ghost';back.textContent='Return to production journey';back.onclick=()=>{window.JOURNEY_INDIVIDUAL_REVIEW=false;renderWorkspaceBody();};document.getElementById('director-next-step')?.replaceChildren(back);}
   renderStudioAgent();renderPreflightBanner();shEnsureAgentSelection();
   if(pStatus(stage)=="locked"&&!(pShots().length&&["keyframe","voice","animation"].includes(stage))){
     const action=defaultDecisionAction();
@@ -4295,17 +4324,58 @@ async function approveWatchTake(tok,candidate,button){
   }catch(error){showToast(error.message,false);}
   finally{if(button&&button.isConnected){button.disabled=false;button.textContent='Approve take';}}
 }
+const RETAKE_PREPARATIONS = {};
+function retakePreparationKey(tok){return SH_EP+':'+String(SH_SC)+':'+tok;}
+function retakePreparationHTML(){
+  const tok=(pShots()[PSHOT_I]||{}).shotId, c=RETAKE_PREPARATIONS[retakePreparationKey(tok)];
+  if(!c)return '';
+  const s=c.scope||{}, title=c.state+(c.state==='BLOCKED PENDING'?' ':c.state==='STALE'||c.state==='RECOVERY REQUIRED'?' — ':'')+(['BLOCKED PENDING','STALE','RECOVERY REQUIRED'].includes(c.state)?c.issue:'');
+  return `<section class="qualification-status" role="status" aria-label="Retake preparation"><strong>${_esc(title)}</strong><span>${_esc([s.project,s.episode,'Scene '+s.scene,s.shot,'Revision '+(s.revision??'pending')].join(' · '))}</span><span>${_esc(c.issue||'Inspecting the current request and saved evidence.')}</span><span>Stages: ${_esc((c.affectedStages||[]).join(', '))} · SEE: ${_esc(c.see)} · Audio1: ${_esc(c.audio1)}</span><span>${_esc(c.providerCallStatus)} · ${_esc(c.nextAction||'Please wait for preparation.')}</span><span>Prior take: ${_esc((c.lineage||{}).batchId||((c.lineage||{}).watchRetake||{}).sourceBatchId||'none')} · ${/timeout/i.test(JSON.stringify(c.lineage||{}))?'Prior timeout retained in evidence':'Recovery lineage retained in evidence'}</span><span>Evidence: ${_esc(c.evidencePath||'Preparation response below')}</span><button class="btn ghost" onclick="downloadRetakeEvidence()">Download preparation evidence</button>${c.state==='READY FOR RETAKE REVIEW'?'<button class="btn" onclick="reviewRetakePreparation()">Review prepared request</button>':''}</section>`;
+}
+function downloadRetakeEvidence(){
+  const c=RETAKE_PREPARATIONS[retakePreparationKey((pShots()[PSHOT_I]||{}).shotId)];if(!c)return;
+  const url=URL.createObjectURL(new Blob([JSON.stringify(c,null,2)],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download=c.scope.shot+'-retake-preparation.json';a.click();URL.revokeObjectURL(url);
+}
+function discussRetakeRepair(){
+  const tok=(pShots()[PSHOT_I]||{}).shotId,c=RETAKE_PREPARATIONS[retakePreparationKey(tok)];
+  if(c)openDirectorAgent({stage:'animation',shotId:tok,seed:c.issue+'\n\n'+c.nextAction});
+}
+function reviewRetakePreparation(){
+  const c=RETAKE_PREPARATIONS[retakePreparationKey((pShots()[PSHOT_I]||{}).shotId)];
+  if(!c||c.state!=='READY FOR RETAKE REVIEW')return;
+  document.getElementById('sheet').innerHTML=`<button class="x" onclick="closeM()">×</button><h3>Prepared retake request</h3><pre style="white-space:pre-wrap">${_esc((c.evidence.promptDirector||{}).snapshot?.prompt||'')}</pre><h4>Spend disclosure</h4><pre style="white-space:pre-wrap">${_esc(JSON.stringify(c.spendDisclosure,null,2))}</pre><p>Only the following explicit action submits this take.</p><button class="btn" onclick="fireReviewedRetake()">Approve spend &amp; Fire</button><button class="btn ghost" onclick="closeM()">Return to WATCH</button>`;
+  document.getElementById('modal').classList.add('show');
+}
+function fireReviewedRetake(){
+  const tok=(pShots()[PSHOT_I]||{}).shotId,c=RETAKE_PREPARATIONS[retakePreparationKey(tok)],auth=(shLedger(tok)||{}).pendingSpendAuth;
+  if(!c||c.state!=='READY FOR RETAKE REVIEW'||!auth||auth.envelopeHash!==c.envelopeHash){showToast('Request changed. Prepare the current retake again.',false);return;}
+  closeM();shApproveSpendFire(tok);
+}
+async function prepareWatchRetake(tok,correction,batch){
+  const episode=SH_EP,scene=String(SH_SC),key=retakePreparationKey(tok);
+  RETAKE_PREPARATIONS[key]={state:'PREPARING RETAKE PACKAGE',scope:{project:'crystal-bears',episode,scene,shot:tok},see:'checking',audio1:'checking',providerCallStatus:'no provider call made'};
+  renderWorkspaceBody();document.getElementById('railwrap').innerHTML=renderStageRail();
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),30000);
+  try{
+    const r=await fetch(BASE+'/api/shot-run',{signal:controller.signal,method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd:'PREPARE_RETAKE',projectId:'crystal-bears',episode,scene,shotId:tok,correction,expectedBatchId:batch})});
+    const j=await r.json();if(!r.ok||!j.retakePreparation)throw new Error(j.error||'Retake preparation returned no evidence.');
+    RETAKE_PREPARATIONS[key]=j.retakePreparation;
+  }catch(e){RETAKE_PREPARATIONS[key]={...RETAKE_PREPARATIONS[key],state:'BLOCKED PENDING',issue:e.name==='AbortError'?'Retake preparation response timed out; no Fire was sent.':String(e.message||e),nextAction:'Retry read-only preparation after checking the Studio connection.',affectedStages:['REVIEW']};}
+  finally{clearTimeout(timeout);}
+  if(SH_EP===episode&&String(SH_SC)===scene){renderWorkspaceBody();document.getElementById('railwrap').innerHTML=renderStageRail();}
+}
 function openWatchRetake(tok){
   const episode=SH_EP,scene=String(SH_SC),batch=(shLedger(tok)||{}).batchId||((shLedger(tok)||{}).watchRetake||{}).sourceBatchId;
   const key='watch-retake:'+episode+':'+scene+':'+tok;
   let draft='';try{draft=localStorage.getItem(key)||'';}catch(e){}
   const saved=(shLedger(tok)||{}).watchRetake||{};
-  document.getElementById('sheet').innerHTML=`<button class="x" onclick="closeM()">×</button><h3>Reject &amp; retake · ${_esc(tok)}</h3><p>What should change? Tell us what worked and should stay, too.</p><label for="watch-retake-note">Your direction</label><textarea id="watch-retake-note" class="ccta" rows="6" maxlength="5000" placeholder="Change… Keep…">${_esc(draft||saved.note||'')}</textarea><p class="dec-caption">Retake archives this take, rebuilds the affected direction and checks the complete request again. Approved assets stay protected. You review the cost before firing.</p><div id="watch-retake-status" role="status"></div><button class="btn" id="watch-retake-submit">Prepare retake</button><button class="btn ghost" onclick="closeM()">Keep reviewing</button>`;
+  document.getElementById('sheet').innerHTML=`<button class="x" onclick="closeM()">×</button><h3>Reject &amp; retake · ${_esc(tok)}</h3><p>What should change? Tell us what worked and should stay, too.</p><label for="watch-retake-note">Your direction</label><textarea id="watch-retake-note" class="ccta" rows="6" maxlength="5000" placeholder="Change… Keep…">${_esc(draft||saved.note||'')}</textarea><p class="dec-caption">Preparation checks the current saved plan and evidence without changing your shot or calling a provider. New direction may require a separate plan refresh. Fire remains a separate decision.</p><div id="watch-retake-status" role="status"></div><button class="btn" id="watch-retake-submit">Prepare retake</button><button class="btn ghost" onclick="closeM()">Keep reviewing</button>`;
   document.getElementById('modal').classList.add('show');
   const input=document.getElementById('watch-retake-note'),button=document.getElementById('watch-retake-submit');
   const update=()=>{button.disabled=!input.value.trim();try{localStorage.setItem(key,input.value);}catch(e){}};
   input.addEventListener('input',update);update();input.focus();
-  button.onclick=()=>{const correction=input.value.trim();if(!correction)return;if(SH_EP!==episode||String(SH_SC)!==scene){showToast('The selected shot changed. Reopen its retake form.',false);return;}button.disabled=true;closeM();shRun('retake',tok,{correction,expectedBatchId:batch,preserveView:true,progressLabel:'Retake · saving direction, rebuilding and checking',afterJob:async job=>{if(job&&job.status==='done'){try{localStorage.removeItem(key);}catch(e){}showToast('Retake checked · review cost and fire',true);}await pLoadAll();renderWorkspaceBody();}});};
+  button.onclick=()=>{const correction=input.value.trim();if(!correction)return;if(SH_EP!==episode||String(SH_SC)!==scene||(pShots()[PSHOT_I]||{}).shotId!==tok){showToast('The selected shot changed. Reopen its retake form.',false);return;}button.disabled=true;closeM();prepareWatchRetake(tok,correction,batch);};
 }
 function openKeyframeRetake(tok,candidate=''){
   const episode=SH_EP,scene=String(SH_SC),key='see-retake:'+episode+':'+scene+':'+tok;
@@ -4387,7 +4457,7 @@ async function directorApplyCorrection(){
   }
   if(scope.stage==="animation"&&(shLedger(tok)||{}).status==="candidates-pending"){
     DIRECTOR_CHAT_OPEN_KEY=null;DIRECTOR_CHAT_OPEN_SCOPE=null;
-    return shRun('retake',tok,{correction:productionInstruction,expectedBatchId:(shLedger(tok)||{}).batchId,preserveView:true,progressLabel:'Retake · rebuilding and checking'});
+    return prepareWatchRetake(tok,productionInstruction,(shLedger(tok)||{}).batchId);
   }
   if(scope.stage==="animation"){
     let status=SH_SEEDANCE_CACHE[tok];
@@ -5870,7 +5940,15 @@ function renderShotStage(mode){
   const decisionTitle=mode==="keyframe"?(keyframeAnchorOwnsCurrent?"Review the opening keyframe":"Build the opening keyframe"):
     mode==="voice"?(resultFirst?"Review the performance":"Create the performance"):
     (hasAnimationResult?"Review the animation take":"Create the animation take");
-  dec.innerHTML=decisionShell(decisionTitle, `${tok} · ${decVersion}`, decActions, decHistory)+
+  const retakePreview=mode==='animation'?RETAKE_PREPARATIONS[retakePreparationKey(tok)]:null;
+  if(retakePreview){
+    decVersion=retakePreview.state;
+    decActions=retakePreview.state==='READY FOR RETAKE REVIEW'
+      ?[`<button class="btn" onclick="reviewRetakePreparation()">Review prepared request</button>`]
+      :[`<p class="dec-caption">${_esc(retakePreview.nextAction||'Preparing the current evidence…')}</p>`]
+        .concat(retakePreview.state==='PREPARING RETAKE PACKAGE'?[]:[`<button class="btn" onclick="discussRetakeRepair()">Resolve with Director</button>`]);
+  }
+  dec.innerHTML=decisionShell(retakePreview?'Retake preparation':decisionTitle, `${tok} · ${decVersion}`, decActions, decHistory)+
     (techPrompt?`<details class="techdetails"><summary>Technical details</summary>
       <div class="techmeta">${techMeta}</div>
       <pre class="techpre">${_esc(techPrompt||"")}</pre></details>`:"")+

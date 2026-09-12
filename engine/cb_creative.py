@@ -72,11 +72,13 @@ import cb_canon
 import cb_departments
 import cb_engine
 import cb_lineage
+import cb_db
 import cb_scripts
 import cb_unit_packing
 from cb_source_refresh import refresh_source_extraction
 from contextvars import ContextVar
 
+_draft_intake = ContextVar('creative_room_draft_intake', default=None)
 _active_direction_brief = ContextVar('creative_room_active_direction_brief', default=None)
 
 CREATIVE = ROOT / "shows" / "crystal-bears" / "creative"
@@ -854,8 +856,14 @@ class PerformanceCard(BaseModel):
     performanceContract: ShotPerformanceContract
 
 
+class ComedyCarrier(BaseModel):
+    beatId: str
+    shotId: str
+
+
 class PerformancePass(BaseModel):
     shots: List[PerformanceCard]
+    comedyCarriers: List[ComedyCarrier] = Field(default_factory=list)
 
 
 class VoiceScript(BaseModel):
@@ -923,6 +931,9 @@ _CANON_SOURCES = {
 def _script_package(episode, cast_scope=None, validate_canon=True):
     cands = sorted((ROOT / "cb-output").glob(f"{episode}_*beat_package.json"),
                    key=lambda p: p.stat().st_mtime)
+    draft = _draft_intake.get()
+    if draft and draft["episode"] == episode:
+        cands = [draft["path"]]
     if not cands:
         raise RuntimeError(f"no approved script/beat package for {episode} in cb-output/")
     path = cands[-1]
@@ -1474,6 +1485,11 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
     ownership_errors = []
     for beat in sd.beats:
         participants = {_norm(name) for name in beat.participatingCharacters}
+        if beat.powerMoment and _norm(beat.powerMoment.bearer) not in participants:
+            ownership_errors.append(
+                f'{beat.beatId}.powerMoment.bearer names {beat.powerMoment.bearer}; '
+                f'use exactly one participating character from {beat.participatingCharacters}. '
+                'Put supporting characters and joining actions in staging, not the bearer name.')
         if beat.emotionContract and _norm(beat.emotionContract.owner) not in participants:
             ownership_errors.append(f'{beat.beatId}.emotionContract.owner must name a participating character')
         if beat.comedyContract:
@@ -1718,12 +1734,12 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
     try:
         _validate_scene_view_allocation(sd, shots)
         packing = _validate_gate4_production_units(shots, sd.beats)
-    except CoverageAllocationError:
-        # Missing/duplicated camera decisions belong to the scene author. Asking
-        # the clip packer to solve an underspecified or over-capacity source plan
-        # first spends another call without giving it authority to repair that plan.
-        raise
     except RuntimeError as error:
+        # An allocator can invent or omit a view ID even when the source plan is
+        # valid. Repair that mapping before asking the scene author to redraft.
+        if isinstance(error, CoverageAllocationError) and not str(error).startswith(
+                'Camera allocation needs the preceding scene viewId'):
+            raise
         log(f"SHOT PLAN — correcting invalid production-unit packing once: {error}")
         repaired = cb_llm.repair_call(
             _mind("DIRECTOR AND CINEMATOGRAPHER, IN SHOT CONFERENCE",
@@ -1811,8 +1827,10 @@ def gate5_performance(episode, scene_num, treatment, sd, shots,
               "whole scene's production handover, LAW 6). Change NOTHING else on the cards - "
               "the sequence design is settled. Never rewrite or copy physicalStaging. Handover "
               "compiles every Gate 3 BIG-comedy staging mechanically into its packed unit. If "
-              "a BIG beat legitimately crosses a unit boundary, performanceContract.beatOwner "
-              "identifies the one unit carrying its physical payoff."),
+              "a BIG beat legitimately crosses a unit boundary, provide exactly one "
+              "comedyCarriers entry (beatId, shotId) selecting its physical payoff unit. "
+              "This is separate from performanceContract.beatOwner: two units may both "
+              "perform the same source beat while only one carries its comedy payoff."),
         f"THE SELECTED TREATMENT:\n{treatment.model_dump_json()[:3000]}\n\n"
         f"THE BEAT EMOTION, COMEDY AND POWER CONTRACTS:\n"
         + "\n".join(b.model_dump_json() for b in sd.beats)
@@ -1888,9 +1906,15 @@ def gate5_performance(episode, scene_num, treatment, sd, shots,
             _norm(phase.performer) for phase in contract.phases
             if _norm(phase.performer) != "environment"
         }
-        if performing_characters - {_norm(name) for name in truth_names}:
-            raise RuntimeError(
-                f"PERFORMANCE CONTRACT MISSING CHARACTER TRUTH for {s.shotId}")
+        missing_truths = performing_characters - {_norm(name) for name in truth_names}
+        if missing_truths:
+            message = (f"PERFORMANCE CONTRACT MISSING CHARACTER TRUTH for {s.shotId}: "
+                       f"{sorted(missing_truths)}. Supply canon-grounded characterTruths for "
+                       "every phase performer; preserve the phases and source beats.")
+            if not review_notes:
+                return gate5_performance(episode, scene_num, treatment, sd, shots,
+                                         review_notes=message, log=log)
+            raise RuntimeError(message)
         for phase in contract.phases:
             if (_norm(phase.performer) not in allowed_norm and
                     _norm(phase.performer) != "environment"):
@@ -1911,12 +1935,32 @@ def gate5_performance(episode, scene_num, treatment, sd, shots,
         d0.performanceContract = contract
 
     carriers_by_beat = {}
+    declared_carriers = {}
+    for assignment in pp.comedyCarriers:
+        if assignment.beatId not in big_beats or assignment.beatId in declared_carriers:
+            raise RuntimeError(f'INVALID COMEDY CARRIER assignment for {assignment.beatId}')
+        declared_carriers[assignment.beatId] = assignment.shotId
     for beat_id, staging in big_beats.items():
         eligible = [shot for shot in shots if beat_id in shot.beatIds]
         if not eligible:
             raise RuntimeError(
                 f"BIG COMEDY STAGING HAS NO PACKED UNIT - {beat_id}")
-        if len(eligible) == 1:
+        if beat_id in declared_carriers:
+            matches = [shot for shot in eligible
+                       if shot.shotId == declared_carriers[beat_id]]
+            if len(matches) != 1:
+                raise RuntimeError(f'COMEDY CARRIER OUTSIDE BEAT - {beat_id}')
+            carrier = matches[0]
+            if carrier.performanceContract.beatOwner != beat_id:
+                message = (f'COMEDY CARRIER PERFORMANCE OWNER MISMATCH - {beat_id}: '
+                           f'{carrier.shotId} owns {carrier.performanceContract.beatOwner}. '
+                           'Select the payoff unit and align its performance beatOwner with '
+                           'that source beat; preserve all source beats and shot coverage.')
+                if not review_notes:
+                    return gate5_performance(episode, scene_num, treatment, sd, shots,
+                                             review_notes=message, log=log)
+                raise RuntimeError(message)
+        elif len(eligible) == 1:
             carrier = eligible[0]
         else:
             owned = [shot for shot in eligible if shot.performanceContract and
@@ -1924,7 +1968,7 @@ def gate5_performance(episode, scene_num, treatment, sd, shots,
             if len(owned) != 1:
                 message = (f"BIG COMEDY STAGING CARRIER AMBIGUOUS - {beat_id} crosses "
                            f"{len(eligible)} units and has {len(owned)} performance owners. "
-                           "Assign exactly one eligible unit as this beat's performance owner, "
+                           "Set comedyCarriers to exactly one beatId/shotId assignment for this beat, "
                            "matching the source action carried in that unit; preserve all shot IDs and coverage.")
                 if not review_notes:
                     return gate5_performance(episode, scene_num, treatment, sd, shots,
@@ -2310,6 +2354,15 @@ def _duration_bounds(rng):
     return (lo, hi) if 0 < lo <= hi else None
 
 
+def _resolve_timing_occurrence(value, approved_ids):
+    if value in approved_ids:
+        return value
+    matches = [item for item in approved_ids
+               if item.startswith("dialogue-occurrence:")
+               and item.removeprefix("dialogue-occurrence:") == value]
+    return matches[0] if len(matches) == 1 else value
+
+
 def _validate_typed_production_contract(shots, details, shot_cast, real_opener):
     """Validate the typed execution contract before it can be approved or signed."""
     detail_by_id = {detail.shotId: detail for detail in details}
@@ -2332,6 +2385,11 @@ def _validate_typed_production_contract(shots, details, shot_cast, real_opener):
                     f"exactly {expected_cast}, got {actual}")
 
         occurrence_ids = list(detail.dialogueOccurrenceIds)
+        # Resolve only an exact, unique namespace omission against locked assignments.
+        # Never infer identity from dialogue text, position or a partial hash.
+        for window in detail.dialogueTimings:
+            window.dialogueOccurrenceId = _resolve_timing_occurrence(
+                window.dialogueOccurrenceId, occurrence_ids)
         timing_ids = [window.dialogueOccurrenceId for window in detail.dialogueTimings]
         if timing_ids != occurrence_ids:
             raise RuntimeError(
@@ -2702,7 +2760,7 @@ def build_scene_direction_card(vision, scene, beats, shots, voices, details):
 # THE SCENE RUN — Gates 0-6 + production detail
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def _serial_scene_director(fn):
-    def locked(scene_num, episode="Ep1", brief=None, log=print):
+    def locked(scene_num, episode="Ep1", brief=None, log=print, **kwargs):
         lock_path = ROOT / "cb-output" / "state" / "episode-scene-director.lock"
         lock_path.parent.mkdir(parents=True, exist_ok=True)
         with open(lock_path, "a+") as lock_file:
@@ -2710,22 +2768,33 @@ def _serial_scene_director(fn):
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
             try:
                 log(f"SCENE {scene_num} — Director text pass started")
-                return fn(scene_num, episode, brief=brief, log=log)
+                return fn(scene_num, episode, brief=brief, log=log, **kwargs)
             finally:
                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
     return locked
 
 
 @_serial_scene_director
-def run_scene(scene_num, episode="Ep1", brief=None, log=print):
+def run_scene(scene_num, episode="Ep1", brief=None, log=print, intake_preview=False):
     from cb_learning_context import scene_scope
     token = _active_direction_brief.set(str(brief).strip() if brief else None)
+    draft_token = None
     try:
-        refresh_source_extraction(ROOT, episode, SCRIPT_STORE, log=log)
+        if intake_preview:
+            import cb_intake
+            draft = cb_intake.preview_intake(episode, log=log)
+            draft_path = OUT / 'intake-preview' / f'{episode}_{draft["candidateDigest"]}_beat_package.json'
+            draft_path.parent.mkdir(parents=True, exist_ok=True)
+            cb_db.atomic_write_json(ROOT, draft_path, draft['package'])
+            draft_token = _draft_intake.set({'episode': episode, 'path': draft_path, **draft})
+        else:
+            refresh_source_extraction(ROOT, episode, SCRIPT_STORE, log=log)
         ready = gate0_readiness(episode, scene_num, brief, log=log)
         with scene_scope(episode, scene_num, ready["cast"]):
             return _run_scene(scene_num, episode, brief, log, ready)
     finally:
+        if draft_token is not None:
+            _draft_intake.reset(draft_token)
         _active_direction_brief.reset(token)
 
 
@@ -2733,7 +2802,8 @@ def _run_scene(scene_num, episode, brief, log, ready):
     from cb_learning_context import current_brief
     source_pkg = ready["scriptPackage"]
     vpath = OUT / f"{episode}_episode_vision.json"
-    vision = (json.load(open(vpath)) if vpath.exists() else episode_vision(episode, log=log))
+    draft = _draft_intake.get()
+    vision = draft["vision"] if draft else (json.load(open(vpath)) if vpath.exists() else episode_vision(episode, log=log))
     beat_signature = cb_lineage.beat_package_signature(source_pkg)
     script_version = (source_pkg.get("sourceScript") or {}).get("scriptVersionId")
     story_canon_digest = cb_canon.profile_digest(
@@ -2849,6 +2919,8 @@ def _run_scene(scene_num, episode, brief, log, ready):
                            "cinematographer": PROV("cinematographer"),
                            "voice": PROV("voice-director")},
            "approvalState": "awaiting-human-storyboard-approval"}
+    if draft:
+        pkg["intakeCandidateDigest"] = draft["candidateDigest"]
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{episode}_scene{scene_num}_storyboard.json"
     json.dump(pkg, open(out, "w"), indent=1, ensure_ascii=False)

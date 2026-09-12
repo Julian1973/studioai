@@ -967,7 +967,7 @@ def intake_status(episode="Ep1"):
 
 
 def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian",
-                   log=print):
+                   log=print, _preview=False):
     if verdict not in ("approve", "reject"):
         raise Refused("REFUSED — verdict must be approve|reject")
     cpath = candidate_path(episode)
@@ -1061,24 +1061,6 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
         "productionPlan": candidate.get("productionPlan") or build_outcome_compression_plan(candidate["beats"]),
     }
     pkg["contentSignature"] = cb_lineage.beat_package_signature(pkg)
-    OUT.mkdir(parents=True, exist_ok=True)
-    pkg_path = OUT / f"{episode}_{slug}_beat_package.json"
-    if existing_records:
-        archive = OUT / "archive" / "script_versions"
-        stamp = _now().replace(":", "").replace("-", "")
-        for old_path, old, old_digest in existing_records:
-            old_version = str(_package_script_version(old) or "legacy").replace(":", "_")
-            cb_db.atomic_write_json(
-                ROOT,
-                archive / f"{old_path.stem}_{old_version}_{stamp}_{old_digest[:12]}.json",
-                old)
-    pkg_digest = next((digest for path, _old, digest in existing_records
-                       if path.resolve() == pkg_path.resolve()), None)
-    cb_db.atomic_write_json(ROOT, pkg_path, pkg, expected_digest=pkg_digest)
-    for old_path, _old, old_digest in existing_records:
-        if old_path.resolve() != pkg_path.resolve():
-            cb_db.atomic_remove(ROOT, old_path, expected_digest=old_digest)
-
     vision_inputs = cb_lineage.episode_vision_inputs(
         current["scriptVersionId"], pkg["contentSignature"],
         canon_lock["profileDigests"]["story"])
@@ -1108,6 +1090,30 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
                  "showrunnerJudgement": "", "approvalState": "approved",
                  "provenance": {"role": "director-intake", "at": _now(),
                                 "reviewedBy": reviewed_by}}
+    if _preview:
+        # Compile a candidate using the SAME source/canon checks and artifact builder.
+        # No canonical write or approval is performed at this boundary.
+        vision_pkg['approvalState'] = 'awaiting-human-approval'
+        vision_pkg['provenance'].pop('reviewedBy', None)
+        return {'package': pkg, 'vision': vision_pkg, 'candidateDigest': candidate_digest}
+    OUT.mkdir(parents=True, exist_ok=True)
+    pkg_path = OUT / f"{episode}_{slug}_beat_package.json"
+    if existing_records:
+        archive = OUT / "archive" / "script_versions"
+        stamp = _now().replace(":", "").replace("-", "")
+        for old_path, old, old_digest in existing_records:
+            old_version = str(_package_script_version(old) or "legacy").replace(":", "_")
+            cb_db.atomic_write_json(
+                ROOT,
+                archive / f"{old_path.stem}_{old_version}_{stamp}_{old_digest[:12]}.json",
+                old)
+    pkg_digest = next((digest for path, _old, digest in existing_records
+                       if path.resolve() == pkg_path.resolve()), None)
+    cb_db.atomic_write_json(ROOT, pkg_path, pkg, expected_digest=pkg_digest)
+    for old_path, _old, old_digest in existing_records:
+        if old_path.resolve() != pkg_path.resolve():
+            cb_db.atomic_remove(ROOT, old_path, expected_digest=old_digest)
+
     CREATIVE_OUT.mkdir(parents=True, exist_ok=True)
     vision_path = episode_vision_path(episode)
     vision_digest = (cb_db.read_json_document(ROOT, vision_path)[1]
@@ -1116,7 +1122,7 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
 
     candidate["approvalState"] = "approved"
     candidate["approval"] = {"reviewedBy": reviewed_by, "at": _now(),
-                             "canonicalPackage": pkg_path.name}
+                             "canonicalPackage": pkg_path.name, "candidateDigest": candidate_digest}
     cb_db.atomic_write_json(ROOT, cpath, candidate, expected_digest=candidate_digest)
 
     log(f"STORY INTAKE APPROVED — {episode} by {reviewed_by}: {pkg_path.name} + "
@@ -1137,6 +1143,12 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
                 episode, verdict, note=note, reviewed_by=reviewed_by, log=log)
     except cb_db.SceneBusy as exc:
         raise Refused(str(exc)) from exc
+
+
+def preview_intake(episode="Ep1", log=print):
+    """Current source-bound candidate for joint Story/Storyboard review, never approval."""
+    with cb_db.scene_lease(ROOT, episode, "__story_intake__", "story-intake-preview"):
+        return _decide_intake(episode, log=log, _preview=True)
 
 
 def rebase_canon_lock(episode="Ep1", reviewed_by="Julian", log=print):

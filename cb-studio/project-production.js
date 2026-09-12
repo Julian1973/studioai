@@ -175,12 +175,12 @@
     const ctx = active = {project,root,episode:episode?String(episode.number):null,shotId:saved.shotId||'',busy:false,timer:null,signature:''};
     root.innerHTML = `<div class="sp-heading"><div><span class="lab">Production agent</span><h2>Direct your episode.</h2></div><button class="btn ghost" data-services>Project services</button></div>${episodes.length?`
       <label>Episode / sequence<select id="sp-episode">${episodes.map(e=>`<option value="${e.number}" ${String(e.number)===ctx.episode?'selected':''}>${e.number} · ${esc(e.title)}</option>`).join('')}</select></label>
-      <div id="sp-readiness"></div><div class="sp-budget"><p id="sp-budget-status"></p><details id="sp-budget-edit" open><summary>Episode allowance</summary><form id="sp-budget-form"><label>Episode allowance (USD)<input type="number" min="0.01" step="0.01" id="sp-budget-amount" required></label><button class="btn ghost" type="submit">Approve allowance & prepare</button></form></details></div>
+      <div id="sp-readiness"></div><div class="sp-budget"><p id="sp-budget-status"></p><details id="sp-budget-edit" open><summary>Episode allowance</summary><form id="sp-budget-form"><label>Episode allowance (USD)<input type="number" min="0.01" step="0.01" id="sp-budget-amount" required></label><button class="btn ghost" type="submit">Approve allowance</button></form></details></div>
       <p id="sp-error" role="alert"></p><div id="sp-source-update"></div><div id="sp-jobs" aria-live="polite"></div><div class="sp-desk"><div class="sp-stage"><div id="sp-shot-list" class="sp-shot-list"></div><div id="sp-outcome"></div></div><aside class="sp-agent"><h3>Direct this shot</h3><div id="sp-scope"></div><div id="sp-feed" role="log" aria-live="polite"></div><form id="sp-chat"><label>Directing<select id="sp-direction-stage"><option value="see">Picture and staging</option><option value="hear">Voice performance</option><option value="watch">Animation and timing</option></select></label><label for="sp-direction">Your direction</label><textarea id="sp-direction" placeholder="Make the reaction more hesitant. Keep the voice and geography." required></textarea><button class="btn" type="submit">Send direction</button></form><p>Your agent uses this project’s bible, references and review notes. Approvals always come from you.</p></aside></div>`:'<p>Save your first script below. The production agent will prepare its shots after you connect direction and approve an episode allowance.</p>'}`;
     root.querySelector('[data-services]').onclick = ()=>services(project);
     if(!episode)return;
     root.querySelector('#sp-episode').onchange = event => {ctx.episode=event.target.value;ctx.shotId='';ctx.signature='';ctx.snapshot=null;refresh(ctx);};
-    root.querySelector('#sp-budget-form').onsubmit = event=>{event.preventDefault();send(ctx,'budget',{amountUsd:root.querySelector('#sp-budget-amount').value});};
+    root.querySelector('#sp-budget-form').onsubmit = event=>{event.preventDefault();send(ctx,'budget',{amountUsd:root.querySelector('#sp-budget-amount').value,prepare:!window.StudioJourney});};
     root.querySelector('#sp-chat').onsubmit = async event => {
       event.preventDefault();const input=root.querySelector('#sp-direction'), message=input.value;
       const clearDraft=window.StudioDrafts?.capture(input);
@@ -212,7 +212,7 @@
       ctx.snapshot=snapshot;draw(ctx);
     } catch(error){if(current(ctx))ctx.root.querySelector('#sp-error').textContent=error.message;}
     clearTimeout(ctx.timer);
-    if(current(ctx))ctx.timer=setTimeout(()=>{const job=ctx.snapshot?.jobs?.[0];if(!ctx.busy&&job?.status==='pending'&&job.taskId&&!job.code)send(ctx,'resume',{jobId:job.id});else refresh(ctx);},4000);
+    if(current(ctx))ctx.timer=setTimeout(()=>{const job=ctx.snapshot?.jobs?.[0];if(!window.StudioJourney&&!ctx.busy&&job?.status==='pending'&&job.taskId&&!job.code)send(ctx,'resume',{jobId:job.id});else refresh(ctx);},4000);
   }
   async function send(ctx, action, extra={}) {
     if(!current(ctx)||ctx.busy||!ctx.snapshot)return false;
@@ -247,7 +247,7 @@
     const budget=state.budget;
     const allowanceEditor=root.querySelector('#sp-budget-edit');
     if(allowanceEditor.dataset.allowance!==String(budget.allowance)){allowanceEditor.open=!budget.allowance;allowanceEditor.dataset.allowance=String(budget.allowance);}
-    root.querySelector('#sp-budget-form button').textContent=budget.allowance?'Update allowance':'Approve allowance & prepare';
+    root.querySelector('#sp-budget-form button').textContent=budget.allowance?'Update allowance':'Approve allowance';
     root.querySelector('#sp-budget-status').textContent=`Allowance ${usd(budget.allowance)} · committed allowance ${usd(budget.committed)} · in progress ${usd(budget.reserved)} · remaining ${usd(budget.allowance-budget.committed-budget.reserved)}`;
     root.querySelector('#sp-cost-evidence')?.remove();
     const costs=ctx.snapshot.costs;
@@ -278,6 +278,15 @@
     const outcome=root.querySelector('#sp-outcome');
     root.querySelector('#sp-director-card')?.remove();
     root.querySelector('#sp-scene-coverage')?.remove();
+    if(window.StudioJourney && !shot?.importedArchive){
+      const key=[ctx.project.id,ctx.episode,shot?.id||'S1.SH1'].join(':');
+      if(outcome.dataset.journeyKey!==key){outcome.dataset.journeyKey=key;StudioJourney.mount(outcome,{projectId:ctx.project.id,episode:ctx.episode,scene:String(shot?.scene||1),unit:shot?.id||'S1.SH1'},{
+        changes:()=>{root.querySelector('#sp-direction').focus();root.querySelector('#sp-direction').scrollIntoView({block:'center'});},
+        settled:()=>refresh(ctx),
+        next:scope=>{ctx.shotId=scope.unit;ctx.signature='';refresh(ctx);}
+      });}else outcome.journeyHandle?.refresh();
+      return;
+    }
     if(!shot){outcome.innerHTML='<div class="sp-box"><h3>Your script becomes directed shots</h3><p>The director prepares emotional beats, camera coverage, performance and matched generation prompts. Your first review is the SEE keyframe.</p><button class="btn" data-command="prepare">Prepare my episode</button></div>';return;}
     const s=stage(shot), candidate=shot.outcomes?.[s];
     let next=s;

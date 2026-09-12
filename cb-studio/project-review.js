@@ -8,7 +8,7 @@
   const labels = {preparing:'Preparing', ready_for_review:'Ready for review', approved:'Approved', needs_attention:'Needs attention', missing:'To prepare'};
   let active;
   function mount(ctx, send, draw) {
-    active = ctx; ctx.reviewSend = send; ctx.reviewDraw = draw; ctx.mode = 'board'; ctx.boardFilter = 'all';
+    active = ctx; ctx.reviewSend = send; ctx.reviewDraw = draw; ctx.mode = window.StudioJourney?'shot':'board'; ctx.boardFilter = 'all';
     const before = ctx.root.querySelector('.sp-desk');
     if (!before) return;
     before.insertAdjacentHTML('beforebegin', `<nav class="sp-workflow" aria-label="Production workspace"><button data-view="board" class="btn">Episode board</button><button data-view="shot" class="btn ghost">Shot workspace</button><button data-view="review" class="btn ghost">Review episode</button></nav><section id="sp-summary" aria-label="Production readiness"></section><section id="sp-board"></section><section id="sp-timeline" hidden></section>`);
@@ -25,7 +25,7 @@
     ctx.root.querySelector('#sp-proposal').onclick = e => {
       const b=e.target.closest('[data-edit]');if(!b)return;
       const shot=ctx.snapshot.state.shots.find(s=>s.id===ctx.shotId);
-      send(ctx,b.dataset.edit,{proposalId:shot?.proposal?.id,prepare:b.dataset.edit==='apply_revision'});
+      send(ctx,b.dataset.edit,{proposalId:shot?.proposal?.id,prepare:!window.StudioJourney&&b.dataset.edit==='apply_revision'});
     };
     ctx.root.querySelector('#sp-continuity').onclick = e => {
       const reference=e.target.closest('[data-reference-choice]');
@@ -51,7 +51,7 @@
       send(ctx,'bind_states',{characterStates:bindings});
     };
     ctx.root.querySelector('#sp-timeline').onclick = e => timelineClick(ctx,e);
-    show(ctx,'board');
+    show(ctx,window.StudioJourney?'shot':'board');
   }
   function show(ctx,mode){
     if(!ctx?.root?.querySelector('#sp-board'))return;
@@ -85,7 +85,7 @@
     const node=root.querySelector('#sp-proposal');
     if(node.dataset.signature!==editSignature){
       node.dataset.signature=editSignature;
-      node.innerHTML=proposal?`<section class="sp-proposal sp-box"><span class="lab">Proposed direction · ${esc(shot.id)}</span><h3>Review what will change</h3><p>${esc(proposal.message)}</p><p>Replaces: ${esc(proposal.impact.reset.map(s=>s.toUpperCase()).join(', ')||'No outcomes')}. Preserves: ${esc(proposal.impact.preserved.map(s=>s.toUpperCase()).join(', ')||'Existing version history')}.</p>${proposal.impact.diff.map(d=>`<details><summary>${esc(d.field)}</summary><div class="sp-diff"><div><small>Current</small><pre>${esc(typeof d.before==='string'?d.before:JSON.stringify(d.before,null,2))}</pre></div><div><small>Proposed</small><pre>${esc(typeof d.after==='string'?d.after:JSON.stringify(d.after,null,2))}</pre></div></div></details>`).join('')}<p>Other shots retain their approved files. Neighbouring joins will be flagged for review.</p><div class="sp-actions"><button class="btn" data-edit="apply_revision">Apply & prepare</button><button class="btn ghost" data-edit="discard_revision">Keep current version</button></div></section>`:shot.editHistory?.length?'<button class="btn ghost" data-edit="undo_revision">Undo last direction edit</button>':'';
+      node.innerHTML=proposal?`<section class="sp-proposal sp-box"><span class="lab">Proposed direction · ${esc(shot.id)}</span><h3>Review what will change</h3><p>${esc(proposal.message)}</p><p>Replaces: ${esc(proposal.impact.reset.map(s=>s.toUpperCase()).join(', ')||'No outcomes')}. Preserves: ${esc(proposal.impact.preserved.map(s=>s.toUpperCase()).join(', ')||'Existing version history')}.</p>${proposal.impact.diff.map(d=>`<details><summary>${esc(d.field)}</summary><div class="sp-diff"><div><small>Current</small><pre>${esc(typeof d.before==='string'?d.before:JSON.stringify(d.before,null,2))}</pre></div><div><small>Proposed</small><pre>${esc(typeof d.after==='string'?d.after:JSON.stringify(d.after,null,2))}</pre></div></div></details>`).join('')}<p>Other shots retain their approved files. Neighbouring joins will be flagged for review.</p><div class="sp-actions"><button class="btn" data-edit="apply_revision">${window.StudioJourney?'Apply correction':'Apply & prepare'}</button><button class="btn ghost" data-edit="discard_revision">Keep current version</button></div></section>`:shot.editHistory?.length?'<button class="btn ghost" data-edit="undo_revision">Undo last direction edit</button>':'';
     }
     const inspection=ctx.snapshot.review.inspections[shot.id];
     const inspector=root.querySelector('#sp-continuity'), signature=JSON.stringify([shot.id,inspection,ctx.snapshot.characterStates,shot.characterStates,ctx.snapshot.services.review,shot.outcomes?.watch?.id,shot.outcomes?.watch?.status,shot.cameraSetupId,shot.compositionReference]);

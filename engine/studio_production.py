@@ -439,7 +439,7 @@ class Production:
                 state["budget"]["allowance"] = amount
                 state["budget"]["approvedAt"] = time.time()
                 self._message(state, "agent", "Episode allowance recorded. I can prepare its shots within the configured estimates; you approve each outcome.")
-                if not state["shots"]:
+                if not state["shots"] and payload.get("prepare", True):
                     advance = ""
             elif action == "status":
                 self._message(state, "agent", self.status_message(state, shot))
@@ -1221,7 +1221,15 @@ class Production:
     def fail(self, job, exc):
         from studio_preflight_evidence import project_failure
         job["preflightEvidence"] = project_failure(self, job, exc, job)
-        error = exc if isinstance(exc, StudioError) else StudioError("The operation could not finish. Your current outcomes are preserved; check the job before retrying.", "operation_failed")
+        from studio_creative_authority import CreativeConflict
+        from pydantic import ValidationError
+        if isinstance(exc, CreativeConflict):
+            error = StudioError(str(exc), "creative_decision_required")
+        elif isinstance(exc, ValidationError):
+            fields = [".".join(map(str, e["loc"])) or "response" for e in exc.errors(include_input=False)[:4]]
+            error = StudioError("The directing response is incomplete or invalid: " + ", ".join(fields) + ". Prepare a corrected response before generation.", "incomplete_direction")
+        else:
+            error = exc if isinstance(exc, StudioError) else StudioError("The operation could not finish. Your current outcomes are preserved; check the job before retrying.", "operation_failed")
         with self.ws.db() as db:
             db.execute("BEGIN IMMEDIATE")
             current = json.loads(db.execute("SELECT data FROM jobs WHERE id=?", (job["id"],)).fetchone()[0])

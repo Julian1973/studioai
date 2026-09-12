@@ -7370,6 +7370,8 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
                               materialize_audio=False, include_audio_reference=True,
                               generate_audio=True):
     """Return every exact provider call that will produce one Studio candidate."""
+    from studio_approved_media_projection import watch_shot
+    shot = watch_shot(shot, led)
     import cb_costs
     def provider_audio_path(master, duration):
         """Fit the approved HEAR master to the picture without changing its speech."""
@@ -7976,10 +7978,14 @@ def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per,
     everything the provider will receive, sealed AT DISCLOSURE — exact prompt, duration, model,
     resolution, candidate count, reference order with per-file hashes, audio hash, max cost.
     The spend token binds to this envelope's hash; firing sends THIS, never a recompile."""
-    refs = _reference_records(shot, imgs)
+    from studio_approved_media_projection import watch_shot, reference_records
+    shot = watch_shot(shot, led)
+    refs = reference_records(_reference_records(shot, imgs), led)
     execution_plan = execution_plan or _animation_execution_plan(
         pkg, shot, led, imgs, anchor, fast, comparison_model_id,
         comparison_run_id, materialize_audio=True)
+    for segment in execution_plan['segments']:
+        segment['references'] = reference_records(segment.get('references', refs), led)
     first_contract = execution_plan["segments"][0]["contract"]
     working = led.get("workingSeedancePrompt") or {}
     specialist = _approved_department_output(pkg, shot["shotId"], "animation") or {}

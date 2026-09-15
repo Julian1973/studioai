@@ -353,3 +353,40 @@ def test_journey_reads_submission_evidence_without_changing_history(tmp_path,sub
     assert bool(view['primary']) is allowed
     assert recovery.read_operations(tmp_path)==before
     assert state['operation']['status']=='needs-decision'
+
+
+def test_returned_batch_currentness_uses_the_same_authority_as_generation(monkeypatch):
+    """Approval accepts unchanged DIRECT, excludes working history, rejects real drift."""
+    import inspect
+    import textwrap
+    import cb_render as render
+    check = inspect.getclosurevars(render._production_policy.approve_shot).nonlocals['animation_direct_inputs_current']
+    scope = inspect.getclosurevars(check)
+    ns = {**scope.globals, **scope.nonlocals, 'current_shot_authority': PD.current_shot_authority}
+    shot = {'shotId':'S2.SH1', 'durationSec':13,
+            'directorCard':{'views':[{'action':'The vision appears, then disappears.'}]},
+            'seedancePrompt':'historical working prose'}
+    media = {'opening':'opening-hash', 'audio':'audio-hash'}
+    refs = [{'path':'opening', 'sha256':'opening-hash'}]
+    ns.update(m=SimpleNamespace(_anchor_for=lambda *a:'opening',
+        _with_effective_reference_slots=lambda p,s,*a:deepcopy(s),
+        _ledger=lambda *a:{'voPath':'audio'}, Refused=ValueError),
+        ordered_slot_signature=lambda *a:deepcopy(refs),
+        require_canon=lambda *a:'canon',
+        voice_approval_status=lambda *a:{'current':True},
+        cb_audio_authority=SimpleNamespace(spoken_dialogue_lines=lambda s:['line']),
+        file_sha256=lambda p:media[p])
+    exec(textwrap.dedent(inspect.getsource(check)),ns)
+    current = ns['animation_direct_inputs_current']
+    recorded = {'canonProfileDigest':'canon',
+        'shotContractHash':ns['json_sha256'](ns['current_shot_authority'](shot)),
+        'openingFrameHash':'opening-hash','audioHash':'audio-hash',
+        'durationSec':13,'references':deepcopy(refs)}
+    assert current(recorded,{},shot,'2','Ep4')
+    shot['seedancePrompt']='another old failure record'
+    assert current(recorded,{},shot,'2','Ep4')
+    for key,value in [('durationSec',12),('directorCard',{'views':[{'action':'Changed action'}]})]:
+        changed=deepcopy(shot);changed[key]=value
+        assert not current(recorded,{},changed,'2','Ep4')
+    media['opening']='changed-pixels'
+    assert not current(recorded,{},shot,'2','Ep4')

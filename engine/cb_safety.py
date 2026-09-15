@@ -1165,7 +1165,7 @@ def create_policy(m):
             return bool(
                 recorded.get("canonProfileDigest") ==
                 require_canon(pkg, episode, "animation") and
-                recorded.get("shotContractHash") == json_sha256(current_shot) and
+                recorded.get("shotContractHash") == json_sha256(current_shot_authority(current_shot)) and
                 recorded.get("openingFrameHash") == file_sha256(anchor) and
                 recorded.get("durationSec") == shot.get("durationSec") and
                 recorded.get("audioHash") == (

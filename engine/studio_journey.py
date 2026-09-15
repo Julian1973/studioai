@@ -98,6 +98,8 @@ class Journey:
                           'review': current.get('review'), 'disclosure': disclosure})
         op = deepcopy(state.get('operation'))
         retry_safe = bool(op and (op.get('decision') or {}).get('retrySafe'))
+        if op and op.get('pending') == 'prepare_render' and op.get('status') == 'needs-decision':
+            retry_safe = self._failed_prepare_has_no_provider(state['scope'], (op.get('receipts') or {}).get('prepare_render') or {})
         corrected = bool(op and op.get('status') == 'needs-decision' and op.get('blockedBinding')
                          and (op['blockedBinding'] != current['binding'] or retry_safe)
                          and (op.get('pending') != 'submit_render' or retry_safe))
@@ -214,7 +216,9 @@ class Journey:
                     op.setdefault('receipts', {}).pop(pending, None)
                     op['pending'] = None
                     try:
-                        (self.store.root / 'cb-output/state/journeys' / (op['id'] + '_' + pending + '.json')).unlink(missing_ok=True)
+                        receipt_path = self.store.root / 'cb-output/state/journeys' / (op['id'] + '_' + pending + '.json')
+                        if receipt_path.exists():
+                            receipt_path.rename(receipt_path.with_name(receipt_path.stem + '_superseded_' + uuid.uuid4().hex + '.json'))
                     except OSError:
                         pass
                 op.update(status='running', decision=None, message='Checking the saved operation')
@@ -226,24 +230,13 @@ class Journey:
         if not job_id:
             return False
         try:
-            from cb_recovery import all_operations, change
-            candidates = [item for item in all_operations(self.store.root)
-                          if item.get('kind') == 'prepare-render'
-                          and str(item.get('episode')) == str(scope.get('episode'))
-                          and str(item.get('scene')) == str(scope.get('scene'))
-                          and item.get('shotId') == scope.get('unit')
-                          and item.get('state') == 'needs-attention']
-            if not candidates:
-                return False
-            latest = max(candidates, key=lambda item: item.get('updatedAt') or item.get('createdAt') or 0)
-            if latest.get('mediaSubmitted') is not False or latest.get('providerTaskIds'):
-                return False
-            attempts = dict(latest.get('attempts') or {})
-            attempts.pop('prepare', None)
-            change(self.store.root, latest['operationId'], 'queued',
-                   'Recovering saved preparation after source/input fix',
-                   attempts=attempts, checkpoint=None, owner=None, workerPid=None, leaseUntil=0)
-            return True
+            from cb_recovery import read_operations, pre_submit_failure, require_no_provider_operation
+            require_no_provider_operation(self.store.root, scope['episode'], scope['scene'], scope['unit'])
+            return any(item.get('jobId') == job_id and pre_submit_failure(item)
+                       and str(item.get('episode')) == str(scope.get('episode'))
+                       and str(item.get('scene')) == str(scope.get('scene'))
+                       and item.get('shotId') == scope.get('unit')
+                       for item in read_operations(self.store.root))
         except Exception:
             return False
 

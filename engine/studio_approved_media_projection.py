@@ -15,6 +15,18 @@ def watch_shot(shot, ledger):
     receipt_path = ledger.get('voPlacementPath')
     if not approval.get('approved') or not receipt_path:
         return result
+    from studio_director_handoff import errors as direct_errors, source as direct_source
+    from studio_request_evidence import digest as direct_digest
+    faults = direct_errors(shot)
+    if faults:
+        raise ValueError('DIRECTOR_REVISION_REQUIRED: ' + faults[0])
+    original_source = direct_digest(direct_source(shot))
+    original_card = direct_digest(shot.get('directorCard') or {})
+    prior_projection = (shot.get('approvedAudioTimingAuthority') or {}).get('directProjection') or {}
+    if (prior_projection.get('projectedSourceHash') == original_source and
+            prior_projection.get('projectedDirectionHash') == original_card):
+        original_source = prior_projection['originalSourceHash']
+        original_card = prior_projection['originalDirectionHash']
     receipt = json.loads(Path(receipt_path).read_text())
     audio = Path(approval['path'])
     if str(audio) != receipt.get('outputPath') or hashlib.sha256(audio.read_bytes()).hexdigest() != receipt.get('outputSha256'):
@@ -65,6 +77,11 @@ def watch_shot(shot, ledger):
     result['approvedAudioTimingAuthority'] = {'placementPath':receipt_path,
         'placementSha256':hashlib.sha256(Path(receipt_path).read_bytes()).hexdigest(),
         'audioSha256':receipt['outputSha256'], 'intervals':changes}
+    result['approvedAudioTimingAuthority']['directProjection'] = {
+        'originalSourceHash': original_source, 'originalDirectionHash': original_card,
+        'projectedSourceHash': direct_digest(direct_source(result)),
+        'projectedDirectionHash': direct_digest(result.get('directorCard') or {}),
+        'kind': 'verified Audio1 timing projection; not direction approval'}
     return result
 
 

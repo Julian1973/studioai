@@ -43,8 +43,14 @@ def errors(shot):
     binding = shot.get('directorCardSource') or {}
     if legacy and not card.get('views'):
         return ['Legacy coverage has no shared Director Card; prepare the current direction handoff.']
-    if binding and (binding.get('version') != VERSION or binding.get('sourceHash') != digest(source(shot))
-                    or binding.get('directionHash') != digest(card)):
+    projection = (shot.get('approvedAudioTimingAuthority') or {}).get('directProjection') or {}
+    timing_projection = bool(binding and projection
+        and projection.get('originalSourceHash') == binding.get('sourceHash')
+        and projection.get('originalDirectionHash') == binding.get('directionHash')
+        and projection.get('projectedSourceHash') == digest(source(shot))
+        and projection.get('projectedDirectionHash') == digest(card))
+    if binding and (binding.get('version') != VERSION or (not timing_projection and (binding.get('sourceHash') != digest(source(shot))
+                    or binding.get('directionHash') != digest(card)))):
         return ['Director Card handoff is stale; rebuild it from the current approved sources.']
     return []
 

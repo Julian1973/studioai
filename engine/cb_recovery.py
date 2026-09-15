@@ -175,14 +175,6 @@ def authored_snapshot(root, descriptor, package):
     """Current semantic inputs, excluding histories, timestamps and compiled prose."""
     shot = next((row for row in package.get("shots", []) if row.get("shotId") == descriptor["shotId"]), {})
     ledger = _ledger(package, descriptor["shotId"])
-    direction = {}
-    for stage in ("cinematography", "animation"):
-        work = (ledger.get("departmentWork") or {}).get(stage) or {}
-        record = work.get("candidate") or work.get("approved") or {}
-        # Capture typed semantic and reference changes; never use record generation
-        # time or compiled provider prose as a new producer instruction.
-        direction[stage] = {key: value for key, value in (record.get("output") or {}).items()
-                            if key not in {"providerPrompt", "compiledPrompt", "promptDirectorEvidence"}}
     roles = ledger.get("additionalAnimationReferenceRoles") or []
     registry_path = pathlib.Path(root) / "cb-output/asset-registry/assets.json"
     try:
@@ -198,15 +190,13 @@ def authored_snapshot(root, descriptor, package):
             reference["currentBytesHash"] = hashlib.sha256(pathlib.Path(reference["path"]).read_bytes()).hexdigest()
         except (OSError, TypeError):
             reference["currentBytesHash"] = "unavailable"
-    return {"shot": {key: value for key, value in shot.items()
-                      if key not in {"seedancePrompt", "keyframePrompt", "compiledPrompt", "promptDirectorEvidence"}},
+    from studio_prompt_director import current_shot_authority
+    return {"shot": current_shot_authority(shot),
             "source": {key: package.get(key) for key in ("revision", "sourceLineage", "sourceStoryboard",
                 "sourceScript", "sceneCoverage", "creativeDirectingStandardVersion")},
-            "feedback": (ledger.get("watchDirectorFeedback") or {}).get("text"),
-            "workingPrompt": (ledger.get("workingSeedancePrompt") or {}).get("text"),
             "workingVoice": (ledger.get("workingVoice") or {}).get("lines"),
             "referenceRoles": roles, "resolvedReferences": sorted(references, key=lambda item: digest(item)),
-            "specialistDirection": direction}
+            "directRevision": digest(shot.get("directorCard"))}
 
 
 def request_fingerprint(root, descriptor, package):
@@ -230,6 +220,47 @@ def _current_cost_decision(conn, op, package):
     return bool(auth and auth["status"] == "issued")
 
 
+def read_operations(root):
+    """Inspect operation evidence without initializing or updating production state."""
+    import sqlite3
+    path = cb_db.state_db_path(root)
+    if not path.exists():
+        return []
+    with sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True) as conn:
+        if not conn.execute("SELECT 1 FROM sqlite_master WHERE name='production_operations'").fetchone():
+            return []
+        return [json.loads(row[0]) for row in conn.execute('SELECT data_json FROM production_operations')]
+
+
+def require_no_provider_operation(root, episode, scene, shot_id, ledger=None):
+    """Read durable submission evidence without creating or updating the state DB."""
+    ledger = ledger or {}
+    batch = ledger.get('batch') or {}
+    if batch.get('status') == 'generating' and (batch.get('token') or batch.get('providerTaskIds')):
+        raise ValueError('WATCH_CONFIGURATION_REQUIRED: the current render request is still active; collect its result before preparing a replacement.')
+    for op in read_operations(root):
+        if (str(op.get('episode')), str(op.get('scene')), op.get('shotId')) != (str(episode), str(scene), shot_id):
+            continue
+        evidence = bool(op.get('mediaSubmitted') or op.get('providerTaskIds') or op.get('submissionAttempt'))
+        # Reconciliation records these outputs after verifying their batch/token.
+        outputs = op.get('returnedPaths') or []
+        complete = bool(outputs and all(pathlib.Path(p).is_file() and pathlib.Path(p).stat().st_size > 0 for p in outputs))
+        uncertain = op.get('kind') == 'submit-watch' and not complete
+        if (evidence and not complete) or uncertain:
+            raise ValueError('WATCH_CONFIGURATION_REQUIRED: provider submission ' + op['operationId'] + ' has no verified completion; reconcile that request before preparing a replacement.')
+
+
+def pre_submit_failure(operation):
+    """Positive non-submission evidence; a status label alone is insufficient."""
+    return bool(operation.get('kind') == 'prepare-render'
+        and operation.get('mediaSubmitted') is False
+        and not operation.get('providerTaskIds')
+        and not operation.get('providerRequestId')
+        and not operation.get('submissionAttempt')
+        and not worker_alive(operation)
+        and operation.get('state') not in ACTIVE_STATES | {'submitting', 'rendering', 'reconciling-submission'})
+
+
 def register(root, args, job_id=None):
     descriptor = describe(args)
     if not descriptor:
@@ -243,6 +274,7 @@ def register(root, args, job_id=None):
         previous = max(matching, key=lambda op: op["createdAt"], default=None)
         if previous:
             if (descriptor["kind"] not in PREPARATION or worker_alive(previous) or
+                    previous.get("mediaSubmitted") is not False or previous.get("providerTaskIds") or
                     previous["state"] in ACTIVE_STATES | {"reconciling-submission", "submitting", "rendering"}):
                 return previous
             if previous.get("inputsCaptured") and _changed_bytes_without_new_approval(
@@ -251,7 +283,7 @@ def register(root, args, job_id=None):
                 _write(conn, previous, {"state": "needs-attention", "message": previous["message"]})
                 return previous
             unchanged = fingerprint == previous.get("resumeInputFingerprint", previous.get("requestFingerprint"))
-            if unchanged and previous["state"] != "awaiting-spend-approval":
+            if unchanged and previous["state"] != "awaiting-spend-approval" and not pre_submit_failure(previous):
                 return previous  # In particular: no new budget for the same failed request.
             if unchanged and _current_cost_decision(conn, previous, package):
                 return previous

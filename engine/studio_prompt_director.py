@@ -11,7 +11,7 @@ import re
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-VERSION = 'prompt-director-2.0.0'
+VERSION = 'prompt-director-validator-3.0.0'
 
 class Record(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -189,6 +189,8 @@ def resolve_references(refs, states):
     return resolved
 
 def run(snapshot, reviewer, *, review_plan_first=False):
+    from studio_watch_plan import current_snapshot
+    snapshot = current_snapshot(snapshot)
     from studio_request_evidence import authority_inventory
     inventory = authority_inventory(snapshot.get('authorities') or {})
     conflicts = inventory['precedence']['conflicts']
@@ -209,12 +211,12 @@ def run(snapshot, reviewer, *, review_plan_first=False):
 
 
 def _run(snapshot, reviewer, *, review_plan_first=False):
-    """Plan-first review and deterministic emission; at most two typed revisions.
+    """Validate exact compiler output without replacing any supplied prose.
 
-    review_plan_first is a compatibility argument only. Every supported WATCH
-    production request now receives semantic plan review before payload review.
+    Optional semantic reviewers can diagnose only; local structural validation
+    makes no claim about visual or semantic production quality.
     """
-    from studio_watch_plan import prepare_plan, correct_plan
+    from studio_watch_plan import prepare_plan
     from studio_character_roles import audit as audit_roles
     from studio_dynamic_state import resolve as resolve_dynamic
     from studio_seedance_execution import compile_prompt, final_check
@@ -246,7 +248,7 @@ def _run(snapshot, reviewer, *, review_plan_first=False):
             data.pop('prompt', None)
         data['dynamicStateResolution'] = deepcopy(dynamic)
         data['characterRoleIntegrity'] = deepcopy(roles)
-        # Exact source bindings let a reviewer propose auditable typed repairs;
+        # Exact source bindings identify DIRECT fields in rejection diagnostics;
         # hashes never appear in the media-provider prompt.
         bindings = {}
         def walk(value, path):
@@ -273,75 +275,69 @@ def _run(snapshot, reviewer, *, review_plan_first=False):
         "stillness, offscreen action, authorised ellipsis and stylised physics. Historical output "
         "failures are risks to inspect, never new canon or proof of a successful fix. Do not invent "
         "events, dialogue, timing, camera cuts or generic joke/emotional arcs. Unseen pixels are "
-        "unverified. Return the Review schema; keep edits empty. Use planCorrections only for "
-        "an emitted request-local /specialist/... typed origin listed in watchPlan.origins, "
-        "binding expectedPlanHash and the existing /shot/... sourcePath/sourceHash from "
-        "sourceFieldBindings. Approved shot/card, audio, identity and contract changes require "
-        "a source decision, not automatic correction. Corrected plans receive independent review.")
+        "unverified. Return the Review schema; edits and planCorrections must be empty. "
+        "DIRECT owns the exact authored ACTION wording and timing. If it is incomplete, "
+        "contradictory or unplayable, report DIRECTOR_REVISION_REQUIRED with the exact issue. "
+        "Do not rewrite, shorten, optimise, redistribute or reconstruct action prose.")
     if working.get('segmentProjectionError'):
         execution = {'applied': False, 'compatibility': 'blocked segment projection', 'error': working['segmentProjectionError']}
         return working, report(errors=[working['segmentProjectionError']], verdict='BLOCKED: PROVIDER PROMPT COMPILATION')
-    for cycle in range(3):
-        try:
-            working = prepare_plan(working)
-            roles = audit_roles(working)
-            if roles['status'] == 'BLOCKED':
-                return working, report(errors=[json.dumps(e, ensure_ascii=False) for e in roles['errors']], verdict='BLOCKED: CHARACTER ROLE INTEGRITY')
-            dynamic = resolve_dynamic(working.get('authorities', {}), working.get('references', []))
-            scoped = resolve_references(dynamic['referencePackage'], [])
-            if dynamic['errors']:
-                return working, report(errors=dynamic['errors'], verdict='BLOCKED: DIRECTION PLAN')
-            # Disposable deterministic output catches binding/size faults without
-            # charging for a semantic-review call. It is not sent to the plan reviewer.
-            preview, execution = compile_prompt(working, roles)
-            _, faults = final_check({**working, 'prompt': preview}, execution)
-            if faults:
-                return working, report(errors=faults, verdict='BLOCKED: PROVIDER PROMPT COMPILATION')
-        except ValueError as exc:
-            execution = {**execution, 'applied': False, 'error': str(exc),
-                'compatibility': 'blocked; no legacy prose bypass'}
-            return working, report(errors=[str(exc)], verdict='BLOCKED: PROVIDER PROMPT COMPILATION')
-        planning = Review.model_validate(reviewer(planning_system, review_data(False))).model_dump()
-        plans.append(planning)
-        if planning['edits']:
-            return working, report(planning, ['Provider-string edits are unsupported; correct a bound typed plan field'], 'BLOCKED: DIRECTION PLAN')
-        result = planning
-        phase = 'plan'
-        if not planning['planCorrections']:
-            errors = lifecycle_errors(planning['lifecycle'])
-            if errors or any(row['category'] != 'risk' for row in planning['findings']):
-                return working, report(planning, errors, 'BLOCKED: DIRECTION PLAN')
-            working['prompt'], execution = compile_prompt(working, roles)
-            result = Review.model_validate(reviewer(SYSTEM, review_data(True))).model_dump()
-            rounds.append(result)
-            phase = 'payload'
-            if result['edits']:
-                trace.append(dict(status='rejected-provider-string-edit', edits=deepcopy(result['edits'])))
-                return working, report(result, ['Provider-string edits are unsupported; correct a bound typed plan field'])
-        if result['planCorrections']:
-            if cycle == 2:
-                return working, report(result, ['Typed plan corrections did not converge within two revisions'])
-            try:
-                revised, receipt = correct_plan(working, result['planCorrections'])
-            except ValueError as exc:
-                trace.append(dict(status='rejected-plan-correction', phase=phase, reason=str(exc)))
-                return working, report(result, [str(exc)])
-            working = revised
-            trace.append(dict(status='revised-typed-plan', phase=phase, revision=receipt))
-            continue
+    try:
+        working = prepare_plan(working)
+        roles = audit_roles(working)
+        if roles['status'] == 'BLOCKED':
+            return working, report(errors=[json.dumps(e, ensure_ascii=False) for e in roles['errors']], verdict='BLOCKED: CHARACTER ROLE INTEGRITY')
+        dynamic = resolve_dynamic(working.get('authorities', {}), working.get('references', []))
+        scoped = resolve_references(dynamic['referencePackage'], [])
+        if dynamic['errors']:
+            return working, report(errors=dynamic['errors'], verdict='BLOCKED: DIRECTION PLAN')
+        # Disposable deterministic output catches binding/size faults without
+        # charging for a semantic-review call. It is not sent to the plan reviewer.
+        preview, execution = compile_prompt(working, roles)
+        if working['prompt'] != preview:
+            return working, report(errors=['Exact WATCH payload differs from current DIRECT compilation. Recompile the current request; do not rewrite direction.'], verdict='WATCH_CONFIGURATION_REQUIRED')
         _, faults = final_check(working, execution)
-        errors = lifecycle_errors(result['lifecycle']) + faults
-        for finding in result['findings']:
-            if finding['category'] == 'risk':
-                continue
-            quotes = re.findall(r'[\"“]([^\"”]+)[\"”]', finding['evidence'])
-            if not finding['evidence'] or not (finding['evidence'] in working['prompt'] or quotes and all(q in working['prompt'] for q in quotes)):
-                errors.append('Payload reviewer finding lacks exact current-payload evidence: ' + finding['reason'])
-        for ref in scoped:
-            if ref.get('resetRisk') and ('opening' in str(ref.get('role', '')).lower() or ref.get('authority') == 'current_state'):
-                errors.append('Current-state reference conflicts with required state: ' + str(ref.get('slot', ref.get('name', 'reference'))))
-        return working, report(result, errors)
-    raise AssertionError('unreachable')
+        if faults:
+            return working, report(errors=faults, verdict='BLOCKED: PROVIDER PROMPT COMPILATION')
+    except ValueError as exc:
+        execution = {**execution, 'applied': False, 'error': str(exc),
+            'compatibility': 'blocked; no legacy prose bypass'}
+        return working, report(errors=[str(exc)], verdict='BLOCKED: PROVIDER PROMPT COMPILATION')
+    if reviewer is None:
+        value = report()
+        value.update(summary='Current structured direction and payload bindings validated.',
+                     reviewScope='deterministic structural validation; semantic and media quality not assessed')
+        return working, value
+    planning = Review.model_validate(reviewer(planning_system, review_data(False))).model_dump()
+    plans.append(planning)
+    if planning['edits']:
+        return working, report(planning, ['Provider-string edits are unsupported; correct a bound typed plan field'], 'BLOCKED: DIRECTION PLAN')
+    result = planning
+    phase = 'plan'
+    if not planning['planCorrections']:
+        errors = lifecycle_errors(planning['lifecycle'])
+        if errors or any(row['category'] != 'risk' for row in planning['findings']):
+            return working, report(planning, errors, 'BLOCKED: DIRECTOR_REVISION_REQUIRED')
+        result = Review.model_validate(reviewer(SYSTEM, review_data(True))).model_dump()
+        rounds.append(result)
+        phase = 'payload'
+        if result['edits']:
+            trace.append(dict(status='rejected-provider-string-edit', edits=deepcopy(result['edits'])))
+            return working, report(result, ['Provider-string edits are unsupported; correct a bound typed plan field'])
+    if result['planCorrections']:
+        return working, report(result, ['DIRECTOR_REVISION_REQUIRED: revise DIRECT; WATCH cannot rewrite authored direction'], 'BLOCKED: DIRECTOR_REVISION_REQUIRED')
+    _, faults = final_check(working, execution)
+    errors = lifecycle_errors(result['lifecycle']) + faults
+    for finding in result['findings']:
+        if finding['category'] == 'risk':
+            continue
+        quotes = re.findall(r'[\"“]([^\"”]+)[\"”]', finding['evidence'])
+        if not finding['evidence'] or not (finding['evidence'] in working['prompt'] or quotes and all(q in working['prompt'] for q in quotes)):
+            errors.append('Payload reviewer finding lacks exact current-payload evidence: ' + finding['reason'])
+    for ref in scoped:
+        if ref.get('resetRisk') and ('opening' in str(ref.get('role', '')).lower() or ref.get('authority') == 'current_state'):
+            errors.append('Current-state reference conflicts with required state: ' + str(ref.get('slot', ref.get('name', 'reference'))))
+    return working, report(result, errors, 'BLOCKED: DIRECTOR_REVISION_REQUIRED' if any(row['category'] in ('story/state contradiction', 'provider infeasibility') for row in result['findings']) else None)
 
 def verify(snapshot, report):
     if ('watchPlan' not in snapshot or 'watchPlanBinding' not in snapshot) and (report or {}).get('watchPlanBinding'):
@@ -403,7 +399,7 @@ def current_shot_authority(shot):
     """
     current = deepcopy(shot)
     for key in list(current):
-        if key.endswith('History') or key in ('splitContinuityRepair',):
+        if key.endswith('History') or key in ('splitContinuityRepair', 'seedancePrompt', 'watchPrompt', 'keyframePrompt', 'seedreamPrompt', 'promptDirectorEvidence', 'workingSeedancePrompt', 'watchDirectorFeedback', 'watchDirectorFeedbackApproved'):
             current.pop(key)
         elif not key.endswith('Approved') and key + 'Approved' in current:
             current.pop(key)
@@ -413,7 +409,7 @@ def current_shot_authority(shot):
 def review_legacy_envelope(env, shot, specialist, *, archive_folder=None):
     import cb_llm
     from cb_prompt_bank import retake_evidence
-    authorities = {'shot': current_shot_authority(shot), 'specialist': deepcopy(specialist)}
+    authorities = {'shot': current_shot_authority(shot), 'specialist': {}}
     authorities['outcomeLearning'] = retake_evidence({
         **(env.get('learningScope') or {}), 'shot': shot})
     authorities['sourceProjection'] = {
@@ -436,10 +432,7 @@ def review_legacy_envelope(env, shot, specialist, *, archive_folder=None):
             snapshot = scope_segment(snapshot, segment)
         except ValueError as exc:
             snapshot['segmentProjectionError'] = str(exc)
-        from studio_final_direction import prompt_director_options
-        final, report = run(snapshot, lambda system, data: cb_llm.structured_with_repair(
-            system, json.dumps(data, ensure_ascii=False), Review, label='prompt_director',
-            **prompt_director_options()), review_plan_first=True)
+        final, report = run(snapshot, None)
         from pathlib import Path
         from studio_request_evidence import _write
         archive = Path(archive_folder) if archive_folder else Path(__file__).resolve().parent.parent / 'cb-output/state/prompt-director'
@@ -456,7 +449,8 @@ def review_legacy_envelope(env, shot, specialist, *, archive_folder=None):
             raise ValueError('BLOCKED: TRACKED PRODUCTION OBJECTS: ' + '; '.join(reasons) + ' (review: ' + str(destination) + ')')
         if report['verdict'] != 'READY TO FIRE':
             reasons = [f['reason'] for f in report['findings'] if f['category'] != 'risk'] + report['errors']
-            raise ValueError(report['verdict'] + ': ' + '; '.join(reasons) + ' (review: ' + str(destination) + ')')
+            code = 'WATCH_CONFIGURATION_REQUIRED' if report['verdict'] in ('WATCH_CONFIGURATION_REQUIRED', 'BLOCKED: PROVIDER PROMPT COMPILATION', 'BLOCKED: CHARACTER ROLE INTEGRITY') else 'DIRECTOR_REVISION_REQUIRED'
+            raise ValueError(code + ': ' + (reasons[0] if reasons else report['summary']) + ' (review: ' + str(destination) + ')')
         verify(final, report)
         segment['prompt'] = final['prompt']
         segment['promptDirectorSnapshot'] = final
@@ -502,3 +496,48 @@ def project_authorities(context, shot, script):
                 audioHash=files[0]['hash'], timingHash=digest(timing),
                 authority='approved recording and measured input-indexed dialogue occurrences')
     return authority
+
+
+def audio_policy(has_audio):
+    """Transport instruction only. Words and intervals stay in approved cues."""
+    if not has_audio:
+        return '[Audio]\nNo dialogue.'
+    from cb_emission_conformance import SINGLE_INSTANCE_DIALOGUE_LOCK
+    return ('[Audio]\nApproved audio @Audio1 is the sole authority for voice identity, cadence, '
+            'delivery, mouth timing, pauses and silence. Preserve its words, speaker ownership and timing. '
+            'No alternative performance; no extra words; no narration; no subtitles or captions. '
+            'Listeners remain silent and closed-mouth. '
+            'Do not add vocal reactions absent from @Audio1. ' + SINGLE_INSTANCE_DIALOGUE_LOCK)
+
+
+def compile_native_source(shot, references, audio):
+    """Free deterministic preview of the same DIRECT fields used at sealing."""
+    from studio_character_roles import audit
+    from studio_seedance_execution import compile_prompt
+    source = current_shot_authority(shot)
+    for field in ('seedancePrompt', 'watchPrompt', 'keyframePrompt', 'seedreamPrompt',
+                  'referenceSlots', 'keyframeReferenceSlots', 'watchDirectorFeedback', 'watchDirectorFeedbackApproved'):
+        source.pop(field, None)
+    snapshot = request_snapshot(audio_policy(bool(audio)), {'shot': source},
+                                references, audio, shot['durationSec'])
+    return compile_prompt(snapshot, audit(snapshot))[0]
+
+
+def native_rule_inputs(shot, prompt):
+    """Project DIRECT/cue ownership into the existing engine-rule input shape."""
+    from studio_watch_plan import build_plan
+    source = request_snapshot(audio_policy(bool(shot.get('dialogueLines'))),
+                              {'shot': current_shot_authority(shot)}, [], {}, shot['durationSec'])
+    plan = build_plan(source)
+    rows = []
+    for number, view in enumerate(plan['views'], 1):
+        indexes = [cue['sourceIndex'] for cue in plan['dialogueOccurrences'] if cue['viewId'] == view['viewId']]
+        authored = (shot['directorCard']['views'])[number - 1]
+        rows.append(dict(shotNumber=number, sourceViewId=view['viewId'],
+                         causalAction=view['action'], framingLensAndCamera=view['camera'],
+                         observablePerformance=view['performance'], landingImage=view['landing'],
+                         dialogueLineIndexes=indexes,
+                         dialogueDirections=[view['performance']] * len(indexes),
+                         holdAfterDialogue=bool(authored.get('holdAfterDialogue', False))))
+    return dict(durationSec=shot['durationSec'], providerPrompt=prompt, shotPlan=rows,
+                geography=plan['geography'])

@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 import re
 
-VERSION = 'seedance-execution-2.0.0'
+VERSION = 'seedance-execution-3.0.0'
 POLICY_PATH = Path(__file__).parent / 'config' / 'seedance_prompt.json'
 AUDIO_HEADINGS = ('Dialogue Authority', 'Audio', 'AUDIO AND EXCLUSIONS')
 INTERNAL_HEADINGS = {
@@ -168,14 +168,31 @@ def _reference_lines(snapshot, roles):
     return lines
 
 
+def require_reference_bindings(references):
+    for ref in references:
+        path = ref.get('path')
+        expected = ref.get('sha256') or ref.get('hash') or ref.get('md5')
+        if not path or not expected:
+            raise ValueError('WATCH_CONFIGURATION_REQUIRED: reference ' + str(ref.get('slot')) + ' has no current file/hash binding')
+        try:
+            data = Path(path).read_bytes()
+        except OSError as exc:
+            raise ValueError('WATCH_CONFIGURATION_REQUIRED: reference ' + str(ref.get('slot')) + ' file is missing') from exc
+        actual = hashlib.md5(data).hexdigest() if len(expected) == 32 else hashlib.sha256(data).hexdigest()
+        if actual != expected:
+            raise ValueError('WATCH_CONFIGURATION_REQUIRED: reference ' + str(ref.get('slot')) + ' hash does not match its approved binding')
+
+
 def compile_prompt(snapshot, roles):
     """The sole final WATCH emitter, driven directly by the bound typed plan."""
     from studio_watch_plan import prepare_plan, digest as plan_digest
     source = snapshot['prompt']
     if 'Human Review Correction' in dict(sections(source)):
         raise ValueError('Unresolved appended correction: update the approved plan and recompile')
+    require_reference_bindings(snapshot.get('references') or [])
     prepared = prepare_plan(snapshot)
     plan = prepared['watchPlan']
+    from studio_authored_action import slot, assemble, proof
     authority = prepared['authorities']
     shot = authority.get('shot') or {}
     evidence = dict(version=VERSION, applied=True, format='typed-plan-only',
@@ -215,20 +232,14 @@ def compile_prompt(snapshot, roles):
         def visual(label, value):
             if not value:
                 return ''
-            kept = []
-            for part in re.split(r'(?<=[.!?])\s+(?=[A-Z])', value):
-                if _passive_offscreen(part, absent, [names[cid] for cid in active]):
-                    evidence['omittedPassiveReminders'].append(dict(viewId=view['viewId'], text=part))
-                else:
-                    kept.append(part)
-            return label + ': ' + ' '.join(kept) if kept else ''
+            return label + ': ' + value
         transition = ('Cut to this view.' if view['entry'] == 'cut' and i else
                       'Continue within the current camera shot; make the directed camera move.' if view['entry'] == 'move' else
                       'Continue within the current camera shot; hold this motivated view.' if view['entry'] == 'hold' else '')
         parts = [f"Shot {i+1}: {view['startSec']:g}–{view['endSec']:g}s",
             'Camera: ' + view['camera'], transition, cast,
             visual('Purpose', view['purpose']), visual('Starting state', view['opening']),
-            visual('Action', view['action']), visual('Performance', view['performance']),
+            'Action: ' + slot(plan['authoredActions'][i], i), visual('Performance', view['performance']),
             visual('Setting / light / materials', view['setting']), visual('End state', view['landing']),
             *view['dialogue'], *view['holds'],
             'Keep identities and actions distinct.' if len(active) > 1 else '']
@@ -250,6 +261,8 @@ def compile_prompt(snapshot, roles):
     from studio_prompt_order import purpose_first
     prompt = bind_visual_names('\n\n'.join(piece for piece in pieces if piece), roles)
     prompt = purpose_first(apply_provider_clauses(protect_honeycomb_aliases(prompt, shot), shot))
+    prompt = assemble(prompt, plan['authoredActions'])
+    evidence['actionIntegrity'] = proof(prompt, plan['authoredActions'])
     for block in plan['audioBlocks']:
         if block not in prompt:
             raise ValueError('Compiler changed the immutable Audio1 provider block')
@@ -284,6 +297,10 @@ def final_check(snapshot, evidence):
         try:
             from studio_watch_plan import prepare_plan, digest as plan_digest
             prepared = prepare_plan(snapshot)
+            from studio_authored_action import proof
+            current_actions = proof(snapshot['prompt'], prepared['watchPlan']['authoredActions'])
+            if current_actions != evidence.get('actionIntegrity'):
+                errors.append('WATCH_AUTHORED_ACTION_DRIFT: final action proof differs from DIRECT')
             if plan_digest(prepared['watchPlan']) != evidence.get('planHash'):
                 errors.append('Provider prompt belongs to a different typed plan revision')
         except ValueError as exc:

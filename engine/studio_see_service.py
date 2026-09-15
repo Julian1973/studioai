@@ -144,7 +144,7 @@ def native_references(root, scope, plan):
 def gate(root, scope, reviewed=None, *, approved=False):
     status = current(root, scope)
     if not status['ready'] or approved and not status['approved']:
-        raise ValueError('Review and approve the current scene plate, opening keyframe and any selected storyboard before HEAR/WATCH.')
+        raise ValueError('WATCH_CONFIGURATION_REQUIRED: ' + ((status.get('issues') or [None])[0] or 'the selected SEE assets do not have a current package approval.'))
     if reviewed and status['binding'] != reviewed.get('binding'):
         raise ValueError('The SEE package changed after review. Review the current selected assets.')
     return status

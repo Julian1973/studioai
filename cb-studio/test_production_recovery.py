@@ -19,6 +19,13 @@ import cb_render as R
 import cb_studio_director as D
 
 
+def install_prepare(monkeypatch, action):
+    """Use the real preparation coordinator around an offline request builder."""
+    def prepare_render(scene, shot_id, episode="Ep1", log=print):
+        return action(scene, shot_id, episode)
+    monkeypatch.setattr(D, "prepare_render", C.protect_preparation(prepare_render))
+
+
 @pytest.fixture
 def world(tmp_path, monkeypatch):
     root = tmp_path
@@ -56,7 +63,7 @@ def world(tmp_path, monkeypatch):
         calls.append("seal")
         ledger["pendingSpendAuth"] = {"token": "sealed", "envelopeHash": "payload-digest"}
         save()
-    monkeypatch.setattr(D, "prepare_render", prepare)
+    install_prepare(monkeypatch, prepare)
     return root, pkg, ledger, calls, save
 
 
@@ -141,7 +148,8 @@ def test_authored_watch_change_starts_one_new_bounded_preparation(world, change_
     assert len(ids) == 1 and previous["operationId"] not in ids
     assert sum(launched for op, launched in results) == 1
     assert results[0][0]["predecessorOperationId"] == previous["operationId"]
-    assert results[0][0]["requestFingerprint"] != previous["requestFingerprint"]
+    changed = results[0][0]["requestFingerprint"] != previous["requestFingerprint"]
+    assert changed == (change_input in {"director-card", "additional-role"})
 
 
 @pytest.mark.parametrize("decision_change", ["missing", "consumed", "replaced"])
@@ -166,8 +174,9 @@ def test_retired_cost_decision_gets_new_lifecycle_without_resetting_same_failure
              owner=None, leaseUntil=0, attempts={"prepare": 2},
              resumeInputFingerprint=C.request_fingerprint(root, current, pkg))
     same = C.register(root, PREPARE_ARGS)
-    assert same["operationId"] == current["operationId"]
-    assert same["attempts"] == {"prepare": 2}
+    assert same["operationId"] != current["operationId"]
+    assert C.get(root, current["operationId"])["attempts"] == {"prepare": 2}
+    assert same["requestFingerprint"] == current["requestFingerprint"]
 
 
 def test_retake_new_approved_source_can_start_new_operation_without_rewriting_prior_evidence(world):
@@ -195,8 +204,9 @@ def test_derived_prompt_and_record_timestamps_do_not_reset_a_failed_request(worl
     ledger["departmentWork"]["animation"]["candidate"]["output"]["providerPrompt"] = "rebuilt compiled prompt"
     save()
     current = C.register(root, PREPARE_ARGS)
-    assert current["operationId"] == previous["operationId"]
-    assert current["attempts"] == {"prepare": 2}
+    assert current["operationId"] != previous["operationId"]
+    assert current["requestFingerprint"] == previous["requestFingerprint"]
+    assert C.get(root, previous["operationId"])["attempts"] == {"prepare": 2}
 
 
 def test_bound_reference_bytes_change_reopens_preparation(world):
@@ -319,24 +329,25 @@ def test_cli_resumes_saved_checkpoints_without_rejecting_or_preparing_twice(worl
     original = copy.deepcopy(ledger)
     def fail(*args):
         raise RuntimeError("Missing current reference")
-    monkeypatch.setattr(D, "prepare_render", fail)
-    assert D.main(ARGS[1:]) == 1
+    install_prepare(monkeypatch, fail)
+    assert D.main(PREPARE_ARGS[1:]) == 1
     op = C.all_operations(root)[0]
     assert op["state"] == "needs-attention"
     server = load_server(root, monkeypatch, "recovery_cli_projection")
     visible = server._jobs_snapshot()[op["jobId"]]
     assert visible["status"] == "failed"
     assert visible["operation"]["operationId"] == op["operationId"]
-    assert {"archive-take", "cinematography", "animation"}.issubset(op["checkpoints"])
+    assert not {"archive-take", "cinematography", "animation"}.intersection(op["checkpoints"])
+    monkeypatch.setenv("CB_PRODUCTION_OPERATION_ID", op["operationId"])
     def succeed(*args):
         ledger["pendingSpendAuth"] = {"token": "current", "envelopeHash": "exact-payload"}
         save()
-    monkeypatch.setattr(D, "prepare_render", succeed)
-    assert D.main(ARGS[1:]) == 0
+    install_prepare(monkeypatch, succeed)
+    assert D.main(PREPARE_ARGS[1:]) == 0
     final = C.get(root, op["operationId"])
     assert final["state"] == "awaiting-spend-approval" and final["mediaSubmitted"] is False
     assert final["payloadHash"] == "exact-payload"
-    assert calls.count("archive") == calls.count("cinematography") == calls.count("animation") == 1
+    assert calls == []
     assert ledger["keyframeApproval"] == original["keyframeApproval"]
     assert ledger["voiceApproval"] == original["voiceApproval"]
     assert C.events(root, op["operationId"])[-1]["state"] == "awaiting-spend-approval"
@@ -348,13 +359,14 @@ def test_timeout_budget_survives_http_resume_and_has_actionable_status(world, mo
     def fail(*args):
         attempts.append(1)
         raise RuntimeError("prompt_director APITimeoutError: request timed out")
-    monkeypatch.setattr(D, "prepare_render", fail)
-    assert D.main(ARGS[1:]) == 1
+    install_prepare(monkeypatch, fail)
+    assert D.main(PREPARE_ARGS[1:]) == 1
     op = C.all_operations(root)[0]
     assert len(attempts) == 2 and op["state"] == "needs-attention"
     server = load_server(root, monkeypatch, "recovery_timeout_server")
     finished = threading.Event()
     def stream(job_id, args):
+        monkeypatch.setenv("CB_PRODUCTION_OPERATION_ID", op["operationId"])
         D.main(args[1:])
         finished.set()
     monkeypatch.setattr(server, "_stream", stream)
@@ -364,24 +376,27 @@ def test_timeout_budget_survives_http_resume_and_has_actionable_status(world, mo
         assert finished.wait(4)
         status, jobs = http.request("GET", "/api/jobs")
         job = jobs["jobs"][payload["jobId"]]
-        assert job["status"] == "failed"
-        assert "recovery limit reached" in job["step"]
+        # Current operation evidence governs recovery, not a cached worker label.
+        saved = C.get(root, op["operationId"])
+        assert saved["state"] == "needs-attention"
+        assert "recovery limit reached" in saved["message"]
     assert len(attempts) == 2  # Resume cannot silently replenish the text retry budget.
     assert ledger["pendingSpendAuth"] is None
 
 
 def test_changed_approved_bytes_are_not_renewed_on_resume(world, monkeypatch):
     root, pkg, ledger, calls, save = world
-    monkeypatch.setattr(D, "prepare_render", lambda *a: (_ for _ in ()).throw(RuntimeError("Missing reference")))
-    assert D.main(ARGS[1:]) == 1
+    install_prepare(monkeypatch, lambda *a: (_ for _ in ()).throw(RuntimeError("Missing reference")))
+    assert D.main(PREPARE_ARGS[1:]) == 1
     op = C.all_operations(root)[0]
     old = op["approvedSources"]
+    monkeypatch.setenv("CB_PRODUCTION_OPERATION_ID", op["operationId"])
     Path(ledger["voPath"]).write_bytes(b"different voice bytes")
-    assert D.main(ARGS[1:]) == 1
+    assert D.main(PREPARE_ARGS[1:]) == 1
     final = C.get(root, op["operationId"])
     assert final["approvedSources"] == old
     assert "Approved inputs changed" in final["message"]
-    assert calls.count("archive") == 1
+    assert calls == []
 
 
 def test_only_explicit_producer_text_retry_reopens_one_bounded_cycle(world, monkeypatch):
@@ -390,12 +405,13 @@ def test_only_explicit_producer_text_retry_reopens_one_bounded_cycle(world, monk
     def fail(*args):
         attempts.append(1)
         raise RuntimeError("prompt_director APITimeoutError: timed out")
-    monkeypatch.setattr(D, "prepare_render", fail)
-    assert D.main(ARGS[1:]) == 1
+    install_prepare(monkeypatch, fail)
+    assert D.main(PREPARE_ARGS[1:]) == 1
     operation = C.all_operations(root)[0]
     assert C.public(operation)["canRetryTextReview"] is True
     C.authorize_text_retry(root, operation["operationId"])
-    assert D.main(ARGS[1:]) == 1
+    monkeypatch.setenv("CB_PRODUCTION_OPERATION_ID", operation["operationId"])
+    assert D.main(PREPARE_ARGS[1:]) == 1
     assert len(attempts) == 4
     with pytest.raises(RuntimeError, match="repair"):
         C.authorize_text_retry(root, operation["operationId"])
@@ -477,8 +493,8 @@ def test_uncertain_submission_reconciles_exact_batch_without_replay(world, monke
 
 def test_successful_process_exit_without_cost_or_media_is_not_completed(world, monkeypatch):
     root, pkg, ledger, calls, save = world
-    monkeypatch.setattr(D, "prepare_render", lambda *a: None)
-    assert D.main(ARGS[1:]) == 1
+    install_prepare(monkeypatch, lambda *a: None)
+    assert D.main(PREPARE_ARGS[1:]) == 1
     op = C.all_operations(root)[0]
-    assert op["state"] == "needs-attention" and "cost review" in op["message"]
+    assert op["state"] == "needs-attention" and "persisted cost decision" in op["message"]
     assert op["mediaSubmitted"] is False

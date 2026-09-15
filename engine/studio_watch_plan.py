@@ -1,3 +1,4 @@
+import studio_dialogue_occurrence as O
 """One typed WATCH execution plan and source-bound, request-local revisions.
 
 No creative inference, file mutation or model calls. Legacy provider prose is an
@@ -11,7 +12,7 @@ import re
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-VERSION = 'watch-plan@1.0.0'
+VERSION = 'watch-plan@2.0.0'
 AUDIO_HEADINGS = ('Dialogue Authority', 'Audio', 'AUDIO AND EXCLUSIONS', 'AUDIO', 'Audio Authority')
 
 
@@ -51,11 +52,12 @@ class DialogueOccurrence(Record):
 
 
 class WatchPlan(Record):
-    version: Literal['watch-plan@1.0.0'] = VERSION
+    version: Literal['watch-plan@2.0.0'] = VERSION
     sourceHash: str
     requestBindingHash: str
     purpose: str = Field(min_length=1)
     views: list[View] = Field(min_length=1)
+    authoredActions: list[dict] = Field(default_factory=list)
     opening: str = ''
     causality: str = ''
     landing: str = ''
@@ -107,8 +109,19 @@ def _assign(value, path, replacement):
     target[int(key) if isinstance(target, list) else key] = replacement
 
 
+def current_snapshot(snapshot):
+    result = deepcopy(snapshot)
+    authority = result.get('authorities') or {}
+    for key in ('specialist', 'outcomeLearning', 'sourceProjection', 'excludedSpecialistHash'):
+        authority.pop(key, None)
+    from studio_prompt_director import current_shot_authority
+    authority['shot'] = current_shot_authority(authority.get('shot') or {})
+    result['authorities'] = authority
+    return result
+
+
 def request_binding(snapshot):
-    return digest({k: snapshot.get(k) for k in ('authorities', 'references', 'audio', 'duration', 'settings')})
+    return digest({k: current_snapshot(snapshot).get(k) for k in ('authorities', 'references', 'audio', 'duration', 'settings')})
 
 
 def _audio_blocks(prompt):
@@ -120,13 +133,19 @@ def _audio_blocks(prompt):
 
 
 def build_plan(snapshot):
+    snapshot = current_snapshot(snapshot)
+    source_shot = (snapshot.get('authorities') or {}).get('shot') or {}
+    occurrence_lines = source_shot.get('dialogueLines') or []
+    if occurrence_lines and all(x.get('dialogueOccurrenceId') for x in occurrence_lines):
+        source_shot['dialogueLines'] = O.require_set(occurrence_lines, occurrence_lines)
     authority = snapshot.get('authorities') or {}
-    shot, specialist = authority.get('shot') or {}, authority.get('specialist') or {}
+    # Department translations are history, not a fallback for missing DIRECT.
+    shot, specialist = authority.get('shot') or {}, {}
     card = shot.get('directorCard') or {}
     views = card.get('views') or []
     directed = specialist.get('shotPlan') or []
-    if not views:
-        raise ValueError('WATCH plan adaptation unavailable: author timed typed coverage before provider compilation')
+    from studio_authored_action import actions
+    authored = actions(shot, authority.get('sourceUnit'))
     from studio_storyboard_prompt import view_timings, validate_view_bindings
     if directed:
         validate_view_bindings(shot, directed)
@@ -138,6 +157,8 @@ def build_plan(snapshot):
     origins = {}
     def select(target, choices, default=''):
         for path in choices:
+            if path.startswith('/specialist/'):
+                continue
             try:
                 value = pointer(authority, path)
             except ValueError:
@@ -149,19 +170,30 @@ def build_plan(snapshot):
     plan = dict(version=VERSION, sourceHash=digest(authority), requestBindingHash=request_binding(snapshot),
         compatibility='native-specialist' if directed else 'project-director-card', origins=origins,
         purpose=select('/purpose', ['/shot/directorCard/audienceFocus', '/specialist/dramaticBeat', '/specialist/generationGoal', '/shot/intent', '/shot/purpose']),
-        opening=select('/opening', ['/shot/openingState', '/specialist/stagePlan/0/initialOrCarriedState']),
-        causality=select('/causality', ['/specialist/physicalCauseAndEffect']),
-        landing=select('/landing', ['/shot/endingState', '/shot/directorCard/handoff', '/specialist/continuityFinish']),
-        geography=select('/geography', ['/specialist/geography'], [shot['geography']] if shot.get('geography') else []),
-        invariants=select('/invariants', ['/specialist/consistencyContract']),
+        opening=select('/opening', ['/shot/openingState', '/shot/directorCard/editIn']),
+        causality=select('/causality', ['/shot/causality', '/shot/directorCard/causality']),
+                landing=select('/landing', ['/shot/endingState', '/shot/directorCard/handoff']),
+                geography=select('/geography', ['/shot/geography'], []),
+        invariants=select('/invariants', ['/shot/mustPreserve', '/shot/directorCard/mustPreserve']),
         sound=[], audioBlocks=_audio_blocks(snapshot.get('prompt', '')), dialogueTiming=[], dialogueOccurrences=[], views=[])
     for key in ('geography', 'invariants'):
-        if key == 'invariants' and isinstance(plan[key], str):
+        if isinstance(plan[key], str):
             plan[key] = [plan[key]]
+        from studio_prompt_structure import prose
+        plan[key] = [prose(value) for value in plan[key]]
         origin = origins.get('/' + key)
         if origin:
             for i in range(len(plan[key])):
                 origins[f'/{key}/{i}'] = f'{origin}/{i}'
+    for owner in (shot, card, shot.get('unitBoundary') or {}):
+        for field in ('mustPreserve', 'mustNotAdvance'):
+            values = owner.get(field) or []
+            if isinstance(values, str):
+                values = [values]
+            for value in values:
+                text = prose(value, 'Must not advance' if field == 'mustNotAdvance' else '')
+                if text and text not in plan['invariants']:
+                    plan['invariants'].append(text)
     from cb_emission_conformance import dialogue_cues, dialogue_placement_line
     lines = shot.get('dialogueLines') or []
     if shot.get('dialogue') and not lines:
@@ -181,12 +213,13 @@ def build_plan(snapshot):
         base, target, native = f'/shot/directorCard/views/{i}', f'/views/{i}', f'/specialist/shotPlan/{i}'
         def field(name, source, fallback, default=''):
             return select(target + '/' + name, [native + '/' + fallback, base + '/' + source], default)
+        origins[target + '/action'] = authored[i]['origin']
         row = dict(viewId=view['viewId'], startSec=interval[0], endSec=interval[1],
             entry=typed.get('transitionType') if typed.get('transitionType') in ('opening','cut','move','hold') else view.get('entry', 'opening' if i == 0 else 'hold'),
             visibleEntities=deepcopy(view.get('visibleEntities')),
             purpose=field('purpose', 'cameraPurpose', 'purpose'),
             camera=field('camera', 'framing', 'framingLensAndCamera'),
-            action=field('action', 'action', 'causalAction'),
+            action=authored[i]['text'],
             performance=field('performance', 'performance', 'observablePerformance'),
             setting=field('setting', 'staging', 'compositionLightAndMaterials'),
             opening=field('opening', 'startState', 'initialOrCarriedState'),
@@ -208,7 +241,7 @@ def build_plan(snapshot):
             else:
                 row['dialogue'].append(dialogue_placement_line(cue,
                     direction=directions[pos] if pos < len(directions) else '',
-                    hold_after=bool(typed.get('holdAfterDialogue', True))))
+                hold_after=bool(view.get('holdAfterDialogue', False))))
             plan['dialogueOccurrences'].append(dict(speaker=cue['speaker'], text=cue['exactText'],
                 startSec=cue['startSec'], endSec=cue['endSec'], viewId=view['viewId'], sourceIndex=number,
                 placement='audio-block' if in_audio else 'view'))
@@ -244,11 +277,13 @@ def build_plan(snapshot):
         plan['audioBlocks'] = ['[Audio]\n' + specialist['audioContract']]
     if cues and not plan['audioBlocks']:
         raise ValueError('WATCH plan requires the immutable approved Audio1 provider block')
-    return WatchPlan.model_validate(plan).model_dump()
+    plan['authoredActions'] = authored
+    result = WatchPlan.model_validate(plan).model_dump()
+    return result
 
 
 def prepare_plan(snapshot):
-    result = deepcopy(snapshot)
+    result = current_snapshot(snapshot)
     if 'watchPlan' in result:
         plan = WatchPlan.model_validate(result['watchPlan']).model_dump()
         if plan['requestBindingHash'] != request_binding(result) or plan['sourceHash'] != digest(result.get('authorities')):
@@ -284,6 +319,8 @@ def correct_plan(snapshot, corrections):
         if correction['expectedPlanHash'] != before_hash:
             raise ValueError('Plan correction belongs to a different plan revision')
         path = correction['path']
+        if path.rsplit('/', 1)[-1] in ('action', 'causalAction', 'storyAction', 'primaryEvent'):
+            raise ValueError('DIRECTOR_REVISION_REQUIRED: WATCH cannot rewrite authored action')
         origins = original['watchPlan']['origins']
         if not path.startswith('/specialist/') or path not in origins.values():
             raise ValueError('Correction must address an emitted request-local specialist field; approved source decisions are immutable')
@@ -319,6 +356,7 @@ def scope_segment(snapshot, segment):
     request-local numeric clocks and selected occurrence indexes are rebased.
     A transport boundary cannot cut through an authored view or spoken line.
     """
+    snapshot = current_snapshot(snapshot)
     authority = snapshot.get('authorities') or {}
     shot, specialist = authority.get('shot') or {}, authority.get('specialist') or {}
     duration = float(shot.get('durationSec', shot.get('duration', 0)))
@@ -334,11 +372,10 @@ def scope_segment(snapshot, segment):
         return deepcopy(snapshot)
     from studio_storyboard_prompt import view_timings, validate_view_bindings
     views = (shot.get('directorCard') or {}).get('views') or []
-    directed = specialist.get('shotPlan') or []
-    if not views or not directed:
-        raise ValueError('Segment projection requires the complete typed source coverage and specialist view bindings')
+    directed = [dict(landingImage=v.get('endState') or '', dialogueLineIndexes=[]) for v in views]
+    if not views:
+        raise ValueError('Segment projection requires current DIRECT coverage views')
     intervals = view_timings(shot, len(views))
-    validate_view_bindings(shot, directed)
     if not all(intervals):
         raise ValueError('Segment projection requires explicit source view intervals')
     selected = [i for i, (a, b) in enumerate(intervals) if start <= a and b <= end]
@@ -450,8 +487,6 @@ def scope_segment(snapshot, segment):
         a, b = stage.get('startSec'), stage.get('endSec')
         if a is not None and b is not None and start <= a and b <= end:
             row = deepcopy(stage); row.update(startSec=a-start, endSec=b-start); stages.append(row)
-    if segment.get('stageNumbers') and [row['stageNumber'] for row in stages] != segment['stageNumbers']:
-        raise ValueError('Segment stageNumbers disagree with complete authored stage intervals')
     local_direction['stagePlan'] = stages
     local_direction['timeline'] = []
     for event in specialist.get('timeline') or []:
@@ -469,7 +504,7 @@ def scope_segment(snapshot, segment):
     local_direction['continuityFinish'] = local_direction['shotPlan'][-1]['landingImage']
     local_shot['endingState'] = local_direction['continuityFinish']
     local_card['handoff'] = local_direction['continuityFinish']
-    local_authority.update(shot=local_shot, specialist=local_direction)
+    local_authority.update(shot=local_shot)
     receipt['projectionHash'] = digest(dict(shot=local_shot, specialist=local_direction))
     result.pop('watchPlan', None); result.pop('watchPlanBinding', None)
     return result

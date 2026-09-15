@@ -24,6 +24,7 @@ import cb_canon
 import cb_providers
 import cb_production_contracts as production_contracts
 import studio_prompt_aliases
+from studio_prompt_director import current_shot_authority
 
 
 def selected_voice_recipe(recipes, selected, candidates, current_compiled_hash=None):
@@ -156,10 +157,11 @@ def create_policy(m):
             return digest
         return lock
 
-    def current_package(scene, episode):
+    def current_package(scene, episode, *, watch=False):
         m._require_show_adapter()
         pkg, path = m.load_pkg(scene, episode)
-        m._require_valid(pkg)
+        if not watch:
+            m._require_valid(pkg)
         m._require_current_lineage(pkg, scene, episode)
         require_canon(pkg, episode)
         return pkg, path
@@ -1054,17 +1056,12 @@ def create_policy(m):
         voice_approval = voice["record"]
         opening_contract = (((ledger.get("keyframeApproval") or {}).get("promptContract") or {})
                             .get("directionContract") or {})
-        cinematography = department_record_status(
-            pkg, shot["shotId"], "cinematography", scene, episode)
         return {
             "canonProfileDigest": require_canon(pkg, episode, "animation"),
             "shotHash": hashlib.sha256(json.dumps(
-                shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
+                current_shot_authority(shot), sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
             "openingFrameHash": file_sha256(anchor),
             "openingStageContractHash": json_sha256(opening_contract),
-            "cinematographyDirectionHash": json_sha256(
-                (cinematography.get("record") or {}).get("output") or {}),
-            "cinematographySourceHash": json_sha256(cinematography.get("expectedInputSignature")),
             "sceneLookHash": ((look.get("active") or {}).get("hash")
                               if look.get("current") else None),
             "referenceOrder": [item["slot"] for item in plan],
@@ -1079,12 +1076,7 @@ def create_policy(m):
                           if has_spoken_dialogue else None),
             "voiceApprovalSignature": (voice_approval.get("inputSignature")
                                        if has_spoken_dialogue else None),
-            "directorFeedbackHash": json_sha256({
-                "workingPrompt": ledger.get("workingSeedancePrompt"),
-                "watchFeedback": ledger.get("watchDirectorFeedback"),
-                "latestRejection": ((ledger.get("rejections") or [])[-1]
-                                    if ledger.get("rejections") else None),
-            }),
+
         }
 
     def animation_generation_signature(pkg, shot, scene, episode, fast=False,
@@ -1092,21 +1084,8 @@ def create_policy(m):
                                        comparison_run_id=None,
                                        include_audio_reference=True,
                                        generate_audio=True):
-        direction = current_direction_record(pkg, shot["shotId"], "animation")
-        # The working prompt is the prompt the director has actually iterated.
-        # The signature must audit the same text that fire_shot will send; using
-        # only the older approved compiler output makes the gate score a
-        # different prompt from the one shown in the studio.
         ledger = m._ledger(pkg, shot["shotId"])
-        working = ledger.get("workingSeedancePrompt") or {}
-        prompt = str(
-            working.get("text")
-            or (direction.get("output") or {}).get("providerPrompt")
-            or ""
-        ).strip()
-        if not prompt:
-            raise m.Refused(
-                f"REFUSED — current Animation direction for {shot['shotId']} has no prompt")
+        prompt = seedance_prompt(pkg, shot, scene, episode)[0]
         anchor = m._anchor_for(pkg, shot)
         shot = m._with_effective_reference_slots(
             pkg, shot, "referenceSlots", scene, episode)
@@ -1137,8 +1116,8 @@ def create_policy(m):
             raise m.Refused("REFUSED — tracked production objects need repair before approval/currentness: " + reasons)
         return {
             "canonProfileDigest": require_canon(pkg, episode, "animation"),
-            "shotContractHash": json_sha256(shot),
-            "animationDirectionSignature": direction.get("inputSignature"),
+            "shotContractHash": json_sha256(current_shot_authority(shot)),
+            "directRevision": json_sha256(shot.get("directorCard")),
             "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
             "audioReferencePolicy": ("guide" if include_audio_reference else
                                      ("native" if generate_audio else "post-only")),
@@ -2041,42 +2020,10 @@ def create_policy(m):
         return result
 
     def seedance_prompt(pkg, shot, scene=None, episode="Ep1", require_current_working=False):
-        # A saved Director iteration is provider authority only after save_seedance_working
-        # has validated its dialogue and production contracts and bound it to the current
-        # SEE/HEAR/reference signature. Keep the typed Animation Director record as the
-        # auditable baseline, then allow that current human override to supply the bytes.
-        direction = current_direction_output(pkg, shot["shotId"], "animation")
-        ledger = m._ledger(pkg, shot["shotId"])
-        working = ledger.get("workingSeedancePrompt") or {}
-        prompt = str(working.get("text") or direction.get("providerPrompt") or "").strip()
-        if not prompt:
-            raise m.Refused(f"REFUSED — current Animation direction for {shot['shotId']} has no prompt")
-        if working.get("text"):
-            current_scene = str(scene or pkg.get("sceneNumber") or "")
-            current_episode = episode or pkg.get("episode") or "Ep1"
-            expected = m._seedance_working_input_signature(
-                pkg, shot, current_scene, current_episode)
-            if not production_contracts.working_signature_matches(working.get("inputSignature"), expected):
-                raise m.Refused(
-                    "REFUSED — saved WATCH working prompt is stale against the current "
-                    "SEE/HEAR/reference inputs. Restore it or save it again after preparing "
-                    "the current Animation direction."
-                )
-        prompt = studio_prompt_aliases.protect_honeycomb_aliases(prompt, shot)
-        return (m._with_character_scale_control(
-            prompt, shot, "referenceSlots", str(scene or pkg.get("sceneNumber")),
-            episode or pkg.get("episode") or "Ep1"), bool(working.get("text")))
+        return original["_resolve_seedance_prompt"](pkg, shot, scene, episode, require_current_working)
 
     def approved_seedance_prompt(pkg, shot):
-        prompt = str(current_direction_output(pkg, shot["shotId"], "animation")
-                     .get("providerPrompt") or "").strip()
-        if not prompt:
-            raise m.Refused(
-                f"REFUSED — Prepare current Animation direction for {shot['shotId']} first")
-        prompt = studio_prompt_aliases.protect_honeycomb_aliases(prompt, shot)
-        return m._with_character_scale_control(
-            prompt, shot, "referenceSlots", str(pkg.get("sceneNumber")),
-            pkg.get("episode") or "Ep1")
+        return seedance_prompt(pkg, shot)[0]
 
     def check_structure(scene, shot_id, episode="Ep1", log=print):
         try:
@@ -2090,23 +2037,8 @@ def create_policy(m):
                   spend_token=None, dry_run=False, comparison_model_id=None,
                   comparison_run_id=None, log=print, include_audio_reference=True,
                   generate_audio=True, protected_comparison=False):
-        pkg, _ = current_package(scene, episode); shot = m._shot(pkg, shot_id)
+        pkg, _ = current_package(scene, episode, watch=True); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
-        production_block = ledger.get("productionBlock") or shot.get("productionBlock") or {}
-        from studio_keyframe_director import recovery_ready
-        if (str(production_block.get("status") or "").upper().startswith("BLOCKED") and
-                not recovery_ready(m, pkg, shot, ledger, scene, episode, spend_token=spend_token, protected_comparison=protected_comparison)):
-            reason = (f"{shot_id} is {production_block.get('status')}: "
-                      f"{production_block.get('reason', 'production recovery gate has not been cleared')}")
-            block_path = m._write_prefire_block_evidence(
-                shot, reason, package=pkg,
-                corrective_action='Complete and record the clean SEE opening qualification, then clear the production recovery gate before WATCH Fire.',
-                source_bindings={'productionBlock': production_block})
-            raise m.Refused(f"REFUSED — {reason} (pre-fire block: {block_path})")
-        if ledger.get("status") == "model-limited":
-            raise m.Refused(
-                f"REFUSED — {shot_id} is MODEL-LIMITED after {m.MAX_BATCH_ATTEMPTS} failed "
-                "candidate batches; human redesign is required before another fire")
         stage_report = keyframe_stage_contract_report(
             ledger.get("keyframeApproval") or {})
         if not stage_report["ready"]:
@@ -2114,11 +2046,13 @@ def create_policy(m):
                 "REFUSED — WATCH blocked because the approved SEE frame does not prove "
                 "the physical stage contract. SEE is the render's opening causality "
                 f"evidence, so text cannot safely override it: {stage_report['reason']}")
-        stored = (((ledger.get("comparisonBatch") or {}).get("envelope") or
-                   (ledger.get("pendingComparisonSpendAuth") or {}).get("envelope") or {})
-                  if protected_comparison else
-                  ((ledger.get("batch") or {}).get("envelope") or
-                   (ledger.get("pendingSpendAuth") or {}).get("envelope") or {}))
+        batch = ledger.get('comparisonBatch' if protected_comparison else 'batch') or {}
+        auth = ledger.get('pendingComparisonSpendAuth' if protected_comparison else 'pendingSpendAuth') or {}
+        stored = ((batch.get('envelope') if batch.get('status') == 'generating' and batch.get('token') == spend_token
+                   else auth.get('envelope') if auth.get('token') == spend_token else {}) or {}) if spend_token else {}
+        if not spend_token:
+            from cb_recovery import require_no_provider_operation
+            require_no_provider_operation(m.ROOT, episode, scene, shot_id, ledger)
         if stored.get("comparisonRunId"):
             if comparison_model_id and (
                     comparison_model_id != stored.get("providerModelId") or

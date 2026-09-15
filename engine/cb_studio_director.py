@@ -1347,7 +1347,7 @@ def build_voice(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> No
 
 
 def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
-    """Prepare AI direction and seal one efficient, reviewable WATCH request."""
+    """Validate current approved authorities and seal a reviewable WATCH request."""
     import cb_providers
     import cb_render
 
@@ -1356,19 +1356,31 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
     package, _ = cb_render.load_pkg(scene, episode)
     shot = cb_render._shot(package, shot_id)
     ledger = cb_render._ledger(package, shot_id)
-    if not _direction_current(scene, shot_id, "cinematography", episode):
-        log("DIRECTOR — refreshing current cinematography direction before render sealing")
-        cb_render.prepare_department(scene, "cinematography", shot_id, episode, log)
-    if not _direction_current(scene, shot_id, "animation", episode):
-        log("DIRECTOR — preparing current animation direction")
-        cb_render.prepare_department(scene, "animation", shot_id, episode, log)
-    package, _ = cb_render.load_pkg(scene, episode)
-    shot = cb_render._shot(package, shot_id)
-    ledger = cb_render._ledger(package, shot_id)
+    from studio_authored_action import actions
+    from studio_director_handoff import errors, card_issues
+    issues = errors(shot) + card_issues(shot)
+    if issues:
+        raise cb_render.Refused('DIRECTOR_REVISION_REQUIRED: ' + issues[0])
+    try:
+        actions(shot)
+    except ValueError as exc:
+        raise cb_render.Refused('DIRECTOR_REVISION_REQUIRED: ' + str(exc)) from exc
+    from studio_see_service import gate as see_gate
+    from cb_recovery import require_no_provider_operation
+    try:
+        require_no_provider_operation(cb_render.ROOT, episode, scene, shot_id, ledger)
+        see_gate(cb_render.ROOT, {'projectId':'crystal-bears', 'episode':episode,
+            'scene':str(scene), 'unit':shot_id}, approved=True)
+    except ValueError as exc:
+        raise cb_render.Refused(str(exc)) from exc
+    import cb_audio_authority
+    if cb_audio_authority.spoken_dialogue_lines(shot):
+        voice = cb_render._voice_approval_status(package, shot, scene, episode)
+        if not voice.get('current'):
+            raise cb_render.Refused('WATCH_CONFIGURATION_REQUIRED: Audio1 is not bound to the current approved dialogue/performance: ' + str(voice.get('reason') or 'approval missing'))
     opening = (ledger.get("keyframeApproval") or {}).get("path") or cb_render._anchor_for(package, shot)
     if not opening:
-        raise cb_render.Refused("Prepare the opening image before SEE action-readiness review")
-    cb_render.review_see_action_readiness(package, shot, ledger, opening, scene, episode)
+        raise cb_render.Refused("WATCH_CONFIGURATION_REQUIRED: approve the Opening Keyframe before preparing WATCH.")
     try:
         cb_render.fire_shot(scene, shot_id, episode, candidates=1, spend_token=None, log=log)
     except cb_render.Refused as exc:
@@ -1381,74 +1393,10 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
 
 
 def retake_render(scene: str, shot_id: str, correction: str, episode: str = "Ep1", log=print, *, expected_batch_id=None):
-    """Archive, rebuild and review a retake; never submit media or approve an outcome."""
+    """Creative changes belong in DIRECT before a new WATCH request is prepared."""
     import cb_render
-    import cb_recovery
-    note = str(correction or '').strip()
-    if not note:
-        raise cb_render.Refused('Describe what should change before preparing a retake.')
-    pkg, path = cb_render.load_pkg(scene, episode)
-    led = cb_render._ledger(pkg, shot_id)
-    existing = led.get('watchRetake') or {}
-    if expected_batch_id != (led.get('batchId') or existing.get('sourceBatchId')) or not expected_batch_id:
-        raise cb_render.Refused('The reviewed take changed. Reload WATCH before preparing its retake.')
-    if led.get('status') != 'candidates-pending' and not (existing.get('status') in {'preparing', 'needs-attention', 'ready'}):
-        raise cb_render.Refused('Select the current returned take to reject, or resume its saved retake.')
-    if existing and existing.get('note') != note:
-        led.setdefault('watchRetakeHistory', []).append(existing)
-    led['watchRetake'] = {'note': note, 'status': 'preparing', 'sourceBatchId': led.get('batchId') or existing.get('sourceBatchId'), 'stage': 'Saving your direction'}
-    led['pendingSpendAuth'] = None
-    cb_render._save(pkg, path)
-    try:
-        log('RETAKE 1/4 — saving correction and archiving the rejected take')
-        cb_recovery.checkpoint('save-correction', 'Saving your direction',
-            lambda: cb_render.save_watch_director_feedback(scene, shot_id, note, episode, log=log))
-        def archive_current_take():
-            current, _ = cb_render.load_pkg(scene, episode)
-            if cb_render._ledger(current, shot_id).get('status') == 'candidates-pending':
-                cb_render.reject_shot(scene, shot_id, note, episode=episode, log=log)
-        cb_recovery.checkpoint('archive-take', 'Archiving the rejected take', archive_current_take)
-        # A fresh specialist translation replaces old appended prompt overrides.
-        cb_recovery.checkpoint('clear-working-prompt', 'Updating the working prompt',
-            lambda: cb_render.restore_seedance_working(scene, shot_id, episode, log))
-        log('RETAKE 2/4 — rebuilding camera and animation direction from the saved correction')
-        pkg, path = cb_render.load_pkg(scene, episode)
-        cb_render._ledger(pkg, shot_id)['watchRetake']['stage'] = 'Preparing direction from your saved correction'
-        cb_render._save(pkg, path)
-        cb_recovery.checkpoint('cinematography', 'Preparing camera direction',
-            lambda: cb_render.prepare_department(scene, 'cinematography', shot_id, episode, log))
-        cb_recovery.checkpoint('animation', 'Preparing animation direction',
-            lambda: cb_render.prepare_department(scene, 'animation', shot_id, episode, log))
-        # Rebind the compiled retake to the current approved opening and exact
-        # upload roles even when specialist preparation reused a cached record.
-        # Cached creative direction is not proof of a current provider payload.
-        cb_recovery.checkpoint('compile', 'Checking current opening and reference bindings',
-            lambda: cb_render.recompile_animation_candidate(scene, shot_id, episode, log), repeat=True)
-        pkg, path = cb_render.load_pkg(scene, episode)
-        led = cb_render._ledger(pkg, shot_id)
-        if led.get('status') == 'model-limited':
-            cb_render.override_model_limited(scene, shot_id,
-                'Director requested a revised retake; specialist direction has been rebuilt: ' + note,
-                episode, log=log)
-        log('RETAKE 3/4 — checking approved inputs, references, timing and Prompt Director')
-        pkg, path = cb_render.load_pkg(scene, episode)
-        cb_render._ledger(pkg, shot_id)['watchRetake']['stage'] = 'Checking the opening, references, timing and final prompt'
-        cb_render._save(pkg, path)
-        cb_recovery.checkpoint('seal-request', 'Checking the animation request and final Director review',
-            lambda: prepare_render(scene, shot_id, episode, log), retry_timeout=True, repeat=True)
-        pkg, path = cb_render.load_pkg(scene, episode)
-        led = cb_render._ledger(pkg, shot_id)
-        if not led.get('pendingSpendAuth'):
-            raise cb_render.Refused('Retake preparation did not produce a current cost review.')
-        led['watchRetake'].update(status='ready', stage='Review cost & fire')
-        cb_render._save(pkg, path)
-        log('RETAKE 4/4 — ready for cost approval and Fire; no render submitted')
-    except Exception as exc:
-        pkg, path = cb_render.load_pkg(scene, episode)
-        cb_render._ledger(pkg, shot_id).setdefault('watchRetake', {'note': note}).update(
-            status='needs-attention', stage=str(exc))
-        cb_render._save(pkg, path)
-        raise
+    raise cb_render.Refused(
+        'DIRECTOR_REVISION_REQUIRED: approve the revised DIRECT for this retake, then prepare WATCH from its current approved media.')
 
 
 def _usage() -> str:

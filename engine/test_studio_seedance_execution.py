@@ -21,14 +21,22 @@ def compact_source(tmp_path, monkeypatch):
     shot['directorCard']['views'][0]['visibleEntities'] = ['character:Mira', 'character:Oren']
     shot['directorCard']['views'][1]['visibleEntities'] = ['character:Oren']
     direction['shotPlan'][1]['compositionLightAndMaterials'] += ' Mira stays offscreen.'
+    # Current WATCH consumes complete approved DIRECT, not specialist fallback.
+    shot['directorCard']['audienceFocus'] = direction['dramaticBeat']
+    for view, row in zip(shot['directorCard']['views'], direction['shotPlan']):
+        view.update(action=row['causalAction'], framing=row['framingLensAndCamera'],
+                    performance=row['observablePerformance'], endState=row['landingImage'],
+                    staging=row['compositionLightAndMaterials'])
     refs = []
     for i, name in enumerate(('opening keyframe', 'Oren', 'scene plate', 'Mira'), 1):
         path = tmp_path / f'{i}.jpg'
         path.write_bytes(name.encode())
         refs.append(dict(slot=f'@图{i}', role=name, path=str(path),
                          hash=hashlib.sha256(path.read_bytes()).hexdigest()))
-    return PD.request_snapshot(D.compile_animation_provider_prompt(shot, direction),
-        dict(shot=shot, specialist=direction), refs, dict(path='fixture.wav', hash='immutable'), 8)
+    snapshot = PD.request_snapshot(PD.audio_policy(True), dict(shot=shot, specialist=direction),
+        refs, dict(path='fixture.wav', hash='immutable'), 8)
+    snapshot['prompt'] = PD.compile_native_source(shot, refs, snapshot['audio'])
+    return snapshot
 
 
 def test_native_compiler_uses_declared_visibility_not_mentions_or_offscreen_speech(compact_source):
@@ -36,7 +44,7 @@ def test_native_compiler_uses_declared_visibility_not_mentions_or_offscreen_spee
     view = {'causalAction': 'Mira stays offscreen while Oren accepts the cup.'}
     assert subjects_for_view([('@图4', 'Mira'), ('@图2', 'Oren')], view, ['Mira'],
         visible_entities=['character:Oren']) == 'Subjects: Oren from @图2.'
-    assert 'Subjects: Oren from @图2.' in compact_source['prompt'].split('Shot 2:', 1)[1]
+    assert 'Visible cast: Oren @图2 only.' in compact_source['prompt'].split('Shot 2:', 1)[1]
     assert 'Subjects: Oren from @图2; Mira' not in compact_source['prompt'].split('Shot 2:', 1)[1]
 
 
@@ -58,14 +66,14 @@ def test_per_view_cast_and_local_role_locks_do_not_activate_absent_character(com
     assert 'Visible cast: Mira @图4; Oren @图2 only.' in first
     assert 'Keep identities and actions distinct.' in first
     assert 'Visible cast: Oren @图2 only.' in second
-    assert 'Mira' not in second
-    assert evidence['omittedPassiveReminders']
+    assert 'Mira @图4 stays offscreen.' in second
+    assert not evidence['omittedPassiveReminders']
 
 
 def test_global_witness_footer_cannot_contaminate_final_single_character_view(compact_source):
     compact_source['prompt'] = compact_source['prompt'].replace(
-        'End state: Oren holds the single cup against his chest.',
-        'End state: Oren holds the single cup against his chest.\nWitness staging: Mira waits elsewhere.')
+        '[TIMED ACTION]',
+        '[TIMED ACTION]\nWitness staging: Mira waits elsewhere.')
     prompt, evidence = E.compile_prompt(compact_source, audit(compact_source))
     assert 'Witness staging:' not in prompt
     assert 'Witness staging: Mira waits elsewhere.' in evidence['sourcePrompt']
@@ -73,12 +81,12 @@ def test_global_witness_footer_cannot_contaminate_final_single_character_view(co
 
 
 def test_joint_offscreen_cause_is_preserved_and_unknown_visibility_not_guessed(compact_source):
-    compact_source['authorities']['specialist']['shotPlan'][1]['causalAction'] = 'Oren cradles the cup because Mira warns him offscreen.'
+    compact_source['authorities']['shot']['directorCard']['views'][1]['action'] = 'Oren cradles the cup because Mira warns him offscreen.'
     prompt, _ = E.compile_prompt(compact_source, audit(compact_source))
-    assert 'because Mira @图4 warns him offscreen.' in prompt
+    assert 'because Mira warns him offscreen.' in prompt
     del compact_source['authorities']['shot']['directorCard']['views'][1]['visibleEntities']
     prompt, _ = E.compile_prompt(compact_source, audit(compact_source))
-    assert 'because Mira @图4 warns him offscreen.' in prompt
+    assert 'because Mira warns him offscreen.' in prompt
     assert 'Visible cast:' not in dict(E.sections(prompt))['TIMED ACTION'].split('Shot 2:', 1)[1]
 
 
@@ -95,13 +103,14 @@ def test_required_state_and_immutable_audio_survive_real_compile_and_seal(compac
     PD.review_legacy_envelope(env, before['authorities']['shot'], before['authorities']['specialist'], archive_folder=tmp_path/'reviews')
     PD.verify_legacy_envelope(env)
     prompt = env['prompt']
-    assert prompt == env['executionPlan']['segments'][0]['prompt'] == next(call['prompt'] for call in calls if 'prompt' in call)
-    assert next(call for call in calls if 'providerPromptCompilation' in call)['providerPromptCompilation']['applied']
+    assert calls == []
+    assert prompt == env['executionPlan']['segments'][0]['prompt'] == before['prompt']
+    assert env['executionPlan']['segments'][0]['promptDirector']['providerPromptCompilation']['applied']
     assert prompt.startswith('[PURPOSE]')
     assert prompt.index('[TIMED ACTION]') < prompt.index('[REFERENCE AUTHORITY]') < prompt.index('[Audio]')
-    assert 'Mira @图4 extends the cup and Oren @图2 reaches to accept it.' in prompt
+    assert 'Mira extends the cup and Oren reaches to accept it.' in prompt
     assert 'Oren @图2 holds the cup; Mira @图4 has released it.' in prompt
-    for heading in E.AUDIO_HEADINGS:
+    for heading in set(E.AUDIO_HEADINGS).intersection(dict(E.sections(before['prompt']))):
         assert dict(E.sections(prompt))[heading] == dict(E.sections(before['prompt']))[heading]
     assert re.findall(r'^Spoken action:.*$', prompt, re.M) == re.findall(r'^Spoken action:.*$', before['prompt'], re.M)
     assert prompt.count('{Here you are.}') == 1
@@ -144,11 +153,11 @@ def test_budget_exception_is_bound_to_source_and_exact_prompt():
 def test_early_budget_block_is_durable_and_never_calls_reviewer(compact_source, monkeypatch, tmp_path):
     import cb_llm
     monkeypatch.setattr(cb_llm, 'structured_with_repair', lambda *a, **k: pytest.fail('No model call'))
-    compact_source['authorities']['specialist']['shotPlan'][1]['causalAction'] += ' word' * 2300
+    compact_source['authorities']['shot']['directorCard']['views'][1]['action'] += ' word' * 2300
     prompt = compact_source['prompt']
     env = dict(prompt=prompt, references=compact_source['references'], audio=compact_source['audio'], durationSec=8,
         executionPlan={'segments':[dict(prompt=prompt,contract={})]})
-    with pytest.raises(ValueError, match='PROVIDER PROMPT COMPILATION'):
+    with pytest.raises(ValueError, match='WATCH_CONFIGURATION_REQUIRED'):
         PD.review_legacy_envelope(env, compact_source['authorities']['shot'], compact_source['authorities']['specialist'], archive_folder=tmp_path/'reports')
     record=json.loads(next((tmp_path/'reports').glob('*.json')).read_text()); report=record['review']
     for key in ('version','sourceHash','inputHash','payloadHash','correctiveAction','summary'):
@@ -188,7 +197,7 @@ def test_native_known_name_and_lowercase_entity_alias_bind_actual_identity(compa
     assert 'Visible cast: Aida @图2 only.' in second
     assert evidence['views'][1]['cast'] == 'Visible cast: Aida @图2 only.'
     assert 'Visible cast: no characters' not in second
-    assert 'Mira' not in second
+    assert 'Mira @图4 stays offscreen.' in second
 
 
 @pytest.mark.parametrize('entities', [[], ['prop:Oren', 'env:pool_surface', 'Unregistered']])

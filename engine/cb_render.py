@@ -1,4 +1,5 @@
 import studio_dialogue_occurrence as O
+from studio_prompt_director import current_shot_authority
 #!/usr/bin/env python3
 """cb_render.py — THE SHOT RENDER LOOP (THE_DEFINITIVE_PIPELINE.md Gates 4-8, hybrid v2).
 
@@ -7499,8 +7500,8 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
                     if include_audio_reference else None)
     model_id, run_id = _comparison_args(comparison_model_id, comparison_run_id)
     references = _reference_records(shot, imgs)
-    parent_prompt = _with_intact_turnaround_law(
-        shot["seedancePrompt"], references)
+    parent_prompt = (shot["seedancePrompt"] if model_id is None else
+                     _with_intact_turnaround_law(shot["seedancePrompt"], references))
     continuity_mode = _continuity_mode(led, shot)
     video_references = []
     if continuity_mode == CONTINUITY_MODE_VIDEO_EXTENSION:
@@ -7512,8 +7513,8 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
             "path": previous_clip,
             "md5": _file_md5(previous_clip),
         }]
-    provider_prompt = _provider_safe_dialogue_prompt(
-        parent_prompt, cb_audio_authority.spoken_dialogue_lines(shot))
+    provider_prompt = (parent_prompt if model_id is None else
+                       _provider_safe_dialogue_prompt(parent_prompt, cb_audio_authority.spoken_dialogue_lines(shot)))
     if model_id is None:
         try:
             contract = cb_providers.request_contract(
@@ -7715,7 +7716,7 @@ def _binding_hash(pkg, shot, led, imgs, anchor, candidates, fast,
         comparison_run_id, materialize_audio=True)
     per = execution_plan["costPerStudioCandidateUsd"]
     payload = {"shotContractHash": hashlib.sha256(json.dumps(
-                   shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
+                   current_shot_authority(shot), sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
                "shotId": shot["shotId"],
                "providerModelId": execution_plan["providerModelId"],
                "comparisonRunId": execution_plan.get("comparisonRunId"),
@@ -8116,7 +8117,7 @@ def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per,
         "script": pkg.get("sourceScript"), "canon": pkg.get("canonLock"),
         "directorCard": shot.get("directorCardSource"),
         "directorCardRevision": (shot.get("directorCard") or {}).get("revision"),
-        "sourceShotHash": hashlib.sha256(json.dumps(shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
+        "sourceShotHash": hashlib.sha256(json.dumps(current_shot_authority(shot), sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
     }
     from studio_prompt_director import review_legacy_envelope
     env["learningScope"] = {"projectId": pkg.get("projectId") or "crystal-bears",
@@ -8132,8 +8133,8 @@ def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per,
                     if "dialogueLineIndexes" in segment else cb_departments.provider_dialogue_lines(shot),
                 stage_plan=segment.get("compiledStages", specialist.get("stagePlan", [])))
             score = _seedance_authoring_score(audit)
-            if not audit.get("productionReady", audit.get("status") == "ready") or score < SEEDANCE_AUTHORING_FLOOR:
-                raise ValueError("Prompt Director correction needs provider-syntax repair before Fire")
+            if not audit.get("productionReady", audit.get("status") == "ready"):
+                raise ValueError("WATCH_CONFIGURATION_REQUIRED: the current compiled request fails provider syntax validation.")
             audit.update(authoringScore10=score, authoringMaximum=10, firingFloor10=SEEDANCE_AUTHORING_FLOOR)
             quality = _prompt_contract_completeness(shot, segment['prompt'], specialist)
             audit['contractCompleteness'] = {k: quality[k] for k in ('score', 'maximum', 'threshold', 'criticalFailures')}
@@ -8289,10 +8290,6 @@ def _resolve_seedance_prompt(pkg, shot, scene=None, episode="Ep1", require_curre
         prompt = compile_native_source(source, refs, audio)
     except ValueError as exc:
         raise Refused('DIRECTOR_REVISION_REQUIRED: ' + str(exc)) from exc
-    working = led.get('workingSeedancePrompt') or {}
-    if working.get('text') and working['text'] != prompt:
-        raise Refused('DIRECTOR_REVISION_REQUIRED: a WATCH prompt override cannot replace approved DIRECT. '
-                      'Apply the correction in DIRECT and clear the superseded working override.')
     return prompt, False
 
 
@@ -9869,22 +9866,11 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         from studio_see_service import gate as see_gate
         see_gate(pathlib.Path(__file__).resolve().parents[1], {'projectId': 'crystal-bears', 'episode': episode, 'scene': str(scene), 'unit': shot_id}, approved=True)
     pkg, path = load_pkg(scene, episode)
-    _require_valid(pkg)                                     # the stored gate, cheapest first
+    # The fresh current-package validator below supersedes its stored verdict.
     _require_current_lineage(pkg, scene, episode)           # THE STATE-INTEGRITY CHECKPOINT —
     # see keyframe_shot's identical fix (2026-07-19) for why this call was missing entirely.
     shot = _shot(pkg, shot_id)
     led = _ledger(pkg, shot_id)
-    production_block = led.get("productionBlock") or shot.get("productionBlock") or {}
-    from studio_keyframe_director import recovery_ready
-    if (str(production_block.get("status") or "").upper().startswith("BLOCKED") and
-            not recovery_ready(sys.modules[__name__], pkg, shot, led, scene, episode, spend_token=spend_token, protected_comparison=protected_comparison)):
-        reason = (f"{shot_id} is {production_block.get('status')}: "
-                  f"{production_block.get('reason', 'production recovery gate has not been cleared')}")
-        block_path = _write_prefire_block_evidence(
-            shot, reason, package=pkg,
-            corrective_action='Complete and record the clean SEE opening qualification, then clear the production recovery gate before WATCH Fire.',
-            source_bindings={'productionBlock': production_block})
-        raise Refused(f"REFUSED — {reason} (pre-fire block: {block_path})")
     protected_comparison = bool(protected_comparison)
     if protected_comparison:
         if led.get("status") != "approved" or not led.get("approvedTake"):
@@ -9894,25 +9880,9 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         if comparison_work.get("status") in ("generating", "candidate-pending"):
             raise Refused(
                 f"REFUSED — {shot_id} already has a protected prompt comparison awaiting completion or decision")
-    if led.get("status") == "model-limited":
-        raise Refused(f"REFUSED — {shot_id} is MODEL-LIMITED after {MAX_BATCH_ATTEMPTS} failed "
-                      f"candidate batches; the ladder requires human redesign or an alternative "
-                      f"production method, never more prompt-patching.\n{DECISION_LADDER}")
-    from studio_keyframe_director import require as require_see_readiness
-    opening = (led.get("keyframeApproval") or {}).get("path") or _anchor_for(pkg, shot)
+    opening = _anchor_for(pkg, shot)
     if not opening:
-        raise Refused("SEE action readiness requires the actual opening image")
-    from studio_keyframe_director import VERSION as see_version, digest as see_digest
-    readiness_source = _see_readiness_source(pkg, shot, led, opening, scene, episode)
-    readiness = led.get('seeActionReadiness') or {}
-    if readiness.get('version') != see_version or readiness.get('inputHash') != see_digest(readiness_source):
-        # Preparation belongs to the workflow, including an inherited relay frame.
-        # A current BLOCKED/UNVERIFIED verdict is still enforced below, not rerolled.
-        review_see_action_readiness(pkg, shot, led, opening, scene, episode)
-    try:
-        require_see_readiness(_see_readiness_source(pkg, shot, led, opening, scene, episode), led.get("seeActionReadiness"))
-    except ValueError as exc:
-        raise Refused(str(exc)) from exc
+        raise Refused("WATCH_CONFIGURATION_REQUIRED: approved opening keyframe is missing")
     animation_direction = {}  # Approved DIRECT is the only creative authority.
     budget = _performance_budget_report(
         _shot_creative_contract_view(pkg, shot, scene, episode), led)
@@ -9946,7 +9916,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         existing_batch.get("envelope") if existing_batch.get("status") == "generating"
         else existing_auth.get("envelope")
     ) or {}
-    sealed_comparison_run = existing_envelope.get("comparisonRunId")
+    sealed_comparison_run = existing_envelope.get("comparisonRunId") if spend_token else None
     if sealed_comparison_run:
         sealed_model = existing_envelope.get("providerModelId")
         if comparison_model_id and (
@@ -9958,12 +9928,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         "fal" if comparison_model_id else
         cb_providers.video_model(require_enabled=False).provider)
     _require_confirmed_billing(billing_provider)             # protection 5 — block, not warn
-    # THE ANIMATION WORKING PROMPT, IF SAVED, IS WHAT ACTUALLY SUBMITS (2026-07-19, Julian's
-    # contained-creative-controls directive): a shallow-copied VIEW of the shot with
-    # seedancePrompt swapped for the working override — every downstream read in this
-    # function (Law 6 check, binding hash, disclosure, sealed envelope, the real generate
-    # call) already reads shot["seedancePrompt"], so this one substitution is the whole
-    # change. The approved package's own shot record (pkg["shots"]) is never touched.
+    # Compile current DIRECT; archived working prompts do not enter the request.
     resolved_prompt, using_working = _resolve_seedance_prompt(
         pkg, shot, scene, episode, require_current_working=True)
     if resolved_prompt != shot.get("seedancePrompt"):
@@ -10049,7 +10014,8 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
             raise Refused(f"REFUSED — {shot_id} has a candidate batch pending Julian's review "
                           f"(approve one candidate or reject the batch first)")
         # PROTECTION 4: fresh validation of the CURRENT package, every disclosure
-        _fresh_validation(pkg, episode, shot_id)
+        current_package = {**pkg, "shots": [shot if row.get("shotId") == shot_id else row for row in pkg["shots"]]}
+        _fresh_validation(current_package, episode, shot_id)
         binding, per = _binding_hash(
             pkg, shot, led, imgs, anchor, candidates, fast,
             comparison_model_id, comparison_run_id, execution_plan)

@@ -22,7 +22,7 @@ def correction(snapshot, *, value='Oren cradles the cup with both hands.'):
     prepared = snapshot if snapshot.get('watchPlan') else P.prepare_plan(snapshot)
     return dict(expectedPlanHash=P.digest(prepared['watchPlan']),
         path='/specialist/shotPlan/1/causalAction',
-        expected=prepared['authorities']['specialist']['shotPlan'][1]['causalAction'], value=value,
+        expected=prepared['watchPlan']['views'][1]['action'], value=value,
         sourcePath='/shot/approvedExecutionCorrection',
         sourceHash=P.digest(prepared['authorities']['shot']['approvedExecutionCorrection']),
         reason='Use the current approved hand position in the request-local execution plan')
@@ -49,65 +49,42 @@ def test_typed_execution_refinement_survives_broad_source_card(compact_source):
     view = compact_source['authorities']['shot']['directorCard']['views'][0]
     view.update(framing='Medium framing.', action='Pass the cup.', performance='Hesitation.', endState='Cup passed.')
     prompt, _ = E.compile_prompt(compact_source, audit(compact_source))
-    assert 'Hold a medium two-shot at eye height.' in prompt
-    assert 'Mira @图4 hesitates, then relaxes her fingers.' in prompt
+    assert 'Camera: Medium framing.' in prompt
+    assert 'Pass the cup.' in prompt
+    assert 'Hesitation.' in prompt
+    assert 'Hold a medium two-shot at eye height.' not in prompt
 
 
-def test_correction_updates_typed_origin_and_preserves_source_audio_refs_contract(compact_source):
+def test_correction_cannot_replace_current_direct_action(compact_source):
     source = corrected_source(compact_source)
     original = deepcopy(source)
-    revised, receipt = P.correct_plan(source, [correction(source)])
-    assert revised['authorities']['specialist']['shotPlan'][1]['causalAction'] == revised['watchPlan']['views'][1]['action']
-    assert revised['authorities']['shot'] == source['authorities']['shot']
+    with pytest.raises(ValueError):
+        P.correct_plan(source, [correction(source)])
     assert source == original
-    for key in ('audio', 'references', 'duration', 'settings'):
-        assert revised[key] == original[key]
-    assert receipt['originalPlanHash'] != receipt['revisedPlanHash']
-    assert receipt['approvedSourceMutated'] is False
-    prompt, evidence = E.compile_prompt(revised, audit(revised))
-    assert 'Oren @图2 cradles the cup with both hands.' in prompt
-    assert all(block in prompt for block in revised['watchPlan']['audioBlocks'])
-    assert not E.final_check({**revised, 'prompt': prompt}, evidence)[1]
-
 
 @pytest.mark.parametrize('phase', ['plan', 'payload'])
-def test_review_correction_repeats_plan_review_and_compiles_sealed_exact_output(compact_source, phase):
+def test_review_correction_is_diagnostic_only(compact_source, phase):
     source = corrected_source(compact_source)
     seen = []
     def worker(system, data):
         seen.append(deepcopy(data))
         result = review()
-        target = len(seen) == (1 if phase == 'plan' else 2)
-        if target:
+        if len(seen) == (1 if phase == 'plan' else 2):
             result['planCorrections'] = [correction(data)]
         return result
     final, report = PD.run(source, worker)
-    PD.verify(final, report)
-    assert 'prompt' not in seen[0]
-    plan_inputs = [item for item in seen if 'prompt' not in item]
-    assert len(plan_inputs) == 2
-    assert plan_inputs[-1]['watchPlan']['views'][1]['action'].endswith('both hands.')
-    assert seen[-1]['prompt'] == final['prompt']
-    recompiled, evidence = E.compile_prompt(final, audit(final))
-    assert recompiled == final['prompt']
-    assert evidence['planHash'] == report['providerPromptCompilation']['planHash']
-    assert len(report['planRevisions']) == 1
+    assert report['verdict'] != 'READY TO FIRE'
+    assert len(seen) == (1 if phase == 'plan' else 2)
+    assert not report.get('planRevisions')
+    assert final['prompt'] == source['prompt']
     assert final['authorities']['shot'] == source['authorities']['shot']
-    assert report['trace'][0]['status'] == 'revised-typed-plan'
+    with pytest.raises(ValueError):
+        PD.verify(final, report)
 
-
-def test_legacy_envelope_archives_revised_plan_and_exact_submitted_text(compact_source, tmp_path, monkeypatch):
+def test_legacy_envelope_archives_exact_direct_without_model_calls(compact_source, tmp_path, monkeypatch):
     import cb_llm
     source = corrected_source(compact_source)
-    seen = []
-    def worker(system, text, schema, **options):
-        data = json.loads(text)
-        seen.append(data)
-        result = review()
-        if len(seen) == 2:
-            result['planCorrections'] = [correction(data)]
-        return result
-    monkeypatch.setattr(cb_llm, 'structured_with_repair', worker)
+    monkeypatch.setattr(cb_llm, 'structured_with_repair', lambda *a, **k: pytest.fail('No model call'))
     env = dict(prompt=source['prompt'], references=source['references'], audio=source['audio'], durationSec=8,
         executionPlan={'segments': [dict(prompt=source['prompt'], contract={})]})
     original = deepcopy(source)
@@ -116,11 +93,10 @@ def test_legacy_envelope_archives_revised_plan_and_exact_submitted_text(compact_
     segment = env['executionPlan']['segments'][0]
     record = json.loads(next(tmp_path.glob('*.json')).read_text())
     assert record['snapshot'] == segment['promptDirectorSnapshot']
-    assert record['snapshot']['watchPlan']['views'][1]['action'].endswith('both hands.')
-    assert record['snapshot']['authorities']['specialist']['shotPlan'][1]['causalAction'].endswith('both hands.')
-    assert record['snapshot']['prompt'] == seen[-1]['prompt'] == env['prompt']
+    assert record['snapshot']['watchPlan']['views'][1]['action'] == source['authorities']['shot']['directorCard']['views'][1]['action']
+    assert 'specialist' not in record['snapshot']['authorities']
+    assert record['snapshot']['prompt'] == env['prompt'] == source['prompt']
     assert source == original
-
 
 @pytest.mark.parametrize('change', ['plan_hash', 'source_hash', 'source_path', 'expected', 'approved_path', 'audio_path', 'section', 'tag'])
 def test_stale_or_protected_typed_corrections_are_refused(compact_source, change):
@@ -188,6 +164,7 @@ def test_project_director_card_adapts_without_native_specialist(compact_source):
         view.update(framing=row['framingLensAndCamera'], action=row['causalAction'],
             performance=row['observablePerformance'], staging=row['compositionLightAndMaterials'],
             endState=row['landingImage'], entry=row['transitionType'])
+    source['prompt'] = E.compile_prompt(source, audit(source))[0]
     final, report = PD.run(source, lambda *a: review())
     PD.verify(final, report)
     assert final['watchPlan']['compatibility'] == 'project-director-card'
@@ -201,6 +178,7 @@ def test_audio_embedded_dialogue_is_kept_once_without_moving_its_protected_bytes
     source['prompt'] = source['prompt'].replace('[Audio]\n', '[Audio]\n' + cue + '\n')
     prepared = P.prepare_plan(source)
     assert prepared['watchPlan']['dialogueOccurrences'][0]['placement'] == 'audio-block'
+    source['prompt'] = E.compile_prompt(source, audit(source))[0]
     final, report = PD.run(source, lambda *a: review())
     PD.verify(final, report)
     assert final['prompt'].count('{Here you are.}') == 1
@@ -232,11 +210,14 @@ def test_two_segment_scope_rebases_audio_and_preserves_exact_parent_truth(compac
             stageNumbers=[i+1], dialogueLineIndexes=[i], sourceViewIds=[shot['directorCard']['views'][i]['viewId']],
             prompt=source['prompt'], contract={}, references=source['references'],
             audio={**source['audio'], 'sourcePath':'master.wav', 'sourceMd5':'master-immutable', 'sourceStartSec':start, 'sourceEndSec':end}))
+    for segment in segments:
+        scoped = P.scope_segment(PD.request_snapshot(PD.audio_policy(True), {'shot':shot}, segment['references'], segment['audio'], 4, {}), segment)
+        segment['prompt'] = E.compile_prompt(scoped, audit(scoped))[0]
     env = dict(prompt=source['prompt'], durationSec=8, references=source['references'], audio=source['audio'], executionPlan={'segments':segments})
     PD.review_legacy_envelope(env, shot, specialist, archive_folder=tmp_path)
     PD.verify_legacy_envelope(env)
     assert source == original
-    assert len(seen) == 4 and all('prompt' not in seen[i] for i in (0,2))
+    assert seen == []
     records = [json.loads(path.read_text()) for path in tmp_path.glob('*.json')]
     assert len(records) == 2
     for index, segment in enumerate(env['executionPlan']['segments']):
@@ -271,7 +252,7 @@ def test_invalid_segment_scope_is_durable_before_any_reviewer(compact_source, tm
     if failure == 'view-boundary': segment.update(globalEndSec=3, durationSec=3)
     elif failure == 'speech-boundary': source['authorities']['shot']['dialogueLines'][0].update(startSec=3, endSec=5)
     env = dict(prompt=source['prompt'], durationSec=8, references=source['references'], audio=source['audio'], executionPlan={'segments':[segment]})
-    with pytest.raises(ValueError, match='PROVIDER PROMPT COMPILATION'):
+    with pytest.raises(ValueError, match='WATCH_CONFIGURATION_REQUIRED'):
         PD.review_legacy_envelope(env, source['authorities']['shot'], source['authorities']['specialist'], archive_folder=tmp_path)
     record = json.loads(next(tmp_path.glob('*.json')).read_text())
     assert record['review']['providerPromptCompilation']['compatibility'] == 'blocked segment projection'

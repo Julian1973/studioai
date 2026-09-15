@@ -16,7 +16,7 @@ import uuid
 LABELS = {
     'prepare': 'Prepare Scene',
     'plan': 'Approve Plan & Create Images',
-    'images': 'Approve Images & Create Audio',
+    'images': 'Approve SEE & Create Audio',
     'audio': 'Approve Audio & Render',
     'film': 'Approve & Next',
 }
@@ -38,6 +38,8 @@ PHRASES = {
     'submit_render': 'Creating animation', 'review_film': 'Reviewing returned animation',
     'approve_film': 'Recording your film decision', 'assemble': 'Adding the accepted take to the scene',
     'prepare_next': 'Preparing what comes next',
+    'reject_images': 'Saving image feedback', 'reject_audio': 'Saving audio feedback',
+    'request_film_changes': 'Saving video feedback',
 }
 
 
@@ -82,8 +84,12 @@ class Journey:
             raise ValueError('The production state cannot be displayed.')
         silent = not current.get('requiresAudio', True)
         label = LABELS.get(phase)
+        if phase == 'plan' and current.get('review', {}).get('seePackage'):
+            label = 'Approve DIRECT & Open SEE'
         if phase == 'images' and silent:
-            label = 'Approve Images & Render'
+            label = 'Approve SEE & Render'
+        if phase == 'images' and current.get('review', {}).get('seePackage', {}).get('approved'):
+            label = 'Render' if silent else 'Create audio'
         disclosure = deepcopy(current.get('disclosure') or {'limitUsd': 0, 'operations': []})
         limit = disclosure.get('limitUsd', 0)
         if isinstance(limit, bool) or not isinstance(limit, (int, float)) or not math.isfinite(limit) or limit < 0:
@@ -95,15 +101,41 @@ class Journey:
         corrected = bool(op and op.get('status') == 'needs-decision' and op.get('blockedBinding')
                          and (op['blockedBinding'] != current['binding'] or retry_safe)
                          and (op.get('pending') != 'submit_render' or retry_safe))
+        if op and op.get('intent')=='changes' and op.get('status')=='needs-decision':
+            corrected=False
         if corrected:
             op['status'] = 'superseded'
+        if op and op.get('decision'):
+            from studio_recovery_projection import project
+            op['decision']['recovery'] = project(stage=op.get('pending') or op.get('phase'),
+                scene_id=state['scope']['scene'], message=op['decision']['issue'],
+                attempt_id=op['id'], request_hash=(op.get('receipts',{}).get('prepare_render') or {}).get('envelopeHash'),
+                evidence_ref=op['decision'].get('evidence'))
+        if op:
+            shown=(op.get('receipts',{}).get('prepare_render') or {}).get('requestDisplay')
+            if shown: op['requestDisplayHash']=digest(shown)
+        from studio_creative_review import present
+        creative = present(current, op, busy)
         return dict(scope=state['scope'], revision=state['revision'], phase=phase,
+                    creativeReview=creative,
                     corrected=corrected,
-                    primary=None if busy or (state.get('operation', {}).get('status') == 'needs-decision' and not corrected) or phase in ('complete', 'dependency') else label,
+                    primary=None if disclosure.get('ready') is False or busy or (state.get('operation', {}).get('status') == 'needs-decision' and not corrected) or phase in ('complete', 'dependency') else label,
                     busy=busy, review=current.get('review'), disclosure=disclosure, binding=binding,
                     operation=op, normalActionCount=state['actions'],
                     correctionActionCount=state['corrections'], dependency=current.get('dependency'),
                     next=current.get('next'), concerns=current.get('concerns', []))
+
+    def displayed(self, scope, operation_id, request_hash):
+        """Receipt that the interface presented the exact request; not a spend approval."""
+        key=scope_key(scope)
+        with self.store.lock(key):
+            state=self.store.read(key)
+            op=(state or {}).get('operation') or {}
+            shown=(op.get('receipts',{}).get('prepare_render') or {}).get('requestDisplay')
+            if not shown or op.get('id')!=operation_id or digest(shown)!=request_hash:
+                raise ValueError('The displayed request is not this operation’s prepared request')
+            op['displayedRequestHash']=request_hash
+            self.store.save(key,state)
 
     def accept(self, scope, payload, actor):
         key = scope_key(scope)
@@ -122,25 +154,50 @@ class Journey:
             if payload.get('expectedRevision') != state['revision'] or payload.get('binding') != view['binding']:
                 raise DecisionRequired('This review changed in another window.', 'Review the current version.', current.get('preserved', []))
             phase = view['phase']
-            if not view['primary']:
+            approval_only = payload.get('intent') == 'approve'
+            request_changes = payload.get('intent') == 'changes'
+            note = str(payload.get('note') or '').strip()
+            if request_changes and (not view['creativeReview']['canRequestChanges'] or not note or len(note)>3000):
+                raise DecisionRequired('Choose the current media and describe the requested change.', 'Review the current version.')
+            if approval_only and not view['creativeReview']['canApprove']:
+                raise DecisionRequired('This media version is not ready for approval.', 'Review the current version.')
+            if not view['primary'] and not (approval_only or request_changes):
                 raise DecisionRequired('This unit is waiting for approved continuity.', 'Approve the preceding result.', current.get('preserved', []))
             if payload.get('action') != phase:
                 raise ValueError('Use the current production action.')
             steps = list(STEPS[phase])
+            if phase == 'plan' and current.get('review', {}).get('seePackage'):
+                steps = ['approve_plan']
             if phase == 'images' and not current.get('requiresAudio', True):
                 steps = ['approve_images', 'align_timing', 'prepare_render', 'submit_render', 'review_film']
+            candidate=payload.get('candidate',1)
+            if phase=='film' and (isinstance(candidate,bool) or not isinstance(candidate,int) or not 1<=candidate<=len(current.get('review',{}).get('videos') or [])):
+                raise DecisionRequired('Select the video version you reviewed.', 'Review the current take.')
+            grant = deepcopy(view['disclosure'])
+            if approval_only:
+                steps = {'images': ['approve_images'], 'audio': ['approve_audio'],
+                         'film': ['approve_film', 'assemble', 'prepare_next']}[phase]
+                # A media approval authorizes no paid preparation or generation.
+                grant.update(limitUsd=0, operations=[], textCapUsd=0, maxMediaCalls=0)
+            if request_changes:
+                steps = {'images':['reject_images'], 'audio':['reject_audio'], 'film':['request_film_changes']}[phase]
+                grant.update(limitUsd=0, operations=[], textCapUsd=0, maxMediaCalls=0)
             op = dict(id=uuid.uuid4().hex, status='queued', phase=phase, steps=steps,
                       completed=[], receipts={}, pending=None, actor=actor,
                       reviewedBinding=current['binding'], review=deepcopy(current.get('review')),
-                      grant=deepcopy(view['disclosure']), startedAt=time.time(),
-                      message='Starting '+view['primary'], decision=None)
-            correction = view['corrected'] or any(h.get('action') == phase for h in state['history'])
+                      grant=grant, intent='changes' if request_changes else 'approve' if approval_only else 'create', note=note if request_changes else None, startedAt=time.time(),
+                      message='Saving creative feedback' if request_changes else 'Saving media approval' if approval_only else 'Starting '+view['primary'], decision=None)
+            if phase=='film':
+                op['candidate']=candidate
+                op['review']['videos']=[op['review']['videos'][candidate-1]]
+            correction = request_changes or view['corrected'] or any(
+                h.get('action') == phase and h.get('intent','create') == op['intent'] for h in state['history'])
             state.update(operation=op, revision=state['revision']+1, actions=state['actions']+(0 if correction else 1),
                          corrections=state['corrections']+(1 if correction else 0))
             result = {'operationId': op['id'], 'revision': state['revision']}
             state['commands'][command] = result
             state['history'].append({'at': time.time(), 'operation': op['id'], 'action': phase,
-                                     'actor': actor, 'binding': view['binding'], 'grant': op['grant']})
+                                     'actor': actor, 'intent': op['intent'], 'binding': view['binding'], 'grant': op['grant']})
             self.store.save(key, state)
             return result
 
@@ -151,8 +208,44 @@ class Journey:
             state = self.store.read(key)
             op = (state or {}).get('operation') or {}
             if op.get('status') == 'needs-decision' and op.get('pending'):
+                pending = op.get('pending')
+                receipt = (op.get('receipts') or {}).get(pending) or {}
+                if pending == 'prepare_render' and self._failed_prepare_has_no_provider(scope, receipt):
+                    op.setdefault('receipts', {}).pop(pending, None)
+                    op['pending'] = None
+                    try:
+                        (self.store.root / 'cb-output/state/journeys' / (op['id'] + '_' + pending + '.json')).unlink(missing_ok=True)
+                    except OSError:
+                        pass
                 op.update(status='running', decision=None, message='Checking the saved operation')
                 self.store.save(key, state)
+
+    def _failed_prepare_has_no_provider(self, scope, receipt):
+        """Allow fresh request preparation after a failed pre-submit check only."""
+        job_id = receipt.get('jobId')
+        if not job_id:
+            return False
+        try:
+            from cb_recovery import all_operations, change
+            candidates = [item for item in all_operations(self.store.root)
+                          if item.get('kind') == 'prepare-render'
+                          and str(item.get('episode')) == str(scope.get('episode'))
+                          and str(item.get('scene')) == str(scope.get('scene'))
+                          and item.get('shotId') == scope.get('unit')
+                          and item.get('state') == 'needs-attention']
+            if not candidates:
+                return False
+            latest = max(candidates, key=lambda item: item.get('updatedAt') or item.get('createdAt') or 0)
+            if latest.get('mediaSubmitted') is not False or latest.get('providerTaskIds'):
+                return False
+            attempts = dict(latest.get('attempts') or {})
+            attempts.pop('prepare', None)
+            change(self.store.root, latest['operationId'], 'queued',
+                   'Recovering saved preparation after source/input fix',
+                   attempts=attempts, checkpoint=None, owner=None, workerPid=None, leaseUntil=0)
+            return True
+        except Exception:
+            return False
 
     def tick(self, scope):
         """Execute at most one step. Polling can resume a persisted job, never replay it."""
@@ -170,6 +263,15 @@ class Journey:
                 return
             step = remaining[0]
             try:
+                if op.get('review', {}).get('seePackage') and step in ('approve_images', 'create_audio', 'prepare_render', 'submit_render'):
+                    from studio_see_service import gate
+                    gate(self.adapter.root, scope, op['review']['seePackage'], approved=step != 'approve_images')
+                if step == 'submit_render':
+                    shown=(op.get('receipts',{}).get('prepare_render') or {}).get('requestDisplay')
+                    if shown and op.get('displayedRequestHash')!=digest(shown):
+                        op['message']='Final request ready — displaying prompt, attachments and cost before submission'
+                        self.store.save(key,state)
+                        return
                 if op['pending']:
                     result = self.adapter.reconcile(scope, step, deepcopy(op))
                 else:
@@ -182,6 +284,9 @@ class Journey:
                     raise ValueError('The production service did not return a supported result.')
                 op['receipts'][step] = deepcopy(result)
                 if result['status'] == 'complete':
+                    if step == 'approve_images' and op.get('review', {}).get('seePackage'):
+                        from studio_see_service import approve
+                        approve(self.adapter.root, scope, op['review']['seePackage'], op['actor'])
                     op['completed'].append(step)
                     op['pending'] = None
                 op['message'] = result.get('message', PHRASES[step])

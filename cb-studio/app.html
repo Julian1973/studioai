@@ -7105,9 +7105,6 @@ function showFireReadinessHold(shotId,data){
 }
 async function shRender(shotId,options){
   options=options||{};
-  if(!currentProductionDirection("animation",shotId)){
-    prepareDirectionThen("animation",shotId,()=>shRender(shotId));return;
-  }
   const led=shLedger(shotId),auth=led&&led.pendingSpendAuth;
   if(auth&&auth.token){openAnimationConfirmModal(shotId);return;}
   showStageWorking("Checking WATCH readiness","Validating the current script, voice, timing and lineage. No provider is contacted.");

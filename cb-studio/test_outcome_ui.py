@@ -349,7 +349,10 @@ def test_fire_prepares_internal_direction_then_returns_to_the_visible_outcome():
     assert "No separate approval is required" in APP
     assert "No media is being generated and no media spend can occur in this step" in APP
     assert 'prepareDirectionThen(directionStage,ctx.shotId,()=>openDisclosureModal(kind,ctx))' in APP
-    assert 'prepareDirectionThen("animation",shotId,()=>shRender(shotId))' in APP
+    fire_start = APP.index("async function shRender(shotId,options)")
+    fire_body = APP[fire_start:APP.index("function shCompareRender", fire_start)]
+    assert 'prepareDirectionThen("animation",shotId,()=>shRender(shotId))' not in fire_body
+    assert 'fetch(url,{cache:"no-store"})' in fire_body
     assert "SH_AFTER_JOB" in APP
     assert 'protectedComparison?"Fire one comparison":"Fire candidates"' in APP
     assert "Seedance 2.5 prompt preflight" in APP

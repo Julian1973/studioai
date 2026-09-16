@@ -33,7 +33,11 @@ def _trailing_screenplay_action(text):
     """Split an all-caps effect followed by third-person screenplay action."""
     match = re.search(
         r"(?:^|(?<=[.!?…]))\s*((?:[A-Z][A-Z'’-]{1,})[.!?…]+\s+"
-        r"(?:The|A|An|His|Her|Their)\s+[a-z].*)$", text)
+        r"(?:The|A|An|Another|His|Her|Their)\s+[a-z].*)$", text)
+    if not match:
+        match = re.search(
+            r"(?:^|(?<=[.!?…]))\s*((?:Another)\s+[a-z][^.!?…]*[.!?…]*)$",
+            text)
     if not match:
         return text, None
     return text[:match.start(1)].strip(), match.group(1).strip()

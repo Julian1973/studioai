@@ -154,6 +154,10 @@ def resolve(authorities, references):
     checks=[];clauses=[]
     for index, v in enumerate(views):
         critical_entities = set(v.get('criticalStateEntities') or [])
+        visible_critical_entities = {
+            entity for entity in critical_entities
+            if not str(entity).startswith('support:')
+        }
         at = _start_time(v, f'directorCard/views/{index}', repairs)
         if at is None or v.get('visibleEntities') is None:
             reason = str(v.get('viewId'))+': visibility/time not declared'
@@ -161,9 +165,9 @@ def resolve(authorities, references):
             if critical_entities:
                 errors.append(reason + '; restore critical view timing/visibility from approved direction and review again')
             continue
-        if critical_entities - set(v['visibleEntities']):
+        if visible_critical_entities - set(v['visibleEntities']):
             errors.append(v['viewId']+': critical entities missing from declared view visibility')
-        if critical_entities.intersection(incomplete) or (critical_entities and None in incomplete):
+        if visible_critical_entities.intersection(incomplete) or (visible_critical_entities and None in incomplete):
             errors.append(v['viewId']+': critical state change has incomplete entity/time/state; repair source and review again')
         state=deepcopy(initial); seen=set(); relationship=v.get('storyRelationship') or card.get('storyTime','next_beat')
         if relationship in RESET:

@@ -171,9 +171,11 @@ def test_story_intake_approval_is_idempotent_when_package_is_already_current():
     assert "Story & Direction is already approved for this script and canon lock." in SERVER
 
 
-def test_department_run_never_reuses_a_stale_candidate():
-    assert 'status.get("candidate") and status.get("candidateCurrent")' in SERVER
-    assert 'args = ["cb_render.py", "department-prepare"' in SERVER
+def test_department_mutation_route_is_retired():
+    route = SERVER[SERVER.index('if self.path == "/api/department-run"'):]
+    route = route[:route.index('if self.path == "/api/director-chat"')]
+    assert 'RETIRED_ROUTE' in route
+    assert 'department-prepare' not in route
 
 
 def test_studio_jobs_force_current_engine_env_over_parent_env():
@@ -354,7 +356,7 @@ def test_duplicate_and_background_session_reads_do_not_compete():
 def test_voice_contract_failure_is_contained_in_hear_instead_of_losing_studio():
     assert '"code": "VOICE_PROMPT_CONTRACT"' in SERVER
     assert '"stage": "voice"' in SERVER
-    assert '"action": "Correct and prepare current Voice direction."' in SERVER
+    assert '"action": "Complete the named DIRECT performance or HEAR configuration."' in SERVER
     assert "except (cb_render.Refused, ValueError) as exc:" in SERVER
 
 
@@ -1062,16 +1064,23 @@ def test_rough_cut_uses_a_saved_approved_take_bin():
     assert "rough_cut_projection" in SERVER
 
 
-def test_approved_take_flows_to_next_shot_through_inherited_see_frame():
+def test_approved_take_flows_to_next_shot_through_its_own_opening_keyframe():
     assert "async function continueToNextProductionShot()" in APP
-    assert 'prepareDirectionThen("cinematography",next.shotId' in APP
-    assert 'shRun("rescreen-keyframe",next.shotId' in APP
-    assert 'shRun("select-previous",next.shotId' in APP
+    assert 'if(policy.needsKeyframe&&!current.keyframe)' in APP
     assert 'openShotOutcome("keyframe",nextIndex)' in APP
-    assert "Use last frame from ${_esc(previousShot)} · no generation cost" in APP
-    assert "const previousShot=hasPrevious?((pShots()[PSHOT_I-1]||{}).shotId" in APP
+    assert 'prepareDirectionThen("cinematography",next.shotId' not in APP
+    assert "Use last frame from ${_esc(previousShot)} · no generation cost" not in APP
     assert "Continue to HEAR" in APP
     assert "Continue to WATCH" in APP
+
+
+def test_scene_plate_fire_uses_the_exact_request_reviewed_in_see():
+    assert 'fetch(BASE+"/api/scenelook-request?"' in APP
+    assert "Exact prompt sent to Seedream" in APP
+    assert "scenePlateRequest:request" in APP
+    assert "if(opts.scenePlateRequest)body.scenePlateRequest=opts.scenePlateRequest" in APP
+    assert 'self.path == "/api/scenelook-request"' in SERVER
+    assert 'reviewed_scene_plate_request=reviewed_scene_plate_request' in SERVER
 
 
 def test_fire_preserves_the_current_watch_screen_while_work_runs():

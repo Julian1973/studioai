@@ -172,6 +172,7 @@ async function run() {
   const notes = {};
   const jobs = {};
   const requests = [];
+  const apiPaths = [];
   let mainNavigations = 0;
   page.on("framenavigated", (frame) => { if (frame === page.mainFrame()) mainNavigations += 1; });
 
@@ -205,8 +206,10 @@ async function run() {
     const request = route.request();
     const url = new URL(request.url());
     const pathname = url.pathname;
+    apiPaths.push(`${request.method()} ${pathname}`);
     const json = (body, status = 200) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
     if (pathname === "/api/studio-version") return json({ version: reportedBuild });
+    if (pathname === "/api/shot-fire-readiness") return json({ ready: true, zeroSpend: true });
     if (pathname === "/api/scene-roster") return json({ scenes: Array.from({ length: 10 }, (_, i) => ({ sceneNumber: String(i + 1), location: `Scene ${i + 1}` })) });
     if (pathname === "/api/director-board") return json({ sceneCount: 10, nextDecision: { scene: "1", shotId: "S1.SH1A" }, scenes: [] });
     if (pathname === "/api/project-workbench-state") return json({ project: "crystal-bears", episode: "Ep1", scene: "1", retakeNotes: { ...notes } });
@@ -314,6 +317,41 @@ async function run() {
   console.log("PASS Provider refusal exposed its real cause and a Fix voice setup action");
   console.log("PASS Retake note persisted as a production diagnosis");
   console.log("PASS All state transitions completed without a page refresh");
+
+  // Exercise app.html's actual Fire function in Chromium. Stub only its final job launcher;
+  // the button must call the shared read-only readiness route directly and must never touch
+  // any retired specialist or recompile route.
+  const firePage = await context.newPage();
+  const fireTarget = `${base}/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=1&sc=1&st=animation&shot=S1.SH1A`;
+  await firePage.goto(fireTarget, { waitUntil: "domcontentloaded" });
+  await firePage.waitForFunction(() => typeof window.shRender === "function");
+  const fireApiStart = apiPaths.length;
+  await firePage.evaluate(() => {
+    window.__goldenFireCalls = [];
+    shLedger = () => ({});
+    showStageWorking = () => {};
+    clearInlineSourceProgress = () => {};
+    showFireReadinessHold = (_, data) => { throw new Error(`Unexpected blocker: ${JSON.stringify(data)}`); };
+    shRun = (command, shotId, options) => window.__goldenFireCalls.push({ command, shotId, options });
+    const button = document.createElement("button");
+    button.id = "golden-fire-button";
+    button.textContent = "Fire Seedance 2.5";
+    button.onclick = () => shRender("S1.SH1A");
+    document.body.appendChild(button);
+  });
+  await firePage.locator("#golden-fire-button").click();
+  await firePage.waitForFunction(() => window.__goldenFireCalls.length === 1);
+  const fireCalls = await firePage.evaluate(() => window.__goldenFireCalls);
+  const fireApis = apiPaths.slice(fireApiStart);
+  if (fireCalls[0].command !== "fire" || fireCalls[0].shotId !== "S1.SH1A") {
+    throw new Error(`Browser Fire did not go directly to fire: ${JSON.stringify(fireCalls)}`);
+  }
+  if (!fireApis.includes("GET /api/shot-fire-readiness") ||
+      fireApis.some((entry) => /department|recompile-animation/.test(entry))) {
+    throw new Error(`Browser Fire touched a retired route: ${JSON.stringify(fireApis)}`);
+  }
+  await firePage.close();
+  console.log("PASS Browser Fire used shared WATCH readiness with zero specialist routes");
 
   const canonicalHash = "#view=director&scene=1&shot=S1.SH1A&beat=chase";
   await page.evaluate((hash) => { location.hash = hash; }, canonicalHash);

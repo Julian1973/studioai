@@ -28,6 +28,14 @@ def file_record(root, value):
             'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
 
 
+def optional_collection(value, field):
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise ValueError(f'STUDIO_JOURNEY_INVALID_COLLECTION: {field} must be a list or null')
+    return value
+
+
 def read(root, scope):
     scope_key(scope)
     path = root / 'cb-output' / f"{scope['episode']}_scene{scope['scene']}_production_package.json"
@@ -35,8 +43,10 @@ def read(root, scope):
     import cb_db
     pkg = cb_db.read_json_document(root, path)[0] if path.exists() else {}
     board = cb_db.read_json_document(root, board_path)[0] if board_path.exists() else {}
-    shot = next((s for s in pkg.get('shots', []) if s['shotId'] == scope['unit']), {})
-    led = next((s for s in pkg.get('continuityLedger', []) if s['shotId'] == scope['unit']), {})
+    shot = next((s for s in optional_collection(pkg.get('shots'), 'shots')
+                 if s['shotId'] == scope['unit']), {})
+    led = next((s for s in optional_collection(pkg.get('continuityLedger'), 'continuityLedger')
+                if s['shotId'] == scope['unit']), {})
     return pkg, board, shot, led
 
 
@@ -60,7 +70,8 @@ class Native:
         see = led.get('keyframeCandidate') or led.get('keyframeApproval') or {}
         image = file_record(self.root, see.get('path') or led.get('keyframePath'))
         audio = file_record(self.root, led.get('voPath'))
-        videos = [file_record(self.root, p) for p in led.get('candidatePaths', [])]
+        videos = [file_record(self.root, p) for p in
+                  optional_collection(led.get('candidatePaths'), 'candidatePaths')]
         videos = [v for v in videos if v]
         if led.get('status') == 'approved':
             videos = [v for v in [file_record(self.root, led.get('approvedTake'))] if v]
@@ -83,12 +94,6 @@ class Native:
             # Already accepted performances are reused, with a single render decision.
             phase = 'audio'
         dependency = None
-        source_id = shot.get('sourceShotId')
-        if source_id and (shot.get('motionContinuityRequired') or shot.get('sourceType') in ('relay','continuation')):
-            prior = next((l for l in pkg.get('continuityLedger', []) if l['shotId'] == source_id), {})
-            if not (prior.get('status') == 'approved' and file_record(self.root, prior.get('harvestFrame'))):
-                dependency = f'Approve {source_id} and its ending before preparing this opening.'
-                phase = 'dependency'
         references = R.shot_reference_manifest(scope['scene'],scope['unit'],scope['episode']) if shot else {}
         for section in ('keyframe','animation'):
             for ref in (references.get(section) or {}).get('references', []):
@@ -97,7 +102,7 @@ class Native:
         review = {'references':references, 'title': shot.get('purpose') or board.get('scene', {}).get('title') or 'Scene direction',
                   'direction': shot.get('openingPose') or board.get('scene', {}).get('purpose') or '',
                   'actionPlan':[{'timing':v.get('timing',''),'action':v.get('action','')} for v in (shot.get('directorCard') or {}).get('views',[])],
-                  'script': spoken, 'performancePrompt':'\n'.join(str(l.get('text') or '') for l in led.get('voGeneratedFrom', [])), 'plan': [view for scene in (board.get('sceneCoverage') or []) for view in scene.get('views', [scene])] or board.get('shots') or [],
+                  'script': spoken, 'performancePrompt':'\n'.join(str(l.get('text') or '') for l in optional_collection(led.get('voGeneratedFrom'), 'voGeneratedFrom')), 'plan': [view for scene in optional_collection(board.get('sceneCoverage'), 'sceneCoverage') for view in scene.get('views', [scene])] or optional_collection(board.get('shots'), 'storyboard shots'),
                   'images': ([{**image,'label':'Opening keyframe'}] if image else []) + ([{**plate,'label':'Scene plate'}] if plate else []), 'plate':plate, 'audio': audio, 'videos': videos,
                   'source': authority(shot) if shot else {},
                   'seeCurrent': see_current, 'audioCurrent': audio_current,
@@ -115,7 +120,7 @@ class Native:
                'audio':['direction','animation']}.get(phase, [])
         if not has_audio and phase == 'images':
             limit = budget['remainingUsd']
-        active = list(pkg.get('shots', []))
+        active = optional_collection(pkg.get('shots'), 'shots')
         index = next((i for i,s in enumerate(active) if s.get('shotId') == scope['unit']), -1)
         next_scope = {**scope, 'unit':active[index+1]['shotId']} if 0 <= index < len(active)-1 else None
         if next_scope is None and index == len(active)-1 and phase == 'complete':

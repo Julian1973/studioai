@@ -9,7 +9,7 @@ from test_production_recovery import Http
 from studio_journey import Journey,StudioStore,DecisionRequired,scope_key
 from studio_journey_project import Project,Services
 import studio_journey_http as H
-ROOT=Path('/Users/julianjenkins/Desktop/Ai Studio')
+ROOT=Path(__file__).resolve().parent.parent
 
 @pytest.fixture
 def live_controls(setup,monkeypatch):

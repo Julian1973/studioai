@@ -58,6 +58,22 @@ def test_episode_script_registry_sync_refuses_unpublished_pointer(monkeypatch):
         module.synchronize_episode_script_registry("Ep2", expected)
 
 
+def test_scene_plate_job_carries_the_exact_reviewed_request(monkeypatch):
+    module = _load_server_module("cb_studio_scene_plate_review_test")
+    calls = []
+    monkeypatch.setattr(module, "_start", lambda job_id, gate, scene, args: (
+        calls.append((gate, scene, args)) or job_id))
+    reviewed = {"requestHash": "a" * 64, "prompt": "Exact reviewed Scene Plate prompt"}
+
+    module.shot_run_job("scenelook", "3", "Ep4",
+                        reviewed_scene_plate_request=reviewed)
+
+    args = calls[0][2]
+    encoded = args[args.index("--reviewed-request-b64") + 1]
+    assert json.loads(base64.urlsafe_b64decode(encoded).decode()) == reviewed
+    assert calls[0][:2] == ("shot:scenelook", "3")
+
+
 def test_prepared_storyboard_does_not_hide_failed_production_handover(monkeypatch, tmp_path):
     module = _load_server_module('cb_studio_handover_failure_test')
     monkeypatch.setattr(module, 'ROOT', tmp_path)
@@ -187,41 +203,17 @@ def _request(port, method, path, headers=None, body=None):
     return result
 
 
-@pytest.mark.parametrize('stage', ['look', 'review-final'])
-@pytest.mark.parametrize('shot_value', [None, ''])
-def test_scene_department_null_target_reaches_scene_scope(studio, monkeypatch, stage, shot_value):
-    from types import SimpleNamespace
-    module, port = studio
-    calls = []
-    monkeypatch.setattr(module, '_canonical_cb_render', lambda: SimpleNamespace(
-        department_status=lambda *a: calls.append(a) or {'directionReady': True}))
-    _, headers, _ = _request(port, 'GET', '/cb-studio/app.html')
-    auth = {'Cookie': headers['Set-Cookie'].split(';', 1)[0],
-            'Origin': f'http://127.0.0.1:{port}', 'Content-Type': 'application/json'}
-    code, _, body = _request(port, 'POST', '/api/department-run', auth,
-        json.dumps({'scene': '2', 'episode': 'Ep3', 'stage': stage, 'shotId': shot_value}))
-    assert code == 200, body
-    assert json.loads(body)['existing']
-    assert calls == [('2', None, 'Ep3', stage)]
-
-
-@pytest.mark.parametrize('route', ['save', 'decide'])
-def test_scene_department_edit_keeps_null_target(studio, monkeypatch, route):
-    import cb_render
-    module, port = studio
-    calls = []
-    def record(*args, **kwargs):
-        calls.append((args, kwargs)); return {'saved': True}
-    monkeypatch.setattr(cb_render, 'save_department_candidate', record)
-    monkeypatch.setattr(cb_render, 'decide_department', record)
+@pytest.mark.parametrize('route', ['run', 'save', 'decide'])
+def test_retired_department_mutations_are_gone_from_current_production(studio, route):
+    _, port = studio
     _, headers, _ = _request(port, 'GET', '/cb-studio/app.html')
     auth = {'Cookie': headers['Set-Cookie'].split(';', 1)[0],
             'Origin': f'http://127.0.0.1:{port}', 'Content-Type': 'application/json'}
     code, _, body = _request(port, 'POST', '/api/department-' + route, auth,
         json.dumps({'scene':'2', 'episode':'Ep3', 'stage':'look', 'shotId':None,
                     'text':'Current scene world', 'verdict':'approve'}))
-    assert code == 200, body
-    assert calls[0][1]['shot_id'] is None
+    assert code == 410, body
+    assert 'RETIRED_ROUTE' in json.loads(body)['error']
 
 
 def test_accept_direction_queues_all_eight_scene_compilers_without_provider_calls(monkeypatch,
@@ -757,7 +749,7 @@ def test_credits_endpoint_requires_auth_and_routes_one_explicit_fire(studio, mon
     ('chat:approve:keyframe', True, 'voice'),
     ('chat:approve:keyframe', False, 'animation'),
     ('chat:approve:voice', True, 'animation'),
-    ('chat:approve:render', True, 'voice'),
+    ('chat:approve:render', True, 'keyframe'),
 ])
 def test_chat_approval_prepares_only_next_outcome(monkeypatch, tmp_path, gate, spoken, next_stage):
     module = _load_server_module('outcome_transition_' + next_stage)

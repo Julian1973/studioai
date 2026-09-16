@@ -208,16 +208,12 @@ def _choose_shot(state: dict[str, Any], requested_shot_id: str | None) -> dict[s
     shots = state.get("shots") or []
     if requested_shot_id:
         selected = next((shot for shot in shots if shot.get("shotId") == requested_shot_id), None)
-        animations_complete = bool(shots) and all(_shot_complete(shot) for shot in shots)
-        if selected and (not animations_complete or
-                         not (selected.get("current") or {}).get("directorReview")):
+        if selected:
             return selected
     animation_target = next((shot for shot in shots if not _shot_complete(shot)), None)
     if animation_target:
         return animation_target
-    review_target = next((shot for shot in shots
-                          if not (shot.get("current") or {}).get("directorReview")), None)
-    return review_target or (shots[0] if shots else None)
+    return shots[0] if shots else None
 
 
 def _provider_blocker(preflight: dict[str, Any]) -> dict[str, Any] | None:
@@ -901,29 +897,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         keyframe_headline = (((preflight.get("productionInputs") or {}).get("shots") or {})
                              .get(shot_id) or {}).get("keyframePromptHeadline")
 
-        if all_animations_current and not all(
-                (item.get("current") or {}).get("directorReview") for item in all_state_shots):
-            phase = "review"
-            artifact = {"type": "video", "url": shot_media.get("clip"),
-                        "label": "Accepted animation"}
-            review_work = ((package_ledger.get("departmentWork") or {})
-                           .get("review-animation") or {})
-            review_candidate = review_work.get("candidate") or {}
-            if pending.get("directorReview") and review_candidate:
-                status = "ready_to_review"
-                headline = "Quality review ready"
-                summary = "Confirm the accepted take still protects story, performance and continuity."
-                quality_review = review_candidate.get("output") or {}
-                decisions = [
-                    _action("accept-quality", "Confirm shot"),
-                    _action("reopen-shot", "Reopen", destructive=True),
-                ]
-            else:
-                status = "ready_to_fire"
-                headline = "Run the quality check"
-                summary = purpose
-                primary = _action("run-quality-review", "Run quality check")
-        elif all_animations_current:
+        if all_animations_current:
             phase = "final"
             final_stage = stages.get("final") or {}
             post = state.get("postProduction") or {}
@@ -991,13 +965,11 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                            "Selecting a candidate does not approve it.")
                 primary = None
                 decisions = []
-            elif _ai_creative_review(package_ledger, phase)["available"]:
+            else:
                 decisions = [
                     _action("accept-keyframe", "Accept"),
                     _action("iterate-keyframe", "Iterate", destructive=True),
                 ]
-            else:
-                primary = _action("run-ai-review", "Run AI Director review")
         elif not keyframe_ready:
             phase = "keyframe"
             status = "ready_to_fire"
@@ -1064,14 +1036,11 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             candidates = shot_media.get("candidates") or []
             artifact = {"type": "video-set", "items": candidates,
                         "label": "Animation candidates"}
-            if _ai_creative_review(package_ledger, phase)["available"]:
-                decisions = [
-                    _action("accept-animation", "Accept", candidate=(candidates[0].get("n")
-                                                                      if len(candidates) == 1 else None)),
-                    _action("iterate-animation", "Iterate", destructive=True),
-                ]
-            else:
-                primary = _action("run-ai-review", "Run AI Director review")
+            decisions = [
+                _action("accept-animation", "Accept", candidate=(candidates[0].get("n")
+                                                                  if len(candidates) == 1 else None)),
+                _action("iterate-animation", "Iterate", destructive=True),
+            ]
         elif (not all_animations_current and keyframe_ready and voice_ready
               and not current.get("animation")):
             phase = "animation"
@@ -1266,62 +1235,6 @@ def _direction_current(scene: str, shot_id: str, stage: str, episode: str) -> bo
 
 def build_keyframe(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
     import cb_render
-
-    package, _ = cb_render.load_pkg(scene, episode)
-    shot = cb_render._shot(package, shot_id)
-    ledger = cb_render._ledger(package, shot_id)
-    work = ledger.setdefault("departmentWork", {}).setdefault(
-        "cinematography", {"approved": None, "candidate": None, "history": []})
-
-    def contract_is_complete(record: dict[str, Any] | None) -> bool:
-        try:
-            cb_render._keyframe_direction_contract(
-                ((record or {}).get("output") or {}), shot)
-            return True
-        except (cb_render.Refused, KeyError, TypeError, ValueError):
-            return False
-
-    def approved_direction_is_current() -> bool:
-        return (
-            contract_is_complete(work.get("approved"))
-            and _direction_current(scene, shot_id, "cinematography", episode)
-        )
-
-    if not approved_direction_is_current():
-        if work.get("candidate"):
-            direction_state = cb_render._department_record_status(
-                package, shot_id, "cinematography", scene, episode)
-            candidate_is_current = (
-                direction_state.get("current")
-                and direction_state.get("source") == "prepared"
-                and direction_state.get("record") is work["candidate"]
-            )
-            if contract_is_complete(work["candidate"]) and candidate_is_current:
-                log("DIRECTOR — promoting the current complete cinematography contract")
-                cb_render.decide_department(
-                    scene, "cinematography", "approved", shot_id=shot_id,
-                    note="Current typed direction promoted for keyframe compilation.",
-                    episode=episode, reviewed_by="Studio contract migration", log=log)
-            else:
-                log("DIRECTOR — refreshing legacy cinematography direction to the current contract")
-                cb_render.decide_department(
-                    scene, "cinematography", "rejected", shot_id=shot_id,
-                    note="Legacy direction is missing required typed keyframe fields.",
-                    episode=episode, reviewed_by="Studio contract migration", log=log)
-            # decide_department reloads and saves the package independently. Refresh this
-            # local view before deciding whether a replacement direction is still needed.
-            package, _ = cb_render.load_pkg(scene, episode)
-            shot = cb_render._shot(package, shot_id)
-            ledger = cb_render._ledger(package, shot_id)
-            work = ledger.setdefault("departmentWork", {}).setdefault(
-                "cinematography", {"approved": None, "candidate": None, "history": []})
-        if not approved_direction_is_current():
-            cb_render.prepare_department(
-                scene, "cinematography", shot_id, episode, log)
-            cb_render.decide_department(
-                scene, "cinematography", "approved", shot_id=shot_id,
-                note="Refreshed to the current typed keyframe contract.", episode=episode,
-                reviewed_by="Studio contract migration", log=log)
     cb_render.keyframe_shot(scene, shot_id, episode, log)
 
 
@@ -1338,12 +1251,91 @@ def refire_keyframe(scene: str, shot_id: str, correction: str,
 
 def build_voice(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
     import cb_render
-
-    if not _direction_current(scene, shot_id, "voice", episode):
-        log("DIRECTOR — preparing current voice direction")
-        cb_render.prepare_department(scene, "voice", shot_id, episode, log)
     package, path = cb_render.load_pkg(scene, episode)
     cb_render.voice_shot(package, path, shot_id, episode, log)
+
+
+def watch_readiness(scene: str, shot_id: str, episode: str = "Ep1") -> dict[str, Any]:
+    """Pure, zero-spend WATCH readiness used by preview and Fire."""
+    import cb_audio_authority
+    import cb_costs
+    import cb_providers
+    import cb_render
+    from cb_recovery import require_no_provider_operation
+    from studio_authored_action import actions
+    from studio_director_handoff import errors, card_issues
+    from studio_see_service import gate as see_gate
+
+    model = cb_providers.video_model(require_enabled=True)
+    package, _ = cb_render.load_pkg(scene, episode)
+    cb_render._require_valid(package)
+    cb_render._require_current_lineage(package, scene, episode)
+    shot = cb_render._shot(package, shot_id)
+    ledger = cb_render._ledger(package, shot_id)
+    issues = errors(shot) + card_issues(shot)
+    if issues:
+        raise cb_render.Refused("DIRECT_REVISION_REQUIRED: " + issues[0])
+    authored = actions(shot)
+    require_no_provider_operation(cb_render.ROOT, episode, scene, shot_id, ledger)
+    try:
+        see_gate(cb_render.ROOT, {"projectId": "crystal-bears", "episode": episode,
+            "scene": str(scene), "unit": shot_id}, approved=True)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise cb_render.Refused("WATCH_CONFIGURATION_REQUIRED: " + str(exc)) from exc
+    budget = cb_render._performance_budget_report(
+        cb_render._shot_creative_contract_view(package, shot, scene, episode), ledger)
+    if not budget.get("ready"):
+        raise cb_render.Refused("HEAR_CONFIGURATION_REQUIRED: " +
+                                "; ".join(budget.get("reasons") or []))
+    spoken = cb_audio_authority.spoken_dialogue_lines(shot)
+    voice = cb_render._voice_approval_status(package, shot, scene, episode)
+    if spoken and not voice.get("current"):
+        raise cb_render.Refused(
+            "HEAR_CONFIGURATION_REQUIRED: current approved Audio1 is required: " +
+            str(voice.get("reason") or "approval missing"))
+    from studio_approved_media_projection import watch_shot
+    source = watch_shot(shot, ledger)
+    source = cb_render._with_effective_reference_slots(
+        package, source, "referenceSlots", str(scene), episode)
+    opening = cb_render._anchor_for(package, source)
+    attachments = cb_render._provider_attachment_plan(
+        source, "referenceSlots", opening, str(scene), episode,
+        cb_render._characters_cfg())
+    reference_records = cb_render._reference_records(
+        source, [item["path"] for item in attachments])
+    audio = ({"path": ledger["voPath"], "md5": cb_render._file_md5(ledger["voPath"])}
+             if ledger.get("voPath") else {})
+    from studio_prompt_director import audio_policy, current_shot_authority, request_snapshot
+    from studio_watch_plan import prepare_plan, digest
+    from studio_character_roles import audit
+    from studio_seedance_execution import compile_prompt
+    snapshot = request_snapshot(audio_policy(bool(audio)),
+        {"shot": current_shot_authority(source)}, reference_records, audio,
+        source["durationSec"])
+    prepared = prepare_plan(snapshot)
+    prompt, evidence = compile_prompt(prepared, audit(prepared))
+    integrity = evidence["actionIntegrity"]
+    if integrity["authoredActionHash"] != integrity["emittedActionHash"]:
+        raise cb_render.Refused("WATCH_AUTHORED_ACTION_DRIFT")
+    contract = cb_providers.request_contract(
+        fast=False, duration=int(round(source["durationSec"])),
+        resolution=cb_render._review_video_resolution(),
+        image_count=len(reference_records), audio_count=1 if audio else 0,
+        video_count=0)
+    cost = cb_costs.estimate_video_cost(
+        contract["costRateKey"], int(round(source["durationSec"])))
+    request_identity = {
+        "promptHash": digest(prompt), "references": reference_records,
+        "audio": audio, "contract": contract, "durationSec": source["durationSec"]}
+    return {"ready": True, "zeroSpend": True, "shotId": shot_id,
+            "authoredActionHash": integrity["authoredActionHash"],
+            "emittedActionHash": integrity["emittedActionHash"],
+            "actions": authored, "prompt": prompt, "promptHash": digest(prompt),
+            "references": reference_records, "audio": audio,
+            "durationSec": source["durationSec"], "provider": model.provider,
+            "providerModelId": contract["providerModelId"], "settings": contract,
+            "estimatedCostUsd": round(cost, 4),
+            "requestHash": digest(request_identity)}
 
 
 def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
@@ -1351,36 +1343,8 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
     import cb_providers
     import cb_render
 
-    model = cb_providers.video_model(require_enabled=True)
-    cb_render._require_confirmed_billing(model.provider)
-    package, _ = cb_render.load_pkg(scene, episode)
-    shot = cb_render._shot(package, shot_id)
-    ledger = cb_render._ledger(package, shot_id)
-    from studio_authored_action import actions
-    from studio_director_handoff import errors, card_issues
-    issues = errors(shot) + card_issues(shot)
-    if issues:
-        raise cb_render.Refused('DIRECTOR_REVISION_REQUIRED: ' + issues[0])
-    try:
-        actions(shot)
-    except ValueError as exc:
-        raise cb_render.Refused('DIRECTOR_REVISION_REQUIRED: ' + str(exc)) from exc
-    from studio_see_service import gate as see_gate
-    from cb_recovery import require_no_provider_operation
-    try:
-        require_no_provider_operation(cb_render.ROOT, episode, scene, shot_id, ledger)
-        see_gate(cb_render.ROOT, {'projectId':'crystal-bears', 'episode':episode,
-            'scene':str(scene), 'unit':shot_id}, approved=True)
-    except ValueError as exc:
-        raise cb_render.Refused(str(exc)) from exc
-    import cb_audio_authority
-    if cb_audio_authority.spoken_dialogue_lines(shot):
-        voice = cb_render._voice_approval_status(package, shot, scene, episode)
-        if not voice.get('current'):
-            raise cb_render.Refused('WATCH_CONFIGURATION_REQUIRED: Audio1 is not bound to the current approved dialogue/performance: ' + str(voice.get('reason') or 'approval missing'))
-    opening = (ledger.get("keyframeApproval") or {}).get("path") or cb_render._anchor_for(package, shot)
-    if not opening:
-        raise cb_render.Refused("WATCH_CONFIGURATION_REQUIRED: approve the Opening Keyframe before preparing WATCH.")
+    readiness = watch_readiness(scene, shot_id, episode)
+    cb_render._require_confirmed_billing(readiness["provider"])
     try:
         cb_render.fire_shot(scene, shot_id, episode, candidates=1, spend_token=None, log=log)
     except cb_render.Refused as exc:

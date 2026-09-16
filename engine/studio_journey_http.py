@@ -3,6 +3,7 @@ from studio_journey import Journey, StudioStore, DecisionRequired, scope_key
 from pathlib import Path
 import threading
 import time
+import uuid
 
 _ACTIVE=set()
 _LOCK=threading.Lock()
@@ -41,18 +42,28 @@ def continue_operation(server,scope):
 
 def request(server,data):
     scope=data.get('scope') or {}
-    scope_key(scope)
-    J=controller(server,scope)
     action=data.get('command','status')
-    if action=='decide':
-        J.accept(scope,data,str(data.get('by') or 'Producer'))
-        continue_operation(server,scope)
-    elif action=='recover':
-        J.recover(scope)
-        continue_operation(server,scope)
-    elif action=='resume':
-        # Resume a persisted active sequence only, never reset failed jobs or approvals.
-        continue_operation(server,scope)
-    elif action!='status':
-        raise ValueError('Use the current production action.')
-    return J.view(scope)
+    request_id=str(data.get('requestId') or ('journey_'+uuid.uuid4().hex[:12]))
+    try:
+        scope_key(scope)
+        J=controller(server,scope)
+        if action=='decide':
+            J.accept(scope,data,str(data.get('by') or 'Producer'))
+            continue_operation(server,scope)
+        elif action=='recover':
+            J.recover(scope)
+            continue_operation(server,scope)
+        elif action=='resume':
+            continue_operation(server,scope)
+        elif action!='status':
+            raise ValueError('Use the current production action.')
+        return J.view(scope)
+    except Exception as exc:
+        component=str(scope.get('unit') or scope.get('shot') or 'production journey')
+        operation='journey.refresh' if action=='status' else f'journey.{action}'
+        return {'ok':False, 'error': {
+            'errorCode':'STUDIO_JOURNEY_PROJECTION_ERROR' if action=='status' else 'STUDIO_JOURNEY_ERROR',
+            'stage':'journey', 'operation':operation, 'component':component,
+            'humanMessage':'Studio could not load the current production review.' if action=='status' else 'Studio could not complete this production step.',
+            'technicalMessage':f'{type(exc).__name__}: {exc}',
+            'correlationId':request_id, 'requestId':request_id}}

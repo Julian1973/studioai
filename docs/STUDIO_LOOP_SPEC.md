@@ -1,69 +1,55 @@
 # Studio Loop Spec
 
-This local copy records the implemented Studio loop contract when the upstream PR artifact
-is not available to the checkout.
+## Current loop
 
-The project-aware agent and BYOK workspace use the shared command contract documented
-in [Project production agent](PROJECT_AGENT.md). The storage paths and APIs below describe
-the original production desk, retained as the compatibility path for established projects.
+The current Studio loop is:
 
-## Emission readiness
+`SCRIPT → DIRECT → SEE → HEAR → WATCH → FIRE → REVIEW`
 
-`cb_emission_standard.preflight` checks the request contract. Craft scores are advisory;
-a score threshold is not a production gate. Actual script, reference, audio, provider-limit
-and authorization contradictions must be resolved before submission.
+DIRECT is the only creative authority. SEE visualizes approved direction as a Scene Plate,
+one Opening Keyframe owned by the current generation unit, and an optional Illustrated
+Storyboard. HEAR creates ElevenLabs v3 Audio1 from exact dialogue and DIRECT performance.
+WATCH mechanically emits the provider prompt, references and audio without creative
+substitution. FIRE submits the sealed request to BytePlus. REVIEW is human Approve or
+Retake.
 
-## Prompt Bank Record
+## Readiness and prompt integrity
 
-Every approved or rejected animation prompt is written append-only to
-`cb-output/prompt-bank/prompt_bank.jsonl`.
+The producer preview and the actual Fire route call the same zero-spend WATCH readiness
+implementation. It verifies:
 
-Required record fields:
+- current DIRECT
+- current approved SEE
+- current approved Audio1 when dialogue exists
+- current reference files and hashes
+- no unresolved provider operation
+- `authoredActionHash == emittedActionHash`
+- valid BytePlus model, duration, settings and cost contract
 
-- `schemaVersion`
-- `recordId`
-- `bankedAt`
-- `episode`
-- `scene`
-- `shotId`
-- `artifactType`
-- `outcome`
-- `approved`
-- `diagnosis`
-- `category`
-- `candidate`
-- `candidatePath`
-- `promptHash`
-- `promptText`
-- `parsed`
-- `archetype`
-- `conformance`
-- `metadata`
+A failure returns one current blocker. It does not call a specialist or rewrite direction.
 
-The `parsed` object is created at bank time and includes section order, section sizes,
-total character and word count, shot count, dialogue presence and audio policy signals.
+## Continuity
 
-The v1 query surface is:
+New generation units use editorial cuts. Each unit owns an Opening Keyframe. The next unit
+preserves story state and visual identity while choosing its own composition. Normal current
+production does not require a previous final frame, a previous video, `@Video1`, an extension
+source or pixel-for-pixel continuation.
 
-```bash
-python3 engine/cb_prompt_bank.py report
-python3 engine/cb_render.py prompt-bank
-```
+Historical keyframe-handoff, video-extension and specialist records remain readable for
+provenance. They cannot supply current production authority.
 
-It reports section-order frequency, character-count distribution and archetype win rate.
+## Submission, recovery and approval
 
-## Render Continuity Modes
+The sealed request binds exact DIRECT action, SEE assets, references, Audio1 and provider
+settings. A known provider task is polled or recovered by its task ID. An unknown submission
+outcome blocks retry until reconciled.
 
-Each non-opening shot defaults to `keyframe-handoff`: the previous approved shot's harvested
-final frame is the first image reference.
+Returned-media approval validates the sealed request, provider task, returned media hash,
+reference hashes and Audio1 hash. It does not compare against unrelated mutable working
+metadata.
 
-A non-opening shot may opt into `video-extension`: the previous approved clip is attached as
-`@Video1`, the prompt receives a continue-forward directive, and the still-image reference
-pack remains attached for identity, scene and style control.
+## Prompt Bank
 
-CLI selector:
-
-```bash
-python3 engine/cb_render.py continuity-mode <scene> <shotId> keyframe-handoff [episode]
-python3 engine/cb_render.py continuity-mode <scene> <shotId> video-extension [episode]
-```
+Approved and rejected animation prompts remain append-only in
+`cb-output/prompt-bank/prompt_bank.jsonl`. They are evidence and learning material, not a
+fallback authority for current WATCH compilation.

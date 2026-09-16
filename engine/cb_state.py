@@ -269,12 +269,24 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
     ledger = cb_render._ledger(pkg, shot_id)
     needs_keyframe = cb_render._shot_uses_own_keyframe(shot, ledger)
 
-    cine = cb_render._department_record_status(
-        pkg, shot_id, "cinematography", scene, episode)
-    voice_direction = cb_render._department_record_status(
-        pkg, shot_id, "voice", scene, episode)
-    animation_direction = cb_render._department_record_status(
-        pkg, shot_id, "animation", scene, episode)
+    try:
+        cb_render._direct_keyframe_direction(shot)
+        cine = {"current": True, "reason": None}
+    except (cb_render.Refused, KeyError, TypeError, ValueError) as exc:
+        cine = {"current": False, "reason": str(exc)}
+    talky = bool(cb_audio_authority.spoken_dialogue_lines(shot))
+    try:
+        if talky:
+            cb_render._approved_voice_lines(pkg, shot)
+        voice_direction = {"current": True, "reason": None}
+    except (cb_render.Refused, KeyError, TypeError, ValueError) as exc:
+        voice_direction = {"current": False, "reason": str(exc)}
+    from studio_director_handoff import errors as direct_errors, card_issues
+    direct_issues = direct_errors(shot) + card_issues(shot)
+    animation_direction = {
+        "current": not direct_issues,
+        "reason": direct_issues[0] if direct_issues else None,
+    }
 
     keyframe_approval = ledger.get("keyframeApproval") or {}
     keyframe_candidate = ledger.get("keyframeCandidate") or {}
@@ -341,7 +353,6 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
         candidate_current = False
 
     voice = cb_render._voice_approval_status(pkg, shot, scene, episode)
-    talky = bool(cb_audio_authority.spoken_dialogue_lines(shot))
     voice_ok = voice["current"]
     # Once HEAR is signed, the immutable approved media bundle is the operational
     # performance direction. A later unapproved draft cannot make that decision stale.
@@ -360,10 +371,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
     else:
         animation_state = "designed"
 
-    review = cb_render._department_record_status(
-        pkg, shot_id, "review-animation", scene, episode)
-    review_work = ((ledger.get("departmentWork") or {}).get("review-animation") or {})
-    continuity_current = bool(animation["current"] and review["current"])
+    continuity_current = bool(animation["current"])
 
     scene_look_gated = not scene_look_current
     ready_to_animate = bool(
@@ -416,31 +424,24 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
     elif needs_keyframe and not keyframe_satisfied:
         label, sub, badge = (
             "New keyframe required",
-            None if cine["current"] else
-            "direction will prepare automatically when you build the keyframe",
+            None if cine["current"] else cine["reason"],
             "ready",
         )
     elif not voice_ok:
         label, sub, badge = (
             "Opening frame ready",
-            ("performance direction will prepare automatically when you fire"
+            (voice_direction["reason"]
              if not voice_direction["current"] else
              "generate, listen and choose Accept or Iterate"),
-            "ready",
-        )
-    elif animation_state == "approved" and not continuity_current:
-        label, sub, badge = (
-            "Animation accepted",
-            "Director Review still needs a current sign-off",
             "ready",
         )
     elif animation_state == "approved":
         label, sub, badge = "Complete", None, "approved"
     elif not animation_direction["current"]:
         label, sub, badge = (
-            "Ready to fire animation",
-            "the Studio will prepare current Animation direction before showing the spend",
-            "ready",
+            "DIRECT needs one correction",
+            animation_direction["reason"],
+            "blocked",
         )
     elif animation_state == "designed":
         label, sub, badge = "Ready to animate", None, "ready"
@@ -459,12 +460,6 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "Accepted animation is stale",
             "a direct prompt, frame, reference, voice or media input changed",
             "blocked",
-        )
-    elif not continuity_current:
-        label, sub, badge = (
-            "Animation accepted",
-            "Director Review still needs a current sign-off",
-            "ready",
         )
     else:
         label, sub, badge = "Complete", None, "approved"
@@ -494,7 +489,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "animationDirection": animation_direction["current"],
             "animationBatch": batch_current,
             "animation": animation["current"],
-            "directorReview": review["current"],
+            "directorReview": animation["current"],
             "continuity": continuity_current,
         },
         "reasons": {
@@ -504,17 +499,17 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "voice": voice["reason"],
             "animationDirection": animation_direction["reason"],
             "animation": animation["reason"],
-            "directorReview": review["reason"],
+            "directorReview": None,
         },
         "pending": {
             "request": bool(ledger.get("pendingSpendAuth")),
             "keyframe": bool(keyframe_candidate),
             "voice": bool(ledger.get("voPath") and not voice_ok),
             "animation": ledger.get("status") == "candidates-pending",
-            "directorReview": bool(review_work.get("candidate")),
+            "directorReview": False,
         },
         "allowedActions": {
-            "prepareCinematography": package_current,
+            "prepareCinematography": False,
             "generateKeyframe": bool(
                 package_current and scene_look_current and needs_keyframe and
                 cine["current"] and not keyframe_candidate),
@@ -523,14 +518,13 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
                 keyframe_screening.get("status") == "pass"),
             "rescreenKeyframe": bool(
                 package_current and scene_look_current and kf == "screening"),
-            "prepareVoice": bool(package_current and talky),
+            "prepareVoice": False,
             "generateVoice": bool(
                 package_current and talky and voice_direction_current and
                 not voice["approved"]),
             "approveVoice": bool(
                 talky and ledger.get("voPath") and not voice_ok),
-            "prepareAnimation": bool(
-                package_current and scene_look_current and keyframe_satisfied and voice_ok),
+            "prepareAnimation": False,
             "fireAnimation": ready_to_animate,
             "approveAnimation": bool(
                 animation_state == "candidates-pending" and batch_current),
@@ -562,9 +556,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
         if changed_stage_current:
             # Recompute the first downstream action after any preserved approval has been
             # restored above. The initial action map was built before that scoped carry-forward.
-            result["allowedActions"]["prepareAnimation"] = bool(
-                package_current and scene_look_current and
-                result["current"]["keyframe"] and result["current"]["voice"])
+            result["allowedActions"]["prepareAnimation"] = False
         if not changed_stage_current:
             if "voice" not in preserved:
                 result["voiceOk"] = False
@@ -752,9 +744,6 @@ def production_state(scene, episode="Ep1", intake=None):
 
     scene_look = cb_render.scenelook_status(scene, episode)
     look_record = cb_render._load_scenelook_rec(scene, episode)
-    look_work = (look_record.get("departmentWork") or {}).get("look") or {}
-    look_direction = cb_render._department_record_status(
-        pkg, None, "look", scene, episode)
     scene_look_current = bool(scene_look.get("current"))
     if amendment:
         carried_look = ((amendment.get("record") or {}).get("sceneLookPath") and {
@@ -772,12 +761,6 @@ def production_state(scene, episode="Ep1", intake=None):
             "approved", "approved scene world preserved for the scoped shot amendment")
     elif production_block:
         stages["scenelook"] = production_block
-    elif look_work.get("candidate") and not look_direction["current"]:
-        stages["scenelook"] = _stage(
-            "blocked", "Look direction inputs changed")
-    elif not look_direction["current"]:
-        stages["scenelook"] = _stage(
-            "ready", "prepare current Look Development direction")
     elif scene_look.get("candidate"):
         stages["scenelook"] = _stage(
             "approved" if scene_look.get("candidateCurrent") else "awaiting",
@@ -997,7 +980,7 @@ def production_state(scene, episode="Ep1", intake=None):
         "sceneLook": {
             "status": scene_look.get("status"),
             "current": scene_look_current,
-            "directionCurrent": look_direction["current"],
+            "directionCurrent": True,
         },
         "timingSlate": timing,
         "postProduction": {

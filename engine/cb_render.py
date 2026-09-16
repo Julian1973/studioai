@@ -57,7 +57,6 @@ approximates "is it funny").
     python3 cb_render.py keyframe-library <scene> <shotId> [episode]
     python3 cb_render.py select-upload  <scene> <shotId> <uploadPath> [episode]
     python3 cb_render.py select-library <scene> <shotId> <libraryPath> [episode]
-    python3 cb_render.py select-previous <scene> <shotId> [episode]
     python3 cb_render.py select-render-upload <scene> <shotId> <videoPath> [episode]
     python3 cb_render.py voice-status <scene> <shotId> [episode]
     python3 cb_render.py save-voice   <scene> <shotId> '<json lines>' [episode]
@@ -69,9 +68,8 @@ approximates "is it funny").
     python3 cb_render.py restore-seedance <scene> <shotId> [episode]
     python3 cb_render.py bind-location-reference <scene> <shotId> <label> <path> [episode]
     python3 cb_render.py check-structure  <scene> <shotId> [episode]
-    python3 cb_render.py continuity-mode  <scene> <shotId> <keyframe-handoff|video-extension> [episode]
     python3 cb_render.py prompt-bank
-    python3 cb_render.py department-prepare <scene> <look|cinematography|voice|animation|review-keyframe|review-animation|review-final> <shotId|-> [episode]
+    python3 cb_render.py department-prepare <scene> <review-keyframe|review-animation|review-final> <shotId|-> [episode]
     python3 cb_render.py department-status  <scene> <stage> <shotId|-> [episode]
     python3 cb_render.py next     <scene> [episode] [--candidates N] [--spend-token T]
     python3 cb_render.py fire     <scene> <shotId> [episode] [--candidates N] [--spend-token T]
@@ -87,7 +85,7 @@ approximates "is it funny").
     python3 cb_render.py stitch   <scene> [episode]
     python3 cb_render.py status   <scene> [episode]
 """
-import os, sys, io, json, re, glob, pathlib, datetime, shutil, hashlib, uuid, subprocess, tempfile, threading
+import os, sys, io, json, re, glob, pathlib, datetime, shutil, hashlib, uuid, subprocess, tempfile, threading, base64
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_engine
@@ -347,29 +345,14 @@ def _requires_stage_contract_keyframe(shot):
 
 def _shot_uses_own_keyframe(shot, ledger=None):
     """Whether SEE must author and approve a shot-owned opening frame."""
-    # A relay's approved predecessor frame is already its authored SEE contract.
-    # Requiring another frame for a large cast breaks the exact continuity the relay
-    # exists to preserve and sends the Studio around SEE -> HEAR -> WATCH in a loop.
-    return shot.get("sourceType") == "opener"
+    # Editorial-cut production gives every generation unit its own approved opening
+    # composition. Previous final frames remain readable historical evidence only.
+    return True
 
 
 def _require_stage_contract_keyframe(shot, ledger, pkg=None):
     if not _requires_stage_contract_keyframe(shot):
         return
-    if shot.get("sourceType") == "relay" or shot.get("sourceShotId"):
-        if ledger.get("continuityMode") == CONTINUITY_MODE_VIDEO_EXTENSION:
-            return
-        source_id = shot.get("sourceShotId")
-        source = _ledger(pkg, source_id) if pkg and source_id else {}
-        inherited = source.get("harvestFrame")
-        if (source.get("status") == "approved" and inherited and
-                os.path.exists(inherited)):
-            return
-        raise Refused(
-            f"REFUSED — {shot.get('shotId')} is waiting for {source_id}'s approved "
-            "final frame. Approve the previous WATCH take first; its harvested final "
-            "frame becomes this relay shot's SEE contract automatically."
-        )
     approval = ledger.get("keyframeApproval") or {}
     path = approval.get("path")
     if approval.get("approved") and path and os.path.exists(path):
@@ -2666,18 +2649,33 @@ def _effective_reference_slots(pkg, shot, slots_key, scene, episode):
         }
     if slots_key == "referenceSlots" and not slots:
         slots = dict(shot.get("animationReferenceSlots") or {})
-    if _is_relay_or_split_shot(shot) and _slots_need_continuation_rebuild(slots):
-        slots = _continuation_reference_slots(
-            shot, include_audio=(slots_key == "referenceSlots"))
     if slots_key != "referenceSlots":
         return _with_required_prop_slots(slots, shot, scene, episode)
-    if not slots:
-        approved = _stored_approved_department_output(
-            pkg, shot.get("shotId"), "animation") or {}
-        slots = _slots_from_reference_contract(
-            approved.get("referenceContract") or [],
-            characters=shot.get("charactersInFrame") or [],
-        )
+
+    # Current WATCH is an editorial cut from this unit's own approved opening keyframe.
+    # Translate historical relay roles locally; never consult an Animation department.
+    ordered_roles = []
+    audio_roles = []
+    for slot, role in slots.items():
+        if str(slot).startswith("@Audio"):
+            audio_roles.append(role)
+            continue
+        normalized = str(role or "").strip()
+        if normalized in ("previous shot final frame", "previous shot state reference"):
+            normalized = "opening keyframe"
+        if normalized and normalized not in ordered_roles:
+            ordered_roles.append(normalized)
+    if "opening keyframe" not in ordered_roles:
+        ordered_roles.insert(0, "opening keyframe")
+    if "scene plate" not in ordered_roles:
+        ordered_roles.append("scene plate")
+    for character in shot.get("charactersInFrame") or []:
+        name = str(character or "").strip()
+        if name and name not in ordered_roles:
+            ordered_roles.append(name)
+    slots = {f"@图{index}": role for index, role in enumerate(ordered_roles, 1)}
+    if cb_audio_authority.spoken_dialogue_lines(shot):
+        slots["@Audio1"] = audio_roles[0] if audio_roles else "voice track"
 
     # Extra approved location angles support reverse coverage without replacing the
     # scene plate or changing the separately-approved opening keyframe contract.
@@ -2878,24 +2876,29 @@ def _expanded_reference_blueprint(shot, slots_key, characters_cfg, scene=None,
                                   episode="Ep1"):
     """Bind each logical character slot to one complete, uncropped turnaround sheet."""
     usage = "keyframe" if slots_key == "keyframeReferenceSlots" else "animation"
-    slots = _with_required_prop_slots(
-        shot.get(slots_key) or {}, shot, scene, episode)
+    raw_slots = dict(shot.get(slots_key) or {})
+    slots = {}
+    for slot, role in raw_slots.items():
+        role = str(role or "").strip()
+        if role in ("previous shot final frame", "previous shot state reference"):
+            if usage == "keyframe":
+                continue
+            role = "opening keyframe"
+        slots[slot] = role
+    image_roles = [role for slot, role in slots.items() if str(slot).startswith("@图")]
+    next_image = max([int(key[2:]) for key in slots if key.startswith("@图")] or [0]) + 1
+    if usage == "keyframe" and "scene plate" not in image_roles:
+        slots[f"@图{next_image}"] = "scene plate"
+    if usage == "animation" and "opening keyframe" not in image_roles:
+        slots[f"@图{next_image}"] = "opening keyframe"
+    slots = _with_required_prop_slots(slots, shot, scene, episode)
     from studio_reference_contract import complete_identity_slots, required_cast
     cast = (required_cast(shot) if usage == "keyframe" else
             shot.get("charactersInFrame") or [])
     slots = complete_identity_slots(slots, cast)
-    transition = shot.get("shotTransition") or {}
-    if usage == "keyframe" and transition.get("type") == "cut" and transition.get("stateSourceShotId"):
-        slots = dict(slots)
-        if not {"previous shot state reference", "previous shot final frame"}.intersection(slots.values()):
-            number = max([int(key[2:]) for key in slots if key.startswith("@图")] or [0]) + 1
-            slots[f"@图{number}"] = "previous shot state reference"
     expanded = []
     source_slots = [key for key in slots if key.startswith("@图")]
-    relay_keyframe = bool(
-        usage == "keyframe" and
-        shot.get("sourceType") in {"relay", "continuation", "split"} and
-        shot.get("sourceShotId"))
+    relay_keyframe = False
     source_slots.sort(key=lambda key: (
         _stable_reference_role_key(
             slots[key], usage, characters_cfg, relay=relay_keyframe), int(key[2:])))
@@ -3230,6 +3233,16 @@ def shot_reference_manifest(scene, shot_id, episode="Ep1"):
                         "mediaCallsRequired": 0, "maxMediaCalls": 0,
                         "estimatedMaxUsd": 0.0,
                     })
+    if keyframe_applies:
+        prompt = _resolve_keyframe_prompt(pkg, shot)
+        direct = _direct_keyframe_direction(shot)
+        build_status = {
+            **build_status,
+            "prompt": prompt,
+            "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+            "promptSource": "current-direct",
+            "promptHeadline": direct.get("audienceRead"),
+        }
     return {
         "episode": episode, "scene": str(scene), "shotId": shot_id,
         "zeroSpend": True, "readOnly": True,
@@ -4832,7 +4845,7 @@ def _with_opening_composition_control(prompt, shot, scene, episode):
 
 
 def _keyframe_direction_contract(direction, shot):
-    """Validate the one approved direction record consumed by the keyframe compiler."""
+    """Validate the DIRECT projection consumed by the keyframe compiler."""
     shot_id = shot.get("shotId")
     required_text = (
         "audienceRead", "lensAndCameraRelationship", "lightingAndDepth",
@@ -4854,7 +4867,7 @@ def _keyframe_direction_contract(direction, shot):
         missing.append("negativeSpace")
     if missing:
         raise Refused(
-            f"REFUSED — approved Cinematography direction for {shot_id} is missing "
+            f"REFUSED — approved DIRECT opening direction for {shot_id} is missing "
             + ", ".join(missing))
 
     if len(cast) != len(set(cast)):
@@ -4868,7 +4881,7 @@ def _keyframe_direction_contract(direction, shot):
         if str(value).strip()))
     if approved_cast and cast != approved_cast:
         raise Refused(
-            f"REFUSED — approved Cinematography cast for {shot_id} does not match the "
+            f"REFUSED — approved DIRECT cast for {shot_id} does not match the "
             f"shot contract: expected {approved_cast}, got {cast}")
 
     placements = (direction.get("openingFrameLayout") or {}).get("placements") or []
@@ -4882,7 +4895,7 @@ def _keyframe_direction_contract(direction, shot):
     if (direction.get("canonicalStyleVersion") != style_version or
             direction.get("canonicalStyleParagraph") != style_text):
         raise Refused(
-            f"REFUSED — approved Cinematography style for {shot_id} does not match the "
+            f"REFUSED — approved DIRECT style for {shot_id} does not match the "
             f"versioned canonical style {style_version}")
 
     playable = cb_engine_rules.playable_stage_report(shot, direction)
@@ -5318,9 +5331,7 @@ def _with_character_scale_control(prompt, shot, slots_key, scene, episode):
 
 def _resolve_keyframe_prompt(pkg, shot):
     """Return a prompt only when this shot must own an approved SEE frame."""
-    if not _shot_uses_own_keyframe(shot, _ledger(pkg, shot["shotId"])):
-        return None
-    work = _approved_department_output(pkg, shot["shotId"], "cinematography") or {}
+    work = _direct_keyframe_direction(shot)
     plan = _expanded_reference_blueprint(
         shot, "keyframeReferenceSlots", _characters_cfg())
     prompt = _compile_keyframe_integration_prompt(work, shot, plan)
@@ -5335,6 +5346,60 @@ def _resolve_keyframe_prompt(pkg, shot):
             "lighting, reference-role and continuity decision from the approved direction."
         )
     return studio_prompt_aliases.protect_honeycomb_aliases(prompt, shot)
+
+
+def _direct_keyframe_direction(shot):
+    """Project the approved DIRECT opening composition into SEE without a department."""
+    card = shot.get("directorCard") or {}
+    first = (card.get("views") or [{}])[0]
+    layout = (shot.get("openingFrameLayoutApproved") or
+              shot.get("openingFrameLayout") or card.get("openingFrameLayout"))
+    opening_cast = list(shot.get("openingCharactersInFrame") or
+                        shot.get("charactersInFrame") or [])
+    if not layout and opening_cast and (shot.get("openingPose") or first.get("staging")):
+        count = len(opening_cast)
+        layout = {"sameDepth": count > 1, "placements": [{
+            "character": name, "centerX": (index + 1) / (count + 1),
+            "centerY": .6, "depthPlane": "midground",
+            "pose": shot.get("openingPose") or first.get("staging"),
+            "facing": first.get("staging") or "the authored camera relationship",
+        } for index, name in enumerate(opening_cast)]}
+    if not layout or not layout.get("placements"):
+        raise Refused(
+            "DIRECT_REVISION_REQUIRED: opening characters, pose and composition are "
+            f"required for {shot.get('shotId')} before generating its Opening Keyframe")
+    cine = shot.get("cinematographyContractApproved") or {}
+    style_version, style_text = cb_departments.canonical_style_paragraph()
+    geography = [value for value in (
+        first.get("staging"), first.get("continuity"),
+        cine.get("depthStrategy"), cine.get("composition")) if value]
+    if not geography:
+        geography = ["The approved Scene Plate owns fixed environment geography and props."]
+    negative_space = list(shot.get("negativeSpace") or [])
+    if not negative_space:
+        negative_space = [first.get("framing") or cine.get("composition") or
+                          "Keep the authored subjects readable within the approved composition."]
+    return {
+        "audienceRead": first.get("audienceNeed") or card.get("audienceFocus") or
+                        shot.get("purpose"),
+        "lensAndCameraRelationship": first.get("framing") or
+                                     cine.get("providerInstruction") or shot.get("camera"),
+        "lightingAndDepth": " ".join(value for value in (
+            cine.get("lightingFunction"), cine.get("depthStrategy"),
+            first.get("continuity")) if value) or
+            "The approved Scene Plate owns lighting and depth.",
+        "canonicalStyleVersion": style_version,
+        "canonicalStyleParagraph": style_text,
+        "geography": geography,
+        "charactersInFrame": opening_cast,
+        "negativeSpace": negative_space,
+        "openingFrameLayout": layout,
+        "audienceIntent": first.get("audienceNeed") or shot.get("purpose"),
+        "openingState": first.get("startState") or shot.get("openingPose"),
+        "directorIntent": first.get("cameraPurpose") or card.get("audienceFocus"),
+        "mustPreserve": shot.get("mustPreserve") or card.get("mustPreserve") or [],
+        "mustNotAdvance": shot.get("mustNotAdvance") or card.get("mustNotAdvance") or [],
+    }
 
 
 # ── Gate 4 — voice, the exact words, one in-context call per dialogue shot ──────────────
@@ -6150,8 +6215,8 @@ def _keyframe_input_signature(pkg, shot, scene, episode="Ep1"):
 def _keyframe_prompt_contract(pkg, shot, prompt=None):
     """Snapshot the exact image prompt and route beside the generated candidate."""
     prompt = prompt if prompt is not None else _resolve_keyframe_prompt(pkg, shot)
-    specialist = _approved_department_output(pkg, shot["shotId"], "cinematography") or {}
-    direction_contract = _keyframe_direction_contract(specialist, shot)
+    direction = _direct_keyframe_direction(shot)
+    direction_contract = _keyframe_direction_contract(direction, shot)
     try:
         sections = cb_departments.prompt_sections(prompt)
     except ValueError as exc:
@@ -6161,26 +6226,26 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
             "REFUSED — keyframe prompt does not use the complete ordered Seedream 5 Pro "
             f"production brief required by {SEEDREAM_KEYFRAME_PROMPT_STANDARD}")
     for required_text, section_name in [
-            (re.sub(r"\s+", " ", str(specialist["audienceRead"])).strip(),
+            (re.sub(r"\s+", " ", str(direction["audienceRead"])).strip(),
              "DIRECTOR INTENT"),
-            (_keyframe_frame_section(specialist, _characters_cfg()),
+            (_keyframe_frame_section(direction, _characters_cfg()),
              "SUBJECTS"),
             ("\n".join(direction_contract["geography"]),
              "ENVIRONMENT"),
             ("\n".join(direction_contract["negativeSpace"]),
              "COMPOSITION"),
             (emission.ensure_complete_sentence(
-                specialist["lensAndCameraRelationship"],
+                direction["lensAndCameraRelationship"],
                 context="keyframe camera direction"), "COMPOSITION"),
-            (str(specialist["lightingAndDepth"]).strip(), "LIGHTING"),
+            (str(direction["lightingAndDepth"]).strip(), "LIGHTING"),
     ]:
         protected_required = studio_prompt_aliases.protect_honeycomb_aliases(required_text, shot)
         protected_section = studio_prompt_aliases.protect_honeycomb_aliases(sections[section_name], shot)
         if protected_required not in protected_section:
             raise Refused(
                 f"REFUSED — keyframe prompt [{section_name}] does not contain the approved "
-                "Cinematography direction in provider-safe wording")
-    camera_contract = _camera_consciousness(specialist, shot)
+                "DIRECT direction in provider-safe wording")
+    camera_contract = _camera_consciousness(direction, shot)
     for label, value in camera_contract.items():
         protected_value = studio_prompt_aliases.protect_honeycomb_aliases(str(value).strip(), shot)
         protected_section = studio_prompt_aliases.protect_honeycomb_aliases(
@@ -6209,9 +6274,7 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
     contract = {
         "prompt": prompt,
         "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
-        "promptSource": ("seedream-keyframe-doc-compiler-from-current-cinematography"
-                         if specialist.get("openingFrameLayout")
-                         else "missing-current-cinematography"),
+        "promptSource": "seedream-keyframe-doc-compiler-from-current-direct",
         "promptStandard": SEEDREAM_KEYFRAME_PROMPT_STANDARD,
         "promptSections": list(SEEDREAM_KEYFRAME_PROMPT_SECTIONS),
         "provider": cb_gen.IMAGE_PROVIDER,
@@ -6220,7 +6283,7 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
         "directionContract": {
             "canonicalStyleVersion": direction_contract["styleVersion"],
             "canonicalStyleParagraph": direction_contract["styleText"],
-            "lightingAndDepth": str(specialist["lightingAndDepth"]).strip(),
+            "lightingAndDepth": str(direction["lightingAndDepth"]).strip(),
             "geography": direction_contract["geography"],
             "charactersInFrame": direction_contract["cast"],
             "emptySections": [],
@@ -6272,8 +6335,7 @@ def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1",
     refs = [item["path"] for item in attachment_plan]
     expected_cast = list(dict.fromkeys(
         shot.get("openingCharactersInFrame") or shot.get("charactersInFrame") or []))
-    direction = _approved_department_output(
-        pkg, shot["shotId"], "cinematography") or {}
+    direction = _direct_keyframe_direction(shot)
     layout = direction.get("openingFrameLayout") or {}
 
     identity_by_character = {}
@@ -6417,11 +6479,8 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print, *, compare=False):
     _require_confirmed_billing("google")
     _require_current_scenelook(scene, episode)                # no keyframe without a current approved Scene Look Plate
     shot = _shot(pkg, shot_id)
-    if not _shot_uses_own_keyframe(shot, _ledger(pkg, shot_id)):
-        raise Refused(f"REFUSED — {shot_id} is a relay shot; it anchors on its source shot's "
-                      f"harvested final frame, never its own keyframe")
     led = _ledger(pkg, shot_id)
-    cinematography = _approved_department_output(pkg, shot_id, "cinematography") or {}
+    cinematography = _direct_keyframe_direction(shot)
     playable = cb_engine_rules.playable_stage_report(shot, cinematography)
     if not playable["ready"]:
         raise Refused(
@@ -7081,7 +7140,8 @@ REVIEW_CRITERIA = ["characterIdentity", "relativeScale", "startingGeography",
 FAILURE_CATEGORIES = ["identity", "geography", "action-timing", "instruction-ignored", "other"]
 CONTINUITY_MODE_KEYFRAME = "keyframe-handoff"
 CONTINUITY_MODE_VIDEO_EXTENSION = "video-extension"
-CONTINUITY_MODES = (CONTINUITY_MODE_KEYFRAME, CONTINUITY_MODE_VIDEO_EXTENSION)
+CONTINUITY_MODE_EDITORIAL_CUT = "editorial-cut"
+CONTINUITY_MODES = (CONTINUITY_MODE_EDITORIAL_CUT,)
 
 DECISION_LADDER = """THE FAILURE DECISION LADDER (after reviewing a candidate set):
   1. One candidate succeeds            -> approve it (approve <scene> <shotId> <N>)
@@ -7106,62 +7166,27 @@ def _anchor_for(pkg, shot):
                 f"REFUSED — openingFrameOverride for {shot['shotId']} resolves outside "
                 "the approved Studio media and asset libraries")
         return str(candidate)
-    if _shot_uses_own_keyframe(shot, led):
-        # A GENERATED-BUT-UNAPPROVED CANDIDATE CAN NEVER ANCHOR A FIRE (2026-07-17 state-
-        # integrity checkpoint, corrected 2026-07-18 — direct-input lineage): file existence
-        # alone used to be enough here — the exact class of bug that let a rejected S1.SH1
-        # keyframe read as "approved" and unlock Voice. An explicit keyframeApproval is the
-        # only valid anchor. This no longer also requires the approval's packageRevision to
-        # match the CURRENT package revision — that tie was itself the blanket-invalidation
-        # bug this correction closes (an unrelated shot's edit bumps the package revision
-        # without touching this shot's own approved keyframe at all). The keyframe's own
-        # direct-input validity is enforced once, at approve_keyframe time; an approval that
-        # already passed that check stays a valid anchor regardless of what else in the
-        # package changes later — package revision is provenance evidence, never a gate.
-        appr = led.get("keyframeApproval")
-        kf = appr and appr.get("path")
-        if not appr or not kf or not os.path.exists(kf):
-            raise Refused(f"REFUSED — {shot['shotId']} has no APPROVED keyframe (a generated-"
-                          f"but-unapproved candidate is never a valid anchor) — "
-                          "prepare this shot's opening keyframe, then approve it once reviewed")
-        return kf
-    source_id = shot.get('sourceShotId')
-    if not source_id:
-        raise Refused(f"REFUSED — {shot['shotId']} has no declared opening keyframe or continuity source. Prepare its opening before generation.")
-    src = _ledger(pkg, source_id)
-    if src.get("status") != "approved" or not src.get("harvestFrame"):
-        raise Refused(f"REFUSED — {shot['shotId']} relays off {shot['sourceShotId']}, which is "
-                      f"not approved+harvested yet (status: {src.get('status')}) — "
-                      f"Julian's eye comes first, always")
-    return src["harvestFrame"]
+    # Current production uses editorial cuts. Every generation unit owns one approved
+    # opening keyframe; previous clips/final frames remain historical evidence only.
+    appr = led.get("keyframeApproval")
+    kf = appr and appr.get("path")
+    if not appr or not appr.get("approved") or not kf or not os.path.exists(kf):
+        raise Refused(
+            f"WATCH_CONFIGURATION_REQUIRED: {shot['shotId']} needs its own approved "
+            "Opening Keyframe before WATCH.")
+    return kf
 
 
 def _continuity_mode(ledger, shot=None):
-    # A frozen final frame can preserve an editorial reset, but it cannot preserve the
-    # physical direction or momentum of an active relay. The typed direction record is the
-    # source of truth, so legacy ledgers without an explicit mode still take the safe route.
-    default = (CONTINUITY_MODE_VIDEO_EXTENSION
-               if shot and shot.get("motionContinuityRequired")
-               else CONTINUITY_MODE_KEYFRAME)
-    mode = str(ledger.get("continuityMode") or default)
-    if mode not in CONTINUITY_MODES:
-        raise Refused(f"REFUSED — unknown continuity mode {mode!r}; use one of {CONTINUITY_MODES}")
-    return mode
+    return CONTINUITY_MODE_EDITORIAL_CUT
 
 
 def set_continuity_mode(scene, shot_id, mode, episode="Ep1", log=print):
     mode = str(mode or "").strip()
-    if mode not in CONTINUITY_MODES:
-        raise Refused(f"REFUSED — continuity mode must be one of {CONTINUITY_MODES}")
+    if mode != CONTINUITY_MODE_EDITORIAL_CUT:
+        raise Refused("REFUSED — current production continuity mode is editorial-cut")
     pkg, path = load_pkg(scene, episode)
     shot = _shot(pkg, shot_id)
-    if shot.get("sourceType") == "opener" and mode == CONTINUITY_MODE_VIDEO_EXTENSION:
-        raise Refused("REFUSED — video-extension continuity needs a previous approved clip; "
-                      "opening shots must use keyframe-handoff")
-    if shot.get("motionContinuityRequired") and mode != CONTINUITY_MODE_VIDEO_EXTENSION:
-        raise Refused(
-            "REFUSED — this relay carries continuity-critical motion and must use "
-            "video-extension with the previous approved clip as @Video1")
     led = _ledger(pkg, shot_id)
     led["continuityMode"] = mode
     _save(pkg, path)
@@ -12022,7 +12047,7 @@ if __name__ == "__main__":
         # shared flags: --candidates N (1-4), --approve-spend, --category X
         flags = {"candidates": DEFAULT_CANDIDATES, "spend_token": None, "category": "other",
                  "dry_run": False, "comparison_model": None,
-                 "comparison_run_id": None}
+                 "comparison_run_id": None, "reviewed_request": None}
         pos = []
         i = 1
         while i < len(args):
@@ -12039,6 +12064,9 @@ if __name__ == "__main__":
                 flags["comparison_model"] = args[i + 1]; i += 2
             elif a == "--comparison-run-id":
                 flags["comparison_run_id"] = args[i + 1]; i += 2
+            elif a == "--reviewed-request-b64":
+                flags["reviewed_request"] = json.loads(base64.urlsafe_b64decode(
+                    args[i + 1].encode()).decode()); i += 2
             else:
                 pos.append(a); i += 1
         ep = lambda n: pos[n] if len(pos) > n else "Ep1"
@@ -12055,7 +12083,8 @@ if __name__ == "__main__":
             decide_timing_slate(pos[0], "rejected", pos[1], episode=ep(2))
         elif cmd == "scenelook":
             generate_scenelook_plate(pos[0], ep(1),
-                                     reference_path=(pos[2] if len(pos) > 2 else None))
+                                     reference_path=(pos[2] if len(pos) > 2 else None),
+                                     reviewed_request=flags["reviewed_request"])
         elif cmd == "approve-scenelook":
             approve_scenelook(pos[0], ep(1))
         elif cmd == "reject-scenelook":
@@ -12092,13 +12121,9 @@ if __name__ == "__main__":
             select_keyframe_source(pos[0], pos[1], "upload", ep(3), upload_path=pos[2])
         elif cmd == "select-library":
             select_keyframe_source(pos[0], pos[1], "library", ep(3), library_path=pos[2])
-        elif cmd == "select-previous":
-            select_keyframe_source(pos[0], pos[1], "previousFinalFrame", ep(2))
         elif cmd == "select-render-upload":
             print(json.dumps(
                 import_animation_candidate(pos[0], pos[1], pos[2], ep(3)), indent=1))
-        elif cmd == "recompile-animation":
-            recompile_animation_candidate(pos[0], pos[1], ep(2))
         elif cmd == "voice-status":
             print(json.dumps(voice_performance_status(pos[0], pos[1], ep(2)), indent=1))
         elif cmd == "save-voice":
@@ -12124,8 +12149,6 @@ if __name__ == "__main__":
                 pos[0], pos[1], pos[2], pos[3], episode=ep(4))
         elif cmd == "check-structure":
             print(json.dumps(check_seedance_structure(pos[0], pos[1], ep(2)), indent=1))
-        elif cmd == "continuity-mode":
-            print(json.dumps(set_continuity_mode(pos[0], pos[1], pos[2], ep(3)), indent=1))
         elif cmd == "prompt-bank":
             print(json.dumps(cb_prompt_bank.report(), indent=1, ensure_ascii=False))
         elif cmd == "department-prepare":

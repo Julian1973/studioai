@@ -2683,7 +2683,7 @@ function deriveSceneState(bundle,scriptApproved,scene){
        "select-scenelook-upload","select-scenelook-library"].includes(cmd)?"scenelook":
       ["voice","voice-shot","regen-voice","approve-voice","reject-voice","animatic"].includes(cmd)?"voice":
       ["keyframe","approve-keyframe","rescreen-keyframe","reject-keyframe",
-       "select-upload","select-library","select-previous"].includes(cmd)?"keyframe":
+       "select-upload","select-library"].includes(cmd)?"keyframe":
       cmd=="stitch"?"final":"animation"
     );
     out[target]={state:"generating",sub:out[target]&&out[target].sub};
@@ -3362,24 +3362,7 @@ async function continueToNextProductionShot(){
   const next=shots[nextIndex],policy=shotPipelineState(shots,nextIndex);
   const current=policy.current||{};
   if(policy.needsKeyframe&&!current.keyframe){
-    // The next shot's SEE brief must be current before its opening candidate is installed.
-    // Keep this as one reviewer action: quietly prepare Cinematography, inherit the
-    // preceding approved landing frame when needed, then stop on SEE for approval.
-    await prepareDirectionThen("cinematography",next.shotId,async()=>{
-      const refreshed=shLedger(next.shotId);
-      const candidate=refreshed.keyframeCandidate;
-      if(candidate){
-        if(!candidate.inputSignature||!candidate.contentHash){
-          shRun("rescreen-keyframe",next.shotId,{afterJob:job=>{
-            if(job&&job.status==="done")openShotOutcome("keyframe",nextIndex);
-          }});
-        }else openShotOutcome("keyframe",nextIndex);
-        return;
-      }
-      shRun("select-previous",next.shotId,{afterJob:job=>{
-        if(job&&job.status==="done")openShotOutcome("keyframe",nextIndex);
-      }});
-    });
+    openShotOutcome("keyframe",nextIndex);
     return;
   }
   if(policy.talky&&!current.voice){openShotOutcome("voice",nextIndex);return;}
@@ -3407,7 +3390,7 @@ function shotResolutionAction(pst,tok){
     return {label:"Fire Seedance 2.5",onclick:`shRender('${tok}')`};
   }
   if(["model-limited","stale","stale-batch"].includes(pst.animState)){
-    return {label:"Prepare replacement Animation direction",onclick:`deptRun('animation','${tok}')`};
+    return {label:"Revise this unit in DIRECT",onclick:"openStageOutcome('storyboard')"};
   }
   return {label:"Refresh this shot",onclick:"renderControl()"};
 }
@@ -4184,7 +4167,6 @@ function renderSceneLookStage(){
       <div class="techmeta">plate hash ${_esc((sl.plateHash||"—").slice(0,12))}</div>
       <div class="techmeta">source storyboard md5 ${_esc((sl.sourceStoryboardMd5||"—").slice(0,12))}${sl.sourceStoryboardMd5&&sl.liveStoryboardMd5&&sl.sourceStoryboardMd5!=sl.liveStoryboardMd5?" (superseded by current "+_esc((sl.liveStoryboardMd5||"").slice(0,12))+")":""}</div>
     </details>`;
-  attachDepartmentPanel(dec,"look",null);
 }
 
 // ── shared decision-panel shell: every stage speaks the same language ──
@@ -4393,7 +4375,7 @@ function openKeyframeRetake(tok,candidate=''){
       if(!job||job.status!=='done')return;
       if(SH_EP!==episode||String(SH_SC)!==scene||(pShots()[PSHOT_I]||{}).shotId!==tok)return;
       try{localStorage.removeItem(key);}catch(e){}
-      await prepareDirectionThen('cinematography',tok,()=>openDisclosureModal('keyframe',{shotId:tok}));
+      await openDisclosureModal('keyframe',{shotId:tok});
     }});
   };
 }
@@ -5619,15 +5601,6 @@ function renderShotStage(mode){
         decVersion="Image blocked · audio is ready";
         decActions=[`<button class="btn" onclick="directorStartRejection('keyframe','${_esc(s.shotId)}',decodeURIComponent('${encodeURIComponent(qc.reason||pst.sub||"")}'))">Discuss and correct keyframe</button>`,keyframeDecisionSourceActions(tok),
           `<div class="dec-caption">Audio is not blocking this shot. Seedance 2.5 creates the ${audioContext.sfx.length||2} non-verbal SFX cue${(audioContext.sfx.length||2)===1?"":"s"}; no ElevenLabs track or @Audio1 is required.</div>`];
-      } else if(!pst.needsKeyframe){
-        const inheritedUrl=m.keyframe||m.finalFrame||null;
-        body=inheritedUrl
-          ?`<div class="stage-media inherited-frame"><img src="${_esc(inheritedUrl)}" alt="Last frame from ${_esc(s.sourceShotId||'previous shot')}"/><div class="media-caption"><b>LAST FRAME FROM ${_esc(s.sourceShotId||'PREVIOUS SHOT')}</b><span>Inherited opening frame · no generation cost</span></div></div>`
-          :`<div class="artefact-empty"><div style="color:var(--muted)">Opening frame inherited from ${_esc(s.sourceShotId||'the previous shot')} — no generation and no cost.</div></div>`;
-        decVersion="Opening frame inherited";
-        decActions=[`<button class="btn" onclick="shRun('select-previous','${_esc(tok)}')">Use last frame from ${_esc(s.sourceShotId||'previous shot')} · no generation cost</button>`,actionButtonHTML(pst.talky&&!((pst.current||{}).voice)
-          ?{label:"Continue to Voice & Timing",onclick:"openStageOutcome('voice')"}
-          :{label:"Continue to Animation",onclick:"openStageOutcome('animation')"})];
       } else if(pst.kf=="awaiting"){
         resultFirst=true;
         keyframeAnchorOwnsCurrent=!!m.keyframe;
@@ -5845,7 +5818,7 @@ function renderShotStage(mode){
     } else if(stLabel=="model-limited"){
       body=`<div class="artefact-empty"><div style="color:var(--danger)">Two batches rejected — this shot needs human redesign before firing again.</div></div>`;
       decVersion="Blocked";
-      decActions=[`<button class="btn" onclick="deptRun('animation','${tok}')">Redesign with Animation Director — no media spend</button>`,
+      decActions=[`<button class="btn" onclick="openStageOutcome('storyboard')">Revise in DIRECT</button>`,
         `<button class="btn ghost" onclick="document.getElementById('renderUpload_${_esc(tok)}').click()">Upload render for review</button><input type="file" id="renderUpload_${_esc(tok)}" accept="video/mp4,video/webm" style="display:none" onchange="shRenderUpload('${_esc(tok)}',this)">`,
         `<button class="btn ghost" onclick="shOverrideModelLimited('${tok}')">Human override — reopen shot</button>`,
         `<button class="btn ghost" onclick="openStageOutcome('storyboard')">Review Story &amp; Direction</button>`];
@@ -5874,7 +5847,7 @@ function renderShotStage(mode){
       // inside this existing Animation stage): shown regardless of readiness — editing/
       // checking is useful even before every input is attached. "Generate animation" above
       // stays completely separate with its own cost disclosure; nothing here spends anything.
-      body += `<div class="dec-caption" style="margin-top:14px">Animation generation uses only current signed Animation Director direction. Legacy working-prompt overrides are disabled for production.</div>`;
+      body += `<div class="dec-caption" style="margin-top:14px">WATCH compiles the current approved DIRECT, SEE and HEAR inputs without creative rewriting.</div>`;
       body += `<details class="techdetails"><summary>Prompt checks</summary>${structurePanelHTML(tok,SH_STRUCTURE_CACHE[tok])}${readbackPanelHTML(tok,SH_READBACK_CACHE[tok])}</details>`;
     }
     if((led.rejections||[]).length){
@@ -5965,10 +5938,6 @@ function renderShotStage(mode){
     if(context)productionDetails.appendChild(context);
   }
   if(productionDetails.children.length>1)art.appendChild(productionDetails);
-  attachDepartmentPanel(dec,{keyframe:"cinematography",voice:"voice",animation:"animation"}[mode],s.shotId);
-  if(mode=="keyframe"&&m.keyframe)attachDepartmentPanel(dec,"review-keyframe",s.shotId);
-  if(mode=="animation"&&((m.candidates||[]).length||m.clip||m.finalFrame))
-    attachDepartmentPanel(dec,"review-animation",s.shotId);
   const workspace=document.getElementById("workspace");
   if(workspace){workspace.classList.toggle("result-first",true);workspace.classList.toggle("see-workspace",mode==="keyframe");workspace.classList.toggle("hear-workspace",mode==="voice");}
 }
@@ -6011,7 +5980,7 @@ function showKeyframeScenePlateHold(){
   sheet.innerHTML=`<button class="x" onclick="closeM()">×</button>
     <h3>${awaiting?"Resolve the selected Scene Plate first":"A current Scene Plate is required"}</h3>
     <div class="dec-caption">${awaiting?"The selected image is not current against this scene. Review it and choose approve, replace or reject before building the keyframe.":"S4.SH1 cannot build a keyframe until this scene has a current Scene Plate."}</div>
-    <div class="dec-caption" style="margin-top:10px">When the plate is current, StudioAI will prepare fresh Cinematography direction against that exact image and return to keyframe cost review.</div>
+    <div class="dec-caption" style="margin-top:10px">When the plate is current, StudioAI will compile the opening keyframe directly from approved DIRECT and return to cost review.</div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn ghost" onclick="closeM()">Close</button><button class="btn" onclick="closeM();openStageOutcome('scenelook')">Review Scene Plate</button></div>`;
   document.getElementById("modal").classList.add("show");
 }
@@ -6070,10 +6039,6 @@ async function openDisclosureModal(kind,ctx){
     const cached=SH_VOICE_CACHE[ctx.shotId];
     if(!cached||cached.loading||cached.error)await shLoadVoiceWork(ctx.shotId);
   }
-  const directionStage={keyframe:"cinematography",pose:"cinematography",voice:"voice","voice-regen":"voice",scenelook:"look"}[kind];
-  if(directionStage&&!currentProductionDirection(directionStage,ctx.shotId)){
-    await prepareDirectionThen(directionStage,ctx.shotId,()=>openDisclosureModal(kind,ctx));return;
-  }
   let title,rows,confirm,confirmLabel="Fire",extra="";
   if(kind=="pose"){
     const cost=estCost("seedream5pro_image",{refs:1});
@@ -6097,10 +6062,9 @@ async function openDisclosureModal(kind,ctx){
     if(!(refsState.keyframe&&refsState.keyframe.ready)||!keyframeRefs.length){
       alert("The exact keyframe references are not all ready. Nothing was fired or spent.");return;
     }
-    const inp=currentProductionDirection("cinematography",ctx.shotId);
-    const keyframePrompt=inp&&(inp.keyframePrompt||inp.providerPrompt);
-    if(!inp||!keyframePrompt){alert("Cinematography direction is still being prepared.");return;}
     const build=(refsState&&refsState.keyframeBuild)||{},unit=estCost("seedream5pro_image",{refs:1});
+    const keyframePrompt=build.prompt;
+    if(!keyframePrompt){alert(build.reason||"DIRECT is missing an opening-keyframe field. Nothing was fired.");return;}
     const calls=Number.isFinite(Number(build.maxMediaCalls))?Number(build.maxMediaCalls):1;
     const maximum=build.estimatedMaxUsd!=null?Number(build.estimatedMaxUsd):(unit!=null?unit*calls:null);
     title="Build keyframe";
@@ -6109,7 +6073,7 @@ async function openDisclosureModal(kind,ctx){
       :(build.providerModelId||"Seedream 5 Pro");
     rows=[["Model",modelLabel],
           ["Format","16:9 still opening frame"],
-          ["Creative target",inp.keyframePromptHeadline||inp.audienceRead||"A performance-ready opening stage"],
+          ["Creative target",build.promptHeadline||"A performance-ready opening stage"],
           ["Provider references",keyframeRefs.length+" exact ordered assets shown below"],
           ["Keyframe owns","Identity, canon scale, world, starting camera and light, loose staging, clear action space"],
           ["Animation owns","Facial acting, wing cadence, exact poses, movement, contact, recovery and camera evolution"],
@@ -6125,14 +6089,14 @@ async function openDisclosureModal(kind,ctx){
     confirmLabel="Build keyframe";
     confirm=()=>{closeM();shRun('build-keyframe',ctx.shotId);};
   } else if(kind=="voice"){
-    const inp=(SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.shots&&SH_PREFLIGHT.productionInputs.shots[ctx.shotId])
-      || currentProductionDirection("voice",ctx.shotId);
-    if(!inp||!inp.voiceLines){alert("Voice direction is still being prepared.");return;}
+    const voiceStatus=SH_VOICE_CACHE[ctx.shotId]||{};
+    const voiceLines=voiceStatus.currentLines||[];
+    if(!voiceLines.length){alert("HEAR has no current spoken dialogue to generate. Nothing was fired.");return;}
     title="Final confirmation · generate voice";
-    rows=[["Model","ElevenLabs (V3 dialogue)"],["Shot",ctx.shotId],["Performance",inp.voiceLines.map(x=>x.speaker+": "+x.performedText).join("\n")],
+    rows=[["Model","ElevenLabs (V3 dialogue)"],["Shot",ctx.shotId],["Performance",voiceLines.map(x=>x.speaker+": "+x.text).join("\n")],
           ["Cost","Priced per character — shown in the job log once it fires"],
           ["Outputs","1 audio take"],["Downstream work","Nothing else will run"]];
-    const voiceStatus=SH_VOICE_CACHE[ctx.shotId]||{},approvedById=new Map((voiceStatus.approvedLines||[]).map(x=>[x.dialogueOccurrenceId,x]));
+    const approvedById=new Map((voiceStatus.approvedLines||[]).map(x=>[x.dialogueOccurrenceId,x]));
     extra=`<section class="fire-scorecard" aria-label="Exact dialogue sent to ElevenLabs"><div class="fire-scorecard-head"><div><b>Exact dialogue being generated</b><div class="dec-caption">These are the provider-facing words and V3 performance tags for this Fire.</div></div></div>${(voiceStatus.currentLines||[]).map((line,index)=>{const approved=approvedById.get(line.dialogueOccurrenceId)||(voiceStatus.approvedLines||[])[index]||{};return `<div class="disc-row"><span class="disc-k">${_esc(line.speaker||approved.speaker||"Line "+(index+1))}</span><span class="disc-v"><b>Script:</b> ${_esc(approved.exactText||"")}<br><b>ElevenLabs:</b> ${_esc(line.text||"")}</span></div>`;}).join("")}</section>`;
     confirmLabel="Fire voice";
     confirm=()=>{closeM();shRun('voice-shot',ctx.shotId);};
@@ -6155,32 +6119,34 @@ async function openDisclosureModal(kind,ctx){
     confirmLabel="Fire new take";
     confirm=()=>{closeM();shRun('regen-voice',ctx.shotId);};
   } else if(kind=="scenelook"){
-    // Generation consumes signed current direction. The human judges its visible result rather
-    // than approving internal production prose.
-    const lookInput=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.look;
-    if(!lookInput||!lookInput.prompt){
+    const query=new URLSearchParams({scene:String(SH_SC),episode:SH_EP});
+    if(ctx.sourcePath)query.set("referencePath",ctx.sourcePath);
+    let preview;
+    try{
+      const response=await fetch(BASE+"/api/scenelook-request?"+query.toString(),{cache:"no-store"});
+      preview=await response.json();
+      if(!response.ok||!preview.ok)throw new Error(preview.error||"Scene Plate request is unavailable");
+    }catch(error){
       document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
-        <h3>Look Development is still preparing.</h3>
-        <div class="dec-caption">Scene ${_esc(SH_SC)} needs current signed direction before a paid image can be generated.</div>
+        <h3>Scene Plate needs attention</h3>
+        <div class="dec-caption">${_esc(error.message||"Current Scene Plate request is unavailable.")}</div>
         <div style="display:flex;justify-content:flex-end;margin-top:20px"><button class="btn ghost" onclick="closeM()">Close</button></div>`;
       document.getElementById("modal").classList.add("show");
       return;
     }
-    // THE REFERENCE CHOICE (2026-07-19 UX fix): an optional, explicitly-selected reference
-    // (uploaded or picked from the library) always still fires a real generation call with
-    // that image as reference_path — never used directly as the plate. ctx.sourcePath/
-    // ctx.sourceLabel are set by slUpload/slLibraryPick below; the plain Generate button
-    // leaves both unset, unchanged from before.
+    const request=preview.request,references=preview.references||[];
     const cost=estCost("seedream5pro_image",{refs:ctx.sourcePath?1:0});
     title=ctx.regenerate?"Rebuild Scene World":"Build Scene World";
-    rows=[["Model","Seedream 5 Pro"],
-          ["Creative target",lookInput.headline||"A canon-locked scene world"],
+    rows=[["Model",request.settings.model||"Seedream 5 Pro"],
+          ["Format",request.settings.aspect+" · "+request.settings.resolution],
           ["Reference",ctx.sourcePath?_esc(ctx.sourceLabel||"1 explicitly selected reference"):"None — text-to-image"],
           ["Estimated cost",cost!=null?("~$"+cost.toFixed(3)+" (estimated)"):"unknown"],
           ["Outputs","1 image"],
-          ["Next decision","Fire the first keyframe and judge the complete composition"]];
+          ["Next decision","Approve or reject the returned Scene Plate"]];
+    extra=`${references.length?`<section class="refpanel prefire-refs" aria-label="Exact Scene Plate references"><div class="refhead"><div><div class="reftitle">Exact references sent in this order</div><div class="refsummary">${references.length}/${references.length} ready</div></div></div><div class="refgrid">${references.map(item=>`<article class="refcard"><img class="refmedia zoom" data-cap="${_esc(item.role||'Scene Plate reference')}" src="${BASE}${_esc(item.url)}?v=${MEDIA_V}" alt="${_esc(item.role||'Scene Plate reference')}"><div class="refcopy"><div class="refslot">${_esc(item.role||'Reference')}</div><div class="reffile">${_esc(item.path||'')}</div></div></article>`).join("")}</div></section>`:""}
+      <details class="techdetails prefire-prompt" open><summary>Exact prompt sent to Seedream</summary><pre class="techpre">${_esc(request.prompt)}</pre></details>`;
     confirmLabel="Build scene world";
-    confirm=()=>{closeM();shRun('scenelook',null,{sourcePath:ctx.sourcePath,preserveView:true,progressTarget:"scene-plate",progressLabel:"Generating the new Scene Plate"});};
+    confirm=()=>{closeM();shRun('scenelook',null,{sourcePath:ctx.sourcePath,scenePlateRequest:request,preserveView:true,progressTarget:"scene-plate",progressLabel:"Generating the new Scene Plate"});};
   } else return;
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
     <h3>${_esc(title)}</h3>
@@ -6227,8 +6193,8 @@ function openAnimationConfirmModal(shotId,protectedComparison){
   const led=shLedger(shotId); const auth=led&&(protectedComparison?led.pendingComparisonSpendAuth:led.pendingSpendAuth);
   if(!auth||!auth.token){ alert("No disclosure on record yet — click Generate first."); return; }
   const d=auth.disclosure||{};
-  const inp=currentProductionDirection("animation",shotId);
-  if(!inp||!inp.animationPrompt){alert("Animation direction is still being prepared.");return;}
+  const compiledPrompt=watchPreparedPrompt(led);
+  if(!compiledPrompt){alert("WATCH has no sealed current request. Prepare WATCH again; nothing was fired.");return;}
   const pick=(...ks)=>{for(const k of ks) if(d[k]!=null&&d[k]!=="") return d[k]; return "?";};
   const modelId=pick("providerModelId");
   const modelLabel=modelId==="dreamina-seedance-2-5-260628"?"Seedance 2.5 via BytePlus":
@@ -6252,7 +6218,7 @@ function openAnimationConfirmModal(shotId,protectedComparison){
     <div class="fire-score-meta">Firing floor: ${_esc(Number.isFinite(floor)?floor.toFixed(1):"?")}/10 · Result: ${Number.isFinite(floor)&&overall>=floor&&!failures.length?"PASS — eligible to fire":"BLOCKED"}</div>
     ${failures.length?`<div class="fire-score-failures"><b>Critical failures</b><br>${failures.map(_esc).join("<br>")}</div>`:`<div class="fire-score-meta" style="color:var(--ok)">No critical failures.</div>`}
   </section>`:`<section class="fire-scorecard"><b>Seedance prompt preflight</b><div class="fire-score-failures">Scoring evidence is missing from this sealed request. Do not fire.</div></section>`;
-  const rows=[["Model",modelLabel],["Production unit",led.shotId||"—"],["Duration",pick("shotDurationSec")+"s"],["Creative target",inp.animationPromptHeadline||"A canon-locked performance and camera plan"],
+  const rows=[["Model",modelLabel],["Production unit",led.shotId||"—"],["Duration",pick("shotDurationSec")+"s"],["Creative target","Current approved DIRECT timed action"],
     ["Provider delivery",calls?calls+" → one review candidate":"one provider call"],
     ["Opening frame",pick("openingAnchor")],["Approved audio",pick("audioAsset")],
     ["Candidates",pick("candidates","candidateCount","count")],
@@ -6270,7 +6236,7 @@ function openAnimationConfirmModal(shotId,protectedComparison){
     <div class="disc-rows">${rows.map(([k,v])=>`<div class="disc-row"><span class="disc-k">${_esc(k)}</span><span class="disc-v">${_esc(String(v))}</span></div>`).join("")}</div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
       <button class="btn ghost" onclick="closeM()">Cancel</button>
-      <button class="btn ghost" onclick="closeM();openDirectorAgent({stage:'animation',shotId:'${_attr(shotId)}'})">Discuss or approve in chat</button>
+      <button class="btn ghost" onclick="closeM();openStageOutcome('storyboard')">Revise in DIRECT</button>
       <button class="btn" onclick="_confirmDisclosure()">${protectedComparison?"Fire one comparison":"Fire candidates"}</button>
     </div>`;
   _PENDING_CONFIRM=()=>{closeM();protectedComparison?shApproveComparisonSpendFire(shotId):shApproveSpendFire(shotId);};
@@ -6466,7 +6432,7 @@ function renderFinalStage(){
         `<button class="btn ghost" onclick="renderControl()">Refresh progress</button>`];
     } else {
       finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`,
-        `<button class="btn" onclick="deptRun('review-final','')">Prepare Final &amp; Post review — no media spend</button>`];
+        `<button class="btn" onclick="openStageOutcome('continuity')">Review approved takes</button>`];
     }
     dec.innerHTML=decisionShell("Final Master",post.candidate?"QC passed · awaiting approval":"Approved delivery master",
       finalActions,"");
@@ -6478,10 +6444,6 @@ function renderFinalStage(){
     else finalActions.push(`<button class="btn" onclick="openStageOutcome('continuity')">Open Director's Seat</button>`);
     dec.innerHTML=decisionShell("Final Master","Conform · mix · captions · delivery QC",finalActions,"");
   }
-  if(has)attachDepartmentPanel(dec,"review-final",null);
-  else dec.insertAdjacentHTML("beforeend",`<div class="deptpanel"><div class="deptperson"><div class="deptavatar">PS</div><div>
-    <div class="deptname">Post Supervisor</div><div class="deptmeta">Final & Post · loads crystal-bears-post</div></div></div>
-    <div class="dec-caption">Waiting for a current QC-passed master candidate.</div></div>`);
 }
 
 
@@ -6685,7 +6647,7 @@ async function shRestoreSeedanceWork(tok){
 }
 const SH_LABEL={voice:"Voice all",animatic:"Timing slate",scenelook:"Build Scene World","approve-scenelook":"Accept Scene Look","reject-scenelook":"Iterate Scene Look",keyframe:"Build keyframe",fire:"Fire candidates",next:"Fire next",approve:"Accept candidate",reject:"Iterate batch",edit:"Prepare targeted edit","approve-edit":"Approve edited take","reject-edit":"Reject edited take",stitch:"Build post master",
   "approve-timing-slate":"Approve slate rhythm","reject-timing-slate":"Revise slate timing",
-  "select-upload":"Use uploaded image","select-library":"Use library image","select-previous":"Use previous final frame",
+  "select-upload":"Use uploaded image","select-library":"Use library image",
   "approve-voice":"Accept voice","reject-voice":"Iterate voice"};
 const REJECT_CATS=["identity","geography","action-timing","instruction-ignored","other"];   // mirrors serve.py's REJECT_CATEGORIES exactly
 let SH_CANDS=1;   // One candidate unless the director explicitly requests a batch.
@@ -6816,6 +6778,7 @@ async function shRun(cmd,shotId,opts){
   if(opts.startSec!=null)body.startSec=opts.startSec;
   if(opts.endSec!=null)body.endSec=opts.endSec;
   if(opts.sourcePath)body.sourcePath=opts.sourcePath;          // select-upload/select-library: the holding/library file's own path
+  if(opts.scenePlateRequest)body.scenePlateRequest=opts.scenePlateRequest;
   if(cmd==="approve-keyframe"&&body.candidate==null){
     // Approving the image on screen is an explicit choice of that A/B candidate.
     const visibleCandidate=shLedger(shotId).keyframeCandidate||{};
@@ -6856,13 +6819,11 @@ function shOverrideModelLimited(shotId){
   shRun("override-model-limited",shotId,{afterJob:()=>shRefresh()});
 }
 // ── THE OPENING-FRAME SOURCE CHOICE (2026-07-18, Julian's directive) ────────────────────
-// Four ways an opening frame may come to exist for a shot needing one: generate (paid,
+// Three ways an opening frame may come to exist for a generation unit: generate (paid,
 // existing disclosure-modal path, unchanged), upload (a human-supplied file, no generation
 // cost), library (one of THIS shot's own prior artefacts — a past candidate, a rejected
 // take, a superseded approval, or a currently-pending one — re-selected deliberately, no
-// generation cost), and previousFinalFrame (for every shot after the first — the preceding
-// approved+harvested landing frame carried forward as a fresh candidate, no generation
-// cost). Every one of the last three ends at the SAME approval area as
+// generation cost). Every choice ends at the SAME approval area as
 // generation — "Approve" / "Choose another" — selection is never approval.
 function shOpeningFrameChoices(tok,s){
   const refs=SH_REFERENCE_CACHE[refCacheKey(tok)]||{},build=refs.keyframeBuild||{};
@@ -6870,11 +6831,8 @@ function shOpeningFrameChoices(tok,s){
   const conservativeCalls=1;
   const maxCost=build.estimatedMaxUsd!=null?Number(build.estimatedMaxUsd):(fallback==null?null:fallback*conservativeCalls);
   const genCost=maxCost!=null?(" · up to $"+maxCost.toFixed(3)):"";
-  const hasPrevious=PSHOT_I>0;
-  const previousShot=hasPrevious?((pShots()[PSHOT_I-1]||{}).shotId||"previous shot"):"";
   const buildLabel="Build keyframe";
   return `<div class="ofc">
-    ${hasPrevious?`<div class="ofc-row"><button class="btn" onclick="shRun('select-previous','${_esc(tok)}')">Use last frame from ${_esc(previousShot)} · no generation cost</button></div>`:""}
     <div class="ofc-row"><button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${_esc(tok)}'})">${_esc(buildLabel+genCost)}</button>
       <button class="btn ghost" onclick="document.getElementById('ofcUpload_${_esc(tok)}').click()">Upload keyframe · no generation cost</button>
       <input type="file" id="ofcUpload_${_esc(tok)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)"/></div>
@@ -6885,10 +6843,7 @@ function shOpeningFrameChoices(tok,s){
 }
 function keyframeDecisionSourceActions(tok){
   const inputId=`decisionKfUpload_${tok}`.replaceAll(".","_");
-  const hasPrevious=PSHOT_I>0;
-  const previousShot=hasPrevious?((pShots()[PSHOT_I-1]||{}).shotId||"previous shot"):"";
   return `<div style="display:grid;gap:8px;width:100%">
-    ${hasPrevious?`<button class="btn" onclick="shRun('select-previous','${_esc(tok)}')">Use last frame from ${_esc(previousShot)} · no generation cost</button>`:""}
     <button class="btn ghost" onclick="document.getElementById('${_esc(inputId)}').click()">Upload replacement keyframe</button>
     <input type="file" id="${_esc(inputId)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)">
     <button class="btn ghost" onclick="shOpenFrameLibrary('${_esc(tok)}')">Choose library image</button>
@@ -7113,14 +7068,6 @@ async function shRender(shotId,options){
     const readiness=await (await fetch(url,{cache:"no-store"})).json();
     if(!readiness.ready){
       clearInlineSourceProgress();
-      if(readiness.repairAction==="recompile-animation"&&!options.repairAttempt){
-        showStageWorking("Refreshing WATCH direction","Rebinding the current approved SEE, HEAR, geography and references locally. No media provider is contacted.");
-        shRun("recompile-animation",shotId,{afterJob:job=>{
-          if(job&&job.status==="done")shRender(shotId,{repairAttempt:true});
-          else showFireReadinessHold(shotId,{message:"The local WATCH repair did not complete.",nextAction:"Ask Director"});
-        }});
-        return;
-      }
       showFireReadinessHold(shotId,readiness);return;
     }
   }catch(e){clearInlineSourceProgress();showFireReadinessHold(shotId,{message:"StudioAI could not verify the current WATCH package.",nextAction:"Reload the scene and try again"});return;}

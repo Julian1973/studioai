@@ -487,7 +487,9 @@ def library_for_scene(episode: str, scene: str | int, shot_id: str | None = None
     except ValueError:
         prev_scene = ""
     if prev_scene:
-        items.extend(resolve_assets(episode, prev_scene, kinds={"final_frame"}, include_global=False))
+        items.extend(resolve_assets(episode, prev_scene,
+                                    kinds={"final_frame", "keyframe", "opening_plate"},
+                                    include_global=False))
     seen = set()
     deduped = []
     for item in items:

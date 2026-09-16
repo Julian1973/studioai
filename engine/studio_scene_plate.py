@@ -164,13 +164,15 @@ def reference(root, row, role, source_name):
             'facts':row.get('facts',{})}
 
 
-def native_request(root, scene, episode, renderer=None, reference_path=None):
+def native_request(root, scene, episode, renderer=None, reference_path=None, *,
+                   require_current_lineage=True):
     from studio_profile import load_show_profile
     if renderer is None:
         import cb_render as renderer
     root = Path(root).resolve()
     pkg, _ = renderer.load_pkg(scene, episode)
-    renderer._require_current_lineage(pkg, scene, episode)
+    if require_current_lineage:
+        renderer._require_current_lineage(pkg, scene, episode)
     loaded = load_show_profile(root)
     canon = loaded.canon_paths
     bible = [authority_file(root, canon['lockedCanon'])]

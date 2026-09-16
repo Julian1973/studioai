@@ -49,6 +49,13 @@ def test_exact_direct_survives_history_and_specialists(current):
     assert prior['authorities']['shot']['directorCard'] == current['authorities']['shot']['directorCard']
 
 
+@pytest.mark.parametrize('stage', ['look', 'cinematography', 'voice', 'animation'])
+def test_current_creative_department_preparation_is_retired(stage):
+    import cb_render as R
+    with pytest.raises(R.Refused, match='creative departments are retired'):
+        R.prepare_department('3', stage, 'S3.SH1', 'Ep4')
+
+
 def test_action_drift_blocks(current):
     prompt, evidence = E.compile_prompt(current, audit(current))
     drift = prompt.replace('Mira extends the cup', 'Mira throws the cup')
@@ -245,11 +252,19 @@ def route(monkeypatch,tmp_path,s2_source):
     import studio_see_service as SEE
     import studio_director_handoff as H
     shot=deepcopy(current['authorities']['shot']);shot['shotId']='S2.SH1'
-    pkg={'shots':[shot],'continuityLedger':[{'shotId':'S2.SH1','keyframeApproval':{'approved':True,'path':'opening.png'}}]}
+    opening = tmp_path/'opening.png'
+    opening.write_bytes(b'synthetic opening keyframe')
+    pkg={'shots':[shot],'continuityLedger':[{'shotId':'S2.SH1','keyframeApproval':{'approved':True,'path':str(opening)}}]}
     state={'direct':[], 'see':True, 'audio':True, 'preview':None}
     monkeypatch.setattr(R,'ROOT',tmp_path)
     monkeypatch.setattr(R,'load_pkg',lambda *a:(pkg,tmp_path/'package.json'))
-    monkeypatch.setattr(cb_providers,'video_model',lambda **k:SimpleNamespace(provider='byteplus'))
+    monkeypatch.setattr(R,'_require_valid',lambda *a:None)
+    monkeypatch.setattr(R,'_require_current_lineage',lambda *a:None)
+    monkeypatch.setattr(R,'_anchor_for',lambda *a:str(opening))
+    monkeypatch.setattr(R,'_provider_attachment_plan',lambda *a,**k:[
+        {'path': row['path'], 'role': row['role'], 'slot': row['slot']}
+        for row in current['references']])
+    monkeypatch.setattr(R,'_reference_records',lambda *a,**k:deepcopy(current['references']))
     monkeypatch.setattr(R,'_require_confirmed_billing',lambda *a:None)
     monkeypatch.setattr(H,'errors',lambda s:state['direct'])
     monkeypatch.setattr(H,'card_issues',lambda s:[])
@@ -280,9 +295,9 @@ def test_s2_route_reaches_preview_without_specialist_or_provider(route):
 
 
 @pytest.mark.parametrize('field,value,message',[
- ('direct',['Current DIRECT revision is stale'],'DIRECTOR_REVISION_REQUIRED'),
+ ('direct',['Current DIRECT revision is stale'],'DIRECT_REVISION_REQUIRED'),
  ('see',False,'Opening Keyframe is bound to DIRECT revision X'),
- ('audio',False,'Audio1 is not bound'),
+ ('audio',False,'current approved Audio1 is required'),
 ])
 def test_current_authority_blockers(route,field,value,message):
     import cb_studio_director as D

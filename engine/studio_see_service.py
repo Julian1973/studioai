@@ -248,17 +248,23 @@ def install_component(root, scope, ctx, status, component, images, source):
     expected = ctx['aspect'].split(':')
     ratio = float(expected[0]) / float(expected[1])
     for item in images.values():
-        with Image.open(Path(root)/item['path']) as image:
-            if component != 'storyboard' and abs(image.width/image.height-ratio) > .025:
-                raise ValueError('Choose an image matching the project aspect ratio '+ctx['aspect']+'.')
-            image.verify()
+        try:
+            with Image.open(Path(root)/item['path']) as image:
+                width, height = image.size
+                if component != 'storyboard' and abs(width/height-ratio) > .025:
+                    raise ValueError(f'Scene Plate must match the project {ctx["aspect"]} aspect ratio. Received {width}×{height}.')
+                image.verify()
+        except ValueError:
+            raise
+        except Exception as exc:
+            raise ValueError(f'Scene Plate upload failed: unreadable image ({type(exc).__name__}).') from None
     if component == 'storyboard':
         package.install(status, images, source)
     elif component == 'plate' and ctx['legacy']:
         import cb_render as R
         record = R._load_scenelook_rec(scope['scene'], scope['episode'])
         if record.get('candidate'):
-            raise ValueError('A scene plate is already awaiting review. Resolve it before installing another.')
+            raise ValueError('SEE_PLATE_CANDIDATE_PENDING: A Scene Plate candidate is already awaiting review. Reject or approve it before replacing it.')
         item = next(iter(images.values()))
         record['candidate'] = {'path':str(Path(root)/item['path']), 'hash':item['sha256'],
             'generatedAt':R._now(), 'approvalStatus':'PENDING_HUMAN_REVIEW',

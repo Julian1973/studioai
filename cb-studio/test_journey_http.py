@@ -13,7 +13,7 @@ import sys
 import types
 import pytest
 
-ROOT=Path('/Users/julianjenkins/Desktop/Ai Studio')
+ROOT=Path(__file__).resolve().parent.parent
 sys.path[:0]=[str(Path(__file__).parent),str(ROOT/'engine'),str(ROOT/'cb-studio')]
 from test_production_recovery import Http
 from studio_journey import Journey, StudioStore, scope_key, digest, DecisionRequired

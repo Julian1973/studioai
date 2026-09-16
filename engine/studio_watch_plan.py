@@ -68,7 +68,7 @@ class WatchPlan(Record):
     dialogueTiming: list[str] = Field(default_factory=list)
     dialogueOccurrences: list[DialogueOccurrence] = Field(default_factory=list)
     origins: dict[str, str] = Field(default_factory=dict)
-    compatibility: Literal['native-specialist', 'project-director-card']
+    compatibility: Literal['project-director-card']
 
     @model_validator(mode='after')
     def continuous_intervals(self):
@@ -140,15 +140,12 @@ def build_plan(snapshot):
         source_shot['dialogueLines'] = O.require_set(occurrence_lines, occurrence_lines)
     authority = snapshot.get('authorities') or {}
     # Department translations are history, not a fallback for missing DIRECT.
-    shot, specialist = authority.get('shot') or {}, {}
+    shot = authority.get('shot') or {}
     card = shot.get('directorCard') or {}
     views = card.get('views') or []
-    directed = specialist.get('shotPlan') or []
     from studio_authored_action import actions
     authored = actions(shot, authority.get('sourceUnit'))
-    from studio_storyboard_prompt import view_timings, validate_view_bindings
-    if directed:
-        validate_view_bindings(shot, directed)
+    from studio_storyboard_prompt import view_timings
     intervals = view_timings(shot, len(views))
     if not all(intervals):
         raise ValueError('WATCH plan requires explicit source view intervals; prose and inferred equal timing are unsupported')
@@ -168,8 +165,8 @@ def build_plan(snapshot):
                 return deepcopy(value)
         return deepcopy(default)
     plan = dict(version=VERSION, sourceHash=digest(authority), requestBindingHash=request_binding(snapshot),
-        compatibility='native-specialist' if directed else 'project-director-card', origins=origins,
-        purpose=select('/purpose', ['/shot/directorCard/audienceFocus', '/specialist/dramaticBeat', '/specialist/generationGoal', '/shot/intent', '/shot/purpose']),
+        compatibility='project-director-card', origins=origins,
+        purpose=select('/purpose', ['/shot/directorCard/audienceFocus', '/shot/intent', '/shot/purpose']),
         opening=select('/opening', ['/shot/openingState', '/shot/directorCard/editIn']),
         causality=select('/causality', ['/shot/causality', '/shot/directorCard/causality']),
                 landing=select('/landing', ['/shot/endingState', '/shot/directorCard/handoff']),
@@ -209,22 +206,22 @@ def build_plan(snapshot):
     assigned = set()
     audio_occurrences = Counter(re.findall(r'\{([^{}]+)\}', '\n'.join(plan['audioBlocks'])))
     for i, (view, interval) in enumerate(zip(views, intervals)):
-        typed = directed[i] if directed else {}
-        base, target, native = f'/shot/directorCard/views/{i}', f'/views/{i}', f'/specialist/shotPlan/{i}'
-        def field(name, source, fallback, default=''):
-            return select(target + '/' + name, [native + '/' + fallback, base + '/' + source], default)
+        base, target = f'/shot/directorCard/views/{i}', f'/views/{i}'
+        def field(name, source, default=''):
+            return select(target + '/' + name, [base + '/' + source], default)
         origins[target + '/action'] = authored[i]['origin']
         row = dict(viewId=view['viewId'], startSec=interval[0], endSec=interval[1],
-            entry=typed.get('transitionType') if typed.get('transitionType') in ('opening','cut','move','hold') else view.get('entry', 'opening' if i == 0 else 'hold'),
+            entry=view.get('entry', 'opening' if i == 0 else 'hold'),
             visibleEntities=deepcopy(view.get('visibleEntities')),
-            purpose=field('purpose', 'cameraPurpose', 'purpose'),
-            camera=field('camera', 'framing', 'framingLensAndCamera'),
+            purpose=field('purpose', 'cameraPurpose'),
+            camera=field('camera', 'framing'),
             action=authored[i]['text'],
-            performance=field('performance', 'performance', 'observablePerformance'),
-            setting=field('setting', 'staging', 'compositionLightAndMaterials'),
-            opening=field('opening', 'startState', 'initialOrCarriedState'),
-            landing=field('landing', 'endState', 'landingImage'), dialogue=[], holds=[])
-        indexes = typed.get('dialogueLineIndexes') if directed else [number for number, cue in cue_by_source.items() if interval[0] <= cue['startSec'] < interval[1]]
+            performance=field('performance', 'performance'),
+            setting=field('setting', 'staging'),
+            opening=field('opening', 'startState'),
+            landing=field('landing', 'endState'), dialogue=[], holds=[])
+        indexes = [number for number, cue in cue_by_source.items()
+                   if interval[0] <= cue['startSec'] < interval[1]]
         for pos, number in enumerate(indexes or []):
             if number in assigned or number not in cue_by_source and number not in sfx_by_source:
                 raise ValueError('WATCH dialogue occurrence must have one valid typed view owner')
@@ -234,24 +231,17 @@ def build_plan(snapshot):
             cue = cue_by_source[number]
             if not interval[0] <= cue['startSec'] < interval[1]:
                 raise ValueError('WATCH dialogue owner disagrees with measured Audio1 timing')
-            directions = typed.get('dialogueDirections') or []
             in_audio = audio_occurrences[cue['exactText']] > 0
             if in_audio:
                 audio_occurrences[cue['exactText']] -= 1
             else:
                 row['dialogue'].append(dialogue_placement_line(cue,
-                    direction=directions[pos] if pos < len(directions) else '',
+                    direction=view.get('performance') or '',
                 hold_after=bool(view.get('holdAfterDialogue', False))))
             plan['dialogueOccurrences'].append(dict(speaker=cue['speaker'], text=cue['exactText'],
                 startSec=cue['startSec'], endSec=cue['endSec'], viewId=view['viewId'], sourceIndex=number,
                 placement='audio-block' if in_audio else 'view'))
             assigned.add(number)
-        clocks = (specialist.get('creativeTranslation') or {}).get('gagClocks') or []
-        for clock in clocks:
-            beat = clock.get('beatCode')
-            owners = [j for j, item in enumerate(directed) if beat in (item.get('gagBeatIds') or [])]
-            if owners and owners[-1] == i:
-                row['holds'].append(f"Hold: {float(clock['recoveryHoldSec']):.1f}s — {clock['recoveryHold']}")
         plan['views'].append(row)
     if not set(cue_by_source).issubset(assigned):
         raise ValueError('WATCH plan lacks explicit ownership for an approved dialogue occurrence')
@@ -261,20 +251,13 @@ def build_plan(snapshot):
     for cue in card.get('soundCues') or []:
         if cue.get('destination') == 'watch':
             plan['sound'].append(f"{cue.get('timing', '')}: {cue['instruction']}")
-    for item in specialist.get('timeline') or []:
-        if item.get('channel') in ('music', 'sfx'):
-            plan['sound'].append(f"{item['startSec']:g}–{item['endSec']:g}s: {item['event']}")
     for cue in routed['seedanceSfxCues']:
         timing = f"{cue['startSec']:g}–{cue['endSec']:g}s" if cue.get('startSec') is not None and cue.get('endSec') is not None else ''
         plan['sound'].append(f"{timing}: {cue.get('character') or ''}: {cue['instruction']}")
-    handoff = specialist.get('soundHandoff') or shot.get('soundHandoff') or {}
+    handoff = shot.get('soundHandoff') or {}
     for key, label in (('entry', 'Sound entrance'), ('exit', 'Sound exit'), ('carrySound', 'Carry sound'), ('intentionalContrast', 'Intentional contrast')):
         if handoff.get(key):
             plan['sound'].append(f'{label}: {handoff[key]}')
-    # Sound ownership remains sourced from an explicit sound contract, never a
-    # generic instruction silently added after compilation.
-    if specialist.get('audioContract') and not plan['audioBlocks']:
-        plan['audioBlocks'] = ['[Audio]\n' + specialist['audioContract']]
     if cues and not plan['audioBlocks']:
         raise ValueError('WATCH plan requires the immutable approved Audio1 provider block')
     plan['authoredActions'] = authored

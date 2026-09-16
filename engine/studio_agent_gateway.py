@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 import sqlite3
+from contextlib import contextmanager
 import time
 from urllib.parse import urlsplit
 import requests
@@ -107,8 +108,13 @@ class Gateway:
             db.execute('CREATE TABLE IF NOT EXISTS receipts (id TEXT PRIMARY KEY, binding TEXT, state TEXT, result TEXT, created REAL)')
         os.chmod(self.path, 0o600)
 
+    @contextmanager
     def db(self):
-        return sqlite3.connect(self.path, timeout=30)
+        db = sqlite3.connect(self.path, timeout=30)
+        try:
+            yield db
+        finally:
+            db.close()
 
     def _scope(self, operation, args):
         if operation in {'projects', 'connections', 'jobs', 'create_project'}:

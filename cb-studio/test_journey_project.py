@@ -3,7 +3,7 @@ from pathlib import Path
 import socket
 import uuid
 import pytest
-ROOT=Path('/Users/julianjenkins/Desktop/Ai Studio')
+ROOT=Path(__file__).resolve().parent.parent
 sys.path[:0]=[str(Path(__file__).parent),str(ROOT/'engine')]
 from test_studio_production import setup
 from studio_journey_project import Project, Services

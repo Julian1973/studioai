@@ -455,6 +455,71 @@ def compile_track(direction, locked_lines):
     return track
 
 
+def compile_direct_track(shot, locked_lines):
+    """Compile HEAR directly from approved DIRECT and canon voice cards.
+
+    No Voice department record participates. DIRECT owns the performance brief;
+    the compiler only binds its explicit V3 tags, exact words, timing and voice.
+    """
+    briefs = {
+        item.get("dialogueOccurrenceId"): item
+        for item in (shot.get("voiceDirectorBrief") or [])
+        if item.get("dialogueOccurrenceId")
+    }
+    cards = voice_cards().get("characters", {})
+    compiled = []
+    previous = "\n"
+    for index, locked in enumerate(locked_lines, start=1):
+        occurrence = locked.get("dialogueOccurrenceId")
+        brief = briefs.get(occurrence) or {}
+        speaker = str(locked.get("speaker") or "").strip()
+        card = cards.get(speaker)
+        if not card:
+            raise VoiceContractError(
+                f"HEAR_CONFIGURATION_REQUIRED: no locked canon voice for {speaker}")
+        exact = _locked_text(locked).strip()
+        direction = str(brief.get("elevenLabsV3Direction") or
+                        locked.get("delivery") or "").strip()
+        if not direction:
+            raise VoiceContractError(
+                "HEAR_CONFIGURATION_REQUIRED: DIRECT ElevenLabs v3 performance "
+                f"direction is missing for {occurrence or index}")
+        tags = []
+        for tag in _TAG_RE.findall(direction):
+            normalized = tag.strip().casefold()
+            if normalized and normalized not in tags:
+                tags.append(normalized)
+        performed = ((" ".join(f"[{tag}]" for tag in tags) + " ")
+                     if tags else "") + exact
+        recipe = {"recipeId": f"{shot.get('shotId')}-DIRECT-{index}",
+                  "label": "DIRECT performance", "performedText": performed,
+                  "primary": True, "takesCount": 1}
+        item = {
+            "dialogueOccurrenceId": occurrence,
+            "sourceEventId": locked.get("sourceEventId"),
+            "character": speaker,
+            "voiceTreatment": locked.get("voiceTreatment") or "single_voice",
+            "chorusMembers": deepcopy(locked.get("chorusMembers") or []),
+            "voiceIds": [card["voiceId"]], "voiceId": card["voiceId"],
+            "modelId": card.get("modelId", "eleven_v3"),
+            "voiceSettings": deepcopy(card["settings"]),
+            "exactDialogue": exact,
+            "previousText": previous,
+            "startsAtSec": float(locked.get("startSec") or 0),
+            "estimatedDurationSec": max(.01, float(
+                (locked.get("endSec") or 0) - (locked.get("startSec") or 0))),
+            "takeRecipes": [recipe],
+            "directPerformanceDirection": direction,
+        }
+        item["compiledHash"] = _digest(item)
+        compiled.append(item)
+        previous = exact
+    track = {"compiler": "direct-elevenlabs-v3@1", "shotId": shot.get("shotId"),
+             "lines": compiled}
+    track["compiledHash"] = _digest(track)
+    return track
+
+
 def bank_recipe(character, archetype_id, recipe, *, shot_id, candidate, reviewed_by="Julian"):
     """Persist only an explicit human HEAR verdict; generation never calls this."""
     try:

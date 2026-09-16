@@ -83,10 +83,10 @@ def perform(root, scope, step, op, R=None, D=None):
     if step == 'create_images':
         look = R.scenelook_status(sc,ep)
         if not look.get('current'):
-            if look.get('approved') or look.get('candidate'):
-                raise DecisionRequired('The scene plate needs a specific source review.', 'Review its changed reference or direction before replacing it.', ['Existing scene plate'])
-            R.prepare_department(sc,'look',None,ep)
-            R.generate_scenelook_plate(sc,ep)
+            raise DecisionRequired(
+                'SEE needs a current approved Scene Plate.',
+                'Generate, upload or choose the Scene Plate in SEE, then approve it.',
+                ['Existing approved visual assets'])
         if led.get('keyframeCandidate'):
             return {'status':'complete','message':'Current image candidate reused'}
         if (led.get('keyframeApproval') or {}).get('approved'):
@@ -170,7 +170,6 @@ def perform(root, scope, step, op, R=None, D=None):
             raise DecisionRequired('Returned footage could not be linked to its reviewed request.', 'Reconcile the originating request before approval.')
         if not led.get('candidatePaths'):
             raise DecisionRequired('The rendered film has not returned.', 'Recover the existing provider job.')
-        R.prepare_department(sc,'review-animation',unit,ep)
         return {'status':'complete','message':'Film and review ready for your decision','origin':origin}
     elif step == 'approve_film':
         actual = file_record(root,(led.get('candidatePaths') or [None])[0])
@@ -179,8 +178,8 @@ def perform(root, scope, step, op, R=None, D=None):
             raise DecisionRequired('The film’s originating request is no longer verified.', 'Reconcile its origin before approval.')
         R.approve_shot(sc,unit,candidate=1,episode=ep,reviewed_by=op['actor'])
     elif step == 'assemble':
-        if led.get('status') != 'approved' or not file_record(root,led.get('harvestFrame')):
-            raise DecisionRequired('The accepted film’s ending has not been recorded.', 'Recover its existing approval.')
+        if led.get('status') != 'approved' or not file_record(root,led.get('approvedTake')):
+            raise DecisionRequired('The accepted film is unavailable.', 'Recover its existing approval.')
         # cb_post derives its assembly selection from this very approval ledger.
         # Build a scene preview only when all scene clips are accepted.
         if all(l.get('status')=='approved' for l in pkg.get('continuityLedger',[])):
@@ -189,11 +188,6 @@ def perform(root, scope, step, op, R=None, D=None):
                 R.stitch_scene(sc,ep)
         return {'status':'complete','message':'Accepted take included in the scene assembly selection'}
     elif step == 'prepare_next':
-        index=next((i for i,s in enumerate(pkg.get('shots',[])) if s.get('shotId')==unit),-1)
-        if 0<=index<len(pkg['shots'])-1:
-            from studio_director_handoff import refresh_previous_frame
-            _,package_path=R.load_pkg(sc,ep)
-            refresh_previous_frame(R,pkg,package_path,pkg['shots'][index+1])
         return {'status':'complete','message':'Ready for the next production unit'}
     else:
         raise ValueError('Unsupported production step')

@@ -28,54 +28,56 @@ def _current_direction(pkg, stage, scene, episode, shot_id=None):
 
 
 def _production_inputs(pkg, scene, episode):
-    """Exact internal directions used by the paid actions, with concise UI headlines."""
+    """Exact DIRECT-derived inputs used by SEE, HEAR and WATCH."""
     result = {"look": None, "shots": {}}
-    look, look_status = _current_direction(pkg, "look", scene, episode)
-    if look:
-        output = look.get("output") or {}
-        prompt = str(output.get("providerPrompt") or "").strip()
+    try:
+        from studio_scene_plate import native_request
+        request = native_request(cb_render.ROOT, scene, episode)
+        prompt = request["prompt"]
         result["look"] = {
-            "source": look_status.get("source"),
-            "headline": output.get("creativeIntent") or output.get("storyOfPlace"),
+            "source": "show-bible-references-direct",
+            "headline": request.get("headline") or "Approved scene world and geography",
             "prompt": prompt,
             "promptHash": _hash_text(prompt),
         }
+    except (OSError, KeyError, TypeError, ValueError):
+        pass
 
     for shot in pkg.get("shots") or []:
         shot_id = shot["shotId"]
         row = {}
-        for stage, prompt_key, headline_keys in (
-                ("cinematography", "keyframePrompt",
-                 ("audienceRead", "composition")),
-                ("animation", "animationPrompt",
-                 ("doesItLand", "generationGoal", "deliveryPlan"))):
-            record, status = _current_direction(
-                pkg, stage, scene, episode, shot_id)
-            if not record:
-                continue
-            output = record.get("output") or {}
-            try:
-                prompt = (cb_render._compile_keyframe_integration_prompt(output, shot)
-                          if stage == "cinematography" else
-                          str(output.get("providerPrompt") or "").strip())
-            except (cb_render.Refused, ValueError) as exc:
-                row[prompt_key + "ContractError"] = str(exc)
-                continue
-            row[prompt_key] = prompt
-            row[prompt_key + "Hash"] = _hash_text(prompt)
-            row[prompt_key + "Source"] = status.get("source")
-            row[prompt_key + "Headline"] = next(
-                (output.get(key) for key in headline_keys if output.get(key)), None)
-        voice, voice_status = _current_direction(
-            pkg, "voice", scene, episode, shot_id)
-        if voice:
-            output = voice.get("output") or {}
+        try:
+            keyframe_prompt = cb_render._resolve_keyframe_prompt(pkg, shot)
+            direct = cb_render._direct_keyframe_direction(shot)
+            row.update({
+                "keyframePrompt": keyframe_prompt,
+                "keyframePromptHash": _hash_text(keyframe_prompt),
+                "keyframePromptSource": "current-direct",
+                "keyframePromptHeadline": direct.get("audienceRead"),
+            })
+        except (cb_render.Refused, KeyError, TypeError, ValueError) as exc:
+            row["keyframePromptContractError"] = str(exc)
+        try:
+            voice_lines = cb_render._approved_voice_lines(pkg, shot)
+        except (cb_render.Refused, KeyError, TypeError, ValueError) as exc:
+            row["voiceContractError"] = str(exc)
+        else:
             row["voiceLines"] = [{
                 "speaker": line.get("speaker"),
-                "performedText": line.get("performedText"),
-                "dramaticIntention": line.get("dramaticIntention"),
-            } for line in (output.get("lines") or [])]
-            row["voiceDirectionSource"] = voice_status.get("source")
+                "performedText": line.get("text"),
+            } for line in voice_lines]
+            row["voiceDirectionSource"] = "current-direct"
+        try:
+            animation_prompt, _ = cb_render._resolve_seedance_prompt(
+                pkg, shot, scene, episode)
+        except (cb_render.Refused, KeyError, TypeError, ValueError) as exc:
+            row["animationPromptContractError"] = str(exc)
+        else:
+            row.update({
+                "animationPrompt": animation_prompt,
+                "animationPromptHash": _hash_text(animation_prompt),
+                "animationPromptSource": "current-direct",
+            })
         if row:
             result["shots"][shot_id] = row
     return result
@@ -336,10 +338,6 @@ def production_preflight(scene, episode="Ep1", state=None):
 
     if state.get("packageCurrent"):
         scene_look = state.get("sceneLook") or {}
-        if not scene_look.get("directionCurrent"):
-            block("LOOK_DIRECTION_NOT_CURRENT", "look",
-                  "Look Development direction is missing or stale.",
-                  "Fire Scene World; the Studio will prepare current Look direction automatically.")
         if not scene_look.get("current"):
             block("SCENE_LOOK_NOT_CURRENT", "look",
                   "No current signed Scene Look working anchor is available.",
@@ -348,11 +346,6 @@ def production_preflight(scene, episode="Ep1", state=None):
         for shot in state.get("shots") or []:
             sid = shot["shotId"]
             current = shot.get("current") or {}
-            if shot.get("needsKeyframe") and not current.get("cinematographyDirection"):
-                block("CINEMATOGRAPHY_NOT_CURRENT", "keyframe",
-                      "Cinematography direction is missing or stale.",
-                      "Build the keyframe; the Studio will prepare current Cinematography "
-                      "direction automatically.", sid)
             if shot.get("needsKeyframe") and not current.get("keyframe"):
                 awaiting = (shot.get("pending") or {}).get("keyframe")
                 block("KEYFRAME_NOT_CURRENT", "keyframe",
@@ -365,27 +358,14 @@ def production_preflight(scene, episode="Ep1", state=None):
                        "character turnarounds to establish identity, canon scale, camera, "
                        "light and clear performance space, then return one finished opening "
                        "stage for Accept or Iterate."), sid)
-            if shot.get("talky") and not current.get("voiceDirection"):
-                block("VOICE_DIRECTION_NOT_CURRENT", "voice",
-                      "Voice direction is missing or stale.",
-                      "Fire the performance; the Studio will prepare current Voice direction automatically.", sid)
             if shot.get("talky") and not current.get("voice"):
                 block("VOICE_TAKE_NOT_CURRENT", "voice",
                       "No current accepted voice take is available.",
                       "Fire the performance, listen, then choose Accept or Iterate.", sid)
-            if not current.get("animationDirection"):
-                block("ANIMATION_DIRECTION_NOT_CURRENT", "animation",
-                      "Animation direction is missing or stale.",
-                      "Fire animation; the Studio will prepare direction from the current frame, references and voice.",
-                      sid)
             if not current.get("animation"):
                 block("ANIMATION_TAKE_NOT_CURRENT", "animation",
                       "No current accepted animation take is available.",
                       "Fire a candidate batch, then choose Accept or Iterate.", sid)
-            if current.get("animation") and not current.get("directorReview"):
-                block("DIRECTOR_REVIEW_NOT_CURRENT", "continuity",
-                      "The approved animation has no current Director Review sign-off.",
-                      "Review the approved take and approve the review evidence.", sid)
 
     timing = state.get("timingSlate") or {}
     if not timing.get("current"):
@@ -442,8 +422,7 @@ def production_preflight(scene, episode="Ep1", state=None):
                   f"Confirm the {provider} plan and billing cadence in billing_profile.json.")
     selected_video = next(
         (row for row in provider_capabilities["models"] if row["selected"]), {})
-    fal_required = (
-        cb_gen.IMAGE_PROVIDER == "seedream" or selected_video.get("provider") == "fal")
+    fal_required = selected_video.get("provider") == "fal"
     if fal_required and not cb_gen.FAL_KEY:
         block("CONFIG_FAL_KEY", "configuration", "FAL_KEY is not configured.",
               "Preserve the Desktop .env or add the fal.ai key before paid work.")

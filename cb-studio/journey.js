@@ -3,7 +3,7 @@
 'use strict';
 let sequence=0;
 const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
-async function api(body){const r=await fetch('/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw new Error(data.error||'Studio could not load the current production action.');return data;}
+async function api(body){const r=await fetch('/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok||data.ok===false){const e=data.error||{};const detail=[e.errorCode&&`errorCode=${e.errorCode}`,e.stage&&`stage=${e.stage}`,e.operation&&`operation=${e.operation}`,e.technicalMessage&&`error=${e.technicalMessage}`,e.humanMessage||e.message].filter(Boolean).join('\n');throw new Error(detail||'Studio could not load the current production action.');}return data;}
 function mount(host,scope,options={}){
  const scopeId=JSON.stringify(scope);if(host.journeyHandle?.scopeId===scopeId){host.journeyHandle.refresh();return host.journeyHandle;}host.journeyHandle?.();
  const ticket=++sequence;let state=null,timer=null,submitted=false,awaitingNext=false,mediaSignature=null,settledSignature=null;

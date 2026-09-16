@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 import pytest
-sys.path.insert(0,'/Users/julianjenkins/Desktop/Ai Studio/engine')
+sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'engine'))
 from studio_journey_worker import spending
 from studio_journey import DecisionRequired
 import cb_episode_budget as budget

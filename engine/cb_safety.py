@@ -628,22 +628,28 @@ def create_policy(m):
             return None
 
     def look_input_signature(scene, episode, plate_path=None, reference_path=None, *, pkg=None):
-        """Every direct Scene Look input, including current signed direction and files."""
+        """Every direct Scene Plate input from canon, DIRECT and selected references."""
         if pkg is None:
             pkg, _ = m.load_pkg(scene, episode)
-        prompt = look_prompt(scene, episode, pkg=pkg) or ""
+        try:
+            from studio_scene_plate import native_request
+            prompt = native_request(
+                m.ROOT, scene, episode, reference_path=reference_path,
+                require_current_lineage=False)["prompt"]
+        except (OSError, KeyError, TypeError, ValueError):
+            prompt = ""
         return {"canonProfileDigest": require_canon(pkg, episode, "look"),
                 "briefHash": hashlib.sha256(prompt.encode()).hexdigest(),
                 "referenceHashes": ({pathlib.Path(reference_path).name: file_sha256(reference_path)}
                                     if reference_path else {}),
                 "plateHash": file_sha256(plate_path) if plate_path else None}
 
-    def generate_look(scene, episode="Ep1", reference_path=None, log=print):
+    def generate_look(scene, episode="Ep1", reference_path=None, log=print, *,
+                      reviewed_request=None):
         pkg, _ = current_package(scene, episode)
-        if not look_prompt(scene, episode):
-            raise m.Refused("REFUSED — Prepare current Look Development direction first.")
         result = original["generate_scenelook_plate"](
-            scene, episode, reference_path=reference_path, log=log)
+            scene, episode, reference_path=reference_path, log=log,
+            reviewed_request=reviewed_request)
         rec = m._load_scenelook_rec(scene, episode)
         rec["candidate"]["packageRevision"] = pkg.get("revision")
         rec["candidate"]["inputSignature"] = look_input_signature(
@@ -668,16 +674,6 @@ def create_policy(m):
     def select_look(scene, mode, episode="Ep1", upload_path=None, library_path=None,
                     reviewed_by="Julian", log=print):
         pkg, _ = current_package(scene, episode)
-        if not look_prompt(scene, episode):
-            # Selecting a real library/upload plate is already the user's explicit Scene
-            # World action. Prepare and sign the zero-media-spend specialist brief behind
-            # that action instead of exposing another departmental gate in the UI.
-            prepare_department(scene, "look", None, episode, log)
-            decide_department(
-                scene, "look", "approved", None,
-                "Automatically prepared for the selected Scene Look source.", episode,
-                "StudioAI", log)
-            pkg, _ = current_package(scene, episode)
         result = original["select_scenelook_source"](
             scene, mode, episode, upload_path, library_path, reviewed_by, log)
         rec = m._load_scenelook_rec(scene, episode)
@@ -694,9 +690,11 @@ def create_policy(m):
         return result
 
     def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
-        if stage in ("cinematography", "animation") and shot_id:
-            from studio_director_handoff import prepare_native
-            prepare_native(m, scene, shot_id, episode, log, stage=stage)
+        if stage in ("look", "cinematography", "voice", "animation"):
+            raise m.Refused(
+                "DIRECTOR_REVISION_REQUIRED: creative departments are retired from current production. "
+                "Use DIRECT for creative authority, SEE for visual evidence, and HEAR for Audio1."
+            )
         pkg, path = current_package(scene, episode)
         if stage in direction_stages:
             current = department_record_status(
@@ -851,7 +849,7 @@ def create_policy(m):
             scene, stage, verdict, shot_id, note, episode, reviewed_by, log)
 
     def keyframe_prompt(pkg, shot):
-        direction = current_direction_output(pkg, shot["shotId"], "cinematography")
+        direction = m._direct_keyframe_direction(shot)
         prompt = m._compile_keyframe_integration_prompt(direction, shot)
         ledger = m._ledger(pkg, shot["shotId"])
         pending = ledger.get("pendingKeyframeCorrection") or (
@@ -878,14 +876,12 @@ def create_policy(m):
         reused = current_requests(m._ledger(pkg, shot["shotId"]), shot)
         if reused is not None:
             return reused
-        output = current_direction_output(pkg, shot["shotId"], "voice")
-        output, locked = cb_audio_authority.route_voice_direction(
-            output, shot.get("dialogueLines") or [])
+        locked = cb_audio_authority.spoken_dialogue_lines(shot)
         if not locked:
             return []
         ledger = m._ledger(pkg, shot["shotId"])
         try:
-            track = m.cb_voice_director.compile_track(output, locked)
+            track = m.cb_voice_director.compile_direct_track(shot, locked)
         except m.cb_voice_director.VoiceContractError as exc:
             raise m.Refused(str(exc)) from exc
         working_by_occurrence = {
@@ -1177,6 +1173,62 @@ def create_policy(m):
         except (m.Refused, OSError, TypeError, ValueError):
             return False
 
+    def sealed_animation_batch_current(batch, ledger):
+        """Validate returned media against the immutable request that produced it."""
+        if not isinstance(batch, dict) or batch.get("status") != "complete":
+            return False
+        try:
+            m._verify_envelope(batch)
+            candidates = batch.get("candidateHashes") or []
+            paths = ledger.get("candidatePaths") or []
+            expected_tasks = {
+                str(item.get("providerTaskId"))
+                for item in (batch.get("transportCandidates") or {}).values()
+                if item.get("providerTaskId")
+            }
+            expected_fingerprints = set()
+            import cb_provider_jobs
+            for segment in (batch.get("envelope", {}).get("executionPlan", {}).get("segments") or []):
+                contract = segment.get("contract") or {}
+                audio = segment.get("audio") or {}
+                images = [r.get("path") for r in segment.get("references") or []]
+                audio_paths = [audio["path"]] if audio.get("path") else []
+                videos = [r.get("path") for r in segment.get("videoReferences") or []]
+                duration = int(round(segment.get("durationSec")))
+                prompt = segment.get("prompt", "")
+                generate_audio = bool(segment.get("generateAudio", True))
+                expected_fingerprints.add(cb_provider_jobs.fingerprint(
+                    contract, prompt, images, audio_paths, videos, duration,
+                    contract.get("resolution"), generate_audio))
+                canonical = cb_providers.request_contract(
+                    fast=contract.get("tier") == "fast", duration=str(duration),
+                    resolution=contract.get("resolution"), image_count=len(images),
+                    audio_count=len(audio_paths), video_count=len(videos),
+                    model_id=contract.get("providerModelId"))
+                expected_fingerprints.add(cb_provider_jobs.fingerprint(
+                    canonical, prompt, images, audio_paths, videos, duration,
+                    contract.get("resolution"), generate_audio))
+            if not candidates or len(candidates) != len(paths):
+                return False
+            for expected, path in zip(candidates, paths):
+                if expected.get("path") != path or expected.get("sha256") != file_sha256(path):
+                    return False
+                receipt = pathlib.Path(str(path) + "." + str(batch.get("batchId")) + ".provider-task.json")
+                if not receipt.is_file():
+                    return False
+                provider = json.loads(receipt.read_text())
+                if not provider.get("taskId") or provider.get("state") not in ("downloaded", "succeeded"):
+                    return False
+                if expected_tasks and str(provider.get("taskId")) not in expected_tasks:
+                    return False
+                if expected_fingerprints and provider.get("requestHash") not in expected_fingerprints:
+                    return False
+                if provider.get("outputHash") != expected.get("sha256"):
+                    return False
+            return True
+        except (m.Refused, OSError, TypeError, ValueError, json.JSONDecodeError):
+            return False
+
     def animation_approval_status(pkg, shot, scene=None, episode=None):
         scene = str(scene if scene is not None else pkg.get("sceneNumber"))
         episode = episode or pkg.get("episode", "Ep1")
@@ -1275,14 +1327,12 @@ def create_policy(m):
         m._require_current_lineage(pkg, pkg.get("sceneNumber"), episode)
         require_canon(pkg, episode, "voice")
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
-        direction = current_direction_output(pkg, shot_id, "voice")
-        direction, spoken_lines = cb_audio_authority.route_voice_direction(
-            direction, shot.get("dialogueLines") or [])
+        spoken_lines = cb_audio_authority.spoken_dialogue_lines(shot)
         if not spoken_lines:
             return None
         m._require_confirmed_billing("elevenlabs")
         try:
-            compiled_track = m.cb_voice_director.compile_track(direction, spoken_lines)
+            compiled_track = m.cb_voice_director.compile_direct_track(shot, spoken_lines)
         except m.cb_voice_director.VoiceContractError as exc:
             raise m.Refused(str(exc)) from exc
 
@@ -1625,17 +1675,7 @@ def create_policy(m):
                 "source": candidate.get("source")}
 
     def keyframe_shot(scene, shot_id, episode="Ep1", log=print, *, compare=False):
-        pkg, _ = current_package(scene, episode)
-        direction = department_record_status(
-            pkg, shot_id, "cinematography", scene, episode)
-        if not direction["current"]:
-            log("SEE PREPARATION — approved inputs changed; refreshing this shot's "
-                "Cinematography before image generation")
-            prepare_department(scene, "cinematography", shot_id, episode, log)
-            pkg, _ = current_package(scene, episode)
-        # Verify the rebuilt record against the current sources, rather than blessing
-        # the old signature or trusting that preparation necessarily succeeded.
-        current_direction_output(pkg, shot_id, "cinematography")
+        current_package(scene, episode)
         failure = None
         try:
             result = (original["keyframe_shot"](scene, shot_id, episode, log, compare=True) if compare else
@@ -2003,17 +2043,8 @@ def create_policy(m):
 
     def anchor_for(pkg, shot):
         result = original["_anchor_for"](pkg, shot)
-        if shot["sourceType"] == "opener":
-            approval = m._ledger(pkg, shot["shotId"]).get("keyframeApproval") or {}
-            state = keyframe_record_status(pkg, shot, approval)
-        else:
-            # For relay shots, original["_anchor_for"] has already enforced the hard
-            # requirement: the source shot is human-approved and has a harvested final
-            # frame. That harvested frame is a state handoff into the next shot, not a
-            # demand that the source shot's old render prompt graph still be current after
-            # later scene-plate/geography corrections. The current shot's references,
-            # scene plate and compiler prompt own the next emission.
-            return result
+        approval = m._ledger(pkg, shot["shotId"]).get("keyframeApproval") or {}
+        state = keyframe_record_status(pkg, shot, approval)
         if not state["current"]:
             raise m.Refused(
                 "REFUSED — opening-frame approval is stale against its direct inputs")
@@ -2126,26 +2157,18 @@ def create_policy(m):
             comparison_model_id, comparison_run_id, log)
 
     def approve_shot(scene, shot_id, candidate=1, episode="Ep1", reviewed_by="Julian", log=print):
+        legacy_currentness = animation_direct_inputs_current
         pkg, _ = current_package(scene, episode)
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
         batch = ledger.get("batch") or {}
-        fired_signature = batch.get("inputSignature")
-        recorded_hashes = batch.get("candidateHashes") or []
-        current_hashes = [
-            {"path": candidate_path, "sha256": file_sha256(candidate_path)}
-            for candidate_path in (ledger.get("candidatePaths") or [])
-        ]
-        if (batch.get("status") != "complete" or
-                not animation_direct_inputs_current(
-                    fired_signature, pkg, shot, str(scene), episode) or
-                not recorded_hashes or recorded_hashes != current_hashes):
+        if not sealed_animation_batch_current(batch, ledger):
             raise m.Refused(
                 f"REFUSED — {shot_id}'s candidate batch is stale, incomplete or changed on disk")
         result = original["approve_shot"](scene, shot_id, candidate, episode, reviewed_by, log)
         pkg, path = m.load_pkg(scene, episode); approval = m._ledger(pkg, shot_id)["approval"]
         ledger = m._ledger(pkg, shot_id)
         approval.update({"packageRevision": pkg.get("revision"),
-                         "inputSignature": fired_signature,
+                         "inputSignature": batch.get("inputSignature"),
                          "contentHash": file_sha256(ledger.get("approvedTake")),
                          "harvestHash": file_sha256(ledger.get("harvestFrame")),
                          "batchId": batch.get("batchId")})

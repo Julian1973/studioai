@@ -47,7 +47,9 @@ def test_visual_provider_prose_has_zero_compilation_authority(compact_source):
 
 def test_typed_execution_refinement_survives_broad_source_card(compact_source):
     view = compact_source['authorities']['shot']['directorCard']['views'][0]
-    view.update(framing='Medium framing.', action='Pass the cup.', performance='Hesitation.', endState='Cup passed.')
+    # Performance is authored prose, not a bare label. Keep the fixture inside
+    # the current DIRECT → WATCH contract.
+    view.update(framing='Medium framing.', action='Pass the cup.', performance='Hesitates before passing the cup.', endState='Cup passed.')
     prompt, _ = E.compile_prompt(compact_source, audit(compact_source))
     assert 'Camera: Medium framing.' in prompt
     assert 'Pass the cup.' in prompt

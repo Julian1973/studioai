@@ -7,6 +7,37 @@
     "child_female": "Amie",
     "child_male": "Luna"
   },
+  "Kit": {
+    "turnaround": "../cb-seed/assets/final_turnarounds/CB_Kit.png",
+    "anchor": "../cb-seed/assets/final_turnarounds/CB_Kit.png",
+    "voiceId": "6lbKISvTuKILAwhNIepr",
+    "sizeRank": 3,
+    "gender": "Female",
+    "size": "a small child rabbit",
+    "sizeRef": "Amie",
+    "cadence": "bright, curious and gentle; reacts with open-eyed wonder",
+    "key_features": "small beige-grey rabbit with tall pink-inner ears, brown eyes and a sage-green knitted scarf",
+    "turn4": "../cb-seed/assets/final_turnarounds/CB_Kit.png",
+    "refs": ["../cb-seed/assets/final_turnarounds/CB_Kit.png"],
+    "heightIn": 20,
+    "age": "Child",
+    "bible": {
+      "character": "Kit",
+      "title": "Kit",
+      "essence": "A small, curious rabbit friend in the Learning Circle.",
+      "pillar": "",
+      "crystal": "",
+      "crystalState": "",
+      "frequency": "",
+      "colour": "beige-grey with a sage-green scarf",
+      "whoTheyAre": "A recurring Learning Circle child and companion; Kit carries no crystal call.",
+      "vulnerability": "Small and easily overlooked in a crowded circle.",
+      "emotionalDNA": "Curiosity makes room for belonging."
+    },
+    "render_ref": "../cb-seed/assets/final_turnarounds/CB_Kit.png",
+    "promptRole": "small rabbit child in the Learning Circle",
+    "isBee": false
+  },
   "Aida": {
     "turnaround": "../cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
     "anchor": "../cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
@@ -131,7 +162,6 @@
     "refs": [
       "../cb-seed/assets/CB_Sunny_turn4.png",
       "../cb-seed/assets/CB_Sunny_turnaround.jpeg",
-      "../cb-seed/assets/characters/Sunny/CB_Sunny_portrait.png",
       "../cb-seed/assets/characters/Sunny/CB_Sunny_char-sheet.png",
       "../cb-seed/assets/characters/Sunny/CB_Sunny_front-back.png",
       "../cb-seed/assets/characters/Sunny/CB_Sunny_expressions-1.jpeg",
@@ -243,7 +273,6 @@
       "../cb-seed/assets/characters/Luna/CB_Luna_expressions-1.jpeg",
       "../cb-seed/assets/characters/Luna/CB_Luna_expressions-2.jpeg",
       "../cb-seed/assets/characters/Luna/CB_Luna_pro-turn-1.jpeg",
-      "../cb-seed/assets/characters/Luna/CB_Luna_pro-turn-2.jpeg",
       "../cb-seed/assets/characters/Luna/CB_Luna_pro-turn-3.jpeg"
     ],
     "height": "4'6\" (137 cm)",

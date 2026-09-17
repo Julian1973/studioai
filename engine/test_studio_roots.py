@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from studio_roots import is_trusted, trusted_path
+from studio_roots import is_trusted, relative_trusted, trusted_path
 
 
 def test_source_local_path_is_trusted(tmp_path):
@@ -65,3 +65,14 @@ def test_missing_data_root_is_clear(tmp_path, monkeypatch):
     monkeypatch.setenv("STUDIO_DATA_ROOT", str(missing))
     with pytest.raises(ValueError):
         trusted_path(missing / "canon.json", source)
+
+
+def test_relative_path_uses_the_configured_root(tmp_path, monkeypatch):
+    source = tmp_path / "release"
+    data = tmp_path / "production-data"
+    data.mkdir()
+    target = data / "shows" / "canon.json"
+    target.parent.mkdir()
+    target.write_text("{}")
+    monkeypatch.setenv("STUDIO_DATA_ROOT", str(data))
+    assert relative_trusted(target, source) == "shows/canon.json"

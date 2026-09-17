@@ -40,3 +40,13 @@ def is_trusted(path: str | Path, default: str | Path) -> bool:
         return True
     except (OSError, ValueError):
         return False
+
+
+def relative_trusted(path: str | Path, default: str | Path) -> str:
+    resolved = trusted_path(path, default)
+    for root in trusted_roots(default):
+        try:
+            return resolved.relative_to(root).as_posix()
+        except ValueError:
+            continue
+    raise ValueError(f"path is not under a configured Studio root: {path}")

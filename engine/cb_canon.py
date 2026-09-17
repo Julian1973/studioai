@@ -14,7 +14,7 @@ import pathlib
 import re
 import sys
 from typing import Any, Iterable
-from studio_roots import trusted_path
+from studio_roots import relative_trusted, trusted_path
 
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -130,7 +130,7 @@ def resolve_declared_path(value: str, root: str | pathlib.Path | None = None) ->
 
 
 def _relative(path: pathlib.Path, root: pathlib.Path) -> str:
-    return str(path.resolve().relative_to(root)).replace("\\", "/")
+    return relative_trusted(path, root)
 
 
 def load_policy(root: str | pathlib.Path | None = None) -> dict:

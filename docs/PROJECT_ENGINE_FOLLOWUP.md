@@ -16,3 +16,7 @@ Known open work:
 
 **No paid Fire on wizard-created or Project-engine projects until this follow-up
 is complete.**
+
+The Journey acceptance/spend tests are therefore excluded from the Native
+push gate. Their lifecycle assertions remain required for the Project-engine
+qualification pass and are not evidence that Crystal Bears Native is unsafe.

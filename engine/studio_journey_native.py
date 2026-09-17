@@ -9,6 +9,18 @@ import json
 import hashlib
 import os
 from studio_journey import DecisionRequired, digest, scope_key, StudioStore
+from studio_roots import data_root
+
+
+def _servable_roots(root):
+    source = Path(root).resolve()
+    data = data_root(source)
+    roots = [(source, "/")]
+    for media_root in (data / "engine" / "media", data / "media"):
+        resolved = media_root.resolve()
+        if all(resolved != existing for existing, _ in roots):
+            roots.append((resolved, "/engine/media/"))
+    return roots
 
 
 def file_record(root, value):
@@ -18,13 +30,17 @@ def file_record(root, value):
     if not path.is_absolute():
         path = root / path
     path = path.resolve()
-    try:
-        relative = path.relative_to(root.resolve())
-    except ValueError:
+    for base, url_prefix in _servable_roots(root):
+        try:
+            relative = path.relative_to(base)
+            break
+        except ValueError:
+            continue
+    else:
         raise ValueError('This production asset is outside the Studio media library.')
     if not path.is_file():
         return None
-    return {'path': str(path), 'url': '/' + relative.as_posix(),
+    return {'path': str(path), 'url': url_prefix + relative.as_posix(),
             'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
 
 

@@ -53,7 +53,7 @@ def test_typed_execution_refinement_survives_broad_source_card(compact_source):
     prompt, _ = E.compile_prompt(compact_source, audit(compact_source))
     assert 'Camera: Medium framing.' in prompt
     assert 'Pass the cup.' in prompt
-    assert 'Hesitation.' in prompt
+    assert 'Hesitates before passing the cup.' in prompt
     assert 'Hold a medium two-shot at eye height.' not in prompt
 
 

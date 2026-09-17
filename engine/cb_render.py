@@ -89,6 +89,7 @@ import os, sys, io, json, re, glob, pathlib, datetime, shutil, hashlib, uuid, su
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_engine
+from studio_roots import trusted_path
 import cb_gen
 import cb_post
 import cb_rough_cut
@@ -403,7 +404,7 @@ def _declared_storyboard_path(pkg, scene, episode="Ep1"):
     if not path.is_absolute():
         path = ROOT / path
     try:
-        path.resolve().relative_to(ROOT.resolve())
+        trusted_path(path, ROOT)
     except ValueError:
         return _storyboard_path(scene, episode)
     return path
@@ -3605,7 +3606,7 @@ def _require_forward_directing_source(pkg, shot, scene, episode):
         if not path.is_absolute():
             path = ROOT / path
         try:
-            path.resolve().relative_to(ROOT.resolve())
+            trusted_path(path, ROOT)
         except ValueError as exc:
             raise Refused(
                 f"REFUSED — {shot['shotId']}'s scoped Director amendment escapes the studio") from exc

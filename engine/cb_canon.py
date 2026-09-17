@@ -14,6 +14,7 @@ import pathlib
 import re
 import sys
 from typing import Any, Iterable
+from studio_roots import trusted_path
 
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -110,9 +111,8 @@ def _status_fingerprint(base: pathlib.Path, episode: str | None) -> tuple:
 
 
 def _inside(root: pathlib.Path, path: pathlib.Path) -> pathlib.Path:
-    resolved = path.resolve()
     try:
-        resolved.relative_to(root)
+        return trusted_path(path, root)
     except ValueError as exc:
         raise CanonLockError(f"canon path escapes the workspace: {path}") from exc
     return resolved

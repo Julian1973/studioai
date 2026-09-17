@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from studio_roots import trusted_path, trusted_roots
 
 
 DEFAULT_SHOW_ID = "crystal-bears"
@@ -78,10 +79,9 @@ def _safe_resolve(base: pathlib.Path, relative: str, label: str) -> pathlib.Path
     base = base.resolve()
     candidate = (base / candidate_path).resolve()
     try:
-        candidate.relative_to(base)
+        return trusted_path(candidate, base)
     except ValueError as exc:
         raise ShowProfileError(f"{label} escapes the show tenant directory") from exc
-    return candidate
 
 
 @dataclass(frozen=True)
@@ -116,7 +116,7 @@ def load_show_profile(repo_root=None, show_id=None) -> LoadedShowProfile:
     shows_root = (root / "shows").resolve()
     show_root = (shows_root / selected).resolve()
     try:
-        show_root.relative_to(shows_root)
+        trusted_path(show_root, root)
     except ValueError as exc:
         raise ShowProfileError("selected show escapes the shows directory") from exc
     profile_path = show_root / "profile.json"

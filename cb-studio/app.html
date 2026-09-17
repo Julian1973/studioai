@@ -1231,7 +1231,7 @@ async function _restoreFromHash(raw){
   if(!proj) return false;
   CURRENT_PROJECT=proj; CUR=null; SHOTS=[]; page="episodes";
   if(!(await boot())) return false;
-  if(CURRENT_PROJECT.setupVersion===1)return true;
+  if(usesProjectWorkspace(CURRENT_PROJECT))return true;
   const pg=params.get('pg')||'episodes', epNum=params.get('ep');
   if(pg=='characters'){showCharacters();return true;}
   if(pg=='scenes'){showScenes();return true;}
@@ -1275,6 +1275,9 @@ const ANIM_TYPES=[
 ];
 function projConfig(){return (CURRENT_PROJECT&&CURRENT_PROJECT.configBase)||"engine/config";}
 function projPkgBase(){return (CURRENT_PROJECT&&CURRENT_PROJECT.packageBase)||"cb-output";}
+const CRYSTAL_BEARS_PROJECT_ID="crystal-bears";
+function isCrystalBearsProject(project){return (project||CURRENT_PROJECT||{}).id===CRYSTAL_BEARS_PROJECT_ID;}
+function usesProjectWorkspace(project){project=project||CURRENT_PROJECT;return !!project&&project.setupVersion===1&&!isCrystalBearsProject(project);}
 function _esc(s){return (''+(s==null?'':s)).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
 function _attr(s){return _esc(s).replace(/"/g,"&quot;");}
 function assetSrc(path){
@@ -1362,7 +1365,7 @@ function renderProjects(){
     return `<article class="projcard" data-primary="${p.primary?'true':'false'}" data-archived="${p.archived?'true':'false'}" id="pc_${_esc(p.id)}" style="--brand:${theme.accent};--brandink:${theme.ink};--brandbg:${theme.soft}">
     <div class="projcard-art" id="pcart_${_esc(p.id)}">
       <div class="projcard-artmedia">${art}</div>
-      <div class="projcard-artmeta"><span>${p.archived?'Preserved reference':p.setupVersion===1?'Director workspace':'Live production'}</span><span>${_esc(p.aspectRatio||'')}</span></div>
+      <div class="projcard-artmeta"><span>${p.archived?'Preserved reference':usesProjectWorkspace(p)?'Director workspace':'Live production'}</span><span>${_esc(p.aspectRatio||'')}</span></div>
     </div>
     <div class="projcard-body">
       <div class="projcard-name"><span>${_esc(p.name)}</span>${p.primary?'<span class="project-role">Main IP</span>':''}</div>
@@ -1372,7 +1375,7 @@ function renderProjects(){
       <div id="pcstats_${_esc(p.id)}" class="projcard-stats"><div class="projcard-activity">Loading production status…</div></div>
       <div class="projcard-actions">
         <button type="button" class="btn" onclick='enterProject(${JSON.stringify(p.id)})'>${p.archived?"Open archive":"Open project"}</button>
-        ${p.archived||p.setupVersion===1?"":`<button type="button" class="btn ghost" onclick='continueProject(${JSON.stringify(p.id)})'>Continue latest episode</button><button type="button" class="btn ghost" onclick='StudioProduction.migration(${JSON.stringify(p.id)})'>Upgrade workspace</button>`}
+        ${p.archived||usesProjectWorkspace(p)?"":`<button type="button" class="btn ghost" onclick='continueProject(${JSON.stringify(p.id)})'>Continue latest episode</button><button type="button" class="btn ghost" onclick='StudioProduction.migration(${JSON.stringify(p.id)})'>Upgrade workspace</button>`}
         ${p.archived?'':`<button type="button" class="btn ghost" onclick='addProjectEpisode(${JSON.stringify(p.id)})'>＋ Add ${p.projectType==='film'?'sequence':'episode'}</button>`}
       </div>
     </div>
@@ -1423,7 +1426,7 @@ async function enterProject(id){
 async function continueProject(id){
   const p=PROJECTS.find(x=>x.id===id); if(!p){alert("Project not found");return;}
   if(!(await enterProject(id)))return;
-  if(p.archived||p.setupVersion===1)return;
+  if(p.archived||usesProjectWorkspace(p))return;
   const episode=EPISODES.filter(e=>e&&e.script).sort((a,b)=>Number(b.number)-Number(a.number))[0]||EPISODES[0];
   if(episode)await openEpisode(episode.number); else addForm();
 }
@@ -1432,7 +1435,7 @@ async function addProjectEpisode(id){
   if(!project||project.archived)return;
   await enterProject(id);
   if(CURRENT_PROJECT?.id!==id)return;
-  if(project.setupVersion===1){
+  if(usesProjectWorkspace(project)){
     const input=document.getElementById('projectPartTitle');
     if(input){input.closest('details').open=true;input.scrollIntoView({block:'center'});input.focus();}
   }else{
@@ -1559,7 +1562,7 @@ function renderNav(){
   const nav=document.getElementById("nav");
   nav.style.removeProperty("display");
   if(!CURRENT_PROJECT){nav.innerHTML=`<div class="nav-section-label">Workspace</div><button type="button" class="active" onclick="bootProjects()"><span aria-hidden="true">▣</span>Projects</button><button type="button" onclick="openProjectWizard()"><span aria-hidden="true">＋</span>Add project</button><button type="button" onclick="StudioProduction.connections()">Connections</button><button type="button" onclick="openAgentAccess()">Agent access</button>`;return;}
-  if(CURRENT_PROJECT.setupVersion===1){nav.innerHTML=`<div class="nav-section-label">${_esc(CURRENT_PROJECT.name)}</div><button onclick="goHome()">Episodes &amp; production board</button><button onclick="StudioReview.show('shot')">Shot workspace</button><button onclick="StudioReview.show('review')">Review episode</button><button onclick="StudioProduction.library()">Edit project library</button><button onclick="StudioProduction.services()">Project services</button><button onclick="StudioProduction.connections()">Workspace connections</button><button onclick="openAgentAccess()">Agent access</button><button onclick="bootProjects()">All projects</button>`;return;}
+  if(usesProjectWorkspace(CURRENT_PROJECT)){nav.innerHTML=`<div class="nav-section-label">${_esc(CURRENT_PROJECT.name)}</div><button onclick="goHome()">Episodes &amp; production board</button><button onclick="StudioReview.show('shot')">Shot workspace</button><button onclick="StudioReview.show('review')">Review episode</button><button onclick="StudioProduction.library()">Edit project library</button><button onclick="StudioProduction.services()">Project services</button><button onclick="StudioProduction.connections()">Workspace connections</button><button onclick="openAgentAccess()">Agent access</button><button onclick="bootProjects()">All projects</button>`;return;}
   if(CUR){
     nav.innerHTML=`<div class="nav-section-label">${_esc(CURRENT_PROJECT.name)}</div><div class="nav-production-name">Episode ${_esc(CUR.number)}<br><span style="color:var(--hint);font-size:11px;font-weight:600">${_esc(CUR.title||"Untitled")}</span></div><button type="button" class="${(page==='sceneboard'||page==='pipeline')?'active':''}" onclick="go('sceneboard')"><span aria-hidden="true">◈</span>Production</button><button type="button" class="${page==='script'?'active':''}" onclick="go('script')"><span aria-hidden="true">≡</span>Script</button><button type="button" onclick="openAgentAccess()">Agent access</button><button type="button" class="nav-back" onclick="goHome()"><span aria-hidden="true">←</span>All episodes</button>`;return;
   }
@@ -1583,7 +1586,7 @@ async function boot(){
         if(!r.ok||!Array.isArray(payload))throw new Error("episode index unavailable");
         return payload;
       }),
-      fetch(BASE+"/"+(CURRENT_PROJECT&&CURRENT_PROJECT.setupVersion===1?projConfig()+"/media-index.json":"cb-studio/data/media-index.json")).then(r=>r.ok?r.json():[]).catch(()=>[]),
+      fetch(BASE+"/"+(CURRENT_PROJECT&&usesProjectWorkspace(CURRENT_PROJECT)?projConfig()+"/media-index.json":"cb-studio/data/media-index.json")).then(r=>r.ok?r.json():[]).catch(()=>[]),
       fetch(BASE+"/"+projConfig()+"/characters.json",{cache:"no-store"}).then(r=>r.ok?r.json():({})).catch(()=>({})),
     ]);
     EPISODES=episodes;MEDIA=Array.isArray(media)?media:[];
@@ -1920,7 +1923,7 @@ async function openEpisode(num,deferRender){
 function render(){
   const view=document.getElementById("view");
   if(page=="projects")return renderProjects();
-  if(CURRENT_PROJECT&&CURRENT_PROJECT.setupVersion===1)return renderProjectWorkspace();
+  if(usesProjectWorkspace(CURRENT_PROJECT))return renderProjectWorkspace();
   if(page=="episodes")return renderEpisodes();
   if(page=="bible")return renderBible();
   if(page=="scenes")return renderScenes();
@@ -2241,7 +2244,7 @@ function _jobGateLabel(gate){
 // its card says so plainly rather than rendering a fabricated 0%.
 async function projectStats(p){
   if(p.archived)return {archived:true};
-  if(p.setupVersion===1){
+  if(usesProjectWorkspace(p)){
     try{
       const episodes=await fetch(BASE+'/'+p.episodesFile,{cache:'no-store'}).then(r=>r.json());
       const latest=episodes[episodes.length-1];if(!latest)return {empty:true};

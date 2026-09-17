@@ -153,6 +153,12 @@ def perform(root, scope, step, op, R=None, D=None):
         auth = after_led.get('pendingSpendAuth') or {}
         if not auth.get('envelopeHash'):
             raise DecisionRequired('No reviewed animation request was sealed.', 'Resolve the recorded preflight issue.')
+        integrity = auth.get('actionIntegrity') or (auth.get('envelope') or {}).get('actionIntegrity') or {}
+        if (integrity.get('authoredActionHash') and integrity.get('emittedActionHash') and
+                integrity['authoredActionHash'] != integrity['emittedActionHash']):
+            raise DecisionRequired('WATCH_AUTHORED_ACTION_DRIFT',
+                'Return to DIRECT and recompile WATCH from the approved action.',
+                ['Approved opening','Approved Audio1'])
         return {'status':'complete','message':'Final request reviewed and sealed',
                 'envelopeHash':auth['envelopeHash'], 'cost':auth['disclosure']['maxBatchCostUsd']}
     elif step == 'submit_render':

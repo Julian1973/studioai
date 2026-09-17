@@ -23,7 +23,8 @@ class Services:
     def snapshot(self, scope):
         return dict(phase='dependency' if self.dependency else self.phase,
                     binding=str(self.version), requiresAudio=not self.silent,
-                    review={'image':self.image,'audio':self.audio,'revision':self.version},
+                    review={'image':self.image,'audio':self.audio,'revision':self.version,
+                            'videos':[{'path':'fixture-returned.mp4'}] if self.phase=='film' else []},
                     preserved=['approved image','approved audio'],
                     disclosure={'limitUsd':2,'operations':[self.phase]})
     def execute(self, scope, step, op):

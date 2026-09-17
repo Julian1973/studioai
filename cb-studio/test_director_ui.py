@@ -118,6 +118,14 @@ def test_story_review_stays_inside_director_pipeline_not_legacy_projects():
     assert 'app.html#pg=projects' not in open_inspector
 
 
+def test_crystal_bears_is_not_routed_by_setup_version_workspace():
+    assert 'StudioJourney.mount(el,{projectId:\'crystal-bears\'' in APP
+    assert 'function usesProjectWorkspace(project)' in APP
+    assert '&&!isCrystalBearsProject(project)' in APP
+    assert 'CURRENT_PROJECT.setupVersion===1' not in APP
+    assert APP.count('setupVersion===1') == 1
+
+
 def test_director_analysis_step_exposes_story_direction_review_gate():
     assert "function renderStoryDirectionDesk()" in JS
     assert "/api/story-intake-status?episode=" in JS

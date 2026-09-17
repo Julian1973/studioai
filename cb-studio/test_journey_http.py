@@ -21,6 +21,63 @@ from studio_journey_native import Native, read
 import studio_journey_http as H
 import studio_journey_worker as W
 
+
+def test_crystal_bears_always_uses_one_golden_path_engine(tmp_path, monkeypatch):
+    import studio_journey_native
+    import studio_workspace
+    import studio_journey_project
+
+    monkeypatch.setattr(H, 'Journey', lambda store, adapter: adapter)
+    monkeypatch.setattr(H, 'StudioStore', lambda root: ('store', root))
+    monkeypatch.setattr(studio_journey_native, 'Native', lambda root, server: ('golden-path-native', root, server))
+    monkeypatch.setattr(studio_workspace, 'Workspace', lambda root: pytest.fail('Workspace must not route Crystal Bears'))
+    monkeypatch.setattr(studio_journey_project, 'Project', lambda root, workspace: pytest.fail('Project engine must not route Crystal Bears'))
+
+    scope = {'projectId': 'crystal-bears', 'episode': 'Ep4', 'scene': '3', 'unit': 'S3.SH1'}
+    assert {H.active_engine(scope)} == {H.CRYSTAL_BEARS_ACTIVE_ENGINE}
+    assert H.active_engine(scope) == H.CRYSTAL_BEARS_ACTIVE_ENGINE
+    assert H.controller(types.SimpleNamespace(ROOT=tmp_path), scope)[0] == H.CRYSTAL_BEARS_ACTIVE_ENGINE
+
+
+def test_non_crystal_bears_projects_keep_project_engine(tmp_path, monkeypatch):
+    import studio_workspace
+    import studio_journey_project
+
+    monkeypatch.setattr(H, 'Journey', lambda store, adapter: adapter)
+    monkeypatch.setattr(H, 'StudioStore', lambda root: ('store', root))
+    monkeypatch.setattr(studio_workspace, 'Workspace', lambda root: ('workspace', root))
+    monkeypatch.setattr(studio_journey_project, 'Project', lambda root, workspace: ('project', root, workspace))
+
+    scope = {'projectId': 'other-show', 'episode': '1', 'scene': '1', 'unit': 'S1.SH1'}
+    assert H.active_engine(scope) == 'project'
+    assert H.controller(types.SimpleNamespace(ROOT=tmp_path), scope)[0] == 'project'
+
+
+def test_watch_action_drift_blocks_before_fire(tmp_path, monkeypatch):
+    import studio_director_handoff
+    monkeypatch.setattr(studio_director_handoff, 'source', lambda shot: {'shotId': shot['shotId'], 'purpose': shot['purpose']})
+
+    root = tmp_path
+    scope = {'projectId': 'crystal-bears', 'episode': 'EpT', 'scene': '1', 'unit': 'S1.SH1'}
+    package = root / 'cb-output' / 'EpT_scene1_production_package.json'
+    package.parent.mkdir()
+    package.write_text(json.dumps({'shots': [{'shotId': 'S1.SH1', 'purpose': 'DIRECT action', 'durationSec': 4}],
+                                   'continuityLedger': [{'shotId': 'S1.SH1'}]}))
+
+    class Director:
+        def prepare_render(self, sc, unit, ep):
+            pkg = json.loads(package.read_text())
+            pkg['continuityLedger'][0]['pendingSpendAuth'] = {
+                'token': 'fixture', 'envelopeHash': 'sealed',
+                'disclosure': {'maxBatchCostUsd': 0},
+                'actionIntegrity': {'authoredActionHash': 'direct', 'emittedActionHash': 'rewritten'},
+            }
+            package.write_text(json.dumps(pkg))
+
+    op = {'review': {}, 'actor': 'Producer'}
+    with pytest.raises(DecisionRequired, match='WATCH_AUTHORED_ACTION_DRIFT'):
+        W.perform(root, scope, 'prepare_render', op, R=types.SimpleNamespace(), D=Director())
+
 @pytest.fixture
 def fixture(tmp_path,monkeypatch):
     original_connect=socket.socket.connect

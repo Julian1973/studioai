@@ -7,17 +7,23 @@ import uuid
 
 _ACTIVE=set()
 _LOCK=threading.Lock()
+CRYSTAL_BEARS_PROJECT_ID = "crystal-bears"
+CRYSTAL_BEARS_ACTIVE_ENGINE = "golden-path-native"
+
+
+def active_engine(scope):
+    project = str((scope or {}).get("projectId") or "")
+    return CRYSTAL_BEARS_ACTIVE_ENGINE if project == CRYSTAL_BEARS_PROJECT_ID else "project"
 
 
 def controller(server, scope):
-    from studio_workspace import Workspace
-    workspace=Workspace(server.ROOT)
-    context=workspace.context(scope['projectId'],scope['episode'])
-    if context.get('legacy'):
+    if active_engine(scope) == CRYSTAL_BEARS_ACTIVE_ENGINE:
         from studio_journey_native import Native
         adapter=Native(server.ROOT,server)
     else:
+        from studio_workspace import Workspace
         from studio_journey_project import Project
+        workspace=Workspace(server.ROOT)
         adapter=Project(server.ROOT,workspace)
     return Journey(StudioStore(server.ROOT),adapter)
 

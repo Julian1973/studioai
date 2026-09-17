@@ -42,3 +42,11 @@ the third action, and a known provider failure does not expose the explicit retr
 decision. The same path records a WATCH request as blocked when a compiled
 reference path cannot be resolved from the worker cwd. No provider or model call
 occurred; no tests were deleted.
+
+The required Native-focused legacy set currently reports 58 failures and 120
+passes. The failures cluster around retired specialist/relay assumptions,
+old candidate-review setup, and old retake/message contracts. They are not
+being made green by weakening production safety. The Native release bar stays
+closed until each Native money/safety case is either rewritten to the current
+DIRECT → SEE → HEAR → WATCH contract or replaced by an equivalent call-counting
+proof.

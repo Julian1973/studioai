@@ -168,28 +168,40 @@ def _reference_lines(snapshot, roles):
     return lines
 
 
-def require_reference_bindings(references):
+def require_reference_bindings(references, *, root=None, resolver=None):
+    """Validate sealed media without depending on the process cwd.
+
+    Callers that own a workspace pass its root or resolver. Absolute paths
+    remain valid for already-resolved Native bindings.
+    """
     for ref in references:
         path = ref.get('path')
         expected = ref.get('sha256') or ref.get('hash') or ref.get('md5')
+        identity = ref.get('slot') or ref.get('role') or ref.get('name') or ref.get('referenceId') or ref.get('assetId') or 'unknown'
         if not path or not expected:
-            raise ValueError('WATCH_CONFIGURATION_REQUIRED: reference ' + str(ref.get('slot')) + ' has no current file/hash binding')
+            raise ValueError('WATCH_REFERENCE_BINDING_MISSING: reference ' + str(identity) + ' has no current file/hash binding')
+        if resolver:
+            path = resolver(path)
+        elif root and not Path(path).is_absolute():
+            path = Path(root) / path
         try:
             data = Path(path).read_bytes()
         except OSError as exc:
-            raise ValueError('WATCH_CONFIGURATION_REQUIRED: reference ' + str(ref.get('slot')) + ' file is missing') from exc
+            raise ValueError('WATCH_REFERENCE_MISSING: reference ' + str(identity) + ' file is missing') from exc
         actual = hashlib.md5(data).hexdigest() if len(expected) == 32 else hashlib.sha256(data).hexdigest()
         if actual != expected:
             raise ValueError('WATCH_CONFIGURATION_REQUIRED: reference ' + str(ref.get('slot')) + ' hash does not match its approved binding')
 
 
-def compile_prompt(snapshot, roles):
+def compile_prompt(snapshot, roles, *, reference_root=None, reference_resolver=None):
     """The sole final WATCH emitter, driven directly by the bound typed plan."""
     from studio_watch_plan import prepare_plan, digest as plan_digest
     source = snapshot['prompt']
     if 'Human Review Correction' in dict(sections(source)):
         raise ValueError('Unresolved appended correction: update the approved plan and recompile')
-    require_reference_bindings(snapshot.get('references') or [])
+    require_reference_bindings(snapshot.get('references') or [],
+                               root=reference_root or snapshot.get('referenceRoot'),
+                               resolver=reference_resolver or snapshot.get('referenceResolver'))
     prepared = prepare_plan(snapshot)
     plan = prepared['watchPlan']
     from studio_authored_action import slot, assemble, proof

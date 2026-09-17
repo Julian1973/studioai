@@ -32,3 +32,13 @@ isolated qualification run can bind its test sockets.
 
 This ledger is deliberately not used to remove or weaken tests. Safety,
 reservation, duplicate-submission, and provider-identity tests remain required.
+
+## Escalated baseline and no-spend qualification
+
+With loopback permission, the unchanged baseline is `130 passed`.
+The producer-facing no-spend matrix then exposed three current Journey blockers:
+late-result and fresh-process recovery do not reach the persisted busy state after
+the third action, and a known provider failure does not expose the explicit retry
+decision. The same path records a WATCH request as blocked when a compiled
+reference path cannot be resolved from the worker cwd. No provider or model call
+occurred; no tests were deleted.

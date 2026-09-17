@@ -7,4 +7,5 @@ RUNTIME_MODULES="${CODEX_NODE_MODULES:-$HOME/.cache/codex-runtimes/codex-primary
 cd "$ROOT"
 echo "Studio push gate: Seven UX Laws + Golden Path"
 PYTHONPATH=engine pytest -q cb-studio/test_local_auth.py cb-studio/test_director_ui.py
+scripts/no_spend_safety.sh
 NODE_PATH="$RUNTIME_MODULES${NODE_PATH:+:$NODE_PATH}" node cb-studio/golden_path_browser.mjs

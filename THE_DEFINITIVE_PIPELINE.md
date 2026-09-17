@@ -55,12 +55,19 @@ Unrelated mutable working records cannot make the take stale.
 If a provider task ID exists, recover or poll that exact task. If submission outcome is
 unknown, stop and reconcile before another attempt. Never duplicate-submit by inference.
 
+Every paid SEE, HEAR, DIRECT text and FIRE action has the same safety boundary: seal the
+request identity, check the approved allowance, reserve spend before provider contact, and
+persist the operation receipt. Release a reservation only for a proven pre-submit failure;
+an unknown outcome remains charged and requires reconciliation. A known task is recovered,
+never resubmitted. Allowance approval authorizes spend; it never approves creative media.
+
 Historical specialist, failed-preparation and recovery records remain readable evidence.
 They are non-authoritative unless they describe a genuinely active current provider
 operation.
 
 ## Verification
 
-Run `scripts/verify_push.sh` plus the permanent zero-provider current-path tests. Preserve
+Run `scripts/verify_push.sh`; it includes `scripts/no_spend_safety.sh`, the permanent
+zero-provider current-path suite. Preserve
 approved media and production records during maintenance. Passing software checks qualifies
 the route; only human review qualifies the creative result.

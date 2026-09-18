@@ -189,7 +189,9 @@ def test_actual_route_native_steps(fixture,scene,silent):
     submitted=[x[1] for x in calls if isinstance(x,tuple) and x[0]=='submit']
     assert reviewed==submitted and len(submitted)==1
     assert ('voice' in calls)==(not silent)
-    assert 'review-originating-film' in calls and 'assembly' in calls
+    assert 'approve-film' in calls
+    assert 'review-originating-film' not in calls
+    assert 'assembly' in calls
 
 
 def test_http_stale_binding_has_no_dispatch(fixture):

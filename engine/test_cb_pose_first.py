@@ -473,6 +473,30 @@ def test_keyframe_prompt_refuses_empty_sections_and_cast_drift(monkeypatch):
         cb_render._compile_keyframe_integration_prompt(direction, shot, [])
 
 
+def test_keyframe_contract_does_not_block_projection_on_lead_room_heuristic(monkeypatch):
+    direction = {
+        **_approved_keyframe_fields(),
+        "audienceRead": "A readable opening.",
+        "lensAndCameraRelationship": "Child-height camera.",
+        "lightingAndDepth": "Warm light.",
+        "geography": ["A shallow stage with no explicit travel corridor."],
+        "charactersInFrame": ["Fuzzby"],
+        "openingFrameLayout": {"placements": [
+            {"character": "Fuzzby", "pose": "hover", "facing": "screen-right"},
+        ]},
+        "negativeSpace": ["Keep the flower visible."],
+    }
+    shot = {"shotId": "S1.SH1A", "charactersInFrame": ["Fuzzby"]}
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {"Fuzzby": {"heightIn": 14}})
+
+    contract = cb_render._keyframe_direction_contract(direction, shot)
+    assert contract["cast"] == ["Fuzzby"]
+
+    invalid = {**direction, "negativeSpace": []}
+    with pytest.raises(cb_render.Refused, match="negativeSpace"):
+        cb_render._keyframe_direction_contract(invalid, shot)
+
+
 def test_pose_pass_requires_one_subject_and_every_objective_dimension():
     dimension = {"score": 2, "visibleEvidence": "Clearly visible."}
     payload = {

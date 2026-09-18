@@ -4899,12 +4899,6 @@ def _keyframe_direction_contract(direction, shot):
             f"REFUSED — approved DIRECT style for {shot_id} does not match the "
             f"versioned canonical style {style_version}")
 
-    playable = cb_engine_rules.playable_stage_report(shot, direction)
-    if not playable["ready"]:
-        raise Refused(
-            f"REFUSED — opening frame for {shot_id} is not a playable stage: " +
-            "; ".join(playable["errors"]))
-
     travel_sides = set()
     for item in placements:
         facing = str(item.get("facing") or "").casefold()

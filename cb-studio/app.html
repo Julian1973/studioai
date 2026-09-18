@@ -3885,6 +3885,13 @@ async function renderWorkspaceBody(){
         })});
         const result=await response.json();
         if(!response.ok||result.ok===false)throw new Error(result.error?.humanMessage||result.error?.technicalMessage||result.error||'Image decision could not be recorded.');
+        const reviews=result.see?.componentReviews||{};
+        if(detail.action==='approved'&&reviews.opening==='approved'&&reviews.plate==='approved'){
+          window.JOURNEY_INDIVIDUAL_REVIEW=false;
+          PSTAGE='voice';
+          renderWorkspaceBody();
+          return {message:'SEE approved. Opening HEAR.'};
+        }
         renderWorkspaceBody();
         return {message:detail.action==='approved'?'Image approved.':'Image rejected.'};
       },

@@ -51,11 +51,12 @@ function mount(host,scope,options={}){
   state=value;if(state.busy&&state.operation?.phase==='film')awaitingNext=true;const op=state.operation,review=state.review||{};
   title.textContent=scope.unit+' · '+(review.title||'Scene production');
   progress.textContent=state.busy?(op?.message||'Preparing your next review'):state.phase==='complete'?'Accepted · ready for the next unit':state.primary||state.dependency||'Review the current issue';
-  const nextMediaSignature=JSON.stringify([state.phase,review.videos,review.images,review.audio,review.plan,review.storyboard]);
+  const images=[...(review.images||[])].sort((a,b)=>({plate:0,opening:1}[a?.component]??2)-({plate:0,opening:1}[b?.component]??2));
+  const nextMediaSignature=JSON.stringify([state.phase,review.videos,images,review.audio,review.plan,review.storyboard]);
   if(nextMediaSignature!==mediaSignature){mediaSignature=nextMediaSignature;media.replaceChildren();
   if(state.phase==='film'||state.phase==='complete'){for(const r of review.videos||[])asset(r,'video');}
-  else if(state.phase==='audio'){asset(review.audio,'audio');for(const r of review.images||[])imageAsset(r);}
-  else if(review.images?.length&&state.phase!=='plan'){for(const r of review.images)imageAsset(r);}
+  else if(state.phase==='audio'){asset(review.audio,'audio');for(const r of images)imageAsset(r);}
+  else if(images.length&&state.phase!=='plan'){for(const r of images)imageAsset(r);}
   else{
    media.append(node('p','Review the production plan in the Storyboard section below.'));
   }

@@ -16,7 +16,7 @@ function mount(host,scope,options={}){
  const advanced=node('details'),advancedTitle=node('summary','Individual corrections and review tools');advanced.append(advancedTitle);
  if(options.advanced){advanced.addEventListener('toggle',()=>{if(advanced.open&&!advanced.dataset.loaded){advanced.dataset.loaded='1';options.advanced(advanced);}});}
  changes.onclick=()=>options.changes?.(state);
- actions.append(primary,changes);host.append(head,media,storyboard,brief,issue,cost,actions,evidence);if(options.advanced)host.append(advanced);
+ actions.append(primary,changes);actions.setAttribute('aria-label','Next required action');host.append(head,actions,issue,cost,media,storyboard,brief,evidence);if(options.advanced)host.append(advanced);
  function imageAsset(record){
   if(!record?.url)return;
   const card=node('article',undefined,'journey-image-card'),figure=node('figure');

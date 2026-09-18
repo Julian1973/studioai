@@ -12,6 +12,33 @@ from test_golden_path import _current_animation_fixture
 TEST_CANON_DIGEST = "c" * 64
 
 
+def test_legacy_uploaded_scene_look_uses_current_direct_inputs_only(tmp_path):
+    upload_root = tmp_path / "engine" / "media" / "uploads_incoming"
+    upload_root.mkdir(parents=True)
+    plate = upload_root / "uploaded.jpg"
+    plate.write_bytes(b"uploaded-scene-look")
+    expected = {
+        "briefHash": "brief-current",
+        "referenceHashes": {},
+        "plateHash": hashlib.sha256(plate.read_bytes()).hexdigest(),
+        "canonProfileDigest": "canon-current",
+    }
+    candidate = {
+        "path": str(plate),
+        "hash": expected["plateHash"],
+        "inputSignature": {"briefHash": "brief-current", "referenceHashes": {}},
+    }
+    assert cb_safety._legacy_uploaded_look_candidate_is_current(
+        candidate, expected, upload_root)
+    candidate["inputSignature"]["briefHash"] = "brief-stale"
+    assert not cb_safety._legacy_uploaded_look_candidate_is_current(
+        candidate, expected, upload_root)
+    candidate["inputSignature"]["briefHash"] = "brief-current"
+    candidate["path"] = str(tmp_path / "external.jpg")
+    assert not cb_safety._legacy_uploaded_look_candidate_is_current(
+        candidate, expected, upload_root)
+
+
 def _test_seedance_25_contract(**kwargs):
     duration = int(kwargs["duration"])
     assert 4 <= duration <= 30

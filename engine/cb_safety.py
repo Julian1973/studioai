@@ -45,6 +45,21 @@ def selected_voice_recipe(recipes, selected, candidates, current_compiled_hash=N
     return None
 
 
+def _legacy_uploaded_look_candidate_is_current(candidate, expected, upload_root):
+    """Accept older upload records only when their current direct inputs still match."""
+    recorded = candidate.get("inputSignature") or {}
+    path = pathlib.Path(candidate.get("path") or "").resolve()
+    try:
+        path.relative_to(pathlib.Path(upload_root).resolve())
+    except ValueError:
+        return False
+    return (
+        recorded.get("briefHash") == expected.get("briefHash")
+        and recorded.get("referenceHashes") == expected.get("referenceHashes")
+        and candidate.get("hash") == expected.get("plateHash")
+    )
+
+
 def uses_isolated_voice_assembly(shot, lines):
     """Keep turn boundaries hard when a shot cannot tolerate dialogue bleed.
 
@@ -667,7 +682,10 @@ def create_policy(m):
                 return rec['approved']['path']
         expected = look_input_signature(
             scene, episode, candidate.get("path"), candidate.get("referencePath"))
-        if candidate.get("inputSignature") != expected:
+        signature_current = candidate.get("inputSignature") == expected
+        legacy_upload_current = _legacy_uploaded_look_candidate_is_current(
+            candidate, expected, m.HERE / "media" / "uploads_incoming")
+        if not signature_current and not legacy_upload_current:
             raise m.Refused("REFUSED — current Look direction changed after this candidate was generated")
         return original["approve_scenelook"](scene, episode, reviewed_by, log)
 

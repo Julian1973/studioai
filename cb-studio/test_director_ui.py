@@ -7,8 +7,6 @@ CSS = (HERE / "director.css").read_text(encoding="utf-8")
 JS = (HERE / "director.js").read_text(encoding="utf-8")
 APP = (HERE / "app.html").read_text(encoding="utf-8")
 SERVER = (HERE / "serve.py").read_text(encoding="utf-8")
-ROOM = (HERE / "room.html").read_text(encoding="utf-8")
-BOARD = (HERE / "board.html").read_text(encoding="utf-8")
 ROOM_INSTRUCTION = (HERE / "CODEX_ROOM_INSTRUCTION.md").read_text(encoding="utf-8")
 UX_CONTRACT = (HERE / "UX_CONTRACT.md").read_text(encoding="utf-8")
 GOLDEN_BROWSER = (HERE / "golden_path_browser.mjs").read_text(encoding="utf-8")
@@ -207,15 +205,13 @@ def test_retired_room_redirects_without_an_independent_paid_proxy():
     assert '"/api/write", "/api/room-chat"' in SERVER
     assert '"zeroSpend": True' in SERVER
     assert '_anthropic_room_chat' not in SERVER
-    assert 'location.replace(dest.href)' in ROOM
-    assert '/cb-studio/app.html' in ROOM
-    assert '/api/room-chat' not in ROOM
+    assert 'def _retired_ui_redirect(handler):' in SERVER
+    assert 'location = "/cb-studio/app.html"' in SERVER
 
 
 def test_old_board_bookmark_redirects_to_current_production():
     assert '"/cb-studio/board.html"' in SERVER
-    assert '/cb-studio/app.html' in BOARD
-    assert 'location.replace(dest.href)' in BOARD
+    assert 'if _retired_ui_redirect(self):' in SERVER
 
 
 def test_exact_request_is_separate_and_named_authoritative():

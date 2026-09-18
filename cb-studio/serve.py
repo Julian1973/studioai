@@ -2449,6 +2449,23 @@ def _legacy_gone(handler):
             return True
     return False
 
+
+def _retired_ui_redirect(handler):
+    """Keep old bookmarks useful without serving retired workflow shells."""
+    path = urlsplit(handler.path).path
+    if path not in {"/cb-studio/room.html", "/cb-studio/board.html"}:
+        return False
+    query = parse_qs(urlsplit(handler.path).query)
+    episode = (query.get("episode") or query.get("ep") or [""])[0]
+    location = "/cb-studio/app.html"
+    if re.fullmatch(r"\d+", str(episode)):
+        location += "#" + urlencode({"p": "crystal-bears", "pg": "sceneboard", "ep": episode})
+    handler.send_response(302)
+    handler.send_header("Location", location)
+    handler.send_header("Cache-Control", "no-store")
+    handler.end_headers()
+    return True
+
 def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
                  candidates=None, spend_token=None, category=None, candidate=None,
                  dry_run=False, source_path=None, character=None, comparison_model_id=None,
@@ -2747,8 +2764,6 @@ _APPROVED_FILES = {
     "/cb-studio/app.html",                # the SPA entry
     "/cb-studio/finishing.html",          # exact-cut review and vCube handoff
     "/cb-studio/director.html",           # outcome-first creative entry
-    "/cb-studio/room.html",               # Studio room assistant entry
-    "/cb-studio/board.html",              # Studio board / rough-cut entry
     "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
     "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
     f"/shows/{ACTIVE_SHOW.profile.showId}/canon/characters.json",
@@ -3020,6 +3035,8 @@ class H(http.server.SimpleHTTPRequestHandler):
     def do_HEAD(self):
         if not self._authorize(allow_launch=True):
             return
+        if _retired_ui_redirect(self):
+            return
         return self._serve_static(head=True)
 
     @_tracked
@@ -3027,6 +3044,8 @@ class H(http.server.SimpleHTTPRequestHandler):
         if not self._authorize(allow_launch=True):
             return
         if _legacy_gone(self):
+            return
+        if _retired_ui_redirect(self):
             return
         if urlsplit(self.path).path in {"/api/episode-covers", "/api/workspace/connections", "/api/project-services", "/api/project-production", "/api/project-library", "/api/project-migration"}:
             from urllib.parse import parse_qs

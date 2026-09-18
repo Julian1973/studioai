@@ -51,10 +51,19 @@ function mount(host,scope,options={}){
    button.onclick=async()=>{if(!options.storyboardAction||button.disabled)return;controls.querySelectorAll('button').forEach(item=>{item.disabled=true;});try{await options.storyboardAction({required:value,review});}catch(error){state.textContent=error.message||'Storyboard choice failed';controls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}};
    controls.append(button);
   }
+  const seePackage=review.seePackage||{}, sheet=seePackage.providerSheet?.media, gridAllowed=review.storyboardRequired!==false;
+  const imageRecords=Array.isArray(review.images)?review.images:[], plateApproved=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='approved'), openingApproved=imageRecords.some(item=>item?.component==='opening'&&item.reviewStatus==='approved');
+  const gridIssues=Array.isArray(seePackage.issues)?seePackage.issues.filter(Boolean):[], approvalBlock=!plateApproved?'Approve scene plate first':!openingApproved?'Approve opening keyframe first':'', gridBlocked=gridIssues.length>0||!!approvalBlock;
+  const gridLabel=sheet?'Storyboard grid ready':!gridAllowed?'Storyboard skipped':gridIssues.length?'Resolve SEE issue first':approvalBlock||'Build Seedance storyboard grid';
+  const gridButton=node('button',gridLabel,'btn ghost');gridButton.type='button';gridButton.disabled=!!sheet||!options.storyboardGridAction||!gridAllowed||gridBlocked;if(gridBlocked)gridButton.title=String(gridIssues[0]||approvalBlock);
+  if(options.storyboardGridAction&&!sheet){gridButton.onclick=async()=>{gridButton.disabled=true;gridButton.textContent='Building storyboard grid…';try{await options.storyboardGridAction({review});}catch(error){gridButton.disabled=false;gridButton.textContent=error.message||'Build Seedance storyboard grid';}};}
+  controls.append(gridButton);
+  if(gridBlocked&&!sheet)controls.append(node('small','Grid blocked · '+String(gridIssues[0]||approvalBlock),'journey-storyboard-grid-note'));
   heading.append(title,state,controls);storyboard.append(heading);
+  if(sheet?.url){const grid=node('figure',undefined,'journey-storyboard-grid');const image=node('img');image.src=sheet.url;image.alt='Chronological Seedance storyboard grid';grid.append(image,node('figcaption','Seedance reference · read left to right, then top to bottom'));storyboard.append(grid);}
   const sourceImages=(review.images||[]).filter(record=>record?.url).sort((a,b)=>({plate:0,opening:1}[a.component]??2)-({plate:0,opening:1}[b.component]??2));
-  const references=Object.values(review.references||{}).flatMap(section=>Array.isArray(section?.references)?section.references:[]).filter(record=>record?.url&&/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(record.url));
-  const inputs=[...sourceImages,...references.filter(record=>!sourceImages.some(source=>source.url===record.url))];
+  const references=(Array.isArray(seePackage.referenceInputs)?seePackage.referenceInputs:[]).filter(record=>record?.url&&/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(record.url));
+  const inputs=references.length?references:[...sourceImages,...Object.values(review.references||{}).flatMap(section=>Array.isArray(section?.references)?section.references:[]).filter(record=>record?.url&&/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(record.url)).filter(record=>!sourceImages.some(source=>source.url===record.url))];
   if(inputs.length){
    const inputSection=node('section',undefined,'journey-storyboard-inputs');
    inputSection.append(node('h4','Visual inputs','journey-storyboard-input-title'));

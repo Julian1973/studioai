@@ -219,6 +219,14 @@ class Package:
             plan['issues'].append('The opening needs review against the changed scene plate or starting direction. Select or generate the current opening before the storyboard.')
         reference_media = [media(self.root, ref) for ref in references]
         anchor_hash = digest([plate, opening, reference_media])
+        reference_inputs = []
+        for label, item in (('Scene plate', plate), ('Opening keyframe', opening)):
+            if item:
+                reference_inputs.append({**item, 'label': label})
+        for item, original in zip(reference_media, references):
+            if item and not any(existing.get('path') == item.get('path') for existing in reference_inputs):
+                label = (original.get('role') or original.get('name')) if isinstance(original, dict) else None
+                reference_inputs.append({**item, 'label': label or 'Character reference'})
         panels = []
         for source in plan['panels']:
             panel = deepcopy(source)
@@ -265,6 +273,7 @@ class Package:
                 'imagesReady': images_ready, 'providerSheet': sheet,
                 'timingAuthority': plan.get('timingAuthority'),
                 'status': 'approved' if approved else 'current' if ready else 'incomplete',
+                'referenceInputs': reference_inputs,
                 'approval': saved.get('approval') if approved else None,
                 'endingMode': 'soft_visual_guidance', 'job': saved.get('job')}
 

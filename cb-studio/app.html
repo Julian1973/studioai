@@ -3904,6 +3904,15 @@ async function renderWorkspaceBody(){
         renderWorkspaceBody();
         return {message:detail.required?'Storyboard enabled.':'Storyboard skipped for this shot.'};
       },
+      storyboardGridAction:async()=>{
+        const response=await fetch(BASE+'/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+          command:'storyboard-grid',scope:{projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},by:REVIEWER
+        })});
+        const result=await response.json();
+        if(!response.ok||result.ok===false){const detail=[result.error?.humanMessage,result.error?.technicalMessage].filter(Boolean).join(' ');throw new Error(detail||result.error||'Storyboard grid could not be built.');}
+        renderWorkspaceBody();
+        return {message:'Seedance storyboard grid built locally.'};
+      },
       next:scope=>{if(String(SH_SC)!==scope.scene){openScene(scope.scene);return;}const i=pShots().findIndex(s=>s.shotId===scope.unit);if(i>=0){PSHOT_I=i;PSTAGE='keyframe';renderWorkspaceBody();}},
       phaseChanged:(phase,previous)=>{if(phase==='film'&&previous==='audio'&&PSTAGE==='voice'){PSTAGE='animation';renderWorkspaceBody();}},
       advanced:container=>{const b=document.createElement('button');b.className='btn ghost';b.textContent='Open individual review controls';b.onclick=()=>{window.JOURNEY_INDIVIDUAL_REVIEW=true;renderWorkspaceBody();};container.append(b);}

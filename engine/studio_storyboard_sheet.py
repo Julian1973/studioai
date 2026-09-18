@@ -5,9 +5,30 @@ import os
 import tempfile
 
 from studio_authored_action import digest
+from studio_roots import data_root
 
 ROLE = 'MULTI_GRID_STORYBOARD'
 VERSION = 'storyboard-sheet@2'
+
+
+def _trusted_media_path(root, value):
+    """Resolve a sheet source under the release or configured media roots."""
+    path = Path(value)
+    path = (path if path.is_absolute() else Path(root) / path).resolve()
+    source = Path(root).resolve()
+    media_roots = [
+        source,
+        (data_root(source) / 'engine' / 'media').resolve(),
+        (data_root(source) / 'media').resolve(),
+        (data_root(source) / 'cb-seed' / 'assets').resolve(),
+    ]
+    for base in dict.fromkeys(media_roots):
+        try:
+            path.relative_to(base)
+            return path
+        except ValueError:
+            continue
+    raise ValueError('Storyboard source image is outside the trusted Studio media library.')
 
 
 def panel_binding(panel):
@@ -56,8 +77,7 @@ def compile_sheet(root, scope_key, status):
     binding = source_binding(status)
     sizes = []
     for panel in panels:
-        path = (Path(root)/panel['media']['path']).resolve()
-        path.relative_to(Path(root).resolve())
+        path = _trusted_media_path(root, panel['media']['path'])
         with Image.open(path) as source:
             sizes.append(source.size)
     columns, rows, width, height, label_height, gap = layout(sizes)
@@ -68,8 +88,7 @@ def compile_sheet(root, scope_key, status):
     for index, panel in enumerate(panels):
         x = gap+(index % columns)*(width+gap)
         y = gap+(index // columns)*(height+label_height+gap)
-        path = (Path(root)/panel['media']['path']).resolve()
-        path.relative_to(Path(root).resolve())
+        path = _trusted_media_path(root, panel['media']['path'])
         import hashlib
         if hashlib.sha256(path.read_bytes()).hexdigest() != panel['media']['sha256']:
             raise ValueError('Storyboard source image changed during compilation. Review it again.')

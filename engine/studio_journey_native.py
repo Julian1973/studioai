@@ -174,6 +174,21 @@ class Native:
                 'dependency':dependency, 'next':next_scope,
                 'concerns': ['Automated checks do not establish cinematic quality. Review the returned media.']}
 
+    def see_package_status(self, scope):
+        """Read the deterministic storyboard package outside the decision binding."""
+        snapshot = self.snapshot(scope)
+        review = snapshot.get('review') or {}
+        opening = next((item for item in review.get('images') or [] if item.get('component') == 'opening'), None)
+        references = []
+        for section in (review.get('references') or {}).values():
+            if isinstance(section, dict):
+                references.extend(section.get('references') or [])
+            elif isinstance(section, list):
+                references.extend(section)
+        from studio_see_package import Package
+        shot = read(self.root, scope)[2]
+        return Package(self.root, scope).status(shot, review.get('plate'), opening, references)
+
     def execute(self, scope, step, op):
         if step == 'approve_plan':
             _,board,shot,_ = read(self.root,scope)

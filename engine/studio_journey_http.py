@@ -90,6 +90,32 @@ def storyboard_choice(server, data):
     return {'ok': True, 'required': required, 'zeroSpend': True, 'see': result}
 
 
+def storyboard_grid(server, data):
+    scope = data.get('scope') or {}
+    if active_engine(scope) != CRYSTAL_BEARS_ACTIVE_ENGINE:
+        raise ValueError('Storyboard grid is only available in the Crystal Bears Golden Path.')
+    actor = str(data.get('by') or 'Producer').strip()
+    if not actor:
+        raise ValueError('Identify the reviewer before compiling the storyboard grid.')
+    from studio_see_service import request as see_request
+    status = see_request(server, {'scope': scope, 'command': 'status'})
+    result = see_request(server, {'scope': scope, 'command': 'compile-grid',
+                                  'binding': status.get('binding'), 'by': actor})
+    return {'ok': True, 'zeroSpend': True, 'see': result}
+
+
+def enrich_native_view(server, scope, view):
+    if active_engine(scope) != CRYSTAL_BEARS_ACTIVE_ENGINE or view.get('phase') in ('prepare', 'plan'):
+        return view
+    try:
+        from studio_journey_native import Native
+        view.setdefault('review', {})['seePackage'] = Native(server.ROOT, server).see_package_status(scope)
+    except Exception as exc:
+        view.setdefault('review', {})['seePackage'] = {
+            'ready': False, 'approved': False, 'issues': [str(exc)], 'panels': [], 'providerSheet': {}}
+    return view
+
+
 def request(server,data):
     scope=data.get('scope') or {}
     action=data.get('command','status')
@@ -100,6 +126,8 @@ def request(server,data):
             return image_review(server, data)
         if action == 'storyboard-choice':
             return storyboard_choice(server, data)
+        if action == 'storyboard-grid':
+            return storyboard_grid(server, data)
         J=controller(server,scope)
         if action=='decide':
             J.accept(scope,data,str(data.get('by') or 'Producer'))
@@ -111,7 +139,7 @@ def request(server,data):
             continue_operation(server,scope)
         elif action!='status':
             raise ValueError('Use the current production action.')
-        return J.view(scope)
+        return enrich_native_view(server, scope, J.view(scope))
     except Exception as exc:
         component=str(scope.get('unit') or scope.get('shot') or 'production journey')
         operation='journey.refresh' if action=='status' else f'journey.{action}'

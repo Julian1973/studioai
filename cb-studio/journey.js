@@ -43,7 +43,15 @@ function mount(host,scope,options={}){
  function asset(record,type){if(!record?.url)return;const e=node(type);e.src=record.url;if(type==='img'){e.alt=(record.label||'Opening image')+' for '+scope.unit;}else{e.controls=true;e.preload='metadata';}const figure=node('figure');if(record.label)figure.append(node('figcaption',record.label));figure.append(e);media.append(figure);}
  function renderStoryboard(review){
   storyboard.replaceChildren();const views=Array.isArray(review.storyboard)&&review.storyboard.length?review.storyboard:(Array.isArray(review.plan)?review.plan:Object.values(review.plan||{}).flat());
-  const heading=node('h3','Storyboard','journey-storyboard-title');storyboard.append(heading);
+  const heading=node('div',undefined,'journey-storyboard-head'),title=node('h3','Storyboard','journey-storyboard-title'),controls=node('div',undefined,'journey-storyboard-actions');
+  const choice=review.storyboardChoice, required=choice==null||choice.required!==false;
+  const state=node('span',required?'Storyboard on':'Storyboard skipped','journey-storyboard-state');
+  for(const [value,label] of [[true,'Use storyboard'],[false,'Skip storyboard']]){
+   const button=node('button',label,'btn '+(value?'':'ghost'));button.type='button';button.disabled=required===value;
+   button.onclick=async()=>{if(!options.storyboardAction||button.disabled)return;controls.querySelectorAll('button').forEach(item=>{item.disabled=true;});try{await options.storyboardAction({required:value,review});}catch(error){state.textContent=error.message||'Storyboard choice failed';controls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}};
+   controls.append(button);
+  }
+  heading.append(title,state,controls);storyboard.append(heading);
   if(!views.length){storyboard.append(node('p','No storyboard views prepared for this production unit.','journey-storyboard-empty'));return;}
   for(const view of views){if(!view||typeof view!=='object')continue;const card=node('article',undefined,'journey-board');card.append(node('small','Storyboard view '+(view.storyboardIndex||'')),node('h4',view.viewId||view.shotId||'Planned view'),node('p',view.action||view.purpose||view.openingImage||view.staging||''),node('p',view.framing||view.camera||''),node('p',view.performance||''));storyboard.append(card);}
  }

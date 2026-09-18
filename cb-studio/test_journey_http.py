@@ -74,6 +74,24 @@ def test_golden_path_image_review_keeps_refire_zero_spend(tmp_path, monkeypatch)
     assert calls[-1]['binding'] == 'see-binding'
 
 
+def test_storyboard_choice_is_zero_spend_and_uses_current_binding(tmp_path, monkeypatch):
+    import studio_see_service
+    scope = {'projectId': 'crystal-bears', 'episode': 'Ep4', 'scene': '3', 'unit': 'S3.SH1'}
+    calls = []
+
+    def see_request(server, payload):
+        calls.append(payload)
+        return {'binding': 'see-binding'} if payload['command'] == 'status' else {'storyboardRequired': False}
+
+    monkeypatch.setattr(studio_see_service, 'request', see_request)
+    result = H.storyboard_choice(types.SimpleNamespace(ROOT=tmp_path), {
+        'scope': scope, 'required': False, 'by': 'Julian'})
+    assert result['ok'] is True
+    assert result['zeroSpend'] is True
+    assert [item['command'] for item in calls] == ['status', 'choose-storyboard']
+    assert calls[-1]['binding'] == 'see-binding'
+
+
 def test_watch_action_drift_blocks_before_fire(tmp_path, monkeypatch):
     import studio_director_handoff
     monkeypatch.setattr(studio_director_handoff, 'source', lambda shot: {'shotId': shot['shotId'], 'purpose': shot['purpose']})

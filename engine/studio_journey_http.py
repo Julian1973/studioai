@@ -73,6 +73,23 @@ def image_review(server, data):
             'zeroSpend': True, 'see': result}
 
 
+def storyboard_choice(server, data):
+    scope = data.get('scope') or {}
+    if active_engine(scope) != CRYSTAL_BEARS_ACTIVE_ENGINE:
+        raise ValueError('Storyboard choice is only available in the Crystal Bears Golden Path.')
+    scope_key(scope)
+    required = data.get('required')
+    actor = str(data.get('by') or 'Producer').strip()
+    if type(required) is not bool or not actor:
+        raise ValueError('Choose Use storyboard or Skip storyboard and identify the reviewer.')
+    from studio_see_service import request as see_request
+    status = see_request(server, {'scope': scope, 'command': 'status'})
+    result = see_request(server, {'scope': scope, 'command': 'choose-storyboard',
+                                  'required': required, 'by': actor,
+                                  'binding': status.get('binding')})
+    return {'ok': True, 'required': required, 'zeroSpend': True, 'see': result}
+
+
 def request(server,data):
     scope=data.get('scope') or {}
     action=data.get('command','status')
@@ -81,6 +98,8 @@ def request(server,data):
         scope_key(scope)
         if action == 'image-review':
             return image_review(server, data)
+        if action == 'storyboard-choice':
+            return storyboard_choice(server, data)
         J=controller(server,scope)
         if action=='decide':
             J.accept(scope,data,str(data.get('by') or 'Producer'))

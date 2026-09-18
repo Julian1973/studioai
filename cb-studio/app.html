@@ -3895,6 +3895,15 @@ async function renderWorkspaceBody(){
         renderWorkspaceBody();
         return {message:detail.action==='approved'?'Image approved.':'Image rejected.'};
       },
+      storyboardAction:async detail=>{
+        const response=await fetch(BASE+'/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+          command:'storyboard-choice',scope:{projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},required:detail.required,by:REVIEWER
+        })});
+        const result=await response.json();
+        if(!response.ok||result.ok===false)throw new Error(result.error?.humanMessage||result.error?.technicalMessage||result.error||'Storyboard choice could not be recorded.');
+        renderWorkspaceBody();
+        return {message:detail.required?'Storyboard enabled.':'Storyboard skipped for this shot.'};
+      },
       next:scope=>{if(String(SH_SC)!==scope.scene){openScene(scope.scene);return;}const i=pShots().findIndex(s=>s.shotId===scope.unit);if(i>=0){PSHOT_I=i;PSTAGE='keyframe';renderWorkspaceBody();}},
       advanced:container=>{const b=document.createElement('button');b.className='btn ghost';b.textContent='Open individual review controls';b.onclick=()=>{window.JOURNEY_INDIVIDUAL_REVIEW=true;renderWorkspaceBody();};container.append(b);}
     });

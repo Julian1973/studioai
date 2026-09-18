@@ -90,6 +90,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_engine
 from studio_roots import trusted_path
+from studio_roots import data_root
 import cb_gen
 import cb_post
 import cb_rough_cut
@@ -119,6 +120,19 @@ import paths as P
 MEDIA = HERE / "media" / "shots"
 ROOT = HERE.parent
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
+
+
+def _data_root():
+    """Resolve production state independently from the immutable release directory."""
+    return data_root(HERE.parent)
+
+
+def _scene_media_root():
+    return _data_root() / "engine" / "media"
+
+
+def _scene_output_root():
+    return _data_root() / "cb-output"
 
 
 def _as_text_list(value):
@@ -907,7 +921,7 @@ def _plate_path(scene, episode="Ep1"):
 # compiler would produce right now. An SH6-only storyboard edit can never touch this, because
 # it was never a real input to begin with.
 def _scenelook_path(scene, episode="Ep1"):
-    return HERE.parent / "cb-output" / f"{episode}_scenelook_scene{scene}.json"
+    return _scene_output_root() / f"{episode}_scenelook_scene{scene}.json"
 
 
 def _sha256_file(path):
@@ -1000,8 +1014,9 @@ def _compile_scenelook_prompt(scene, episode="Ep1"):
     fields — camera framing is a shot-composition concern, never the plate's job (Julian's
     own scope line, and locations.json's own "look" text already says as much: "No
     characters, no homes, no extra props")."""
-    loc_path = HERE.parent / "shows" / "crystal-bears" / "canon" / "locations.json"
-    style_path = HERE.parent / "shows" / "crystal-bears" / "laws" / "style.txt"
+    data = _data_root()
+    loc_path = data / "shows" / "crystal-bears" / "canon" / "locations.json"
+    style_path = data / "shows" / "crystal-bears" / "laws" / "style.txt"
     locs = json.load(open(loc_path)) if loc_path.exists() else {}
     entry = (locs.get(episode) or {}).get(str(scene)) or {}
     style = style_path.read_text().strip() if style_path.exists() else ""
@@ -1024,7 +1039,7 @@ def _resolve_scenelook_prompt(scene, episode="Ep1"):
     signature can call it without a migration/signature recursion.
     """
     base = _compile_scenelook_prompt(scene, episode)
-    path = HERE.parent / "cb-output" / f"{episode}_scenelook_scene{scene}.json"
+    path = _scene_output_root() / f"{episode}_scenelook_scene{scene}.json"
     if not path.exists():
         return base
     try:
@@ -1079,8 +1094,9 @@ def generate_scenelook_plate(scene, episode="Ep1", reference_path=None, log=prin
     assert_current(reviewed_request, compiled)
     prompt = compiled['prompt']
     _require_confirmed_billing("byteplus")
-    (HERE / "media").mkdir(parents=True, exist_ok=True)
-    out = HERE / "media" / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}.png"
+    media_root = _scene_media_root()
+    media_root.mkdir(parents=True, exist_ok=True)
+    out = media_root / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}.png"
     refs = [str(ROOT/r['path']) for r in compiled['selectedReferences']]
     receipt = verify_transport(compiled, refs)
     receipt['compiledRequest'] = compiled
@@ -1117,7 +1133,7 @@ def approve_scenelook(scene, episode="Ep1", reviewed_by="Julian", log=print):
     old = rec.get("approved")
     if old and old.get("path") and os.path.exists(old["path"]):
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "scenelook_superseded" / ts
+        arch = _scene_media_root() / "archive" / "scenelook_superseded" / ts
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(old["path"])
         # Existing renders and library entries retain this exact approved source path.
@@ -1125,7 +1141,7 @@ def approve_scenelook(scene, episode="Ep1", reviewed_by="Julian", log=print):
         shutil.copy2(old["path"], dest)
         rec.setdefault("history", []).append({**old, "outcome": "superseded",
                                                "supersededAt": _now(),
-                                               "archivedFile": str(dest.relative_to(HERE))})
+                                               "archivedFile": str(dest.relative_to(_data_root()))})
     rec["approved"] = {**cand, "approvedAt": _now(), "reviewedBy": reviewed_by}
     rec["candidate"] = None
     _save_scenelook_rec(rec, scene, episode)
@@ -1145,11 +1161,11 @@ def reject_scenelook(scene, note, episode="Ep1", reviewed_by="Julian", log=print
     archived_rel = None
     if cand.get("path") and os.path.exists(cand["path"]):
         ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "scenelook_rejected" / ts
+        arch = _scene_media_root() / "archive" / "scenelook_rejected" / ts
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(cand["path"])
         shutil.move(cand["path"], dest)
-        archived_rel = str(dest.relative_to(HERE))
+        archived_rel = str(dest.relative_to(_data_root()))
     rec.setdefault("history", []).append({**cand, "outcome": "rejected", "rejectedAt": _now(),
                                            "reviewedBy": reviewed_by, "rejectedNote": note.strip(),
                                            "rejectedArchivedFile": archived_rel})
@@ -1182,7 +1198,7 @@ def select_scenelook_source(scene, mode, episode="Ep1", upload_path=None, librar
             raise Refused("REFUSED — no uploaded file found to select")
         # PRESERVE THE ORIGINAL ASSET — a permanent copy, distinct from and never touched by
         # the scene's own immutable candidate copy made below.
-        preserved_dir = HERE / "media" / "uploads"
+        preserved_dir = _scene_media_root() / "uploads"
         preserved_dir.mkdir(parents=True, exist_ok=True)
         ext = pathlib.Path(upload_path).suffix or ".png"
         preserved = preserved_dir / f"{episode}_S{scene}_scenelook_upload_{uuid.uuid4().hex[:8]}{ext}"
@@ -1194,9 +1210,10 @@ def select_scenelook_source(scene, mode, episode="Ep1", upload_path=None, librar
             raise Refused("REFUSED — the selected library item no longer exists on disk")
         src_for_copy = library_path
         source_note = {"source": "library", "libraryOriginal": library_path}
-    (HERE / "media").mkdir(parents=True, exist_ok=True)
+    media_root = _scene_media_root()
+    media_root.mkdir(parents=True, exist_ok=True)
     ext = pathlib.Path(src_for_copy).suffix or ".png"
-    out = HERE / "media" / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}{ext}"
+    out = media_root / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}{ext}"
     shutil.copy2(src_for_copy, out)
     rec = _load_scenelook_rec(scene, episode)
     rec["candidate"] = {"path": str(out), "hash": _sha256_file(out),
@@ -1239,10 +1256,10 @@ def scenelook_reference_library(scene, episode="Ep1"):
     for h in (rec.get("history") or []):
         if h.get("outcome") == "rejected":
             rel = h.get("rejectedArchivedFile")
-            _add(str(HERE / rel) if rel else None, h.get("rejectedAt"), "rejected", h.get("rejectedNote"))
+            _add(str(_data_root() / rel) if rel else None, h.get("rejectedAt"), "rejected", h.get("rejectedNote"))
         elif h.get("outcome") == "superseded":
             rel = h.get("archivedFile")
-            _add(str(HERE / rel) if rel else None, h.get("supersededAt"), "superseded", None)
+            _add(str(_data_root() / rel) if rel else None, h.get("supersededAt"), "superseded", None)
     items.sort(key=lambda x: x.get("at") or "", reverse=True)
     return items
 

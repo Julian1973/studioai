@@ -53,6 +53,27 @@ def test_non_crystal_bears_projects_keep_project_engine(tmp_path, monkeypatch):
     assert H.controller(types.SimpleNamespace(ROOT=tmp_path), scope)[0] == 'project'
 
 
+def test_golden_path_image_review_keeps_refire_zero_spend(tmp_path, monkeypatch):
+    import studio_see_service
+    scope = {'projectId': 'crystal-bears', 'episode': 'Ep4', 'scene': '3', 'unit': 'S3.SH1'}
+    calls = []
+
+    def see_request(server, payload):
+        calls.append(payload)
+        return {'binding': 'see-binding'} if payload['command'] == 'status' else {'status': 'approved'}
+
+    monkeypatch.setattr(studio_see_service, 'request', see_request)
+    server = types.SimpleNamespace(ROOT=tmp_path)
+    refire = H.image_review(server, {'scope': scope, 'component': 'opening', 'decision': 'refire'})
+    assert refire['zeroSpend'] is True
+    assert refire['nextStage'] == 'keyframe'
+    assert calls == []
+    approved = H.image_review(server, {'scope': scope, 'component': 'plate', 'decision': 'approved', 'by': 'Julian'})
+    assert approved['ok'] is True
+    assert [item['command'] for item in calls] == ['status', 'review-component']
+    assert calls[-1]['binding'] == 'see-binding'
+
+
 def test_watch_action_drift_blocks_before_fire(tmp_path, monkeypatch):
     import studio_director_handoff
     monkeypatch.setattr(studio_director_handoff, 'source', lambda shot: {'shotId': shot['shotId'], 'purpose': shot['purpose']})

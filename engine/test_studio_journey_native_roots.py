@@ -3,6 +3,7 @@ import hashlib
 import pytest
 
 from studio_journey_native import file_record
+from studio_see_package import media as see_media
 
 
 def test_file_record_accepts_configured_data_media_only(tmp_path, monkeypatch):
@@ -62,3 +63,24 @@ def test_file_record_accepts_configured_data_cb_seed_assets(tmp_path, monkeypatc
     }
     with pytest.raises(ValueError, match="outside the Studio media library"):
         file_record(source, escape)
+
+
+def test_see_media_accepts_configured_data_media_and_rejects_escape(tmp_path, monkeypatch):
+    source = tmp_path / "release"
+    data = tmp_path / "production-data"
+    source.mkdir()
+    media = data / "engine" / "media" / "shots"
+    media.mkdir(parents=True)
+    asset = media / "S3.SH1.png"
+    asset.write_bytes(b"approved S3.SH1")
+    external = tmp_path / "external.png"
+    external.write_bytes(b"outside")
+    escape = media / "escape.png"
+    escape.symlink_to(external)
+    monkeypatch.setenv("STUDIO_DATA_ROOT", str(data))
+
+    record = see_media(source, asset)
+    assert record["path"] == str(asset.resolve())
+    assert record["url"] == "/engine/media/shots/S3.SH1.png"
+    with pytest.raises(ValueError, match="SEE media must belong to this Studio"):
+        see_media(source, escape)

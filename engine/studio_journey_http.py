@@ -46,12 +46,41 @@ def continue_operation(server,scope):
     threading.Thread(target=work,name='studio-journey-'+key[:8],daemon=True).start()
 
 
+def image_review(server, data):
+    scope = data.get('scope') or {}
+    if active_engine(scope) != CRYSTAL_BEARS_ACTIVE_ENGINE:
+        raise ValueError('Image review is only available in the Crystal Bears Golden Path.')
+    scope_key(scope)
+    component = str(data.get('component') or '')
+    decision = str(data.get('decision') or '')
+    actor = str(data.get('by') or 'Producer').strip()
+    if component not in ('opening', 'plate'):
+        raise ValueError('Choose an opening keyframe or scene plate.')
+    if decision == 'refire':
+        return {'ok': True, 'component': component, 'decision': decision,
+                'nextStage': 'keyframe' if component == 'opening' else 'scenelook',
+                'zeroSpend': True,
+                'message': 'Refire controls opened. Review the exact request before any provider submission.'}
+    if decision not in ('approved', 'rejected') or not actor:
+        raise ValueError('Choose Approve or Reject and identify the reviewer.')
+    from studio_see_service import request as see_request
+    status = see_request(server, {'scope': scope, 'command': 'status'})
+    result = see_request(server, {'scope': scope, 'command': 'review-component',
+                                  'component': component, 'decision': decision,
+                                  'reason': str(data.get('reason') or '').strip(), 'by': actor,
+                                  'binding': status.get('binding')})
+    return {'ok': True, 'component': component, 'decision': decision,
+            'zeroSpend': True, 'see': result}
+
+
 def request(server,data):
     scope=data.get('scope') or {}
     action=data.get('command','status')
     request_id=str(data.get('requestId') or ('journey_'+uuid.uuid4().hex[:12]))
     try:
         scope_key(scope)
+        if action == 'image-review':
+            return image_review(server, data)
         J=controller(server,scope)
         if action=='decide':
             J.accept(scope,data,str(data.get('by') or 'Producer'))

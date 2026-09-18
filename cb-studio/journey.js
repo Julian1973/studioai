@@ -9,30 +9,58 @@ function mount(host,scope,options={}){
  const ticket=++sequence;let state=null,timer=null,submitted=false,awaitingNext=false,mediaSignature=null,settledSignature=null;
  host.replaceChildren();host.classList.add('journey-workspace');
  const head=node('div',undefined,'journey-head'),title=node('h2',scope.unit),progress=node('p','Loading current production…');
- head.append(title,progress);const media=node('div',undefined,'journey-media'),brief=node('div',undefined,'journey-brief');
+ head.append(title,progress);const media=node('div',undefined,'journey-media'),storyboard=node('section',undefined,'journey-storyboard'),brief=node('div',undefined,'journey-brief');
  const actions=node('div',undefined,'journey-actions'),primary=node('button','Loading…','btn'),changes=node('button','Request Changes','btn ghost');primary.disabled=true;
  const cost=node('p',undefined,'journey-cost'),issue=node('div',undefined,'journey-issue');issue.setAttribute('role','status');progress.setAttribute('aria-live','polite');
  const evidence=node('details'),summary=node('summary','Direction, references and evidence'),evidenceBody=node('pre');evidence.append(summary,evidenceBody);
  const advanced=node('details'),advancedTitle=node('summary','Individual corrections and review tools');advanced.append(advancedTitle);
  if(options.advanced){advanced.addEventListener('toggle',()=>{if(advanced.open&&!advanced.dataset.loaded){advanced.dataset.loaded='1';options.advanced(advanced);}});}
  changes.onclick=()=>options.changes?.(state);
- actions.append(primary,changes);host.append(head,media,brief,issue,cost,actions,evidence);if(options.advanced)host.append(advanced);
+ actions.append(primary,changes);host.append(head,media,storyboard,brief,issue,cost,actions,evidence);if(options.advanced)host.append(advanced);
+ function imageAsset(record){
+  if(!record?.url)return;
+  const card=node('article',undefined,'journey-image-card'),figure=node('figure');
+  const image=node('img');image.src=record.url;image.alt=(record.label||'SEE image')+' for '+scope.unit;
+  figure.append(node('figcaption',record.label||'SEE image'),image);card.append(figure);
+  const status=node('p',record.reviewStatus==='approved'?'Approved':record.reviewStatus==='pending'?'Awaiting decision':'Needs image');status.className='journey-image-status';
+  const controls=node('div',undefined,'journey-image-actions');
+  for(const [action,label] of [['approved','Approve'],['rejected','Reject'],['refire','Refire']]){
+   const button=node('button',label,'btn '+(action==='refire'?'ghost':''));
+   button.type='button';button.setAttribute('aria-label',label+' '+(record.label||'SEE image'));
+   button.disabled=action==='approved'&&record.reviewStatus==='approved'||action==='rejected'&&record.reviewStatus!=='pending';
+   button.onclick=async()=>{
+    if(!options.imageAction||button.disabled)return;
+    let reason='';
+    if(action==='rejected'){reason=window.prompt('Reason for rejecting '+(record.label||'this image')+':','Needs a different SEE treatment.');if(reason===null||!reason.trim())return;}
+    controls.querySelectorAll('button').forEach(item=>{item.disabled=true;});status.textContent=action==='refire'?'Opening refire controls…':'Saving '+label.toLowerCase()+'…';
+    try{const result=await options.imageAction({action,component:record.component,reason,record,state});status.textContent=result?.message||label+' recorded';}
+    catch(error){status.textContent=error.message||'Image action failed';controls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}
+   };
+   controls.append(button);
+  }
+  card.append(status,controls);media.append(card);
+ }
  function asset(record,type){if(!record?.url)return;const e=node(type);e.src=record.url;if(type==='img'){e.alt=(record.label||'Opening image')+' for '+scope.unit;}else{e.controls=true;e.preload='metadata';}const figure=node('figure');if(record.label)figure.append(node('figcaption',record.label));figure.append(e);media.append(figure);}
+ function renderStoryboard(review){
+  storyboard.replaceChildren();const views=Array.isArray(review.storyboard)&&review.storyboard.length?review.storyboard:(Array.isArray(review.plan)?review.plan:Object.values(review.plan||{}).flat());
+  const heading=node('h3','Storyboard','journey-storyboard-title');storyboard.append(heading);
+  if(!views.length){storyboard.append(node('p','No storyboard views prepared for this production unit.','journey-storyboard-empty'));return;}
+  for(const view of views){if(!view||typeof view!=='object')continue;const card=node('article',undefined,'journey-board');card.append(node('small','Storyboard view '+(view.storyboardIndex||'')),node('h4',view.viewId||view.shotId||'Planned view'),node('p',view.action||view.purpose||view.openingImage||view.staging||''),node('p',view.framing||view.camera||''),node('p',view.performance||''));storyboard.append(card);}
+ }
  function show(value){
   state=value;if(state.busy&&state.operation?.phase==='film')awaitingNext=true;const op=state.operation,review=state.review||{};
   title.textContent=scope.unit+' · '+(review.title||'Scene production');
   progress.textContent=state.busy?(op?.message||'Preparing your next review'):state.phase==='complete'?'Accepted · ready for the next unit':state.primary||state.dependency||'Review the current issue';
-  const nextMediaSignature=JSON.stringify([state.phase,review.videos,review.images,review.audio,review.plan]);
+  const nextMediaSignature=JSON.stringify([state.phase,review.videos,review.images,review.audio,review.plan,review.storyboard]);
   if(nextMediaSignature!==mediaSignature){mediaSignature=nextMediaSignature;media.replaceChildren();
   if(state.phase==='film'||state.phase==='complete'){for(const r of review.videos||[])asset(r,'video');}
-  else if(state.phase==='audio'){asset(review.audio,'audio');for(const r of review.images||[])asset(r,'img');}
-  else if(review.images?.length&&state.phase!=='plan'){for(const r of review.images)asset(r,'img');}
+  else if(state.phase==='audio'){asset(review.audio,'audio');for(const r of review.images||[])imageAsset(r);}
+  else if(review.images?.length&&state.phase!=='plan'){for(const r of review.images)imageAsset(r);}
   else{
-   const views=Array.isArray(review.plan)?review.plan:Object.values(review.plan||{}).flat();
-   for(const view of views){if(!view||typeof view!=='object')continue;const card=node('article',undefined,'journey-board');card.append(node('small','Storyboard plan · placeholder'),node('h3',view.viewId||view.shotId||'Planned view'),node('p',view.action||view.purpose||view.openingImage||view.staging||''),node('p',view.framing||view.camera||''),node('p',view.performance||''));media.append(card);}
-   if(!media.childElementCount)media.append(node('p','Prepare the scene to review its direction and storyboard.'));
+   media.append(node('p','Review the production plan in the Storyboard section below.'));
   }
   }
+  renderStoryboard(review);
   brief.replaceChildren();if(review.direction)brief.append(node('p',review.direction));
   if(['audio','film'].includes(state.phase)&&review.actionPlan?.length){brief.append(node('h3','Action'));for(const beat of review.actionPlan){brief.append(node('p',(beat.timing?beat.timing+' · ':'')+beat.action));}}
   for(const line of review.script||[]){const p=node('p');p.append(node('b',(line.speaker||'')+' '),node('em','“'+(line.exactText||line.text||line.words||'')+'”'));brief.append(p);}

@@ -14,6 +14,7 @@ import ast
 from studio_authored_action import actions, digest
 from studio_journey import scope_key
 from studio_storyboard_sheet import panel_binding, source_binding, compile_sheet, ROLE as SHEET
+from studio_roots import data_root
 
 VERSION = 'see-package@2'
 ENDING = 'OPTIONAL_ENDING_VISUAL_REFERENCE'
@@ -41,15 +42,25 @@ def media(root, value):
     name = value.get('path') or value.get('url', '').lstrip('/')
     path = Path(name)
     path = (path if path.is_absolute() else Path(root) / path).resolve()
-    try:
-        relative = path.relative_to(Path(root).resolve()).as_posix()
-    except ValueError:
+    source = Path(root).resolve()
+    roots = [(source, '/'),
+             ((data_root(source) / 'engine' / 'media').resolve(), '/engine/media/'),
+             ((data_root(source) / 'media').resolve(), '/engine/media/'),
+             ((data_root(source) / 'cb-seed' / 'assets').resolve(), '/cb-seed/assets/')]
+    for base, prefix in roots:
+        try:
+            relative = path.relative_to(base).as_posix()
+            break
+        except ValueError:
+            continue
+    else:
         raise ValueError('SEE media must belong to this Studio.') from None
     if not path.is_file():
         return None
     actual = hashlib.sha256(path.read_bytes()).hexdigest()
     expected = value.get('sha256') or value.get('hash')
-    return {'path': relative, 'url': '/' + relative, 'sha256': actual,
+    stored_path = relative if base == source else str(path)
+    return {'path': stored_path, 'url': prefix + relative, 'sha256': actual,
             'current': value.get('current', True) and (not expected or expected == actual)}
 
 

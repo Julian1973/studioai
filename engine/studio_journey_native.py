@@ -88,6 +88,10 @@ class Native:
         plate = file_record(self.root,(plate_status.get('active') or plate_status.get('candidate') or plate_status.get('approved') or {}).get('path'))
         see = led.get('keyframeCandidate') or led.get('keyframeApproval') or {}
         image = file_record(self.root, see.get('path') or led.get('keyframePath'))
+        plate_review = ('pending' if plate_status.get('candidate') else
+                        'approved' if plate_status.get('current') or plate_status.get('approved') else 'missing')
+        opening_review = ('pending' if led.get('keyframeCandidate') else
+                          'approved' if (led.get('keyframeApproval') or {}).get('approved') else 'missing')
         audio = file_record(self.root, led.get('voPath'))
         videos = [file_record(self.root, p) for p in
                   optional_collection(led.get('candidatePaths'), 'candidatePaths')]
@@ -118,11 +122,21 @@ class Native:
             for ref in (references.get(section) or {}).get('references', []):
                 asset = file_record(self.root,ref.get('path'))
                 if asset: ref.update(sha256=asset['sha256'],url=asset['url'])
+        storyboard = [
+            {**view, 'storyboardIndex': index + 1}
+            for index, view in enumerate(
+                [view for scene in optional_collection(board.get('sceneCoverage'), 'sceneCoverage')
+                 for view in scene.get('views', [scene])]
+                or optional_collection(board.get('shots'), 'storyboard shots')
+            )
+        ]
+        review_images = ([{**image, 'label':'Opening keyframe', 'component':'opening', 'reviewStatus':opening_review}] if image else [])
+        review_images += ([{**plate, 'label':'Scene plate', 'component':'plate', 'reviewStatus':plate_review}] if plate else [])
         review = {'references':references, 'title': shot.get('purpose') or board.get('scene', {}).get('title') or 'Scene direction',
                   'direction': shot.get('openingPose') or board.get('scene', {}).get('purpose') or '',
                   'actionPlan':[{'timing':v.get('timing',''),'action':v.get('action','')} for v in (shot.get('directorCard') or {}).get('views',[])],
                   'script': spoken, 'performancePrompt':'\n'.join(str(l.get('text') or '') for l in optional_collection(led.get('voGeneratedFrom'), 'voGeneratedFrom')), 'plan': [view for scene in optional_collection(board.get('sceneCoverage'), 'sceneCoverage') for view in scene.get('views', [scene])] or optional_collection(board.get('shots'), 'storyboard shots'),
-                  'images': ([{**image,'label':'Opening keyframe'}] if image else []) + ([{**plate,'label':'Scene plate'}] if plate else []), 'plate':plate, 'audio': audio, 'videos': videos,
+                  'images': review_images, 'storyboard': storyboard, 'plate':plate, 'audio': audio, 'videos': videos,
                   'source': authority(shot) if shot else {},
                   'seeCurrent': see_current, 'audioCurrent': audio_current,
                   'boardHash': digest(board),

@@ -16,10 +16,13 @@ def _servable_roots(root):
     source = Path(root).resolve()
     data = data_root(source)
     roots = [(source, "/")]
-    for media_root in (data / "engine" / "media", data / "media"):
+    for media_root, url_prefix in (
+            (data / "engine" / "media", "/engine/media/"),
+            (data / "media", "/engine/media/"),
+            (data / "cb-seed" / "assets", "/cb-seed/assets/")):
         resolved = media_root.resolve()
         if all(resolved != existing for existing, _ in roots):
-            roots.append((resolved, "/engine/media/"))
+            roots.append((resolved, url_prefix))
     return roots
 
 

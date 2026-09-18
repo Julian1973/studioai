@@ -37,3 +37,28 @@ def test_file_record_accepts_configured_data_media_only(tmp_path, monkeypatch):
         file_record(source, source / ".." / "external.png")
     with pytest.raises(ValueError, match="outside the Studio media library"):
         file_record(source, escape)
+
+
+def test_file_record_accepts_configured_data_cb_seed_assets(tmp_path, monkeypatch):
+    source = tmp_path / "release"
+    data = tmp_path / "production-data"
+    source.mkdir()
+    asset_dir = data / "cb-seed" / "assets" / "final_turnarounds"
+    asset_dir.mkdir(parents=True)
+    asset = asset_dir / "CB_Bo.png"
+    asset.write_bytes(b"locked Bo turnaround")
+    external = tmp_path / "external.png"
+    external.write_bytes(b"outside")
+    escape = asset_dir / "escape.png"
+    escape.symlink_to(external)
+
+    monkeypatch.setenv("STUDIO_DATA_ROOT", str(data))
+
+    record = file_record(source, asset)
+    assert record == {
+        "path": str(asset.resolve()),
+        "url": "/cb-seed/assets/final_turnarounds/CB_Bo.png",
+        "sha256": hashlib.sha256(asset.read_bytes()).hexdigest(),
+    }
+    with pytest.raises(ValueError, match="outside the Studio media library"):
+        file_record(source, escape)

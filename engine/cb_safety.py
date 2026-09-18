@@ -670,6 +670,25 @@ def create_policy(m):
                                     if reference_path else {}),
                 "plateHash": file_sha256(plate_path) if plate_path else None}
 
+    def approved_plate_reuse(scene, episode, path):
+        """Allow only the exact, unchanged approved plate to be reselected without reauthoring."""
+        rec = m._load_scenelook_rec(scene, episode)
+        approved = rec.get("approved") or {}
+        approved_path = pathlib.Path(approved.get("path") or "").expanduser().resolve()
+        selected_path = pathlib.Path(path or "").expanduser().resolve()
+        if not approved_path or selected_path != approved_path or not selected_path.is_file():
+            return None
+        if not approved.get("hash") or file_sha256(selected_path) != approved.get("hash"):
+            return None
+        roots = (
+            data_root(m.ROOT) / "engine" / "media",
+            data_root(m.ROOT) / "media",
+            pathlib.Path(m.ROOT) / "engine" / "media",
+        )
+        if not any(_path_is_under(selected_path, pathlib.Path(root).resolve()) for root in roots):
+            return None
+        return approved
+
     def generate_look(scene, episode="Ep1", reference_path=None, log=print, *,
                       reviewed_request=None):
         pkg, _ = current_package(scene, episode)
@@ -684,9 +703,17 @@ def create_policy(m):
         return result
 
     def approve_look(scene, episode="Ep1", reviewed_by="Julian", log=print):
-        current_package(scene, episode)
         rec = m._load_scenelook_rec(scene, episode)
         candidate = rec.get("candidate") or {}
+        approved = rec.get("approved") or {}
+        same_approved_media = (
+            candidate.get("source") == "library" and
+            pathlib.Path(candidate.get("libraryOriginal") or "").expanduser().resolve() ==
+            pathlib.Path(approved.get("path") or "").expanduser().resolve() and
+            candidate.get("hash") == approved.get("hash") and
+            file_sha256(candidate.get("path")) == approved.get("hash"))
+        if not same_approved_media:
+            current_package(scene, episode)
         if not candidate and (rec.get('approved') or {}).get('approvalMethod') == 'explicit-upload-selection':
             status = scene_status(scene, episode)
             if status.get('approvedCurrent'):
@@ -706,13 +733,17 @@ def create_policy(m):
 
     def select_look(scene, mode, episode="Ep1", upload_path=None, library_path=None,
                     reviewed_by="Julian", log=print):
-        pkg, _ = current_package(scene, episode)
+        reused = approved_plate_reuse(scene, episode, library_path) if mode == "library" else None
+        pkg = {"revision": reused.get("packageRevision")} if reused else None
+        if not reused:
+            pkg, _ = current_package(scene, episode)
         result = original["select_scenelook_source"](
             scene, mode, episode, upload_path, library_path, reviewed_by, log)
         rec = m._load_scenelook_rec(scene, episode)
         rec["candidate"]["packageRevision"] = pkg.get("revision")
-        rec["candidate"]["inputSignature"] = look_input_signature(
-            scene, episode, rec["candidate"].get("path"))
+        rec["candidate"]["inputSignature"] = (
+            dict(reused.get("inputSignature") or {}) if reused else
+            look_input_signature(scene, episode, rec["candidate"].get("path")))
         if mode == 'upload':
             rec['candidate']['approvalMethod'] = 'explicit-upload-selection'
         m._save_scenelook_rec(rec, scene, episode)

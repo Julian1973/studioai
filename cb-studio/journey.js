@@ -55,7 +55,7 @@ function mount(host,scope,options={}){
   const imageRecords=Array.isArray(review.images)?review.images:[], plateApproved=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='approved'), openingApproved=imageRecords.some(item=>item?.component==='opening'&&item.reviewStatus==='approved');
   const gridIssues=Array.isArray(seePackage.issues)?seePackage.issues.filter(Boolean):[], approvalBlock=!plateApproved?'Approve scene plate first':!openingApproved?'Approve opening keyframe first':'', gridBlocked=gridIssues.length>0||!!approvalBlock;
   const gridLabel=sheet?'Storyboard grid ready':!gridAllowed?'Storyboard skipped':gridIssues.length?'Resolve SEE issue first':approvalBlock||'Build Seedance storyboard grid';
-  const gridButton=node('button',gridLabel,'btn ghost');gridButton.type='button';gridButton.disabled=!!sheet||!options.storyboardGridAction||!gridAllowed||gridBlocked;if(gridBlocked)gridButton.title=String(gridIssues[0]||approvalBlock);
+  const gridButton=node('button',gridLabel,'btn ghost');gridButton.type='button';gridButton.dataset.storyboardGrid='1';gridButton.disabled=!!sheet||!options.storyboardGridAction||!gridAllowed||gridBlocked;if(gridBlocked)gridButton.title=String(gridIssues[0]||approvalBlock);
   if(options.storyboardGridAction&&!sheet){gridButton.onclick=async()=>{gridButton.disabled=true;gridButton.textContent='Building storyboard grid…';try{await options.storyboardGridAction({review});}catch(error){gridButton.disabled=false;gridButton.textContent=error.message||'Build Seedance storyboard grid';}};}
   controls.append(gridButton);
   if(gridBlocked&&!sheet)controls.append(node('small','Grid blocked · '+String(gridIssues[0]||approvalBlock),'journey-storyboard-grid-note'));
@@ -115,9 +115,14 @@ function mount(host,scope,options={}){
   issue.replaceChildren();if(op?.status==='superseded'&&op.decision){issue.append(node('strong',op.decision.issue),node('p',op.decision.proposed));}if(decision){issue.append(node('strong',decision.issue),node('p',decision.proposed),node('p','Preserved: '+(decision.preserved||[]).join(', ')));}
   for(const concern of state.concerns||[]){issue.append(node('p',typeof concern==='string'?concern:concern.message||concern.observation||''));}
   cost.textContent=state.disclosure?.limitUsd?'Authorises '+(state.disclosure.operations||[]).join(', ')+' · up to $'+state.disclosure.limitUsd.toFixed(2)+'. '+(state.disclosure.basis||''):'No new generation cost.';
-  primary.textContent=state.busy?(op?.message||'Working…'):state.primary||'Waiting for the required decision';
+  const seePackage=review.seePackage||{}, montageMissing=review.storyboardRequired!==false&&!seePackage.providerSheet?.media;
+  const imageRecords=Array.isArray(review.images)?review.images:[], plateApproved=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='approved'), openingApproved=imageRecords.some(item=>item?.component==='opening'&&item.reviewStatus==='approved');
+  const montageIssues=Array.isArray(seePackage.issues)?seePackage.issues.filter(Boolean):[];
+  const montageActionable=montageMissing&&options.storyboardGridAction&&!montageIssues.length&&plateApproved&&openingApproved;
+  const montageBlock=!plateApproved?'Approve scene plate first':!openingApproved?'Approve opening keyframe first':montageIssues[0]?'Resolve SEE issue first':'';
+  primary.textContent=state.busy?(op?.message||'Working…'):montageActionable?'Build storyboard montage':montageMissing?(montageBlock||'Prepare storyboard montage'):state.primary||'Waiting for the required decision';
   primary.hidden=state.phase==='complete';
-  primary.disabled=state.busy||(!state.primary&&!decision)||submitted;
+  primary.disabled=state.busy||(!state.primary&&!decision)||submitted||(montageMissing&&!montageActionable);
   if(decision)primary.textContent='Check saved operation';
   changes.disabled=state.busy||!options.changes;
   evidenceBody.textContent=JSON.stringify({scope,state:state.phase,normalActions:state.normalActionCount,corrections:state.correctionActionCount,review,operation:op,qualification:'Software checks do not establish live visual compliance.'},null,2);
@@ -126,7 +131,7 @@ function mount(host,scope,options={}){
   if(awaitingNext&&state.phase==='complete'&&state.next&&options.next){awaitingNext=false;options.next(state.next);return;}
  }
  async function refresh(resume=false){clearTimeout(timer);if(ticket!==sequence||!host.isConnected)return;try{show(await api({command:resume?'resume':'status',scope}));if(state.busy)timer=setTimeout(()=>refresh(true),1800);}catch(e){issue.textContent=e.message;primary.disabled=true;}}
- primary.onclick=async()=>{if(!state||submitted||primary.disabled)return;submitted=true;if(state.operation?.status==='needs-decision'){try{show(await api({command:'recover',scope}));}catch(e){issue.textContent=e.message;}finally{submitted=false;refresh(true);}return;}awaitingNext=state.phase==='film';primary.disabled=true;progress.textContent='Starting '+state.primary+'…';try{show(await api({command:'decide',scope,action:state.phase,binding:state.binding,expectedRevision:state.revision,commandId:crypto.randomUUID(),by:options.reviewer||'Producer'}));}catch(e){issue.textContent=e.message;}finally{submitted=false;if(ticket===sequence)refresh(true);}};
+ primary.onclick=async()=>{if(!state||submitted||primary.disabled)return;const gridButton=host.querySelector('[data-storyboard-grid]');if(montageActionable&&gridButton&&!gridButton.disabled){gridButton.click();return;}submitted=true;if(state.operation?.status==='needs-decision'){try{show(await api({command:'recover',scope}));}catch(e){issue.textContent=e.message;}finally{submitted=false;refresh(true);}return;}awaitingNext=state.phase==='film';primary.disabled=true;progress.textContent='Starting '+state.primary+'…';try{show(await api({command:'decide',scope,action:state.phase,binding:state.binding,expectedRevision:state.revision,commandId:crypto.randomUUID(),by:options.reviewer||'Producer'}));}catch(e){issue.textContent=e.message;}finally{submitted=false;if(ticket===sequence)refresh(true);}};
  const handle=()=>{clearTimeout(timer);if(ticket===sequence)sequence++;};handle.scopeId=scopeId;handle.refresh=()=>refresh(true);host.journeyHandle=handle;refresh(true);return handle;
 }
 global.StudioJourney={mount};

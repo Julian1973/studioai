@@ -3888,9 +3888,8 @@ async function renderWorkspaceBody(){
         const reviews=result.see?.componentReviews||{};
         if(detail.action==='approved'&&reviews.opening==='approved'&&reviews.plate==='approved'){
           window.JOURNEY_INDIVIDUAL_REVIEW=false;
-          PSTAGE='voice';
           renderWorkspaceBody();
-          return {message:'SEE approved. Opening HEAR.'};
+          return {message:'SEE images approved. Build the storyboard montage next.'};
         }
         renderWorkspaceBody();
         return {message:detail.action==='approved'?'Image approved.':'Image rejected.'};

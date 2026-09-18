@@ -43,7 +43,7 @@ function mount(host,scope,options={}){
  function asset(record,type){if(!record?.url)return;const e=node(type);e.src=record.url;if(type==='img'){e.alt=(record.label||'Opening image')+' for '+scope.unit;}else{e.controls=true;e.preload='metadata';}const figure=node('figure');if(record.label)figure.append(node('figcaption',record.label));figure.append(e);media.append(figure);}
  function renderStoryboard(review){
   storyboard.replaceChildren();const views=Array.isArray(review.storyboard)&&review.storyboard.length?review.storyboard:(Array.isArray(review.plan)?review.plan:Object.values(review.plan||{}).flat());
-  const heading=node('div',undefined,'journey-storyboard-head'),title=node('h3','Storyboard','journey-storyboard-title'),controls=node('div',undefined,'journey-storyboard-actions');
+  const heading=node('div',undefined,'journey-storyboard-head'),title=node('h3','Storyboard · visual board','journey-storyboard-title'),controls=node('div',undefined,'journey-storyboard-actions');
   const choice=review.storyboardChoice, required=choice==null||choice.required!==false;
   const state=node('span',required?'Storyboard on':'Storyboard skipped','journey-storyboard-state');
   for(const [value,label] of [[true,'Use storyboard'],[false,'Skip storyboard']]){
@@ -52,8 +52,36 @@ function mount(host,scope,options={}){
    controls.append(button);
   }
   heading.append(title,state,controls);storyboard.append(heading);
-  if(!views.length){storyboard.append(node('p','No storyboard views prepared for this production unit.','journey-storyboard-empty'));return;}
-  for(const view of views){if(!view||typeof view!=='object')continue;const card=node('article',undefined,'journey-board');card.append(node('small','Storyboard view '+(view.storyboardIndex||'')),node('h4',view.viewId||view.shotId||'Planned view'),node('p',view.action||view.purpose||view.openingImage||view.staging||''),node('p',view.framing||view.camera||''),node('p',view.performance||''));storyboard.append(card);}
+  const sourceImages=(review.images||[]).filter(record=>record?.url).sort((a,b)=>({plate:0,opening:1}[a.component]??2)-({plate:0,opening:1}[b.component]??2));
+  const references=Object.values(review.references||{}).flatMap(section=>Array.isArray(section?.references)?section.references:[]).filter(record=>record?.url&&/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(record.url));
+  const inputs=[...sourceImages,...references.filter(record=>!sourceImages.some(source=>source.url===record.url))];
+  if(inputs.length){
+   const inputSection=node('section',undefined,'journey-storyboard-inputs');
+   inputSection.append(node('h4','Visual inputs','journey-storyboard-input-title'));
+   const inputGrid=node('div',undefined,'journey-storyboard-input-grid');
+   for(const record of inputs.slice(0,8)){
+    const figure=node('figure',undefined,'journey-storyboard-input');const image=node('img');image.src=record.url;image.alt=record.label||record.role||'Storyboard reference';
+    figure.append(image,node('figcaption',record.label||record.role||'Reference'));inputGrid.append(figure);
+   }
+   inputSection.append(inputGrid);storyboard.append(inputSection);
+  }
+  if(!views.length){storyboard.append(node('p','No storyboard panels prepared for this production unit.','journey-storyboard-empty'));return;}
+  const panelSources=sourceImages.length?sourceImages:references;
+  const cameraText=view=>view.framing||view.framingAndCamera||view.camera||view.cameraBehaviour||view.cameraBehavior||'';
+  const movementText=view=>view.cameraPurpose||view.movement||view.action||view.staging||'';
+  for(const [index,view] of views.entries()){
+   if(!view||typeof view!=='object')continue;
+   const card=node('article',undefined,'journey-board journey-visual-board'),frame=node('div',undefined,'journey-board-frame');
+   const source=panelSources[index===0?0:Math.min(1,panelSources.length-1)]||panelSources[index%Math.max(panelSources.length,1)];
+   if(source?.url){const image=node('img');image.src=source.url;image.alt='Visual storyboard panel '+(index+1);frame.append(image);}
+   frame.append(node('span','Panel '+(view.storyboardIndex||index+1),'journey-board-index'));card.append(frame);
+   const details=node('div',undefined,'journey-board-details');details.append(node('small',view.viewId||view.shotId||'Planned view'),node('h4',view.action||view.purpose||'Planned visual beat'));
+   const camera=cameraText(view),movement=movementText(view),performance=view.performance||view.performanceFocus||'';
+   if(camera)details.append(node('p','Camera: '+camera));
+   if(movement&&movement!==camera)details.append(node('p','Movement: '+movement));
+   if(performance)details.append(node('p','Performance: '+performance));
+   card.append(details);storyboard.append(card);
+  }
  }
  function show(value){
   const previousPhase=state?.phase;state=value;if(state.busy&&state.operation?.phase==='film')awaitingNext=true;const op=state.operation,review=state.review||{};

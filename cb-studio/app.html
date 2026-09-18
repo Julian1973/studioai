@@ -3905,6 +3905,7 @@ async function renderWorkspaceBody(){
         return {message:detail.required?'Storyboard enabled.':'Storyboard skipped for this shot.'};
       },
       next:scope=>{if(String(SH_SC)!==scope.scene){openScene(scope.scene);return;}const i=pShots().findIndex(s=>s.shotId===scope.unit);if(i>=0){PSHOT_I=i;PSTAGE='keyframe';renderWorkspaceBody();}},
+      phaseChanged:(phase,previous)=>{if(phase==='film'&&previous==='audio'&&PSTAGE==='voice'){PSTAGE='animation';renderWorkspaceBody();}},
       advanced:container=>{const b=document.createElement('button');b.className='btn ghost';b.textContent='Open individual review controls';b.onclick=()=>{window.JOURNEY_INDIVIDUAL_REVIEW=true;renderWorkspaceBody();};container.append(b);}
     });
     return;

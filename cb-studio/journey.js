@@ -10,7 +10,7 @@ function mount(host,scope,options={}){
  host.replaceChildren();host.classList.add('journey-workspace');
  const head=node('div',undefined,'journey-head'),title=node('h2',scope.unit),progress=node('p','Loading current production…');
  head.append(title,progress);const media=node('div',undefined,'journey-media'),storyboard=node('section',undefined,'journey-storyboard'),brief=node('div',undefined,'journey-brief');
- const actions=node('div',undefined,'journey-actions'),primary=node('button','Loading…','btn'),changes=node('button','Request Changes','btn ghost');primary.disabled=true;
+ const actions=node('div',undefined,'journey-actions'),primary=node('button','Loading…','btn'),changes=node('button','Edit / Request Changes','btn ghost');primary.disabled=true;
  const cost=node('p',undefined,'journey-cost'),issue=node('div',undefined,'journey-issue');issue.setAttribute('role','status');progress.setAttribute('aria-live','polite');
  const evidence=node('details'),summary=node('summary','Direction, references and evidence'),evidenceBody=node('pre');evidence.append(summary,evidenceBody);
  const advanced=node('details'),advancedTitle=node('summary','Individual corrections and review tools');advanced.append(advancedTitle);
@@ -56,7 +56,7 @@ function mount(host,scope,options={}){
   for(const view of views){if(!view||typeof view!=='object')continue;const card=node('article',undefined,'journey-board');card.append(node('small','Storyboard view '+(view.storyboardIndex||'')),node('h4',view.viewId||view.shotId||'Planned view'),node('p',view.action||view.purpose||view.openingImage||view.staging||''),node('p',view.framing||view.camera||''),node('p',view.performance||''));storyboard.append(card);}
  }
  function show(value){
-  state=value;if(state.busy&&state.operation?.phase==='film')awaitingNext=true;const op=state.operation,review=state.review||{};
+  const previousPhase=state?.phase;state=value;if(state.busy&&state.operation?.phase==='film')awaitingNext=true;const op=state.operation,review=state.review||{};
   title.textContent=scope.unit+' · '+(review.title||'Scene production');
   progress.textContent=state.busy?(op?.message||'Preparing your next review'):state.phase==='complete'?'Accepted · ready for the next unit':state.primary||state.dependency||'Review the current issue';
   const images=[...(review.images||[])].sort((a,b)=>({plate:0,opening:1}[a?.component]??2)-({plate:0,opening:1}[b?.component]??2));
@@ -85,6 +85,7 @@ function mount(host,scope,options={}){
   changes.disabled=state.busy||!options.changes;
   evidenceBody.textContent=JSON.stringify({scope,state:state.phase,normalActions:state.normalActionCount,corrections:state.correctionActionCount,review,operation:op,qualification:'Software checks do not establish live visual compliance.'},null,2);
   const settledKey=op&&!state.busy?[op.id,op.status].join(':'):null;if(settledKey&&settledKey!==settledSignature){settledSignature=settledKey;options.settled?.(state);}
+  if(previousPhase&&previousPhase!==state.phase&&state.phase==='film')options.phaseChanged?.(state.phase,previousPhase);
   if(awaitingNext&&state.phase==='complete'&&state.next&&options.next){awaitingNext=false;options.next(state.next);return;}
  }
  async function refresh(resume=false){clearTimeout(timer);if(ticket!==sequence||!host.isConnected)return;try{show(await api({command:resume?'resume':'status',scope}));if(state.busy)timer=setTimeout(()=>refresh(true),1800);}catch(e){issue.textContent=e.message;primary.disabled=true;}}

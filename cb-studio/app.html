@@ -4170,8 +4170,8 @@ function renderSceneLookStage(){
       :`<div class="artefact-empty"><div style="color:var(--muted)">The previous world anchor is not available in this workspace. Build a fresh one from the current signed direction.</div></div>`;
     if(sl.status=="awaiting"){
       decVersion="World anchor needs rebuilding";
-      decActions=[`<span class="dec-caption">Its signed inputs changed. Clear it, then generate from current direction.</span>`,
-        `<button class="btn" onclick="directorStartRejection('scenelook',null,'')">Discuss rebuild</button>`];
+      decActions=[`<span class="dec-caption">Its signed inputs changed. Re-select or upload the current Scene Plate before approval; no generation is required.</span>`,
+        `<div style="margin-top:8px">${slSourceChoices('Use current Scene Plate',false)}</div>`];
     } else if(sl.status=="working"){
       const shot=firstSceneShot(),shotId=shot.shotId||`S${SH_SC}.SH1`;
       decTitle="Continue to Shot 1";

@@ -88,8 +88,10 @@ class Native:
         plate = file_record(self.root,(plate_status.get('active') or plate_status.get('candidate') or plate_status.get('approved') or {}).get('path'))
         see = led.get('keyframeCandidate') or led.get('keyframeApproval') or {}
         image = file_record(self.root, see.get('path') or led.get('keyframePath'))
-        plate_review = ('pending' if plate_status.get('candidate') else
-                        'approved' if plate_status.get('current') or plate_status.get('approved') else 'missing')
+        plate_review = ('pending' if plate_status.get('candidate') and plate_status.get('candidateCurrent') else
+                        'stale' if plate_status.get('candidate') else
+                        'approved' if plate_status.get('current') else
+                        'stale' if plate_status.get('approved') else 'missing')
         opening_review = ('pending' if led.get('keyframeCandidate') else
                           'approved' if (led.get('keyframeApproval') or {}).get('approved') else 'missing')
         audio = file_record(self.root, led.get('voPath'))
@@ -104,10 +106,22 @@ class Native:
             spoken = [{'speaker':line['speaker'], 'exactText':line['exactDialogue']}
                       for line in board.get('voicePerformances', [])]
         has_audio = bool(spoken)
+        projection_issues = []
         see_current = bool(image and (led.get('keyframeApproval') or {}).get('approved') and not led.get('keyframeCandidate'))
         if see_current:
-            see_current = bool(R._keyframe_record_status(pkg, shot, led['keyframeApproval'], scope['scene'], scope['episode']).get('current'))
-        voice_status = R._voice_approval_status(pkg, shot, scope['scene'], scope['episode']) if shot else {}
+            try:
+                see_current = bool(R._keyframe_record_status(
+                    pkg, shot, led['keyframeApproval'], scope['scene'],
+                    scope['episode']).get('current'))
+            except (R.Refused, OSError, ValueError, KeyError) as exc:
+                see_current = False
+                projection_issues.append(str(exc))
+        try:
+            voice_status = R._voice_approval_status(
+                pkg, shot, scope['scene'], scope['episode']) if shot else {}
+        except (R.Refused, OSError, ValueError, KeyError) as exc:
+            voice_status = {'current': False, 'reason': str(exc)}
+            projection_issues.append(str(exc))
         audio_current = not has_audio or bool(voice_status.get('current'))
         phase = ('complete' if led.get('status') == 'approved' else
                  'film' if videos and led.get('status') == 'candidates-pending' else
@@ -117,7 +131,15 @@ class Native:
             # Already accepted performances are reused, with a single render decision.
             phase = 'audio'
         dependency = None
-        references = R.shot_reference_manifest(scope['scene'],scope['unit'],scope['episode']) if shot else {}
+        reference_issue = None
+        try:
+            references = R.shot_reference_manifest(
+                scope['scene'], scope['unit'], scope['episode']) if shot else {}
+        except (R.Refused, OSError, ValueError, KeyError) as exc:
+            # A read-only journey projection must still show the human-reviewable media.
+            # WATCH/preflight keeps the hard reference gate; projection surfaces the issue.
+            references = {}
+            reference_issue = str(exc)
         for section in ('keyframe','animation'):
             for ref in (references.get(section) or {}).get('references', []):
                 asset = file_record(self.root,ref.get('path'))
@@ -146,6 +168,7 @@ class Native:
                   'boardHash': digest(board),
                   'lineage': {k: deepcopy(led.get(k)) for k in ('batchId','watchRetake','watchRetakeHistory')},
                   'audioIssue': voice_status.get('reason'),
+                  'issues': projection_issues + ([reference_issue] if reference_issue else []),
                   'evidencePath': str(self.root / 'cb-output' / f"{scope['episode']}_scene{scope['scene']}_production_package.json")}
         import cb_episode_budget
         budget = cb_episode_budget.status(scope['episode'])

@@ -22,12 +22,12 @@ function mount(host,scope,options={}){
   const card=node('article',undefined,'journey-image-card'),figure=node('figure');
   const image=node('img');image.src=record.url;image.alt=(record.label||'SEE image')+' for '+scope.unit;
   figure.append(node('figcaption',record.label||'SEE image'),image);card.append(figure);
-  const status=node('p',record.reviewStatus==='approved'?'Approved':record.reviewStatus==='pending'?'Awaiting decision':'Needs image');status.className='journey-image-status';
+  const status=node('p',record.reviewStatus==='approved'?'Approved':record.reviewStatus==='pending'?'Awaiting decision':record.reviewStatus==='stale'?'Refresh required':'Needs image');status.className='journey-image-status';
   const controls=node('div',undefined,'journey-image-actions');
   for(const [action,label] of [['approved','Approve'],['rejected','Reject'],['refire','Refire']]){
    const button=node('button',label,'btn '+(action==='refire'?'ghost':''));
    button.type='button';button.setAttribute('aria-label',label+' '+(record.label||'SEE image'));
-   button.disabled=action==='approved'&&record.reviewStatus==='approved'||action==='rejected'&&record.reviewStatus!=='pending';
+   button.disabled=action==='approved'&&record.reviewStatus!=='pending'||action==='rejected'&&record.reviewStatus!=='pending';
    button.onclick=async()=>{
     if(!options.imageAction||button.disabled)return;
     let reason='';
@@ -53,7 +53,7 @@ function mount(host,scope,options={}){
   }
   const seePackage=review.seePackage||{}, sheet=seePackage.providerSheet?.media, gridAllowed=review.storyboardRequired!==false;
   const imageRecords=Array.isArray(review.images)?review.images:[], plateApproved=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='approved'), openingApproved=imageRecords.some(item=>item?.component==='opening'&&item.reviewStatus==='approved');
-  const gridIssues=Array.isArray(seePackage.issues)?seePackage.issues.filter(Boolean):[], approvalBlock=!plateApproved?'Approve scene plate first':!openingApproved?'Approve opening keyframe first':'', gridBlocked=gridIssues.length>0||!!approvalBlock;
+  const gridIssues=Array.isArray(seePackage.issues)?seePackage.issues.filter(Boolean):[], stalePlate=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='stale'), approvalBlock=!plateApproved?(stalePlate?'Refresh scene plate first':'Approve scene plate first'):!openingApproved?'Approve opening keyframe first':'', gridBlocked=gridIssues.length>0||!!approvalBlock;
   const gridLabel=sheet?'Storyboard grid ready':!gridAllowed?'Storyboard skipped':gridIssues.length?'Resolve SEE issue first':approvalBlock||'Build Seedance storyboard grid';
   const gridButton=node('button',gridLabel,'btn ghost');gridButton.type='button';gridButton.dataset.storyboardGrid='1';gridButton.disabled=!!sheet||!options.storyboardGridAction||!gridAllowed||gridBlocked;if(gridBlocked)gridButton.title=String(gridIssues[0]||approvalBlock);
   if(options.storyboardGridAction&&!sheet){gridButton.onclick=async()=>{gridButton.disabled=true;gridButton.textContent='Building storyboard grid…';try{await options.storyboardGridAction({review});}catch(error){gridButton.disabled=false;gridButton.textContent=error.message||'Build Seedance storyboard grid';}};}

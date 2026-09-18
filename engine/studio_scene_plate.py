@@ -3,6 +3,7 @@ from pathlib import Path
 from copy import deepcopy
 import hashlib
 import json
+from studio_roots import data_root, relative_trusted, trusted_path
 
 VERSION = 'scene-plate-authority@1'
 ROLES = {'ENVIRONMENT_IDENTITY', 'SCENE_LOOK', 'LOCATION_REFERENCE', 'PROP_REFERENCE',
@@ -17,13 +18,23 @@ def file_hash(path):
 def source(name, value, revision=None):
     return {'source': name, 'revision': revision, 'hash': digest(value), 'value': deepcopy(value)}
 
+def _trusted_resolve(root, value):
+    root = Path(root).resolve()
+    raw = Path(value)
+    if not raw.is_absolute():
+        raw = data_root(root) / raw
+    return trusted_path(raw, root)
+
+def _trusted_label(root, path):
+    return relative_trusted(path, root)
+
 def authority_file(root, path, expected=None):
-    root = Path(root).resolve(); path = (root/path).resolve()
-    path.relative_to(root)
+    path = _trusted_resolve(root, path)
+    label = _trusted_label(root, path)
     actual = file_hash(path)
     if expected and expected != actual:
-        raise ValueError('SEE_SCENE_PLATE_AUTHORITY_STALE: '+str(path.relative_to(root)))
-    return {'source': str(path.relative_to(root)), 'revision': actual, 'hash': actual, 'value': path.read_text()}
+        raise ValueError('SEE_SCENE_PLATE_AUTHORITY_STALE: '+label)
+    return {'source': label, 'revision': actual, 'hash': actual, 'value': path.read_text()}
 
 def conflict(a, b, prop):
     raise ValueError('SEE_SCENE_PLATE_AUTHORITY_CONFLICT: '+json.dumps({
@@ -67,7 +78,7 @@ def compile_plate(root, *, bible, references, director, script, look, settings, 
             raise ValueError('SEE_SCENE_PLATE_REFERENCE_UNAPPROVED: '+str(ref.get('assetId')))
         if ref.get('role') not in ROLES or not ref.get('approvalRevision'):
             raise ValueError('SEE_SCENE_PLATE_REFERENCE_PROVENANCE_MISSING')
-        path = (Path(root)/ref['path']).resolve(); path.relative_to(Path(root).resolve())
+        path = _trusted_resolve(root, ref['path'])
         actual = file_hash(path)
         if ref.get('currentness') == 'stale' or ref.get('mediaHash') != actual:
             raise ValueError('SEE_SCENE_PLATE_AUTHORITY_STALE: '+ref['path'])
@@ -152,13 +163,13 @@ def director_source(shot, revision=None):
 def reference(root, row, role, source_name):
     path = row.get('path') or row.get('image') or row.get('master')
     if not path or row.get('approvalStatus') != 'approved': return None
-    resolved = (Path(root)/path).resolve(); resolved.relative_to(Path(root).resolve())
+    resolved = _trusted_resolve(root, path)
     actual = file_hash(resolved)
     expected = row.get('mediaHash') or row.get('sha256') or row.get('hash')
     if expected and expected != actual:
         raise ValueError('SEE_SCENE_PLATE_AUTHORITY_STALE: '+str(path))
     return {'role':role,'assetId':row.get('assetId') or row.get('id') or row.get('name') or str(path),
-            'path':str(resolved.relative_to(Path(root).resolve())), 'mediaHash':actual,
+            'path':_trusted_label(root, resolved), 'mediaHash':actual,
             'approvalStatus':'approved', 'approvalRevision':row.get('approvalRevision') or row.get('version') or digest(row),
             'source':source_name,'currentness':'current','description':row.get('description',row.get('notes','')),
             'facts':row.get('facts',{})}
@@ -183,7 +194,8 @@ def native_request(root, scene, episode, renderer=None, reference_path=None, *,
     bible.append(profile_source)
     locations = json.loads(canon['locations'].read_text())
     world = (locations.get(str(episode)) or {}).get(str(scene)) or {}
-    bible.append(source(str(canon['locations'].relative_to(root))+'#'+str(episode)+'/'+str(scene),world,file_hash(canon['locations'])))
+    locations_label = _trusted_label(root, canon['locations'])
+    bible.append(source(locations_label+'#'+str(episode)+'/'+str(scene),world,file_hash(canon['locations'])))
     shots = pkg.get('shots') or []
     if not shots: raise ValueError('SEE_SCENE_PLATE_AUTHORITY_MISSING: current scene direction')
     director,current_state = director_source(shots[0],pkg.get('revision'))
@@ -198,9 +210,10 @@ def native_request(root, scene, episode, renderer=None, reference_path=None, *,
     rows = list(world.get('references') or [])
     if world.get('master'): rows.insert(0,{**world,'path':world['master'],'name':world.get('name'),'role':'ENVIRONMENT_IDENTITY'})
     for row in rows:
-        item = reference(root,row,row.get('role','LOCATION_REFERENCE'),str(canon['locations'].relative_to(root)))
+        item = reference(root,row,row.get('role','LOCATION_REFERENCE'),locations_label)
         if item: refs.append(item)
-    if reference_path and not any((root/r['path']).resolve()==Path(reference_path).resolve() for r in refs):
+    if reference_path and not any(_trusted_resolve(root, r['path']) == _trusted_resolve(root, reference_path)
+                                  for r in refs):
         raise ValueError('SEE_SCENE_PLATE_REFERENCE_UNAPPROVED: the supplied reference must be registered as approved for this location.')
     from studio_seedream_size import crystal_bears_aspect
     from cb_gen import SEEDREAM_MODEL_ID

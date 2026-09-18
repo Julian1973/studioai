@@ -4193,6 +4193,7 @@ function renderSceneLookStage(){
     } else if(sl.status=="stale"){
       decVersion="World inputs changed";
       decActions=[`<div class="dec-caption" style="color:var(--warn)">The location, lighting or style input changed. Rebuild the world anchor; its proof will be the next keyframe.</div>`,
+        `<div style="margin-top:8px">${slSourceChoices('Use current Scene Plate',false)}</div>`,
         `<div style="margin-top:8px">${slSourceChoices(GEN_LABEL,true)}</div>`];
     } else if(sl.status=="rejected"){
       decVersion="Rejected — see History below";
@@ -6976,12 +6977,18 @@ async function shOpenFrameLibraryPick(tok,path,outcome){
 // Uploading a plate for use is the user's approval, recorded by the shared scene selector.
 // Uploading a reference for a future generation remains a distinct operation.
 function slSourceChoices(genLabel,regenerate){
+  const reuseCurrent=genLabel==='Use current Scene Plate';
   return `<div class="ofc">
-    <div class="ofc-row"><button class="btn" onclick="startScenePlateGeneration(${!!regenerate})">${genLabel}</button></div>
+    <div class="ofc-row"><button class="btn" ${reuseCurrent?'onclick="reuseCurrentScenePlate()"':'onclick="startScenePlateGeneration('+!!regenerate+')"'}>${genLabel}</button></div>
     <div class="ofc-row"><button class="btn ghost" onclick="document.getElementById('slUpload').click()">⇧ Upload and use approved scene plate — no generation cost</button>
       <input type="file" id="slUpload" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="slUpload(this)"/></div>
     <div class="ofc-row"><button class="btn ghost" onclick="slLibrary()">▤ Choose from library — no generation cost</button></div>
   </div>`;
+}
+async function reuseCurrentScenePlate(){
+  const path=SH_SCENELOOK&&SH_SCENELOOK.approved&&SH_SCENELOOK.approved.path;
+  if(!path){showToast('No approved Scene Plate is available to reuse.',false);return;}
+  await slSelectReplacement('select-scenelook-library',path,'Re-selecting the current Scene Plate');
 }
 function startScenePlateGeneration(regenerate){
   const pending=!!(SH_SCENELOOK&&(SH_SCENELOOK.candidate||SH_SCENELOOK.activeSource==="working"||SH_SCENELOOK.status==="working"));

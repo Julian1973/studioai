@@ -852,6 +852,8 @@ def test_scene_plate_library_replacement_archives_pending_candidate_first():
     assert 'function slSelectReplacement(cmd,sourcePath,progressLabel)' in APP
     assert "slSelectReplacement('select-scenelook-library',file" in APP
     assert "slSelectReplacement('select-scenelook-upload',j.sourcePath" in APP
+    assert 'function reuseCurrentScenePlate()' in APP
+    assert "select-scenelook-library',path" in APP
     assert 'shRun("reject-scenelook",null,{' in APP
     assert 'afterJob:job=>{if(job&&job.status==="done")install();}' in APP
 

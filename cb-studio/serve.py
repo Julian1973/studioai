@@ -13,6 +13,21 @@ sys.path.insert(0, str(CBGEN))   # FIXED 2026-07-17 (state-integrity checkpoint)
 # in-process, which raised "No module named 'cb_costs'" until now. cb_costs.py is a pure,
 # side-effect-free module at import time (constants + a path string) — safe to add once, here.
 MEDIA = ROOT / "engine" / "media"
+
+def _trusted_scene_source(path):
+    """Accept reusable scene media only from the configured source/data media roots."""
+    from studio_roots import data_root
+    resolved = pathlib.Path(path).expanduser().resolve()
+    data = data_root(ROOT)
+    roots = tuple(dict.fromkeys((
+        MEDIA.resolve(), (data / "engine" / "media").resolve(),
+        (data / "media").resolve(), (ROOT / "cb-seed" / "assets").resolve(),
+        (data / "cb-seed" / "assets").resolve(),
+    )))
+    if not resolved.is_file() or not any(resolved.is_relative_to(base) for base in roots):
+        raise ValueError("sourcePath must be an existing file under a trusted Studio media root")
+    return str(resolved)
+
 OUT = ROOT / "cb-output"
 DATA = ROOT / "cb-studio" / "data"
 DATA.mkdir(parents=True, exist_ok=True)
@@ -5718,14 +5733,9 @@ class H(http.server.SimpleHTTPRequestHandler):
                     if not source_path or not isinstance(source_path, str):
                         self._json(400, {"error": f"{cmd} needs a sourcePath"}); return
                     try:
-                        sp = pathlib.Path(source_path).resolve()
-                        _roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
-                        if not sp.exists() or not any(sp.is_relative_to(r) for r in _roots):
-                            self._json(400, {"error": "sourcePath must be an existing file under "
-                                                       "engine/media or cb-seed/assets"}); return
+                        source_path = _trusted_scene_source(source_path)
                     except Exception:
-                        self._json(400, {"error": "sourcePath is not a valid path"}); return
-                    source_path = str(sp)
+                        self._json(400, {"error": "sourcePath must be an existing file under a trusted Studio media root"}); return
                 elif cmd == "scenelook" and source_path is not None:
                     # THE SCENE LOOK PROVIDER-ROUTING FIX (2026-07-19): OPTIONAL for this cmd — an
                     # explicitly selected location/style reference, never auto-picked from the Asset

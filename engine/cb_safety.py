@@ -25,6 +25,7 @@ import cb_providers
 import cb_production_contracts as production_contracts
 import studio_prompt_aliases
 from studio_prompt_director import current_shot_authority
+from studio_roots import data_root
 
 
 def selected_voice_recipe(recipes, selected, candidates, current_compiled_hash=None):
@@ -49,15 +50,25 @@ def _legacy_uploaded_look_candidate_is_current(candidate, expected, upload_root)
     """Accept older upload records only when their current direct inputs still match."""
     recorded = candidate.get("inputSignature") or {}
     path = pathlib.Path(candidate.get("path") or "").resolve()
-    try:
-        path.relative_to(pathlib.Path(upload_root).resolve())
-    except ValueError:
+    roots = upload_root if isinstance(upload_root, (tuple, list, set)) else (upload_root,)
+    if not any(
+        _path_is_under(path, pathlib.Path(root).resolve())
+        for root in roots
+    ):
         return False
     return (
         recorded.get("briefHash") == expected.get("briefHash")
         and recorded.get("referenceHashes") == expected.get("referenceHashes")
         and candidate.get("hash") == expected.get("plateHash")
     )
+
+
+def _path_is_under(path, root):
+    try:
+        path.relative_to(root)
+        return True
+    except ValueError:
+        return False
 
 
 def uses_isolated_voice_assembly(shot, lines):
@@ -684,7 +695,11 @@ def create_policy(m):
             scene, episode, candidate.get("path"), candidate.get("referencePath"))
         signature_current = candidate.get("inputSignature") == expected
         legacy_upload_current = _legacy_uploaded_look_candidate_is_current(
-            candidate, expected, m.HERE / "media" / "uploads_incoming")
+            candidate, expected, (
+                m.HERE / "media" / "uploads_incoming",
+                data_root(m.ROOT) / "engine" / "media" / "uploads_incoming",
+                data_root(m.ROOT) / "media" / "uploads_incoming",
+            ))
         if not signature_current and not legacy_upload_current:
             raise m.Refused("REFUSED — current Look direction changed after this candidate was generated")
         return original["approve_scenelook"](scene, episode, reviewed_by, log)

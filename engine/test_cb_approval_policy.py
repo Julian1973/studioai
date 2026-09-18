@@ -33,6 +33,44 @@ def test_legacy_uploaded_scene_look_uses_current_direct_inputs_only(tmp_path):
     candidate["inputSignature"]["briefHash"] = "brief-stale"
     assert not cb_safety._legacy_uploaded_look_candidate_is_current(
         candidate, expected, upload_root)
+
+
+def test_legacy_uploaded_scene_look_accepts_trusted_data_root_only(tmp_path, monkeypatch):
+    source = tmp_path / "release"
+    data = tmp_path / "production-data"
+    upload_root = data / "engine" / "media" / "uploads_incoming"
+    upload_root.mkdir(parents=True)
+    external = tmp_path / "external.jpg"
+    external.write_bytes(b"external")
+    plate = upload_root / "uploaded.jpg"
+    plate.write_bytes(b"uploaded-scene-look")
+    expected = {
+        "briefHash": "brief-current",
+        "referenceHashes": {},
+        "plateHash": hashlib.sha256(plate.read_bytes()).hexdigest(),
+    }
+    candidate = {
+        "path": str(plate),
+        "hash": expected["plateHash"],
+        "inputSignature": {"briefHash": "brief-current", "referenceHashes": {}},
+    }
+    monkeypatch.setenv("STUDIO_DATA_ROOT", str(data))
+    roots = (
+        source / "engine" / "media" / "uploads_incoming",
+        data / "engine" / "media" / "uploads_incoming",
+    )
+    assert source != data
+    assert pathlib.Path.cwd() not in (source, data)
+    assert cb_safety._legacy_uploaded_look_candidate_is_current(candidate, expected, roots)
+
+    candidate["path"] = str(external)
+    assert not cb_safety._legacy_uploaded_look_candidate_is_current(candidate, expected, roots)
+    candidate["path"] = str(upload_root / ".." / ".." / ".." / "external.jpg")
+    assert not cb_safety._legacy_uploaded_look_candidate_is_current(candidate, expected, roots)
+    escaped = upload_root / "symlink.jpg"
+    escaped.symlink_to(external)
+    candidate["path"] = str(escaped)
+    assert not cb_safety._legacy_uploaded_look_candidate_is_current(candidate, expected, roots)
     candidate["inputSignature"]["briefHash"] = "brief-current"
     candidate["path"] = str(tmp_path / "external.jpg")
     assert not cb_safety._legacy_uploaded_look_candidate_is_current(

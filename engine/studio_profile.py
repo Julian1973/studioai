@@ -116,7 +116,11 @@ def load_show_profile(repo_root=None, show_id=None) -> LoadedShowProfile:
     shows_root = (root / "shows").resolve()
     show_root = (shows_root / selected).resolve()
     try:
-        trusted_path(show_root, root)
+        # A clean release keeps immutable code in SOURCE_ROOT and show data in
+        # DATA_ROOT. The shows link may therefore resolve outside the source
+        # checkout, but it must still land under one of the configured roots.
+        if not any(show_root.is_relative_to(trusted) for trusted in trusted_roots(root)):
+            raise ValueError("show tenant is outside configured Studio roots")
     except ValueError as exc:
         raise ShowProfileError("selected show escapes the shows directory") from exc
     profile_path = show_root / "profile.json"

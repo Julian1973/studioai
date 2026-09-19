@@ -63,6 +63,18 @@ def test_profile_rejects_path_escape_and_invalid_show_id(tmp_path):
         studio_profile.load_show_profile(tmp_path, "../moon-lanterns")
 
 
+def test_profile_accepts_show_tenant_in_configured_data_root(tmp_path, monkeypatch):
+    source = tmp_path / "release"
+    data = tmp_path / "trusted-data"
+    show = _profile(data, "moon-lanterns", adapter="moon-lanterns-v1")
+    (source / "shows").parent.mkdir(parents=True)
+    (source / "shows").symlink_to(data / "shows", target_is_directory=True)
+    monkeypatch.setenv("STUDIO_DATA_ROOT", str(data))
+    loaded = studio_profile.load_show_profile(source, "moon-lanterns")
+    assert loaded.show_root == show
+    assert loaded.profile.showId == "moon-lanterns"
+
+
 def test_script_store_isolates_a_second_show(tmp_path):
     _profile(tmp_path)
     store = cb_scripts.ScriptStore(tmp_path, show_id="moon-lanterns")

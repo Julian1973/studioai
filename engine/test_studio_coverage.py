@@ -195,3 +195,59 @@ def test_coverage_renderer_escapes_authored_text_and_does_not_invent_drawings():
     assert(!out.includes('<img'));
     '''
     subprocess.run(['node','-e',script],check=True,capture_output=True)
+
+
+def test_clip_allocation_carries_the_scene_camera_record_and_the_hold():
+    """Gate 4 packs; it never drops the Director's camera. Lens, movement, light, composition,
+    kind, motivation, whose eye-line, who reacts, who is visible and the exact framing ride
+    through to the Native handoff, and a hold stays a hold."""
+    from types import SimpleNamespace
+    from cb_creative import StoryboardInternalShot, _validate_scene_view_allocation
+    from studio_director_card import SceneCoverage
+    source = {**view(), 'entry': 'hold', 'viewpointOwner': 'Zenny', 'listenerReaction': 'One blink.',
+              'visibleEntities': ['character:Zenny'], 'framing': 'CU on Zenny at the flower rim',
+              'cinematography': {'kind': 'reaction', 'motivation': 'LAUGH', 'attention': 'stillness',
+                                 'lens': '50mm — honest', 'movement': 'locked off',
+                                 'light': 'warm-neutral frontal', 'composition': 'right third, negative space left'}}
+    scene = SceneCoverage(scene=1, audienceJourney='Trust', views=[source])
+    packed = StoryboardInternalShot(shotNumber=1, viewId=source['viewId'], transitionType='cut',
+        framingAndCamera='x', purpose='x', storyAction='x', performanceFocus='x', landingImage='x', cutReason='x')
+    _validate_scene_view_allocation(SimpleNamespace(sceneCoverage=[scene]),
+        [SimpleNamespace(shotId='S1.SH1', internalShotPlan=[packed])])
+    assert packed.transitionType == 'hold'
+    assert packed.cinematography == source['cinematography'] and packed.cinematography is not source['cinematography']
+    assert packed.viewpointOwner == 'Zenny' and packed.listenerReaction == 'One blink.'
+    assert packed.visibleEntities == ['character:Zenny'] and packed.framing == source['framing']
+    assert packed.continuity == source['continuity']
+
+
+def test_native_handoff_card_keeps_the_camera_record_and_the_hold():
+    from studio_director_handoff import validate
+    plan = [dict(viewId='v1', transitionType='opening', purpose='Find her', framingAndCamera='MS on Zenny. Find her',
+                 framing='MS on Zenny', staging='At the rim', startState='A', endState='B', storyAction='She waits.',
+                 performanceFocus='Still.', landingImage='B', cutReason='KNOW', continuity='Same rim',
+                 viewpointOwner='Zenny', visibleEntities=['character:Zenny'],
+                 cinematography={'kind': 'master', 'lens': '35mm — present', 'movement': 'slow dolly in'}),
+            dict(viewId='v2', transitionType='hold', purpose='The deadpan', framingAndCamera='CU on Zenny. The deadpan',
+                 framing='CU on Zenny', staging='At the rim', startState='B', endState='C', storyAction='She blinks once.',
+                 performanceFocus='Deadpan.', landingImage='C', cutReason='LAUGH', viewpointOwner='Zenny',
+                 listenerReaction='One blink.', visibleEntities=['character:Zenny'],
+                 cinematography={'kind': 'hold', 'lens': '50mm — honest', 'movement': 'locked off',
+                                 'composition': 'right third'})]
+    shot = {'shotId': 'S1.SH1', 'durationSec': 6, 'storyboardInternalShotPlanApproved': plan,
+            'storyIntentApproved': {'mustUnderstand': 'She stays.', 'narrativeFunction': 'Zenny decides to stay.'},
+            'performanceContractApproved': {'requiredLanding': 'C', 'characters': []}}
+    prepared = {'timedViews': [{'viewId': 'v1', 'atSec': 0, 'endSec': 3, 'visibleEntities': ['character:Zenny'], 'criticalStateEntities': []},
+                               {'viewId': 'v2', 'atSec': 3, 'endSec': 6, 'visibleEntities': ['character:Zenny'], 'criticalStateEntities': []}],
+                'stateChanges': [], 'openingObservedStates': [], 'observationLimitations': 'fixture'}
+    views = validate(prepared, shot)['direction']['views']
+    assert views[0]['framing'] == 'MS on Zenny' and views[0]['cinematography']['lens'] == '35mm — present'
+    assert views[1]['entry'] == 'hold' and views[1]['cinematography']['movement'] == 'locked off'
+    assert views[1]['viewpointOwner'] == 'Zenny' and views[1]['listenerReaction'] == 'One blink.'
+    assert views[0]['continuity'] == 'Same rim'
+    # older plans without the record still read
+    for old in plan:
+        for key in ('framing', 'continuity', 'viewpointOwner', 'listenerReaction', 'visibleEntities', 'cinematography'):
+            old.pop(key, None)
+    legacy = validate(prepared, shot)['direction']['views']
+    assert legacy[0]['framing'] == 'MS on Zenny. Find her' and legacy[1]['cinematography'] == {}

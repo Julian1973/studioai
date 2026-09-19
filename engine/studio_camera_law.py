@@ -16,37 +16,50 @@ import os
 import re
 from pathlib import Path
 
-VERSION = 'camera-law@1.0.0'
+VERSION = 'camera-law@1.1.0'
 NON_CHARACTER_KINDS = {'establishing', 'world_texture', 'transition'}
 
 
 def load(show_root=None, characters=None):
-    """Return (grammar, characters) or (None, {}) when the show has not opted in."""
-    try:
-        if show_root is None:
-            import paths as P
-            show_root = Path(P.SHOW)
-            characters = characters if characters is not None else json.load(open(P.CHARS))
-        show_root = Path(show_root)
-        grammar_path = None
-        profile_path = show_root / 'profile.json'
-        if profile_path.is_file():
-            declared = (json.loads(profile_path.read_text()).get('laws') or {}).get('shotGrammar')
-            if isinstance(declared, str):
-                grammar_path = show_root / declared
-            elif isinstance(declared, dict) and declared.get('file'):
-                grammar_path = show_root / declared['file']
-        if grammar_path is None:
-            grammar_path = show_root / 'laws' / 'shot_grammar.json'
-        if not grammar_path.is_file():
-            return None, {}
-        grammar = json.loads(grammar_path.read_text())
+    """Return (grammar, characters), or (None, {}) when the show has not opted in.
+
+    Opting out is a missing grammar file. A grammar or canon file that exists but cannot be
+    read is an error, raised loudly: the camera law must never vanish from a prompt in
+    silence."""
+    if show_root is None:
+        import paths as P
+        show_root = Path(P.SHOW)
         if characters is None:
-            chars_path = show_root / 'canon' / 'characters.json'
-            characters = json.loads(chars_path.read_text()) if chars_path.is_file() else {}
-        return grammar, characters or {}
-    except Exception:
+            characters = json.load(open(P.CHARS))
+    show_root = Path(show_root)
+    grammar_path = None
+    profile_path = show_root / 'profile.json'
+    if profile_path.is_file():
+        try:
+            declared = (json.loads(profile_path.read_text()).get('laws') or {}).get('shotGrammar')
+        except ValueError as error:
+            raise ValueError(f'show profile is not valid JSON: {profile_path}: {error}') from error
+        if isinstance(declared, str):
+            grammar_path = show_root / declared
+        elif isinstance(declared, dict) and declared.get('file'):
+            grammar_path = show_root / declared['file']
+    if grammar_path is None:
+        grammar_path = show_root / 'laws' / 'shot_grammar.json'
+    if not grammar_path.is_file():
         return None, {}
+    try:
+        grammar = json.loads(grammar_path.read_text())
+    except ValueError as error:
+        raise ValueError(f'shot grammar is not valid JSON: {grammar_path}: {error}') from error
+    if not isinstance(grammar, dict):
+        raise ValueError(f'shot grammar must be a JSON object: {grammar_path}')
+    if characters is None:
+        chars_path = show_root / 'canon' / 'characters.json'
+        try:
+            characters = json.loads(chars_path.read_text()) if chars_path.is_file() else {}
+        except ValueError as error:
+            raise ValueError(f'canon characters is not valid JSON: {chars_path}: {error}') from error
+    return grammar, characters or {}
 
 
 def _height_in(name, characters):

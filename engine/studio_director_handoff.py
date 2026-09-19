@@ -147,19 +147,27 @@ def validate(prepared, shot):
     performance = shot.get('performanceContractApproved') or {}
     views = []
     for old, timing in zip(original, value['timedViews']):
+        # The scene Director's camera decisions ride through unchanged: the exact ladder
+        # framing, the cinematography record (kind, motivation, lens, movement, focus,
+        # light, composition), whose eye-line the view lives at, who reacts, and a hold
+        # that the allocation kept as a hold. Older plans without them still read.
+        transition = old.get('transitionType')
         views.append(dict(viewId=old['viewId'], atSec=timing['atSec'],
             timing=f"{timing['atSec']:g}–{timing['endSec']:g}s",
-            visibleEntities=timing['visibleEntities'], criticalStateEntities=timing['criticalStateEntities'],
+            visibleEntities=timing['visibleEntities'] if timing.get('visibleEntities') is not None else old.get('visibleEntities'),
+            criticalStateEntities=timing['criticalStateEntities'],
             audienceNeed=old.get('purpose') or old.get('storyAction'),
-            framing=old.get('framingAndCamera') or old.get('staging'),
+            framing=old.get('framing') or old.get('framingAndCamera') or old.get('staging'),
             cameraPurpose=old.get('purpose') or old.get('cutReason'),
             cutReason=old.get('cutReason') or 'Preserve approved coverage',
-            continuity=old.get('startState') or old.get('staging'),
+            continuity=old.get('continuity') or old.get('startState') or old.get('staging'),
             productionChoice='controlled multi-shot clip' if len(original)>1 else 'current clip',
-            entry='opening' if not views else ('move' if old.get('transitionType')=='move' else 'cut'),
+            entry='opening' if not views else (transition if transition in ('move', 'hold') else 'cut'),
             staging=old.get('staging'), action=old.get('storyAction'),
             performance=old.get('performanceFocus'), startState=old.get('startState'),
-            endState=old.get('endState') or old.get('landingImage'), cutTo=old.get('cutTo') or None))
+            endState=old.get('endState') or old.get('landingImage'), cutTo=old.get('cutTo') or None,
+            viewpointOwner=old.get('viewpointOwner'), listenerReaction=old.get('listenerReaction'),
+            cinematography=dict(old.get('cinematography') or {})))
     events = [dict(entityId=e['entityId'], atSec=e['atSec'], subject=e['entityId'],
         before=str(properties(e['before'])), after=str(properties(e['after'])), cause=e['cause'],
         beforeValues=properties(e['before']), afterValues=properties(e['after']), timing=f"{e['atSec']:g}s")

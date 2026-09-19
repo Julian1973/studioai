@@ -55,6 +55,7 @@ import datetime
 import fcntl
 import hashlib
 import json
+from copy import deepcopy
 import os
 import pathlib
 import re
@@ -472,6 +473,16 @@ class StoryboardInternalShot(BaseModel):
     cutReason: str = Field(
         min_length=1,
         description="Why this view or internal cut is stronger than remaining on the prior view.")
+    # Carried verbatim from the scene coverage view by allocation (never authored here):
+    # the camera and light record, whose eye-line the view lives at, who reacts, who is
+    # visible, the exact ladder framing and the continuity note. Dropping any of these
+    # at Gate 4 was how the Director's camera never reached the Seedance prompt.
+    framing: Optional[str] = None
+    continuity: Optional[str] = None
+    viewpointOwner: Optional[str] = None
+    listenerReaction: Optional[str] = None
+    visibleEntities: Optional[List[str]] = None
+    cinematography: dict = Field(default_factory=dict)
 
 
 class StoryboardCard(BaseModel):
@@ -783,8 +794,10 @@ def _validate_scene_view_allocation(direction, shots):
             # model to repeat it creates a needless repair loop.
             view.transitionType = views[view.viewId]['entry']
             # Keep staging on the same signed view through Gate 4, handover and WATCH.
-            for field in ('staging', 'startState', 'endState', 'cutTo', 'timing'):
+            for field in ('staging', 'startState', 'endState', 'cutTo', 'timing', 'framing', 'continuity',
+                          'viewpointOwner', 'listenerReaction', 'visibleEntities'):
                 setattr(view, field, views[view.viewId].get(field))
+            view.cinematography = deepcopy(views[view.viewId].get('cinematography') or {})
             source = views[view.viewId]
             # Packing chooses provider units; it does not direct the scene again.
             # Preserve the authored coverage verbatim instead of trusting a second

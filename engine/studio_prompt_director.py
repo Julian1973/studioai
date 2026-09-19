@@ -391,11 +391,10 @@ def request_snapshot(prompt, authorities, references, audio, duration, settings=
     if 'cameraLaw' not in authorities:
         # Camera height derived from locked character heights (laws/shot_grammar.json); a
         # show that has not opted in gets nothing. Lives beside the shot, never in the card.
-        try:
-            from studio_camera_law import authority_for
-            derived = authority_for(authorities.get('shot') or {})
-        except Exception:
-            derived = {}
+        # A show without a grammar derives nothing; a broken grammar or canon file raises,
+        # so the camera law can never drop out of a prompt silently.
+        from studio_camera_law import authority_for
+        derived = authority_for(authorities.get('shot') or {})
         if derived:
             authorities['cameraLaw'] = derived
     return {'prompt': prompt, 'authorities': authorities,

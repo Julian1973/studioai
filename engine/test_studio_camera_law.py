@@ -106,3 +106,18 @@ def test_contract_asks_direct_for_camera_and_light_as_emotional_decisions():
     for phrase in ('stated in millimetres', '50 mm honest and still', 'lock the camera', 'never flat, never from nowhere',
                    'locked camera is a choice about stillness, never a default', 'composition in the view'):
         assert phrase in CONTRACT, phrase
+
+
+def test_broken_grammar_fails_loudly_and_missing_grammar_opts_out(tmp_path):
+    show = tmp_path / 'show'; (show / 'laws').mkdir(parents=True)
+    assert C.load(show_root=show) == (None, {})           # no file: opted out
+    (show / 'laws' / 'shot_grammar.json').write_text('{not json')
+    with pytest.raises(ValueError, match='shot grammar is not valid JSON'):
+        C.load(show_root=show)
+
+
+def test_world_camera_language_never_reads_as_a_request_parameter():
+    from cb_prompt_lab import _REQUEST_PARAMETER_WORDS
+    import re
+    for text in (GRAMMAR['cameraLanguage'], GRAMMAR['lightBaseline'], *(GRAMMAR['cameraByCharacter'].values())):
+        assert not _REQUEST_PARAMETER_WORDS.search(text), text

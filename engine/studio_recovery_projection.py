@@ -33,6 +33,16 @@ def _classify(value):
         return ('DIALOGUE_OCCURRENCE_MISSING', 'STALE_DEPENDENCY',
                 'Required dialogue occurrences are missing or inconsistent.',
                 'Repair exact occurrence assignments against the current dialogue contract; preserve approved words.')
+    from studio_producer_language import translate
+    reading = translate(value)
+    if reading['category'] != 'support':
+        category = {'direction': 'NEEDS_DIRECTOR_DECISION', 'audio': 'NEEDS_DIRECTOR_DECISION',
+                    'references': 'MISSING_UPSTREAM_STATE', 'request': 'STALE_DEPENDENCY',
+                    'money': 'NEEDS_APPROVAL', 'provider': 'PROVIDER_FAILURE',
+                    'images': 'MISSING_UPSTREAM_STATE', 'stale': 'STALE_DEPENDENCY',
+                    'setup': 'CONFIGURATION'}.get(reading['category'], 'NEEDS_DIRECTOR_DECISION')
+        return (reading.get('code') or reading['category'].upper(), category,
+                reading['headline'], reading['nextAction'])
     return ('UNKNOWN', 'UNKNOWN', 'The recorded cause is not classified.',
             'Open the recorded evidence for diagnosis.')
 

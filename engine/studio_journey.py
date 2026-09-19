@@ -113,6 +113,10 @@ class Journey:
                 scene_id=state['scope']['scene'], message=op['decision']['issue'],
                 attempt_id=op['id'], request_hash=(op.get('receipts',{}).get('prepare_render') or {}).get('envelopeHash'),
                 evidence_ref=op['decision'].get('evidence'))
+            # The producer reads a sentence and a next action; the raw cause stays in
+            # 'recovery' and 'issue' for production support.
+            from studio_producer_language import translate
+            op['decision']['producer'] = translate(op['decision']['issue'], stage=op.get('pending') or op.get('phase'))
         if op:
             shown=(op.get('receipts',{}).get('prepare_render') or {}).get('requestDisplay')
             if shown: op['requestDisplayHash']=digest(shown)

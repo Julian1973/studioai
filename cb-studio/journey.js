@@ -185,7 +185,7 @@ function mount(host,scope,options={}){
   issue.replaceChildren();
   // Superseded operations stay in the evidence drawer for audit, but must not
   // present an old failure as the current producer blocker.
-  if(decision){issue.append(node('strong',decision.issue),node('p',decision.proposed),node('p','Preserved: '+(decision.preserved||[]).join(', ')));}
+  if(decision){const pr=decision.producer;if(pr){issue.append(node('strong',pr.headline),node('p',pr.meaning),node('p',pr.nextAction),node('p',pr.preserved+(pr.code?' Reference: '+pr.code:'')));const tech=node('details','');tech.append(node('summary','Technical detail for support'),node('p',decision.issue),node('p',decision.proposed));issue.append(tech);}else{issue.append(node('strong',decision.issue),node('p',decision.proposed),node('p','Preserved: '+(decision.preserved||[]).join(', ')));}}
   for(const concern of state.concerns||[]){issue.append(node('p',typeof concern==='string'?concern:concern.message||concern.observation||''));}
   const seePackage=review.seePackage||{}, montageMissing=state.phase==='images'&&!!options.storyboardGridAction&&(seePackage.storyboardRequired??review.storyboardChoice?.required??review.storyboardRequired)!==false&&seePackage.providerSheet?.status!=='current';
   const imageRecords=Array.isArray(review.images)?review.images:[], plateApproved=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='approved'), openingApproved=imageRecords.some(item=>item?.component==='opening'&&item.reviewStatus==='approved');
@@ -199,7 +199,7 @@ function mount(host,scope,options={}){
   primary.hidden=state.phase==='complete';
   primary.disabled=state.busy||(!state.primary&&!decision&&!approvalOnly)||submitted||(montageMissing&&!montageActionable);
   if(approvalOnly){primary.textContent=state.phase==='film'?'Approve & Next':state.creativeReview.approveLabel;primary.disabled=state.busy||submitted;}
-  if(decision){primary.textContent='Check saved operation';primary.disabled=submitted;}
+  if(decision){primary.textContent=decision.producer?.button||'Check saved operation';primary.disabled=submitted;}
   if(requestPending){primary.textContent='Approve request & Fire';primary.disabled=submitted;const display=node('section');display.append(node('h3','WATCH · Final request'),node('pre',JSON.stringify(request,null,2)));brief.prepend(display);}
   cost.textContent=approvalOnly||montageMissing||decision?'No new generation cost.':state.disclosure?.limitUsd?'Maximum authorised spend: $'+state.disclosure.limitUsd.toFixed(2)+'. '+(state.disclosure.basis||''):'No new generation cost.';
   changes.disabled=state.busy||!options.changes;

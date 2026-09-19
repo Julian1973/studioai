@@ -37,7 +37,10 @@ def present(current, operation=None, busy=False):
     title={'review':f'Review your {noun}','ready':f'Create your {noun}',
            'preparing':f'Studio is preparing your {noun}',
            'waiting':'Waiting for Studio','complete':'Video approved'}[state]
-    message=('Your approved work is saved. Production support is needed before Studio can continue.' if waiting else
+    stopped=(operation.get('decision') or {}).get('issue') if waiting else None
+    from studio_producer_language import stopped_message
+    message=((stopped_message(stopped, stage=operation.get('pending')) if stopped else
+              'Your approved work is saved. Studio needs one more step before it can continue.') if waiting else
              'Your approved work stays available while Studio prepares the next result.' if busy else
              'Approve this version or request another version.' if state=='review' else
              'Studio handles direction, references and preparation.' if state=='ready' else
@@ -45,7 +48,8 @@ def present(current, operation=None, busy=False):
     if waiting and operation.get('intent')=='changes':
         title='Changes requested'
         message='Your feedback is saved with this version. Studio needs to prepare the revision before another video can be created.'
-    return {'stage':stage,'state':state,'title':title,'message':message,
+    producer=(operation.get('decision') or {}).get('producer') if waiting else None
+    return {'stage':stage,'state':state,'title':title,'message':message,'producer':producer,
             'canApprove':state=='review' and (stage!='see' or see is None or bool(see.get('ready'))),'canRequestChanges':state=='review', 'canCreate':state=='ready' and not (stage=='see' and see and see.get('directorApproved') and not see.get('ready')),
             'approveLabel':f'Approve {noun}','createLabel':f'Create {noun}',
             'alternativeLabel':'Request another version',

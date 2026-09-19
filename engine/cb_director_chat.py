@@ -99,7 +99,13 @@ def _scope_context(episode, scene, shot_id, stage, issue):
     department = (ledger.get("departmentWork") or {}).get(
         {"keyframe": "cinematography", "voice": "voice", "animation": "animation",
          "animation-edit": "animation", "animation-refire": "animation"}.get(stage, stage), {})
-    continuity_out = shot.get("continuityOut") or {}
+    # The production detail keeps the typed closing state in continuityOutState; the
+    # older continuityOut field is prose (a str). Reading the prose as a record stopped
+    # every Director conversation on a real package with "'str' object has no attribute 'get'".
+    continuity_out = shot.get("continuityOutState")
+    if not isinstance(continuity_out, dict):
+        continuity_out = shot.get("continuityOut") if isinstance(shot.get("continuityOut"), dict) else {}
+    continuity_prose = shot.get("continuityOut") if isinstance(shot.get("continuityOut"), str) else ""
     closing_characters = [
         {
             "character": item.get("character"), "screenZone": item.get("screenZone"),
@@ -122,6 +128,7 @@ def _scope_context(episode, scene, shot_id, stage, issue):
                 "cameraSide": continuity_out.get("cameraSide"),
                 "lighting": continuity_out.get("lighting"),
                 "characters": closing_characters,
+                "description": str(continuity_prose or "")[:700],
             },
         },
         "cameraTreatment": shot.get("camera"),

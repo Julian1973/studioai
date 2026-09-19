@@ -136,3 +136,22 @@ def test_animation_edit_passes_local_review_frames_and_persists_range(monkeypatc
     assert result["reply"]["editStartSec"] == 8.5
     assert result["messages"][-1]["editEndSec"] == 11
     assert result["zeroMediaSpend"] is True
+
+
+def test_chat_reads_the_typed_closing_state_and_never_treats_prose_continuity_as_a_record(monkeypatch, tmp_path):
+    """Real packages carry continuityOut as prose (str) and the typed state in
+    continuityOutState. The chat used to call .get on the prose and stop every Director
+    conversation with "'str' object has no attribute 'get'" (Ep4 scene 2, 19 Sep)."""
+    package = _package()
+    shot = package["shots"][0]
+    shot["continuityOut"] = "Aida holds the conker at the satchel, camera side left, lantern light."
+    shot["continuityOutState"] = {"cameraSide": "left", "lighting": "lantern",
+                                  "characters": [{"character": "Aida", "screenZone": "left", "pose": "seated", "expression": "warm"}]}
+    monkeypatch.setattr(chat.cb_render, "load_pkg", lambda scene, episode: (package, tmp_path / "pkg.json"))
+    context = chat._scope_context("Ep4", "2", "S1.SH1", "animation", "Open on the world.")
+    landing = context["orderedShotStates"]["landing"]
+    assert landing["cameraSide"] == "left" and landing["characters"][0]["character"] == "Aida"
+    assert landing["description"].startswith("Aida holds the conker")
+    shot.pop("continuityOutState")
+    context = chat._scope_context("Ep4", "2", "S1.SH1", "animation", "Open on the world.")
+    assert context["orderedShotStates"]["landing"]["characters"] == []

@@ -3202,8 +3202,27 @@ def shot_reference_manifest(scene, shot_id, episode="Ep1"):
                 })
         return entries
 
-    keyframe_entries = image_entries("keyframeReferenceSlots")
-    animation_entries = image_entries("referenceSlots", animation_anchor)
+    def unavailable_from_slots(slots_key, message):
+        raw = dict(shot.get(slots_key) or {})
+        roles = list(raw.values())
+        if slots_key == "keyframeReferenceSlots" and "scene plate" not in roles:
+            roles.append("scene plate")
+        if slots_key == "referenceSlots" and "opening keyframe" not in roles:
+            roles.append("opening keyframe")
+        return [{"position": index + 1, "slot": f"@Image{index + 1}",
+                 "sourceSlot": f"@Image{index + 1}", "role": str(role),
+                 "kind": "image", "status": "missing", "ready": False,
+                 "path": None, "fileName": None, "message": message}
+                for index, role in enumerate(roles) if role]
+
+    try:
+        keyframe_entries = image_entries("keyframeReferenceSlots")
+    except (Refused, OSError, ValueError, KeyError) as exc:
+        keyframe_entries = unavailable_from_slots("keyframeReferenceSlots", str(exc))
+    try:
+        animation_entries = image_entries("referenceSlots", animation_anchor)
+    except (Refused, OSError, ValueError, KeyError) as exc:
+        animation_entries = unavailable_from_slots("referenceSlots", str(exc))
     animation_slots = _effective_reference_slots(
         pkg, shot, "referenceSlots", scene, episode)
     audio_slot = next((slot for slot in animation_slots

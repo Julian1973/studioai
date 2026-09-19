@@ -104,6 +104,22 @@ function mount(host,scope,options={}){
    }
    inputSection.append(inputGrid);storyboard.append(inputSection);
   }
+  const referenceSections=Object.entries(review.references||{}).filter(([,section])=>section&&Array.isArray(section.references));
+  if(referenceSections.length||review.referenceIssue){
+   const referenceSection=node('section',undefined,'journey-reference-inputs');
+   referenceSection.append(node('h4','SEE references used for creation','journey-storyboard-input-title'));
+   if(review.referenceIssue)referenceSection.append(node('p','Reference audit: '+review.referenceIssue,'journey-reference-warning'));
+   const referenceGrid=node('div',undefined,'journey-storyboard-input-grid');
+   for(const [stage,section] of referenceSections){for(const record of section.references){
+    const figure=node('figure',undefined,'journey-storyboard-input journey-reference-input');
+    if(record.url){const image=node('img');image.src=record.url;image.alt=record.role||'SEE reference';figure.append(image);}
+    else figure.append(node('div','Reference unavailable','journey-image-empty'));
+    const state=record.status==='ready'?'Ready':(record.message||'Missing');
+    figure.append(node('figcaption',(stage+' · '+(record.role||record.fileName||'Reference')+' · '+state)));
+    referenceGrid.append(figure);
+   }}
+   referenceSection.append(referenceGrid);storyboard.append(referenceSection);
+  }
   if(!sheet)storyboard.append(node('p','Storyboard montage not created yet.','journey-storyboard-empty'));
   if(options.storyboardPanelAction&&plateApproved&&openingApproved){
    const boardBusy=['queued','running','unknown'].includes(seePackage.job?.status);

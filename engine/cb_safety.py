@@ -1824,7 +1824,7 @@ def create_policy(m):
 
     def select_keyframe(scene, shot_id, mode, episode="Ep1", upload_path=None,
                         library_path=None, reviewed_by="Julian", log=print):
-        pkg, _ = current_package(scene, episode)
+        pkg, _ = current_package(scene, episode, scene_plate=True)
         # Uploading or reselecting an existing image is itself a human SEE decision and
         # must remain available when specialist direction is missing or stale. Generated
         # keyframes still require current Cinematography in keyframe_shot(). Downstream
@@ -1846,7 +1846,20 @@ def create_policy(m):
                 "providerCalled": False,
             })
         candidate["packageRevision"] = pkg.get("revision")
-        candidate["inputSignature"] = keyframe_signature(pkg, shot, candidate, scene, episode)
+        try:
+            candidate["inputSignature"] = keyframe_signature(pkg, shot, candidate, scene, episode)
+            candidate.pop("sourceIntegrityIssue", None)
+        except m.Refused as exc:
+            # Source selection is zero-spend review work. Keep the uploaded image visible
+            # in SEE, but mark missing identity/canon inputs so approval and generation
+            # remain hard-blocked until those references are restored.
+            candidate["inputSignature"] = {
+                "cardHash": m._live_card_hash(shot["shotId"], scene, episode),
+                "sceneLookHash": (scene_status(scene, episode).get("active") or {}).get("hash"),
+                "selectedAssetHash": m._file_md5(candidate.get("path")),
+                "source": candidate.get("source"),
+            }
+            candidate["sourceIntegrityIssue"] = str(exc)
         candidate["contentHash"] = file_sha256(candidate.get("path"))
         candidate["conformanceScreening"] = (
             m.screen_keyframe_conformance(

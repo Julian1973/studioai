@@ -14,7 +14,8 @@ const baseView={phase:'images',primary:'Approve SEE & Create Audio',revision:1,b
  {component:'plate',label:'Scene plate',url:'/plate.png',reviewStatus:'pending'},
  {component:'opening',label:'Opening keyframe',url:'/opening.png',reviewStatus:'approved'}],
  storyboard:[{viewId:'S3-V01',action:'Sunny places the cup.',camera:'Low close view'}],
- storyboardRequired:true,seePackage:{binding:'see-v1',panels:[],issues:[],providerSheet:{}}}};
+ storyboardRequired:true,seePackage:{binding:'see-v1',panels:[],issues:[],providerSheet:{}},
+ references:{keyframe:{references:[{role:'Sunny',status:'missing',message:'Sunny identity reference is missing'}]},animation:{references:[{role:'scene plate',status:'ready',url:'/plate.png'}]}}}};
 let view=structuredClone(baseView);
 const server=createServer(async(req,res)=>{
  if(req.url==='/api/production-journey'){
@@ -55,6 +56,8 @@ try{
  await page.getByRole('button',{name:'Approve Scene plate',exact:true}).waitFor();
  assert.equal(await primary.isDisabled(),true);
  assert.equal(await page.locator('img[alt^="Visual storyboard panel"]').count(),0,'Planning references must not impersonate generated panels');
+ assert.equal(await page.getByText(/SEE references used for creation/).count(),1);
+ assert.equal(await page.getByText('keyframe · Sunny · Sunny identity reference is missing',{exact:true}).count(),1);
  const plate=page.locator('.journey-image-card').first();
  await plate.getByRole('button',{name:'Library',exact:true}).click();
  assert.equal(await plate.getByRole('button',{name:'Library',exact:true}).isEnabled(),true);

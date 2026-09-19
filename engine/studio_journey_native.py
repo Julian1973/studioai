@@ -157,7 +157,16 @@ class Native:
         storyboard_required = True if storyboard_choice is None else bool(storyboard_choice.get('required'))
         review_images = ([{**image, 'label':'Opening keyframe', 'component':'opening', 'reviewStatus':opening_review}] if image else [])
         review_images += ([{**plate, 'label':'Scene plate', 'component':'plate', 'reviewStatus':plate_review}] if plate else [])
-        review = {'references':references, 'title': shot.get('purpose') or board.get('scene', {}).get('title') or 'Scene direction',
+        reference_inputs = []
+        for section_name, section in references.items():
+            if not isinstance(section, dict):
+                continue
+            for item in section.get('references') or []:
+                reference_inputs.append({**item, 'stage': section_name,
+                                         'label': item.get('role') or item.get('fileName') or 'Reference'})
+        review = {'references':references, 'referenceInputs':reference_inputs,
+                  'referenceIssue':reference_issue,
+                  'title': shot.get('purpose') or board.get('scene', {}).get('title') or 'Scene direction',
                   'direction': shot.get('openingPose') or board.get('scene', {}).get('purpose') or '',
                   'actionPlan':[{'timing':v.get('timing',''),'action':v.get('action','')} for v in (shot.get('directorCard') or {}).get('views',[])],
                   'script': spoken, 'performancePrompt':'\n'.join(str(l.get('text') or '') for l in optional_collection(led.get('voGeneratedFrom'), 'voGeneratedFrom')), 'plan': [view for scene in optional_collection(board.get('sceneCoverage'), 'sceneCoverage') for view in scene.get('views', [scene])] or optional_collection(board.get('shots'), 'storyboard shots'),

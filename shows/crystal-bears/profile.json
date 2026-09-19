@@ -22,6 +22,10 @@
     "wingLaw": {
       "file": "laws/wing_law.txt",
       "appliesWhen": "any cast member has isBee=true in canon/characters.json"
+    },
+    "shotGrammar": {
+      "file": "laws/shot_grammar.json",
+      "appliesWhen": "a view names a featured character; camera height is derived from canon heightIn"
     }
   },
   "episodes": {

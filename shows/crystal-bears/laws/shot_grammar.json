@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "doctrine": "Camera height is a story decision measured from the featured character's eye-line (Patrick Lin). Size is chosen from the ladder against the subject's locked height. Lens follows relationship: wider to hold geography and two bodies, longer to press in on a thought. A subject under two feet tall is photographed from its own eye-line unless the view is about scale, so the world towers around it.",
+  "eyeLineFraction": {"bear": 0.9, "bee": 0.85, "rabbit": 0.85, "default": 0.9},
+  "speciesByCharacter": {"Fuzzby": "bee", "Zenny": "bee", "Kit": "rabbit"},
+  "creatureEyeLevelBelowIn": 24,
+  "defaultHeight": "eye level of the featured character",
+  "sizeLadder": [
+    {"size": "EWS", "name": "extreme wide", "subjectFrameFraction": [0.0, 0.15], "use": "place, scale, weather"},
+    {"size": "WS", "name": "wide", "subjectFrameFraction": [0.15, 0.4], "use": "geography, full bodies, group"},
+    {"size": "MWS", "name": "medium wide", "subjectFrameFraction": [0.4, 0.6], "use": "knees up, two bodies in relation"},
+    {"size": "MS", "name": "medium", "subjectFrameFraction": [0.6, 0.85], "use": "waist up, dialogue, business with hands"},
+    {"size": "MCU", "name": "medium close", "subjectFrameFraction": [0.85, 1.1], "use": "chest up, decision, recognition"},
+    {"size": "CU", "name": "close", "subjectFrameFraction": [1.1, 1.6], "use": "head and shoulders, thought"},
+    {"size": "ECU", "name": "extreme close", "subjectFrameFraction": [1.6, 99], "use": "eyes, paw, object detail"}
+  ],
+  "lensBySize": {"EWS": "wide", "WS": "wide", "MWS": "normal", "MS": "normal", "MCU": "long", "CU": "long", "ECU": "macro"},
+  "heightByAttention": {
+    "scale": "low, below the subject's eye-line, looking up",
+    "threat": "low, below the subject's eye-line, looking up",
+    "world": "above the canopy or at the horizon; not a character height",
+    "stillness": "exactly at the subject's eye-line",
+    "default": "at the featured character's eye-line"
+  },
+  "reservedSizes": [],
+  "notes": "Laws are not hashed by the canon lock. Heights come from canon/characters.json heightIn; this file never restates them."
+}

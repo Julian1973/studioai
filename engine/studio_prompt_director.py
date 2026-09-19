@@ -387,7 +387,18 @@ def return_review(report, candidate, observations, *, method, ranges, audio_revi
             'approval': 'not-granted', 'adjoiningCuts': 'unverified'}
 
 def request_snapshot(prompt, authorities, references, audio, duration, settings=None):
-    return {'prompt': prompt, 'authorities': deepcopy(authorities),
+    authorities = deepcopy(authorities)
+    if 'cameraLaw' not in authorities:
+        # Camera height derived from locked character heights (laws/shot_grammar.json); a
+        # show that has not opted in gets nothing. Lives beside the shot, never in the card.
+        try:
+            from studio_camera_law import authority_for
+            derived = authority_for(authorities.get('shot') or {})
+        except Exception:
+            derived = {}
+        if derived:
+            authorities['cameraLaw'] = derived
+    return {'prompt': prompt, 'authorities': authorities,
             'references': deepcopy(references), 'audio': deepcopy(audio),
             'duration': duration, 'settings': deepcopy(settings or {})}
 

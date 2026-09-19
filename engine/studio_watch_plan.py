@@ -133,7 +133,7 @@ def _audio_blocks(prompt):
 
 
 
-def camera_line(view, framing):
+def camera_line(view, framing, law=None):
     """The provider's camera line carries DIRECT's camera intention, not only its framing.
 
     A view's cinematography record (lens relationship, movement or hold, focus, light)
@@ -148,6 +148,9 @@ def camera_line(view, framing):
         value = cinema.get(key)
         if isinstance(value, str) and value.strip():
             parts.append(f'{label}: {value.strip()}')
+    if law:
+        from studio_camera_law import camera_height_line
+        parts.append(camera_height_line(law))
     return ' '.join(part for part in parts if part)
 
 
@@ -233,7 +236,8 @@ def build_plan(snapshot):
             entry=view.get('entry', 'opening' if i == 0 else 'hold'),
             visibleEntities=deepcopy(view.get('visibleEntities')),
             purpose=field('purpose', 'cameraPurpose'),
-            camera=camera_line(view, field('camera', 'framing')),
+            camera=camera_line(view, field('camera', 'framing'),
+                               (authority.get('cameraLaw') or {}).get(view['viewId'])),
             action=authored[i]['text'],
             performance=field('performance', 'performance'),
             setting=field('setting', 'staging'),

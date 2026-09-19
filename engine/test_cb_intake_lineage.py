@@ -33,7 +33,7 @@ def test_parse_script_stops_dialogue_before_possessive_action_without_blank_line
     ]
 
 
-def _canon_status(episode="Ep1", cast=None, root=None):
+def _canon_status(episode="Ep1", cast=None, root=None, *, asset_scope=None):
     return {
         "current": True, "episodeReady": True,
         "manifestDigest": "m" * 64,

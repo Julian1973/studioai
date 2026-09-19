@@ -84,7 +84,7 @@ def _voice_direction_output(shot):
             "lines": lines}
 
 
-def _test_canon_status(episode=None, cast=None, root=None):
+def _test_canon_status(episode=None, cast=None, root=None, *, asset_scope=None):
     return {
         "current": True, "episodeReady": bool(episode),
         "manifestDigest": "m" * 64, "profileDigests": TEST_CANON_DIGESTS,

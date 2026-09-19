@@ -122,13 +122,48 @@ ROOT = HERE.parent
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 
 
+_DEFAULT_ROOT = ROOT
+
+
+def _source_base():
+    """The single source root every production path hangs off.
+
+    In production ROOT and HERE.parent are the same directory. Callers (and tests) may
+    relocate the studio by overriding either ROOT or HERE; both must move every path
+    together, otherwise the storyboard, the package and the media are looked up under
+    different roots — the split-root outage of 17 Sep."""
+    return ROOT if ROOT != _DEFAULT_ROOT else HERE.parent
+
+
 def _data_root():
     """Resolve production state independently from the immutable release directory."""
-    return data_root(HERE.parent)
+    return data_root(_source_base())
 
 
 def _scene_media_root():
+    """Scene media (plates, uploads, archives). In a single-root deployment this is the
+    engine's own media folder beside this module; in a split deployment it is the data
+    root's engine/media. Archive records are stored relative to this folder's parent so
+    records written before the split keep resolving."""
+    if not os.environ.get("STUDIO_DATA_ROOT"):
+        return HERE / "media"
     return _data_root() / "engine" / "media"
+
+
+def _scene_media_base():
+    """The directory archive records are relative to (historically the engine folder)."""
+    return _scene_media_root().parent
+
+
+def _archived_abs(rel):
+    """Resolve a stored archive path; accept both the engine-relative and data-root-relative forms."""
+    if not rel:
+        return None
+    candidates = (_scene_media_base() / rel, _data_root() / rel, HERE / rel)
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    return str(candidates[0])
 
 
 def _scene_output_root():
@@ -1156,7 +1191,7 @@ def approve_scenelook(scene, episode="Ep1", reviewed_by="Julian", log=print):
         shutil.copy2(old["path"], dest)
         rec.setdefault("history", []).append({**old, "outcome": "superseded",
                                                "supersededAt": _now(),
-                                               "archivedFile": str(dest.relative_to(_data_root()))})
+                                               "archivedFile": str(dest.relative_to(_scene_media_base()))})
     rec["approved"] = {**cand, "approvedAt": _now(), "reviewedBy": reviewed_by}
     rec["candidate"] = None
     _save_scenelook_rec(rec, scene, episode)
@@ -1180,7 +1215,7 @@ def reject_scenelook(scene, note, episode="Ep1", reviewed_by="Julian", log=print
         arch.mkdir(parents=True, exist_ok=True)
         dest = arch / os.path.basename(cand["path"])
         shutil.move(cand["path"], dest)
-        archived_rel = str(dest.relative_to(_data_root()))
+        archived_rel = str(dest.relative_to(_scene_media_base()))
     rec.setdefault("history", []).append({**cand, "outcome": "rejected", "rejectedAt": _now(),
                                            "reviewedBy": reviewed_by, "rejectedNote": note.strip(),
                                            "rejectedArchivedFile": archived_rel})
@@ -1271,10 +1306,10 @@ def scenelook_reference_library(scene, episode="Ep1"):
     for h in (rec.get("history") or []):
         if h.get("outcome") == "rejected":
             rel = h.get("rejectedArchivedFile")
-            _add(str(_data_root() / rel) if rel else None, h.get("rejectedAt"), "rejected", h.get("rejectedNote"))
+            _add(_archived_abs(rel), h.get("rejectedAt"), "rejected", h.get("rejectedNote"))
         elif h.get("outcome") == "superseded":
             rel = h.get("archivedFile")
-            _add(str(_data_root() / rel) if rel else None, h.get("supersededAt"), "superseded", None)
+            _add(_archived_abs(rel), h.get("supersededAt"), "superseded", None)
     items.sort(key=lambda x: x.get("at") or "", reverse=True)
     return items
 

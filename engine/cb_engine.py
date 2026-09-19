@@ -66,7 +66,8 @@ def canonical_package_path(scene, episode="Ep1"):
 
 
 def _storyboard_path(scene, episode="Ep1"):
-    return HERE.parent / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
+    # Production data (storyboards) lives under the data root, like the package it feeds.
+    return data_root(HERE.parent) / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
 
 
 def _sha256_file(path):

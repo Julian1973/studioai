@@ -640,6 +640,23 @@ class Production:
             prompt += "\n[Audio]\nNo spoken dialogue."
         # Keep source text in the review record, not as a second competing action/dialogue script.
         # Approved voice cues above remain the provider's spoken-word authority.
+        # The provider payload is the deterministic compiler's output from the typed
+        # DIRECT plan (the sole final WATCH emitter). Sealing anything else is refused
+        # at review as "payload differs from current DIRECT compilation", which left the
+        # one-button journey stopped at WATCH.
+        try:
+            from studio_prompt_director import project_authorities, request_snapshot
+            from studio_watch_plan import prepare_plan
+            from studio_character_roles import audit as audit_roles
+            from studio_seedance_execution import compile_prompt
+            compiled_snapshot = prepare_plan(request_snapshot(
+                prompt, project_authorities(context, shot, source), refs, audio, duration, binding))
+            prompt, _ = compile_prompt(compiled_snapshot, audit_roles(compiled_snapshot),
+                                       reference_root=self.ws.root)
+        except ValueError:
+            # Incomplete DIRECT (e.g. no timed views yet): keep the descriptive request so
+            # the Prompt Director records the exact block for the producer, as before.
+            pass
         ratio = context["project"].get("aspectRatio") or "16:9"
         if ratio not in {"16:9", "9:16", "1:1", "4:3", "3:4", "21:9"}:
             raise StudioError("Choose a supported project aspect ratio before animation.", "unsupported_format")
@@ -944,7 +961,10 @@ class Production:
                     response.pop('_usage', None)
                     return response
                 try:
-                    final, report = review_prompt(source, reviewer, review_plan_first=True)
+                    # Project media paths are workspace-relative; resolve them against
+                    # this workspace, never the process cwd or the release folder.
+                    final, report = review_prompt(source, reviewer, review_plan_first=True,
+                                                  reference_root=self.ws.root)
                 except ValueError as exc:
                     raise StudioError(str(exc), 'prompt_coherence') from exc
                 if report['verdict'] != 'READY TO FIRE':

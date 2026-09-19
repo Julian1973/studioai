@@ -188,7 +188,7 @@ def resolve_references(refs, states):
             'declared continuation state only; not independent location or time jumps')
     return resolved
 
-def run(snapshot, reviewer, *, review_plan_first=False):
+def run(snapshot, reviewer, *, review_plan_first=False, reference_root=None):
     from studio_watch_plan import current_snapshot
     snapshot = current_snapshot(snapshot)
     from studio_request_evidence import authority_inventory
@@ -203,14 +203,14 @@ def run(snapshot, reviewer, *, review_plan_first=False):
             providerCalled=False,spendOccurred=False,creativeOutcome='unverified',
             correctiveAction='Resolve the named source decisions before compilation.')
     else:
-        working, report = _run(snapshot, reviewer, review_plan_first=review_plan_first)
+        working, report = _run(snapshot, reviewer, review_plan_first=review_plan_first, reference_root=reference_root)
     report['authorityInventory'] = authority_inventory(working.get('authorities') or {})
     report['originalAuthorityInventory'] = inventory
     report['intendedPlan'] = deepcopy(working.get('watchPlan'))
     return working, report
 
 
-def _run(snapshot, reviewer, *, review_plan_first=False):
+def _run(snapshot, reviewer, *, review_plan_first=False, reference_root=None):
     """Validate exact compiler output without replacing any supplied prose.
 
     Optional semantic reviewers can diagnose only; local structural validation
@@ -293,7 +293,7 @@ def _run(snapshot, reviewer, *, review_plan_first=False):
             return working, report(errors=dynamic['errors'], verdict='BLOCKED: DIRECTION PLAN')
         # Disposable deterministic output catches binding/size faults without
         # charging for a semantic-review call. It is not sent to the plan reviewer.
-        preview, execution = compile_prompt(working, roles)
+        preview, execution = compile_prompt(working, roles, reference_root=reference_root)
         if working['prompt'] != preview:
             return working, report(errors=['Exact WATCH payload differs from current DIRECT compilation. Recompile the current request; do not rewrite direction.'], verdict='WATCH_CONFIGURATION_REQUIRED')
         _, faults = final_check(working, execution)

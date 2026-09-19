@@ -13,6 +13,7 @@ sys.path.insert(0, str(CBGEN))   # FIXED 2026-07-17 (state-integrity checkpoint)
 # in-process, which raised "No module named 'cb_costs'" until now. cb_costs.py is a pure,
 # side-effect-free module at import time (constants + a path string) — safe to add once, here.
 MEDIA = ROOT / "engine" / "media"
+from studio_roots import data_root
 
 def _trusted_scene_source(path):
     """Accept reusable scene media only from the configured source/data media roots."""
@@ -28,7 +29,7 @@ def _trusted_scene_source(path):
         raise ValueError("sourcePath must be an existing file under a trusted Studio media root")
     return str(resolved)
 
-OUT = ROOT / "cb-output"
+OUT = data_root(ROOT) / "cb-output"
 DATA = ROOT / "cb-studio" / "data"
 DATA.mkdir(parents=True, exist_ok=True)
 _PROJECT_SETUP_LOCK = threading.RLock()

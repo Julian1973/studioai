@@ -17,6 +17,7 @@ import cb_quality
 import cb_render
 import cb_audio_authority
 import cb_rough_cut
+import cb_scripts
 import cb_production_contracts as contracts
 
 
@@ -223,7 +224,8 @@ def _storyboard_status(scene, episode, intake):
             current_path.read_text(encoding="utf-8")).get(str(scene_number))
         scene_source_unchanged = bool(
             old_scene_digest and old_scene_digest == new_scene_digest)
-    except (OSError, TypeError, ValueError, cb_intake.Refused):
+    except (OSError, TypeError, ValueError, cb_intake.Refused,
+            cb_scripts.ScriptStoreError):
         scene_source_unchanged = False
     outside_replaced_scene_range = bool(
         scope.get("kind") == "scene-range-replacement" and scene_number and
@@ -679,28 +681,42 @@ def production_state(scene, episode="Ep1", intake=None):
     else:
         stages["storyboard"] = _stage("awaiting", storyboard_reason)
 
+    carried_production = False
     try:
         pkg, _ = cb_render.load_pkg(scene, episode)
         package_exists = True
         lineage = cb_render.lineage_status(pkg, scene, episode)
         amendment = _scoped_shot_amendment(intake, scene, pkg)
+        # Existing approved scene packages remain reviewable when a clean release
+        # is missing the immutable source-script bytes. This is continuation of a
+        # signed production record, not permission to author a new episode script.
+        carried_production = bool(
+            not script_current and storyboard and
+            storyboard.get("approvalState") == "approved" and
+            (pkg.get("sourceScript") or {}).get("scriptVersionId") and
+            (pkg.get("validation") or {}).get("passed"))
         preserved_scene = bool(
-            not intake_current and lineage["current"] and storyboard and
-            storyboard.get("approvalState") == "approved")
+            (not intake_current and lineage["current"] and storyboard and
+             storyboard.get("approvalState") == "approved") or carried_production)
         if preserved_scene:
+            if carried_production:
+                stages["script"] = _stage(
+                    "approved", "existing production record preserved; restore the source bundle before new script work")
             storyboard_current = True
             stages["storyboard"] = _stage(
-                "approved", "this scene is unchanged in the active script")
+                "approved", "existing production record preserved")
         # Use the same declared-source graph as Fire. A scoped approved revision
         # may intentionally differ from the canonical scene's older storyboard.
         package_current = bool(
-            (pkg.get("validation") or {}).get("passed") and lineage["current"])
+            (pkg.get("validation") or {}).get("passed") and
+            (lineage["current"] or carried_production))
     except cb_render.Refused:
         pkg = None
         package_exists = False
         package_current = False
         amendment = None
         preserved_scene = False
+        carried_production = False
         lineage = {"current": False, "reasonCodes": ["production-package-missing"]}
 
     if amendment:
@@ -974,6 +990,7 @@ def production_state(scene, episode="Ep1", intake=None):
         "packageExists": True,
         "packageCurrent": package_current,
         "preservedScene": preserved_scene,
+        "carriedProduction": carried_production,
         "scopedAmendment": amendment,
         "packageRevision": pkg.get("revision"),
         "lineage": lineage,

@@ -381,9 +381,13 @@ def production_preflight(scene, episode="Ep1", state=None):
     except cb_render.Refused:
         pass
 
+    # A carried, already-approved record may be reviewed without re-resolving its
+    # historical source graph. New preparation and provider actions still use the
+    # normal current-input path below and remain subject to the canon lock.
     production_inputs = (
         _production_inputs(package, str(scene), episode)
-        if package and state.get("packageCurrent") else {"look": None, "shots": {}}
+        if package and state.get("packageCurrent") and
+        not state.get("carriedProduction") else {"look": None, "shots": {}}
     )
 
     provider_capabilities = cb_providers.capability_report()
@@ -405,11 +409,19 @@ def production_preflight(scene, episode="Ep1", state=None):
               show_profile.get("error") or
               f"Engine adapter {show_profile.get('engineAdapter')} is not installed.",
               "Install and test this show's creative adapter before production.")
-    if show_profile.get("missingRequiredContent"):
+    missing_show_content = show_profile.get("missingRequiredContent") or []
+    if missing_show_content and not (
+            state.get("carriedProduction") and missing_show_content == ["scripts"]):
         block("SHOW_PROFILE_CONTENT_MISSING", "configuration",
               "Show profile content is missing: " +
-              ", ".join(show_profile["missingRequiredContent"]),
+              ", ".join(missing_show_content),
               "Restore the named tenant files before production.")
+    elif missing_show_content:
+        warnings.append({
+            "code": "SHOW_PROFILE_SCRIPT_BUNDLE_MISSING_FOR_CARRIED_RECORD",
+            "stage": "configuration",
+            "message": "Existing production record is reviewable; restore immutable script bytes before starting new script work.",
+        })
 
     for provider in ("fal", "elevenlabs"):
         if (provider == "elevenlabs" and package and

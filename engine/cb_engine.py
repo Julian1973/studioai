@@ -47,6 +47,7 @@ import cb_lineage
 import cb_scripts
 import cb_engine_rules
 import paths as P
+from studio_roots import data_root
 
 ROOT = HERE.parent
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
@@ -61,7 +62,7 @@ def canonical_package_path(scene, episode="Ep1"):
     render or provider entry point, so it does not violate cb_handover's own
     never-imports-cb_render/cb_gen invariant. No new module, no new convention: this is
     the SAME path both modules already computed independently before this correction."""
-    return HERE.parent / "cb-output" / f"{episode}_scene{scene}_production_package.json"
+    return data_root(HERE.parent) / "cb-output" / f"{episode}_scene{scene}_production_package.json"
 
 
 def _storyboard_path(scene, episode="Ep1"):

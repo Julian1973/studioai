@@ -3260,7 +3260,11 @@ async function pLoadAll(){await Promise.all([shFetchPkg(),pFetchStoryboard(),fet
 function currentBundle(){ return {storyboard:PSB, pkg:SH_PKG, media:SH_MEDIA, pkgFile:SH_FILE, scenelook:SH_SCENELOOK, preflight:SH_PREFLIGHT, productionState:SH_STATE}; }
 function carriedProductionScene(){
   const row=(SCENE_ROSTER||[]).find(item=>String(item.scene)===String(SH_SC));
-  return !!(SH_PKG&&row&&row.carried&&row.package);
+  // A signed production package is enough to continue an existing scene even
+  // when the clean install is missing the original immutable script bytes.
+  // New script authoring remains blocked by the portable-bundle warning.
+  return !!(SH_PKG&&Array.isArray(SH_PKG.shots)&&SH_PKG.shots.length&&
+    ((row&&row.carried&&row.package)||SH_PKG.sourceScript));
 }
 function currentStages(){
   // Existing carried scenes are already production records. Keep them reviewable

@@ -394,7 +394,7 @@ def _require_valid(pkg):
 # is the ONE place that claim is checked against the live file's ACTUAL current bytes —
 # never by filesystem existence of a rendered asset, which proves nothing about lineage.
 def _storyboard_path(scene, episode="Ep1"):
-    return HERE.parent / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
+    return _data_root() / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
 
 
 def _current_storyboard_md5(scene, episode="Ep1"):
@@ -416,7 +416,7 @@ def _declared_storyboard_path(pkg, scene, episode="Ep1"):
         return _storyboard_path(scene, episode)
     path = pathlib.Path(declared)
     if not path.is_absolute():
-        path = ROOT / path
+        path = _data_root() / path
     try:
         trusted_path(path, ROOT)
     except ValueError:
@@ -434,6 +434,7 @@ def lineage_status(pkg, scene, episode="Ep1"):
     current_script = None
     script_current = False
     script_error = None
+    previous_source_match = False
     try:
         current = SCRIPT_STORE.current(episode, required=True)
         current_script = current["scriptVersionId"]
@@ -444,7 +445,6 @@ def lineage_status(pkg, scene, episode="Ep1"):
         # parsed source content so repeated edits in another scene do not invalidate the
         # whole episode merely because the episode-level version id advanced.
         scope = current.get("changeScope") or {}
-        previous_source_match = False
         try:
             prior_scene = int(re.sub(r"\D", "", str(scene)) or "0")
             changed_scene = int(re.sub(r"\D", "", str(scope.get("scene"))) or "0")

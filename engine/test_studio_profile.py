@@ -44,6 +44,7 @@ def test_profile_resolves_only_inside_selected_tenant(tmp_path):
     assert loaded.canon_paths["characters"] == show / "canon" / "characters.json"
     assert loaded.canon_paths["identityPacks"] == show / "canon" / "identity_packs.json"
     report = studio_profile.capability_report(loaded)
+    assert "identityPacks" in report["missingRequiredContent"]
     assert report["adapterReady"] is False
     assert report["productionReady"] is False
 

@@ -160,6 +160,11 @@ def capability_report(loaded: LoadedShowProfile) -> dict:
         "continuity": loaded.canon_paths["continuity"],
         "scripts": loaded.scripts_path,
     }
+    # A declared provider identity-pack source is part of the portable show
+    # contract. Without it, SEE/WATCH can display a scene but cannot prepare
+    # a trustworthy character reference on another machine.
+    if "identityPacks" in loaded.canon_paths:
+        required["identityPacks"] = loaded.canon_paths["identityPacks"]
     missing = [name for name, path in required.items() if not path.exists()]
     adapter_ready = loaded.profile.engineAdapter in SUPPORTED_ENGINE_ADAPTERS
     return {

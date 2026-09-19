@@ -296,10 +296,14 @@ class Journey:
                 op.update(status='needs-decision', decision=exc.detail, message=exc.detail['issue'],
                           blockedBinding=self._failure_snapshot(scope).get('binding'))
             except Exception as exc:
+                # The producer reads one sentence; support needs the exact origin. Keep the
+                # traceback with the saved decision so a stop can always be traced to a line.
+                import traceback
                 op.update(status='needs-decision', message='Preparation needs attention',
                           blockedBinding=self._failure_snapshot(scope).get('binding'),
                           decision=dict(issue=str(exc), proposed='Review the saved issue and resume this operation.',
-                                        preserved=self._failure_snapshot(scope).get('preserved', [])))
+                                        preserved=self._failure_snapshot(scope).get('preserved', []),
+                                        trace=traceback.format_exc()[-6000:]))
             self.store.save(key, state)
 
     def _failure_snapshot(self, scope):

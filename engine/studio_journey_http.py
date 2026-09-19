@@ -163,9 +163,13 @@ def request(server,data):
             raise ValueError('Use the current production action.')
         return enrich_native_view(server, scope, J.view(scope))
     except Exception as exc:
+        import sys, traceback
+        trace = traceback.format_exc()
+        print(f'STUDIO JOURNEY ERROR [{request_id}] {action}: {type(exc).__name__}: {exc}\n{trace}', file=sys.stderr, flush=True)
         component=str(scope.get('unit') or scope.get('shot') or 'production journey')
         operation='journey.refresh' if action=='status' else f'journey.{action}'
         return {'ok':False, 'error': {
+            'trace': trace[-6000:],
             'errorCode':'STUDIO_JOURNEY_PROJECTION_ERROR' if action=='status' else 'STUDIO_JOURNEY_ERROR',
             'stage':'journey', 'operation':operation, 'component':component,
             'humanMessage':'Studio could not load the current production review.' if action=='status' else 'Studio could not complete this production step.',

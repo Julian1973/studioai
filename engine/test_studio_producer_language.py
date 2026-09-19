@@ -56,3 +56,14 @@ def test_review_card_shows_the_producer_sentence_when_stopped():
     assert card['message'] == 'The render request needs approving before filming. Approve the request to film this shot.'
     assert card['producer']['button'] == 'Approve and film'
     assert 'Production support' not in card['message']
+
+
+def test_a_journey_stop_keeps_its_traceback_for_support(monkeypatch, tmp_path):
+    """The producer reads one sentence; the saved decision carries the exact origin."""
+    import studio_journey_http as H
+    class Server: ROOT = tmp_path
+    monkeypatch.setattr(H, 'controller', lambda server, scope: (_ for _ in ()).throw(AttributeError("'str' object has no attribute 'get'")))
+    out = H.request(Server(), {'scope': {'projectId': 'crystal-bears', 'episode': 'Ep4', 'scene': '2', 'unit': 'S2.SH1'}, 'action': 'resume'})
+    assert out['ok'] is False
+    assert "'str' object has no attribute 'get'" in out['error']['technicalMessage']
+    assert 'Traceback' in out['error']['trace'] and 'AttributeError' in out['error']['trace']

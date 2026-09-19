@@ -4048,7 +4048,19 @@ class H(http.server.SimpleHTTPRequestHandler):
                     _canonical_cb_render=_canonical_cb_render,
                     decode_image_upload=decode_image_upload,
                     _storyboard_approval=_storyboard_approval)
-                return self._json(200, request(services, self._body()))
+                result = request(services, self._body())
+                # Decision conflicts are returned as structured projections by the
+                # shared journey adapter. Preserve the HTTP conflict boundary here so
+                # a stale review cannot be mistaken for an accepted decision.
+                error = result.get("error") if isinstance(result, dict) else None
+                technical = str((error or {}).get("technicalMessage") or "")
+                if (error and error.get("errorCode") == "STUDIO_JOURNEY_ERROR"
+                        and technical.startswith("DecisionRequired:")):
+                    return self._json(409, {
+                        "error": technical.split(":", 1)[1].strip(),
+                        "decision": {"issue": technical.split(":", 1)[1].strip()},
+                    })
+                return self._json(200, result)
             except DecisionRequired as exc:
                 return self._json(409, {"error":str(exc), "decision":exc.detail})
             except (ValueError, RuntimeError, OSError) as exc:

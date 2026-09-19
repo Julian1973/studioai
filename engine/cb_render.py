@@ -3271,14 +3271,24 @@ def shot_reference_manifest(scene, shot_id, episode="Ep1"):
                         "estimatedMaxUsd": 0.0,
                     })
     if keyframe_applies:
-        prompt = _resolve_keyframe_prompt(pkg, shot)
-        direct = _direct_keyframe_direction(shot)
+        try:
+            prompt = _resolve_keyframe_prompt(pkg, shot)
+            direct = _direct_keyframe_direction(shot)
+        except (Refused, OSError, ValueError, KeyError) as exc:
+            # SEE remains a diagnostic surface when a required reference is missing.
+            # Provider preparation and approval still fail closed on this same issue.
+            prompt = None
+            direct = {}
+            keyframe_prompt_issue = str(exc)
+        else:
+            keyframe_prompt_issue = None
         build_status = {
             **build_status,
             "prompt": prompt,
-            "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+            "promptHash": hashlib.sha256(prompt.encode()).hexdigest() if prompt else None,
             "promptSource": "current-direct",
             "promptHeadline": direct.get("audienceRead"),
+            "issue": keyframe_prompt_issue,
         }
     return {
         "episode": episode, "scene": str(scene), "shotId": shot_id,

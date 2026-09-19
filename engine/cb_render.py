@@ -978,7 +978,12 @@ def scenelook_status(scene, episode="Ep1"):
     triggered by an unrelated storyboard/shot edit."""
     rec = _load_scenelook_rec(scene, episode)
     approved, candidate = rec.get("approved"), rec.get("candidate")
-    current_sig = _scenelook_input_signature(scene, episode)
+    try:
+        current_sig = _scenelook_input_signature(scene, episode)
+        direct_inputs_available = True
+    except (Refused, OSError, ValueError, KeyError):
+        current_sig = {}
+        direct_inputs_available = False
     def signature_current(record):
         stored = record.get("inputSignature") or {}
         # Approval provenance may include canon/profile and plate hashes. Status only
@@ -990,7 +995,11 @@ def scenelook_status(scene, episode="Ep1"):
                 "candidate": candidate, "history": rec.get("history", [])}
     if approved:
         approved_ok = os.path.exists(approved.get("path") or "")
-        sig_current = signature_current(approved)
+        uploaded_plate = approved.get("approvalMethod") == "explicit-upload-selection"
+        file_current = bool(approved_ok and approved.get("hash") and
+                            _sha256_file(approved.get("path")) == approved.get("hash"))
+        sig_current = (signature_current(approved) if direct_inputs_available else
+                       uploaded_plate and file_current)
         status = "approved" if (approved_ok and sig_current) else "stale"
         return {"status": status, "current": (status == "approved"), "approved": approved,
                 "candidate": None, "history": rec.get("history", [])}

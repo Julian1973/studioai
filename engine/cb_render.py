@@ -3209,11 +3209,26 @@ def shot_reference_manifest(scene, shot_id, episode="Ep1"):
             roles.append("scene plate")
         if slots_key == "referenceSlots" and "opening keyframe" not in roles:
             roles.append("opening keyframe")
-        return [{"position": index + 1, "slot": f"@Image{index + 1}",
-                 "sourceSlot": f"@Image{index + 1}", "role": str(role),
-                 "kind": "image", "status": "missing", "ready": False,
-                 "path": None, "fileName": None, "message": message}
-                for index, role in enumerate(roles) if role]
+        entries = []
+        for index, role in enumerate(roles):
+            if not role:
+                continue
+            path = None
+            item_message = message
+            try:
+                if _is_non_identity_image_role(str(role)):
+                    path = _slot_path_for_role(
+                        str(role), animation_anchor, scene, episode, characters_cfg,
+                        shot=shot, usage="keyframe" if slots_key == "keyframeReferenceSlots" else "animation")
+            except (Refused, OSError, ValueError, KeyError) as exc:
+                item_message = str(exc)
+            entries.append({"position": index + 1, "slot": f"@Image{index + 1}",
+                            "sourceSlot": f"@Image{index + 1}", "role": str(role),
+                            "kind": "image", "status": "ready" if path else "missing",
+                            "ready": bool(path), "path": path,
+                            "fileName": pathlib.Path(path).name if path else None,
+                            "message": item_message})
+        return entries
 
     try:
         keyframe_entries = image_entries("keyframeReferenceSlots")

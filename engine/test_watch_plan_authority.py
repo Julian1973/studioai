@@ -275,3 +275,19 @@ def test_project_measurements_bind_repeated_words_by_occurrence_and_recording():
     assert shot == original
     shot['outcomes']['hear']['voiceTiming']['lines'].reverse()
     with pytest.raises(ValueError, match='input order'): project_authorities(context,shot,'same words')
+
+
+def test_camera_line_carries_directed_movement_and_lens_only_when_authored():
+    from studio_watch_plan import camera_line
+    plain = {'framing': 'Wide, eye level.'}
+    assert camera_line(plain, 'Wide, eye level.') == 'Wide, eye level.'
+    directed = {'framing': 'High wide over the canopy.',
+                'cinematography': {'kind': 'establishing', 'motivation': 'PLACE',
+                                   'lens': 'long lens, compressed canopy',
+                                   'movement': 'the camera descends through the canopy and finds the clearing',
+                                   'light': 'low morning sun through the leaves'}}
+    line = camera_line(directed, 'High wide over the canopy.')
+    assert line.startswith('High wide over the canopy.')
+    assert 'Movement: the camera descends through the canopy and finds the clearing' in line
+    assert 'Lens: long lens, compressed canopy' in line and 'Light: low morning sun' in line
+    assert 'PLACE' not in line and 'establishing' not in line  # intent stays in the card, not the prompt

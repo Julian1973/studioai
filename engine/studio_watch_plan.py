@@ -132,6 +132,25 @@ def _audio_blocks(prompt):
     return [block for _, block in blocks]
 
 
+
+def camera_line(view, framing):
+    """The provider's camera line carries DIRECT's camera intention, not only its framing.
+
+    A view's cinematography record (lens relationship, movement or hold, focus, light)
+    used to reach the scene plate but not the WATCH shot line, so a directed move such as
+    "the camera descends through the canopy and finds the clearing" never reached the
+    provider unless it was repeated inside framing. Append those authored fields, in a
+    fixed order, only when present, so older cards compile exactly as before.
+    """
+    cinema = view.get('cinematography') if isinstance(view.get('cinematography'), dict) else {}
+    parts = [str(framing or '').strip()]
+    for key, label in (('lens', 'Lens'), ('movement', 'Movement'), ('focus', 'Focus'), ('light', 'Light')):
+        value = cinema.get(key)
+        if isinstance(value, str) and value.strip():
+            parts.append(f'{label}: {value.strip()}')
+    return ' '.join(part for part in parts if part)
+
+
 def build_plan(snapshot):
     snapshot = current_snapshot(snapshot)
     source_shot = (snapshot.get('authorities') or {}).get('shot') or {}
@@ -214,7 +233,7 @@ def build_plan(snapshot):
             entry=view.get('entry', 'opening' if i == 0 else 'hold'),
             visibleEntities=deepcopy(view.get('visibleEntities')),
             purpose=field('purpose', 'cameraPurpose'),
-            camera=field('camera', 'framing'),
+            camera=camera_line(view, field('camera', 'framing')),
             action=authored[i]['text'],
             performance=field('performance', 'performance'),
             setting=field('setting', 'staging'),

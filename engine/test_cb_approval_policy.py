@@ -77,6 +77,32 @@ def test_legacy_uploaded_scene_look_accepts_trusted_data_root_only(tmp_path, mon
         candidate, expected, upload_root)
 
 
+def test_reselected_same_approved_scene_plate_refreshes_stale_metadata(tmp_path):
+    source = tmp_path / "release"
+    data = tmp_path / "production-data"
+    media = data / "engine" / "media"
+    media.mkdir(parents=True)
+    approved_path = media / "approved.png"
+    candidate_path = media / "reselected.png"
+    approved_path.write_bytes(b"same-approved-scene-plate")
+    candidate_path.write_bytes(approved_path.read_bytes())
+    approved_hash = hashlib.sha256(approved_path.read_bytes()).hexdigest()
+    approved = {"path": str(approved_path), "hash": approved_hash}
+    candidate = {"path": str(candidate_path), "hash": approved_hash,
+                 "source": "library", "libraryOriginal": str(approved_path)}
+    roots = (source / "engine" / "media", data / "engine" / "media")
+
+    assert source != data
+    assert pathlib.Path.cwd() not in (source, data)
+    assert cb_safety._same_approved_scene_media(candidate, approved, roots)
+
+    candidate_path.write_bytes(b"changed-media")
+    assert not cb_safety._same_approved_scene_media(candidate, approved, roots)
+    candidate_path.unlink()
+    candidate_path.symlink_to(tmp_path / "external.png")
+    assert not cb_safety._same_approved_scene_media(candidate, approved, roots)
+
+
 def _test_seedance_25_contract(**kwargs):
     duration = int(kwargs["duration"])
     assert 4 <= duration <= 30

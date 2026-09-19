@@ -71,6 +71,29 @@ def _path_is_under(path, root):
         return False
 
 
+def _same_approved_scene_media(candidate, approved, roots):
+    """Recognize only an unchanged, explicitly reselected copy of the approved plate."""
+    if not candidate or candidate.get("source") != "library" or not approved:
+        return False
+    try:
+        selected = pathlib.Path(candidate.get("path") or "").expanduser().resolve()
+        original = pathlib.Path(candidate.get("libraryOriginal") or "").expanduser().resolve()
+        approved_path = pathlib.Path(approved.get("path") or "").expanduser().resolve()
+        trusted = tuple(pathlib.Path(root).resolve() for root in roots)
+        if original != approved_path or not selected.is_file() or not approved_path.is_file():
+            return False
+        if not all(any(_path_is_under(path, root) for root in trusted)
+                   for path in (selected, original)):
+            return False
+        approved_hash = approved.get("hash")
+        return bool(
+            approved_hash and candidate.get("hash") == approved_hash and
+            hashlib.sha256(selected.read_bytes()).hexdigest() == approved_hash and
+            hashlib.sha256(original.read_bytes()).hexdigest() == approved_hash)
+    except (OSError, TypeError, ValueError):
+        return False
+
+
 def uses_isolated_voice_assembly(shot, lines):
     """Keep turn boundaries hard when a shot cannot tolerate dialogue bleed.
 
@@ -599,6 +622,13 @@ def create_policy(m):
     def scene_status(scene, episode="Ep1", *, pkg=None):
         rec = m._load_scenelook_rec(scene, episode)
         approved, candidate = rec.get("approved"), rec.get("candidate")
+        trusted_roots = (
+            data_root(m.ROOT) / "engine" / "media",
+            data_root(m.ROOT) / "media",
+            pathlib.Path(m.ROOT) / "engine" / "media",
+        )
+        same_approved_candidate = _same_approved_scene_media(
+            candidate, approved, trusted_roots)
         def plate_current(record):
             if not record:
                 return False
@@ -608,7 +638,8 @@ def create_policy(m):
                 return bool(
                     os.path.exists(record.get("path") or "") and
                     record.get("hash") == file_sha256(record.get("path")) and
-                    record.get("inputSignature") == current_sig)
+                    (record.get("inputSignature") == current_sig or
+                     record is candidate and same_approved_candidate))
             except (m.Refused, OSError, ValueError):
                 return False
 
@@ -706,12 +737,13 @@ def create_policy(m):
         rec = m._load_scenelook_rec(scene, episode)
         candidate = rec.get("candidate") or {}
         approved = rec.get("approved") or {}
-        same_approved_media = (
-            candidate.get("source") == "library" and
-            pathlib.Path(candidate.get("libraryOriginal") or "").expanduser().resolve() ==
-            pathlib.Path(approved.get("path") or "").expanduser().resolve() and
-            candidate.get("hash") == approved.get("hash") and
-            file_sha256(candidate.get("path")) == approved.get("hash"))
+        trusted_roots = (
+            data_root(m.ROOT) / "engine" / "media",
+            data_root(m.ROOT) / "media",
+            pathlib.Path(m.ROOT) / "engine" / "media",
+        )
+        same_approved_media = _same_approved_scene_media(
+            candidate, approved, trusted_roots)
         if not same_approved_media:
             current_package(scene, episode)
         if not candidate and (rec.get('approved') or {}).get('approvalMethod') == 'explicit-upload-selection':
@@ -729,6 +761,9 @@ def create_policy(m):
             ))
         if not signature_current and not legacy_upload_current:
             raise m.Refused("REFUSED — current Look direction changed after this candidate was generated")
+        if same_approved_media:
+            candidate["inputSignature"] = expected
+            candidate["approvalMethod"] = "explicit-library-selection"
         return original["approve_scenelook"](scene, episode, reviewed_by, log)
 
     def select_look(scene, mode, episode="Ep1", upload_path=None, library_path=None,

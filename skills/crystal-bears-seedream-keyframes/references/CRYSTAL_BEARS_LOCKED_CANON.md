@@ -1,0 +1,1 @@
+../../../shows/crystal-bears/canon/LOCKED_CANON.md

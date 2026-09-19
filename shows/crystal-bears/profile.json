@@ -15,6 +15,10 @@
   },
   "laws": {
     "style": "laws/style.txt",
+    "crystalEnergy": {
+      "file": "laws/crystal_energy_law.txt",
+      "appliesWhen": "a crystal glows, responds, combines energy, or a Crystal Call occurs"
+    },
     "wingLaw": {
       "file": "laws/wing_law.txt",
       "appliesWhen": "any cast member has isBee=true in canon/characters.json"

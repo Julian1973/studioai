@@ -35,20 +35,34 @@ def watch_shot(shot, ledger):
     if hashlib.sha256(timing.read_bytes()).hexdigest() != receipt.get('dialogueTimingSha256'):
         raise ValueError('Audio1 dialogue timing receipt changed.')
     placements = receipt.get('placements') or []
+    lines = result.get('dialogueLines') or []
     by_id = {p['dialogueOccurrenceId']: p for p in placements if p.get('dialogueOccurrenceId')}
-    if len(by_id) != len(placements):
+    if by_id and len(by_id) != len(placements):
+        # Some placements are identified and some are not, or an ID repeats: ambiguous.
         raise ValueError('Audio1 placement occurrences must be unique and explicit.')
-    prior = {p['dialogueOccurrenceId']:p for p in (result.get('approvedAudioTimingAuthority') or {}).get('intervals', [])}
+    if not by_id:
+        # A receipt written before dialogue occurrence IDs existed binds by dialogue index.
+        # That is only unambiguous when there is one placement per line, in order, and no
+        # speaker repeats the same words within the shot.
+        if len(placements) != len(lines) or any(
+                p.get('dialogueIndex') not in (None, i) for i, p in enumerate(placements)):
+            raise ValueError('Audio1 placement occurrences must be unique and explicit.')
+        if len({(str(l.get('speaker')), str(l.get('exactText'))) for l in lines}) != len(lines):
+            raise ValueError('Repeated dialogue needs explicit Audio1 occurrence IDs.')
+    def occurrence_key(index, line):
+        return line.get('dialogueOccurrenceId') or f'{shot.get("shotId")}.dialogue.{index + 1}'
+    prior = {p.get('dialogueOccurrenceId'):p for p in (result.get('approvedAudioTimingAuthority') or {}).get('intervals', [])}
     changes = []
-    for index, line in enumerate(result.get('dialogueLines') or []):
-        placement = by_id.get(line.get('dialogueOccurrenceId'))
+    for index, line in enumerate(lines):
+        placement = by_id.get(line.get('dialogueOccurrenceId')) if by_id else placements[index]
         if placement is None:
             raise ValueError('Approved Audio1 has no placement for dialogue occurrence ' + str(line.get('dialogueOccurrenceId')))
         start, end = float(placement['targetStartSec']), float(placement['targetEndSec'])
         if not 0 <= start < end <= float(shot['durationSec']):
             raise ValueError('Approved dialogue falls outside the current shot duration.')
-        changes.append({'dialogueOccurrenceId': line['dialogueOccurrenceId'],
-                        'estimated': prior.get(line['dialogueOccurrenceId'], {}).get('estimated', {'startSec':line.get('startSec'),'endSec':line.get('endSec')}),
+        key = occurrence_key(index, line)
+        changes.append({'dialogueOccurrenceId': key,
+                        'estimated': prior.get(key, {}).get('estimated', {'startSec':line.get('startSec'),'endSec':line.get('endSec')}),
                         'measured': {'startSec':start,'endSec':round(end,6)}})
         line.update(startSec=start,endSec=round(end,6))
     # Legacy cards encode completion as a typed state value. Resolve only an
@@ -66,7 +80,7 @@ def watch_shot(shot, ledger):
         if len(matches) != 1:
             raise ValueError('Dialogue-dependent state event needs an explicit occurrence binding.')
         line = matches[0]
-        event['dialogueOccurrenceId'] = line['dialogueOccurrenceId']
+        event['dialogueOccurrenceId'] = occurrence_key(result['dialogueLines'].index(line), line)
         if (event.get('beforeValues') or {}).get('spokenLineStatus') != status:
             event.update(atSec=line['endSec'], timing=f"{line['endSec']:g}s",
                          cause='Approved Audio1 dialogue occurrence completes at its measured placement end.')

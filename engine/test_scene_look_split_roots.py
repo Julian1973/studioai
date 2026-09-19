@@ -46,3 +46,31 @@ def test_scene_plate_reuse_reads_and_writes_trusted_data_root(tmp_path, monkeypa
     record = json.loads(render._scenelook_path("3", "Ep4").read_text())
     assert record["candidate"]["path"] == candidate
     assert record["candidate"]["inputSignature"] == {"briefHash": "approved-brief"}
+
+
+def test_explicit_uploaded_scene_plate_stays_current_by_trusted_hash(
+        tmp_path, monkeypatch):
+    data = tmp_path / "production"
+    (data / "cb-output").mkdir(parents=True)
+    (data / "engine" / "media").mkdir(parents=True)
+    approved = data / "engine" / "media" / "Ep4_S3_plate.png"
+    approved.write_bytes(b"human-selected scene plate")
+
+    monkeypatch.setenv("STUDIO_DATA_ROOT", str(data))
+    monkeypatch.setattr(render, "_scenelook_input_signature",
+                        lambda *args: {"briefHash": "current-generated-brief"})
+    render._save_scenelook_rec({
+        "approved": {
+            "path": str(approved),
+            "hash": render._sha256_file(approved),
+            "inputSignature": {"briefHash": "old-generated-brief"},
+            "approvalMethod": "explicit-upload-selection",
+        },
+        "candidate": None,
+        "history": [],
+    }, "3", "Ep4")
+
+    status = render.scenelook_status("3", "Ep4")
+
+    assert status["status"] == "approved"
+    assert status["approvedCurrent"] is True

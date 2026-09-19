@@ -634,11 +634,20 @@ def create_policy(m):
             if not record:
                 return False
             try:
+                file_current = bool(
+                    os.path.exists(record.get("path") or "") and
+                    record.get("hash") == file_sha256(record.get("path")))
+                # An explicitly uploaded plate is human-selected visual authority.
+                # Its currentness is proved by the trusted path and content hash;
+                # it must not be reclassified as stale because generated direction
+                # metadata is unavailable or has changed independently.
+                explicit_upload = record.get("approvalMethod") == "explicit-upload-selection"
+                if explicit_upload:
+                    return file_current
                 current_sig = look_input_signature(
                     scene, episode, record.get("path"), record.get("referencePath"), pkg=pkg)
                 return bool(
-                    os.path.exists(record.get("path") or "") and
-                    record.get("hash") == file_sha256(record.get("path")) and
+                    file_current and
                     (record.get("inputSignature") == current_sig or
                      record is candidate and same_approved_candidate))
             except (m.Refused, OSError, ValueError):

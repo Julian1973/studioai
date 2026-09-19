@@ -256,12 +256,12 @@ class Journey:
                 return
             step = remaining[0]
             try:
-                # SEE must be approved before audio and request preparation.
-                # The request itself is approved by Project.execute immediately
-                # before Fire; gating it here deadlocks the one-button Journey
-                # at submit_render and prevents the durable provider operation
-                # from ever being created.
-                if op.get('review', {}).get('seePackage') and step in ('approve_images', 'create_audio', 'prepare_render'):
+                # SEE must be approved before audio, request preparation and the
+                # paid submission itself: the approved SEE package the producer saw
+                # must still be the current one when money is spent. (The 17 Sep
+                # deadlock at submit_render was the WATCH request being refused at
+                # review, not this gate; that is fixed at the request's source.)
+                if op.get('review', {}).get('seePackage') and step in ('approve_images', 'create_audio', 'prepare_render', 'submit_render'):
                     from studio_see_service import gate
                     gate(self.adapter.root, scope, op['review']['seePackage'], approved=step != 'approve_images')
                 if step == 'submit_render':

@@ -998,8 +998,8 @@ def scenelook_status(scene, episode="Ep1"):
         uploaded_plate = approved.get("approvalMethod") == "explicit-upload-selection"
         file_current = bool(approved_ok and approved.get("hash") and
                             _sha256_file(approved.get("path")) == approved.get("hash"))
-        sig_current = (signature_current(approved) if direct_inputs_available else
-                       uploaded_plate and file_current)
+        sig_current = (uploaded_plate and file_current) or (
+            direct_inputs_available and signature_current(approved))
         status = "approved" if (approved_ok and sig_current) else "stale"
         return {"status": status, "current": (status == "approved"), "approved": approved,
                 "candidate": None, "history": rec.get("history", [])}

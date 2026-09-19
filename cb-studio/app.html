@@ -3615,6 +3615,7 @@ async function renderControl(){
       <span class="wtop-sel">${sceneSelectorHTML()}</span>
     </div>
     <div id="jobbanner"></div>
+    <div id="installation-status"></div>
     <div id="railwrap">${renderStageRail()}</div>
     <div id="director-next-step">${directorNextStepHTML()}</div><div id="sceneaudio"></div>
     <div id="shotoverview">${sceneShotOverviewHTML()}</div>
@@ -3628,12 +3629,46 @@ async function renderControl(){
       <div id="studioagent"></div>
       <div id="readiness"></div>
     </div></details>`;
-  renderStudioAgent(); renderPreflightBanner(); renderJobBanner();
+  renderStudioAgent(); renderInstallationBanner(); renderPreflightBanner(); renderJobBanner();
   await renderWorkspaceBody();
   startWatchServerPoll();
 }
+function renderInstallationBanner(){
+  const el=document.getElementById("installation-status");
+  if(!el)return;
+  const profile=SH_PROFILE;
+  if(!profile||profile.productionReady!==false){el.innerHTML="";return;}
+  const missing=(profile.missingRequiredContent||[]).map(x=>_esc(x)).join(", ");
+  const detail=profile.error||(
+    missing
+      ? "This installation is missing trusted show data: "+missing+". Supply the declared show bundle before opening SEE or WATCH."
+      : "The selected show profile is not production-ready. Supply the trusted show bundle before opening SEE or WATCH."
+  );
+  el.innerHTML=`<div style="border:1px solid var(--danger);background:var(--dangerbg);border-radius:8px;padding:10px 12px;margin-bottom:12px">
+    <b style="color:var(--danger)">Portable show bundle needs attention</b>
+    <div style="margin-top:7px">${_esc(detail)}</div>
+    <div style="margin-top:7px;color:var(--muted);font-size:11px">SOURCE_ROOT and DATA_ROOT stay separate. No provider call or media generation is allowed until this trusted data is present.</div>
+    <details style="margin-top:9px"><summary>Show installation details</summary><div style="margin-top:6px">Show: ${_esc(profile.showId||"unknown")} · Adapter: ${_esc(profile.engineAdapter||"unknown")} · Profile: ${_esc(profile.profilePath||"unknown")}</div></details>
+  </div>`;
+}
 function renderPreflightBanner(){
   const el=document.getElementById("readiness");if(!el)return;
+  const profile=SH_PROFILE;
+  if(profile&&profile.productionReady===false){
+    const missing=(profile.missingRequiredContent||[]).map(x=>_esc(x)).join(", ");
+    const detail=profile.error||(
+      missing
+        ? "This installation is missing trusted show data: "+missing+". Supply the declared show bundle before opening SEE or WATCH."
+        : "The selected show profile is not production-ready. Supply the trusted show bundle before opening SEE or WATCH."
+    );
+    el.innerHTML=`<div style="border:1px solid var(--danger);background:var(--dangerbg);border-radius:8px;padding:10px 12px;margin-bottom:12px">
+      <b style="color:var(--danger)">Portable show bundle needs attention</b>
+      <div style="margin-top:7px">${_esc(detail)}</div>
+      <div style="margin-top:7px;color:var(--muted);font-size:11px">SOURCE_ROOT and DATA_ROOT stay separate. No provider call or media generation is allowed until this trusted data is present.</div>
+      <details style="margin-top:9px"><summary>Show installation details</summary><div style="margin-top:6px">Show: ${_esc(profile.showId||"unknown")} · Adapter: ${_esc(profile.engineAdapter||"unknown")} · Profile: ${_esc(profile.profilePath||"unknown")}</div></details>
+    </div>`;
+    return;
+  }
   if(SH_AGENT&&!SH_AGENT.error){el.innerHTML="";return;}
   const p=SH_PREFLIGHT;if(!p||p.error){el.innerHTML="";return;}
   if(p.ok){el.innerHTML=`<div style="border:1px solid var(--ok);background:var(--okbg);border-radius:8px;padding:10px 12px;margin-bottom:12px;color:var(--ok)">✓ Production preflight passed — all known inputs are current. ${_esc(p.nextAction||"")}</div>`;return;}
@@ -6555,7 +6590,7 @@ function renderFinalStage(){
 
 let SH_SAVED_JOB=null;
 try{SH_SAVED_JOB=JSON.parse(localStorage.getItem("cb_active_production_job")||"null");}catch(e){SH_SAVED_JOB=null;}
-let SH_EP=null,SH_SC="1",SH_PKG=null,SH_MEDIA=null,SH_FILE=null,SH_ERR=null,SH_JOB=(SH_SAVED_JOB&&SH_SAVED_JOB.id)||null,SH_POLL=null,SH_WATCH_POLL=null,SH_WATCH_ACTIVE_ID=null,SH_SCENELOOK=null,SH_REASSESS=null,SH_PREFLIGHT=null,SH_STATE=null,SH_AGENT=null;
+let SH_EP=null,SH_SC="1",SH_PKG=null,SH_MEDIA=null,SH_FILE=null,SH_ERR=null,SH_JOB=(SH_SAVED_JOB&&SH_SAVED_JOB.id)||null,SH_POLL=null,SH_WATCH_POLL=null,SH_WATCH_ACTIVE_ID=null,SH_SCENELOOK=null,SH_REASSESS=null,SH_PREFLIGHT=null,SH_STATE=null,SH_AGENT=null,SH_PROFILE=null;
 let SH_JOB_CTX=SH_SAVED_JOB;
 function shRememberJob(id){
   SH_JOB_CTX={id,episode:String(SH_EP||""),scene:String(SH_SC||""),startedAt:new Date().toISOString()};
@@ -6759,14 +6794,18 @@ const REJECT_CATS=["identity","geography","action-timing","instruction-ignored",
 let SH_CANDS=1;   // One candidate unless the director explicitly requests a batch.
 const shTok=x=>String(x||"").replace(/[^A-Za-z0-9._-]/g,"");   // shotId into an onclick attr — token-safe, mirrors the server's own _SHOT_TOKEN
 async function shFetchPkg(){
-  SH_PKG=null;SH_MEDIA=null;SH_FILE=null;SH_ERR=null;SH_SCENELOOK=null;SH_REASSESS=null;SH_PREFLIGHT=null;SH_STATE=null;SH_AGENT=null;
+  SH_PKG=null;SH_MEDIA=null;SH_FILE=null;SH_ERR=null;SH_SCENELOOK=null;SH_REASSESS=null;SH_PREFLIGHT=null;SH_STATE=null;SH_AGENT=null;SH_PROFILE=null;
   SH_REFERENCE_CACHE={};
   SH_AGENT_KEY=null;SH_AGENT_CACHE={};SH_AGENT_SEQ++;
   try{
     // One authoritative state/preflight read first. The former six-way Promise.all made
     // production_state run repeatedly and could leave mobile on "Loading scene" while
     // filesystem and SQLite reads competed with one another.
-    const r=await fetch(BASE+"/api/shot-package?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"});
+    const [r,profileResponse]=await Promise.all([
+      fetch(BASE+"/api/shot-package?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}),
+      fetch(BASE+"/api/show-profile",{cache:"no-store"}).catch(()=>null)
+    ]);
+    SH_PROFILE=profileResponse?await profileResponse.json().catch(()=>null):null;
     const j=await r.json();
     if(j&&j.package){SH_PKG=j.package;SH_MEDIA=j.media||{};SH_FILE=j.file||null;}
     else SH_ERR=(j&&j.error)||("HTTP "+r.status);

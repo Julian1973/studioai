@@ -124,6 +124,13 @@ def test_crystal_bears_is_not_routed_by_setup_version_workspace():
     assert APP.count('setupVersion===1') == 1
 
 
+def test_pipeline_surfaces_portable_show_bundle_before_production():
+    assert 'fetch(BASE+"/api/show-profile"' in APP
+    assert 'Portable show bundle needs attention' in APP
+    assert 'missingRequiredContent' in APP
+    assert 'No provider call or media generation is allowed' in APP
+
+
 def test_director_analysis_step_exposes_story_direction_review_gate():
     assert "function renderStoryDirectionDesk()" in JS
     assert "/api/story-intake-status?episode=" in JS

@@ -147,3 +147,79 @@ def test_shot_revision_updates_scene_coverage_without_touching_other_views():
     from studio_workspace import StudioError
     with pytest.raises(StudioError, match='another shot'):
         revised_scene_coverage(state, original, new)
+
+
+# --- Feature-animation coverage vocabulary (Phase 1, inside cinematography) ---
+
+def _view(view_id, **extra):
+    base = dict(viewId=view_id, audienceNeed='Read the moment.', framing='Medium.', cameraPurpose='Hold attention.',
+                cutReason='new information', continuity='Door behind.', productionChoice='current clip')
+    base.update(extra)
+    return base
+
+
+def test_coverage_vocabulary_is_accepted_and_reaches_the_scene_board():
+    from studio_director_card import validate_coverage, SceneCoverage
+    from studio_coverage import unit_board, scene_boards
+    views = [
+        _view('S1.V1', cinematography={'kind': 'environment', 'functions': ['establish place', 'create anticipation']},
+              visibleEntities=['sky', 'birds']),
+        _view('S1.V2', cinematography={'kind': 'master', 'motivation': 'new information', 'cutTiming': 'on'}),
+        _view('S1.V3', sourceBeat='cup', cinematography={'kind': 'cut_in', 'actionPhase': 'preparation'}),
+        _view('S1.V4', sourceBeat='cup', cinematography={'kind': 'insert', 'actionPhase': 'contact', 'motivation': 'object interaction'}),
+        _view('S1.V5', cinematography={'kind': 'reaction', 'motivation': 'reaction', 'cutTiming': 'after'},
+              viewpointOwner='Luna', listenerReaction='Delayed realisation.'),
+    ]
+    scene = SceneCoverage(scene=1, audienceJourney='Arrive through the world, land on the cup.',
+                          entrance='through the world: birds, then down to the clearing', mode='warm comedy', views=views)
+    shot = {'id': 'S1.SH1', 'scene': 1, 'directorCard': {'views': views}}
+    validate_coverage([scene], [shot])  # no error
+    panels = unit_board(shot)['panels']
+    assert [p['kind'] for p in panels] == ['environment', 'master', 'cut_in', 'insert', 'reaction']
+    assert panels[0]['functions'] == ['establish place', 'create anticipation']
+    assert panels[3]['actionPhase'] == 'contact' and panels[4]['cutTiming'] == 'after'
+    board = scene_boards([shot], [scene.model_dump()])[0]
+    assert board['entrance'].startswith('through the world') and board['mode'] == 'warm comedy'
+
+
+@pytest.mark.parametrize('bad, message', [
+    (dict(cinematography={'kind': 'b-roll'}), 'unknown coverage kind'),
+    (dict(cinematography={'motivation': 'because cinematic'}), 'unknown cut motivation'),
+    (dict(cinematography={'cutTiming': 'later'}), 'cutTiming must be one of'),
+    (dict(cinematography={'kind': 'environment'}), 'at least one function'),
+    (dict(cinematography={'kind': 'environment', 'functions': ['establish place']}, visibleEntities=['character:Sunny']), 'not a character entity'),
+    (dict(cinematography={'kind': 'reaction'}), 'names the listener'),
+])
+def test_coverage_vocabulary_rejects_ambiguity_not_taste(bad, message):
+    from studio_director_card import validate_coverage, SceneCoverage
+    views = [_view('S1.V1', **bad)]
+    scene = SceneCoverage(scene=1, audienceJourney='x', views=views)
+    with pytest.raises(ValueError, match=message):
+        validate_coverage([scene], [{'id': 'S1.SH1', 'scene': 1, 'directorCard': {'views': views}}])
+
+
+def test_action_chain_cannot_run_backwards_within_a_beat():
+    from studio_director_card import validate_coverage, SceneCoverage
+    views = [_view('S1.V1', sourceBeat='cup', cinematography={'actionPhase': 'completion'}),
+             _view('S1.V2', sourceBeat='cup', cinematography={'actionPhase': 'contact'})]
+    scene = SceneCoverage(scene=1, audienceJourney='x', views=views)
+    with pytest.raises(ValueError, match='runs backwards'):
+        validate_coverage([scene], [{'id': 'S1.SH1', 'scene': 1, 'directorCard': {'views': views}}])
+
+
+def test_cards_without_the_vocabulary_keep_their_revision():
+    """Phase 1 adds nothing to the hashed card: existing approvals stay current."""
+    from studio_director_card import card
+    shot = {'id': 'S1.SH1', 'duration': 4, 'directorCard': dict(direction(), views=[_view('S1.V1')])}
+    before = card(shot)['revision']
+    import copy
+    again = copy.deepcopy(shot)
+    assert card(again)['revision'] == before
+    assert 'kind' not in again['directorCard']['views'][0]
+
+
+def test_contract_carries_the_feature_animation_craft():
+    from studio_director_card import CONTRACT
+    for phrase in ('ESTABLISH THE WORLD', 'ACTION CHAINS', 'REACTIONS', 'PHOTOGRAPH THOUGHT', 'MOTIVATED CUTS',
+                   'INTERNAL COVERAGE FIRST', 'Never derive a view\'s screen duration', 'designed, not documented'):
+        assert phrase in CONTRACT

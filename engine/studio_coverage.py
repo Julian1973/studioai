@@ -57,7 +57,13 @@ def unit_board(shot):
             'startState': view.get('startState') or (shot.get('openingState', shot.get('openingImageApproved', shot.get('openingImage', ''))) if index == 0 else ''),
             'endState': view.get('endState') or view.get('landingImage', ''),
             'cutReason': view.get('cutReason', ''), 'cutTo': view.get('cutTo') or '',
-            'continuity': view.get('continuity', ''), 'productionChoice': view.get('productionChoice', 'allocated in existing shot plan')})
+            'continuity': view.get('continuity', ''), 'productionChoice': view.get('productionChoice', 'allocated in existing shot plan'),
+            # Feature-animation coverage vocabulary (Phase 1: keys inside cinematography).
+            'kind': (view.get('cinematography') or {}).get('kind') if isinstance(view.get('cinematography'), dict) else None,
+            'motivation': (view.get('cinematography') or {}).get('motivation') if isinstance(view.get('cinematography'), dict) else None,
+            'cutTiming': (view.get('cinematography') or {}).get('cutTiming') if isinstance(view.get('cinematography'), dict) else None,
+            'actionPhase': (view.get('cinematography') or {}).get('actionPhase') if isinstance(view.get('cinematography'), dict) else None,
+            'functions': (view.get('cinematography') or {}).get('functions') if isinstance(view.get('cinematography'), dict) else None})
     body = {'version': VERSION, 'shotId': shot.get('id', shot.get('shotId')),
             'scene': shot.get('scene'), 'duration': shot.get('duration', shot.get('durationSec', shot.get('targetDurationSec'))),
             'panels': panels, 'acting': d.get('acting', []),
@@ -70,10 +76,13 @@ def unit_board(shot):
 
 def scene_boards(shots, coverage=()):
     journeys = {s['scene']: s.get('audienceJourney', '') for s in coverage}
+    entrances = {s['scene']: s.get('entrance') for s in coverage}
+    modes = {s['scene']: s.get('mode') for s in coverage}
     scenes = {}
     for shot in shots:
         scene = shot.get('scene', 1)
-        row = scenes.setdefault(scene, {'scene': scene, 'audienceJourney': journeys.get(scene, ''), 'units': []})
+        row = scenes.setdefault(scene, {'scene': scene, 'audienceJourney': journeys.get(scene, ''),
+                                        'entrance': entrances.get(scene), 'mode': modes.get(scene), 'units': []})
         row['units'].append(unit_board(shot))
     from studio_scene_handoff import episode_sound_plan
     sound = episode_sound_plan(shots)['scenes']

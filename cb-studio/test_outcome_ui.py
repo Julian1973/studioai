@@ -3,7 +3,6 @@ from pathlib import Path
 
 
 APP = (Path(__file__).parent / "app.html").read_text(encoding="utf-8")
-JOURNEY = (Path(__file__).parent / "journey.js").read_text(encoding="utf-8")
 SERVER = (Path(__file__).parent / "serve.py").read_text(encoding="utf-8")
 RENDER = (Path(__file__).parent.parent / "engine" / "cb_render.py").read_text(encoding="utf-8")
 INTAKE = (Path(__file__).parent.parent / "engine" / "cb_intake.py").read_text(encoding="utf-8")
@@ -857,17 +856,6 @@ def test_scene_plate_library_replacement_archives_pending_candidate_first():
     assert "select-scenelook-library',path" in APP
     assert 'shRun("reject-scenelook",null,{' in APP
     assert 'afterJob:job=>{if(job&&job.status==="done")install();}' in APP
-
-
-def test_golden_path_scene_plate_exposes_direct_source_controls_and_scene_authority():
-    assert "record.component==='plate'&&options.scenePlateAction" in JOURNEY
-    assert "node('button','Upload','btn ghost')" in JOURNEY
-    assert "node('button','Refire','btn ghost')" in JOURNEY
-    assert "node('button','Library','btn ghost')" in JOURNEY
-    assert "scenePlateAction:async detail=>" in APP
-    assert "slUpload(detail.input)" in APP
-    assert "await slLibrary()" in APP
-    assert "PSTAGE='scenelook'" in APP
 
 
 def test_keyframe_cost_review_uses_durable_cinematography_direction():

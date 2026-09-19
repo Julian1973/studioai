@@ -72,6 +72,11 @@ def test_golden_path_image_review_keeps_refire_zero_spend(tmp_path, monkeypatch)
     assert approved['ok'] is True
     assert [item['command'] for item in calls] == ['status', 'review-component']
     assert calls[-1]['binding'] == 'see-binding'
+    calls.clear()
+    result = H.request(server, {'command': 'image-review', 'scope': scope,
+        'component': 'plate', 'decision': 'approved', 'binding': 'old-binding', 'by': 'Julian'})
+    assert result['ok'] is False
+    assert [item['command'] for item in calls] == ['status']
 
 
 def test_storyboard_choice_is_zero_spend_and_uses_current_binding(tmp_path, monkeypatch):
@@ -90,6 +95,53 @@ def test_storyboard_choice_is_zero_spend_and_uses_current_binding(tmp_path, monk
     assert result['zeroSpend'] is True
     assert [item['command'] for item in calls] == ['status', 'choose-storyboard']
     assert calls[-1]['binding'] == 'see-binding'
+
+
+def test_storyboard_actions_preserve_reviewed_binding_and_provider_quote(tmp_path, monkeypatch):
+    import studio_see_service
+    scope = {'projectId': 'crystal-bears', 'episode': 'Ep4', 'scene': '3', 'unit': 'S3.SH1'}
+    calls = []
+
+    def service(server, payload):
+        calls.append(payload)
+        if payload.get('binding') != 'current':
+            raise ValueError('SEE changed in another window')
+        return {'binding': 'current'}
+
+    monkeypatch.setattr(studio_see_service, 'request', service)
+    server = types.SimpleNamespace(ROOT=tmp_path)
+    base = {'scope': scope, 'command': 'storyboard-action', 'binding': 'current', 'by': 'Julian'}
+    result = H.request(server, {**base, 'action': 'review-panel', 'panelId': 'P1', 'decision': 'approved'})
+    assert result['ok'] and result['zeroSpend']
+    assert calls[-1]['component'] == 'storyboard' and calls[-1]['binding'] == 'current'
+    result = H.request(server, {**base, 'binding': 'old', 'action': 'review-panel', 'panelId': 'P1'})
+    assert result['ok'] is False and 'changed' in result['error']['technicalMessage']
+    count = len(calls)
+    result = H.request(server, {**base, 'action': 'fire'})
+    assert result['ok'] is False and len(calls) == count
+    H.request(server, {**base, 'action': 'generate', 'quoteHash': 'reviewed-quote'})
+    assert calls[-1]['quoteHash'] == 'reviewed-quote'
+
+
+def test_watch_display_receipt_requires_matching_operation_and_request(tmp_path, monkeypatch):
+    from studio_journey import digest
+    scope = {'projectId': 'crystal-bears', 'episode': 'Ep4', 'scene': '3', 'unit': 'S3.SH1'}
+    store = StudioStore(tmp_path)
+    shown = {'prompt': 'sealed DIRECT action', 'cost': 2}
+    store.save(scope_key(scope), {'scope': scope, 'operation': {'id': 'current',
+               'receipts': {'prepare_render': {'requestDisplay': shown}}}})
+    journey = Journey(store, None)
+    monkeypatch.setattr(H, 'controller', lambda *args: journey)
+    monkeypatch.setattr(H, 'enrich_native_view', lambda server, scope, view: view)
+    monkeypatch.setattr(journey, 'view', lambda scope: {'ok': True})
+    resumes = []
+    monkeypatch.setattr(H, 'continue_operation', lambda *args: resumes.append(True))
+    base = {'scope': scope, 'command': 'request-displayed', 'operationId': 'current'}
+    assert H.request(types.SimpleNamespace(ROOT=tmp_path), {**base, 'requestHash': 'old'})['ok'] is False
+    assert resumes == []
+    assert H.request(types.SimpleNamespace(ROOT=tmp_path), {**base, 'requestHash': digest(shown)})['ok']
+    assert store.read(scope_key(scope))['operation']['displayedRequestHash'] == digest(shown)
+    assert resumes == [True]
 
 
 def test_watch_action_drift_blocks_before_fire(tmp_path, monkeypatch):

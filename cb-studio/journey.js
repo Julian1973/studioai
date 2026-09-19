@@ -5,8 +5,8 @@ let sequence=0;
 const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
 async function api(body){const r=await fetch('/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok||data.ok===false){const e=data.error||{};const detail=[e.errorCode&&`errorCode=${e.errorCode}`,e.stage&&`stage=${e.stage}`,e.operation&&`operation=${e.operation}`,e.technicalMessage&&`error=${e.technicalMessage}`,e.humanMessage||e.message].filter(Boolean).join('\n');throw new Error(detail||'Studio could not load the current production action.');}return data;}
 function mount(host,scope,options={}){
- const scopeId=JSON.stringify(scope);if(host.journeyHandle?.scopeId===scopeId){host.journeyHandle.refresh();return host.journeyHandle;}host.journeyHandle?.();
- const ticket=++sequence;let state=null,timer=null,submitted=false,awaitingNext=false,mediaSignature=null,settledSignature=null;
+ const scopeId=JSON.stringify(scope);if(host.journeyHandle?.scopeId===scopeId&&host.querySelector('.journey-head')){host.journeyHandle.refresh();return host.journeyHandle;}host.journeyHandle?.();
+ const ticket=++sequence;let state=null,timer=null,submitted=false,awaitingNext=false,mediaSignature=null,settledSignature=null,montageActionable=false,approvalOnly=false,requestPending=false,refreshSequence=0;
  host.replaceChildren();host.classList.add('journey-workspace');
  const head=node('div',undefined,'journey-head'),title=node('h2',scope.unit),progress=node('p','Loading current production…');
  head.append(title,progress);const media=node('div',undefined,'journey-media'),storyboard=node('section',undefined,'journey-storyboard'),brief=node('div',undefined,'journey-brief');
@@ -18,56 +18,53 @@ function mount(host,scope,options={}){
  changes.onclick=()=>options.changes?.(state);
  actions.append(primary,changes);actions.setAttribute('aria-label','Next required action');host.append(head,actions,issue,cost,media,storyboard,brief,evidence);if(options.advanced)host.append(advanced);
  function imageAsset(record){
-  if(!record?.url)return;
+  if(!record)return;
   const card=node('article',undefined,'journey-image-card'),figure=node('figure');
-  const image=node('img');image.src=record.url;image.alt=(record.label||'SEE image')+' for '+scope.unit;
+  const image=record.url?node('img'):node('p','No image selected','journey-image-empty');if(record.url){image.src=record.url;image.alt=(record.label||'SEE image')+' for '+scope.unit;}
   figure.append(node('figcaption',record.label||'SEE image'),image);card.append(figure);
   const status=node('p',record.reviewStatus==='approved'?'Approved':record.reviewStatus==='pending'?'Awaiting decision':record.reviewStatus==='stale'?'Refresh required':'Needs image');status.className='journey-image-status';
   const controls=node('div',undefined,'journey-image-actions');
-  const decisions=record.component==='plate'
+  const sourceAction=options.imageSourceAction||(record.component==='plate'?options.scenePlateAction:null);
+  const decisions=sourceAction
    ?[['approved','Approve'],['rejected','Reject']]
    :[['approved','Approve'],['rejected','Reject'],['refire','Refire']];
   for(const [action,label] of decisions){
    const button=node('button',label,'btn '+(action==='refire'?'ghost':''));
    button.type='button';button.setAttribute('aria-label',label+' '+(record.label||'SEE image'));
-   button.disabled=action==='approved'&&record.reviewStatus!=='pending'||action==='rejected'&&record.reviewStatus!=='pending';
+   const unavailable=()=>state.busy||submitted||action==='approved'&&record.reviewStatus!=='pending'||action==='rejected'&&record.reviewStatus!=='pending';
+   button.disabled=unavailable();
    button.onclick=async()=>{
     if(!options.imageAction||button.disabled)return;
     let reason='';
     if(action==='rejected'){reason=window.prompt('Reason for rejecting '+(record.label||'this image')+':','Needs a different SEE treatment.');if(reason===null||!reason.trim())return;}
     controls.querySelectorAll('button').forEach(item=>{item.disabled=true;});status.textContent=action==='refire'?'Opening refire controls…':'Saving '+label.toLowerCase()+'…';
     try{const result=await options.imageAction({action,component:record.component,reason,record,state});status.textContent=result?.message||label+' recorded';}
-    catch(error){status.textContent=error.message||'Image action failed';controls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}
+    catch(error){status.textContent=error.message||'Image action failed';}
+    finally{for(const item of controls.children)item.disabled=item.restoreDisabled();}
    };
+   button.restoreDisabled=unavailable;
    controls.append(button);
   }
   card.append(status,controls);media.append(card);
-  if(record.component==='plate'&&options.scenePlateAction){
+  if(sourceAction){
    const sourceControls=node('div',undefined,'journey-image-source-actions');
+   sourceControls.setAttribute('aria-label','Change '+record.label);
+   const run=async(action,input)=>{
+    if(state.busy||submitted)return;
+    sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=true;});
+    try{const result=await sourceAction({action,input,component:record.component,record,state});if(result?.message)status.textContent=result.message;}
+    catch(error){status.textContent=error.message||'Image action failed';}
+    finally{sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=!!state.busy;});}
+   };
    const upload=node('button','Upload','btn ghost');upload.type='button';
    const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp';input.hidden=true;
    upload.onclick=()=>input.click();
-   input.onchange=async()=>{
-    if(!input.files?.length)return;
-    sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=true;});
-    status.textContent='Installing uploaded Scene Plate…';
-    try{const result=await options.scenePlateAction({action:'upload',input,record,state});status.textContent=result?.message||'Uploaded Scene Plate is ready for approval';}
-    catch(error){status.textContent=error.message||'Scene Plate upload failed';}
-    finally{sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}
-   };
+   input.onchange=()=>input.files?.length&&run('upload',input);
    const refire=node('button','Refire','btn ghost');refire.type='button';
-   refire.onclick=async()=>{
-    sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=true;});
-    try{const result=await options.scenePlateAction({action:'refire',record,state});status.textContent=result?.message||'Refire controls opened';}
-    catch(error){status.textContent=error.message||'Scene Plate refire could not be opened';sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}
-   };
+   refire.onclick=()=>run('refire');
    const library=node('button','Library','btn ghost');library.type='button';
-   library.onclick=async()=>{
-    sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=true;});
-    try{const result=await options.scenePlateAction({action:'library',record,state});status.textContent=result?.message||'Scene Plate library opened';}
-    catch(error){status.textContent=error.message||'Scene Plate library could not be opened';}
-    finally{sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}
-   };
+   library.onclick=()=>run('library');
+   for(const button of [upload,refire,library])button.disabled=!!state.busy;
    sourceControls.append(upload,refire,library,input);card.append(sourceControls);
   }
 }
@@ -75,22 +72,24 @@ function mount(host,scope,options={}){
  function renderStoryboard(review){
   storyboard.replaceChildren();const views=Array.isArray(review.storyboard)&&review.storyboard.length?review.storyboard:(Array.isArray(review.plan)?review.plan:Object.values(review.plan||{}).flat());
   const heading=node('div',undefined,'journey-storyboard-head'),title=node('h3','Storyboard · visual board','journey-storyboard-title'),controls=node('div',undefined,'journey-storyboard-actions');
-  const choice=review.storyboardChoice, required=choice==null||choice.required!==false;
-  const state=node('span',required?'Storyboard on':'Storyboard skipped','journey-storyboard-state');
+  const choice=review.storyboardChoice, required=(review.seePackage?.storyboardRequired??choice?.required??review.storyboardRequired)!==false;
+  const boardState=node('span',required?'Storyboard on':'Storyboard skipped','journey-storyboard-state');
   for(const [value,label] of [[true,'Use storyboard'],[false,'Skip storyboard']]){
-   const button=node('button',label,'btn '+(value?'':'ghost'));button.type='button';button.disabled=required===value;
-   button.onclick=async()=>{if(!options.storyboardAction||button.disabled)return;controls.querySelectorAll('button').forEach(item=>{item.disabled=true;});try{await options.storyboardAction({required:value,review});}catch(error){state.textContent=error.message||'Storyboard choice failed';controls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}};
+   const button=node('button',label,'btn '+(value?'':'ghost'));button.type='button';button.disabled=state.busy||required===value||!options.storyboardAction;
+   button.onclick=async()=>{if(button.disabled)return;button.disabled=true;try{await options.storyboardAction({required:value,review});await refresh();}catch(error){boardState.textContent=error.message||'Storyboard choice failed';button.disabled=false;}};
    controls.append(button);
   }
-  const seePackage=review.seePackage||{}, sheet=seePackage.providerSheet?.media, gridAllowed=review.storyboardRequired!==false;
+  const seePackage=review.seePackage||{}, sheet=seePackage.providerSheet?.status==='current'?seePackage.providerSheet.media:null, gridAllowed=required;
   const imageRecords=Array.isArray(review.images)?review.images:[], plateApproved=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='approved'), openingApproved=imageRecords.some(item=>item?.component==='opening'&&item.reviewStatus==='approved');
-  const gridIssues=Array.isArray(seePackage.issues)?seePackage.issues.filter(Boolean):[], stalePlate=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='stale'), approvalBlock=!plateApproved?(stalePlate?'Refresh scene plate first':'Approve scene plate first'):!openingApproved?'Approve opening keyframe first':'', gridBlocked=gridIssues.length>0||!!approvalBlock;
+  const panels=seePackage.panels||[], panelsReady=panels.length>0&&panels.every(p=>p.status==='current'&&p.reviewStatus==='approved');
+  const gridIssues=Array.isArray(seePackage.issues)?seePackage.issues.filter(Boolean):[], stalePlate=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='stale'), approvalBlock=!plateApproved?(stalePlate?'Replace or refire scene plate':'Approve scene plate first'):!openingApproved?'Approve opening keyframe first':!panelsReady?'Prepare and approve storyboard images':'', gridBlocked=gridIssues.length>0||!!approvalBlock;
   const gridLabel=sheet?'Storyboard grid ready':!gridAllowed?'Storyboard skipped':gridIssues.length?'Resolve SEE issue first':approvalBlock||'Build Seedance storyboard grid';
-  const gridButton=node('button',gridLabel,'btn ghost');gridButton.type='button';gridButton.dataset.storyboardGrid='1';gridButton.disabled=!!sheet||!options.storyboardGridAction||!gridAllowed||gridBlocked;if(gridBlocked)gridButton.title=String(gridIssues[0]||approvalBlock);
+  const gridButton=node('button',gridLabel,'btn ghost');gridButton.type='button';gridButton.dataset.storyboardGrid='1';gridButton.disabled=state.busy||!!sheet||!options.storyboardGridAction||!gridAllowed||gridBlocked;if(gridBlocked)gridButton.title=String(gridIssues[0]||approvalBlock);
   if(options.storyboardGridAction&&!sheet){gridButton.onclick=async()=>{gridButton.disabled=true;gridButton.textContent='Building storyboard grid…';try{await options.storyboardGridAction({review});}catch(error){gridButton.disabled=false;gridButton.textContent=error.message||'Build Seedance storyboard grid';}};}
-  controls.append(gridButton);
-  if(gridBlocked&&!sheet)controls.append(node('small','Grid blocked · '+String(gridIssues[0]||approvalBlock),'journey-storyboard-grid-note'));
-  heading.append(title,state,controls);storyboard.append(heading);
+  if(required)controls.append(gridButton);
+  if(required&&gridBlocked&&!sheet)controls.append(node('small','Grid blocked · '+String(gridIssues[0]||approvalBlock),'journey-storyboard-grid-note'));
+  heading.append(title,boardState,controls);storyboard.append(heading);
+  if(!required)return;
   if(sheet?.url){const grid=node('figure',undefined,'journey-storyboard-grid');const image=node('img');image.src=sheet.url;image.alt='Chronological Seedance storyboard grid';grid.append(image,node('figcaption','Seedance reference · read left to right, then top to bottom'));storyboard.append(grid);}
   const sourceImages=(review.images||[]).filter(record=>record?.url).sort((a,b)=>({plate:0,opening:1}[a.component]??2)-({plate:0,opening:1}[b.component]??2));
   const references=(Array.isArray(seePackage.referenceInputs)?seePackage.referenceInputs:[]).filter(record=>record?.url&&/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(record.url));
@@ -105,22 +104,42 @@ function mount(host,scope,options={}){
    }
    inputSection.append(inputGrid);storyboard.append(inputSection);
   }
-  if(!views.length){storyboard.append(node('p','No storyboard panels prepared for this production unit.','journey-storyboard-empty'));return;}
-  const panelSources=sourceImages.length?sourceImages:references;
+  if(!sheet)storyboard.append(node('p','Storyboard montage not created yet.','journey-storyboard-empty'));
+  if(options.storyboardPanelAction&&plateApproved&&openingApproved){
+   const boardBusy=['queued','running','unknown'].includes(seePackage.job?.status);
+   const prepare=node('button',boardBusy?'Storyboard generation in progress':'Generate storyboard images','btn ghost');prepare.type='button';prepare.disabled=state.busy||boardBusy||panelsReady;
+   prepare.onclick=async()=>{prepare.disabled=true;try{await options.storyboardPanelAction({command:'quote',review});}catch(e){boardState.textContent=e.message;}finally{prepare.disabled=!!state.busy;}};
+   storyboard.append(prepare);
+  }
+  if(!views.length&&!panels.length)return;
+  const planned=node('details'),plannedTitle=node('summary',panels.length?'Storyboard images and camera plan':'Camera plan · images not created');planned.append(plannedTitle);storyboard.append(planned);
   const cameraText=view=>view.framing||view.framingAndCamera||view.camera||view.cameraBehaviour||view.cameraBehavior||'';
   const movementText=view=>view.cameraPurpose||view.movement||view.action||view.staging||'';
-  for(const [index,view] of views.entries()){
+  for(const [index,view] of (panels.length?panels:views).entries()){
    if(!view||typeof view!=='object')continue;
    const card=node('article',undefined,'journey-board journey-visual-board'),frame=node('div',undefined,'journey-board-frame');
-   const source=panelSources[index===0?0:Math.min(1,panelSources.length-1)]||panelSources[index%Math.max(panelSources.length,1)];
+   const source=view.status==='current'?view.media:null;
    if(source?.url){const image=node('img');image.src=source.url;image.alt='Visual storyboard panel '+(index+1);frame.append(image);}
+   if(!source?.url)frame.append(node('p',view.media?'Image needs updating':'Image not created','journey-image-empty'));
    frame.append(node('span','Panel '+(view.storyboardIndex||index+1),'journey-board-index'));card.append(frame);
    const details=node('div',undefined,'journey-board-details');details.append(node('small',view.viewId||view.shotId||'Planned view'),node('h4',view.action||view.purpose||'Planned visual beat'));
    const camera=cameraText(view),movement=movementText(view),performance=view.performance||view.performanceFocus||'';
    if(camera)details.append(node('p','Camera: '+camera));
    if(movement&&movement!==camera)details.append(node('p','Movement: '+movement));
    if(performance)details.append(node('p','Performance: '+performance));
-   card.append(details);storyboard.append(card);
+   card.append(details);planned.append(card);
+   if(view.id&&options.storyboardPanelAction){
+    const panelControls=node('div',undefined,'journey-image-actions');
+    const upload=node('input');upload.type='file';upload.accept='image/png,image/jpeg,image/webp';upload.hidden=true;
+    const run=async(command,extra={})=>{const buttons=[...panelControls.querySelectorAll('button')],disabled=buttons.map(b=>b.disabled);buttons.forEach(b=>b.disabled=true);try{await options.storyboardPanelAction({command,panelId:view.id,review,...extra});await refresh();}catch(e){boardState.textContent=e.message;}finally{buttons.forEach((b,i)=>b.disabled=disabled[i]);}};
+    const uploadButton=node('button','Upload','btn ghost');uploadButton.type='button';uploadButton.disabled=state.busy||view.reuseOpening;uploadButton.onclick=()=>upload.click();upload.onchange=()=>upload.files?.length&&run('upload',{input:upload});
+    panelControls.append(uploadButton,upload);
+    for(const [decision,label] of [['approved','Approve'],['rejected','Reject']]){
+     const button=node('button',label,'btn ghost');button.type='button';button.disabled=state.busy||view.status!=='current'||view.reviewStatus==='approved';
+     button.onclick=()=>{const reason=decision==='rejected'?window.prompt('What needs to change?',''):'';if(reason===null||decision==='rejected'&&!reason.trim())return;run('review-panel',{decision,reason});};panelControls.append(button);
+    }
+    details.append(node('p',view.status==='current'?(view.reviewStatus==='approved'?'Approved':'Awaiting decision'):'Needs image'),panelControls);
+   }
   }
  }
  function show(value){
@@ -128,7 +147,11 @@ function mount(host,scope,options={}){
   title.textContent=scope.unit+' · '+(review.title||'Scene production');
   progress.textContent=state.busy?(op?.message||'Preparing your next review'):state.phase==='complete'?'Accepted · ready for the next unit':state.primary||state.dependency||'Review the current issue';
   const images=[...(review.images||[])].sort((a,b)=>({plate:0,opening:1}[a?.component]??2)-({plate:0,opening:1}[b?.component]??2));
-  const nextMediaSignature=JSON.stringify([state.phase,review.videos,images,review.audio,review.plan,review.storyboard]);
+  if(options.imageSourceAction&&['images','audio'].includes(state.phase)){
+   for(const [component,label] of [['plate','Scene plate'],['opening','Opening keyframe']])if(!images.some(r=>r.component===component))images.push({component,label,reviewStatus:'missing'});
+   images.sort((a,b)=>({plate:0,opening:1}[a.component]??2)-({plate:0,opening:1}[b.component]??2));
+  }
+  const nextMediaSignature=JSON.stringify([state.phase,state.busy,review.videos,images,review.audio,review.plan,review.storyboard]);
   if(nextMediaSignature!==mediaSignature){mediaSignature=nextMediaSignature;media.replaceChildren();
   if(state.phase==='film'||state.phase==='complete'){for(const r of review.videos||[])asset(r,'video');}
   else if(state.phase==='audio'){asset(review.audio,'audio');for(const r of images)imageAsset(r);}
@@ -145,24 +168,29 @@ function mount(host,scope,options={}){
   const decision=op?.status==='needs-decision'?op.decision:null;
   issue.replaceChildren();if(op?.status==='superseded'&&op.decision){issue.append(node('strong',op.decision.issue),node('p',op.decision.proposed));}if(decision){issue.append(node('strong',decision.issue),node('p',decision.proposed),node('p','Preserved: '+(decision.preserved||[]).join(', ')));}
   for(const concern of state.concerns||[]){issue.append(node('p',typeof concern==='string'?concern:concern.message||concern.observation||''));}
-  cost.textContent=state.disclosure?.limitUsd?'Authorises '+(state.disclosure.operations||[]).join(', ')+' · up to $'+state.disclosure.limitUsd.toFixed(2)+'. '+(state.disclosure.basis||''):'No new generation cost.';
-  const seePackage=review.seePackage||{}, montageMissing=review.storyboardRequired!==false&&!seePackage.providerSheet?.media;
+  const seePackage=review.seePackage||{}, montageMissing=state.phase==='images'&&!!options.storyboardGridAction&&(seePackage.storyboardRequired??review.storyboardChoice?.required??review.storyboardRequired)!==false&&seePackage.providerSheet?.status!=='current';
   const imageRecords=Array.isArray(review.images)?review.images:[], plateApproved=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='approved'), openingApproved=imageRecords.some(item=>item?.component==='opening'&&item.reviewStatus==='approved');
   const montageIssues=Array.isArray(seePackage.issues)?seePackage.issues.filter(Boolean):[];
-  const montageActionable=montageMissing&&options.storyboardGridAction&&!montageIssues.length&&plateApproved&&openingApproved;
-  const montageBlock=!plateApproved?'Approve scene plate first':!openingApproved?'Approve opening keyframe first':montageIssues[0]?'Resolve SEE issue first':'';
+  montageActionable=montageMissing&&!montageIssues.length&&plateApproved&&openingApproved&&(seePackage.panels||[]).length>0&&seePackage.panels.every(p=>p.status==='current'&&p.reviewStatus==='approved');
+  const montageBlock=!plateApproved?'Choose and approve scene plate':!openingApproved?'Approve opening keyframe first':montageIssues[0]?'Review storyboard issue':'Prepare and approve storyboard images';
+  approvalOnly=!!state.creativeReview?.canApprove&&['images','audio','film'].includes(state.phase)&&!montageMissing;
+  const request=op?.receipts?.prepare_render?.requestDisplay;
+  requestPending=!!(state.busy&&request&&op.requestDisplayHash&&op.displayedRequestHash!==op.requestDisplayHash);
   primary.textContent=state.busy?(op?.message||'Working…'):montageActionable?'Build storyboard montage':montageMissing?(montageBlock||'Prepare storyboard montage'):state.primary||'Waiting for the required decision';
   primary.hidden=state.phase==='complete';
-  primary.disabled=state.busy||(!state.primary&&!decision)||submitted||(montageMissing&&!montageActionable);
-  if(decision)primary.textContent='Check saved operation';
+  primary.disabled=state.busy||(!state.primary&&!decision&&!approvalOnly)||submitted||(montageMissing&&!montageActionable);
+  if(approvalOnly){primary.textContent=state.phase==='film'?'Approve & Next':state.creativeReview.approveLabel;primary.disabled=state.busy||submitted;}
+  if(decision){primary.textContent='Check saved operation';primary.disabled=submitted;}
+  if(requestPending){primary.textContent='Approve request & Fire';primary.disabled=submitted;const display=node('section');display.append(node('h3','WATCH · Final request'),node('pre',JSON.stringify(request,null,2)));brief.prepend(display);}
+  cost.textContent=approvalOnly||montageMissing||decision?'No new generation cost.':state.disclosure?.limitUsd?'Maximum authorised spend: $'+state.disclosure.limitUsd.toFixed(2)+'. '+(state.disclosure.basis||''):'No new generation cost.';
   changes.disabled=state.busy||!options.changes;
   evidenceBody.textContent=JSON.stringify({scope,state:state.phase,normalActions:state.normalActionCount,corrections:state.correctionActionCount,review,operation:op,qualification:'Software checks do not establish live visual compliance.'},null,2);
   const settledKey=op&&!state.busy?[op.id,op.status].join(':'):null;if(settledKey&&settledKey!==settledSignature){settledSignature=settledKey;options.settled?.(state);}
   if(previousPhase&&previousPhase!==state.phase&&state.phase==='film')options.phaseChanged?.(state.phase,previousPhase);
   if(awaitingNext&&state.phase==='complete'&&state.next&&options.next){awaitingNext=false;options.next(state.next);return;}
  }
- async function refresh(resume=false){clearTimeout(timer);if(ticket!==sequence||!host.isConnected)return;try{show(await api({command:resume?'resume':'status',scope}));if(state.busy)timer=setTimeout(()=>refresh(true),1800);}catch(e){issue.textContent=e.message;primary.disabled=true;}}
- primary.onclick=async()=>{if(!state||submitted||primary.disabled)return;const gridButton=host.querySelector('[data-storyboard-grid]');if(montageActionable&&gridButton&&!gridButton.disabled){gridButton.click();return;}submitted=true;if(state.operation?.status==='needs-decision'){try{show(await api({command:'recover',scope}));}catch(e){issue.textContent=e.message;}finally{submitted=false;refresh(true);}return;}awaitingNext=state.phase==='film';primary.disabled=true;progress.textContent='Starting '+state.primary+'…';try{show(await api({command:'decide',scope,action:state.phase,binding:state.binding,expectedRevision:state.revision,commandId:crypto.randomUUID(),by:options.reviewer||'Producer'}));}catch(e){issue.textContent=e.message;}finally{submitted=false;if(ticket===sequence)refresh(true);}};
+ async function refresh(resume=false){clearTimeout(timer);if(ticket!==sequence||!host.isConnected)return;const revision=++refreshSequence;try{const value=await api({command:resume?'resume':'status',scope});if(ticket!==sequence||revision!==refreshSequence||!host.isConnected)return;show(value);if(state.busy||['queued','running'].includes(state.review?.seePackage?.job?.status))timer=setTimeout(()=>refresh(true),1800);}catch(e){if(ticket!==sequence||revision!==refreshSequence)return;issue.textContent=e.message;primary.disabled=true;}}
+ primary.onclick=async()=>{if(!state||submitted||primary.disabled)return;const decision=state.operation?.status==='needs-decision';const gridButton=host.querySelector('[data-storyboard-grid]');if(!decision&&montageActionable&&gridButton&&!gridButton.disabled){gridButton.click();return;}submitted=true;primary.disabled=true;awaitingNext=state.phase==='film';try{const body=decision?{command:'recover',scope}:requestPending?{command:'request-displayed',scope,operationId:state.operation.id,requestHash:state.operation.requestDisplayHash}:{command:'decide',scope,action:state.phase,binding:state.binding,expectedRevision:state.revision,commandId:crypto.randomUUID(),by:options.reviewer||'Producer',...(approvalOnly?{intent:'approve'}:{})};show(await api(body));}catch(e){issue.textContent=e.message;}finally{submitted=false;if(ticket===sequence)refresh(true);}};
  const handle=()=>{clearTimeout(timer);if(ticket===sequence)sequence++;};handle.scopeId=scopeId;handle.refresh=()=>refresh(true);host.journeyHandle=handle;refresh(true);return handle;
 }
 global.StudioJourney={mount};

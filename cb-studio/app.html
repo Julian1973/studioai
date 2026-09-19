@@ -3838,6 +3838,36 @@ function renderPromptReviewWorkspace(){
     <div class="wcol wcol-review"><div class="pstagehead"><h1>Render Review</h1><select class="plselect" style="width:auto;min-width:110px;margin:0" aria-label="Review shot" onchange="openPromptReviewShot(this.value)">${shotOptions}</select><button class="btn ghost" onclick="PSTAGE=null;renderWorkspaceBody();_syncHash()">Return to production</button></div>${panels}</div>`;
 }
 
+async function journeyStoryboardPanelAction(scope,detail){
+  const send=async extra=>{
+    const response=await fetch(BASE+'/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      command:'storyboard-action',scope,binding:detail.review.seePackage?.binding,by:REVIEWER,...extra
+    })});
+    const result=await response.json();
+    if(!response.ok||result.ok===false)throw new Error(result.error?.technicalMessage||result.error?.humanMessage||result.error||'Storyboard action failed.');
+    return result;
+  };
+  if(detail.command==='quote'){
+    const {quote}=await send({action:'quote',panelId:detail.panelId});
+    const sheet=document.getElementById('sheet');
+    sheet.innerHTML=`<button class="x" onclick="closeM()" aria-label="Close">×</button><h3>Generate storyboard images</h3><p>${_esc(quote.binding.provider)} · ${_esc(quote.binding.model)} · ${quote.newImageCount} images · maximum $${Number(quote.hardMaximumUsd).toFixed(2)}</p><div class="journey-storyboard-input-grid">${quote.references.map(r=>`<figure><img src="${_attr(r.url)}" alt="${_attr(r.role||r.name||'Approved reference')}"><figcaption>${_esc(r.role||r.name||'Reference')}</figcaption></figure>`).join('')}</div><details><summary>Prompts and camera plan</summary><pre style="white-space:pre-wrap">${_esc(quote.prompts.map(p=>p.prompt).join('\n\n'))}</pre></details><p id="storyboardGenerationStatus" role="status"></p><button class="btn" id="storyboardGenerate">Generate · up to $${Number(quote.hardMaximumUsd).toFixed(2)}</button><button class="btn ghost" onclick="closeM()">Back</button>`;
+    document.getElementById('modal').classList.add('show');
+    document.getElementById('storyboardGenerate').onclick=async event=>{
+      const button=event.currentTarget;button.disabled=true;
+      try{await send({action:'generate',binding:quote.sourceBinding,quoteHash:quote.quoteHash,panelId:quote.panelId});closeM();document.getElementById('workspace')?.journeyHandle?.refresh();}
+      catch(error){sheet.querySelector('#storyboardGenerationStatus').textContent=error.message;button.disabled=false;}
+    };
+    return;
+  }
+  const payload={action:detail.command,panelId:detail.panelId,decision:detail.decision,reason:detail.reason};
+  if(detail.command==='upload'){
+    const file=detail.input.files?.[0];if(!file)return;
+    const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Image could not be read.'));reader.readAsDataURL(file);});
+    payload.images=[{panelId:detail.panelId,data}];
+  }
+  await send(payload);
+}
+
 function storyboardStartOutcomeHTML(){
   const state=pStatus("storyboard"),episodeDirection=needsEpisodeStoryDirection();
   if(state==="generating")return outcomePanelHTML({tone:"working",title:"Story & Direction is working",body:"The candidate will appear here when it is ready for your review.",actions:[{label:"Refresh progress",onclick:"renderControl()"}]});
@@ -3848,6 +3878,7 @@ function storyboardStartOutcomeHTML(){
 
 async function renderWorkspaceBody(){
   const el=document.getElementById("workspace"); if(!el)return;
+  if(window.StudioJourney&&PSTAGE==='scenelook'&&!window.JOURNEY_INDIVIDUAL_REVIEW)PSTAGE='keyframe';
   el.classList.remove("review-workspace","focus-workspace","result-first");
   // "REMEMBER YOUR PLACE" (2026-07-19): renderWorkspaceBody is the one function every
   // shot-navigation change already calls (Previous/Next, clicking a shot in the sidebar,
@@ -3872,6 +3903,7 @@ async function renderWorkspaceBody(){
     const chosen=pShots()[PSHOT_I]||{}, shotId=chosen.shotId||`S${SH_SC}.SH1`;
     for(const id of ['studioagent','readiness','director-next-step']){const n=document.getElementById(id);if(n)n.innerHTML='';}
     StudioJourney.mount(el,{projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},{
+      reviewer:REVIEWER,
       changes:state=>openDirectorAgent({episode:SH_EP,scene:SH_SC,shotId,stage:({prepare:'storyboard',plan:'storyboard',images:'keyframe',audio:'voice',film:'animation',complete:'animation'})[state?.phase]||stage}),
       imageAction:async detail=>{
         if(detail.action==='refire'){
@@ -3881,10 +3913,11 @@ async function renderWorkspaceBody(){
           return {message:'Refire controls opened. Review the request before any provider submission.'};
         }
         const response=await fetch(BASE+'/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-          command:'image-review',scope:{projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},component:detail.component,decision:detail.action,reason:detail.reason,by:REVIEWER
+          command:'image-review',scope:{projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},component:detail.component,decision:detail.action,reason:detail.reason,by:REVIEWER,binding:detail.state.review.seePackage?.binding
         })});
         const result=await response.json();
         if(!response.ok||result.ok===false)throw new Error(result.error?.humanMessage||result.error?.technicalMessage||result.error||'Image decision could not be recorded.');
+        await shFetchPkg();
         const reviews=result.see?.componentReviews||{};
         if(detail.action==='approved'&&reviews.opening==='approved'&&reviews.plate==='approved'){
           window.JOURNEY_INDIVIDUAL_REVIEW=false;
@@ -3894,23 +3927,26 @@ async function renderWorkspaceBody(){
         renderWorkspaceBody();
         return {message:detail.action==='approved'?'Image approved.':'Image rejected.'};
       },
-      scenePlateAction:async detail=>{
+      imageSourceAction:async detail=>{
+        const plate=detail.component==='plate';
         if(detail.action==='refire'){
-          window.JOURNEY_INDIVIDUAL_REVIEW=true;
-          PSTAGE='scenelook';
-          renderWorkspaceBody();
-          return {message:'Scene Plate refire controls opened.'};
+          if(plate)startScenePlateGeneration(true);
+          else openDisclosureModal('keyframe',{shotId:shTok(shotId)});
+          return;
         }
         if(detail.action==='upload'){
-          slUpload(detail.input);
-          return {message:'Upload started. Review the new Scene Plate candidate, then approve it.'};
+          if(plate)await slUpload(detail.input);
+          else await shOpenFrameUpload(shTok(shotId),detail.input);
+          return;
         }
         if(detail.action==='library'){
-          await slLibrary();
-          return {message:'Scene Plate library opened.'};
+          if(plate)await slLibrary();
+          else await shOpenFrameLibrary(shTok(shotId));
+          return;
         }
         throw new Error('Choose Upload, Refire or Library.');
       },
+      storyboardPanelAction:detail=>journeyStoryboardPanelAction({projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},detail),
       storyboardAction:async detail=>{
         const response=await fetch(BASE+'/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           command:'storyboard-choice',scope:{projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},required:detail.required,by:REVIEWER
@@ -3935,6 +3971,7 @@ async function renderWorkspaceBody(){
     });
     return;
   }
+  el.journeyHandle?.();el.journeyHandle=null;el.classList.remove('journey-workspace');
   if(window.JOURNEY_INDIVIDUAL_REVIEW){const back=document.createElement('button');back.className='btn ghost';back.textContent='Return to production journey';back.onclick=()=>{window.JOURNEY_INDIVIDUAL_REVIEW=false;renderWorkspaceBody();};document.getElementById('director-next-step')?.replaceChildren(back);}
   renderStudioAgent();renderPreflightBanner();shEnsureAgentSelection();
   if(pStatus(stage)=="locked"&&!(pShots().length&&["keyframe","voice","animation"].includes(stage))){
@@ -7026,18 +7063,17 @@ async function slUpload(input){
   // zero-cost pattern exactly — the uploaded file becomes the candidate directly via
   // select-scenelook-upload, never a reference fed into a fresh AI generation.
   const file=input.files&&input.files[0]; if(!file)return;
-  const reader=new FileReader();
-  reader.onload=async()=>{
-    try{
-      const r=await fetch(BASE+"/api/scenelook-upload",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,filename:file.name,dataB64:reader.result})});
-      const j=await r.json();
-      if(!j.ok){alert("Upload failed: "+(j.error||"unknown error"));return;}
-      await slSelectReplacement('select-scenelook-upload',j.sourcePath,"Installing the uploaded Scene Plate");
-    }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
-    input.value="";
-  };
-  reader.readAsDataURL(file);
+  const scene=String(SH_SC),episode=SH_EP;
+  try{
+    const dataB64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Image could not be read.'));reader.readAsDataURL(file);});
+    const r=await fetch(BASE+"/api/scenelook-upload",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({scene,episode,filename:file.name,dataB64})});
+    const j=await r.json();
+    if(!r.ok||!j.ok)throw new Error('Upload failed: '+(j.error||'unknown error'));
+    if(scene!==String(SH_SC)||episode!==SH_EP)throw new Error('Scene changed during upload. Return to the original scene to select the image.');
+    await slSelectReplacement('select-scenelook-upload',j.sourcePath,"Installing the uploaded Scene Plate");
+  }catch(error){showToast(error.message,false);throw error;}
+  finally{input.value="";}
 }
 async function slLibrary(){
   // THE REAL REUSABLE LIBRARY (2026-07-19 correction — "the library has to come from the

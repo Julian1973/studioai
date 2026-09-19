@@ -4046,6 +4046,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             try:
                 services = types.SimpleNamespace(ROOT=ROOT, _start=_start,
                     _canonical_cb_render=_canonical_cb_render,
+                    decode_image_upload=decode_image_upload,
                     _storyboard_approval=_storyboard_approval)
                 return self._json(200, request(services, self._body()))
             except DecisionRequired as exc:

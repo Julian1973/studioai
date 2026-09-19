@@ -427,7 +427,7 @@ def request(server, data):
             log = root/'cb-output/state/see-packages'/(job['id']+'.log')
             try:
                 with log.open('ab') as output:
-                    process = subprocess.Popen([str(root/'.venv/bin/python'), str(root/'engine/studio_see_worker.py'),
+                    process = subprocess.Popen([sys.executable, str(root/'engine/studio_see_worker.py'),
                                                json.dumps(scope), job['id']], cwd=root/'engine', stdout=output, stderr=output)
                 record['job']['pid'] = process.pid
                 package.save(record)

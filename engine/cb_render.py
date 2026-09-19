@@ -979,12 +979,18 @@ def scenelook_status(scene, episode="Ep1"):
     rec = _load_scenelook_rec(scene, episode)
     approved, candidate = rec.get("approved"), rec.get("candidate")
     current_sig = _scenelook_input_signature(scene, episode)
+    def signature_current(record):
+        stored = record.get("inputSignature") or {}
+        # Approval provenance may include canon/profile and plate hashes. Status only
+        # compares the plate's direct environment inputs, so extra fields cannot make
+        # an unchanged approved plate appear stale.
+        return all(stored.get(key) == value for key, value in current_sig.items())
     if candidate:
         return {"status": "awaiting", "current": False, "approved": approved,
                 "candidate": candidate, "history": rec.get("history", [])}
     if approved:
         approved_ok = os.path.exists(approved.get("path") or "")
-        sig_current = approved.get("inputSignature") == current_sig
+        sig_current = signature_current(approved)
         status = "approved" if (approved_ok and sig_current) else "stale"
         return {"status": status, "current": (status == "approved"), "approved": approved,
                 "candidate": None, "history": rec.get("history", [])}

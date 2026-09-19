@@ -182,7 +182,10 @@ function mount(host,scope,options={}){
   for(const line of review.script||[]){const p=node('p');p.append(node('b',(line.speaker||'')+' '),node('em','“'+(line.exactText||line.text||line.words||'')+'”'));brief.append(p);}
   if(state.phase==='audio'&&review.performancePrompt){const p=node('details');p.append(node('summary','ElevenLabs performance prompt'),node('pre',review.performancePrompt));brief.append(p);}
   const decision=op?.status==='needs-decision'?op.decision:null;
-  issue.replaceChildren();if(op?.status==='superseded'&&op.decision){issue.append(node('strong',op.decision.issue),node('p',op.decision.proposed));}if(decision){issue.append(node('strong',decision.issue),node('p',decision.proposed),node('p','Preserved: '+(decision.preserved||[]).join(', ')));}
+  issue.replaceChildren();
+  // Superseded operations stay in the evidence drawer for audit, but must not
+  // present an old failure as the current producer blocker.
+  if(decision){issue.append(node('strong',decision.issue),node('p',decision.proposed),node('p','Preserved: '+(decision.preserved||[]).join(', ')));}
   for(const concern of state.concerns||[]){issue.append(node('p',typeof concern==='string'?concern:concern.message||concern.observation||''));}
   const seePackage=review.seePackage||{}, montageMissing=state.phase==='images'&&!!options.storyboardGridAction&&(seePackage.storyboardRequired??review.storyboardChoice?.required??review.storyboardRequired)!==false&&seePackage.providerSheet?.status!=='current';
   const imageRecords=Array.isArray(review.images)?review.images:[], plateApproved=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='approved'), openingApproved=imageRecords.some(item=>item?.component==='opening'&&item.reviewStatus==='approved');

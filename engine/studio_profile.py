@@ -113,7 +113,13 @@ def load_show_profile(repo_root=None, show_id=None) -> LoadedShowProfile:
     root = pathlib.Path(repo_root or pathlib.Path(__file__).resolve().parent.parent).resolve()
     selected = validate_show_id(
         show_id if show_id is not None else os.environ.get("STUDIO_SHOW", DEFAULT_SHOW_ID))
-    shows_root = (root / "shows").resolve()
+    # Show data (canon, laws, profile) is production data: in a split deployment it
+    # lives under STUDIO_DATA_ROOT, and reading the release folder's copy would run the
+    # Studio on stale canon. Prefer the data root; fall back to the source checkout.
+    from studio_roots import data_root
+    shows_root = (data_root(root) / "shows").resolve()
+    if not (shows_root / selected / "profile.json").is_file() and (root / "shows" / selected / "profile.json").is_file():
+        shows_root = (root / "shows").resolve()
     show_root = (shows_root / selected).resolve()
     try:
         # A clean release keeps immutable code in SOURCE_ROOT and show data in

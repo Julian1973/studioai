@@ -57,8 +57,13 @@ def optional_collection(value, field):
 
 def read(root, scope):
     scope_key(scope)
-    path = root / 'cb-output' / f"{scope['episode']}_scene{scope['scene']}_production_package.json"
-    board_path = root / 'cb-output/creative' / f"{scope['episode']}_scene{scope['scene']}_storyboard.json"
+    # Production records live under the data root; in a single-root deployment that is
+    # the studio root itself. Reading them from the release folder returns an empty shot
+    # and SEE then refuses with 'complete the timed action in DIRECT' (17 Sep outage class).
+    root = Path(root)
+    data = data_root(root)
+    path = data / 'cb-output' / f"{scope['episode']}_scene{scope['scene']}_production_package.json"
+    board_path = data / 'cb-output/creative' / f"{scope['episode']}_scene{scope['scene']}_storyboard.json"
     import cb_db
     pkg = cb_db.read_json_document(root, path)[0] if path.exists() else {}
     board = cb_db.read_json_document(root, board_path)[0] if board_path.exists() else {}

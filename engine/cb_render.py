@@ -3029,7 +3029,7 @@ def _provider_attachment_plan(shot, slots_key, anchor_path, scene, episode,
         })
     if slots_key == 'referenceSlots':
         from studio_see_service import native_references
-        plan = native_references(pathlib.Path(__file__).resolve().parents[1],
+        plan = native_references(_source_base(),
             {'projectId': 'crystal-bears', 'episode': episode, 'scene': str(scene), 'unit': shot['shotId']}, plan)
     return plan
 
@@ -5843,7 +5843,7 @@ def restore_voice_working(scene, shot_id, episode="Ep1", log=print):
 
 def voice_shot(pkg, path, shot_id, episode="Ep1", log=print):
     from studio_see_service import gate as see_gate
-    see_gate(pathlib.Path(__file__).resolve().parents[1], {'projectId': 'crystal-bears', 'episode': episode, 'scene': str(pkg['sceneNumber']), 'unit': shot_id}, approved=True)
+    see_gate(_source_base(), {'projectId': 'crystal-bears', 'episode': episode, 'scene': str(pkg['sceneNumber']), 'unit': shot_id}, approved=True)
     shot = _shot(pkg, shot_id)
     from studio_source_segmentation import spoken
     for source_line in shot.get('dialogueLines') or []:
@@ -9995,7 +9995,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     (6) every candidate and every failure is persisted, nothing deleted."""
     if not dry_run:
         from studio_see_service import gate as see_gate
-        see_gate(pathlib.Path(__file__).resolve().parents[1], {'projectId': 'crystal-bears', 'episode': episode, 'scene': str(scene), 'unit': shot_id}, approved=True)
+        see_gate(_source_base(), {'projectId': 'crystal-bears', 'episode': episode, 'scene': str(scene), 'unit': shot_id}, approved=True)
     pkg, path = load_pkg(scene, episode)
     # The fresh current-package validator below supersedes its stored verdict.
     _require_current_lineage(pkg, scene, episode)           # THE STATE-INTEGRITY CHECKPOINT —

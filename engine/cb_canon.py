@@ -772,11 +772,30 @@ def status(episode: str | None = None, cast: Iterable[str] | None = None,
 
 
 def require_locked(episode: str | None = None, cast: Iterable[str] | None = None,
-                   root: str | pathlib.Path | None = None) -> dict:
+                   root: str | pathlib.Path | None = None, *,
+                   asset_scope: str | None = None) -> dict:
+    if asset_scope not in (None, "scene-plate"):
+        raise CanonLockError("unknown canon asset scope")
     result = status(episode, cast, root)
     issues = list(result.get("blockers") or [])
     if episode:
         issues.extend(result.get("episodeBlockers") or [])
+    if asset_scope == "scene-plate":
+        # Empty environment plates do not consume cast imagery. Keep all canon
+        # text, manifest, location and non-asset readiness failures enforced.
+        asset_only_cast = {
+            row["name"] for row in result.get("characters", [])
+            if row.get("gaps") and all(
+                gap == "identity anchor missing" or gap.startswith("declared asset missing:")
+                for gap in row["gaps"])
+        }
+        issues = [item for item in issues if not (
+            item.get("code") == "CANON_ASSET_DRIFT" and (
+                str(item.get("owner", "")).startswith("character:") or
+                item.get("owner") == "provider-identity") or
+            item.get("code") == "CAST_CANON_INCOMPLETE" and
+            item.get("character") in asset_only_cast
+        )]
     if issues:
         messages = [str(item.get("message") or item.get("code")) for item in issues[:5]]
         raise CanonLockError("CANON LOCK REFUSED - " + " | ".join(messages))

@@ -115,6 +115,69 @@ def test_changed_source_and_asset_make_lock_stale(tmp_path):
     assert {"CANON_SOURCE_DRIFT", "CANON_ASSET_DRIFT"} <= codes
 
 
+def test_scene_plate_scope_excludes_only_unconsumed_character_images(tmp_path):
+    _workspace(tmp_path)
+    cb_canon.write_lock(tmp_path, "Tester")
+    (tmp_path / "assets" / "keen.png").unlink()
+    cb_canon.require_locked("Ep1", ["Keen"], tmp_path, asset_scope="scene-plate")
+    with pytest.raises(cb_canon.CanonLockError, match="missing"):
+        cb_canon.require_locked("Ep1", ["Keen"], tmp_path)
+
+
+@pytest.mark.parametrize("damaged", [
+    "assets/cove.png",
+    "shows/crystal-bears/canon/LOCKED_CANON.md",
+    "shows/crystal-bears/canon/characters.json",
+    "shows/crystal-bears/canon/CANON_LOCK.json",
+])
+def test_scene_plate_scope_still_rejects_canon_and_environment_drift(tmp_path, damaged):
+    _workspace(tmp_path)
+    cb_canon.write_lock(tmp_path, "Tester")
+    (tmp_path / damaged).write_text("{}")
+    with pytest.raises(cb_canon.CanonLockError):
+        cb_canon.require_locked("Ep1", ["Keen"], tmp_path, asset_scope="scene-plate")
+
+
+def test_uploaded_scene_plate_works_without_character_images(tmp_path, monkeypatch):
+    import cb_render as render
+    import studio_scene_plate
+
+    data = tmp_path / "data"
+    source = tmp_path / "release"
+    cwd = tmp_path / "cwd"
+    (source / "engine").mkdir(parents=True)
+    cwd.mkdir()
+    policy = _workspace(data)
+    policy["profiles"]["look"] = ["showBible", "locations"]
+    _write(data / cb_canon.POLICY_REL, policy)
+    cb_canon.write_lock(data, "Tester")
+    (data / "assets" / "keen.png").unlink()
+    upload = data / "engine" / "media" / "uploads_incoming" / "plate.png"
+    upload.parent.mkdir(parents=True)
+    upload.write_bytes(b"validated upload fixture")
+    monkeypatch.setenv("STUDIO_DATA_ROOT", str(data))
+    monkeypatch.setattr(render, "ROOT", data)
+    monkeypatch.setattr(render, "HERE", source / "engine")
+    monkeypatch.setattr(render, "load_pkg", lambda *args: (
+        {"revision": 1, "cast": ["Keen"]}, data / "package.json"))
+    monkeypatch.setattr(render, "_require_show_adapter", lambda: None)
+    monkeypatch.setattr(render, "_require_valid", lambda pkg: None)
+    monkeypatch.setattr(render, "_require_current_lineage", lambda *args: None)
+    monkeypatch.setattr(render, "_resolve_scenelook_prompt", lambda *args: "Empty cove")
+    monkeypatch.setattr(studio_scene_plate, "native_request", lambda *args, **kwargs: {
+        "prompt": "Empty cove"})
+    monkeypatch.chdir(cwd)
+
+    selected = render.select_scenelook_source(
+        "1", "upload", "Ep1", upload_path=str(upload), log=lambda *args: None)
+    assert pathlib.Path(selected).read_bytes() == upload.read_bytes()
+    assert pathlib.Path(selected).is_relative_to(data / "engine" / "media")
+    assert render._load_scenelook_rec("1", "Ep1")["approved"]["path"] == selected
+    # Provider generation still requires the full canon lock.
+    with pytest.raises(render.Refused, match="CANON LOCK REFUSED"):
+        render.generate_scenelook_plate("1", "Ep1", log=lambda *args: None)
+
+
 def test_provider_identity_packs_are_locked_without_invalidating_story(tmp_path):
     policy = _workspace(tmp_path)
     baseline = cb_canon.write_lock(tmp_path, "Tester")

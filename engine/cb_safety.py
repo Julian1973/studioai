@@ -196,7 +196,8 @@ def create_policy(m):
     def require_canon(pkg, episode, profile=None):
         try:
             lock = cb_canon.require_locked(
-                episode, package_cast(pkg), root=m.ROOT)
+                episode, package_cast(pkg), root=m.ROOT,
+                **({"asset_scope": "scene-plate"} if profile == "look" else {}))
         except cb_canon.CanonLockError as exc:
             raise m.Refused(str(exc)) from exc
         if profile:
@@ -206,13 +207,13 @@ def create_policy(m):
             return digest
         return lock
 
-    def current_package(scene, episode, *, watch=False):
+    def current_package(scene, episode, *, watch=False, scene_plate=False):
         m._require_show_adapter()
         pkg, path = m.load_pkg(scene, episode)
         if not watch:
             m._require_valid(pkg)
         m._require_current_lineage(pkg, scene, episode)
-        require_canon(pkg, episode)
+        require_canon(pkg, episode, "look" if scene_plate else None)
         return pkg, path
 
     def json_sha256(value):
@@ -745,7 +746,7 @@ def create_policy(m):
         same_approved_media = _same_approved_scene_media(
             candidate, approved, trusted_roots)
         if not same_approved_media:
-            current_package(scene, episode)
+            current_package(scene, episode, scene_plate=True)
         if not candidate and (rec.get('approved') or {}).get('approvalMethod') == 'explicit-upload-selection':
             status = scene_status(scene, episode)
             if status.get('approvedCurrent'):
@@ -771,7 +772,7 @@ def create_policy(m):
         reused = approved_plate_reuse(scene, episode, library_path) if mode == "library" else None
         pkg = {"revision": reused.get("packageRevision")} if reused else None
         if not reused:
-            pkg, _ = current_package(scene, episode)
+            pkg, _ = current_package(scene, episode, scene_plate=True)
         result = original["select_scenelook_source"](
             scene, mode, episode, upload_path, library_path, reviewed_by, log)
         rec = m._load_scenelook_rec(scene, episode)

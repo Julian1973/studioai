@@ -3258,7 +3258,15 @@ async function pFetchStoryboard(){
 }
 async function pLoadAll(){await Promise.all([shFetchPkg(),pFetchStoryboard(),fetchJobsNow(),fetchRates(),ensureRoster()]);}
 function currentBundle(){ return {storyboard:PSB, pkg:SH_PKG, media:SH_MEDIA, pkgFile:SH_FILE, scenelook:SH_SCENELOOK, preflight:SH_PREFLIGHT, productionState:SH_STATE}; }
-function currentStages(){ return deriveSceneState(currentBundle(), !!(CUR&&CUR.script), SH_SC); }
+function carriedProductionScene(){
+  const row=(SCENE_ROSTER||[]).find(item=>String(item.scene)===String(SH_SC));
+  return !!(SH_PKG&&row&&row.carried&&row.package);
+}
+function currentStages(){
+  // Existing carried scenes are already production records. Keep them reviewable
+  // even when the episode index still lacks the newer script-approval flag.
+  return deriveSceneState(currentBundle(), !!(CUR&&CUR.script)||carriedProductionScene(), SH_SC);
+}
 function pStatus(id){ try{ return currentStages()[id].state; }catch(e){ return "locked"; } }
 function pStatusSub(id){ try{ return currentStages()[id].sub||null; }catch(e){ return null; } }
 function pActiveStage(){

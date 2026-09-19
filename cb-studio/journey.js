@@ -24,7 +24,10 @@ function mount(host,scope,options={}){
   figure.append(node('figcaption',record.label||'SEE image'),image);card.append(figure);
   const status=node('p',record.reviewStatus==='approved'?'Approved':record.reviewStatus==='pending'?'Awaiting decision':record.reviewStatus==='stale'?'Refresh required':'Needs image');status.className='journey-image-status';
   const controls=node('div',undefined,'journey-image-actions');
-  for(const [action,label] of [['approved','Approve'],['rejected','Reject'],['refire','Refire']]){
+  const decisions=record.component==='plate'
+   ?[['approved','Approve'],['rejected','Reject']]
+   :[['approved','Approve'],['rejected','Reject'],['refire','Refire']];
+  for(const [action,label] of decisions){
    const button=node('button',label,'btn '+(action==='refire'?'ghost':''));
    button.type='button';button.setAttribute('aria-label',label+' '+(record.label||'SEE image'));
    button.disabled=action==='approved'&&record.reviewStatus!=='pending'||action==='rejected'&&record.reviewStatus!=='pending';
@@ -39,7 +42,35 @@ function mount(host,scope,options={}){
    controls.append(button);
   }
   card.append(status,controls);media.append(card);
- }
+  if(record.component==='plate'&&options.scenePlateAction){
+   const sourceControls=node('div',undefined,'journey-image-source-actions');
+   const upload=node('button','Upload','btn ghost');upload.type='button';
+   const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp';input.hidden=true;
+   upload.onclick=()=>input.click();
+   input.onchange=async()=>{
+    if(!input.files?.length)return;
+    sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=true;});
+    status.textContent='Installing uploaded Scene Plate…';
+    try{const result=await options.scenePlateAction({action:'upload',input,record,state});status.textContent=result?.message||'Uploaded Scene Plate is ready for approval';}
+    catch(error){status.textContent=error.message||'Scene Plate upload failed';}
+    finally{sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}
+   };
+   const refire=node('button','Refire','btn ghost');refire.type='button';
+   refire.onclick=async()=>{
+    sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=true;});
+    try{const result=await options.scenePlateAction({action:'refire',record,state});status.textContent=result?.message||'Refire controls opened';}
+    catch(error){status.textContent=error.message||'Scene Plate refire could not be opened';sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}
+   };
+   const library=node('button','Library','btn ghost');library.type='button';
+   library.onclick=async()=>{
+    sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=true;});
+    try{const result=await options.scenePlateAction({action:'library',record,state});status.textContent=result?.message||'Scene Plate library opened';}
+    catch(error){status.textContent=error.message||'Scene Plate library could not be opened';}
+    finally{sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=false;});}
+   };
+   sourceControls.append(upload,refire,library,input);card.append(sourceControls);
+  }
+}
  function asset(record,type){if(!record?.url)return;const e=node(type);e.src=record.url;if(type==='img'){e.alt=(record.label||'Opening image')+' for '+scope.unit;}else{e.controls=true;e.preload='metadata';}const figure=node('figure');if(record.label)figure.append(node('figcaption',record.label));figure.append(e);media.append(figure);}
  function renderStoryboard(review){
   storyboard.replaceChildren();const views=Array.isArray(review.storyboard)&&review.storyboard.length?review.storyboard:(Array.isArray(review.plan)?review.plan:Object.values(review.plan||{}).flat());

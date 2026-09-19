@@ -3894,6 +3894,23 @@ async function renderWorkspaceBody(){
         renderWorkspaceBody();
         return {message:detail.action==='approved'?'Image approved.':'Image rejected.'};
       },
+      scenePlateAction:async detail=>{
+        if(detail.action==='refire'){
+          window.JOURNEY_INDIVIDUAL_REVIEW=true;
+          PSTAGE='scenelook';
+          renderWorkspaceBody();
+          return {message:'Scene Plate refire controls opened.'};
+        }
+        if(detail.action==='upload'){
+          slUpload(detail.input);
+          return {message:'Upload started. Review the new Scene Plate candidate, then approve it.'};
+        }
+        if(detail.action==='library'){
+          await slLibrary();
+          return {message:'Scene Plate library opened.'};
+        }
+        throw new Error('Choose Upload, Refire or Library.');
+      },
       storyboardAction:async detail=>{
         const response=await fetch(BASE+'/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           command:'storyboard-choice',scope:{projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},required:detail.required,by:REVIEWER

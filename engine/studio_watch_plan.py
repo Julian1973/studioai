@@ -136,7 +136,7 @@ def _audio_blocks(prompt):
 def camera_line(view, framing, law=None):
     """The provider's camera line carries DIRECT's camera intention, not only its framing.
 
-    A view's cinematography record (lens relationship, movement or hold, focus, light)
+    A view's cinematography record (lens, movement or hold, focus, light, composition)
     used to reach the scene plate but not the WATCH shot line, so a directed move such as
     "the camera descends through the canopy and finds the clearing" never reached the
     provider unless it was repeated inside framing. Append those authored fields, in a
@@ -144,7 +144,8 @@ def camera_line(view, framing, law=None):
     """
     cinema = view.get('cinematography') if isinstance(view.get('cinematography'), dict) else {}
     parts = [str(framing or '').strip()]
-    for key, label in (('lens', 'Lens'), ('movement', 'Movement'), ('focus', 'Focus'), ('light', 'Light')):
+    for key, label in (('lens', 'Lens'), ('movement', 'Movement'), ('focus', 'Focus'),
+                       ('light', 'Light'), ('composition', 'Composition')):
         value = cinema.get(key)
         if isinstance(value, str) and value.strip():
             parts.append(f'{label}: {value.strip()}')
@@ -213,6 +214,12 @@ def build_plan(snapshot):
                 text = prose(value, 'Must not advance' if field == 'mustNotAdvance' else '')
                 if text and text not in plan['invariants']:
                     plan['invariants'].append(text)
+    # The show's camera language and light baseline (laws/shot_grammar.json) are stated
+    # once, under MUST PRESERVE, so every view is photographed in the same world.
+    from studio_camera_law import world_camera_lines
+    for text in world_camera_lines((authority.get('cameraLaw') or {}).get('_world')):
+        if text not in plan['invariants']:
+            plan['invariants'].append(text)
     from cb_emission_conformance import dialogue_cues, dialogue_placement_line
     lines = shot.get('dialogueLines') or []
     if shot.get('dialogue') and not lines:

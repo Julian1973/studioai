@@ -137,12 +137,43 @@ def derive(view, grammar, characters):
             size = code
             break
     lens = (grammar.get('lensBySize') or {}).get(size) if size else None
-    return dict(version=VERSION, subject=subject, subjectHeightIn=height, eyeLineIn=eye,
-                species=species, cameraHeight=instruction, size=size, lens=lens)
+    facts = dict(version=VERSION, subject=subject, subjectHeightIn=height, eyeLineIn=eye,
+                 species=species, cameraHeight=instruction, size=size, lens=lens)
+    by_character = grammar.get('cameraByCharacter') or {}
+    rule = by_character.get(subject)
+    if isinstance(rule, str) and rule.strip():
+        facts['characterGrammar'] = rule.strip()
+    return facts
+
+
+def world_camera(grammar):
+    """The show's camera language and light baseline: stated once per prompt, never per view.
+
+    Both are the studio's cinematographer craft (camera language of the world, motivated
+    light) kept as show data so DIRECT and the provider read the same words."""
+    if not grammar:
+        return None
+    language = str(grammar.get('cameraLanguage') or '').strip()
+    light = str(grammar.get('lightBaseline') or '').strip()
+    if not language and not light:
+        return None
+    return dict(version=VERSION, cameraLanguage=language, lightBaseline=light)
+
+
+def world_camera_lines(world):
+    """Lines for the provider's MUST PRESERVE block."""
+    if not world:
+        return []
+    lines = []
+    if world.get('cameraLanguage'):
+        lines.append('Camera language of this world: ' + world['cameraLanguage'])
+    if world.get('lightBaseline'):
+        lines.append('Light of this world: ' + world['lightBaseline'])
+    return lines
 
 
 def authority_for(shot, grammar=None, characters=None):
-    """{viewId: derived} for every view on the shot's Director Card; {} when not opted in."""
+    """{viewId: derived, '_world': world camera} for the shot's Director Card; {} when not opted in."""
     if grammar is None:
         grammar, characters = load()
     if not grammar:
@@ -152,14 +183,21 @@ def authority_for(shot, grammar=None, characters=None):
         facts = derive(view, grammar, characters or {})
         if facts and view.get('viewId'):
             result[view['viewId']] = facts
+    world = world_camera(grammar)
+    if world:
+        result['_world'] = world
     return result
 
 
 def camera_height_line(facts):
-    """The words the provider receives. Inches are the law; the instruction is the intent."""
+    """The words the provider receives. Inches are the law; the instruction is the intent;
+    a character's own camera grammar (from the show's data) rides on the same line."""
     if not facts:
         return ''
     line = f"Camera height: {facts['cameraHeight']} — {facts['subject']}'s eye-line is {facts['eyeLineIn']:g} in above the ground"
     if facts.get('lens'):
         line += f"; {facts['lens']} lens for a {facts['size']}"
-    return line + '.'
+    line += '.'
+    if facts.get('characterGrammar'):
+        line += f" {facts['subject']}'s camera: {facts['characterGrammar']}."
+    return line

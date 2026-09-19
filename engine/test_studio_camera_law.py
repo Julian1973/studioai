@@ -65,3 +65,44 @@ def test_compiled_camera_line_carries_inches_and_directed_move():
     line = camera_line(view, 'MCU on Fuzzby', law)
     assert line.startswith('MCU on Fuzzby Movement: the camera drifts down to the petal')
     assert "Fuzzby's eye-line is 11.9 in above the ground" in line and 'long lens for a MCU' in line
+
+
+def test_character_camera_grammar_from_data_rides_on_the_camera_line():
+    from studio_watch_plan import camera_line
+    view = _view('V', framing='CU on Zenny', viewpointOwner='Zenny',
+                 cinematography={'kind': 'hold', 'lens': '50mm — her stillness needs no drama from the glass',
+                                 'movement': 'locked off', 'composition': 'Zenny on the right third, negative space left'})
+    law = C.derive(view, GRAMMAR, CHARS)
+    assert law['characterGrammar'].startswith('the camera is steadier around Zenny')
+    line = camera_line(view, 'CU on Zenny', law)
+    assert 'Lens: 50mm — her stillness needs no drama from the glass' in line
+    assert 'Movement: locked off' in line and 'Composition: Zenny on the right third' in line
+    assert "Zenny's camera: the camera is steadier around Zenny" in line and 'locked off with no movement' in line
+    bear = C.derive(_view('V', framing='MS on Sunny', viewpointOwner='Sunny'), GRAMMAR, CHARS)
+    assert 'characterGrammar' not in bear  # only characters the show's grammar defines
+
+
+def test_world_camera_language_and_light_are_stated_once_under_must_preserve():
+    from studio_prompt_director import request_snapshot
+    from studio_watch_plan import build_plan
+    card = {'audienceFocus': 'x', 'views': [
+        _view('S3.V1', viewpointOwner='Sunny', framing='MS on Sunny', startState='Sunny at the table.', endState='Sunny turns.'),
+        _view('S3.V2', viewpointOwner='Sunny', framing='CU on Sunny', timing='4-8s', entry='cut',
+              startState='Sunny mid-turn.', endState='Sunny settles.')]}
+    shot = {'shotId': 'S3.SH1', 'durationSec': 8, 'charactersInFrame': ['Sunny'], 'directorCard': card}
+    snap = request_snapshot('[Audio]\nNo dialogue.', {'shot': shot}, [], {}, 8)
+    world = snap['authorities']['cameraLaw']['_world']
+    assert world['cameraLanguage'].startswith('Slightly imperfect and organic')
+    plan = build_plan(snap)
+    world_lines = [x for x in plan['invariants'] if x.startswith(('Camera language of this world:', 'Light of this world:'))]
+    assert len(world_lines) == 2 and 'never mechanical, never cold' in world_lines[0]
+    assert 'warm-gold against cool-teal' in world_lines[1] and 'Every light is motivated' in world_lines[1]
+    assert not any('Camera language of this world' in v['camera'] for v in plan['views'])  # once, not per view
+
+
+def test_contract_asks_direct_for_camera_and_light_as_emotional_decisions():
+    from studio_director_card import CONTRACT
+    assert 'CAMERA AND LIGHT ARE EMOTIONAL DECISIONS, NEVER SPECS' in CONTRACT
+    for phrase in ('stated in millimetres', '50 mm honest and still', 'lock the camera', 'never flat, never from nowhere',
+                   'locked camera is a choice about stillness, never a default', 'composition in the view'):
+        assert phrase in CONTRACT, phrase

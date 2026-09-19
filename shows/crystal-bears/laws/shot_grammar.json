@@ -1,18 +1,55 @@
 {
-  "version": 1,
-  "doctrine": "Camera height is a story decision measured from the featured character's eye-line (Patrick Lin). Size is chosen from the ladder against the subject's locked height. Lens follows relationship: wider to hold geography and two bodies, longer to press in on a thought. A subject under two feet tall is photographed from its own eye-line unless the view is about scale, so the world towers around it.",
+  "version": 2,
+  "doctrine": "Camera height is a story decision measured from the featured character's eye-line (Patrick Lin). Size is chosen from the ladder against the subject's locked height. Lens follows emotion and relationship: wider to hold geography, energy and two bodies, longer to press in on a thought. A subject under two feet tall is photographed from its own eye-line unless the view is about scale, so the world towers around it. Camera and light are emotional decisions, never technical specs (the studio's cinematographer skill, Patrick Lin camera / Jean-Claude Kalache light, restored here as data on 2026-09-19).",
+  "decisionOrder": ["what must the audience FEEL at this exact moment", "the camera language for this world and beat (organic and breathing, or still and composed)", "the lens, stated in millimetres", "what the light is saying and what motivates it", "the frame: horizontals and verticals, thirds, negative space, foreground / midground / background"],
+  "cameraLanguage": "Slightly imperfect and organic: breathing movement, gentle lens warmth, a steadicam or handheld feel for joyful, energetic sequences; a locked, still camera for moments of weight, emotion or revelation. Never clinical, never mechanical, never cold. Calm beat: stable, wide, breathing. Rising energy: closer lens, more movement, tighter frame. Emotional peak: the camera goes very still (weight) or very agitated (chaos). Resolution: back to wide, open, horizontal.",
+  "lensByEmotion": {
+    "18-24mm": "immersive, energetic, a little distorted: flying, action, the world rushing past",
+    "35mm": "natural, present, slightly in the scene: joyful exploration, mid-adventure",
+    "50mm": "honest, still, emotional weight: quiet moments, held conversation, a character alone with a feeling; lock the camera and let the character carry it",
+    "85mm": "intimate without being invasive: reactions, emotional close-ups, a single tear or smile",
+    "100-135mm": "compressed, isolated, dreamy: watching from a distance, wonder at something far away"
+  },
+  "movementGrammar": {
+    "locked": "gravity, composure, the moment matters: deadpan, emotional weight, comedy stillness",
+    "slow dolly in": "wonder, revelation, emotional approach: we are drawn into something",
+    "slow pull back": "isolation: the character is alone with a feeling, small in a big world",
+    "handheld breathing": "life, spontaneity, physicality: action, chase, energy",
+    "crane or tilt up": "reveal of scale, awe at the environment",
+    "whip pan": "comedy crash, sudden action, surprise",
+    "rack focus": "pay attention to this now: an emotional redirect from foreground to character"
+  },
+  "scaleGrammar": "Horizontal lines: openness, freedom, joy. Vertical lines (tall trees, upward framing): scale, vulnerability, small in a big world. Wide with negative space above and around the characters: they are small and the world is enormous and magical. Tight frame filled by the character: intimacy, focus, emotion. Centring is a specific strong choice (confrontation, formality, comedy); most compositions live on thirds or in dynamic balance.",
+  "lightBaseline": "Warm golden-amber key (sun through the canopy, god-rays) against a cool green-teal fill from sky and ambient; that warm-gold against cool-teal contrast is the show's signature, with golden pollen scatter as warmth made visible. Never pure white light, never flat. Every light is motivated by something in the world (canopy sun, a crystal glow, a flower's warm reflection). A large soft source means warmth and belonging; a small hard source means tension or a secret. The key character gets the light; the secondary character gets the fill.",
+  "lightDirection": {
+    "front lit": "open, approachable, nothing to hide",
+    "rim lit": "warmth, magic, being held by the world",
+    "top lit": "interrogated, exposed, pressure",
+    "back lit silhouette": "mystery, the unknown, a dramatic reveal",
+    "bottom lit": "unease; sparingly, never for the Bears"
+  },
+  "colourTemperature": {
+    "warm orange-amber": "safe, friendly, home, joy",
+    "cool blue": "distance, loneliness, uncertainty",
+    "teal-cyan": "magical, otherworldly, crystal energy"
+  },
+  "cameraByCharacter": {
+    "Fuzzby": "the camera is slightly energetic around Fuzzby and wants to keep up with him: handheld breathing on his action beats (24-35mm), eye-level or just below so we are with him, a quick surprised push-in or sudden re-frame when he crashes or fumbles, and in comedy beats a close-up on his bulbous tan nose, which is the character",
+    "Zenny": "the camera is steadier around Zenny: slow dollies and smooth tracks, 50-85mm in her intimate moments, and on a deadpan line the camera is locked off with no movement because the still frame is the comedy; she is always daintier than Fuzzby in the frame"
+  },
+  "antiPatterns": ["static without intention (lock because stillness is the story, never as a default)", "moving without motivation (no drifts, floats or pans for their own sake)", "unmotivated or flat light", "the wrong lens for the beat (wide in a quiet emotional moment feels cheap; telephoto in fast action feels disconnected)", "neutral eye-level for everything", "lighting both characters identically", "centring every composition", "treating camera and light as technical specs rather than emotional decisions"],
   "eyeLineFraction": {"bear": 0.9, "bee": 0.85, "rabbit": 0.85, "default": 0.9},
   "speciesByCharacter": {"Fuzzby": "bee", "Zenny": "bee", "Kit": "rabbit"},
   "creatureEyeLevelBelowIn": 24,
   "defaultHeight": "eye level of the featured character",
   "sizeLadder": [
-    {"size": "EWS", "name": "extreme wide", "subjectFrameFraction": [0.0, 0.15], "use": "place, scale, weather"},
-    {"size": "WS", "name": "wide", "subjectFrameFraction": [0.15, 0.4], "use": "geography, full bodies, group"},
+    {"size": "EWS", "name": "extreme wide", "subjectFrameFraction": [0.0, 0.15], "use": "place, scale, weather; the characters tiny among giant flowers"},
+    {"size": "WS", "name": "wide", "subjectFrameFraction": [0.15, 0.4], "use": "geography, full bodies, group, flying, physical comedy"},
     {"size": "MWS", "name": "medium wide", "subjectFrameFraction": [0.4, 0.6], "use": "knees up, two bodies in relation"},
-    {"size": "MS", "name": "medium", "subjectFrameFraction": [0.6, 0.85], "use": "waist up, dialogue, business with hands"},
+    {"size": "MS", "name": "medium", "subjectFrameFraction": [0.6, 0.85], "use": "waist up, dialogue, reaction, business with hands"},
     {"size": "MCU", "name": "medium close", "subjectFrameFraction": [0.85, 1.1], "use": "chest up, decision, recognition"},
-    {"size": "CU", "name": "close", "subjectFrameFraction": [1.1, 1.6], "use": "head and shoulders, thought"},
-    {"size": "ECU", "name": "extreme close", "subjectFrameFraction": [1.6, 99], "use": "eyes, paw, object detail"}
+    {"size": "CU", "name": "close", "subjectFrameFraction": [1.1, 1.6], "use": "head and shoulders, thought, punchline, wonder"},
+    {"size": "ECU", "name": "extreme close", "subjectFrameFraction": [1.6, 99], "use": "eyes, paw, nose, a crystal, object detail; the detail is the story"}
   ],
   "lensBySize": {"EWS": "wide", "WS": "wide", "MWS": "normal", "MS": "normal", "MCU": "long", "CU": "long", "ECU": "macro"},
   "heightByAttention": {
@@ -23,5 +60,5 @@
     "default": "at the featured character's eye-line"
   },
   "reservedSizes": [],
-  "notes": "Laws are not hashed by the canon lock. Heights come from canon/characters.json heightIn; this file never restates them."
+  "notes": "Laws are not hashed by the canon lock. Heights come from canon/characters.json heightIn; this file never restates them. cameraByCharacter holds only the characters the studio's cinematographer skill defined; add a bear only when Julian rules its camera grammar."
 }

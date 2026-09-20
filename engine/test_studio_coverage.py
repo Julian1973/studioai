@@ -276,6 +276,7 @@ def test_a_vocabulary_slip_in_scene_coverage_is_returned_to_the_director_once(mo
         calls.append(errors)
         assert 'Scene 3 view door-wide: a hold has no cut motivation' in errors
         assert 'motivation must be null' in system
+        repair.system = system
         return repair.reply
 
     monkeypatch.setattr(cb_creative.cb_llm, 'repair_call', repair)
@@ -288,8 +289,17 @@ def test_a_vocabulary_slip_in_scene_coverage_is_returned_to_the_director_once(mo
     assert cb_creative._return_coverage_vocabulary_to_author(slipped, 3, log=lambda *a, **k: None) is clean
     assert len(calls) == 1 and 'Scene 3 view door-wide: a hold has no cut motivation' in calls[0]
 
+    # A second slip gets one more bounded return, carrying only what is still wrong; a third stops.
     repair.reply = still_wrong
     import pytest
     with pytest.raises(cb_creative.CoverageAllocationError) as stop:
         cb_creative._return_coverage_vocabulary_to_author(slipped, 3, log=lambda *a, **k: None)
-    assert 'a hold has no cut motivation' in str(stop.value) and len(calls) == 2
+    assert 'a hold has no cut motivation' in str(stop.value) and len(calls) == 3
+    assert 'actionPhase one of preparation, contact, completion, consequence, reaction' in repair.system
+
+    calls.clear()
+    replies = iter([still_wrong, clean])
+    repair.reply = None
+    monkeypatch.setattr(cb_creative.cb_llm, 'repair_call', lambda *a, **k: (calls.append(a[3]), next(replies))[1])
+    assert cb_creative._return_coverage_vocabulary_to_author(slipped, 3, log=lambda *a, **k: None) is clean
+    assert len(calls) == 2

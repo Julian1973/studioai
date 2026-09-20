@@ -867,26 +867,37 @@ def _return_coverage_vocabulary_to_author(sd, scene_num, *, log=print):
     """One bounded return to the Director; the record is never edited for them."""
     for note in coverage_order_notes(sd):
         log(f"  [director] gate3_beats_s{scene_num}: order note (not a stop): {note}", flush=True)
+    from studio_director_card import (COVERAGE_KINDS, ATTENTION_PRIORITIES, ACTION_PHASES,
+                                      CUT_MOTIVATIONS, CUT_TIMINGS)
     problems = coverage_vocabulary_problems(sd)
     if not problems:
         return sd
-    log(f"  [director] gate3_beats_s{scene_num}: coverage vocabulary returned to the author once: "
-        + ' | '.join(problems), flush=True)
-    repaired = cb_llm.repair_call(
-        _mind("DIRECTOR", ["directorTaste"],
-              COVERAGE_CONTRACT + "\nRepair ONLY the named coverage view(s) so the record obeys the "
-              "vocabulary. A hold carries no motivation (motivation must be null); motivations "
-              "belong to cuts. A reaction view names its listener. A world-texture view names its "
-              "function and shows no character. Keep every beat, the selected treatment, exact "
-              "dialogue, view order, framing, action, performance, timing, continuity and every "
-              "other field exactly as authored; change nothing the check did not name."),
-        "CURRENT SCENE DIRECTION:\n" + sd.model_dump_json(),
-        PlannedSceneDirection, '\n'.join(problems), tier="premium",
-        label=f"gate3_coverage_s{scene_num}", log=log)
-    remaining = coverage_vocabulary_problems(repaired)
-    if remaining:
-        raise CoverageAllocationError('; '.join(remaining))
-    return repaired
+    vocabulary = ("VOCABULARY, EXACTLY: kind one of " + ', '.join(COVERAGE_KINDS)
+                  + "; motivation one of " + ', '.join(CUT_MOTIVATIONS) + " (null on a hold)"
+                  + "; cutTiming one of " + ', '.join(CUT_TIMINGS)
+                  + "; actionPhase one of " + ', '.join(ACTION_PHASES) + " or null"
+                  + "; attention one of " + ', '.join(ATTENTION_PRIORITIES) + ".")
+    # Two bounded returns: a big scene can carry a dozen slips and the first pass may miss
+    # one. Each return sends only what is still wrong. A third slip stops, honestly.
+    for attempt in (1, 2):
+        log(f"  [director] gate3_beats_s{scene_num}: coverage vocabulary returned to the author "
+            f"({'once' if attempt == 1 else 'a second time'}): " + ' | '.join(problems), flush=True)
+        sd = cb_llm.repair_call(
+            _mind("DIRECTOR", ["directorTaste"],
+                  COVERAGE_CONTRACT + "\nRepair ONLY the named coverage view(s) so the record obeys the "
+                  "vocabulary. " + vocabulary + " A hold carries no motivation (motivation must be "
+                  "null); motivations belong to cuts. A reaction view names its listener. A "
+                  "world-texture view names its function and shows no character. Keep every beat, "
+                  "the selected treatment, exact dialogue, view order, framing, action, performance, "
+                  "timing, continuity and every other field exactly as authored; change nothing the "
+                  "check did not name."),
+            "CURRENT SCENE DIRECTION:\n" + sd.model_dump_json(),
+            PlannedSceneDirection, '\n'.join(problems), tier="premium",
+            label=f"gate3_coverage_s{scene_num}", log=log)
+        problems = coverage_vocabulary_problems(sd)
+        if not problems:
+            return sd
+    raise CoverageAllocationError('; '.join(problems))
 
 
 def plan_camera_allocation(episode, scene_num, vision, selection, treatment, ready,

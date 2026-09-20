@@ -238,3 +238,29 @@ def test_contract_carries_the_feature_animation_craft():
                    'HOLD OR CUT, THEN WHY, THEN HOW', 'ACTION CHAINS', 'REACTIONS', 'PHOTOGRAPH THOUGHT',
                    'visual sentence', 'INTERNAL COVERAGE IS THE DEFAULT', 'never the provider', 'better visual decisions'):
         assert phrase in CONTRACT
+
+
+def test_the_contract_only_asks_for_words_the_check_accepts():
+    """20 Sep 2026, Ep4 scene 4: the contract said "thought, performance, action" and the check
+    wanted "character thought, character performance, physical action"; the Director used the
+    contract's words and was refused. The contract now names the check's words, the check
+    accepts the contract's short forms, and the five action phases are spelled out."""
+    from studio_director_card import (CONTRACT, ATTENTION_PRIORITIES, ACTION_PHASES, COVERAGE_KINDS,
+                                      canonical_attention, canonical_kind, coverage_issues)
+    for word in ATTENTION_PRIORITIES:
+        assert word in CONTRACT, word
+    for phase in ACTION_PHASES:
+        assert phase in CONTRACT, phase
+    for kind in COVERAGE_KINDS:
+        assert kind in CONTRACT, kind
+    assert canonical_attention('thought') == 'character thought'
+    assert canonical_attention('performance') == 'character performance'
+    assert canonical_attention('action') == 'physical action'
+    assert canonical_kind('opening') == 'establishing' and canonical_kind('button') == 'landing'
+    view = _view('S4.V1', cinematography={'kind': 'opening', 'attention': 'thought', 'actionPhase': 'contact'})
+    assert coverage_issues(view) == []
+    view = _view('S4.V2', cinematography={'kind': 'action', 'attention': 'urgency', 'actionPhase': 'acceleration'})
+    issues = coverage_issues(view)
+    assert any("unknown coverage kind 'action'" in i for i in issues)
+    assert any("unknown attention priority 'urgency'" in i for i in issues)
+    assert any("unknown actionPhase 'acceleration'" in i for i in issues)

@@ -1102,3 +1102,28 @@ def test_gate4_packing_repair_is_bounded_and_revalidated(monkeypatch, repair_suc
         with pytest.raises(RuntimeError, match='FALSE_DURATION_SPLIT'):
             run()
     assert len(repairs) == 1 and len(validations) == 2
+
+
+def test_a_line_placed_in_the_wrong_unit_is_refused_with_the_unit_that_carries_its_beat():
+    """20 Sep 2026, Ep4 scene 4 (five units): Production Detail put a line into S4.SH2 while
+    its beat lived in another unit, and the correction it received said only "not S4.SH2".
+    The refusal now names the unit(s) that carry the beat, so the rerun copies a fact
+    instead of guessing again."""
+    import pytest
+    voice = C.VoicePerformance(
+        dialogueOccurrenceId="dialogue-occurrence:sha256:line", beatId="1.B2",
+        speaker="KEEN", exactDialogue="Cups!", dramaticIntention="rally", subtext="hope",
+        relationshipTarget="Bo", emotionalEntry="bright", emotionalExit="bright",
+        operativeWords=["Cups"], pace="quick", rhythm="simple", pauses="none",
+        breaths="natural", nonVerbalActions="point", elevenLabsV3Direction="bright call",
+        physicalActionRelationship="pointing", expectedTiming="1s")
+    first = _card("S1.SH1")                       # carries 1.B1 only
+    second = _card("S1.SH2")
+    second.beatIds = ["1.B2"]                      # the only unit carrying the line's beat
+    detail_wrong = _detail("S1.SH1", occurrence_ids=["dialogue-occurrence:sha256:line"])
+    detail_other = _detail("S1.SH2", occurrence_ids=[])
+    assert C._units_carrying_beat([first, second], "1.B2") == ["S1.SH2"]
+    with pytest.raises(RuntimeError) as refused:
+        C._assign_dialogue_occurrences([first, second], [voice], [detail_wrong, detail_other])
+    message = str(refused.value)
+    assert "CROSSED BEATS" in message and "the unit(s) carrying that beat: S1.SH2" in message

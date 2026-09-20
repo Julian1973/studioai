@@ -2206,6 +2206,11 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
     return review
 
 
+def _units_carrying_beat(shots, beat_id):
+    """The provider units whose beatIds include this beat, in unit order."""
+    return [shot.shotId for shot in shots if beat_id in (getattr(shot, 'beatIds', None) or [])]
+
+
 def _assign_dialogue_occurrences(shots, voices, details):
     """Validate the typed occurrence-to-shot partition; infer only a unique placement."""
     detail_by_id = {detail.shotId: detail for detail in details}
@@ -2274,9 +2279,11 @@ def _assign_dialogue_occurrences(shots, voices, details):
                 raise RuntimeError(
                     f"DIALOGUE ASSIGNMENT UNKNOWN — {shot.shotId} names {occurrence_id}")
             if owner_by_id[occurrence_id] not in shot_by_id[shot.shotId].beatIds:
+                legal = _units_carrying_beat(shots, owner_by_id[occurrence_id])
                 raise RuntimeError(
                     f"DIALOGUE ASSIGNMENT CROSSED BEATS — {occurrence_id} belongs to "
-                    f"{owner_by_id[occurrence_id]}, not {shot.shotId}")
+                    f"{owner_by_id[occurrence_id]}, not {shot.shotId}; the unit(s) carrying that "
+                    f"beat: {', '.join(legal) or 'none'} — move the ID and its timing window there")
             assigned_in_shot_order.append(occurrence_id)
     if assigned_in_shot_order != expected:
         raise RuntimeError(
@@ -2362,6 +2369,10 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
           "these):\n"
         + "\n".join(f"{v.dialogueOccurrenceId} | beat {v.beatId} | {v.speaker}: "
                     f"{v.exactDialogue} | {v.expectedTiming}" for v in voices)
+        + "\n\nWHERE EACH LINE MAY LAND (structural fact: a line lives only in a unit that "
+          "carries its beat; when one unit is listed, that is its only legal shot):\n"
+        + "\n".join(f"{v.dialogueOccurrenceId} -> {', '.join(_units_carrying_beat(shots, v.beatId)) or 'NO UNIT CARRIES ITS BEAT'}"
+                    for v in voices)
         + cast_block
         + (("\n\nTHE PREVIOUS PRODUCTION-DETAIL DRAFT WAS REFUSED. Correct only this typed contract error and return the complete detail set again:\n" +
             str(validation_note)) if validation_note else ""),
@@ -2947,13 +2958,18 @@ def _run_scene(scene_num, episode, brief, log, ready):
                       + (("; ".join(i.issue for i in review.issues[:3])) or
                           review.judgement[:400]))
         log("ESCALATION — " + escalation)
-    try:
-        details = production_detail(episode, scene_num, sd, shots, voices, log=log)
-    except RuntimeError as exc:
-        log(f"PRODUCTION DETAIL REFUSED — {exc} — rerunning once with the exact contract error")
-        details = production_detail(
-            episode, scene_num, sd, shots, voices, log=log,
-            validation_note=str(exc))
+    note = None
+    for attempt in (1, 2, 3):
+        try:
+            details = production_detail(episode, scene_num, sd, shots, voices, log=log,
+                                        validation_note=note)
+            break
+        except RuntimeError as exc:
+            if attempt == 3:
+                raise
+            note = str(exc)
+            log(f"PRODUCTION DETAIL REFUSED — {exc} — rerunning "
+                f"({'once' if attempt == 1 else 'a second time'}) with the exact contract error")
 
     storyboard_inputs = {
         "scriptVersionId": script_version,

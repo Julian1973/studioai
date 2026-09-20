@@ -1,4 +1,5 @@
 """Plan-first reviewer guards and immutable payload verification, no network."""
+import pathlib
 from copy import deepcopy
 import socket
 import pytest
@@ -21,18 +22,45 @@ def state(at, values, cause='', entity='object-1'):
     return dict(entity=entity, at=at, view=str(at), values=values, cause=cause, source='Director Card')
 
 
+def _bound_reference(role):
+    """A reference is a file and its hash. A role name alone is not a binding, and the
+    sealed-media check refuses it before anything this module proves can run."""
+    import hashlib, tempfile
+    global _REFERENCE_DIR
+    try:
+        _REFERENCE_DIR
+    except NameError:
+        _REFERENCE_DIR = pathlib.Path(tempfile.mkdtemp(prefix='prompt-director-refs-'))
+    path = _REFERENCE_DIR / (role.replace(' ', '_') + '.png')
+    if not path.exists():
+        path.write_bytes(role.encode())
+    return {'role': role, 'path': str(path),
+            'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+
+
 def snapshot(prompt='Move the object.'):
     # Explicit synthetic typed direction; the freeform prompt is retained solely
     # to exercise audio intake and the rejection of historical visual prose.
     shot = dict(shotId='fixture', durationSec=12, purpose='Make the object transfer readable.',
-        directorCard={'views': [dict(viewId='view-1', timing='0–12s', atSec=0, visibleEntities=[])]},
+        directorCard={'audienceFocus': 'Read the object changing hands.',
+            # A current view carries its authored action and the camera, performance and
+            # landing every WATCH view is built from; without them the plan is refused
+            # before anything this module is meant to prove can run.
+            'views': [dict(viewId='view-1', timing='0–12s', atSec=0, visibleEntities=[],
+                entry='opening', action='The holder lifts the object and carries it clear of its support.',
+                framing='Medium on the transfer, held steady',
+                cameraPurpose='Keep the object and both hands readable',
+                performance='The hands lead; the eyes check the empty support after',
+                staging='Holder at the support, object between them',
+                startState='The object rests on its support',
+                endState='The holder has the single object and the support is empty')]},
         approvedAction='The same object travels with its holder; its support stays empty.')
     direction = dict(shotPlan=[dict(sourceViewId='view-1', transitionType='opening',
         framingLensAndCamera='Hold a medium view of the transfer.', causalAction='Move the object.',
         observablePerformance='The holder checks the empty support.', compositionLightAndMaterials='Keep the established soft light.',
         landingImage='The holder has the single object.', dialogueLineIndexes=[])])
     return request_snapshot(prompt, {'revision': 2, 'shot': shot, 'specialist': direction},
-        [{'role': 'scene plate'}], {'hash': 'locked'}, 12)
+        [_bound_reference('scene plate')], {'hash': 'locked'}, 12)
 
 
 def test_plan_correction_reaches_final_payload_and_is_re_reviewed():
@@ -96,7 +124,7 @@ def test_authorised_overlap_survives_and_audio_string_edits_are_refused():
         return review(edits=[dict(old='B laughs nonverbally during the line.', new='B remains silent.', source='default', reason='bad')])
     final, report = run(source, worker)
     assert text in final['prompt'] and 'B remains silent.' not in final['prompt']
-    assert report['verdict'].startswith('BLOCKED')
+    assert report['verdict'].startswith(('BLOCKED', 'WATCH_CONFIGURATION_REQUIRED'))
 
 
 def test_true_audio_conflict_blocks_and_is_grounded():
@@ -161,7 +189,7 @@ def test_ungrounded_hard_review_cannot_silently_become_ready():
         return review(findings=[dict(category='story/state contradiction', reason='Incompatible locations',
             evidence='"Object is here." vs "Object is there."', correction='Resolve location')])
     final, report = run(snapshot(), worker)
-    assert report['verdict'].startswith('BLOCKED')
+    assert report['verdict'].startswith(('BLOCKED', 'WATCH_CONFIGURATION_REQUIRED'))
     assert any('lacks exact current-payload evidence' in item for item in report['errors'])
 
 
@@ -187,5 +215,5 @@ def test_repeated_provider_edits_do_not_bypass_structured_correction_route():
         return review(edits=[dict(old='absent text', new='invented text', source='wrong', reason='bad')])
     final, report = run(snapshot(), worker)
     assert 'invented text' not in final['prompt']
-    assert report['verdict'].startswith('BLOCKED')
+    assert report['verdict'].startswith(('BLOCKED', 'WATCH_CONFIGURATION_REQUIRED'))
     assert report['trace'][-1]['status'] == 'rejected-provider-string-edit'

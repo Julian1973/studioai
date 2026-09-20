@@ -1,0 +1,111 @@
+{
+  "crystal_cove_main_crystal_clearing_locked": {
+    "file": "crystal_cove_main_crystal_clearing_locked.png",
+    "locationId": "crystal_cove_main_crystal_clearing",
+    "name": "Crystal Cove Main Crystal Clearing — wide ceremonial forest circle",
+    "location": "A wide ceremonial forest clearing inside Crystal Cove, ringed by ancient trees, mossy crystal banks, log benches and a central stone circle with enough open floor for the full Crystal Bears group to breathe.",
+    "look": "Wide locked establishing plate with golden post-storm forest light, tall trees, log benches around the ceremony space, large pink and aqua crystals across mossy banks, a central circular mark and visible breathing room for group staging; not a beach, not a tight rainforest corridor, not an open meadow.",
+    "source": "Julian approved Scene 9 crystal clearing lock",
+    "episode": "Ep1",
+    "scene": "9",
+    "updatedAt": "2026-08-21T12:03:00"
+  },
+  "deep_rainforest_flowers": {
+    "file": "deep_rainforest_flowers.png",
+    "locationId": "deep_rainforest_flowers",
+    "name": "Rainforest pollen meadow — warm morning tall-flower lane, bee's-eye wide",
+    "location": "A dense Crystal Cove rainforest flower meadow at bee scale, with a navigable lane of towering pollen-heavy blossoms beneath a leafy canopy.",
+    "look": "Empty bee's-eye establishing plate filled by tall open pollen flowers dominating foreground and midground, with two neighboring blooms set frame-left and frame-right for the work route, a broad flexible leaf near frame-left for a soft bonk, a low branch crossing behind the flower lane for the later clip-and-tumble, drifting pollen motes in warm depth, and canopy layers above with one faint darker gap hinting at distant weather; no characters, no extra props, only the flowers, leaf, branch, pollen air, and rainforest depth needed for the comedy route and storm-shift ending.",
+    "source": "Ep1 scene 1",
+    "episode": "Ep1",
+    "scene": "1",
+    "updatedAt": "2026-06-30T13:59:11"
+  },
+  "deep_rainforest": {
+    "file": "deep_rainforest.png",
+    "locationId": "deep_rainforest",
+    "name": "Rainforest pollen corridor — warm morning tall-flower bee's-eye wide",
+    "location": "A narrow aerial pathway through the rainforest wildflower canopy, with towering pollen-heavy blossoms, broad springy leaves, and a few low crossing branches arranged as a playful obstacle corridor for fast bee flight.",
+    "look": "Empty establishing plate with tall open pollen-flowers dominating foreground, midground, and background, creating a clear left-to-right flight lane through the blooms. Broad green leaves jut into the corridor at soft collision height, and one thin branch crosses the midground path for the later tumble. Fine golden pollen floats in warm morning god-rays; the upper background holds a small slice of clear sky with the faintest distant greying at the edge, hinting at pressure beyond the safe play-space. No characters.",
+    "source": "Ep1 scene 1",
+    "episode": "Ep1",
+    "scene": "1",
+    "updatedAt": "2026-07-02T15:08:42"
+  },
+  "deep_rainforest_flower_field": {
+    "file": "deep_rainforest_flower_field.png",
+    "locationId": "deep_rainforest_flower_field",
+    "name": "Rainforest Pollen Run — sunlit giant flower field, bee's-eye wide",
+    "location": "A warm rainforest flower-field corridor in Crystal Cove, dense with towering pollen-heavy blossoms, broad leaves, low branches at bee-flight height, grass channels, drifting pollen motes and a small sky gap beyond the canopy.",
+    "look": "Empty establishing plate filled frame-to-frame with tall swaying pollen flowers dominating foreground, midground and background; a clear bee-height flight corridor runs left-to-right between blossoms so rapid aerial zig-zags, dips into flowers, leaf ricochets, branch clips and blossom crashes can all play in the same space. Broad leaves jut into the midground for soft impacts, one low branch crosses the upper flight path, and several open blossoms face the corridor at different depths for repeated pollen gags. Warm golden morning light pours through the canopy from upper left, catching pollen motes in the air; 2-3 soft ambient crystals sit low in the grass as gentle bokeh accents. A faint cooler sky gap in the deep background hints at distant pressure building, but no storm is visible yet. No characters.",
+    "source": "Ep1 scene 1",
+    "episode": "Ep1",
+    "scene": "1",
+    "updatedAt": "2026-07-02T17:38:01"
+  },
+  "crystal_cove_meadow": {
+    "file": "crystal_cove_meadow.png",
+    "locationId": "crystal_cove_meadow",
+    "name": "Meadow Pollen Run — sunlit wildflower meadow, bee's-eye low",
+    "location": "A sunlit wildflower meadow in Crystal Cove, framed at bee-flight height so ordinary lavender spikes, daisies and clover loom like a towering blossom corridor. Sparkling heart-shaped light trails and floating cut crystals (quartz, amethyst, opal, garnet) drift among the stems and rest low in the grass; warm rolling hills glow gold-pink in the deep background.",
+    "look": "Empty establishing plate filmed low, at bee-flight height, looking ACROSS the meadow so ordinary blooms loom tall and frame-filling — foreground, midground and background all thick with purple lavender spikes, white daisies and pink-red clover, with a clear low flight corridor winding between the stems for rapid aerial zig-zags, dips into flowers, leaf brushes and blossom crashes. Sparkling heart-shaped light trails loop through the middle distance; clusters of floating cut crystals in many colours (clear quartz, amethyst, opal, garnet, citrine) hover among the blooms and rest low in the grass, with two soft glowing pink orbs drifting centrally. Warm golden-pink light backlights the whole frame, haloing the flowers; soft rolling hills recede into a warm gold-pink haze in the deep background. No storm yet, no characters.",
+    "source": "Ep1 scene 1",
+    "episode": "Ep1",
+    "scene": "1",
+    "updatedAt": "2026-07-04T05:52:12"
+  },
+  "rainforest_flower_meadow": {
+    "file": "rainforest_flower_meadow.png",
+    "locationId": "rainforest_flower_meadow",
+    "name": "Rainforest flower meadow — sunlit pollen corridor, low bee's-eye wide",
+    "location": "A warm morning rainforest flower corridor at bee height, with towering blossoms rising from tall grass, broad springy leaves crossing the flight path, and a few low branches tucked between the pollen-heavy blooms.",
+    "look": "The empty plate is filled by oversized rainforest flowers and open pollen-packed petal cups, arranged as a clear left-to-right flying corridor through tall grass; broad flexible leaves jut into the midair path for ricochets, soft blossom rims layer through the foreground and background for bounce-through impacts, and one slim branch cuts across the route at bee height. Warm pollen motes hang in the sunbeams, leaf shadows are just beginning to cool at the edges, and the far upper canopy carries the faintest suggestion of pressure changing without showing the storm yet. No characters, no homes, no extra props — only the flowers, leaves, grass, branch, pollen, and morning air the comedy needs.",
+    "source": "Ep1 scene 1",
+    "episode": "Ep1",
+    "scene": "1",
+    "updatedAt": "2026-07-15T23:26:58"
+  },
+  "deep_rainforest_flower_meadow": {
+    "file": "deep_rainforest_flower_meadow.png",
+    "locationId": "deep_rainforest_flower_meadow",
+    "name": "Rainforest Pollen Meadow — warm morning tall-flower corridor, bee's-eye wide",
+    "location": "A bee-height wildflower corridor inside the Crystal Cove rainforest — an open flight lane between banks of towering pollen-heavy blossoms, broad leaves, one low clipping branch, and a wide sky gap beyond the deeper trees.",
+    "look": "Empty establishing plate, shot from an ELEVATED DRONE VANTAGE above the flower tops — matching the beat's own wide-angle drone-chase camera height, never a ground-level view boxed in between flower walls. Looking down and across the meadow, a clear flight lane of open air runs left-to-right through the blossoms below: giant pollen flowers cluster along its banks with several deep petal cups for dives and stuck-in-flower gags, a springy broad leaf sits mid-lane for the FWIP ricochet, and a thin branch crosses the forward path before another open blossom. Warm pollen motes drift through the air, petals and stems sway in a clear breeze below, and beyond the meadow's far edge the treeline opens onto a WIDE sky — real visible depth and air on every side, where the light is just beginning to cool for the later thunder cue. No characters, no props, nothing outside the pollen-run action space.",
+    "source": "Ep1 scene 1",
+    "episode": "Ep1",
+    "scene": "1",
+    "updatedAt": "2026-07-15T12:50:57"
+  },
+  "crystal_woods_forest_path": {
+    "file": "crystal_woods_forest_path.png",
+    "locationId": "crystal_woods_forest_path",
+    "name": "Crystal Woods Forest Path",
+    "source": "restored from lock record 19 Sep 2026",
+    "episode": "Ep2",
+    "scene": ""
+  },
+  "crystal_woods_camera_angles": {
+    "file": "crystal_woods_camera_angles.png",
+    "locationId": "crystal_woods_forest_path",
+    "name": "Crystal Woods Camera Angles",
+    "source": "restored from lock record 19 Sep 2026",
+    "episode": "Ep2",
+    "scene": ""
+  },
+  "crystal_woods_learning_circle": {
+    "file": "crystal_woods_learning_circle.png",
+    "locationId": "crystal_woods_learning_circle",
+    "name": "Crystal Woods Learning Circle",
+    "source": "restored from lock record 19 Sep 2026",
+    "episode": "Ep2",
+    "scene": ""
+  },
+  "crystal_woods_learning_circle_camera_plan": {
+    "file": "crystal_woods_learning_circle_camera_plan.png",
+    "locationId": "crystal_woods_learning_circle",
+    "name": "Crystal Woods Learning Circle Camera Plan",
+    "source": "restored from lock record 19 Sep 2026",
+    "episode": "Ep2",
+    "scene": ""
+  }
+}

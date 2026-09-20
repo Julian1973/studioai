@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /shows/crystal-bears/canon/LOCKED_CANON.md. Regenerate: python3 tools/sync_canon.py -->
-
 # THE CRYSTAL BEARS — Locked Canon & Asset Register
 
 **Status:** Source of truth (v1, 2026-06-19). This document reconciles the Show Bible (PDF), Julian's existing Crystal Bears skill stack, and the reference-asset library into ONE canon. The app's IP library and every skill must derive from this. Where any skill disagrees, **this document + the Show Bible win** (see §9 — Drift Corrections).

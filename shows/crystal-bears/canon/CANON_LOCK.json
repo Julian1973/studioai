@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "showId": "crystal-bears",
-  "lockedAt": "2026-08-30T00:02:40+00:00",
+  "lockedAt": "2026-09-20T03:52:44+00:00",
   "lockedBy": "Julian",
   "policySha256": "fc3625bf18b0fee24f6e10b6ae4a6a9517626072f5c41448e6f112551307fca2",
   "sources": {
@@ -15,7 +15,7 @@
     },
     "characters": {
       "path": "shows/crystal-bears/canon/characters.json",
-      "sha256": "a373e544c247dd57f26ad7969820f08d91b9d1454268ea407b50c82416b56cba"
+      "sha256": "fe6ccf1b38c2ceafc34db81b097a4bbd127dcc8edc5810dd784f620053484acb"
     },
     "cinematographyTaste": {
       "path": "shows/crystal-bears/creative/CINEMATOGRAPHY_TASTE_CANON.md",
@@ -47,7 +47,7 @@
     },
     "locationAssetManifest": {
       "path": "cb-seed/assets/locations/_manifest.json",
-      "sha256": "201df4d67c916a9b709e7f7cd2310ef66c456af0ef101d7f19ddbdaa76691c35"
+      "sha256": "0daa675e77207e819ac725af781c2edec2c2596ccd1ca476283efdb871dde40a"
     },
     "locations": {
       "path": "shows/crystal-bears/canon/locations.json",
@@ -59,43 +59,43 @@
     },
     "runtimeAnimation": {
       "path": "skills/seedance-production-director/SKILL.md",
-      "sha256": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
+      "sha256": "18510333c249d8c5ba5ce616be8a569c9ff147bf19855e1b3b0ec56baa116edb"
     },
     "runtimeCamera": {
       "path": "skills/crystal-bears-cinematographer/SKILL.md",
-      "sha256": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      "sha256": "d5f7268f7899fdb27c3b892b779bf81103727ad507cc96bafc17d723d7376eb3"
     },
     "runtimeCinematographer": {
       "path": "skills/crystal-bears-cinematographer/SKILL.md",
-      "sha256": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      "sha256": "d5f7268f7899fdb27c3b892b779bf81103727ad507cc96bafc17d723d7376eb3"
     },
     "runtimeComposer": {
       "path": "skills/crystal-bears-composer/SKILL.md",
-      "sha256": "7b359c3b9e35ef3a11aba7f9a19a93c0b5821c3ea5cbefcc4b45c82941f3cadc"
+      "sha256": "afe9d66acdcbca77d31c248fe2a16572d26801a5cdc46c9d584f562c79c6dd57"
     },
     "runtimeContinuity": {
       "path": "skills/crystal-bears-continuity/SKILL.md",
-      "sha256": "8b6d8668632b679538b891dd722171985f51368247d55c8449e1a97786c6d798"
+      "sha256": "8dd4c22b3280a54a74eb8629f75a041acdd863f90c57ec2ae3ba9f014af7428d"
     },
     "runtimeDirector": {
       "path": "skills/crystal-bears-director/SKILL.md",
-      "sha256": "41b837a597f5f5b0d3a4cdfdfecbe9e76b28a8a13fa533b81702e7faa81d13c0"
+      "sha256": "1b8c77a03e76b9ddf02a978d33cbed6a21b78544d2eefae16526e2a82e3fbcd1"
     },
     "runtimeDp": {
       "path": "skills/crystal-bears-cinematographer/SKILL.md",
-      "sha256": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      "sha256": "d5f7268f7899fdb27c3b892b779bf81103727ad507cc96bafc17d723d7376eb3"
     },
     "runtimePost": {
       "path": "skills/crystal-bears-post/SKILL.md",
-      "sha256": "c54d22b1cdc3ccc5720b7e821abc5bd5ae0512fecca1022d64e0468541254577"
+      "sha256": "abd838b290c109f095a90ca60af561dba9b0c72bdd57ddad4896f04ce428068a"
     },
     "runtimeVoice": {
       "path": "skills/crystal-bears-voice-director/SKILL.md",
-      "sha256": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
+      "sha256": "91e8a3b816fc9a192b4ee22ad7a7e293ae83acdd75be2aef8ad3a7b39da0b1ad"
     },
     "runtimeWriter": {
       "path": "skills/crystal-bears-writer/SKILL.md",
-      "sha256": "57a999c5e0e0df3d338e54d6e5e7a37015f2125583cf402983f1c58dfa1bedb6"
+      "sha256": "8479c4160ccdcf0ed01f77deb37315a173ac2dcc947eecc0a5d0c55840132309"
     },
     "sfxLibrary": {
       "path": "shows/crystal-bears/canon/sfx_library.json",
@@ -203,13 +203,6 @@
           "sha256": "bdd6d9b11293c66d787b13b9d2ff3d217a216ce7650365f0488f6a5057c2c377"
         },
         {
-          "path": "cb-seed/assets/characters/Aida/CB_Aida_render-1.png",
-          "roles": [
-            "refs[11]"
-          ],
-          "sha256": "c0f13f2e93abc386e653a0f26094584dcecce02e1da142d0ad52ffd2f91644a8"
-        },
-        {
           "path": "cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
           "roles": [
             "anchor",
@@ -220,25 +213,11 @@
           "sha256": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
         },
         {
-          "path": "cb-seed/assets/houses/CB_Aida_house-ext.png",
-          "roles": [
-            "house.exterior"
-          ],
-          "sha256": "4b961307e846451c568276652956fa738d6a26a868ff8841d4d5f81c6830bfd4"
-        },
-        {
           "path": "cb-seed/assets/houses/CB_Aida_house-int-multicam.jpeg",
           "roles": [
             "house.interiorMulticam"
           ],
           "sha256": "c9f53b1defb442a41873634910403e7ee611c847986cb326689991e61fece75e"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Aida_house-int.jpeg",
-          "roles": [
-            "house.interior"
-          ],
-          "sha256": "c5fd1ccaaaf236e69bda1e3edf24b8875c88f67e8ef444c7177889986034fb1c"
         }
       ]
     },
@@ -264,56 +243,49 @@
         {
           "path": "cb-seed/assets/characters/Sunny/CB_Sunny_char-sheet.png",
           "roles": [
-            "refs[4]"
+            "refs[3]"
           ],
           "sha256": "46c8471c6be677170b742a96adca2a116288b310e0cba158992ef39d1ad98467"
         },
         {
           "path": "cb-seed/assets/characters/Sunny/CB_Sunny_expressions-1.jpeg",
           "roles": [
-            "refs[6]"
+            "refs[5]"
           ],
           "sha256": "d05d7deb33b5c38ad587e104e12c3eb67b79e91319cc45737b2765820ea830da"
         },
         {
           "path": "cb-seed/assets/characters/Sunny/CB_Sunny_expressions-2.jpeg",
           "roles": [
-            "refs[7]"
+            "refs[6]"
           ],
           "sha256": "7c2e31be14e1554a2bd7b310a1d8ab3b72fff44057b5f620e2b7a5692af4965f"
         },
         {
           "path": "cb-seed/assets/characters/Sunny/CB_Sunny_front-back-2.jpeg",
           "roles": [
-            "refs[8]"
+            "refs[7]"
           ],
           "sha256": "70e0be7f82a5516e79032a6bf65aec0a3ebc16ea6323ca48fd9d49e071a1bcb9"
         },
         {
           "path": "cb-seed/assets/characters/Sunny/CB_Sunny_front-back.png",
           "roles": [
-            "refs[5]"
+            "refs[4]"
           ],
           "sha256": "f835055d56e2a656bc6acb80cb809384a292dc49bc2c636147f3df6e357ad246"
         },
         {
-          "path": "cb-seed/assets/characters/Sunny/CB_Sunny_portrait.png",
-          "roles": [
-            "refs[3]"
-          ],
-          "sha256": "1f6a3f588c647fbd674bb3294b361fdc1271d9b31605903d411edba50411d9d3"
-        },
-        {
           "path": "cb-seed/assets/characters/Sunny/CB_Sunny_pro-turn-1.jpeg",
           "roles": [
-            "refs[9]"
+            "refs[8]"
           ],
           "sha256": "3f01a10ab162dbae86c34635f40f88d19062bb0b431e67528d806883fa4e3c1b"
         },
         {
           "path": "cb-seed/assets/characters/Sunny/CB_Sunny_pro-turn-2.jpeg",
           "roles": [
-            "refs[10]"
+            "refs[9]"
           ],
           "sha256": "c679b1b3b6fe124da5b07d1b17027f59d5e469991e5e019bf09e22e1b74442d0"
         },
@@ -335,25 +307,11 @@
           "sha256": "9a252778045b96b33c68a2b740a7eb3d59ccbd5c41de083da24a15382de0b912"
         },
         {
-          "path": "cb-seed/assets/houses/CB_Sunny_house-ext.jpeg",
-          "roles": [
-            "house.exterior"
-          ],
-          "sha256": "b0bb0bebad6e6f8690d1a1044695070d385671238b3d28f5591455265bc3f18b"
-        },
-        {
           "path": "cb-seed/assets/houses/CB_Sunny_house-int-multicam.jpeg",
           "roles": [
             "house.interiorMulticam"
           ],
           "sha256": "47726c880f43ced21b4161069b69fed97efbe307fcc71fb1fbed63614a5f6c28"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Sunny_house-int.jpeg",
-          "roles": [
-            "house.interior"
-          ],
-          "sha256": "6ff9f1984725a698b80ffcc61497fc1c72031c8addb83eb82c4f392c48cb5844"
         }
       ]
     },
@@ -372,7 +330,11 @@
         {
           "path": "cb-seed/assets/CB_Luna_turnaround.jpeg",
           "roles": [
-            "refs[2]"
+            "anchor",
+            "refs[2]",
+            "render_ref",
+            "turn4",
+            "turnaround"
           ],
           "sha256": "daea078a395d2a0d088fcacb24199fcc268d8f916fb066b70d809f95d308de91"
         },
@@ -412,16 +374,9 @@
           "sha256": "f631039412b48255769bea7c66410d2c522ea67dc936b36a9f402949d6e11a6f"
         },
         {
-          "path": "cb-seed/assets/characters/Luna/CB_Luna_pro-turn-2.jpeg",
-          "roles": [
-            "refs[9]"
-          ],
-          "sha256": "b566318b286211eb81e40b277d02f5534b46e85e6d0a43e32cff136b18e0c66e"
-        },
-        {
           "path": "cb-seed/assets/characters/Luna/CB_Luna_pro-turn-3.jpeg",
           "roles": [
-            "refs[10]"
+            "refs[9]"
           ],
           "sha256": "71088ad0c88b9a8ea22092234b3f931669fdd3f73d0904fd98ecb9a83e69be8c"
         },
@@ -433,35 +388,11 @@
           "sha256": "9c3c23a6147a4849f2c4573aa9b22f3b922d01d7a225be2997f0ec8e2202c7c2"
         },
         {
-          "path": "cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
-          "roles": [
-            "anchor",
-            "render_ref",
-            "turn4",
-            "turnaround"
-          ],
-          "sha256": "c606b18e95fb5a02d85dbac065001b37ad37521ef9dc663d4cd0200a3cefb0a4"
-        },
-        {
           "path": "cb-seed/assets/houses/CB_Luna_house-ext-multicam.jpeg",
           "roles": [
             "house.exteriorMulticam"
           ],
           "sha256": "496cb7f359998fe6e1fca90a87609aa45b5b049a2b18168bc32f04e68cacc85f"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Luna_house-ext.jpeg",
-          "roles": [
-            "house.exterior"
-          ],
-          "sha256": "799db9cfe61182852a836b397b4ba2ecf3f40721b1746a025051a83a5cec344a"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Luna_house-int.jpeg",
-          "roles": [
-            "house.interior"
-          ],
-          "sha256": "c3adf0190107dcfedff41c771fb6cc58ee421e4663fe9b496f8f3456a2a8d86c"
         }
       ]
     },
@@ -480,7 +411,11 @@
         {
           "path": "cb-seed/assets/CB_Misty_turnaround.jpeg",
           "roles": [
-            "refs[2]"
+            "anchor",
+            "refs[2]",
+            "render_ref",
+            "turn4",
+            "turnaround"
           ],
           "sha256": "b8697420287374617941867b535ac49a07d5f4072929e25d72dc7730c8f55bdf"
         },
@@ -513,16 +448,6 @@
           "sha256": "309f67116ae8fd02c0fac4f27df0a9ebde52830296c1b4c1c0ca0288ee63acc5"
         },
         {
-          "path": "cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
-          "roles": [
-            "anchor",
-            "render_ref",
-            "turn4",
-            "turnaround"
-          ],
-          "sha256": "e16d95d0182d3cc86b54d09e8f478fd8c8f912f55cc4afcc1dc641305df465b6"
-        },
-        {
           "path": "cb-seed/assets/houses/CB_Misty_house-ext-multicam.jpeg",
           "roles": [
             "house.exteriorMulticam"
@@ -535,13 +460,6 @@
             "house.exterior"
           ],
           "sha256": "87a010792c953149d9c25949647670d0ae048cbeb665a5fc832ab9d7d0efb3de"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Misty_house-int.jpeg",
-          "roles": [
-            "house.interior"
-          ],
-          "sha256": "d5cf90f27e7be898fe000a36649b4f074533a14a02e7055f407a12b5602a5e53"
         }
       ]
     },
@@ -560,7 +478,11 @@
         {
           "path": "cb-seed/assets/CB_Amie_turnaround.jpeg",
           "roles": [
-            "refs[2]"
+            "anchor",
+            "refs[2]",
+            "render_ref",
+            "turn4",
+            "turnaround"
           ],
           "sha256": "e4c5507559f252ca05c8ddf2a6bd8939768465cd29f8c5268b16cc52bbe92c4d"
         },
@@ -593,16 +515,6 @@
           "sha256": "c175d1288ae063fa10ada127dc21565257314d0006b768f54343ac6c280074d7"
         },
         {
-          "path": "cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
-          "roles": [
-            "anchor",
-            "render_ref",
-            "turn4",
-            "turnaround"
-          ],
-          "sha256": "8e521c72177e835505f82edbb32f136d0240ab54492827fd94c5742a5b2171d4"
-        },
-        {
           "path": "cb-seed/assets/houses/CB_Amie_house-ext-multicam.jpeg",
           "roles": [
             "house.exteriorMulticam"
@@ -610,25 +522,11 @@
           "sha256": "eacfafe93f4ad92a6095a0890251b04334687285835c1bce31287185ddd521f6"
         },
         {
-          "path": "cb-seed/assets/houses/CB_Amie_house-ext.jpeg",
-          "roles": [
-            "house.exterior"
-          ],
-          "sha256": "990986822ec9560f6ddb99ad281aa470e93e905f161e9df7f5b43ce716dbac4d"
-        },
-        {
           "path": "cb-seed/assets/houses/CB_Amie_house-int-multicam.jpeg",
           "roles": [
             "house.interiorMulticam"
           ],
           "sha256": "7c66eee400b4e898cf0f10102df847525248907af7f8669dc3b31d2f6fe3cfe0"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Amie_house-int.jpeg",
-          "roles": [
-            "house.interior"
-          ],
-          "sha256": "8118ce5bcd8965b1700d185c7dd66cd293df050a654de06343391a7f1ecd3c49"
         }
       ]
     },
@@ -654,7 +552,11 @@
         {
           "path": "cb-seed/assets/CB_Howey_turnaround.jpeg",
           "roles": [
-            "refs[2]"
+            "anchor",
+            "refs[2]",
+            "render_ref",
+            "turn4",
+            "turnaround"
           ],
           "sha256": "87a30df769f7ef755f6040bf26522e8503acd4826e9c2705f431be550e798b85"
         },
@@ -701,13 +603,6 @@
           "sha256": "35355b9310cb115b9fb3c0d8923265832cbeb68afb45916bb37d46b09f0e5856"
         },
         {
-          "path": "cb-seed/assets/characters/Howey/CB_Howey_pro-turn-3.jpeg",
-          "roles": [
-            "refs[11]"
-          ],
-          "sha256": "7208ff9a1ccfc529af6dcd54ffa1f15298e1664a21319b877fba0bcd7a6bb3a0"
-        },
-        {
           "path": "cb-seed/assets/characters/Howey/CB_Howey_render-1.png",
           "roles": [
             "refs[5]"
@@ -715,35 +610,11 @@
           "sha256": "fb54f4bfb7c6edce0a71dc7486b14e491c819ba1b646168111b7a729bca9c323"
         },
         {
-          "path": "cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
-          "roles": [
-            "anchor",
-            "render_ref",
-            "turn4",
-            "turnaround"
-          ],
-          "sha256": "3c32364fb292c00fc868f679d577cdc3598b9abc8e34407ae2d0e433bcf83ad3"
-        },
-        {
           "path": "cb-seed/assets/houses/CB_Howey_house-ext-multicam.jpeg",
           "roles": [
             "house.exteriorMulticam"
           ],
           "sha256": "816d0df9c80ac299809720e9a233460f137f29be9f5f666ac13430dc2205b6a5"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Howey_house-ext.jpeg",
-          "roles": [
-            "house.exterior"
-          ],
-          "sha256": "fc5fab49131fc59356e347f5a043d5cb184c845a7790a0fba8da707cb3de8ab8"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Howey_house-int-multicam.jpeg",
-          "roles": [
-            "house.interiorMulticam"
-          ],
-          "sha256": "324879454f6d392e11fff2342d0f6c36d60054c85e8fb8d1eeb7a5cf471f0b89"
         },
         {
           "path": "cb-seed/assets/houses/CB_Howey_house-int.jpeg",
@@ -798,7 +669,11 @@
         {
           "path": "cb-seed/assets/characters/Keen/CB_Keen_pro-turn-1.jpeg",
           "roles": [
-            "refs[5]"
+            "anchor",
+            "refs[5]",
+            "render_ref",
+            "turn4",
+            "turnaround"
           ],
           "sha256": "581fdba6dee6d4550df56124c54673e71d6bcfc9744037d9e4e38795d06b6d7a"
         },
@@ -832,16 +707,6 @@
           "sha256": "c17662469e556f97f86e9f4ed05a1f448741399cf95d05b334610352f0e25eef"
         },
         {
-          "path": "cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
-          "roles": [
-            "anchor",
-            "render_ref",
-            "turn4",
-            "turnaround"
-          ],
-          "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
-        },
-        {
           "path": "cb-seed/assets/houses/CB_Keen_house-ext-multicam.jpeg",
           "roles": [
             "house.exteriorMulticam"
@@ -849,25 +714,11 @@
           "sha256": "997d98e4011310078dcf5f118b2d0e163572789486dafa545d35bfcf1548d36e"
         },
         {
-          "path": "cb-seed/assets/houses/CB_Keen_house-ext.jpeg",
-          "roles": [
-            "house.exterior"
-          ],
-          "sha256": "17326d83b5b45c3ba953e4aed8e6d1d67bf97928b892b8b505f0efd568fd8189"
-        },
-        {
           "path": "cb-seed/assets/houses/CB_Keen_house-int-multicam.jpeg",
           "roles": [
             "house.interiorMulticam"
           ],
           "sha256": "033f7d75d4db53398225cf20c6bc93755b9dea9b165b7f2f3527b2c524c8c7e5"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Keen_house-int.jpeg",
-          "roles": [
-            "house.interior"
-          ],
-          "sha256": "fb280ee9fd672338c963d9195ebbdb9d58da3e45a7b071728e9e4ad195fe31c3"
         }
       ]
     },
@@ -955,13 +806,6 @@
             "house.interiorMulticam"
           ],
           "sha256": "58cf5d2d0edef06a64f27833dbff2d1b750e7b8411a3eaa09f28a3450365c123"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Fuzzby_house-int.jpeg",
-          "roles": [
-            "house.interior"
-          ],
-          "sha256": "ac7a07a227005f3a1713eebacf7c1a94388ac5483f3a79809dbc4b5f1d258452"
         }
       ]
     },
@@ -1021,13 +865,6 @@
             "house.exterior"
           ],
           "sha256": "450980f99646e3d46f11769afd0d9d7f000ae9d52481f11bbdf9d3c5f9d32d42"
-        },
-        {
-          "path": "cb-seed/assets/houses/CB_Zenny_house-int.jpeg",
-          "roles": [
-            "house.interior"
-          ],
-          "sha256": "302c9db4353a736380e723ec2c98cbcb24db0f6c290822cc03ac0cc3d9bdf79d"
         }
       ]
     },
@@ -1084,19 +921,13 @@
         {
           "path": "cb-seed/assets/CB_Squeaky_turn4.png",
           "roles": [
-            "refs[1]"
-          ],
-          "sha256": "db3c223127e9babc46584bb4d233ad9f4ced734edf3a28d89b9e3b9820418e76"
-        },
-        {
-          "path": "cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
-          "roles": [
             "anchor",
+            "refs[1]",
             "render_ref",
             "turn4",
             "turnaround"
           ],
-          "sha256": "1d603e20e2b8acdb2c96850152c83f0ada89d685333882c910897f0d3ea43404"
+          "sha256": "db3c223127e9babc46584bb4d233ad9f4ced734edf3a28d89b9e3b9820418e76"
         }
       ]
     },
@@ -1348,5 +1179,5 @@
       "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
     }
   ],
-  "manifestDigest": "1bd7201454af656fec1609e820fcdf6dd276be9222a05464d402d41578e24342"
+  "manifestDigest": "997d7799ba256d61a0d8125edcd3049dbd64c7c349b9ea74ad8f8756ddd9abd0"
 }

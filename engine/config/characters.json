@@ -8,8 +8,8 @@
     "child_male": "Luna"
   },
   "Kit": {
-    "turnaround": "../cb-seed/assets/final_turnarounds/CB_Kit.png",
-    "anchor": "../cb-seed/assets/final_turnarounds/CB_Kit.png",
+    "turnaround": "../cb-seed/assets/characters/Kit/CB_Kit_char-turnaround.png",
+    "anchor": "../cb-seed/assets/characters/Kit/CB_Kit_char-turnaround.png",
     "voiceId": "6lbKISvTuKILAwhNIepr",
     "sizeRank": 3,
     "gender": "Female",
@@ -17,8 +17,10 @@
     "sizeRef": "Amie",
     "cadence": "bright, curious and gentle; reacts with open-eyed wonder",
     "key_features": "small beige-grey rabbit with tall pink-inner ears, brown eyes and a sage-green knitted scarf",
-    "turn4": "../cb-seed/assets/final_turnarounds/CB_Kit.png",
-    "refs": ["../cb-seed/assets/final_turnarounds/CB_Kit.png"],
+    "turn4": "../cb-seed/assets/characters/Kit/CB_Kit_char-turnaround.png",
+    "refs": [
+      "../cb-seed/assets/characters/Kit/CB_Kit_char-turnaround.png"
+    ],
     "heightIn": 20,
     "age": "Child",
     "bible": {
@@ -34,7 +36,7 @@
       "vulnerability": "Small and easily overlooked in a crowded circle.",
       "emotionalDNA": "Curiosity makes room for belonging."
     },
-    "render_ref": "../cb-seed/assets/final_turnarounds/CB_Kit.png",
+    "render_ref": "../cb-seed/assets/characters/Kit/CB_Kit_char-turnaround.png",
     "promptRole": "small rabbit child in the Learning Circle",
     "isBee": false
   },
@@ -57,16 +59,13 @@
       "../cb-seed/assets/characters/Aida/CB_Aida_char-sheet.png",
       "../cb-seed/assets/characters/Aida/CB_Aida_front-back.png",
       "../cb-seed/assets/characters/Aida/CB_Aida_expressions-2.jpeg",
-      "../cb-seed/assets/characters/Aida/CB_Aida_pro-turn-1.jpeg",
-      "../cb-seed/assets/characters/Aida/CB_Aida_render-1.png"
+      "../cb-seed/assets/characters/Aida/CB_Aida_pro-turn-1.jpeg"
     ],
     "height": "5'0\" (152 cm)",
     "heightIn": 60,
     "turn4": "../cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
     "house": {
-      "interior": "cb-seed/assets/houses/CB_Aida_house-int.jpeg",
       "interiorMulticam": "cb-seed/assets/houses/CB_Aida_house-int-multicam.jpeg",
-      "exterior": "cb-seed/assets/houses/CB_Aida_house-ext.png",
       "exteriorMulticam": null,
       "interiorDesc": "Cozy round-walled cottage interior: warm timber walls, stone fireplace, patchwork-quilt bed, pink crystal clusters and a glowing salt lamp in soft golden firelight.",
       "exteriorDesc": "Whimsical earthen cottage with a curved mossy roof, round wooden door, draped in pink wisteria and flanked by large pink crystals in a sunbeam-lit mossy forest."
@@ -174,9 +173,7 @@
     "heightIn": 50,
     "turn4": "../cb-seed/assets/final_turnarounds/CB_Sunny.jpeg",
     "house": {
-      "interior": "cb-seed/assets/houses/CB_Sunny_house-int.jpeg",
       "interiorMulticam": "cb-seed/assets/houses/CB_Sunny_house-int-multicam.jpeg",
-      "exterior": "cb-seed/assets/houses/CB_Sunny_house-ext.jpeg",
       "exteriorMulticam": "cb-seed/assets/houses/CB_Sunny_house-ext-multicam.jpeg",
       "interiorDesc": "Round stone-and-timber interior with conical thatched roof, blazing fireplace, glowing amber crystals, sun-motif quilted bed and sunburst rug.",
       "exteriorDesc": "Mushroom-shaped cottage with a yellow mossy cap roof, white stone walls with golden crystals and a sun-carved door in a flower-filled clearing."
@@ -256,8 +253,6 @@
     "cameraRegister": "Lead with expansive motion verbs, then push to an extreme close-up on her one deliberate abrupt halt \u2014 hold the stillness longer than feels comfortable. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)"
   },
   "Luna": {
-    "turnaround": "../cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
-    "anchor": "../cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
     "voiceId": "gqDyJgCTCxcTOzggXvmS",
     "sizeRank": 3,
     "gender": "Female",
@@ -277,11 +272,8 @@
     ],
     "height": "4'6\" (137 cm)",
     "heightIn": 54,
-    "turn4": "../cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
     "house": {
-      "interior": "cb-seed/assets/houses/CB_Luna_house-int.jpeg",
       "interiorMulticam": null,
-      "exterior": "cb-seed/assets/houses/CB_Luna_house-ext.jpeg",
       "exteriorMulticam": "cb-seed/assets/houses/CB_Luna_house-ext-multicam.jpeg",
       "interiorDesc": "Tree-hollow bedroom of carved dark wood and grey stone, glowing violet amethyst, lit fireplace, purple-quilted bed and a crescent-moon 'CL' door.",
       "exteriorDesc": "Fairytale cottage built into a mossy tree trunk with thatched-root roof, purple crystals and lavender flowers and a crescent-moon 'CL' door."
@@ -337,7 +329,6 @@
       "crystalMoment": "Her Lepidolite does NOT flare, strobe, or spike \u2014 that would break her. Instead it eases on: the soft steady lavender deepens slowly to a full, true, even lavender, like a light being turned gently up by hand. As the line resolves, a single slow lavender wave ripples softly outward from her chest gem, time-dilating the air and pulling the world into soft focus \u2014 the whole frame settling, slowing, going lavender around her. After: it holds at that fuller warm even glow, the calm having landed and stayed; no afterflash, just steadiness.",
       "trigger": "It only earns its place once the too-big feeling has been genuinely felt \u2014 the storm of wiggles in the room (or, for her own arc, the storm she's quietly carried) has crested and someone is right at the edge of being overwhelmed. The call is NOT a rote button: she reaches for it only after she has truly let the feeling be big, hers or theirs, in the silence first. For her deepest version it lands the moment she lets herself need the calm too \u2014 settling herself as much as the room \u2014 so the crystal responds to that lived sincerity, not to volume."
     },
-    "render_ref": "../cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
     "promptRole": "the quiet, still bear",
     "isBee": false,
     "lexicon": {
@@ -360,11 +351,13 @@
         "bright"
       ]
     },
-    "cameraRegister": "Smooth, slow tracking shots and soft focus, never a sudden camera move \u2014 the camera moves the way she does. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)"
+    "cameraRegister": "Smooth, slow tracking shots and soft focus, never a sudden camera move \u2014 the camera moves the way she does. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)",
+    "turn4": "../cb-seed/assets/CB_Luna_turnaround.jpeg",
+    "turnaround": "../cb-seed/assets/CB_Luna_turnaround.jpeg",
+    "anchor": "../cb-seed/assets/CB_Luna_turnaround.jpeg",
+    "render_ref": "../cb-seed/assets/CB_Luna_turnaround.jpeg"
   },
   "Misty": {
-    "turnaround": "../cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
-    "anchor": "../cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
     "voiceId": "Yj7sxjH2wQmzIjjKXnDy",
     "sizeRank": 6,
     "gender": "Female",
@@ -381,9 +374,7 @@
     ],
     "height": "5'5\" (165 cm)",
     "heightIn": 65,
-    "turn4": "../cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
     "house": {
-      "interior": "cb-seed/assets/houses/CB_Misty_house-int.jpeg",
       "interiorMulticam": null,
       "exterior": "cb-seed/assets/houses/CB_Misty_house-ext.jpeg",
       "exteriorMulticam": "cb-seed/assets/houses/CB_Misty_house-ext-multicam.jpeg",
@@ -435,7 +426,6 @@
       "crystalMoment": "Through the hesitation the Moonstone shimmers iridescent and restless \u2014 light skating across its pearly surface like the inside of a shell, refusing to settle, mirroring the second-guessing. At the exact instant the doubt breaks (on \"seeing old and new\"), the shimmer STOPS \u2014 and the crystal blazes a steady, clear, cool white, moonlit and certain, holding rock-steady through \"Moonstone, help us through.\" On the final phrase a soft iridescent blue-silver pulse rings outward from it across the room, a wave of moonlit certainty. After the call it settles to that clean steady white and HOLDS \u2014 no flicker \u2014 the visual proof she has finally trusted herself. (Per locked staging, the camera steadies with it: any drift/handheld settles dead-still as the Moonstone blazes \u2014 the world stops second-guessing when she does.)",
       "trigger": "It is EARNED only after she has felt the unspoken thing and survived the cost of nearly swallowing it again. She has sensed the real feeling in the room \u2014 the quiet friend, the masked worry, the thing no one's said \u2014 felt it first and faster than anyone, and then done what she always does: talked herself out of it, deferred, gone quiet, hesitated at the edge of speaking. The call cannot fire on the sensing; it fires the instant she chooses to TRUST the gut she's been doubting and say it out loud \u2014 the gap between knowing and saying finally closing. The feeling that unlocks it is the small, costly courage of self-trust: \"I know this is true, and I'm done being too afraid to say it.\" Never a chant, never on cue \u2014 it lands only once that private knowing has become worth voicing for the people she loves."
     },
-    "render_ref": "../cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
     "promptRole": "the soft, attentive bear",
     "isBee": false,
     "lexicon": {
@@ -460,11 +450,13 @@
         "loom"
       ]
     },
-    "cameraRegister": "Eye-level, gentle honest framing; hold on her listening face, then steady as she finally speaks. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)"
+    "cameraRegister": "Eye-level, gentle honest framing; hold on her listening face, then steady as she finally speaks. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)",
+    "turn4": "../cb-seed/assets/CB_Misty_turnaround.jpeg",
+    "turnaround": "../cb-seed/assets/CB_Misty_turnaround.jpeg",
+    "anchor": "../cb-seed/assets/CB_Misty_turnaround.jpeg",
+    "render_ref": "../cb-seed/assets/CB_Misty_turnaround.jpeg"
   },
   "Amie": {
-    "turnaround": "../cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
-    "anchor": "../cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
     "voiceId": "6lbKISvTuKILAwhNIepr",
     "sizeRank": 1,
     "gender": "Female",
@@ -481,11 +473,8 @@
     ],
     "height": "3'10\" (117 cm)",
     "heightIn": 46,
-    "turn4": "../cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
     "house": {
-      "interior": "cb-seed/assets/houses/CB_Amie_house-int.jpeg",
       "interiorMulticam": "cb-seed/assets/houses/CB_Amie_house-int-multicam.jpeg",
-      "exterior": "cb-seed/assets/houses/CB_Amie_house-ext.jpeg",
       "exteriorMulticam": "cb-seed/assets/houses/CB_Amie_house-ext-multicam.jpeg",
       "interiorDesc": "Crystal-cottage interior of grey fieldstone walls and timber beams, glowing hearth, rustic kitchen, amber firelight and purple amethyst clusters.",
       "exteriorDesc": "Round mushroom-style cottage with purple shingled roof and crescent-moon door, in a misty pastel crystal forest of amethyst at lavender sunset."
@@ -539,7 +528,6 @@
       "crystalMoment": "Through the whole spin before this it has been fractured, shifting, restless light \u2014 too many perspectives. On \"From within,\" as her paws press her chest, the fracturing STILLS \u2014 the shards drawing inward and knitting to one deep, steady purple core (the spinning resolving into a single point). On the lift to \"BRIGHT\" the Amethyst clears to brilliant, brilliant violet \u2014 clean-faceted, radiant \u2014 and on \"let's shine the light\" it sends warm purple/lavender light blooming OUTWARD past her, an expanding glow that washes the frame in balanced, symmetrical radiance (mirroring the crystal's clean facets). Her hair-gem and the teardrop pendant catch and glint right on \"light\" \u2014 the visual proof clarity has landed. Note D / Re (293.66 Hz) sings under it.",
       "trigger": "It must land at the bottom of her overthink valley turning \u2014 NEVER as a rote chant. The whole episode she's been drowning in everyone's feelings at once, frozen, unable to choose or act for herself. The Call is only earned in the held, sustained pause where the spinning finally STOPS: the moment she quits trying to hold ALL of it, stops understanding everyone, and feels-into ONE friend \u2014 or, harder still, into herself \u2014 and that single bridge is enough. The real feeling has to be felt first (the frozen too-much giving way to one clear, grounded knowing) \u2014 then, and only then, does the inner truth surface and the Call rise out of it. It is the sound of \"I don't have to carry every perspective; I can shine my own light and share it.\" Understanding becoming a step forward, not a hiding place."
     },
-    "render_ref": "../cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
     "promptRole": "the warm, empathetic bear",
     "isBee": false,
     "lexicon": {
@@ -560,11 +548,13 @@
         "cute"
       ]
     },
-    "cameraRegister": "Rack focus, slightly unstable framing when overwhelmed; perfectly symmetrical, balanced compositions in resolution. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)"
+    "cameraRegister": "Rack focus, slightly unstable framing when overwhelmed; perfectly symmetrical, balanced compositions in resolution. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)",
+    "turn4": "../cb-seed/assets/CB_Amie_turnaround.jpeg",
+    "turnaround": "../cb-seed/assets/CB_Amie_turnaround.jpeg",
+    "anchor": "../cb-seed/assets/CB_Amie_turnaround.jpeg",
+    "render_ref": "../cb-seed/assets/CB_Amie_turnaround.jpeg"
   },
   "Howey": {
-    "turnaround": "../cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
-    "anchor": "../cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
     "voiceId": "rXUAKUHFzRwd8mYd3oLz",
     "sizeRank": 7,
     "gender": "Male",
@@ -581,16 +571,12 @@
       "../cb-seed/assets/characters/Howey/CB_Howey_expressions-1.jpeg",
       "../cb-seed/assets/characters/Howey/CB_Howey_expressions-2.jpeg",
       "../cb-seed/assets/characters/Howey/CB_Howey_pro-turn-1.jpeg",
-      "../cb-seed/assets/characters/Howey/CB_Howey_pro-turn-2.jpeg",
-      "../cb-seed/assets/characters/Howey/CB_Howey_pro-turn-3.jpeg"
+      "../cb-seed/assets/characters/Howey/CB_Howey_pro-turn-2.jpeg"
     ],
     "height": "5'10\" (178 cm)",
     "heightIn": 70,
-    "turn4": "../cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
     "house": {
       "interior": "cb-seed/assets/houses/CB_Howey_house-int.jpeg",
-      "interiorMulticam": "cb-seed/assets/houses/CB_Howey_house-int-multicam.jpeg",
-      "exterior": "cb-seed/assets/houses/CB_Howey_house-ext.jpeg",
       "exteriorMulticam": "cb-seed/assets/houses/CB_Howey_house-ext-multicam.jpeg",
       "interiorDesc": "Warm stone-walled cottage interior lit by a crystal-flanked fireplace, patchwork-quilted bed, round moonlit window and apothecary shelves.",
       "exteriorDesc": "Round-doored forest cottage of grey fieldstone with a thatched grassy roof, glowing white crystals and white flowers in a moonlit woodland."
@@ -645,7 +631,6 @@
       "crystalMoment": "The Howlite reads his inner monologue, as always. It opens dimmer than the others \u2014 because his armour is over-responsibility, the crystal is half-shadowed at the trigger, the light he's been pouring outward leaving little for himself. As he names the fear and settles, on \"steady and bright\" it warms from that dim to a pure even white \u2014 not a sudden flare but a slow swell, like a held breath turning to glow. The signature beat is the blaze that fires on \"Howlite, guide us right!\" \u2014 and crucially it blazes BRIGHTEST as his paw is over his own heart, the canon tell that his crystal blazes when he ACCEPTS care, here accepting it from himself. Clean warm white light pools outward from his chest, the calm light source the others drift toward; mint-cool motes settle in the air. After the call it holds a steady, generous, unflickering white \u2014 the anchor glow restored, completed in both directions.",
       "trigger": "It is EARNED, never chanted. It cannot fire from a steady Howey \u2014 it only lands once he has hit his real feeling: the moment the giver who cannot receive runs himself dim and finally, wordlessly, lets a friend's kindness reach him (or chooses to be as gentle with himself as with them). The honest beat that unlocks it is the fear NAMED, not hidden \u2014 he is afraid he doesn't have enough left, afraid his own care doesn't count, and instead of \"I'm fine, don't worry about me,\" he stays still and lets that truth be true. The instant he stops over-functioning and accepts that he is allowed to be held too, the steadiness becomes real, not performed \u2014 and only then does the call belong in his mouth. Sincerity, not volume: the crystal answers the moment the strongest, gentlest bear lets himself be cared for."
     },
-    "render_ref": "../cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
     "promptRole": "the big, gentle guardian bear",
     "isBee": false,
     "lexicon": {
@@ -667,18 +652,20 @@
         "cheerfully accept help"
       ]
     },
-    "cameraRegister": "Eye-level or gentle low angle that reads his scale as safety, never looming; steady camera holding longer than comfortable on his face for the receiving beat. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)"
+    "cameraRegister": "Eye-level or gentle low angle that reads his scale as safety, never looming; steady camera holding longer than comfortable on his face for the receiving beat. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)",
+    "turn4": "../cb-seed/assets/CB_Howey_turnaround.jpeg",
+    "turnaround": "../cb-seed/assets/CB_Howey_turnaround.jpeg",
+    "anchor": "../cb-seed/assets/CB_Howey_turnaround.jpeg",
+    "render_ref": "../cb-seed/assets/CB_Howey_turnaround.jpeg"
   },
   "Keen": {
-    "turnaround": "../cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
-    "anchor": "../cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
     "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
     "sizeRank": 4,
     "gender": "Male",
     "size": "a sturdy young bear \u2014 MEDIUM, similar in height to Luna and Aida (NOT a tiny cub); only Amie and Sunny are clearly smaller, and Misty and Howey are taller",
     "key_features": "a young blue bear cub with his SIGNATURE upright pale/white tuft of fur standing up on the crown of his head (always present)",
     "markers": "the upright white tuft on the crown of his head",
-    "cadence": "leans in before he's ready, gulps hard, and goes anyway — curiosity always wins the argument with his own nerves",
+    "cadence": "leans in before he's ready, gulps hard, and goes anyway \u2014 curiosity always wins the argument with his own nerves",
     "wristband_states": {
       "none": [],
       "vacant": [
@@ -700,11 +687,8 @@
     ],
     "height": "4'9\" (145 cm)",
     "heightIn": 57,
-    "turn4": "../cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
     "house": {
-      "interior": "cb-seed/assets/houses/CB_Keen_house-int.jpeg",
       "interiorMulticam": "cb-seed/assets/houses/CB_Keen_house-int-multicam.jpeg",
-      "exterior": "cb-seed/assets/houses/CB_Keen_house-ext.jpeg",
       "exteriorMulticam": "cb-seed/assets/houses/CB_Keen_house-ext-multicam.jpeg",
       "interiorDesc": "Round stone hut interior with timber rafters, glowing fireplace, blue-and-white knit bed, woven rugs, a porthole to a moonlit sea and aqua crystals.",
       "exteriorDesc": "Domed grey fieldstone hut with glowing blue crystal veins, round door, porthole windows and a glass skylight on a sunny meadow with blue crystals."
@@ -725,7 +709,7 @@
         "label": "No cuffs \u2014 Ep1 state",
         "canonical": false,
         "turnaround": "../cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
-        "altTurnaround": "../cb-seed/assets/ep1/CB_Keen_turnaround.jpeg",
+        "altTurnaround": "../cb-seed/assets/CB_Keen_turnaround_pro.jpeg",
         "note": "Keen without his cuffs \u2014 an Ep1 state."
       }
     },
@@ -786,7 +770,6 @@
       "crystalMoment": "It begins DIM \u2014 flickering, uncertain, the cool blue guttering low while the fear is still in his voice (in Ep1's origin beat it's the vacant wristband bezels self-glowing faintly aqua from within, courage before the crystal even exists). As his voice firms on \"with all my might\" the flicker steadies. On \"Aquamarine\" the light catches and holds; and on \"shine with light!\" it BLAZES \u2014 electric azure surging up and outward from the wrists, the two kite-gems igniting steady in the gold cuffs, cool blue shadows burning off into bright dawn-blue. The blaze is the visible proof he acted THROUGH the fear, not around it \u2014 earned by the dim that came first, never handed to him.",
       "trigger": "It only lands AFTER the real fear has been felt and shown \u2014 never as a rote chant. The earning beat is the selfless one: someone he can save is in danger (Squeaky in the dark water), his paws genuinely don't want to move, and the call comes in the half-second AFTER he's already decided to go anyway \u2014 not to summon courage he doesn't have, but as the declaration of the truth he just discovered in his own body: that he's scared AND he's going, and the scared part is where the brave part comes from. The crystal answers because he MEANS it \u2014 he's stopped pretending he was never afraid. Without the visible gulp and trembling-paws fear immediately before, the call is unearned and must not be spoken."
     },
-    "render_ref": "../cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
     "promptRole": "the young bear cub",
     "isBee": false,
     "lexicon": {
@@ -810,7 +793,11 @@
         "calm down"
       ]
     },
-    "cameraRegister": "Low angles to emphasise the scale of the obstacle he faces, with rapid dynamic push-ins on the Crystal Call. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)"
+    "cameraRegister": "Low angles to emphasise the scale of the obstacle he faces, with rapid dynamic push-ins on the Crystal Call. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)",
+    "turn4": "../cb-seed/assets/characters/Keen/CB_Keen_pro-turn-1.jpeg",
+    "turnaround": "../cb-seed/assets/characters/Keen/CB_Keen_pro-turn-1.jpeg",
+    "anchor": "../cb-seed/assets/characters/Keen/CB_Keen_pro-turn-1.jpeg",
+    "render_ref": "../cb-seed/assets/characters/Keen/CB_Keen_pro-turn-1.jpeg"
   },
   "Fuzzby": {
     "anchor": "../cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
@@ -863,7 +850,6 @@
     "weight": "2 lbs",
     "gender": "Male",
     "house": {
-      "interior": "cb-seed/assets/houses/CB_Fuzzby_house-int.jpeg",
       "interiorMulticam": "cb-seed/assets/houses/CB_Fuzzby_house-int-multicam.jpeg",
       "exterior": "cb-seed/assets/houses/CB_Fuzzby_house-ext.jpeg",
       "exteriorMulticam": "cb-seed/assets/houses/CB_Fuzzby_house-ext-multicam.jpeg",
@@ -961,7 +947,6 @@
     "heightIn": 12,
     "gender": "Female",
     "house": {
-      "interior": "cb-seed/assets/houses/CB_Zenny_house-int.jpeg",
       "interiorMulticam": null,
       "exterior": "cb-seed/assets/houses/CB_Zenny_house-ext.jpeg",
       "exteriorMulticam": null,
@@ -1130,13 +1115,10 @@
     "cameraRegister": "Eye-level, warm, and close \u2014 proximity reads as safety; no sudden camera moves around her, she is a place of stillness. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)"
   },
   "Squeaky": {
-    "turnaround": "../cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
-    "anchor": "../cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
     "voiceId": null,
     "size": "a small dolphin",
     "cadence": "answers everything in quick chirps and clicks, circling back around whoever's talking like the conversation is a game",
     "key_features": "a friendly young bottlenose dolphin \u2014 soft grey-blue with a pale cream belly, a rounded smiling face, big warm expressive eyes, and a subtle aqua crystal-shimmer (Crystal Cove companion)",
-    "turn4": "../cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
     "refs": [
       "../cb-seed/assets/CB_Squeaky_turn4.png"
     ],
@@ -1184,7 +1166,6 @@
     },
     "sizeRank": 4,
     "gender": "Male",
-    "render_ref": "../cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
     "promptRole": "the playful dolphin",
     "isBee": false,
     "lexicon": {
@@ -1207,7 +1188,11 @@
         "glowing power crystal"
       ]
     },
-    "cameraRegister": "Stage him in and around water \u2014 leaping arcs, surface play, half-submerged; cut to his big expressive eyes for emotional beats, hold the rescue beat to let it breathe. (extracted from the character's own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)"
+    "cameraRegister": "Stage him in and around water \u2014 leaping arcs, surface play, half-submerged; cut to his big expressive eyes for emotional beats, hold the rescue beat to let it breathe. (extracted from the character's own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW \u2014 adversarially verified against the source text; not invented.)",
+    "turn4": "../cb-seed/assets/CB_Squeaky_turn4.png",
+    "turnaround": "../cb-seed/assets/CB_Squeaky_turn4.png",
+    "anchor": "../cb-seed/assets/CB_Squeaky_turn4.png",
+    "render_ref": "../cb-seed/assets/CB_Squeaky_turn4.png"
   },
   "Bo": {
     "_status": "LOCKED (2026-08-26, Julian supplied turnaround, satchel, house plates and ElevenLabs voice). Bo is production-usable for Ep2. Do not redesign or substitute species.",

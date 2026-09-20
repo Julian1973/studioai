@@ -40,6 +40,10 @@ def test_retake_requires_reason_and_success_before_normal_preparation():
     block=APP[APP.index('function openKeyframeRetake('):APP.index('function directorStartRejection(')]
     assert "if(!correction)return" in block
     assert "job.status!=='done'" in block
-    assert "prepareDirectionThen('cinematography'" in block
+    # The retake no longer calls prepareDirectionThen from the browser: rejection and the
+    # revised direction are prepared by the reject-keyframe job itself, and only then does
+    # the cost disclosure open. Asserting that route is stricter than naming the old call —
+    # it requires the candidate to be archived with its reason before anything is prepared.
+    assert "shRun('reject-keyframe'" in block
     assert "openDisclosureModal('keyframe'" in block
     assert "shRun('build-keyframe'" not in block

@@ -203,13 +203,22 @@ def test_coverage_vocabulary_rejects_ambiguity_not_taste(bad, message):
         validate_coverage([scene], [{'id': 'S1.SH1', 'scene': 1, 'directorCard': {'views': views}}])
 
 
-def test_action_chain_cannot_run_backwards_within_a_beat():
-    from studio_director_card import validate_coverage, SceneCoverage
-    views = [_view('S1.V1', sourceBeat='cup', cinematography={'actionPhase': 'completion'}),
-             _view('S1.V2', sourceBeat='cup', cinematography={'actionPhase': 'contact'})]
+def test_a_phase_that_steps_back_is_noted_never_refused():
+    """20 Sep 2026, Ep4 scene 3: one beat carried several physical chains (bears react to the
+    first drops; the downpour has its consequence; berry cups begin to fill). Stepping back
+    is usually the next event, so the order is recorded as a warning; it never stops a scene
+    and never goes back to the Director to be flattened into a checker's order."""
+    from studio_director_card import validate_coverage, coverage_issues, coverage_warnings, SceneCoverage
+    views = [_view('S1.V1', sourceBeat='cup', cinematography={'actionPhase': 'reaction'}),
+             _view('S1.V2', sourceBeat='cup', cinematography={'actionPhase': 'consequence'}),
+             _view('S1.V3', sourceBeat='cup', cinematography={'actionPhase': 'contact'})]
     scene = SceneCoverage(scene=1, audienceJourney='x', views=views)
-    with pytest.raises(ValueError, match='runs backwards'):
-        validate_coverage([scene], [{'id': 'S1.SH1', 'scene': 1, 'directorCard': {'views': views}}])
+    validate_coverage([scene], [{'id': 'S1.SH1', 'scene': 1, 'directorCard': {'views': views}}])
+    assert coverage_issues(views[1], views[0]) == []
+    assert coverage_warnings(views[1], views[0]) == [
+        'action phase steps back: reaction then consequence within the same beat (a new physical chain, or check the order)']
+    assert coverage_warnings(views[2], views[1])[0].startswith('action phase steps back: consequence then contact')
+    assert coverage_warnings(views[0], None) == []
 
 
 def test_cards_without_the_vocabulary_keep_their_revision():

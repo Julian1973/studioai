@@ -337,13 +337,30 @@ def coverage_issues(view, previous=None):
         issues.append('a hold has no cut motivation; its cutReason says why staying is stronger')
     if kind == 'reaction' and not (view.get('viewpointOwner') or view.get('listenerReaction')):
         issues.append('a reaction view names the listener (viewpointOwner) or listenerReaction')
-    if phase and previous:
-        prev_cinema = previous.get('cinematography') or {}
-        prev_phase = prev_cinema.get('actionPhase') if isinstance(prev_cinema, dict) else None
-        same_beat = view.get('sourceBeat') and view.get('sourceBeat') == previous.get('sourceBeat')
-        if same_beat and prev_phase in ACTION_PHASES and ACTION_PHASES.index(phase) < ACTION_PHASES.index(prev_phase):
-            issues.append(f"action chain runs backwards: {prev_phase} then {phase} within the same beat")
     return issues
+
+
+def coverage_warnings(view, previous=None):
+    """Order observations the software records and shows but never refuses on.
+
+    One beat often carries several physical chains (the first drops land, the bears react,
+    the downpour has its consequence, a new contact begins). A phase that steps back is
+    usually the Director moving to the next event, so it is noted for the reader, not
+    returned to the author: sending it back would only make the Director strip or reorder
+    phases to satisfy a checker. (20 Sep 2026, Ep4 scene 3.)
+    """
+    cinema = view.get('cinematography') or {}
+    if not isinstance(cinema, dict) or not previous:
+        return []
+    phase = cinema.get('actionPhase')
+    prev_cinema = previous.get('cinematography') or {}
+    prev_phase = prev_cinema.get('actionPhase') if isinstance(prev_cinema, dict) else None
+    same_beat = view.get('sourceBeat') and view.get('sourceBeat') == previous.get('sourceBeat')
+    if (phase in ACTION_PHASES and same_beat and prev_phase in ACTION_PHASES and
+            ACTION_PHASES.index(phase) < ACTION_PHASES.index(prev_phase)):
+        return [f"action phase steps back: {prev_phase} then {phase} within the same beat "
+                "(a new physical chain, or check the order)"]
+    return []
 
 
 def validate_coverage(scenes, shots):

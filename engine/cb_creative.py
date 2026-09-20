@@ -849,8 +849,24 @@ def coverage_vocabulary_problems(direction):
     return problems
 
 
+def coverage_order_notes(direction):
+    """Recorded, shown, never refused: phases that step back inside one beat."""
+    from studio_director_card import coverage_warnings
+    notes = []
+    for scene in direction.sceneCoverage or []:
+        previous = None
+        for view in scene.views:
+            record = view.model_dump()
+            for note in coverage_warnings(record, previous):
+                notes.append(f"Scene {scene.scene} view {view.viewId}: {note}")
+            previous = record
+    return notes
+
+
 def _return_coverage_vocabulary_to_author(sd, scene_num, *, log=print):
     """One bounded return to the Director; the record is never edited for them."""
+    for note in coverage_order_notes(sd):
+        log(f"  [director] gate3_beats_s{scene_num}: order note (not a stop): {note}", flush=True)
     problems = coverage_vocabulary_problems(sd)
     if not problems:
         return sd

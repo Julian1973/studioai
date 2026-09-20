@@ -1358,3 +1358,20 @@ def test_cut_keeps_separate_ending_reference_and_explicit_shot_prop(monkeypatch)
         assert 'prop:other' not in roles and 'prop:unapproved' not in roles
     assert compiled['referenceSlots']['@图1'] == 'opening keyframe'
     assert 'do not copy the prior framing' in compiled['keyframePrompt']
+
+
+def test_anyone_at_frame_one_is_in_the_unit_cast():
+    """20 Sep 2026, Ep4 scene 4 (BOUNDARY_CAST_INVALID): the unit cast is read from the
+    prose the unit names, the opening cast from its first stage. On a crowded scene they
+    disagreed and the engine refused the package. Frame one wins."""
+    sb_shot = _sb_shot("S4.SH2", ["4.B2"], "PLANNED_CUT")
+    for key in ("openingImage", "principalPerformance", "physicalOrEmotionalChange",
+                "closingImage", "physicalPerformance", "animationTiming"):
+        sb_shot[key] = "Fuzzby turns the cup over and waits."
+    pd = _pd("S4.SH2", True)
+    cfg = {"Fuzzby": {"avoid": ""}, "Zenny": {"avoid": ""}}
+    shot, _ = H.distil_shot(sb_shot, pd, ["Fuzzby", "Zenny"], [], None, cfg,
+                            opening_cast=["Fuzzby", "Zenny"])
+    assert shot.openingCharactersInFrame == ["Fuzzby", "Zenny"]
+    assert "Zenny" in shot.charactersInFrame and "Fuzzby" in shot.charactersInFrame
+    assert set(shot.openingCharactersInFrame) <= set(shot.charactersInFrame)

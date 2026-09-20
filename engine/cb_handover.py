@@ -1049,6 +1049,15 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
         if speaker in visible_cast and speaker not in characters_in_frame:
             characters_in_frame.append(speaker)
 
+    # Anyone at frame one is in frame. The unit cast is read from the prose the unit
+    # names; the opening cast from its first stage, falling back to that stage's whole
+    # beat cast. On a crowded scene the two can disagree (Ep4 scene 4, 20 Sep 2026:
+    # BOUNDARY_CAST_INVALID). Frame one wins: a character present at the boundary is a
+    # member of the unit, and loses nothing by carrying an identity reference.
+    for character in (opening_cast or []):
+        if character in visible_cast and character not in characters_in_frame:
+            characters_in_frame.append(character)
+
     shot = cb_engine.Shot(
         shotId=sb_shot["shotId"], beatCode=sb_shot["beatIds"][0],
         beatCodes=list(sb_shot["beatIds"]), durationSec=duration,

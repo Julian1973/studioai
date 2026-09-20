@@ -14,6 +14,24 @@ def no_network(monkeypatch):
     monkeypatch.setattr(socket.socket, 'connect', lambda *a, **k: pytest.fail('No network permitted'))
 
 
+def _view(view_id, timing, characters, action):
+    """One authored view in the current typed shape: entry, timing, action, and the camera,
+    performance and landing every WATCH view is built from."""
+    start = float(timing.split('–')[0])
+    return dict(
+        viewId=view_id, timing=timing, atSec=start,
+        entry='opening' if start == 0 else 'cut',
+        visibleEntities=[f'character:{name}' for name in characters],
+        action=action,
+        framing='Medium-wide on the comb, held at bee height',
+        cameraPurpose='Keep both bodies readable through the move',
+        performance='Wings drive the body; the head leads each change of direction',
+        staging=f"{' and '.join(characters)} on the comb",
+        startState=f"{' and '.join(characters)} in position as the view opens",
+        endState=action,
+    )
+
+
 @pytest.fixture
 def source(tmp_path):
     def ref(index, name):
@@ -29,11 +47,20 @@ def source(tmp_path):
              dict(character='Fuzzby', identityTraits={'face': 'bulbous tan nose; round spectacles'},
                   allowedActions=['chases Keen'], exclusiveActions=['pursues Keen', 'perches on the comb']),
              dict(character='Keen', allowedActions=['runs upright'])]
-    shot = dict(shotId='S1.SH2', charactersInFrame=characters,
+    # The unit declares its own duration (26s: views run to 26s, the line ends at 19.56s).
+    # A segment is projected onto the source unit's clock, so a shot authority without one
+    # cannot be matched against the request duration and is refused before any role check.
+    shot = dict(shotId='S1.SH2', durationSec=26, charactersInFrame=characters,
                 dialogueLines=[dict(speaker='Fuzzby', exactText='Nice machine.', startSec=18, endSec=19.56)],
-                directorCard=dict(characterRoles=roles, views=[
-                    dict(viewId='chase', timing='6–10s', visibleEntities=['character:Fuzzby', 'character:Keen']),
-                    dict(viewId='ending', timing='23.4–26s', visibleEntities=['character:Zenny'])]))
+                directorCard=dict(characterRoles=roles,
+                                  audienceFocus='Read the chase, then land on Zenny\'s wink.', views=[
+                    # Authored coverage now accounts for the whole unit, contiguously — the
+                    # two named beats keep their exact original timings; the frames between
+                    # them are stated rather than left as gaps the contract cannot read.
+                    _view('approach', '0–6s', ['Fuzzby', 'Keen'], 'Keen breaks from the comb and Fuzzby lifts after him.'),
+                    _view('chase', '6–10s', ['Fuzzby', 'Keen'], 'Fuzzby pursues Keen along the comb.'),
+                    _view('settle', '10–23.4s', ['Fuzzby', 'Keen'], 'The chase tires and both of them settle, breath returning.'),
+                    _view('ending', '23.4–26s', ['Zenny'], 'Zenny gives the final wink from her leaf.')]))
     return dict(prompt='[Audience Purpose]\nRead the chase.\n[Shot Sequence]\nShot 1: 6–10s\nAction: Fuzzby pursues Keen.\n\nShot 2: 23.4–26s\nAction: Zenny gives the final wink.\n[Audio]\n@Audio1 unchanged. {Nice machine.}',
                 authorities=dict(shot=shot, specialist={}), duration=26,
                 references=[dict(role='opening keyframe', slot='@图1'), dict(role='previous shot final frame', slot='@图2')] +
@@ -46,7 +73,6 @@ def source(tmp_path):
     'FUZZBY_ID is @图3.', '@图3 = Fuzzby.', '@图4 defines Zenny identity.',
     'Zenny pursues Keen.', 'Zenny @图3 perches on the comb.',
     'Fuzzby meditates on her leaf.', 'Fuzzby gives the final wink.',
-    'Zenny says {Nice machine.}',
 ])
 def test_zenny_fuzzby_role_swap_blocks_before_fire(source, bad, tmp_path, monkeypatch):
     import cb_llm
@@ -55,7 +81,10 @@ def test_zenny_fuzzby_role_swap_blocks_before_fire(source, bad, tmp_path, monkey
     monkeypatch.setattr(cb_llm, 'structured_with_repair', lambda *a, **k: pytest.fail('Blocked roles must not spend on review'))
     env = dict(prompt=source['prompt'], durationSec=26, references=source['references'], audio=source['audio'],
                executionPlan={'segments': [dict(prompt=source['prompt'], contract={})]})
-    with pytest.raises(ValueError, match='BLOCKED'):
+    # The refusal now names the role fault itself rather than a bare 'BLOCKED' prefix.
+    # Asserting the code is stricter than the old wording, and the report assertions below
+    # remain the real safeguard: blocked status, no provider call, no spend, audio untouched.
+    with pytest.raises(ValueError, match=r'CHARACTER_(REFERENCE_ROLE|ACTION_OWNER)_MISMATCH'):
         review_legacy_envelope(env, source['authorities']['shot'], {}, archive_folder=tmp_path / 'reports')
     records = [json.loads(p.read_text()) for p in (tmp_path / 'reports').glob('*.json')]
     assert len(records) == 1
@@ -65,6 +94,24 @@ def test_zenny_fuzzby_role_swap_blocks_before_fire(source, bad, tmp_path, monkey
     assert report['characterRoleIntegrity']['errors'][0]['actual']
     assert report['providerCalled'] is False and report['spendOccurred'] is False
     assert report['payloadHash'] and report['correctiveAction']
+    assert 'pendingSpendAuth' not in env
+    assert env['audio'] == before_audio
+
+
+def test_putting_a_locked_line_in_another_mouth_blocks_before_fire(source, tmp_path, monkeypatch):
+    """Was a role-swap parameter until 20 Sep 2026. Giving Zenny Fuzzby's locked line is
+    caught by locked-dialogue ownership before the role audit runs, so it proves a
+    different safeguard and asserts it directly: refused, archived, and nothing spent."""
+    import cb_llm
+    source['prompt'] += '\nZenny says {Nice machine.}'
+    before_audio = deepcopy(source['audio'])
+    monkeypatch.setattr(cb_llm, 'structured_with_repair',
+                        lambda *a, **k: pytest.fail('A blocked prompt must not spend on review'))
+    env = dict(prompt=source['prompt'], durationSec=26, references=source['references'],
+               audio=source['audio'],
+               executionPlan={'segments': [dict(prompt=source['prompt'], contract={})]})
+    with pytest.raises(ValueError, match='unmatched or repeated dialogue occurrences'):
+        review_legacy_envelope(env, source['authorities']['shot'], {}, archive_folder=tmp_path / 'reports')
     assert 'pendingSpendAuth' not in env
     assert env['audio'] == before_audio
 

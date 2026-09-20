@@ -58,7 +58,7 @@ RULES = (
      'images',
      "The scene's background plate needs approving first.",
      "Every scene is anchored on one approved world plate before its first image.",
-     "Approve or regenerate the scene plate, then continue.", "Open scene plate"),
+     "Choose the plate from your library, upload one, or generate one, then approve it and continue.", "Open scene plate"),
     (r"BLOCKED: CHARACTER ROLE INTEGRITY|role swap|CHARACTER TRUTH",
      'direction',
      "Two characters could be confused in this shot.",

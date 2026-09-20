@@ -115,7 +115,28 @@ try{
    assert.equal(await button.evaluate(el=>el.scrollWidth<=el.clientWidth),true,'Button label overflow');
   }
  }
+ // SEE before the plate exists: the unit is still in 'plan' and the recorded stop asks for
+ // the scene plate. The producer must see the two SEE tiles (plate, then keyframe) with
+ // their Upload / Refire / Library controls, and the stop's button must open the plate
+ // library on this surface instead of re-running the failed step.
+ await page.setViewportSize({width:1280,height:960});
+ await page.evaluate(()=>{window.calls.length=0;});
+ await refresh({phase:'plan',primary:'',revision:9,binding:'plan-1',busy:false,
+  operation:{id:'op-plate',status:'needs-decision',decision:{issue:'REFUSED — no current signed scene plate found for Ep4 scene 3',proposed:'Choose or generate the scene plate.',
+   producer:{category:'images',headline:"The scene's background plate needs approving first.",meaning:'Every scene is anchored on one approved world plate before its first image.',nextAction:'Choose the plate from your library, upload one, or generate one, then approve it and continue.',button:'Open scene plate',preserved:'Everything you approved is saved.'}}},
+  review:{images:[],plate:null,storyboard:baseView.review.storyboard,storyboardRequired:false,seePackage:{binding:'see-plan',panels:[],issues:[],providerSheet:{}}}});
+ const tiles=page.locator('.journey-image-card');
+ await tiles.first().waitFor();
+ assert.equal(await tiles.count(),2,'SEE shows the scene plate and the opening keyframe tiles before either exists');
+ assert.deepEqual(await tiles.evaluateAll(cards=>cards.map(c=>c.dataset.component)),['plate','opening'],'Scene plate first, keyframe second');
+ assert.equal(await page.getByText('Review the production plan in the Storyboard section below.').count(),0,'No text wall in place of the SEE tiles');
+ assert.equal(await page.getByRole('button',{name:'Library',exact:true}).count(),2,'Each tile offers the library');
+ assert.equal(await primary.textContent(),'Open scene plate');
+ const recoversBefore=requests.filter(r=>r.command==='recover').length;
+ await primary.click();
+ await page.waitForFunction(()=>window.calls.some(c=>c.source==='library'&&c.component==='plate'));
+ assert.equal(requests.filter(r=>r.command==='recover').length,recoversBefore,'The plate stop never re-runs the failed step');
  assert.deepEqual(errors,[]);
- console.log('PASS: source controls, missing assets, approval failure, DIRECT, optional storyboard, real montage, HEAR approval, recovery, sealed WATCH, REVIEW, remount, desktop/mobile. External requests blocked.');
+ console.log('PASS: SEE tiles before the plate exists, source controls, missing assets, approval failure, DIRECT, optional storyboard, real montage, HEAR approval, recovery, sealed WATCH, REVIEW, remount, desktop/mobile. External requests blocked.');
 }catch(error){console.error(error,errors,await page?.locator('body').innerText());throw error;}
 finally{await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

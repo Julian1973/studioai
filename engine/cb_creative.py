@@ -828,6 +828,51 @@ def _validate_scene_view_allocation(direction, shots):
         raise CoverageAllocationError(str(error)) from error
 
 
+def coverage_vocabulary_problems(direction):
+    """The objective vocabulary checks on the author's own coverage, before any allocation.
+
+    Gate 4's repair lane re-packs the scene record; it cannot mend a slip inside that
+    record (a hold carrying a cut motivation, a reaction with no listener). Those are the
+    author's to fix, so they are found here, at the author, with the exact words the
+    later check would use.
+    """
+    from studio_director_card import coverage_issues
+    problems = []
+    for scene in direction.sceneCoverage or []:
+        previous = None
+        for view in scene.views:
+            record = view.model_dump()
+            issues = coverage_issues(record, previous)
+            if issues:
+                problems.append(f"Scene {scene.scene} view {view.viewId}: " + '; '.join(issues))
+            previous = record
+    return problems
+
+
+def _return_coverage_vocabulary_to_author(sd, scene_num, *, log=print):
+    """One bounded return to the Director; the record is never edited for them."""
+    problems = coverage_vocabulary_problems(sd)
+    if not problems:
+        return sd
+    log(f"  [director] gate3_beats_s{scene_num}: coverage vocabulary returned to the author once: "
+        + ' | '.join(problems), flush=True)
+    repaired = cb_llm.repair_call(
+        _mind("DIRECTOR", ["directorTaste"],
+              COVERAGE_CONTRACT + "\nRepair ONLY the named coverage view(s) so the record obeys the "
+              "vocabulary. A hold carries no motivation (motivation must be null); motivations "
+              "belong to cuts. A reaction view names its listener. A world-texture view names its "
+              "function and shows no character. Keep every beat, the selected treatment, exact "
+              "dialogue, view order, framing, action, performance, timing, continuity and every "
+              "other field exactly as authored; change nothing the check did not name."),
+        "CURRENT SCENE DIRECTION:\n" + sd.model_dump_json(),
+        PlannedSceneDirection, '\n'.join(problems), tier="premium",
+        label=f"gate3_coverage_s{scene_num}", log=log)
+    remaining = coverage_vocabulary_problems(repaired)
+    if remaining:
+        raise CoverageAllocationError('; '.join(remaining))
+    return repaired
+
+
 def plan_camera_allocation(episode, scene_num, vision, selection, treatment, ready,
                            sd, *, heart=None, review_notes="", log=print):
     """Return an unallocatable plan to its author once, before any media work.
@@ -1495,6 +1540,7 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
         f"order). Source IDs are immutable facts and will be mechanically restored after "
         f"your creative pass; never merge, drop, duplicate or reorder a source beat.",
         PlannedSceneDirection, tier="premium", label=f"gate3_beats_s{scene_num}")
+    sd = _return_coverage_vocabulary_to_author(sd, scene_num, log=log)
     ownership_errors = []
     for beat in sd.beats:
         participants = {_norm(name) for name in beat.participatingCharacters}

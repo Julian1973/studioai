@@ -251,3 +251,45 @@ def test_native_handoff_card_keeps_the_camera_record_and_the_hold():
             old.pop(key, None)
     legacy = validate(prepared, shot)['direction']['views']
     assert legacy[0]['framing'] == 'MS on Zenny. Find her' and legacy[1]['cinematography'] == {}
+
+
+def test_a_vocabulary_slip_in_scene_coverage_is_returned_to_the_director_once(monkeypatch):
+    """20 Sep 2026, Ep4 scene 3: the Director authored a hold and gave it a cut motivation.
+    Gate 4's repair lane re-packs the scene record and cannot mend the record itself, so the
+    scene died twice on the same sentence. The slip is now found at the author, handed back
+    once with the check's own words, and the corrected record continues. A second slip still
+    stops, honestly; a clean record is never sent back."""
+    from types import SimpleNamespace
+    import cb_creative
+    from studio_director_card import SceneCoverage
+
+    def direction(motivation):
+        source = {**view(), 'entry': 'hold', 'cinematography': {'kind': 'hold', 'motivation': motivation,
+                  'lens': '50mm — honest', 'movement': 'locked off'}}
+        scene = SceneCoverage(scene=3, audienceJourney='Trust the stillness', views=[source])
+        return SimpleNamespace(sceneCoverage=[scene], beats=[], model_dump_json=lambda: '{"scene": 3}')
+
+    slipped, clean, still_wrong = direction('KNOW'), direction(None), direction('FEEL')
+    calls = []
+
+    def repair(system, user, schema, errors, **kw):
+        calls.append(errors)
+        assert 'Scene 3 view door-wide: a hold has no cut motivation' in errors
+        assert 'motivation must be null' in system
+        return repair.reply
+
+    monkeypatch.setattr(cb_creative.cb_llm, 'repair_call', repair)
+
+    assert cb_creative.coverage_vocabulary_problems(clean) == []
+    assert cb_creative._return_coverage_vocabulary_to_author(clean, 3, log=lambda *a, **k: None) is clean
+    assert calls == []
+
+    repair.reply = clean
+    assert cb_creative._return_coverage_vocabulary_to_author(slipped, 3, log=lambda *a, **k: None) is clean
+    assert len(calls) == 1 and 'Scene 3 view door-wide: a hold has no cut motivation' in calls[0]
+
+    repair.reply = still_wrong
+    import pytest
+    with pytest.raises(cb_creative.CoverageAllocationError) as stop:
+        cb_creative._return_coverage_vocabulary_to_author(slipped, 3, log=lambda *a, **k: None)
+    assert 'a hold has no cut motivation' in str(stop.value) and len(calls) == 2

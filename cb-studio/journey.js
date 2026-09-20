@@ -19,7 +19,7 @@ function mount(host,scope,options={}){
  actions.append(primary,changes);actions.setAttribute('aria-label','Next required action');host.append(head,actions,issue,cost,media,storyboard,brief,evidence);if(options.advanced)host.append(advanced);
  function imageAsset(record){
   if(!record)return;
-  const card=node('article',undefined,'journey-image-card'),figure=node('figure');
+  const card=node('article',undefined,'journey-image-card'),figure=node('figure');card.dataset.component=record.component||'';
   const image=record.url?node('img'):node('p','No image selected','journey-image-empty');if(record.url){image.src=record.url;image.alt=(record.label||'SEE image')+' for '+scope.unit;}
   figure.append(node('figcaption',record.label||'SEE image'),image);card.append(figure);
   const status=node('p',record.reviewStatus==='approved'?'Approved':record.reviewStatus==='pending'?'Awaiting decision':record.reviewStatus==='stale'?'Refresh required':'Needs image');status.className='journey-image-status';
@@ -163,7 +163,8 @@ function mount(host,scope,options={}){
   title.textContent=scope.unit+' · '+(review.title||'Scene production');
   progress.textContent=state.busy?(op?.message||'Preparing your next review'):state.phase==='complete'?'Accepted · ready for the next unit':state.primary||state.dependency||'Review the current issue';
   const images=[...(review.images||[])].sort((a,b)=>({plate:0,opening:1}[a?.component]??2)-({plate:0,opening:1}[b?.component]??2));
-  if(options.imageSourceAction&&['images','audio'].includes(state.phase)){
+  const seeSurface=!!options.imageSourceAction&&['plan','images','audio'].includes(state.phase);
+  if(seeSurface){
    for(const [component,label] of [['plate','Scene plate'],['opening','Opening keyframe']])if(!images.some(r=>r.component===component))images.push({component,label,reviewStatus:'missing'});
    images.sort((a,b)=>({plate:0,opening:1}[a.component]??2)-({plate:0,opening:1}[b.component]??2));
   }
@@ -171,7 +172,7 @@ function mount(host,scope,options={}){
   if(nextMediaSignature!==mediaSignature){mediaSignature=nextMediaSignature;media.replaceChildren();
   if(state.phase==='film'||state.phase==='complete'){for(const r of review.videos||[])asset(r,'video');}
   else if(state.phase==='audio'){asset(review.audio,'audio');for(const r of images)imageAsset(r);}
-  else if(images.length&&state.phase!=='plan'){for(const r of images)imageAsset(r);}
+  else if(images.length&&(state.phase!=='plan'||seeSurface)){for(const r of images)imageAsset(r);}
   else{
    media.append(node('p','Review the production plan in the Storyboard section below.'));
   }
@@ -209,7 +210,7 @@ function mount(host,scope,options={}){
   if(awaitingNext&&state.phase==='complete'&&state.next&&options.next){awaitingNext=false;options.next(state.next);return;}
  }
  async function refresh(resume=false){clearTimeout(timer);if(ticket!==sequence||!host.isConnected)return;const revision=++refreshSequence;try{const value=await api({command:resume?'resume':'status',scope});if(ticket!==sequence||revision!==refreshSequence||!host.isConnected)return;show(value);if(state.busy||['queued','running'].includes(state.review?.seePackage?.job?.status))timer=setTimeout(()=>refresh(true),1800);}catch(e){if(ticket!==sequence||revision!==refreshSequence)return;issue.textContent=e.message;primary.disabled=true;}}
- primary.onclick=async()=>{if(!state||submitted||primary.disabled)return;const decision=state.operation?.status==='needs-decision';const gridButton=host.querySelector('[data-storyboard-grid]');if(!decision&&montageActionable&&gridButton&&!gridButton.disabled){gridButton.click();return;}submitted=true;primary.disabled=true;awaitingNext=state.phase==='film';try{const body=decision?{command:'recover',scope}:requestPending?{command:'request-displayed',scope,operationId:state.operation.id,requestHash:state.operation.requestDisplayHash}:{command:'decide',scope,action:state.phase,binding:state.binding,expectedRevision:state.revision,commandId:crypto.randomUUID(),by:options.reviewer||'Producer',...(approvalOnly?{intent:'approve'}:{})};show(await api(body));}catch(e){issue.textContent=e.message;}finally{submitted=false;if(ticket===sequence)refresh(true);}};
+ primary.onclick=async()=>{if(!state||submitted||primary.disabled)return;const decision=state.operation?.status==='needs-decision';if(decision&&state.operation?.decision?.producer?.category==='images'&&options.imageSourceAction){const tile=media.querySelector('[data-component="plate"]');tile?.scrollIntoView({block:'center'});const record=(state.review?.images||[]).find(r=>r?.component==='plate')||{component:'plate',label:'Scene plate',reviewStatus:'missing'};try{await options.imageSourceAction({action:'library',component:'plate',record,state});}catch(e){issue.textContent=e.message;}return;}const gridButton=host.querySelector('[data-storyboard-grid]');if(!decision&&montageActionable&&gridButton&&!gridButton.disabled){gridButton.click();return;}submitted=true;primary.disabled=true;awaitingNext=state.phase==='film';try{const body=decision?{command:'recover',scope}:requestPending?{command:'request-displayed',scope,operationId:state.operation.id,requestHash:state.operation.requestDisplayHash}:{command:'decide',scope,action:state.phase,binding:state.binding,expectedRevision:state.revision,commandId:crypto.randomUUID(),by:options.reviewer||'Producer',...(approvalOnly?{intent:'approve'}:{})};show(await api(body));}catch(e){issue.textContent=e.message;}finally{submitted=false;if(ticket===sequence)refresh(true);}};
  const handle=()=>{clearTimeout(timer);if(ticket===sequence)sequence++;};handle.scopeId=scopeId;handle.refresh=()=>refresh(true);host.journeyHandle=handle;refresh(true);return handle;
 }
 global.StudioJourney={mount};

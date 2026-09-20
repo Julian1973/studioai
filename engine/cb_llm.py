@@ -61,11 +61,13 @@ OPENAI_TEXT_RATES = {
     "gpt-5.4": {"input": 2.50, "cached_input": 0.25, "output": 15.00},
     "gpt-5.4-mini": {"input": 0.75, "cached_input": 0.075, "output": 4.50},
 }
+# One attempt, never a silent retry. 480 s: Ep4 scene 4 (30 script events; beats,
+# contracts and seventeen views in one Director reply) timed out at 180 s on 20 Sep 2026.
 try:
     PROVIDER_TIMEOUT_SECONDS = max(
-        10.0, float(os.environ.get("DIRECTOR_PROVIDER_TIMEOUT_SECONDS", "180")))
+        10.0, float(os.environ.get("DIRECTOR_PROVIDER_TIMEOUT_SECONDS", "480")))
 except (TypeError, ValueError):
-    PROVIDER_TIMEOUT_SECONDS = 180.0
+    PROVIDER_TIMEOUT_SECONDS = 480.0
 try:
     PROVIDER_ATTEMPTS = min(
         3, max(1, int(os.environ.get("DIRECTOR_PROVIDER_ATTEMPTS", "1"))))

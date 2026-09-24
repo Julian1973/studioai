@@ -38,7 +38,8 @@ try{
  await page.goto(origin);
  await page.evaluate(()=>{
   window.calls=[];
-  window.options={reviewer:'Julian',changes:()=>{},
+  window.options={reviewer:'Julian',changes:()=>calls.push({direct:true}),openHear:()=>calls.push({hear:true}),
+   openStage:stage=>calls.push({stage}),openLibrary:()=>calls.push({library:true}),
    imageSourceAction:async d=>{calls.push({source:d.action,component:d.component});},
    imageAction:async d=>{calls.push({review:d.action});throw new Error('Current approval could not be saved');},
    storyboardAction:async d=>calls.push({required:d.required}),
@@ -96,6 +97,36 @@ try{
  assert.equal(await primary.isEnabled(),true,'Recovery must stay reachable with missing storyboard');
  await decide('recover');assert.equal(requests.some(r=>r.command==='recover'),true);
 
+ await refresh({...baseView,operation:{id:'review-failed',status:'needs-decision',grant:{limitUsd:2.5},
+  decision:{issue:'WATCH_PROMPT_REVIEW_REQUIRED',proposed:'Retry review',
+   producer:{category:'direction',headline:'Review could not verify its evidence.',meaning:'Approved work is retained.',nextAction:'Retry or review direction.',button:'Retry review',preserved:'Everything approved is saved.'}}}});
+ assert.match(await page.locator('.journey-cost').innerText(),/original action cap of \$2\.50/);
+ assert.equal(await page.getByRole('button',{name:'Review in DIRECT',exact:true}).count(),1);
+ await page.getByRole('button',{name:'Review in DIRECT',exact:true}).click();
+ assert.equal(await page.evaluate(()=>calls.some(c=>c.stage==='direct'||c.direct)),true,'Producer can choose manual direction review');
+ await refresh({...baseView,phase:'audio',operation:{id:'audio-failed',status:'needs-decision',grant:{limitUsd:0},
+  decision:{issue:'Audio needs review',proposed:'Open HEAR',
+   producer:{category:'audio',headline:'Audio needs review.',meaning:'Approved work is retained.',nextAction:'Open HEAR.',button:'Retry',preserved:'Everything approved is saved.'}}}});
+ assert.equal(await page.getByRole('button',{name:'Open HEAR',exact:true}).count(),1);
+ await page.getByRole('button',{name:'Open HEAR',exact:true}).click();
+ assert.equal(await page.evaluate(()=>calls.some(c=>c.hear)),true,'Producer can choose HEAR without retrying generation');
+ await refresh({...baseView,phase:'audio',operation:{id:'direct-fix',status:'needs-decision',
+  decision:{issue:'Voice direction is missing',proposed:'Review DIRECT',producer:{category:'audio',targetStage:'direct',headline:'Voice direction needs attention.',meaning:'Approved work is retained.',nextAction:'Add acting direction in DIRECT.',button:'Open direction',preserved:'Everything approved is saved.'}}}});
+ await page.evaluate(()=>{window.calls.length=0;});
+ const recoverCountBeforeDirect=requests.filter(r=>r.command==='recover').length;
+ await primary.click();
+ assert.deepEqual(await page.evaluate(()=>calls.filter(c=>c.stage).map(c=>c.stage)),['direct'],'Top action opens the named repair stage');
+ assert.equal(requests.filter(r=>r.command==='recover').length,recoverCountBeforeDirect,'Navigation does not resume or rerun a failed operation');
+
+ await page.evaluate(()=>{window.calls.length=0;});
+ await refresh({...baseView,phase:'film',operation:{id:'provider-timeout',status:'needs-decision',
+  decision:{issue:'APITimeoutError: Request timed out.',proposed:'Check whether the provider accepted the request.',
+   producer:{category:'provider',headline:'The provider did not answer in time.',meaning:'The job may already exist.',nextAction:'Check the existing job before retrying.',button:'Check existing job',preserved:'Everything approved is saved.'}}}});
+ const providerRecoverCount=requests.filter(r=>r.command==='recover').length;
+ await Promise.all([page.waitForResponse(r=>r.url().endsWith('/api/production-journey')&&r.request().postDataJSON()?.command==='recover'),primary.click()]);
+ assert.equal(requests.filter(r=>r.command==='recover').length,providerRecoverCount+1,'Timeout recovery checks the saved operation instead of routing to DIRECT or resubmitting');
+ assert.deepEqual(await page.evaluate(()=>calls),[],'Timeout recovery does not navigate to an unrelated stage');
+
  await refresh({...skipped,phase:'audio',busy:true,operation:{id:'watch',status:'running',requestDisplayHash:'sealed',receipts:{prepare_render:{requestDisplay:{prompt:'Exact sealed prompt',maximumUsd:2}}}}});
  await page.getByText('WATCH · Final request',{exact:true}).waitFor();
  await decide('request-displayed');
@@ -136,6 +167,15 @@ try{
  await primary.click();
  await page.waitForFunction(()=>window.calls.some(c=>c.source==='library'&&c.component==='plate'));
  assert.equal(requests.filter(r=>r.command==='recover').length,recoversBefore,'The plate stop never re-runs the failed step');
+ await refresh({phase:'audio',primary:'',revision:10,binding:'see-stale',busy:false,
+  operation:{id:'op-opening-stale',status:'needs-decision',decision:{issue:'REFUSED — opening-frame approval is stale against its direct inputs',proposed:'Review the updated opening frame.',
+   producer:{category:'images',targetStage:'see',component:'opening',headline:'The opening frame needs updating.',meaning:'Its inputs changed; the saved image is retained.',nextAction:'Review the opening frame in SEE.',button:'Review opening frame',preserved:'Everything you approved is saved.'}}},
+  review:{...baseView.review,images:[{component:'plate',label:'Scene plate',url:'/plate.png',reviewStatus:'approved'},
+   {component:'opening',label:'Opening keyframe',url:'/opening.png',reviewStatus:'stale'}],storyboardRequired:false,seePackage:{binding:'see-stale',panels:[],issues:[],providerSheet:{}}}});
+ const openingActionCount=requests.filter(r=>r.command==='recover').length;
+ await primary.click();
+ await page.waitForFunction(()=>window.calls.some(c=>c.source==='library'&&c.component==='opening'));
+ assert.equal(requests.filter(r=>r.command==='recover').length,openingActionCount,'Stale opening recovery never routes through the plate or blind retry');
  assert.deepEqual(errors,[]);
  console.log('PASS: SEE tiles before the plate exists, source controls, missing assets, approval failure, DIRECT, optional storyboard, real montage, HEAR approval, recovery, sealed WATCH, REVIEW, remount, desktop/mobile. External requests blocked.');
 }catch(error){console.error(error,errors,await page?.locator('body').innerText());throw error;}

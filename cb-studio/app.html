@@ -3951,6 +3951,15 @@ async function renderWorkspaceBody(){
     for(const id of ['studioagent','readiness','director-next-step']){const n=document.getElementById(id);if(n)n.innerHTML='';}
     StudioJourney.mount(el,{projectId:'crystal-bears',episode:SH_EP,scene:String(SH_SC),unit:shotId},{
       reviewer:REVIEWER,
+      openHear:()=>openShotOutcome('voice',PSHOT_I),
+      openSee:()=>openShotOutcome('keyframe',PSHOT_I),
+      openStage:target=>{
+        if(target==='direct')return openDirectorAgent({episode:SH_EP,scene:SH_SC,shotId,stage:'storyboard'});
+        if(target==='library')return slLibrary();
+        const destination={see:'keyframe',hear:'voice',watch:'animation'}[target];
+        if(destination)return openShotOutcome(destination,PSHOT_I);
+      },
+      openLibrary:()=>slLibrary(),
       changes:state=>openDirectorAgent({episode:SH_EP,scene:SH_SC,shotId,stage:({prepare:'storyboard',plan:'storyboard',images:'keyframe',audio:'voice',film:'animation',complete:'animation'})[state?.phase]||stage}),
       imageAction:async detail=>{
         if(detail.action==='refire'){

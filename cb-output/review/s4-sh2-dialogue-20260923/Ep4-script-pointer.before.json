@@ -1,0 +1,15 @@
+{
+ "schemaVersion": 1,
+ "episodeId": "Ep4",
+ "scriptVersionId": "sha256:eee45840ac475706f035afd261e499a46451824299cf3b85e114e37466d5b407",
+ "sha256": "eee45840ac475706f035afd261e499a46451824299cf3b85e114e37466d5b407",
+ "byteLength": 11732,
+ "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep4/eee45840ac475706f035afd261e499a46451824299cf3b85e114e37466d5b407.txt",
+ "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep4/eee45840ac475706f035afd261e499a46451824299cf3b85e114e37466d5b407.json",
+ "displayFile": "Ep4_The_Perfectly_Rainy_Party.txt",
+ "title": "The Perfectly Rainy Party",
+ "activationId": "1097b891384e4aa3a364296d43cf1f12",
+ "activatedAt": "2026-09-19T20:48:38+00:00",
+ "activatedBy": "Julian ruling 19 Sep 2026: Ep4 is The Perfectly Rainy Party; rebuilt from locked event records",
+ "previousScriptVersionId": "sha256:97061d106bd43fb43f7782ca9d52aa8eac7be4c6577795a12181c11af737b3b7"
+}

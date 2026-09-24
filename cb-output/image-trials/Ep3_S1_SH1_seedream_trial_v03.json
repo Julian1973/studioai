@@ -1,0 +1,35 @@
+{
+  "episode": "Ep3",
+  "scene": "1",
+  "shot": "S1.SH1",
+  "status": "unapproved-comparison",
+  "model": "dola-seedream-5-0-pro-260628",
+  "prompt": "Edit Image1 into one 16:9 opening keyframe. This is a precise revision of an accepted composition, NOT a new scene. Make only three changes: restore the two bee identities from their authoritative character sheets and enlarge the blueberry for comedy.\nReference responsibilities: Image1 is the base image and sole composition, camera, staging, pose and lighting authority. Image2 is @Keen identity; preserve Keen as in Image1. Image3 is @Zenny identity, with exact facial structure, proportions, silhouette and accessories taken from the entire turnaround. Image4 is @Fuzzby identity with exact facial structure, proportions, silhouette and accessories from the entire turnaround. These two sheets override the imperfect bee identities in Image1; never mix their traits. Image5 is the original Buzzing Nook environment reference for continuity only; do not reframe or rebuild the accepted Image1 environment. Image6 is catapult material/design reference only; do not change Image1's accepted mechanism, orientation or placement. Never copy labels, white backgrounds or multiple views from the reference sheets.\nModification 1: At Image1's existing honeycomb, replace ONLY the bee with faithful @Fuzzby from Image4, asleep with eyes closed, settled body resting physically ON TOP of the honeycomb, paws supported on its upper surface, exact character identity rather than a generic bee. Keep his current screen position and apparent size. Do not put him on a leaf or in flight.\nModification 2: At Image1's existing broad leaf, replace ONLY the bee with faithful @Zenny from Image3, meditating, eyes closed, sitting cross-legged on the leaf with settled weight. Keep current screen position, apparent size and peaceful pose. No facial juice. Do not put her on the honeycomb or in flight.\nModification 3: Enlarge the ONE blueberry in the existing catapult cup until it is comically oversized, approximately the width of Keen's head, bulging well above the cup rim. A clearly recognisable fresh blueberry with natural bloom and crown scar, not a wool ball. Keep its bottom securely cradled inside the cup; enlarge the cup only minimally if necessary to support it. Preserve Keen's hand contacts and the continuous throwing arm.\nPreserve everything else in Image1: exactly three characters, Keen's identity and pose, foreground distance to back tree, camera framing, all environment geography, stream, branches, crystals, leaf, catapult position and rearward-loaded launch orientation, and warm lighting. Preserve the vibrant golden honeycomb with wet glistening honey highlights. Do not change honeycomb shape or size. Match existing feature-animation 3D CGI, soft volumetric light, tactile materials and warm harmonious palette. Integrate the revised subjects with coherent contact shadows and perspective.\nExclude: extra characters, generic interchangeable bees, mixed bee identities, extra limbs or accessories, text, arrows, watermark, action montage, flying blueberry, launch, impact, juice, new camera angle or background redesign. Render one clean image only.",
+  "references": [
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_SH1_seedream_prompt_trial_v02.png",
+      "sha256": "8b153725e230bd910bfcb725eba393408ad57c6cf29fad703fc4b38c25c250aa"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+      "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+      "sha256": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+      "sha256": "fb455325843d9068ad3982767c6fa047556f58d9bfa1062f0afb7465367eecc8"
+    }
+  ],
+  "output": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_SH1_seedream_prompt_trial_v03.png"
+}

@@ -1,0 +1,16 @@
+{
+  "source": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v03_shot1.mp4",
+  "sourceSha256": "6e00d0ef8586db324d42df74af3513f5ced9dd9019160c4d314a87f09f6c2676",
+  "frameIndex": 288,
+  "framePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_last1.png",
+  "frameSha256": "d1a6b00dfa2c1040db4bce0c2a790785ac1f8dccdd06ee93a840bb1fe927a27c",
+  "duration": "12.064000",
+  "frameRate": "24/1",
+  "dimensions": [
+    854,
+    480
+  ],
+  "audioPresent": true,
+  "humanApproval": false,
+  "basis": "Exact final decoded frame from new authorised draft clip; not an approved production shot."
+}

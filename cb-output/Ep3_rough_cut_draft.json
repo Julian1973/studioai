@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 2,
+  "episode": "Ep3",
+  "updatedAt": "2026-09-11T09:10:30.815243+00:00",
+  "sequence": [],
+  "sceneCuts": {
+    "1": {
+      "updatedAt": "2026-09-11T09:10:30.815170+00:00",
+      "confirmed": true,
+      "sequence": [
+        {
+          "shotId": "S1.SH1",
+          "scene": "1",
+          "durationSec": 20.0,
+          "inSec": 0.0,
+          "outSec": 20.0,
+          "manualTrim": false,
+          "sourceHash": "9d3cdebef2747ee9dcaf20d1f1a43099c794579fbb8486ded3189f6f55bcb66a",
+          "addedAt": "2026-09-11T09:10:30.622447+00:00"
+        },
+        {
+          "shotId": "S1.SH2A",
+          "scene": "1",
+          "durationSec": 12.0,
+          "inSec": 0.0,
+          "outSec": 12.0,
+          "manualTrim": false,
+          "sourceHash": "2662a273a1fede4ab07122bfe03b90f56d7a1960ec45ff00f617eee4ddf961d7",
+          "addedAt": "2026-09-11T09:10:30.622900+00:00"
+        },
+        {
+          "shotId": "S1.SH2B",
+          "scene": "1",
+          "durationSec": 19.0,
+          "inSec": 0.0,
+          "outSec": 19.0,
+          "manualTrim": false,
+          "sourceHash": "954821bf3221928496fd36c4bef45e616332907e85e484cec6e7f752c74218f7",
+          "addedAt": "2026-09-11T09:10:30.622903+00:00"
+        }
+      ]
+    }
+  }
+}

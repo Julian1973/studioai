@@ -1,0 +1,969 @@
+{
+ "shot": {
+  "shotId": "S1.SH1",
+  "beatCode": "1.B1",
+  "beatCodes": [
+   "1.B1",
+   "1.B2",
+   "1.B3"
+  ],
+  "shotRole": "coverage",
+  "establishJob": null,
+  "buttonChange": null,
+  "frameSource": null,
+  "durationSec": 24.0,
+  "purpose": "Keen’s berry prank hits the wrong target; Fuzzby’s ridiculous wake-up distracts him into a honeycomb theft, then his own machine punishes him. Zenny’s composure contrasts with their escalating foolishness.",
+  "performanceAssignment": "Performance phases: anticipation: Keen He over-focuses beside the catapult, holds the aim, then commits the release with small tense precision; action: ENVIRONMENT The berry flies, strikes Zenny, the catapult rebounds, and the honeycomb rolls away into Fuzzby’s reach; reaction: Zenny She registers the hit with a tiny eye twitch, then stays almost still while the juice runs down; settle: Fuzzby He wakes into the moment, lifts into delighted laughter, and becomes the scene’s buoyant witness. Cause and effect: Keen’s release sends the berry toward the wrong target; the rebound punishes his tail; the honeycomb is redirected across the ground and ends up in front of Fuzzby. Visible turn: Keen’s private confidence turns into exposed embarrassment, while Zenny’s stillness turns the mishap into a calm, readable joke. Land on: Zenny remains the emotional anchor with berry visible on her face; Keen is hidden or withdrawn; Fuzzby is awake and amused near the honeycomb. Acting freedom: Keen can vary the size of his duck and retreat, Zenny can use micro-pauses and a small reset breath, and Fuzzby can layer in sleepy-to-delighted wake-up motion without changing the clear chain of events.",
+  "camera": "Layer Keen, Zenny, the catapult, and the honeycomb in one readable morning space; start with careful aim, reveal the miss on Zenny, then hold her calm reset while Fuzzby’s laughter and Keen’s hiding remain visible in the same world.",
+  "openingPose": "Use the approved uploaded opening: Keen and loaded catapult in the near-left foreground; Zenny meditating on her leaf and Fuzzby asleep ON the honeycomb at the distant back-right tree.",
+  "sourceType": "opener",
+  "sourceShotId": null,
+  "motionContinuityRequired": false,
+  "cutInMotivation": "The scene’s meaning depends on the hush after impact; a cut before Zenny’s reset would weaken the feel of Keen hiding and the joke blooming from restraint.",
+  "dialogueBinding": "Perform only the ordered approved dialogue occurrences. Screenplay action, sound labels and BEAT are silent. Only the active speaker moves their mouth; every other character reacts silently.",
+  "dialogueLines": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:d020620e87b4c22bc3b9d1d470cd83432eb7379c1a8e654f5c0727aa5c45d450",
+    "sourceEventId": "script-event:sha256:edf4253986b039e9dafd5018e256c99f0a1e0900ba28423f5874536ad0bb7fc6",
+    "speaker": "Zenny",
+    "exactText": "OK, Fuzzby, calm down. It’s not that funny.",
+    "delivery": "OK, Fuzzby, calm down. It’s not that funny.",
+    "startSec": 1.1,
+    "endSec": 3.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "OK, Fuzzby, calm down. It’s not that funny."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:7fee2d9cb41a63e56e0b45bd8a386fc311690bc4cbc4fab820a4503437412603",
+    "sourceEventId": "script-event:sha256:a89c2cc5d0de8283d035ca7b2dbb4596c80f203c3d2c8861dfae28eaa9c9c63a",
+    "speaker": "Keen",
+    "exactText": "Uh-oh—",
+    "delivery": "Uh-oh—",
+    "startSec": 7.9,
+    "endSec": 9.1,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "Uh-oh—"
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:cec1f363ba43575ebd78115d93d6fb76474d415e5d02ff02eac7b43053b767a4",
+    "sourceEventId": "script-event:sha256:7a01d2dcd06ec68464dd2bb089338d663983b87e541405ce76434155eab5a4bc",
+    "speaker": "Keen",
+    "exactText": "Ow!",
+    "delivery": "Ow!",
+    "startSec": 10.0,
+    "endSec": 11.4,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "Ow!"
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:af5fcbd763300a5c3178b566dbf454aa465da9a5e968d757b27f892398989399",
+    "sourceEventId": "script-event:sha256:4c0d5177394ba9ce823ee4a4d9a840e0865d32c363f421727fb2f2c55b857194",
+    "speaker": "Fuzzby",
+    "exactText": "Nice machine.",
+    "delivery": "Nice machine.",
+    "startSec": 16.5,
+    "endSec": 17.3,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "Nice machine."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:ef01301e702cef0abafe827904e959d5b9a630b0278f1de87ce90c32b987c84a",
+    "sourceEventId": "script-event:sha256:a8f5a8c06a4e3711735a25f9d488652e6a0a712d051f222b6c9ba63d3eaee63a",
+    "speaker": "Keen",
+    "exactText": "It almost worked.",
+    "delivery": "It almost worked.",
+    "startSec": 17.7,
+    "endSec": 18.7,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "It almost worked."
+   }
+  ],
+  "visualPayoff": "Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position.",
+  "physicalStaging": {
+   "staysVisible": "The catapult, Keen, the falling Fuzzby, and the honeycomb’s roll all stay readable in one layered space.",
+   "contactAndWeight": "The snap-back has weight: the catapult smacks Keen’s tail, Fuzzby’s drop reads as a real bump, and the honeycomb’s bounce is clear.",
+   "payoffShape": "One clean chain: rush in, rebound, bounce, roll, stop.",
+   "prohibitedStaging": [
+    "No hidden cut that blurs the catapult hit",
+    "No floating or weightless fall for Fuzzby",
+    "No cluttered framing that hides the honeycomb’s final stop"
+   ]
+  },
+  "physicalStagings": [
+   {
+    "staysVisible": "The catapult, Keen, the falling Fuzzby, and the honeycomb’s roll all stay readable in one layered space.",
+    "contactAndWeight": "The snap-back has weight: the catapult smacks Keen’s tail, Fuzzby’s drop reads as a real bump, and the honeycomb’s bounce is clear.",
+    "payoffShape": "One clean chain: rush in, rebound, bounce, roll, stop.",
+    "prohibitedStaging": [
+     "No hidden cut that blurs the catapult hit",
+     "No floating or weightless fall for Fuzzby",
+     "No cluttered framing that hides the honeycomb’s final stop"
+    ],
+    "beatCode": "1.B2"
+   }
+  ],
+  "prohibited": [
+   "Keep all three cast identities readable throughout the same space; do not lose Zenny's berry mark or Fuzzby's honeycomb.",
+   "Preserve the quiet after the splat so Keen's shame and Zenny's restraint land before Fuzzby's laugh lifts the beat.",
+   "Maintain the catapult's recoil and the honeycomb's final stop as physically legible cause-and-effect."
+  ],
+  "charactersInFrame": [
+   "Keen",
+   "Zenny",
+   "Fuzzby"
+  ],
+  "offscreenSpeakers": [],
+  "requiredPropReferences": [
+   "woodland-catapult"
+  ],
+  "openingCharactersInFrame": [
+   "Keen",
+   "Zenny"
+  ],
+  "closingCharactersInFrame": null,
+  "continuityIn": null,
+  "continuityOut": {
+   "lighting": "warm morning light",
+   "cameraSide": "leaf-level three-quarter from Keen's side across to Zenny and Fuzzby",
+   "characters": [
+    {
+     "character": "Keen",
+     "screenZone": "low left edge, partly hidden behind the catapult",
+     "facing": "angled away from Zenny",
+     "pose": "withdrawn crouch",
+     "expression": "shame-shrunk and trying to disappear",
+     "visibleMarks": [],
+     "heldProps": []
+    },
+    {
+     "character": "Zenny",
+     "screenZone": "center",
+     "facing": "forward",
+     "pose": "seated and settled",
+     "expression": "calm, unreadable",
+     "visibleMarks": [
+      "berry streak visible on face"
+     ],
+     "heldProps": []
+    },
+    {
+     "character": "Fuzzby",
+     "screenZone": "upper right near the honeycomb",
+     "facing": "toward the others",
+     "pose": "awake and lifted into amused alertness",
+     "expression": "delighted",
+     "visibleMarks": [],
+     "heldProps": [
+      "honeycomb"
+     ]
+    }
+   ]
+  },
+  "shotTransition": {
+   "type": "scene-start",
+   "stateSourceShotId": null,
+   "reason": "The scene’s meaning depends on the hush after impact; a cut before Zenny’s reset would weaken the feel of Keen hiding and the joke blooming from restraint.",
+   "openingImage": "Keen poised beside the catapult, one eye closed, tongue out, aiming at the honeycomb while Zenny sits still on her leaf.",
+   "camera": "Layer Keen, Zenny, the catapult, and the honeycomb in one readable morning space; start with careful aim, reveal the miss on Zenny, then hold her calm reset while Fuzzby’s laughter and Keen’s hiding remain visible in the same world."
+  },
+  "continuityProseIn": "",
+  "continuityProseOut": "The shot ends in the same morning space with Zenny calm again, Keen withdrawn and low in frame, and Fuzzby awake beside the honeycomb after the prank has fully landed.",
+  "dialogueTimingProse": "All five dialogue occurrences belong to this shot, in the locked order, with each timing window staying inside the 24-second duration.",
+  "referenceRolesProse": "Keen's exacting setup and embarrassed hide; Zenny's deadpan stillness and berry-marked reset; Fuzzby's sleepy-to-delighted witness; the catapult, honeycomb, and warm morning space as the readable environment anchors.",
+  "principalPerformanceApproved": "Keen is tight, careful, and secretly pleased until the shot goes wrong; Zenny barely reacts; Fuzzby wakes into delighted laughter.",
+  "physicalPerformanceApproved": "Keen makes a tiny, exacting launch prep beside the catapult, then jerks into a low duck as the berry misses and snaps back on him. Zenny barely changes shape: one eye twitch, a still absorb of the splat, then a calm face wipe and reset. Fuzzby wakes above the honeycomb, lifts into delighted motion, and keeps laughing as the scene settles.",
+  "animationTimingApproved": "Release immediately, splat before 1.1s; wake-up foolishness under Zenny’s line; snatch and return before tail hit at 10s; final exchange 16.5–20.27s; collapse and reset by 24s. Preserve approved HEAR timing.",
+  "performanceContractApproved": {
+   "beatOwner": "1.B2",
+   "playableIntention": "Keen thinks he can keep the prank private until the world and Zenny prove otherwise.",
+   "phases": [
+    {
+     "phase": "anticipation",
+     "performer": "Keen",
+     "observableAction": "He over-focuses beside the catapult, holds the aim, then commits the release with small tense precision."
+    },
+    {
+     "phase": "action",
+     "performer": "ENVIRONMENT",
+     "observableAction": "The berry flies, strikes Zenny, the catapult rebounds, and the honeycomb rolls away into Fuzzby’s reach."
+    },
+    {
+     "phase": "reaction",
+     "performer": "Zenny",
+     "observableAction": "She registers the hit with a tiny eye twitch, then stays almost still while the juice runs down."
+    },
+    {
+     "phase": "settle",
+     "performer": "Fuzzby",
+     "observableAction": "He wakes into the moment, lifts into delighted laughter, and becomes the scene’s buoyant witness."
+    }
+   ],
+   "physicalCauseAndEffect": "Keen’s release sends the berry toward the wrong target; the rebound punishes his tail; the honeycomb is redirected across the ground and ends up in front of Fuzzby.",
+   "visibleEmotionalTurn": "Keen’s private confidence turns into exposed embarrassment, while Zenny’s stillness turns the mishap into a calm, readable joke.",
+   "requiredLanding": "Zenny remains the emotional anchor with berry visible on her face; Keen is hidden or withdrawn; Fuzzby is awake and amused near the honeycomb.",
+   "performanceFreedom": "Keen can vary the size of his duck and retreat, Zenny can use micro-pauses and a small reset breath, and Fuzzby can layer in sleepy-to-delighted wake-up motion without changing the clear chain of events.",
+   "characterTruths": [
+    {
+     "character": "Keen",
+     "canonTrait": "over-careful and secretly hopeful under pressure",
+     "playableWant": "to make the shot look clean and keep his plan from being seen",
+     "pressureResponse": "he over-controls, then hides the instant it fails",
+     "observableSignature": "tight prep, quick duck, shrinking posture, shame made physical",
+     "substitutionTest": "Only Keen can read as the one who planned, launched, and immediately tried to disappear; another character would not carry the same secrecy-to-shame turn."
+    },
+    {
+     "character": "Zenny",
+     "canonTrait": "dry, still, and emotionally economical under pressure",
+     "playableWant": "to keep the chaos from taking over the scene",
+     "pressureResponse": "she absorbs the hit with minimal motion and resets herself",
+     "observableSignature": "one-eye twitch, still seated shape, calm face wipe, settled eyes",
+     "substitutionTest": "Only Zenny can make the joke land through restraint; another character would overplay the reaction and lose the deadpan anchor."
+    },
+    {
+     "character": "Fuzzby",
+     "canonTrait": "manic, warm, and physically overcommitted",
+     "playableWant": "to turn the mess into shared delight",
+     "pressureResponse": "he wakes into motion and amplifies the laugh without cruelty",
+     "observableSignature": "sleepy lift into buoyant laughter, chest-forward delight, lively hover/wriggle",
+     "substitutionTest": "Only Fuzzby can convert the aftermath into buoyant relief; another character would not supply his specific crash-into-joy energy."
+    }
+   ],
+   "comedyStaging": {
+    "staysVisible": "The catapult, Keen, the falling Fuzzby, and the honeycomb’s roll all stay readable in one layered space.",
+    "contactAndWeight": "The snap-back has weight: the catapult smacks Keen’s tail, Fuzzby’s drop reads as a real bump, and the honeycomb’s bounce is clear.",
+    "payoffShape": "One clean chain: rush in, rebound, bounce, roll, stop.",
+    "prohibitedStaging": [
+     "No hidden cut that blurs the catapult hit",
+     "No floating or weightless fall for Fuzzby",
+     "No cluttered framing that hides the honeycomb’s final stop"
+    ]
+   }
+  },
+  "characterTruthsApproved": [
+   {
+    "character": "Keen",
+    "canonTrait": "over-careful and secretly hopeful under pressure",
+    "playableWant": "to make the shot look clean and keep his plan from being seen",
+    "pressureResponse": "he over-controls, then hides the instant it fails",
+    "observableSignature": "tight prep, quick duck, shrinking posture, shame made physical",
+    "substitutionTest": "Only Keen can read as the one who planned, launched, and immediately tried to disappear; another character would not carry the same secrecy-to-shame turn."
+   },
+   {
+    "character": "Zenny",
+    "canonTrait": "dry, still, and emotionally economical under pressure",
+    "playableWant": "to keep the chaos from taking over the scene",
+    "pressureResponse": "she absorbs the hit with minimal motion and resets herself",
+    "observableSignature": "one-eye twitch, still seated shape, calm face wipe, settled eyes",
+    "substitutionTest": "Only Zenny can make the joke land through restraint; another character would overplay the reaction and lose the deadpan anchor."
+   },
+   {
+    "character": "Fuzzby",
+    "canonTrait": "manic, warm, and physically overcommitted",
+    "playableWant": "to turn the mess into shared delight",
+    "pressureResponse": "he wakes into motion and amplifies the laugh without cruelty",
+    "observableSignature": "sleepy lift into buoyant laughter, chest-forward delight, lively hover/wriggle",
+    "substitutionTest": "Only Fuzzby can convert the aftermath into buoyant relief; another character would not supply his specific crash-into-joy energy."
+   }
+  ],
+  "comedyStagingApproved": {
+   "staysVisible": "The catapult, Keen, the falling Fuzzby, and the honeycomb’s roll all stay readable in one layered space.",
+   "contactAndWeight": "The snap-back has weight: the catapult smacks Keen’s tail, Fuzzby’s drop reads as a real bump, and the honeycomb’s bounce is clear.",
+   "payoffShape": "One clean chain: rush in, rebound, bounce, roll, stop.",
+   "prohibitedStaging": [
+    "No hidden cut that blurs the catapult hit",
+    "No floating or weightless fall for Fuzzby",
+    "No cluttered framing that hides the honeycomb’s final stop"
+   ]
+  },
+  "comedyStagingsApproved": [
+   {
+    "beatCode": "1.B2",
+    "staysVisible": "The catapult, Keen, the falling Fuzzby, and the honeycomb’s roll all stay readable in one layered space.",
+    "contactAndWeight": "The snap-back has weight: the catapult smacks Keen’s tail, Fuzzby’s drop reads as a real bump, and the honeycomb’s bounce is clear.",
+    "payoffShape": "One clean chain: rush in, rebound, bounce, roll, stop.",
+    "prohibitedStaging": [
+     "No hidden cut that blurs the catapult hit",
+     "No floating or weightless fall for Fuzzby",
+     "No cluttered framing that hides the honeycomb’s final stop"
+    ]
+   }
+  ],
+  "comedyContractsApproved": [
+   {
+    "beatCode": "1.B1",
+    "mode": "SMALL",
+    "mechanism": "concealment → revelation",
+    "comicOwner": "Keen",
+    "straightCharacter": "Zenny",
+    "setup": "Keen is already aimed at the distant honeycomb; Zenny meditates and Fuzzby sleeps on it.",
+    "expectation": "A careful launch should make Keen look competent.",
+    "disruption": "The berry hits Zenny; Fuzzby wakes and makes a ridiculous upside-down spectacle of himself.",
+    "button": "Zenny’s calm warning lands flat against the chaos around her.",
+    "hold": "Read Zenny’s stillness against Fuzzby’s foolishness during her line, without delaying the launch.",
+    "physicalStaging": null,
+    "recoveryHoldSec": 0.2
+   },
+   {
+    "beatCode": "1.B2",
+    "mode": "BIG",
+    "mechanism": "anticipation → reversal",
+    "comicOwner": "Keen",
+    "straightCharacter": "Zenny",
+    "setup": "A precise launch set-up promises control.",
+    "expectation": "Keen will make the clean move and keep his plan private.",
+    "disruption": "Fuzzby drops, Keen freezes, and the catapult rebounds against him instead.",
+    "button": "The honeycomb ends up in front of Fuzzby anyway.",
+    "hold": "A brief stunned recognition after the honeycomb stops, within the approved audio timing.",
+    "physicalStaging": {
+     "staysVisible": "The catapult, Keen, the falling Fuzzby, and the honeycomb’s roll all stay readable in one layered space.",
+     "contactAndWeight": "The snap-back has weight: the catapult smacks Keen’s tail, Fuzzby’s drop reads as a real bump, and the honeycomb’s bounce is clear.",
+     "payoffShape": "One clean chain: rush in, rebound, bounce, roll, stop.",
+     "prohibitedStaging": [
+      "No hidden cut that blurs the catapult hit",
+      "No floating or weightless fall for Fuzzby",
+      "No cluttered framing that hides the honeycomb’s final stop"
+     ]
+    },
+    "recoveryHoldSec": 2.0
+   },
+   {
+    "beatCode": "1.B3",
+    "mode": "SMALL",
+    "mechanism": "deadpan observation",
+    "comicOwner": "Fuzzby",
+    "straightCharacter": "Zenny",
+    "setup": "The scene has already landed its slapstick hit.",
+    "expectation": "Someone will comment on the mess.",
+    "disruption": "Fuzzby praises the wreck as if it were success, while Keen tries to save face.",
+    "button": "The catapult collapses behind Keen on his attempted recovery.",
+    "hold": "Let Zenny settle after the collapse; no extension beyond the 24-second approved track.",
+    "physicalStaging": null,
+    "recoveryHoldSec": 0.5
+   }
+  ],
+  "emotionContractsApproved": [
+   {
+    "beatCode": "1.B1",
+    "owner": "Keen",
+    "entryState": "Proud, tense, and secretly hopeful.",
+    "pressure": "He wants the shot to land cleanly without being caught.",
+    "choiceOrRealisation": "He sees Fuzzby’s laughter as an opportunity and commits to the prank.",
+    "exitState": "More committed, with the risk now active.",
+    "observableEvidence": "He focuses on the catapult and times his move to Fuzzby’s distraction.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "The audience knows Keen is about to act, and Zenny has not moved."
+   },
+   {
+    "beatCode": "1.B2",
+    "owner": "Keen",
+    "entryState": "Sure of his timing, hiding his nerves.",
+    "pressure": "He wants to seize the opportunity before it disappears.",
+    "choiceOrRealisation": "He realizes too late that the plan is not under control.",
+    "exitState": "Struck, frozen, and exposed.",
+    "observableEvidence": "He rushes, stops, gets smacked by the catapult, and the honeycomb rolls away.",
+    "audienceAlignment": "ahead",
+    "heldAfterBeat": "Keen’s shame is visible; the scene holds the aftermath long enough to register it."
+   },
+   {
+    "beatCode": "1.B3",
+    "owner": "Zenny",
+    "entryState": "Unmoved, slightly splatted, and already deciding not to make this bigger.",
+    "pressure": "She has absorbed the consequence and now controls the temperature of the scene.",
+    "choiceOrRealisation": "She resets herself instead of reacting strongly.",
+    "exitState": "Calm again, with the berry still visible on her face.",
+    "observableEvidence": "Her eye twitch, calm licks, and closed eyes show the reset.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "The audience holds Zenny’s stillness and Keen’s lingering shame together."
+   }
+  ],
+  "cinematographyContractApproved": {
+   "storyPointOfView": "Zenny’s stillness is the emotional anchor while Keen’s secrecy is the pressure line.",
+   "emotionalDistanceStart": "Close enough to feel Keen’s control and the loaded quiet around Zenny.",
+   "emotionalDistanceEnd": "A little closer on Zenny’s absorbed consequence, with Keen reduced to hiding and Fuzzby as witness.",
+   "revealStrategy": "Begin with the setup already tense, then reveal the wrong target through the hit and keep the frame on Zenny long enough for Keen’s shame to register.",
+   "shotScale": "Starts medium-close with layered depth, then settles into a reaction-led hold.",
+   "lensIntent": "A naturalistic perspective that keeps foreground machinery and the target plane legible without flattening the joke.",
+   "cameraHeight": "Leaf-level, so the honeycomb, catapult, and faces feel physically connected.",
+   "composition": "Layered foreground catapult, middle-plane Zenny, upper/peripheral witness space for Fuzzby.",
+   "depthStrategy": "Distinct planes for plan, target, and witness so the miss reads instantly.",
+   "cameraBehavior": "Observes Keen’s setup, then abandons his hiding place to stay with Zenny and the aftermath.",
+   "focusStrategy": "Shift focus from Keen’s careful aim to Zenny’s face and the berry mark, then keep Fuzzby readable at the edge.",
+   "lightingFunction": "Warm morning light that stays friendly while the berry strike supplies the sharp visual punctuation.",
+   "paletteFunction": "Honey-gold setup with a bright berry mark cutting through it, then softening back into morning light.",
+   "performanceVisibility": "Small facial changes must stay readable: Keen’s tension, Zenny’s twitch, Fuzzby’s wake-up laughter.",
+   "editorialPurpose": "One compact arc: setup, miss, absorb, reset.",
+   "memorableLandingImage": "Zenny berry-streaked and unbothered, while Keen stays hidden.",
+   "providerInstruction": "Layer Keen, Zenny, the catapult, and the honeycomb in one readable morning space; start with careful aim, reveal the miss on Zenny, then hold her calm reset while Fuzzby’s laughter and Keen’s hiding remain visible in the same world."
+  },
+  "performanceBudgetApproved": {
+   "emotionalTurnCount": 2,
+   "propStateChangeCount": 3,
+   "dialogueHeavy": true,
+   "silentActingReserveSec": 6.5,
+   "landingHoldSec": 3.5,
+   "minimumHonestDurationSec": 22.0,
+   "decision": "single-unit",
+   "rationale": "One same-place prank arc with three turns fits honestly under 30 seconds if the hush after impact is protected; splitting would undercut the concealment-to-revelation joke."
+  },
+  "storyIntentApproved": {
+   "narrativeFunction": "Prank setup, slapstick turn, and warm aftermath in one compact beat.",
+   "primaryAudienceFeeling": "Delighted surprise.",
+   "secondaryAudienceFeeling": "Tender wincing at Keen’s shame.",
+   "outerAction": "Keen fires the berry; it hits Zenny; Fuzzby wakes laughing; Zenny resets.",
+   "innerAction": "Keen learns his private choice has a witness and a cost.",
+   "performanceDirection": "Keen is over-careful, then vanishes from the mistake; Zenny stays almost still and lets one tiny twitch carry the sting; Fuzzby wakes into delighted approval.",
+   "mutedRead": "Even without dialogue, the berry hit, Keen’s duck, Zenny’s face, and Fuzzby’s laugh are clear.",
+   "environmentPressure": "The branch, catapult, and honeycomb make the setup precarious, so one miss immediately spills onto another body.",
+   "soundStory": "The crisp launch and splat are followed by a brief hush, then Fuzzby’s laughing buzz opens the joke again.",
+   "motifUse": "The tiny engineered launch becomes a messy landing on the wrong bee.",
+   "thoughtChangeAndCut": "Cut when the meaning changes from setup to impact, then from impact to Zenny’s reset.",
+   "mustUnderstand": "Keen caused the hit, Zenny absorbed it calmly, and Fuzzby turned it into a shared joke.",
+   "mustNotKnowYet": "No one needs to spell out Keen’s whole apology; the shame can stay physical.",
+   "reactionBeat": "Zenny’s tiny eye twitch and calm reset are the emotional joke’s anchor.",
+   "relationshipDistance": "Close, but not intimate enough to protect Keen from being seen.",
+   "relationshipPowerDynamic": "Zenny quietly owns the temperature after the hit; Keen loses control.",
+   "touchOrAvoidance": "No comforting touch; the comedy depends on distance and restraint.",
+   "eyelineRule": "Keen aims at the honeycomb, Zenny stays forward, and Fuzzby’s waking look exposes Keen.",
+   "silhouetteRead": "Keen’s hidden crouch, Zenny’s still seated shape, and Fuzzby’s wake-up above the honeycomb stay distinct.",
+   "silenceRule": "Protect a brief hush after the splat before Fuzzby’s laughter returns.",
+   "scoreInstruction": "Keep score out until the aftermath; let the quiet and berry drip carry the beat before any light musical release."
+  },
+  "targetDurationSecApproved": 24,
+  "storyboardStagePlanApproved": [
+   {
+    "stageNumber": 1,
+    "beatIds": [
+     "1.B1"
+    ],
+    "purpose": "Setup the careful prank and establish the shared morning space.",
+    "primaryEvent": "Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 from 1.1 to 5.66s. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together.",
+    "emotionalOrComicTurn": "Controlled confidence meets deadpan calm.",
+    "cameraAndTransition": "Begin exactly on the approved wide opening. Accelerate alongside the blueberry across the creek to the back-right tree, then settle on Zenny and Fuzzby together.",
+    "observableEndState": "Zenny has delivered her calm warning; Fuzzby is awake and laughing on the still-attached honeycomb; Keen is emerging from cover."
+   },
+   {
+    "stageNumber": 2,
+    "beatIds": [
+     "1.B2"
+    ],
+    "purpose": "Deliver the reversal and the full physical chain.",
+    "primaryEvent": "Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen.",
+    "emotionalOrComicTurn": "Concealment flips into visible consequence.",
+    "cameraAndTransition": "Track Keen visibly from near bank to honeycomb and back along the same route; widen for the tail hit, rock bounce and log roll. Keep the catapult fixed on the near bank.",
+    "observableEndState": "Fuzzby is on the ground beside the recovered honeycomb; Keen is beside the catapult with his sore tail."
+   },
+   {
+    "stageNumber": 3,
+    "beatIds": [
+     "1.B3"
+    ],
+    "purpose": "Land the deadpan recovery and the final comic witness beat.",
+    "primaryEvent": "Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters.",
+    "emotionalOrComicTurn": "Deadpan restraint wins over embarrassment.",
+    "cameraAndTransition": "Stay on the same geographic axis. Read Fuzzby’s dry verdict and Keen’s comeback, then the collapse; settle on Zenny’s calm reset.",
+    "observableEndState": "Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position."
+   }
+  ],
+  "storyboardInternalShotPlanApproved": [
+   {
+    "shotNumber": 1,
+    "purpose": "Open on the careful setup with tension already present.",
+    "framingAndCamera": "Begin exactly on the approved wide opening. Accelerate alongside the blueberry across the creek to the back-right tree, then settle on Zenny and Fuzzby together.",
+    "storyAction": "Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 from 1.1 to 5.66s. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together.",
+    "performanceFocus": "Fuzzby startles into a pompous upright pose, tips upside down gripping the honeycomb with his feet, and shakes with excessive laughter. Zenny stays almost motionless.",
+    "landingImage": "Zenny has delivered her calm warning; Fuzzby is awake and laughing on the still-attached honeycomb; Keen is emerging from cover.",
+    "cutReason": "The launch is more interesting once the frame discovers Zenny’s stillness against Keen’s control."
+   },
+   {
+    "shotNumber": 2,
+    "purpose": "Capture the miss and its immediate fallout as the joke turns.",
+    "framingAndCamera": "Track Keen visibly from near bank to honeycomb and back along the same route; widen for the tail hit, rock bounce and log roll. Keep the catapult fixed on the near bank.",
+    "storyAction": "Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen.",
+    "performanceFocus": "Keen exploits the distraction, then scrambles back with stolen honeycomb. Fuzzby lands in a harmless untidy heap.",
+    "landingImage": "Fuzzby is on the ground beside the recovered honeycomb; Keen is beside the catapult with his sore tail.",
+    "cutReason": "A new view is needed when the emotional meaning changes from setup to consequence."
+   },
+   {
+    "shotNumber": 3,
+    "purpose": "Finish on the warm aftertaste of the joke.",
+    "framingAndCamera": "Stay on the same geographic axis. Read Fuzzby’s dry verdict and Keen’s comeback, then the collapse; settle on Zenny’s calm reset.",
+    "storyAction": "Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters.",
+    "performanceFocus": "Fuzzby suddenly composes himself for his dry line; Keen tries to save face, then deflates when the machine collapses.",
+    "landingImage": "Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position.",
+    "cutReason": "The scene ends best when Zenny’s restraint owns the frame after the laugh lands."
+   }
+  ],
+  "transitionType": "CONTINUOUS",
+  "providerBoundaryReasonApproved": "scene_end",
+  "providerBoundaryExplanationApproved": "All three beats play as one compact same-place, same-cast, same-emotion arc; splitting would make the prank feel scheduled instead of discovered.",
+  "voiceDirectorBrief": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:d020620e87b4c22bc3b9d1d470cd83432eb7379c1a8e654f5c0727aa5c45d450",
+    "sourceEventId": "script-event:sha256:edf4253986b039e9dafd5018e256c99f0a1e0900ba28423f5874536ad0bb7fc6",
+    "speaker": "Zenny",
+    "exactDialogue": "OK, Fuzzby, calm down. It’s not that funny.",
+    "elevenLabsV3Direction": "OK, Fuzzby, calm down. It’s not that funny.",
+    "startSec": 1.1,
+    "endSec": 3.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:7fee2d9cb41a63e56e0b45bd8a386fc311690bc4cbc4fab820a4503437412603",
+    "sourceEventId": "script-event:sha256:a89c2cc5d0de8283d035ca7b2dbb4596c80f203c3d2c8861dfae28eaa9c9c63a",
+    "speaker": "Keen",
+    "exactDialogue": "Uh-oh—",
+    "elevenLabsV3Direction": "Uh-oh—",
+    "startSec": 7.9,
+    "endSec": 9.1,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:cec1f363ba43575ebd78115d93d6fb76474d415e5d02ff02eac7b43053b767a4",
+    "sourceEventId": "script-event:sha256:7a01d2dcd06ec68464dd2bb089338d663983b87e541405ce76434155eab5a4bc",
+    "speaker": "Keen",
+    "exactDialogue": "Ow!",
+    "elevenLabsV3Direction": "Ow!",
+    "startSec": 10.0,
+    "endSec": 11.4,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:af5fcbd763300a5c3178b566dbf454aa465da9a5e968d757b27f892398989399",
+    "sourceEventId": "script-event:sha256:4c0d5177394ba9ce823ee4a4d9a840e0865d32c363f421727fb2f2c55b857194",
+    "speaker": "Fuzzby",
+    "exactDialogue": "Nice machine.",
+    "elevenLabsV3Direction": "Nice machine.",
+    "startSec": 16.5,
+    "endSec": 17.3,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:ef01301e702cef0abafe827904e959d5b9a630b0278f1de87ce90c32b987c84a",
+    "sourceEventId": "script-event:sha256:a8f5a8c06a4e3711735a25f9d488652e6a0a712d051f222b6c9ba63d3eaee63a",
+    "speaker": "Keen",
+    "exactDialogue": "It almost worked.",
+    "elevenLabsV3Direction": "It almost worked.",
+    "startSec": 17.7,
+    "endSec": 18.7,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   }
+  ],
+  "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby, @图4 only for Keen and @图5 only for the nook set.\n\nBegin exactly on @图1, the approved opening frame — layer Keen, Zenny, the catapult, and the honeycomb in one readable morning space; start with careful aim, reveal the miss on Zenny, then hold her calm reset while Fuzzby’s laughter and Keen’s hiding remain visible in the same world. Performance phases: anticipation: Keen He over-focuses beside the catapult, holds the aim, then commits the release with small tense precision; action: ENVIRONMENT The berry flies, strikes Zenny, the catapult rebounds, and the honeycomb rolls away into Fuzzby’s reach; reaction: Zenny She registers the hit with a tiny eye twitch, then stays almost still while the juice runs down; settle: Fuzzby He wakes into the moment, lifts into delighted laughter, and becomes the scene’s buoyant witness. Cause and effect: Keen’s release sends the berry toward the wrong target; the rebound punishes his tail; the honeycomb is redirected across the ground and ends up in front of Fuzzby. Visible turn: Keen’s private confidence turns into exposed embarrassment, while Zenny’s stillness turns the mishap into a calm, readable joke. Land on: Zenny remains the emotional anchor with berry visible on her face; Keen is hidden or withdrawn; Fuzzby is awake and amused near the honeycomb. Acting freedom: Keen can vary the size of his duck and retreat, Zenny can use micro-pauses and a small reset breath, and Fuzzby can layer in sleepy-to-delighted wake-up motion without changing the clear chain of events. Zenny calmly licks the berry juice from her face and closes her eyes again while Keen remains hidden.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Zenny and Keen and Fuzzby. Preserve character identity and relative scale. Keep The catapult, Keen, the falling Fuzzby, and the honeycomb’s roll all stay readable in one layered space. End with berry streak visible on face visible.",
+  "promptWords": 324,
+  "referenceSlots": {
+   "@图1": "opening keyframe",
+   "@图2": "Zenny",
+   "@图3": "Fuzzby",
+   "@图4": "Keen",
+   "@图5": "scene plate",
+   "@Audio1": "voice track"
+  },
+  "audioBrief": "SHOT S1.SH1 — voice-only performance for @Audio1.\nZenny: \"OK, Fuzzby, calm down. It’s not that funny.\" — OK, Fuzzby, calm down. It’s not that funny. Target 1.1-3s.\nKeen: \"Uh-oh—\" — Uh-oh— Target 7.9-9.1s.\nKeen: \"Ow!\" — Ow! Target 10-11.4s.\nFuzzby: \"Nice machine.\" — Nice machine. Target 16.5-17.3s.\nKeen: \"It almost worked.\" — It almost worked. Target 17.7-18.7s.\nPreserve the exact words. No narration, ad-libs, action labels, sound effects or music.",
+  "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Keen (@图2, bear) poised beside the catapult, one eye closed, tongue out, aiming at the honeycomb while Zenny (@图1, bee) sits still on her leaf.\n\n@图3 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nLiving performance lock: Keen, Zenny each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+  "keyframePromptWords": 120,
+  "keyframeReferenceSlots": {
+   "@图1": "Zenny",
+   "@图2": "Keen",
+   "@图3": "scene plate",
+   "@图4": "Fuzzby"
+  },
+  "internalConstraints": "Hard constraints: No hidden cut that blurs the catapult hit; No floating or weightless fall for Fuzzby; No cluttered framing that hides the honeycomb’s final stop; Keep all three cast identities readable throughout the same space; do not lose Zenny's berry mark or Fuzzby's honeycomb; Preserve the quiet after the splat so Keen's shame and Zenny's restraint land before Fuzzby's laugh lifts the beat; Maintain the catapult's recoil and the honeycomb's final stop as physically legible cause-and-effect; no character redesign; no extra characters; no on-screen text; no invented voices; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+ },
+ "direction": {
+  "soundHandoff": {
+   "entry": "Warm morning ambience with soft creek water, leaf rustle, and a light comic tension under the catapult setup.",
+   "exit": "Ease the instrumental score to a soft creek and woodland bed under Zenny’s reset; no extra voice or final loud musical surge.",
+   "carrySound": "Catapult twang, berry splat, tail smack, small roll of honeycomb, then a soft lingering creek bed.",
+   "entryEnergy": 2,
+   "exitEnergy": 2,
+   "intentionalContrast": "Immediate playful release, escalating physical comedy, then a quiet ending."
+  },
+  "shotId": "S1.SH1",
+  "durationSec": 24,
+  "taskMode": "reference-to-video",
+  "pacingMode": "timestamp",
+  "timeline": [
+   {
+    "channel": "action",
+    "startSec": 0.0,
+    "endSec": 5.66,
+    "event": "Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 from 1.1 to 5.66s. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together."
+   },
+   {
+    "channel": "action",
+    "startSec": 5.66,
+    "endSec": 16.5,
+    "event": "Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen."
+   },
+   {
+    "channel": "action",
+    "startSec": 16.5,
+    "endSec": 24.0,
+    "event": "Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters."
+   }
+  ],
+  "generationGoal": "Keen’s overconfident oversized-blueberry launch splats the meditating Zenny; Fuzzby wakes into ridiculous upside-down laughter, giving Keen the chance to snatch the honeycomb, before the catapult punishes Keen and collapses beneath his attempt to save face.",
+  "deliveryPlan": "Use one compact 24-second unit with three motivated stages: setup, reversal, and quiet landing. Keep the whole chain readable in one morning space, preserve the hush after impact, and end on Zenny’s calm reset with Keen withdrawn and Fuzzby amused.",
+  "creativeTranslation": {
+   "interpretation": {
+    "jokeOrAche": "Keen’s private competence collapses into public embarrassment while Zenny’s restraint makes the mishap funnier.",
+    "mechanism": "concealment and over-control give way to a clean reversal, then deadpan recovery.",
+    "statusBefore": "Careful, tense, and secretly hopeful.",
+    "statusAfter": "Exposed, calm again, and lightly triumphant in the wrong way.",
+    "audienceProgression": [
+     "We think Keen is in control.",
+     "The miss and rebound expose him instantly.",
+     "Zenny’s stillness and Fuzzby’s delight complete the joke."
+    ],
+    "emotionalHeart": "A small mistake is only bearable because the others refuse to make it bigger."
+   },
+   "gagClocks": [
+    {
+     "beatCode": "1.B1",
+     "mode": "SMALL",
+     "setup": "Keen is already aimed at the distant honeycomb; Zenny meditates and Fuzzby sleeps on it.",
+     "anticipation": "Fuzzby startles into a pompous upright pose, tips upside down gripping the honeycomb with his feet, and shakes with excessive laughter. Zenny stays almost motionless.",
+     "impact": "The berry hits Zenny; Fuzzby wakes and makes a ridiculous upside-down spectacle of himself.",
+     "reaction": "Fuzzby startles into a pompous upright pose, tips upside down gripping the honeycomb with his feet, and shakes with excessive laughter. Zenny stays almost motionless.",
+     "recoveryHold": "Read Zenny’s stillness against Fuzzby’s foolishness during her line, without delaying the launch.",
+     "recoveryHoldSec": 0.2,
+     "button": "Zenny’s calm warning lands flat against the chaos around her.",
+     "retroactive": false,
+     "providerAction": "Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 from 1.1 to 5.66s. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together."
+    },
+    {
+     "beatCode": "1.B2",
+     "mode": "BIG",
+     "setup": "A precise launch set-up promises control.",
+     "anticipation": "Keen exploits the distraction, then scrambles back with stolen honeycomb. Fuzzby lands in a harmless untidy heap.",
+     "impact": "Fuzzby drops, Keen freezes, and the catapult rebounds against him instead.",
+     "reaction": "Keen exploits the distraction, then scrambles back with stolen honeycomb. Fuzzby lands in a harmless untidy heap.",
+     "recoveryHold": "A brief stunned recognition after the honeycomb stops, within the approved audio timing.",
+     "recoveryHoldSec": 2.0,
+     "button": "The honeycomb ends up in front of Fuzzby anyway.",
+     "retroactive": true,
+     "providerAction": "Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen."
+    },
+    {
+     "beatCode": "1.B3",
+     "mode": "SMALL",
+     "setup": "The scene has already landed its slapstick hit.",
+     "anticipation": "Fuzzby suddenly composes himself for his dry line; Keen tries to save face, then deflates when the machine collapses.",
+     "impact": "Fuzzby praises the wreck as if it were success, while Keen tries to save face.",
+     "reaction": "Fuzzby suddenly composes himself for his dry line; Keen tries to save face, then deflates when the machine collapses.",
+     "recoveryHold": "Let Zenny settle after the collapse; no extension beyond the 24-second approved track.",
+     "recoveryHoldSec": 0.5,
+     "button": "The catapult collapses behind Keen on his attempted recovery.",
+     "retroactive": false,
+     "providerAction": "Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters."
+    }
+   ],
+   "generationDesign": {
+    "packagingDecision": "single-unit",
+    "completeGagArcCount": 3,
+    "densityJudgement": "Dense physical comedy, exact reveal geography, and a hush-based landing require one protected unit with three internal shots rather than a split continuation.",
+    "splitOrNonSplitRationale": "The beat’s meaning depends on the uninterrupted chain from setup to impact to dry recovery. A split would weaken the hush, obscure the rebound, and risk losing Keen’s shame-to-hide turn.",
+    "handoffState": "Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position."
+   }
+  },
+  "dramaticBeat": "A concealed prank backfires into a deadpan aftermath, with Zenny’s restraint and Fuzzby’s delight carrying the landing.",
+  "audienceBefore": "Expecting a neat prank and a smug win from Keen.",
+  "audienceAfter": "Having watched competence fail, then laugh turn into a calm, readable reset.",
+  "beatOwner": "Keen",
+  "performanceFreedom": "Keen may vary the size of the duck and retreat; Zenny may use micro-pauses and a small reset breath; Fuzzby may wake into a buoyant laugh and lively hover without changing the event chain.",
+  "performanceArc": "careful aim → sudden fail → restrained recovery → amused witness",
+  "physicalCauseAndEffect": "Keen’s release sends the berry to the wrong target, the rebound punishes his tail, and the honeycomb rolls into Fuzzby’s reach.",
+  "cameraBehaviour": "Leaf-level three-quarter coverage with layered depth; hold the setup long enough to read the aim, reveal the miss on Zenny, then stay with her calm reset while Fuzzby’s wake-up and Keen’s hiding remain visible.",
+  "timingAndRhythm": "Measured setup, snap on release, a short frozen beat for recoil, then a gentler settling lane that allows the reaction to breathe.",
+  "landingBreath": "Let Zenny’s stillness own the last beat; Keen stays low and withdrawn while Fuzzby’s amused witness energy hangs over the ruined catapult.",
+  "directionDensity": "guided",
+  "precisionReasons": [
+   "Exact dialogue order and ownership are locked.",
+   "Continuity depends on preserving berry mark, tail recoil, honeycomb stop, and final hiding positions.",
+   "Historical feedback ev-d1e37ededb noted audible glitches/noise; keep the audible bed smooth and the acting prompt clean without adding a hard gate."
+  ],
+  "shotPlan": [
+   {
+    "shotNumber": 1,
+    "purpose": "Setup the careful prank and establish the shared morning space.",
+    "framingLensAndCamera": "Begin exactly on the approved wide opening. Accelerate alongside the blueberry across the creek to the back-right tree, then settle on Zenny and Fuzzby together.",
+    "causalAction": "Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 from 1.1 to 5.66s. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together.",
+    "observablePerformance": "Fuzzby startles into a pompous upright pose, tips upside down gripping the honeycomb with his feet, and shakes with excessive laughter. Zenny stays almost motionless.",
+    "compositionLightAndMaterials": "Preserve the approved opening geography, morning light, identities and prop design.",
+    "landingImage": "Zenny has delivered her calm warning; Fuzzby is awake and laughing on the still-attached honeycomb; Keen is emerging from cover.",
+    "dialogueLineIndexes": [
+     1
+    ],
+    "dialogueDirections": [
+     "OK, Fuzzby, calm down. It’s not that funny."
+    ],
+    "holdAfterDialogue": false,
+    "gagBeatIds": [
+     "1.B1"
+    ]
+   },
+   {
+    "shotNumber": 2,
+    "purpose": "Deliver the reversal and the full physical chain.",
+    "framingLensAndCamera": "Track Keen visibly from near bank to honeycomb and back along the same route; widen for the tail hit, rock bounce and log roll. Keep the catapult fixed on the near bank.",
+    "causalAction": "Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen.",
+    "observablePerformance": "Keen exploits the distraction, then scrambles back with stolen honeycomb. Fuzzby lands in a harmless untidy heap.",
+    "compositionLightAndMaterials": "Preserve the approved opening geography, morning light, identities and prop design.",
+    "landingImage": "Fuzzby is on the ground beside the recovered honeycomb; Keen is beside the catapult with his sore tail.",
+    "dialogueLineIndexes": [
+     2,
+     3
+    ],
+    "dialogueDirections": [
+     "Uh-oh—",
+     "Ow!"
+    ],
+    "holdAfterDialogue": false,
+    "gagBeatIds": [
+     "1.B2"
+    ]
+   },
+   {
+    "shotNumber": 3,
+    "purpose": "Land the deadpan recovery and the final comic witness beat.",
+    "framingLensAndCamera": "Stay on the same geographic axis. Read Fuzzby’s dry verdict and Keen’s comeback, then the collapse; settle on Zenny’s calm reset.",
+    "causalAction": "Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters.",
+    "observablePerformance": "Fuzzby suddenly composes himself for his dry line; Keen tries to save face, then deflates when the machine collapses.",
+    "compositionLightAndMaterials": "Preserve the approved opening geography, morning light, identities and prop design.",
+    "landingImage": "Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position.",
+    "dialogueLineIndexes": [
+     4,
+     5
+    ],
+    "dialogueDirections": [
+     "Nice machine.",
+     "It almost worked."
+    ],
+    "holdAfterDialogue": false,
+    "gagBeatIds": [
+     "1.B3"
+    ]
+   }
+  ],
+  "timingBeats": [
+   {
+    "type": "load_release",
+    "count": 1,
+    "source": "Keen steadies and fires the catapult."
+   },
+   {
+    "type": "impact",
+    "count": 1,
+    "source": "The berry hits Zenny and the rebound starts the physical joke."
+   },
+   {
+    "type": "reaction",
+    "count": 1,
+    "source": "Zenny’s stillness, Keen’s hide, and Fuzzby’s amused wake-up complete the landing."
+   }
+  ],
+  "witnessStagingSides": [
+   "Keen begins near-left beside the catapult, ducks after firing, crosses to snatch the honeycomb, returns along the same route, then walks away after the collapse.",
+   "Zenny stays on the leaf at the back-right tree across the creek; the splat is licked and then wiped away before her final meditation.",
+   "Fuzzby begins asleep ON the distant honeycomb; his upside-down wake-up and laughter happen before the snatch; he ends on the ground beside the recovered honeycomb."
+  ],
+  "stagePlan": [
+   {
+    "stageNumber": 1,
+    "beatIds": [
+     "1.B1"
+    ],
+    "purpose": "Setup the concealed prank and preserve the quiet before the miss.",
+    "startSec": 0.0,
+    "endSec": 5.66,
+    "initialOrCarriedState": "Keen is poised beside the catapult; Zenny sits still on her leaf; Fuzzby is present above as a lively witness.",
+    "cause": "Keen has chosen the timing and is using the lull to launch his plan.",
+    "primaryEvent": "Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 from 1.1 to 5.66s. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together.",
+    "observableEndState": "Zenny has delivered her calm warning; Fuzzby is awake and laughing on the still-attached honeycomb; Keen is emerging from cover.",
+    "emotionOrCameraAnalysis": "Begin exactly on the approved wide opening. Accelerate alongside the blueberry across the creek to the back-right tree, then settle on Zenny and Fuzzby together."
+   },
+   {
+    "stageNumber": 2,
+    "beatIds": [
+     "1.B2"
+    ],
+    "purpose": "Show the reversal as one clear cause-and-effect chain.",
+    "startSec": 5.66,
+    "endSec": 16.5,
+    "initialOrCarriedState": "The berry is in flight; the target is still uncorrected; Keen believes the shot will work.",
+    "cause": "Keen’s release has already committed the motion and the audience can now read the wrong target.",
+    "primaryEvent": "Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen.",
+    "observableEndState": "Fuzzby is on the ground beside the recovered honeycomb; Keen is beside the catapult with his sore tail.",
+    "emotionOrCameraAnalysis": "Track Keen visibly from near bank to honeycomb and back along the same route; widen for the tail hit, rock bounce and log roll. Keep the catapult fixed on the near bank."
+   },
+   {
+    "stageNumber": 3,
+    "beatIds": [
+     "1.B3"
+    ],
+    "purpose": "Land the recovery on Zenny’s quiet control and Fuzzby’s bright witness.",
+    "startSec": 16.5,
+    "endSec": 24.0,
+    "initialOrCarriedState": "The joke has already landed and the aftermath is visible in the same morning space.",
+    "cause": "The impact has settled, leaving room for commentary and recovery.",
+    "primaryEvent": "Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters.",
+    "observableEndState": "Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position.",
+    "emotionOrCameraAnalysis": "Stay on the same geographic axis. Read Fuzzby’s dry verdict and Keen’s comeback, then the collapse; settle on Zenny’s calm reset."
+   }
+  ],
+  "geography": [
+   "Inherit the exact approved @图1 opening: Keen and loaded catapult on the near left bank; across the visible creek corridor, Fuzzby sleeps ON the hanging honeycomb at the back-right tree, with Zenny meditating ON the nearby leaf. Preserve that distance and those landmarks. The oversized blueberry is already seated in the rearward cup. Follow its flight toward the back tree; do not teleport bees into the foreground. Later Keen must visibly cross to the honeycomb to snatch it."
+  ],
+  "attributeOwnership": [
+   "Keen owns the catapult operation and the shameful retreat; no other character may appear to launch it.",
+   "Zenny owns the berry mark and the deadpan reset; no other character should seem to absorb or erase it.",
+   "Fuzzby begins asleep on the honeycomb. Keen alone snatches and carries it, then loses it at the tail hit; it finally rolls back to Fuzzby.",
+   "The catapult remains a grounded wooden prop with recoil weight; do not reassign it as a floating gag device."
+  ],
+  "environmentContract": [
+   "Warm morning light stays constant through the unit.",
+   "The ground plane remains continuous and usable for the honeycomb roll.",
+   "The catapult recoil must stay physically legible and not teleport between positions.",
+   "The berry splats Zenny before her line; she licks and finally wipes it away.",
+   "The ruined catapult may collapse only after Keen’s attempted recovery in the final stage."
+  ],
+  "motionVocabulary": [
+   {
+    "character": "Fuzzby",
+    "belongs": [
+     "careens",
+     "overcommits",
+     "barrels",
+     "bounces",
+     "improvises",
+     "presents",
+     "rockets"
+    ],
+    "banned": [
+     "slinks",
+     "hesitates",
+     "glides",
+     "sulks",
+     "waits",
+     "creeps"
+    ]
+   },
+   {
+    "character": "Zenny",
+    "belongs": [
+     "glides",
+     "observes",
+     "settles",
+     "arches",
+     "softens",
+     "levels"
+    ],
+    "banned": [
+     "scrambles",
+     "flails",
+     "rushes",
+     "panics",
+     "showboats"
+    ]
+   }
+  ],
+  "referenceContract": [
+   {
+    "assetTag": "@图1",
+    "role": "opening_frame",
+    "controls": "the exact first-frame composition and carried visible state from the approved opening keyframe",
+    "scope": "continuity"
+   },
+   {
+    "assetTag": "@图2",
+    "role": "character_identity",
+    "controls": "Zenny identity, proportions, scale and approved wearable state",
+    "scope": "canon"
+   },
+   {
+    "assetTag": "@图3",
+    "role": "character_identity",
+    "controls": "Fuzzby identity, proportions, scale and approved wearable state",
+    "scope": "canon"
+   },
+   {
+    "assetTag": "@图4",
+    "role": "character_identity",
+    "controls": "Keen identity, proportions, scale and approved wearable state",
+    "scope": "canon"
+   },
+   {
+    "assetTag": "@图5",
+    "role": "prop",
+    "controls": "the exact woodland-catapult design, materials, construction, scale and approved carried state",
+    "scope": "continuity"
+   },
+   {
+    "assetTag": "@图6",
+    "role": "location",
+    "controls": "the approved scene geography, world, light, materials and atmosphere",
+    "scope": "episode"
+   },
+   {
+    "assetTag": "@Audio1",
+    "role": "audio",
+    "controls": "approved dialogue, voice identity, cadence, delivery and mouth timing",
+    "scope": "continuity"
+   }
+  ],
+  "openingCarriedState": "Keen is poised beside the catapult, one eye closed, tongue out, aiming at the honeycomb while Zenny sits still on her leaf.",
+  "openingMotionBridge": "Begin on the exact approved opening, already cocked and aimed. Keen releases at once. Camera accelerates alongside the oversized blueberry over the creek toward the back tree and catches its splat on Zenny before her approved line begins at 1.1s. No fresh aiming pause or opening reset.",
+  "actionOwnership": [
+   "Keen is the only actor who may visibly launch the catapult.",
+   "Zenny is the only target who may visibly receive the berry mark.",
+   "Fuzzby is the only witness who may visibly own the honeycomb payoff.",
+   "The catapult recoil belongs to the prop and Keen’s reaction; do not assign it to Zenny or Fuzzby."
+  ],
+  "consistencyContract": [
+   "Keep all three identities readable throughout the same space.",
+   "Preserve Zenny’s berry mark and Keen’s withdrawal at the end.",
+   "Keep the honeycomb’s final stop in front of Fuzzby.",
+   "Respect the left-to-right geography from Keen to Zenny to Fuzzby.",
+   "Use the historical note ev-d1e37ededb only as a reminder to keep the sound bed smooth and the acting prompt clean."
+  ],
+  "audioContract": "@Audio1 is the sole authority for voice identity, cadence, timing and silence. Spoken lines appear only where assigned, in the locked order, with no extra dialogue. The non-speaking characters remain silent throughout each other’s lines.",
+  "continuityFinish": "Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position.",
+  "surgicalSafeguards": [
+   "Keep the berry splat, licking and final wipe in script order.",
+   "Do not obscure the honeycomb’s final stop in front of Fuzzby.",
+   "Maintain smooth audible bed and avoid noisy glitches in the sound assembly."
+  ],
+  "editScope": "Single generation unit; no split render requested.",
+  "contentToPreserve": [
+   "Exact dialogue order and ownership.",
+   "Readable catapult hit, tail recoil, and honeycomb roll.",
+   "Zenny’s restrained reset and Keen’s shame-hidden landing."
+  ],
+  "extensionDirection": "forward",
+  "transitionTrigger": "The prank reaches the point where the berry has already hit and the aftermath needs a reaction-led landing.",
+  "transitionTransformation": "Camera stays in the same world and lets the reversible joke resolve into calm aftermath.",
+  "transitionArrivalState": "Zenny calm again, Keen hidden or withdrawn, Fuzzby amused near the honeycomb.",
+  "audioTransition": "Keep the morning ambience and comic contact sounds continuous through the impact and landing.",
+  "firstFrameTag": "Keen poised beside the catapult, Zenny still on her leaf, berry about to launch.",
+  "lastFrameTag": "Zenny calm again with berry visible, Keen withdrawn low, Fuzzby amused beside the honeycomb.",
+  "storyboardTag": "Three-stage prank reversal with deadpan landing.",
+  "storyboardReadingOrder": "Left-to-right: Keen setup, Zenny impact, Fuzzby witness landing.",
+  "blockoutKind": "coarse",
+  "blockoutMappings": [
+   "Stage 1: Keen aims at center-left, Zenny remains centered and still.",
+   "Stage 2: Berry crosses to Zenny, Keen ducks low left, honeycomb rolls toward upper right.",
+   "Stage 3: Zenny settles center, Keen stays low left, Fuzzby brightens upper right beside the honeycomb."
+  ],
+  "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Zenny; @图3=Fuzzby; @图4=Keen; @图5=prop; @图6=location; @Audio1=audio; never swap.\nAngles: @图2=one Zenny; @图3=one Fuzzby; @图4=one Keen; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Zenny identity, proportions, scale and approved wearable state: Zenny identity, proportions, scale and approved wearable state; Zenny approved wearable state: round glasses. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines exactly one Fuzzby identity, proportions, scale and approved wearable state: Fuzzby identity, proportions, scale and approved wearable state; Fuzzby approved wearable state: round wire-frame spectacles. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图4 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图5 defines the exact woodland-catapult design, materials, construction, scale and approved carried state. Exclude its background, people and composition.\n@图6 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nBegin on the exact approved opening, already cocked and aimed. Keen releases at once. Camera accelerates alongside the oversized blueberry over the creek toward the back tree and catches its splat on Zenny before her approved line begins at 1.1s. No fresh aiming pause or opening reset.\n\n[ACTION OWNERSHIP]\nKeen is the only actor who may visibly launch the catapult.\nZenny is the only target who may visibly receive the berry mark.\nFuzzby is the only witness who may visibly own the honeycomb payoff.\nThe catapult recoil belongs to the prop and Keen’s reaction; do not assign it to Zenny or Fuzzby.\n\n[ATTRIBUTE OWNERSHIP]\nKeen owns the catapult operation and the shameful retreat; no other character may appear to launch it.\nZenny owns the berry mark and the deadpan reset; no other character should seem to absorb or erase it.\nFuzzby begins asleep on the honeycomb. Keen alone snatches and carries it, then loses it at the tail hit; it finally rolls back to Fuzzby.\nThe catapult remains a grounded wooden prop with recoil weight; do not reassign it as a floating gag device.\nKeen approved wearable state: gold wrist cuffs with aquamarine gems\nZenny approved wearable state: round glasses\nFuzzby approved wearable state: round wire-frame spectacles\n\n[ENVIRONMENT CONTRACT]\nWarm morning light stays constant through the unit.\nThe ground plane remains continuous and usable for the honeycomb roll.\nThe catapult recoil must stay physically legible and not teleport between positions.\nThe berry splats Zenny before her line; she licks and finally wipes it away.\nThe ruined catapult may collapse only after Keen’s attempted recovery in the final stage.\n\n[One-Sentence Summary]\nKeen’s overconfident oversized-blueberry launch splats the meditating Zenny; Fuzzby wakes into ridiculous upside-down laughter, giving Keen the chance to snatch the honeycomb, before the catapult punishes Keen and collapses beneath his attempt to save face.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Inherit the exact approved @图1 opening: Keen and loaded catapult on the near left bank; across the visible creek corridor, Fuzzby sleeps ON the hanging honeycomb at the back-right tree, with Zenny meditating ON the nearby leaf. Preserve that distance and those landmarks. The oversized blueberry is already seated in the rearward cup. Follow its flight toward the back tree; do not teleport bees into the foreground. Later Keen must visibly cross to the honeycomb to snatch it.\n\n[Crystal Energy Law]\nCRYSTAL ENERGY LAW - SHOW-WIDE\n\nCrystal energy and every Crystal Call are vibrational, living and beautiful. The\nenergy emerges as softly luminous crystal motes, translucent colour, shimmer and\ngentle pulses that float, drift, gather, curl and ripple through the air. It may\nsettle across the ground, wrap softly around a character or make nearby crystal\nsurfaces resonate with light.\n\nCrystal energy is never a hard-edged beam, laser ray, projectile, weapon, rigid\nshaft of light or explosive blast. Its movement must feel harmonic, weightless,\nemotion-led and welcoming, with the colour belonging to the active crystal.\n\n[Living Performance]\nLiving performance lock: Keen, Zenny, Fuzzby has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: Begin exactly on the approved wide opening. Accelerate alongside the blueberry across the creek to the back-right tree, then settle on Zenny and Fuzzby together. Action: Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 from 1.1 to 5.66s. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together. Performance: Fuzzby startles into a pompous upright pose, tips upside down gripping the honeycomb with his feet, and shakes with excessive laughter. Zenny stays almost motionless. End state: Zenny has delivered her calm warning; Fuzzby is awake and laughing on the still-attached honeycomb; Keen is emerging from cover. Spoken action: Zenny, OK, Fuzzby, calm down. It’s not that funny: {OK, Fuzzby, calm down. It’s not that funny.} Hold: 0.2s — Read Zenny’s stillness against Fuzzby’s foolishness during her line, without delaying the launch.\nPhase 2: Camera: Track Keen visibly from near bank to honeycomb and back along the same route; widen for the tail hit, rock bounce and log roll. Keep the catapult fixed on the near bank. Action: Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen. Performance: Keen exploits the distraction, then scrambles back with stolen honeycomb. Fuzzby lands in a harmless untidy heap. End state: Fuzzby is on the ground beside the recovered honeycomb; Keen is beside the catapult with his sore tail. Spoken action: Keen, Uh-oh—: {Uh-oh—} Spoken action: Keen, Ow!: {Ow!} Hold: 2.0s — A brief stunned recognition after the honeycomb stops, within the approved audio timing.\nPhase 3: Camera: Stay on the same geographic axis. Read Fuzzby’s dry verdict and Keen’s comeback, then the collapse; settle on Zenny’s calm reset. Action: Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters. Performance: Fuzzby suddenly composes himself for his dry line; Keen tries to save face, then deflates when the machine collapses. End state: Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position. Spoken action: Fuzzby, Nice machine: {Nice machine.} Spoken action: Keen, It almost worked: {It almost worked.} Hold: 0.5s — Let Zenny settle after the collapse; no extension beyond the 24-second approved track.\nWitness staging: Keen begins near-left beside the catapult, ducks after firing, crosses to snatch the honeycomb, returns along the same route, then walks away after the collapse. Zenny stays on the leaf at the back-right tree across the creek; the splat is licked and then wiped away before her final meditation. Fuzzby begins asleep ON the distant honeycomb; his upside-down wake-up and laughter happen before the snatch; he ends on the ground beside the recovered honeycomb. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Keen, one Zenny and one Fuzzby throughout; no duplicates of any character. Maintain all three identities readable throughout the same space. Safeguard: the berry splat, licking and final wipe in script order. Safeguard: Do not obscure the honeycomb’s final stop in front of Fuzzby. Living performance lock: Keen, Zenny, Fuzzby has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position.\n\n[CHANNEL TIMING]\naction: 0 seconds until 5.66 seconds: Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 from 1.1 to 5.66s. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together.\naction: 5.66 seconds until 16.5 seconds: Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen.\naction: 16.5 seconds until 24 seconds: Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters.\n\n[SOUND HANDOFF]\nShape the permitted soundtrack as part of the surrounding scene, preserving dialogue and action timing.\nGive the ending an intentional sound handoff. Avoid an unrequested closing crescendo followed by a fresh loud entrance; preserve a story-motivated accent when directed. Do not invent a fixed pause or stretch the performance.\nSound entrance: Warm morning ambience with soft creek water, leaf rustle, and a light comic tension under the catapult setup.\nSound exit: Ease the instrumental score to a soft creek and woodland bed under Zenny’s reset; no extra voice or final loud musical surge.\nCarry sound: Catapult twang, berry splat, tail smack, small roll of honeycomb, then a soft lingering creek bed.\nIntentional contrast: Immediate playful release, escalating physical comedy, then a quiet ending."
+ }
+}

@@ -13,8 +13,8 @@
       "theme": {
         "accent": "#745477"
       },
-      "coverImage": "/engine/media/Ep2_S1_plate_candidate_145f7eff.jpeg",
-      "episodeCoverImage": "/engine/media/Ep2_S2_plate_candidate_e7be89c0.png",
+      "coverImage": "/engine/media/Ep4_S3_plate_candidate_82ab3c95.png",
+      "episodeCoverImage": "/engine/media/Ep4_S3_plate_candidate_82ab3c95.png",
       "voiceProvider": "ElevenLabs (v3)",
       "musicStyle": "Warm orchestral with gentle motifs; each bear seeded to a musical note.",
       "configBase": "shows/crystal-bears/canon",

@@ -1,0 +1,78 @@
+{
+  "version": "1.0.0",
+  "project": "crystal-bears",
+  "episode": "Ep3",
+  "scene": 1,
+  "shotId": "S1.SH1",
+  "status": "returned-awaiting-review",
+  "purpose": "whole-honeycomb 30-second coverage trial",
+  "model": "dola-seedream-5-0-pro-260628",
+  "prompt": "Create one clean COLOUR STORYBOARD CONTACT SHEET: exactly TWELVE distinct cinematic panels, THREE columns by FOUR rows, read left to right then top to bottom. Each panel is landscape 16:9; the whole sheet is 4:3. Narrow plain gutters, no lettering, no captions, no dialogue balloons. This is a sequential film coverage plan, not twelve alternative versions of one opening.\n\nREFERENCE AUTHORITY: Image1 is the approved opening composition and scene geography, including the oversized blueberry, separate suspended golden honeycomb and Zenny's leaf. Panel1 closely matches Image1. Image2 is @Keen identity only. Image3 is @Zenny identity only. Image4 is @Fuzzby identity only. Preserve each identity exactly from its own sheet; never combine their traits or copy multiple turnaround poses. Image5 supplies the Buzzing Nook environment only; its architectural honey houses are NOT the removable honeycomb. Image6 supplies wooden catapult construction/material only; Image1 controls its initial orientation and the BLUEBERRY replaces Image6's wool ball. References have different jobs; preserve the foreground-to-background distance of Image1 when returning to wide views.\n\nThe story is a successful theft followed by comic loss. The WHOLE separate hanging honeycomb is taken, never a broken piece. The same single comb changes ownership and location. It must disappear from its branch after removal. The houses remain intact. @Keen starts foreground camera-left at the catapult; @Zenny meditates on her original leaf at the far tree; @Fuzzby starts asleep ON TOP of the hanging comb. The creek and stepping route separate near and far action. Views change, world positions do not teleport. Fuzzby is larger than Zenny but both much smaller than Keen, matching the reference identities at their different depths.\n\nPANEL ORDER \u2014 one readable instant in each panel:\n1. Wide opening exactly staged from Image1: Keen concentrating beside loaded catapult, one eye closed, tongue out; a single comically oversized blueberry sits in its cup. Distant Fuzzby sleeps on golden comb, Zenny meditates on leaf. Establish distance and clear travel corridor.\n2. Dynamic berry-follow view looking along the travel path across the creek: the ONE released blueberry is foreground in flight, Zenny is the approaching destination, Keen and the now EMPTY catapult recede behind. Convey fast forward camera travel through perspective, not extra berries or motion duplicates.\n3. Close locked composition on Zenny on her leaf: blueberry has JUST splatted on her forehead, purple juice streak down face, one irritated eye twitch. Her seated balance stays composed; no intact berry remains.\n4. Upward reaction medium on Fuzzby perched atop the still-hanging comb: awakened, exuberant physical laughter, leaning back with delighted uncontained body reaction. His wings are visibly spread; this is the same bee from Image4.\n5. Close on Zenny, same leaf and berry streak: calmly addressing Fuzzby with dry restraint, one gentle lick of juice, attention upward, weight completely settled. The contrast with Fuzzby's energy is the joke.\n6. Three-quarter wide from the far bank: Keen has visibly reached the back tree and successfully lifts the WHOLE separate honeycomb clear of its support, both paws supporting its weight. Fuzzby is immediately above it losing his perch, feet just unsupported; no second comb remains hanging. Original leaf and creek locate this viewpoint.\n7. Medium tracking view along return route: Keen retreats toward his near-bank machine carrying the whole comb, glancing back with sudden concern. Behind him Fuzzby has landed harmlessly in soft moss at the far tree, surprised and awake, wings opening to follow. Do not place Fuzzby back on the missing comb.\n8. Low side mechanism insert: Keen is back at the original catapult carrying the comb. His backward hip contact visibly knocks a loosened wooden support, letting the empty throwing arm swing down onto his short tail. Show contact and Keen's startled physical recoil in one readable composition. This is an accidental loose-arm drop, NO automatic reloading, NO stretched tail, NO rope trap. Catapult still standing but destabilised.\n9. Low wide consequence along ground: Keen's recoil has released the WHOLE comb, which is now rolling off a low rock toward Fuzzby. Fuzzby has flown back into this near-bank area and lands facing the approaching honey. Branch stays empty in background; Zenny remains distant on leaf. Keep one comb, no duplicate flight positions.\n10. Medium on Fuzzby beside the stopped honeycomb on the near bank, looking up at Keen with amused satisfaction. The honey has come to him; he owns the punchline through a knowing expression and relaxed grounded pose.\n11. Reverse medium on Keen, looking toward Fuzzby with sheepish defeated dignity. The empty catapult immediately behind him is beginning to collapse from its loosened support. The comedy is his restrained recognition, not another wild stunt. No berry in any cup.\n12. Intimate locked close-up of Zenny on the ORIGINAL leaf. One small knowing wink, residual purple berry streak, settled cross-legged meditation posture. This is the final living beat before both eyes close again. Same warm morning light and original back-tree geography. No new gag.\n\nVisual treatment: original stylised 3D feature animation matching Image1, warm saturated harmonious colours, soft woodland morning light, tactile wood and soft character materials. Golden honey glistens vibrantly throughout. Maintain clear silhouettes, contact, weight, intent, attention and distinct reactions. Wide views explain geography; inserts show causes; closer reactions land the comedy; reverse angles preserve eyelines. Every frame is a different intended story beat, not generic smiling poses.\nPreserve character designs, approved starting geography, one single launch, permanently empty catapult after launch, persistent juice on Zenny, one whole honeycomb and its correct changing location. Exclude text, arrows, labels, page titles, extra cast, mixed bee identities, replacement environments, duplicate props, honey-house theft, magically reset machine, wool ball, vacant staring and montage elements inside an individual panel.",
+  "references": [
+    {
+      "slot": 1,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+      "sha256": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a"
+    },
+    {
+      "slot": 2,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+    },
+    {
+      "slot": 3,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+    },
+    {
+      "slot": 4,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+      "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+    },
+    {
+      "slot": 5,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+      "sha256": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+    },
+    {
+      "slot": 6,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+      "sha256": "fb455325843d9068ad3982767c6fa047556f58d9bfa1062f0afb7465367eecc8"
+    }
+  ],
+  "voiceAuthority": {
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_vo_30s_revision_v03.wav",
+    "sha256": "65cae1ecd1d741143b3b41f0cc6de8b5023ae047a713641692c16832126d9b82"
+  },
+  "productionMutation": false,
+  "humanApproval": false,
+  "output": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_SH1_coverage_trial_v01.png",
+  "review": {
+    "reviewer": "Codex visual inspection",
+    "humanApproval": false,
+    "imageSha256": "f466c9e341445038b7450b6f4ec6724d7694b4ab8dd4c8b657ed293a56c86b4c",
+    "decision": "repair-before-video",
+    "findings": [
+      {
+        "panel": 8,
+        "issue": "Blueberry reappears in cup; arm-tail contact unclear; honeycomb absent from paws."
+      },
+      {
+        "panel": 10,
+        "issue": "Fuzzby inherits Zenny berry stain; honeycomb not visible beside him."
+      },
+      {
+        "panel": 12,
+        "issue": "Residual berry mark missing; wink unclear."
+      },
+      {
+        "panels": [
+          6,
+          7,
+          9
+        ],
+        "issue": "Drop, retreat and return geography need clearer action states."
+      }
+    ]
+  }
+}

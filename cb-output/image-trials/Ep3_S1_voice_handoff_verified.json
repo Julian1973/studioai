@@ -1,0 +1,133 @@
+{
+  "source": "voice-director-compiled",
+  "currentLines": [
+    {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:d020620e87b4c22bc3b9d1d470cd83432eb7379c1a8e654f5c0727aa5c45d450",
+      "sourceEventId": "script-event:sha256:edf4253986b039e9dafd5018e256c99f0a1e0900ba28423f5874536ad0bb7fc6",
+      "speaker": "Zenny",
+      "text": "[deadpan] OK, Fuzzby, calm down. It\u2019s not that funny.",
+      "voiceId": "XEiPrIitaegdirIGkODX",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+        "stability": 0.55,
+        "similarity_boost": 0.9,
+        "style": 0.1
+      },
+      "previousText": "Keen\u2019s miss has just landed; Zenny absorbs the hit.",
+      "compiledHash": "6b0af3f6f4dc1ec9957078cfd7649ddbc72c7f105b07c28ccf6f4001d5d174d9",
+      "recipeId": "S1.SH1-Zenny-1",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+        "XEiPrIitaegdirIGkODX"
+      ],
+      "dramaticIntention": "Keep the room calm and undercut the chaos without giving Keen a bigger reaction.",
+      "subtext": "I am not indulging this mess.",
+      "cadenceAndBreath": "Still, low, almost matter-of-fact; tiny pause before the last clause.",
+      "timingAndBody": "Seated, nearly motionless; one-eye twitch, then a small reset breath."
+    },
+    {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:7fee2d9cb41a63e56e0b45bd8a386fc311690bc4cbc4fab820a4503437412603",
+      "sourceEventId": "script-event:sha256:a89c2cc5d0de8283d035ca7b2dbb4596c80f203c3d2c8861dfae28eaa9c9c63a",
+      "speaker": "Keen",
+      "text": "[hesitates][nervous] Uh-oh\u2014",
+      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+        "stability": 0.4,
+        "similarity_boost": 0.9,
+        "style": 0.2
+      },
+      "previousText": "Zenny\u2019s flat warning has landed; Keen realizes the prank is wrong-footed.",
+      "compiledHash": "5328a32410614952de969925d3c58d97fc798b1d56438fdff28b3654fa18b5cb",
+      "recipeId": "S1.SH1-Keen-1",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+        "TCRj5m2u9xhZHJ8h9pMv"
+      ],
+      "dramaticIntention": "Register the failure before it fully hits him.",
+      "subtext": "Oh no, I\u2019m exposed.",
+      "cadenceAndBreath": "Cut off and small, with a trapped intake on the dash.",
+      "timingAndBody": "Already ducking low; the word comes from behind the shame."
+    },
+    {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:cec1f363ba43575ebd78115d93d6fb76474d415e5d02ff02eac7b43053b767a4",
+      "sourceEventId": "script-event:sha256:7a01d2dcd06ec68464dd2bb089338d663983b87e541405ce76434155eab5a4bc",
+      "speaker": "Keen",
+      "text": "[gasps] Ow!",
+      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+        "stability": 0.4,
+        "similarity_boost": 0.9,
+        "style": 0.2
+      },
+      "previousText": "The catapult rebounds and smacks his tail.",
+      "compiledHash": "9032c298734537b56522138f45daffc8382182ac2ac92370c5a1867297a620eb",
+      "recipeId": "S1.SH1-Keen-2",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+        "TCRj5m2u9xhZHJ8h9pMv"
+      ],
+      "dramaticIntention": "React instantly to the rebound hit and sell the physical surprise.",
+      "subtext": "That really got me.",
+      "cadenceAndBreath": "Short, sharp, yelped on impact.",
+      "timingAndBody": "A tiny recoil/duck; the pain reads through the body first."
+    },
+    {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:af5fcbd763300a5c3178b566dbf454aa465da9a5e968d757b27f892398989399",
+      "sourceEventId": "script-event:sha256:4c0d5177394ba9ce823ee4a4d9a840e0865d32c363f421727fb2f2c55b857194",
+      "speaker": "Fuzzby",
+      "text": "[casual] Nice machine.",
+      "voiceId": "DNK8oCkkHjIyEjzlCeQq",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+        "stability": 0.25,
+        "similarity_boost": 0.7,
+        "style": 0.4
+      },
+      "previousText": "The chain reaction has settled; Fuzzby has become the witness.",
+      "compiledHash": "b3e0c72cf830db04517136b222939dd56e0a8daa4a702a28bcddcb748585a9d7",
+      "recipeId": "S1.SH1-Fuzzby-1",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+        "DNK8oCkkHjIyEjzlCeQq"
+      ],
+      "dramaticIntention": "Turn the wreck into approving witness energy.",
+      "subtext": "This disaster is entertaining enough to praise.",
+      "cadenceAndBreath": "Light, easy, almost pleased with the contraption\u2019s violence.",
+      "timingAndBody": "Wakes up into the moment; amused lean toward the honeycomb."
+    },
+    {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:ef01301e702cef0abafe827904e959d5b9a630b0278f1de87ce90c32b987c84a",
+      "sourceEventId": "script-event:sha256:a8f5a8c06a4e3711735a25f9d488652e6a0a712d051f222b6c9ba63d3eaee63a",
+      "speaker": "Keen",
+      "text": "[exhales][proud] It almost worked.",
+      "voiceId": "TCRj5m2u9xhZHJ8h9pMv",
+      "modelId": "eleven_v3",
+      "voiceSettings": {
+        "stability": 0.4,
+        "similarity_boost": 0.9,
+        "style": 0.2
+      },
+      "previousText": "Fuzzby\u2019s praise lands; Keen tries to answer without looking up.",
+      "compiledHash": "8c31c1de6d67ed7cde9298c041d469ab4f5c73b99b09ae28cf7ca011d1a1fa01",
+      "recipeId": "S1.SH1-Keen-3",
+      "voiceTreatment": "single_voice",
+      "chorusMembers": [],
+      "voiceIds": [
+        "TCRj5m2u9xhZHJ8h9pMv"
+      ],
+      "dramaticIntention": "Try to salvage a shred of dignity after obvious failure.",
+      "subtext": "Please let this count as close enough.",
+      "cadenceAndBreath": "A small resigned exhale, then a thin attempt at self-justification.",
+      "timingAndBody": "Still hidden/withdrawn; the line comes from the floor, not the chest."
+    }
+  ],
+  "takeMatchesCurrent": false,
+  "seePreserved": true,
+  "existingAudioPreserved": true
+}

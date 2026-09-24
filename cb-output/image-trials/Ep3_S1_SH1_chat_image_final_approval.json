@@ -1,0 +1,42 @@
+{
+  "episode": "Ep3",
+  "scene": "1",
+  "shot": "S1.SH1",
+  "source": "/Users/julianjenkins/.codex/generated_images/01a07b67-a686-7843-9132-4158e9707e97/exec-0fa32042-6263-4ea6-8791-532a1836e2dc.png",
+  "approvedPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+  "sha256": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a",
+  "origin": "ChatGPT built-in image tool; exact model version not exposed",
+  "humanInstruction": "im happy with this lock it in the studio",
+  "approval": {
+    "approved": true,
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+    "at": "2026-09-08T23:37:21",
+    "reviewedBy": "Julian",
+    "source": "uploaded",
+    "inputSignature": {
+      "cardHash": "17a9d64d4e13f88f335b1e0d846b8080276ff34ae32fee23cd714fd9beb39af0",
+      "canonProfileDigest": "fcdbd58c09ee9cc2fcc874873bd7cb744ed74bb7160167b546eef0b3dba07813",
+      "sceneLookHash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f",
+      "selectedAssetHash": "efe8439c708560901ae8336249e36b3a",
+      "source": "uploaded"
+    },
+    "promptContract": null,
+    "abTest": null,
+    "packageRevision": 1,
+    "contentHash": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a",
+    "conformanceScreening": {
+      "status": "unavailable",
+      "reason": "Cinematography direction is not current. The imported image remains available for the human Director's SEE decision; downstream direction will be rebuilt from the approved image.",
+      "checkedAt": "2026-09-08T23:37:21",
+      "screenVersion": 2,
+      "mediaProviderCalled": false,
+      "candidateSha256": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a"
+    },
+    "conformanceAdvisoryDecision": {
+      "acceptedBy": "Julian",
+      "acceptedAt": "2026-09-08T23:37:21",
+      "statusAtDecision": "unavailable",
+      "reasonAtDecision": "Cinematography direction is not current. The imported image remains available for the human Director's SEE decision; downstream direction will be rebuilt from the approved image."
+    }
+  }
+}

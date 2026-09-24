@@ -1,0 +1,375 @@
+{
+  "project": "crystal-bears",
+  "episode": "Ep3",
+  "scene": 1,
+  "trial": true,
+  "shotId": "S1.SH2",
+  "humanApproval": false,
+  "preservesCurrentProduction": true,
+  "state": "returned-awaiting-human-review",
+  "task": {
+    "type": "storyboard_grid",
+    "goal": "Keen exploits the distraction, takes the whole honeycomb, and returns to his machine; a visible mechanical accident delivers the prize to Fuzzby. Zenny\u2019s knowing wink restores calm.",
+    "duration_seconds": 26,
+    "resolution": "480p",
+    "storyboard_tag": "@Image 7",
+    "storyboard_reading_order": "left to right, top to bottom, two columns; ignore the final blank cell",
+    "references": [
+      {
+        "tag": "@Image 1",
+        "subject": "Approved opening frame",
+        "defines": "exact opening composition, initial world positions and finished visual style",
+        "exclude": "repeated opening poses or a fixed camera for the entire sequence"
+      },
+      {
+        "tag": "@Image 2",
+        "subject": "Zenny",
+        "defines": "Zenny identity and relative proportions",
+        "exclude": "turnaround layouts or Fuzzby identity"
+      },
+      {
+        "tag": "@Image 3",
+        "subject": "Fuzzby",
+        "defines": "Fuzzby identity and relative proportions",
+        "exclude": "turnaround layouts or Zenny identity"
+      },
+      {
+        "tag": "@Image 4",
+        "subject": "Keen",
+        "defines": "Keen identity and relative proportions",
+        "exclude": "turnaround poses or sheet backgrounds"
+      },
+      {
+        "tag": "@Image 5",
+        "subject": "Catapult",
+        "defines": "wooden catapult materials and construction",
+        "exclude": "the wool ball or a reloaded cup after launch"
+      },
+      {
+        "tag": "@Image 6",
+        "subject": "Buzzing Nook",
+        "defines": "established scene environment and landmarks",
+        "exclude": "architectural honey houses as the removable prop"
+      },
+      {
+        "tag": "@Image 7",
+        "subject": "Coverage board",
+        "defines": "ordered coverage views for THIS clip only, left to right, top to bottom; ignore the final blank cell; camera and action guide, not initial state",
+        "exclude": "the grid, gutters, still-image holds or any identity drift in the board"
+      },
+      {
+        "tag": "@Image 8",
+        "subject": "Previous clip final frame",
+        "defines": "same-moment world-space continuity: character positions, eyelines, prop ownership, marks, light and action phase",
+        "exclude": "opening camera composition, a repeated shot, a morph or motion reference"
+      },
+      {
+        "tag": "@Audio1",
+        "subject": "Approved spoken performance",
+        "defines": "exact dialogue, speaker identity, performance, cadence and measured lip-sync timing",
+        "exclude": "replacement, time-stretched, paraphrased or invented speech"
+      }
+    ],
+    "assets": {
+      "images": [
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_opening2.png",
+          "tag": "@Image 1"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+          "tag": "@Image 2"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+          "tag": "@Image 3"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+          "tag": "@Image 4"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+          "tag": "@Image 5"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+          "tag": "@Image 6"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_board2.png",
+          "tag": "@Image 7"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_last1.png",
+          "tag": "@Image 8"
+        }
+      ],
+      "audio": [
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v03_audio2.wav",
+          "tag": "@Audio1",
+          "duration_seconds": 26
+        }
+      ]
+    },
+    "stages": [
+      {
+        "purpose": "View 1",
+        "event": "0\u20136s. Start EXACTLY at new-angle @Image 1, same moment as @Image 8. Keen steps from his established near-bank position, crosses the visible stepping route to the far tree, and lifts the WHOLE hanging comb in both paws. Fuzzby loses support and drops harmlessly to the moss, fluttering. Show the crossing and grab in a coherent wide travelling view.",
+        "end_state": "Keen at the far tree holding the whole comb; original branch empty. Fuzzby has lost his perch."
+      },
+      {
+        "purpose": "View 2",
+        "event": "6\u201310s. Follow Keen returning along the SAME stepping route towards his original catapult with the honeycomb. His backward glance at Fuzzby\u2019s drop earns the exact recorded Uh-oh at 8s. Fuzzby recovers and follows with fluttering wings.",
+        "end_state": "Keen back beside near-bank machine with the comb. Fuzzby arrives nearby; Zenny stays at far leaf."
+      },
+      {
+        "purpose": "View 3",
+        "event": "10\u201315s. Cut to a readable side view then the contact insert. Keen backs into the loose catapult support; that contact dislodges it, causing the EMPTY throwing arm to fall onto his short tail at the recorded Ow at 12s. His recoil releases the comb. It bounces once and rolls along the short log to Fuzzby on the near bank.",
+        "end_state": "Whole comb stops at Fuzzby; Keen paws empty. Machine wobbles; original branch empty; cup empty."
+      },
+      {
+        "purpose": "View 4",
+        "event": "15\u201322.21s. Let Fuzzby notice the unexpected prize and look to Keen. Medium Fuzzby for Nice machine at 18s; reverse to Keen for It almost worked at 20s. Keen tries a trace of dignity, then deflates. AFTER his reply the loosened machine collapses with one wooden clatter.",
+        "end_state": "Fuzzby beside comb, Keen beside collapsed empty machine. All action ends before the final button."
+      },
+      {
+        "purpose": "View 5",
+        "event": "22.21s\u2013end. Cut to a SETTLED close-up of Zenny on her original leaf, purple mark remaining. Meet camera with both eyes open, close ONE eye for a clear knowing wink while the other stays open, reopen it; then close both eyes and hold peaceful meditation to the end. Camera is still before the wink; no extra joke.",
+        "end_state": "Zenny meditates on her original leaf with eyes closed and purple mark. Near bank: Keen and collapsed machine, Fuzzby with whole comb. No new action."
+      }
+    ],
+    "scene_style": "Original stylised 3D feature animation matching the approved opening frame: warm woodland morning light, tactile materials and glistening golden honey. Deliberate comic pace and character-specific acting.",
+    "camera": "Start on the new opening keyframe @Image 1 as an immediate same-moment editorial cut from the previous clip. Follow @Image 7 left-to-right, top-to-bottom for subsequent action/coverage, preserving current world state from @Image 8. The previous frame is not an opening frame. Motivated wide crossing, contact insert, dialogue reverses, then still Zenny close-up. No transition morph, opening replay or reset.",
+    "consistency": [
+      "@Image 1 owns the NEW opening angle. @Image 8 supplies ONLY the preceding dynamic state; never start at @Image 8 or morph into @Image 1.",
+      "Preserve the original creek, stepping route, far tree and actual distances. Follow the crossing and return; no teleporting or mirrored geography.",
+      "One WHOLE comb: branch to Keen to ground beside Fuzzby. Empty branch after grab. Machine cup stays EMPTY throughout.",
+      "Only Zenny has purple juice. Fuzzby flutters whenever airborne."
+    ],
+    "audio": "Dialogue language: English.\n@Audio1 is the sole authority for voice identity, cadence, timing and silence. Spoken lines appear only where assigned, in the locked order, with no extra dialogue. The non-speaking characters remain silent throughout each other\u2019s lines.\nKEEN at 8s\u20139.24s: {Uh-oh\u2014}\nKEEN at 12s\u201313.4s: {Ow!}\nFUZZBY at 18s\u201319.56s: {Nice machine.}\nKEEN at 20s\u201322.2s: {It almost worked.}\nUse the supplied recorded performances exactly at these local timings. Only the named speaker articulates each line. Fuzzby\u2019s nonverbal laughter is generated Seedance SFX, not additional speech: sustain it through the cut to Zenny and underneath her response at a lower level. Natural woodland ambience, wing buzz and physical effects; a gentle playful score stays low and does not restart loudly at cuts."
+  },
+  "prompt": "[Storyboard Role]\n@Image 7 defines the storyboard grid for shot order and approximate composition. Follow it panel by panel, left to right, top to bottom, two columns; ignore the final blank cell. Do not use its gutters, line-art style, text labels, or placeholder characters; render full-screen moving scenes.\n[Reference Roles]\n@Image 1 defines <Approved opening frame>'s exact opening composition, initial world positions and finished visual style. Do not use repeated opening poses or a fixed camera for the entire sequence.\n@Image 2 defines <Zenny>'s Zenny identity and relative proportions. Do not use turnaround layouts or Fuzzby identity.\n@Image 3 defines <Fuzzby>'s Fuzzby identity and relative proportions. Do not use turnaround layouts or Zenny identity.\n@Image 4 defines <Keen>'s Keen identity and relative proportions. Do not use turnaround poses or sheet backgrounds.\n@Image 5 defines <Catapult>'s wooden catapult materials and construction. Do not use the wool ball or a reloaded cup after launch.\n@Image 6 defines <Buzzing Nook>'s established scene environment and landmarks. Do not use architectural honey houses as the removable prop.\n@Image 7 defines <Coverage board>'s ordered coverage views for THIS clip only, left to right, top to bottom; ignore the final blank cell; camera and action guide, not initial state. Do not use the grid, gutters, still-image holds or any identity drift in the board.\n@Image 8 defines <Previous clip final frame>'s same-moment world-space continuity: character positions, eyelines, prop ownership, marks, light and action phase. Do not use opening camera composition, a repeated shot, a morph or motion reference.\n@Audio1 defines <Approved spoken performance>'s exact dialogue, speaker identity, performance, cadence and measured lip-sync timing. Do not use replacement, time-stretched, paraphrased or invented speech.\n[Generation Goal]\nKeen exploits the distraction, takes the whole honeycomb, and returns to his machine; a visible mechanical accident delivers the prize to Fuzzby. Zenny\u2019s knowing wink restores calm.\n[Shot Plan]\nShot 1: 0\u20136s. Start EXACTLY at new-angle @Image 1, same moment as @Image 8. Keen steps from his established near-bank position, crosses the visible stepping route to the far tree, and lifts the WHOLE hanging comb in both paws. Fuzzby loses support and drops harmlessly to the moss, fluttering. Show the crossing and grab in a coherent wide travelling view. End state: Keen at the far tree holding the whole comb; original branch empty. Fuzzby has lost his perch.\nShot 2: 6\u201310s. Follow Keen returning along the SAME stepping route towards his original catapult with the honeycomb. His backward glance at Fuzzby\u2019s drop earns the exact recorded Uh-oh at 8s. Fuzzby recovers and follows with fluttering wings. End state: Keen back beside near-bank machine with the comb. Fuzzby arrives nearby; Zenny stays at far leaf.\nShot 3: 10\u201315s. Cut to a readable side view then the contact insert. Keen backs into the loose catapult support; that contact dislodges it, causing the EMPTY throwing arm to fall onto his short tail at the recorded Ow at 12s. His recoil releases the comb. It bounces once and rolls along the short log to Fuzzby on the near bank. End state: Whole comb stops at Fuzzby; Keen paws empty. Machine wobbles; original branch empty; cup empty.\nShot 4: 15\u201322.21s. Let Fuzzby notice the unexpected prize and look to Keen. Medium Fuzzby for Nice machine at 18s; reverse to Keen for It almost worked at 20s. Keen tries a trace of dignity, then deflates. AFTER his reply the loosened machine collapses with one wooden clatter. End state: Fuzzby beside comb, Keen beside collapsed empty machine. All action ends before the final button.\nShot 5: 22.21s\u2013end. Cut to a SETTLED close-up of Zenny on her original leaf, purple mark remaining. Meet camera with both eyes open, close ONE eye for a clear knowing wink while the other stays open, reopen it; then close both eyes and hold peaceful meditation to the end. Camera is still before the wink; no extra joke. End state: Zenny meditates on her original leaf with eyes closed and purple mark. Near bank: Keen and collapsed machine, Fuzzby with whole comb. No new action.\n[Scene and Visual Style]\nOriginal stylised 3D feature animation matching the approved opening frame: warm woodland morning light, tactile materials and glistening golden honey. Deliberate comic pace and character-specific acting.\n[Camera]\nStart on the new opening keyframe @Image 1 as an immediate same-moment editorial cut from the previous clip. Follow @Image 7 left-to-right, top-to-bottom for subsequent action/coverage, preserving current world state from @Image 8. The previous frame is not an opening frame. Motivated wide crossing, contact insert, dialogue reverses, then still Zenny close-up. No transition morph, opening replay or reset.\n[Maintain Consistency]\n@Image 1 owns the NEW opening angle. @Image 8 supplies ONLY the preceding dynamic state; never start at @Image 8 or morph into @Image 1. Preserve the original creek, stepping route, far tree and actual distances. Follow the crossing and return; no teleporting or mirrored geography. One WHOLE comb: branch to Keen to ground beside Fuzzby. Empty branch after grab. Machine cup stays EMPTY throughout. Only Zenny has purple juice. Fuzzby flutters whenever airborne.\n[Audio]\nDialogue language: English.\n@Audio1 is the sole authority for voice identity, cadence, timing and silence. Spoken lines appear only where assigned, in the locked order, with no extra dialogue. The non-speaking characters remain silent throughout each other\u2019s lines.\nKEEN at 8s\u20139.24s: {Uh-oh\u2014}\nKEEN at 12s\u201313.4s: {Ow!}\nFUZZBY at 18s\u201319.56s: {Nice machine.}\nKEEN at 20s\u201322.2s: {It almost worked.}\nUse the supplied recorded performances exactly at these local timings. Only the named speaker articulates each line. Fuzzby\u2019s nonverbal laughter is generated Seedance SFX, not additional speech: sustain it through the cut to Zenny and underneath her response at a lower level. Natural woodland ambience, wing buzz and physical effects; a gentle playful score stays low and does not restart loudly at cuts.\n[Forbidden]\ndo not mix identities between references, do not use reference backgrounds unless explicitly assigned, do not reproduce storyboard text labels, do not retain line-art styling unless explicitly requested.",
+  "promptSha256": "0aa1725c79aece81855db530ef0216f5927d528b7bad9148265aa3552f143ddc",
+  "references": [
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_opening2.png",
+      "sha256": "e6d3c8e4c33e4c3d32e83df11f40e3b9772a52b8688f3bcde3d1d386d5350e61"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+      "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+      "sha256": "fb455325843d9068ad3982767c6fa047556f58d9bfa1062f0afb7465367eecc8"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+      "sha256": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_board2.png",
+      "sha256": "3abe8412203b430dcf4e7fe48f1c8823f699df1db41a67074e951b1a278ad28d"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_last1.png",
+      "sha256": "d1a6b00dfa2c1040db4bce0c2a790785ac1f8dccdd06ee93a840bb1fe927a27c"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v03_audio2.wav",
+      "sha256": "57f8297abe8a7023fb046ab2c45aba751705a23a184eaee4ecca17727b40623a"
+    }
+  ],
+  "audio": {
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v03_audio2.wav",
+    "sha256": "57f8297abe8a7023fb046ab2c45aba751705a23a184eaee4ecca17727b40623a",
+    "duration": 26,
+    "dialogue": [
+      {
+        "speaker": "KEEN",
+        "exactText": "Uh-oh\u2014",
+        "startSec": 8.0,
+        "endSec": 9.24,
+        "sourceStartSec": 11.9,
+        "sourceEndSec": 13.14,
+        "sampleRange": [
+          565440,
+          636480
+        ],
+        "copiedSamplesSha256": "a709a6db602e77f5f07b22d61aedd6fe844cb82b39826c88604cfa264ca6d015"
+      },
+      {
+        "speaker": "KEEN",
+        "exactText": "Ow!",
+        "startSec": 12.0,
+        "endSec": 13.4,
+        "sourceStartSec": 14,
+        "sourceEndSec": 15.4,
+        "sampleRange": [
+          666240,
+          744960
+        ],
+        "copiedSamplesSha256": "3b1667cd657c9091d08e31f4231ebcc772d51d429f2e656ec0ca6f5ab1180d6d"
+      },
+      {
+        "speaker": "FUZZBY",
+        "exactText": "Nice machine.",
+        "startSec": 18.0,
+        "endSec": 19.56,
+        "sourceStartSec": 20.5,
+        "sourceEndSec": 22.06,
+        "sampleRange": [
+          978240,
+          1064640
+        ],
+        "copiedSamplesSha256": "c940acaef6f8d1325a18382b2094dee8d66bad49dac5ad7b795e8f501e9ece53"
+      },
+      {
+        "speaker": "KEEN",
+        "exactText": "It almost worked.",
+        "startSec": 20.0,
+        "endSec": 22.2,
+        "sourceStartSec": 22.19,
+        "sourceEndSec": 24.39,
+        "sampleRange": [
+          1059360,
+          1176480
+        ],
+        "copiedSamplesSha256": "e171f9567a9a3b34c1100204b732075390c8d8a063a61ecd5ce4765930a32d82"
+      }
+    ],
+    "status": "derived-trial-not-new-human-approval"
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": [
+      "1 audio reference clip(s) fall outside the recommended 5-10 second range",
+      "For 16-30 second work, timestamped stages provide stronger pacing control"
+    ],
+    "assets": {
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "1 audio reference clip(s) fall outside the recommended 5-10 second range."
+      ],
+      "counts": {
+        "images": 8,
+        "videos": 0,
+        "audio": 1,
+        "combined": 9
+      },
+      "durations": {
+        "videos": 0,
+        "audio": 26.0
+      },
+      "subjectCounts": {
+        "images": 0,
+        "videos": 0
+      },
+      "limits": {
+        "images": {
+          "max_count": 30,
+          "recommended_subjects": [
+            1,
+            8
+          ]
+        },
+        "videos": {
+          "max_count": 10,
+          "max_combined_duration_seconds": 30,
+          "recommended_subjects": [
+            1,
+            5
+          ],
+          "recommended_clip_length_seconds": [
+            5,
+            10
+          ]
+        },
+        "audio": {
+          "max_count": 10,
+          "max_combined_duration_seconds": 30,
+          "recommended_clip_length_seconds": [
+            5,
+            10
+          ]
+        },
+        "combined": {
+          "max_count": 50
+        },
+        "video_editing": {
+          "recommended_source_video_seconds": 20,
+          "recommended_reference_images": [
+            1,
+            5
+          ]
+        }
+      }
+    },
+    "timeline": {
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "For 16-30 second work, timestamped stages provide stronger pacing control."
+      ],
+      "timed": false,
+      "ranges": []
+    }
+  },
+  "provider": {
+    "checked": true,
+    "ready": true,
+    "providerCalled": false,
+    "reason": "The request fits the enabled, verified provider contract.",
+    "mode": "reference-to-video",
+    "providerModelId": "dreamina-seedance-2-5-260628",
+    "provider": "byteplus",
+    "modelVersion": "2.5-260628",
+    "capabilityVerifiedAt": "2026-08-16",
+    "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757"
+  },
+  "promptPreflight": {
+    "score": 9.0,
+    "advisoryScoreTarget": 9.5,
+    "scoreAdvisoryOnly": true,
+    "verdict": "PASS",
+    "findings": [
+      {
+        "severity": "POLISH",
+        "rule": "button-hold",
+        "message": "No protected post-line hold is visible in the specialist draft.",
+        "fix": "The deterministic emitter must add holds to non-immediate recognition/reaction lines.",
+        "deduction": 0.25
+      },
+      {
+        "severity": "FIX",
+        "rule": "audio-policy",
+        "message": "Music/SFX policy is absent.",
+        "fix": "State either No music or the approved Seedance non-verbal music/SFX policy.",
+        "deduction": 0.75
+      }
+    ],
+    "clean": false
+  },
+  "estimateUsd": 2.7066,
+  "progress": {
+    "event": "downloaded",
+    "taskId": "cgt-20260909184507-qbzmh",
+    "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v03_shot2.mp4",
+    "outputBytes": 15711929
+  },
+  "providerTaskId": "cgt-20260909184507-qbzmh",
+  "output": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v03_shot2.mp4",
+  "assetId": "aa5da666b12478374bb2f286"
+}

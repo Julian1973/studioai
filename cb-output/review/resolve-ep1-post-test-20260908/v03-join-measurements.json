@@ -1,0 +1,314 @@
+[
+  {
+    "from": "S1.SH1A",
+    "to": "S1.SH1B",
+    "timeSec": 9.056,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -26.4,
+      -25.4
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "S1.SH1B",
+    "to": "S1.SH1C",
+    "timeSec": 17.12,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -21.1,
+      -31.9
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "S1.SH1C",
+    "to": "S1.SH2",
+    "timeSec": 29.184,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -48.8,
+      -21.0
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "S1.SH2",
+    "to": "2.B1.S1",
+    "timeSec": 44.256,
+    "sceneBoundary": true,
+    "oneSecondMeanDBFS": [
+      -42.5,
+      -39.5
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "2.B1.S1",
+    "to": "2.B2.S1",
+    "timeSec": 56.32,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -28.6,
+      -34.0
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "2.B2.S1",
+    "to": "2.B3.S1",
+    "timeSec": 62.336,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -33.5,
+      -35.3
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "2.B3.S1",
+    "to": "3.B1.S1",
+    "timeSec": 74.4,
+    "sceneBoundary": true,
+    "oneSecondMeanDBFS": [
+      -24.3,
+      -29.9
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "3.B1.S1",
+    "to": "3.B3.S1",
+    "timeSec": 104.48,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -28.5,
+      -34.1
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "3.B3.S1",
+    "to": "3.B5.S1",
+    "timeSec": 134.56,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -23.9,
+      -33.2
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "3.B5.S1",
+    "to": "3.B7.S1",
+    "timeSec": 164.64,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -15.3,
+      -27.8
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "3.B7.S1",
+    "to": "4.B1.S1",
+    "timeSec": 188.704,
+    "sceneBoundary": true,
+    "oneSecondMeanDBFS": [
+      -19.1,
+      -29.7
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "4.B1.S1",
+    "to": "4.B3.S1",
+    "timeSec": 218.745667,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -20.0,
+      -13.0
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "4.B3.S1",
+    "to": "4.B5.S1",
+    "timeSec": 248.825667,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -21.7,
+      -15.5
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "4.B5.S1",
+    "to": "5.B1.S1",
+    "timeSec": 278.905667,
+    "sceneBoundary": true,
+    "oneSecondMeanDBFS": [
+      -23.1,
+      -20.6
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "5.B1.S1",
+    "to": "6.B1.S1",
+    "timeSec": 306.969667,
+    "sceneBoundary": true,
+    "oneSecondMeanDBFS": [
+      -32.8,
+      -30.0
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "6.B1.S1",
+    "to": "6.B3.S1",
+    "timeSec": 330.049667,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -19.0,
+      -19.6
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "6.B3.S1",
+    "to": "7.B1.S1",
+    "timeSec": 356.139357,
+    "sceneBoundary": true,
+    "oneSecondMeanDBFS": [
+      -19.8,
+      -26.0
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "7.B1.S1",
+    "to": "7.B3.S1",
+    "timeSec": 372.203357,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -30.7,
+      -31.4
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "7.B3.S1",
+    "to": "7.B9.S1",
+    "timeSec": 402.283357,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -29.7,
+      -24.8
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "7.B9.S1",
+    "to": "S8.SH1",
+    "timeSec": 412.363357,
+    "sceneBoundary": true,
+    "oneSecondMeanDBFS": [
+      -30.6,
+      -31.3
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "S8.SH1",
+    "to": "S8.SH2",
+    "timeSec": 442.443357,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -22.3,
+      -30.8
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "S8.SH2",
+    "to": "9.B1.S1",
+    "timeSec": 468.523357,
+    "sceneBoundary": true,
+    "oneSecondMeanDBFS": [
+      -29.0,
+      -29.9
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "9.B1.S1",
+    "to": "9.B2.S1",
+    "timeSec": 480.565024,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -40.7,
+      -41.6
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "9.B2.S1",
+    "to": "9.B3.S1",
+    "timeSec": 500.565024,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -29.9,
+      -26.8
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "9.B3.S1",
+    "to": "10.B1.S1",
+    "timeSec": 524.565024,
+    "sceneBoundary": true,
+    "oneSecondMeanDBFS": [
+      -34.1,
+      -26.4
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  },
+  {
+    "from": "10.B1.S1",
+    "to": "10.B2.S1",
+    "timeSec": 547.565024,
+    "sceneBoundary": false,
+    "oneSecondMeanDBFS": [
+      -16.7,
+      -25.6
+    ],
+    "review": "measured only; sound and motion unverified",
+    "repair": "none without perceptual evidence"
+  }
+]

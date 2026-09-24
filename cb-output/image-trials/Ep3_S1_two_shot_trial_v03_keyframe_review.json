@@ -1,0 +1,18 @@
+{
+  "usableForAuthorisedTrial": true,
+  "humanApproval": false,
+  "sourceKeyframeSha256": "e6d3c8e4c33e4c3d32e83df11f40e3b9772a52b8688f3bcde3d1d386d5350e61",
+  "review": "Visual comparison of new opening with exact previous ending and established wide references.",
+  "observations": [
+    "New three-quarter near-bank viewpoint; Keen beside catapult.",
+    "Catapult cup visibly empty; no intact blueberry.",
+    "Zenny across creek on leaf with purple forehead/cheek mark.",
+    "Fuzzby on whole hanging comb; no grab or crossing has happened.",
+    "Creek route remains visible between near and far banks."
+  ],
+  "limitations": [
+    "Prior ending is a Zenny close-up; offscreen state derives from earlier wide, not from pixels absent in the final frame.",
+    "New angle is a generated inference, not a measured 3D reconstruction; exact distance and mechanical pose remain review points.",
+    "No human approval or audio review implied."
+  ]
+}

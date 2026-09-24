@@ -1,0 +1,10 @@
+{
+  "status": "review-candidates-not-final",
+  "shot1": "engine/media/shots/Ep3_S1_two_shot_trial_v04_shot1.mp4",
+  "shot2": "engine/media/shots/Ep3_S1_two_shot_trial_v03_shot2.mp4",
+  "humanApproval": false,
+  "shot1FlightReview": "Sampled 4 fps: Keen and catapult exit left as camera travels forward; absent from ensuing flight and impact framing.",
+  "joinReview": "Revalidation required: latest shot1 has a smaller residual forehead mark than shot2 opening derived from earlier shot1.",
+  "shot2Outstanding": "Blue object reappears in empty catapult cup around12\u201315s.",
+  "audioReview": "Input speech samples preserved; generated output listening and exact lip-sync not verified."
+}

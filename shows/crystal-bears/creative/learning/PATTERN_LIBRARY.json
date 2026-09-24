@@ -256,6 +256,23 @@
    "maturity": "observation",
    "approvalState": "awaiting-human-decision",
    "regression": null
+  },
+  {
+   "patternId": "pat-4b7820cd",
+   "proposedAt": "2026-09-20T05:37:17",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on scene 2: “Producer journey 91c8202185234ffe9ccc0adf595731fd”",
+   "supportingEvidence": [
+    "ev-e967190afc"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
   }
  ]
 }

@@ -1,0 +1,56 @@
+{
+  "episode": "Ep1",
+  "mode": "legacy-post-review",
+  "sourceSha256": "14142e15d9031403851e8356bc5470ab81ecaedad62fcf4c31403f7f21942d7c",
+  "proxySha256": "31350c0ed51340926d237c1482e138c391d37599f38bca635d311100d07e7317",
+  "model": "gemini-3.8-flash",
+  "sampleFPS": 4,
+  "uploads": [
+    {
+      "name": "files/00vlaxv1bi8v",
+      "deleted": true
+    }
+  ],
+  "phase": "cleanup",
+  "reservation": "141072a8627d46b0907885dadca9c8a9",
+  "status": "completed",
+  "usage": {
+    "total_tokens": 171654,
+    "total_input_tokens": 168311,
+    "input_tokens_by_modality": [
+      {
+        "modality": "video",
+        "tokens": 166969
+      },
+      {
+        "modality": "text",
+        "tokens": 1342
+      }
+    ],
+    "total_cached_tokens": 0,
+    "total_output_tokens": 3343,
+    "total_tool_use_tokens": 0,
+    "total_thought_tokens": 0,
+    "raw_prompt_token": 200121,
+    "model_invocation_token_counts": [
+      {
+        "prompt_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 7151
+          },
+          {
+            "modality": "video",
+            "tokens": 166969
+          }
+        ],
+        "candidates_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 3347
+          }
+        ]
+      }
+    ]
+  }
+}

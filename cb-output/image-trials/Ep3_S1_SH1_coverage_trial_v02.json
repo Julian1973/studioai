@@ -1,0 +1,57 @@
+{
+  "version": "1.0.1",
+  "project": "crystal-bears",
+  "episode": "Ep3",
+  "scene": 1,
+  "shotId": "S1.SH1",
+  "status": "returned-awaiting-review",
+  "parent": "Ep3_S1_SH1_coverage_trial_v01",
+  "prompt": "Precisely edit the storyboard in Image1. Preserve the exact THREE-column FOUR-row layout and the untouched panels. No text, captions or arrows. Image1 is the base sheet, Image2 controls @Keen identity, Image3 controls @Zenny identity, Image4 controls @Fuzzby identity. Image5 establishes original scene geography and original wooden catapult construction; its loaded blueberry exists ONLY at the story opening, never in a later panel. Keep the same original 3D animation style, warm lighting, framing borders and colours.\nRepair only the six specified panels. Count panels left-to-right, top-to-bottom. Do not change panels 1,2,3,4,5 or11.\n\nPanel6, row2 column3 <bbox>670 285 990 505</bbox>: Keen has just lifted the WHOLE golden comb clear of the branch in both paws. Fuzzby is directly above the comb, feet unsupported as his perch disappears; wings spread and startled, starting a short harmless drop. Preserve original far-bank tree and Zenny's separate leaf in the scene. No honeycomb remains on the branch; no duplicate comb.\n\nPanel7, row3 column1 <bbox>10 515 335 733</bbox>: Keen is MOVING back toward his near-bank catapult holding the comb in both paws, one foot stepping across the creek's low stone, looking back with sudden concern. He is NOT sitting. Fuzzby behind has landed safely in moss and is spreading wings to follow. Show geographical travel and weight, not teleportation.\n\nPanel8, row3 column2 <bbox>345 515 658 733</bbox>: REPLACE this panel with a clear side view of the accident at the near-bank catapult. Keen still holds the whole comb in BOTH paws. His hip has nudged its loose wooden support and the unrestrained wooden throwing arm has swung down onto his short tail: show the ARM TOUCHING THE TAIL, his startled recoil and the loosened support. The cup at the arm end is conspicuously EMPTY. DELETE the blueberry/wool ball currently in this panel. Only the initial launch panel contains an intact berry. The machine is wobbling but not yet collapsed. Do not invent rope entrapment or stretch the tail. This panel must make the physical cause unmistakable.\n\nPanel9, row3 column3 <bbox>670 515 990 733</bbox>: the whole honeycomb has rolled onto the NEAR bank in front of Fuzzby, beside the original catapult location. Fuzzby has flown across to catch up and is now landing on moss beside it. Keep the creek beyond them and the EMPTY former honeycomb branch at the far tree. Zenny remains on her far-tree leaf. No character or prop duplicates. Do not leave Fuzzby at the distant tree while the honey is at the near bank.\n\nPanel10, row4 column1 <bbox>10 745 335 985</bbox>: replace the mistaken bee with exact @Fuzzby from Image4, standing beside the WHOLE golden honeycomb clearly visible immediately at his feet, looking UP toward Keen with amused satisfaction. Fuzzby has NO PURPLE JUICE anywhere: only Zenny was struck. Preserve Fuzzby's own face, body, antennae and glasses from Image4; no Zenny trait blending. Same near-bank light and ground as panel9.\n\nPanel12, row4 column3 <bbox>670 745 990 985</bbox>: exact @Zenny from Image3 stays seated cross-legged on her original leaf. Preserve a small remaining PURPLE BERRY STREAK on her cheek/forehead after wiping. One eye clearly open and the other clearly closed for ONE knowing wink, not two half-closed eyes. Her body is peacefully settled. This is the last expression before returning to meditation; no extra movement or gag.\n\nPreserve every other accepted element. Keep one honeycomb moving from branch to Keen to ground beside Fuzzby; no piece breaks off. No blueberry returns after panel2. Three identities only, no generic substitutions. The repair must clarify cause, ownership, geography and acting; no new set or mechanical redesign.",
+  "model": "dola-seedream-5-0-pro-260628",
+  "references": [
+    {
+      "slot": 1,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_SH1_coverage_trial_v01.png",
+      "sha256": "f466c9e341445038b7450b6f4ec6724d7694b4ab8dd4c8b657ed293a56c86b4c"
+    },
+    {
+      "slot": 2,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+    },
+    {
+      "slot": 3,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+    },
+    {
+      "slot": 4,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+      "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+    },
+    {
+      "slot": 5,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+      "sha256": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a"
+    }
+  ],
+  "humanApproval": false,
+  "productionMutation": false,
+  "output": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_SH1_coverage_trial_v02.png",
+  "review": {
+    "reviewer": "Codex visual inspection",
+    "humanApproval": false,
+    "imageSha256": "4ba0fe6eba58b32479067f2c2708b474de34992922ef49272d296c6c440e66be",
+    "decision": "one-insert-repair",
+    "passed": [
+      "berry removed from late catapult",
+      "whole comb visible beside Fuzzby",
+      "berry stain removed from Fuzzby",
+      "Zenny wink and residual stain visible",
+      "Keen visibly moving with comb"
+    ],
+    "remaining": [
+      "Panel8 still does not visibly establish arm-tail contact."
+    ]
+  }
+}

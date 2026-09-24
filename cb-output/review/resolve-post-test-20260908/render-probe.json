@@ -1,0 +1,38 @@
+{
+    "programs": [
+
+    ],
+    "stream_groups": [
+
+    ],
+    "streams": [
+        {
+            "codec_name": "hevc",
+            "codec_type": "video",
+            "width": 3840,
+            "height": 2160,
+            "color_space": "bt709",
+            "color_transfer": "bt709",
+            "color_primaries": "bt709",
+            "avg_frame_rate": "24/1",
+            "nb_frames": "10672"
+        },
+        {
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "avg_frame_rate": "0/0",
+            "nb_frames": "20847"
+        },
+        {
+            "codec_type": "data",
+            "avg_frame_rate": "12288/512",
+            "nb_frames": "1"
+        }
+    ],
+    "format": {
+        "duration": "444.736000",
+        "size": "860110544"
+    }
+}

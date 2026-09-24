@@ -1,0 +1,8 @@
+{
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "{'score': 7.0, 'advisoryScoreTarget': 9.5, 'scoreAdvisoryOnly': True, 'verdict': 'BLOCK', 'findings': [{'severity': 'FATAL', 'rule': 'reference-role', 'message': 'Reference has no explicit role: @Image 6 supplies four ordered views: setup, splat, Fuzzby laughing, Zenny respo', 'fix': 'Give every reference exactly one positive role.', 'deduction': 2.0}, {'severity': 'POLISH', 'rule': 'button-hold', 'message': 'No protected post-line hold is visible in the specialist draft.', 'fix': 'The deterministic emitter must add holds to non-immediate recognition/reaction lines.', 'deduction': 0.25}, {'severity': 'FIX', 'rule': 'audio-policy', 'message': 'Music/SFX policy is absent.', 'fix': 'State either No music or the approved Seedance non-verbal music/SFX policy.', 'deduction': 0.75}], 'clean': False}"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "episode": "Ep2",
+  "candidateTimelineId": "46690651-c9fa-47aa-ada1-df6900e82982",
+  "renderJobId": "ba043245-85fb-4098-b790-4118d8bd694f",
+  "audioAuthority": "User explicitly requested retention of the existing soundtrack in approved renders, with cleanup only. No HEAR replacement.",
+  "sourceCount": 19,
+  "changedSources": [],
+  "processing": {
+    "tool": "ffmpeg loudnorm two-pass; imported and routed into Resolve via MCP",
+    "targetIntegratedLUFS": -18,
+    "targetTruePeak": -1.5,
+    "rangeSetting": 18,
+    "measuredCandidateIntegratedLUFS": -18.2,
+    "measuredCandidateTruePeakDBTP": -1.4,
+    "measuredCandidateLRA": 16.6,
+    "sampleRate": 48000,
+    "samplesPerChannel": 21344000,
+    "durationSeconds": 444.6666666667,
+    "noiseReduction": false,
+    "voiceReplacement": false,
+    "newMusic": false,
+    "retiming": false
+  },
+  "verification": {
+    "sourceHashes": "pass",
+    "timelineAudio1Enabled": false,
+    "timelineAudio2HEAREnabled": false,
+    "timelineAudio3LevelledMixEnabled": true,
+    "audioFrameExtent": [
+      86400,
+      97072
+    ],
+    "fullPerceptualListening": "unverified",
+    "fullMotionReview": "unverified",
+    "render": "complete; native Resolve MCP verify_output passed",
+    "approval": "unapproved candidate",
+    "fullDecode": "pass; exit 0, empty error log",
+    "exportedIntegratedLUFS": -18.2,
+    "exportedTruePeakDBTP": -1.5,
+    "exportedLRA": 16.6,
+    "audioCorrespondence": "five anchors, zero measured lag, correlation > 0.99999",
+    "driveUpload": "confirmed cloud metadata: name, exact byte size and Test folder parent match",
+    "drivePlayback": "pending web player processing check"
+  },
+  "outputSha256": "81cf80370f50606ca3962b9956ca8d0dc6ac0819a667457ddd01263f77dbc6c9",
+  "outputBytes": 860110608,
+  "driveFileId": "1JD0ssx9oOHSS1SA7Bz1dZMkpcLKsrzNX",
+  "driveUrl": "https://drive.google.com/file/d/1JD0ssx9oOHSS1SA7Bz1dZMkpcLKsrzNX/view"
+}

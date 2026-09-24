@@ -1,0 +1,632 @@
+{
+ "verdict": "warnings",
+ "blockers": [],
+ "warnings": [
+  "24 duplicated direction(s) detected in the resolved prompt"
+ ],
+ "checks": {
+  "performanceBudget": {
+   "applicable": true,
+   "ready": true,
+   "durationSec": 24.0,
+   "dialogueOccupiedSec": 5.5,
+   "dialogueOccupancyRatio": 0.229,
+   "availableUnvoicedSec": 18.5,
+   "requiredSilentActingAndLandingSec": 10.0,
+   "emotionalTurnCount": 2,
+   "propStateChangeCount": 3,
+   "reasons": [],
+   "recommendedAction": "proceed-to-animatic"
+  },
+  "modelTarget": "dreamina-seedance-2-5-260628",
+  "billingConfirmed": {
+   "ok": true,
+   "provider": "byteplus"
+  },
+  "openingFrameAttached": {
+   "ok": true,
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png"
+  },
+  "sceneLookAttached": {
+   "ok": true
+  },
+  "referencesAttached": {
+   "ok": true,
+   "count": 6,
+   "order": [
+    "@图1",
+    "@图2",
+    "@图3",
+    "@图4",
+    "@图5",
+    "@图6"
+   ]
+  },
+  "referenceContract": [
+   {
+    "position": 1,
+    "assetTag": "@图1",
+    "sourceSlot": "@图1",
+    "role": "opening keyframe",
+    "view": null,
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+    "sameCharacterGroup": null,
+    "contentHash": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a"
+   },
+   {
+    "position": 2,
+    "assetTag": "@图2",
+    "sourceSlot": "@图2",
+    "role": "Zenny",
+    "view": "complete-turnaround",
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+    "sameCharacterGroup": "3bf0b6fd35cdc3d6b6c55b888541d33825e4dad5fc1cdf0856031f4d8ac145ea",
+    "contentHash": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+   },
+   {
+    "position": 3,
+    "assetTag": "@图3",
+    "sourceSlot": "@图3",
+    "role": "Fuzzby",
+    "view": "complete-turnaround",
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+    "sameCharacterGroup": "4a2265bef4c40c7397ca5eb041621d6fae19c90fd4753fadf520d31446835051",
+    "contentHash": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+   },
+   {
+    "position": 4,
+    "assetTag": "@图4",
+    "sourceSlot": "@图4",
+    "role": "Keen",
+    "view": "complete-turnaround",
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+    "sameCharacterGroup": "5c020adad113aef2d7e2fc4e351084907e5db360f7ab691723cfb289ad4930d0",
+    "contentHash": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+   },
+   {
+    "position": 5,
+    "assetTag": "@图5",
+    "sourceSlot": "@图6",
+    "role": "prop:woodland-catapult",
+    "view": null,
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+    "sameCharacterGroup": null,
+    "contentHash": "fb455325843d9068ad3982767c6fa047556f58d9bfa1062f0afb7465367eecc8"
+   },
+   {
+    "position": 6,
+    "assetTag": "@图6",
+    "sourceSlot": "@图5",
+    "role": "scene plate",
+    "view": null,
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+    "sameCharacterGroup": null,
+    "contentHash": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+   },
+   {
+    "position": 7,
+    "assetTag": "@Audio1",
+    "role": "approved dialogue and performance track",
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_vo_candidate_a8b19435.wav",
+    "contentHash": "d08a93556568771fd5eccc6b9460eb42902e78aa81ebc1500b601852c84cc0c7"
+   }
+  ],
+  "requiredPropReferences": {
+   "ok": true,
+   "required": [
+    "prop:woodland-catapult"
+   ],
+   "present": [
+    "prop:woodland-catapult"
+   ],
+   "missing": [],
+   "proofRule": "Only a dedicated prop:<id> attachment in the sealed provider upload list counts; prompt prose, scene plates and inherited frames do not."
+  },
+  "audioAttached": {
+   "ok": true,
+   "required": true,
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_vo_candidate_a8b19435.wav"
+  },
+  "durationSec": 24.0,
+  "resolution": "480p",
+  "aspectRatio": "16:9",
+  "continuityMode": "keyframe-handoff",
+  "relayReferenceBundle": {
+   "ok": true,
+   "required": [],
+   "present": [],
+   "missing": []
+  },
+  "providerContract": {
+   "providerModelId": "dreamina-seedance-2-5-260628",
+   "provider": "byteplus",
+   "modelVersion": "2.5-260628",
+   "transport": "byteplus-async",
+   "mode": "reference-to-video",
+   "endpoint": "/api/v3/contents/generations/tasks",
+   "resolution": "480p",
+   "duration": 24,
+   "costRateKey": "seedance_25_byteplus_480p_per_sec",
+   "capabilityVerifiedAt": "2026-08-16",
+   "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757"
+  },
+  "model": "dreamina-seedance-2-5-260628",
+  "usingWorkingVersion": false,
+  "promptSource": "seedance-production-director-approved",
+  "emissionConformance": {
+   "score": 9.75,
+   "advisoryScoreTarget": 9.5,
+   "scoreAdvisoryOnly": true,
+   "verdict": "PASS",
+   "findings": [
+    {
+     "severity": "POLISH",
+     "rule": "button-hold",
+     "message": "No protected post-line hold is visible in the specialist draft.",
+     "fix": "The deterministic emitter must add holds to non-immediate recognition/reaction lines.",
+     "deduction": 0.25
+    }
+   ],
+   "clean": false
+  },
+  "contractCompleteness": {
+   "score": 20,
+   "maximum": 20,
+   "threshold": 17,
+   "needsRevision": false,
+   "criticalFailures": [],
+   "dimensions": {
+    "storyBeat": 2,
+    "canonAndReferences": 2,
+    "physicalCauseAndEffect": 2,
+    "cameraAndEdit": 2,
+    "observablePerformance": 2,
+    "compositionDepth": 2,
+    "lightMaterialsFinish": 2,
+    "dialogueAudioSeparation": 2,
+    "continuityLanding": 2,
+    "promptEconomy": 2
+   }
+  },
+  "qualityGate": {
+   "score": 20,
+   "maximum": 20,
+   "threshold": 17,
+   "needsRevision": false,
+   "criticalFailures": [],
+   "dimensions": {
+    "storyBeat": 2,
+    "canonAndReferences": 2,
+    "physicalCauseAndEffect": 2,
+    "cameraAndEdit": 2,
+    "observablePerformance": 2,
+    "compositionDepth": 2,
+    "lightMaterialsFinish": 2,
+    "dialogueAudioSeparation": 2,
+    "continuityLanding": 2,
+    "promptEconomy": 2
+   }
+  },
+  "seedancePipeline": {
+   "zeroSpend": true,
+   "providerCalled": false,
+   "approvalChanged": false,
+   "classification": {
+    "type": "reference_based_generation",
+    "reason": "The request supplied an explicit supported task type.",
+    "explicit": true,
+    "extensionDirection": "forward"
+   },
+   "taskType": "reference_based_generation",
+   "promptLabTaskMode": "reference-to-video",
+   "promptSource": "approved-existing",
+   "approvedPromptPreserved": true,
+   "providerPrompt": "[Locked Character Turnarounds]\n@图2 defines Zenny's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n@图3 defines Fuzzby's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n@图4 defines Keen's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n\nAUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Zenny; @图3=Fuzzby; @图4=Keen; @图5=prop; @图6=location; @Audio1=audio; never swap.\nAngles: @图2=one Zenny; @图3=one Fuzzby; @图4=one Keen; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Zenny identity, proportions, scale and approved wearable state: Zenny identity, proportions, scale and approved wearable state; Zenny approved wearable state: round glasses. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines exactly one Fuzzby identity, proportions, scale and approved wearable state: Fuzzby identity, proportions, scale and approved wearable state; Fuzzby approved wearable state: round wire-frame spectacles. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图4 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图5 defines the exact woodland-catapult design, materials, construction, scale and approved carried state. Exclude its background, people and composition.\n@图6 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nBegin on the exact approved opening, already cocked and aimed. Keen releases at once. Camera accelerates alongside the oversized blueberry over the creek toward the back tree and catches its splat on Zenny before her approved line begins at 1.1s. No fresh aiming pause or opening reset.\n\n[ACTION OWNERSHIP]\nKeen is the only actor who may visibly launch the catapult.\nZenny is the only target who may visibly receive the berry mark.\nFuzzby is the only witness who may visibly own the honeycomb payoff.\nThe catapult recoil belongs to the prop and Keen’s reaction; do not assign it to Zenny or Fuzzby.\n\n[ATTRIBUTE OWNERSHIP]\nKeen owns the catapult operation and the shameful retreat; no other character may appear to launch it.\nZenny owns the berry mark and the deadpan reset; no other character should seem to absorb or erase it.\nFuzzby begins asleep on the honeycomb. Keen alone snatches and carries it, then loses it at the tail hit; it finally rolls back to Fuzzby.\nThe catapult remains a grounded wooden prop with recoil weight; do not reassign it as a floating gag device.\nKeen approved wearable state: gold wrist cuffs with aquamarine gems\nZenny approved wearable state: round glasses\nFuzzby approved wearable state: round wire-frame spectacles\n\n[ENVIRONMENT CONTRACT]\nWarm morning light stays constant through the unit.\nThe ground plane remains continuous and usable for the honeycomb roll.\nThe catapult recoil must stay physically legible and not teleport between positions.\nThe berry splats Zenny before her line; she licks and finally wipes it away.\nThe ruined catapult may collapse only after Keen’s attempted recovery in the final stage.\n\n[One-Sentence Summary]\nKeen’s overconfident oversized-blueberry launch splats the meditating Zenny; Fuzzby wakes into ridiculous upside-down laughter, giving Keen the chance to snatch the honeycomb, before the catapult punishes Keen and collapses beneath his attempt to save face.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Inherit the exact approved @图1 opening: Keen and loaded catapult on the near left bank; across the visible creek corridor, Fuzzby sleeps ON the hanging honeycomb at the back-right tree, with Zenny meditating ON the nearby leaf. Preserve that distance and those landmarks. The oversized blueberry is already seated in the rearward cup. Follow its flight toward the back tree; do not teleport bees into the foreground. Later Keen must visibly cross to the honeycomb to snatch it.\n\n[Crystal Energy Law]\nCRYSTAL ENERGY LAW - SHOW-WIDE\n\nCrystal energy and every Crystal Call are vibrational, living and beautiful. The\nenergy emerges as softly luminous crystal motes, translucent colour, shimmer and\ngentle pulses that float, drift, gather, curl and ripple through the air. It may\nsettle across the ground, wrap softly around a character or make nearby crystal\nsurfaces resonate with light.\n\nCrystal energy is never a hard-edged beam, laser ray, projectile, weapon, rigid\nshaft of light or explosive blast. Its movement must feel harmonic, weightless,\nemotion-led and welcoming, with the colour belonging to the active crystal.\n\n[Living Performance]\nLiving performance lock: Keen, Zenny, Fuzzby has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: Begin exactly on the approved wide opening. Accelerate alongside the blueberry across the creek to the back-right tree, then settle on Zenny and Fuzzby together. Action: Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 within the approved @Audio1 placement window. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together. Performance: Fuzzby startles into a pompous upright pose, tips upside down gripping the honeycomb with his feet, and shakes with excessive laughter. Zenny stays almost motionless. End state: Zenny has delivered her calm warning; Fuzzby is awake and laughing on the still-attached honeycomb; Keen is emerging from cover. Spoken action: Zenny, OK, Fuzzby, calm down. It’s not that funny: {OK, Fuzzby, calm down. It’s not that funny.} Hold: 0.2s — Read Zenny’s stillness against Fuzzby’s foolishness during her line, without delaying the launch.\nPhase 2: Camera: Track Keen visibly from near bank to honeycomb and back along the same route; widen for the tail hit, rock bounce and log roll. Keep the catapult fixed on the near bank. Action: Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen. Performance: Keen exploits the distraction, then scrambles back with stolen honeycomb. Fuzzby lands in a harmless untidy heap. End state: Fuzzby is on the ground beside the recovered honeycomb; Keen is beside the catapult with his sore tail. Spoken action: Keen, Uh-oh—: {Uh-oh—} Spoken action: Keen, Ow!: {Ow!} Hold: 2.0s — A brief stunned recognition after the honeycomb stops, within the approved audio timing.\nPhase 3: Camera: Stay on the same geographic axis. Read Fuzzby’s dry verdict and Keen’s comeback, then the collapse; settle on Zenny’s calm reset. Action: Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters. Performance: Fuzzby suddenly composes himself for his dry line; Keen tries to save face, then deflates when the machine collapses. End state: Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position. Spoken action: Fuzzby, Nice machine: {Nice machine.} Spoken action: Keen, It almost worked: {It almost worked.} Hold: 0.5s — Let Zenny settle after the collapse; no extension beyond the 24-second approved track.\nWitness staging: Keen side: low left, partly hidden behind the catapult, angled away from Zenny. Zenny side: center, seated and settled, facing forward with the berry streak visible. Fuzzby side: upper right near the honeycomb, facing the others as awake amused witness. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Keen, one Zenny and one Fuzzby throughout; no duplicates of any character. Maintain all three identities readable throughout the same space. Safeguard: the berry splat, licking and final wipe in script order. Safeguard: Do not obscure the honeycomb’s final stop in front of Fuzzby. Living performance lock: Keen, Zenny, Fuzzby has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position.\n\n[CHANNEL TIMING]\naction: 0 seconds until 5.66 seconds: Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 within the approved @Audio1 placement window. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together.\naction: 5.66 seconds until 16.5 seconds: Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen.\naction: 16.5 seconds until 24 seconds: Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters.\n\n[SOUND HANDOFF]\nShape the permitted soundtrack as part of the surrounding scene, preserving dialogue and action timing.\nGive the ending an intentional sound handoff. Avoid an unrequested closing crescendo followed by a fresh loud entrance; preserve a story-motivated accent when directed. Do not invent a fixed pause or stretch the performance.\nSound entrance: Warm morning ambience with soft creek water, leaf rustle, and a light comic tension under the catapult setup.\nSound exit: A tiny recovery hush under Zenny’s reset, then Fuzzby’s amused breath and Keen’s embarrassed retreat.\nCarry sound: Catapult twang, berry splat, tail smack, small roll of honeycomb, then a soft lingering creek bed.\nIntentional contrast: Starts held and careful, ends with quiet shame easing into amused witness energy.",
+   "promptHash": "46fa94bdebaf0029adfbf3b413940e925472446d20b376056a6a12d23fb8a294",
+   "requestSettings": {
+    "durationSec": 24.0,
+    "aspectRatio": "16:9",
+    "resolution": "480p",
+    "modelId": "dreamina-seedance-2-5-260628"
+   },
+   "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": [
+     "1 audio reference clip(s) fall outside the recommended 5-10 second range",
+     "State the no-music sound directive explicitly in the audio contract"
+    ],
+    "assets": {
+     "ok": true,
+     "errors": [],
+     "warnings": [
+      "1 audio reference clip(s) fall outside the recommended 5-10 second range."
+     ],
+     "counts": {
+      "images": 6,
+      "videos": 0,
+      "audio": 1,
+      "combined": 7
+     },
+     "durations": {
+      "videos": 0,
+      "audio": 24.0
+     },
+     "subjectCounts": {
+      "images": 4,
+      "videos": 0
+     },
+     "limits": {
+      "images": {
+       "max_count": 30,
+       "recommended_subjects": [
+        1,
+        8
+       ]
+      },
+      "videos": {
+       "max_count": 10,
+       "max_combined_duration_seconds": 30,
+       "recommended_subjects": [
+        1,
+        5
+       ],
+       "recommended_clip_length_seconds": [
+        5,
+        10
+       ]
+      },
+      "audio": {
+       "max_count": 10,
+       "max_combined_duration_seconds": 30,
+       "recommended_clip_length_seconds": [
+        5,
+        10
+       ]
+      },
+      "combined": {
+       "max_count": 50
+      },
+      "video_editing": {
+       "recommended_source_video_seconds": 20,
+       "recommended_reference_images": [
+        1,
+        5
+       ]
+      }
+     }
+    },
+    "timeline": {
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "timed": true,
+     "ranges": [
+      [
+       1,
+       0.0,
+       5.66
+      ],
+      [
+       2,
+       5.66,
+       16.5
+      ],
+      [
+       3,
+       16.5,
+       24.0
+      ]
+     ]
+    }
+   },
+   "checklist": [
+    {
+     "item": "Task type is classified.",
+     "passed": true
+    },
+    {
+     "item": "All references are explicitly bound by role.",
+     "passed": true
+    },
+    {
+     "item": "Each character, product, or prop has a unique name.",
+     "passed": true
+    },
+    {
+     "item": "Reference exclusions are stated.",
+     "passed": true
+    },
+    {
+     "item": "Prompt follows Subject + Action + Scene + Style + Camera + Audio.",
+     "passed": true
+    },
+    {
+     "item": "Long videos are divided into stages or timestamps.",
+     "passed": true
+    },
+    {
+     "item": "Each stage has one primary change.",
+     "passed": true
+    },
+    {
+     "item": "Each stage has a visible end state.",
+     "passed": true
+    },
+    {
+     "item": "Character identity, clothing, prop ownership, and spatial relationships are consistent.",
+     "passed": true
+    },
+    {
+     "item": "Video edits define the sole editing master.",
+     "passed": true
+    },
+    {
+     "item": "Video edits define edit scope and preserve-list.",
+     "passed": true
+    },
+    {
+     "item": "Extensions anchor the boundary frame.",
+     "passed": true
+    },
+    {
+     "item": "Transitions define trigger, camera movement, transformation, arrival state, and audio crossover.",
+     "passed": true
+    },
+    {
+     "item": "Emotions are paired with visible cues.",
+     "passed": true
+    },
+    {
+     "item": "Forbidden list is tailored to the task.",
+     "passed": true
+    },
+    {
+     "item": "No unsupported capabilities are assumed.",
+     "passed": true
+    }
+   ],
+   "providerQualification": {
+    "checked": true,
+    "ready": true,
+    "providerCalled": false,
+    "reason": "The request fits the enabled, verified provider contract.",
+    "mode": "reference-to-video",
+    "providerModelId": "dreamina-seedance-2-5-260628",
+    "provider": "byteplus",
+    "modelVersion": "2.5-260628",
+    "capabilityVerifiedAt": "2026-08-16",
+    "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757"
+   },
+   "readyForPrompt": true,
+   "readyForProvider": true
+  },
+  "seedancePromptContract": {
+   "productionReady": true,
+   "productionErrors": [],
+   "timeline": {
+    "ready": true,
+    "errors": []
+   },
+   "profile": "bytedance-seedance-2.5-2026-08-07",
+   "source": {
+    "title": "Dreamina Seedance 2.5 User Guide",
+    "url": "https://docs.byteplus.com/en/docs/ModelArk/2607689",
+    "larkUrl": "https://bytedance.larkoffice.com/docx/A88jd0B47oAd8zxWp5ycZFMfnxh",
+    "productUrl": "https://dreamina.capcut.com/seedance/seedance-2-5",
+    "apiQualificationUrl": "https://docs.byteplus.com/en/docs/modelark/1159178",
+    "skill": ".agents/skills/sd25-pe",
+    "lastUpdated": "2026-08-07",
+    "scope": "Official Dreamina/BytePlus prompt guidance; executable API schema, pricing and account access are separate"
+   },
+   "guideLimits": {
+    "standardDurationSec": {
+     "minimum": 4,
+     "maximum": 30
+    },
+    "betaLongVideoDurationSec": {
+     "minimum": 5,
+     "maximum": 180
+    },
+    "extensionDurationSec": {
+     "minimum": 4,
+     "maximum": 30
+    },
+    "outputResolutions": [
+     "480p",
+     "720p"
+    ],
+    "maxCombinedInputs": 50,
+    "maxImages": 30,
+    "maxVideos": 10,
+    "maxVideoDurationSec": 30,
+    "maxAudioClips": 10,
+    "maxAudioDurationSec": 30
+   },
+   "guideSemantics": {
+    "timestampControl": "Time ranges allocate pacing and exact time points improve alignment; they are not a frame-accurate edit guarantee.",
+    "extensionPreservation": "Preserve the source and match its boundary state, but review the join; generated continuation and boundary frames are not guaranteed pixel-identical.",
+    "negativeInstructions": "Explicit forbidden items improve reliability but remain probabilistic and require review.",
+    "identityStability": "Multi-character consistency is improved, not self-approving; identity and count still require visual review.",
+    "longVideoRoute": "The 5-180 second mode is a Dreamina beta product capability, not a qualified Studio API route.",
+    "audioOnly": "Dreamina product guidance describes audio-only creation; the current BytePlus Seedance 2.0 API still requires at least one image or video reference.",
+    "cleanOutput": "Dreamina advertises cleaner 4K output; the executable provider contract remains the authority for resolution and every render still requires QC.",
+    "watermarkPolicy": "The Studio never uses generative watermark removal as a production shortcut; source footage must be owned or licensed and delivered clean."
+   },
+   "taskMode": "reference-to-video",
+   "status": "ready",
+   "score": 13,
+   "maximum": 13,
+   "authorityScores": {
+    "official-guide": {
+     "label": "Official guide",
+     "score": 8,
+     "maximum": 8
+    },
+    "studio-policy": {
+     "label": "Studio production policy",
+     "score": 5,
+     "maximum": 5
+    }
+   },
+   "summary": "Prompt matches every required authoring check.",
+   "referenceCount": 7,
+   "referenceCounts": {
+    "image": 6,
+    "video": 0,
+    "audio": 1
+   },
+   "stageCount": 3,
+   "checks": [
+    {
+     "code": "goal",
+     "label": "One-sentence story summary",
+     "status": "pass",
+     "required": true,
+     "authority": "official-guide",
+     "detail": "[One-Sentence Summary] states the central event.",
+     "nextAction": ""
+    },
+    {
+     "code": "reference-roles",
+     "label": "Reference roles",
+     "status": "pass",
+     "required": true,
+     "authority": "official-guide",
+     "detail": "All 7 expected references are individually bound and scoped.",
+     "nextAction": ""
+    },
+    {
+     "code": "reference-limits",
+     "label": "Official reference-count limits",
+     "status": "pass",
+     "required": true,
+     "authority": "official-guide",
+     "detail": "Mapped 6 image(s), 0 video(s) and 1 audio clip(s).",
+     "nextAction": ""
+    },
+    {
+     "code": "opening-frame",
+     "label": "Opening-frame authority",
+     "status": "pass",
+     "required": true,
+     "authority": "studio-policy",
+     "detail": "The opening reference explicitly controls the first visible state.",
+     "nextAction": ""
+    },
+    {
+     "code": "global-settings",
+     "label": "Global world and anti-collapse settings",
+     "status": "pass",
+     "required": false,
+     "authority": "official-guide",
+     "detail": "[Global Settings] establishes the world, look and camera language.",
+     "nextAction": ""
+    },
+    {
+     "code": "stages",
+     "label": "Consecutive directed shots",
+     "status": "pass",
+     "required": true,
+     "authority": "official-guide",
+     "detail": "3 consecutive shot(s) carry the event progression.",
+     "nextAction": ""
+    },
+    {
+     "code": "approved-stage-plan",
+     "label": "Approved story plan",
+     "status": "pass",
+     "required": true,
+     "authority": "studio-policy",
+     "detail": "The typed approved stage plan remains the compiler source behind the shot sequence.",
+     "nextAction": ""
+    },
+    {
+     "code": "stage-direction",
+     "label": "Action and performance direction",
+     "status": "pass",
+     "required": true,
+     "authority": "official-guide",
+     "detail": "Every internal shot has one camera job, action and visible end state.",
+     "nextAction": ""
+    },
+    {
+     "code": "stage-end-states",
+     "label": "Visible shot handoffs",
+     "status": "pass",
+     "required": true,
+     "authority": "studio-policy",
+     "detail": "Every internal shot ends on a visible handoff.",
+     "nextAction": ""
+    },
+    {
+     "code": "consistency",
+     "label": "Global continuity supplement",
+     "status": "pass",
+     "required": true,
+     "authority": "official-guide",
+     "detail": "[Global Supplement] protects identity, ownership and screen geography.",
+     "nextAction": ""
+    },
+    {
+     "code": "audio",
+     "label": "Dialogue and audio authority",
+     "status": "pass",
+     "required": true,
+     "authority": "studio-policy",
+     "detail": "The prompt places each locked line once and gives @Audio1 sole performance authority.",
+     "nextAction": ""
+    },
+    {
+     "code": "pacing",
+     "label": "Pacing control",
+     "status": "pass",
+     "required": true,
+     "authority": "official-guide",
+     "detail": "Storyline stages control pacing; timestamps are optional unless a critical handoff, entrance, exit, transition or dialogue cue needs timing.",
+     "nextAction": ""
+    },
+    {
+     "code": "request-parameters",
+     "label": "Request parameters stay outside the prompt",
+     "status": "pass",
+     "required": true,
+     "authority": "studio-policy",
+     "detail": "Duration, aspect ratio, resolution and model selection remain in the API contract.",
+     "nextAction": ""
+    },
+    {
+     "code": "guide-duration",
+     "label": "Guide duration",
+     "status": "pass",
+     "required": true,
+     "authority": "official-guide",
+     "detail": "24s is within the official 4-30 second standard window.",
+     "nextAction": ""
+    }
+   ],
+   "repairActions": [],
+   "advisoryOnly": true,
+   "providerAvailabilityChecked": false,
+   "providerCalled": false,
+   "normalizedScore": 10.0,
+   "firingFloor": 9.5
+  },
+  "creativeTranslation": {
+   "ready": true,
+   "errors": [],
+   "approvedGagBeatCodes": [
+    "1.B1",
+    "1.B2",
+    "1.B3"
+   ],
+   "compiledGagBeatCodes": [
+    "1.B1",
+    "1.B2",
+    "1.B3"
+   ],
+   "derivedFromApprovedContracts": false
+  }
+ },
+ "finalPrompt": "[Locked Character Turnarounds]\n@图2 defines Zenny's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n@图3 defines Fuzzby's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n@图4 defines Keen's complete, uncropped 360 turnaround sheet. Every view on this sheet is the same character identity, not an additional character. Use the entire sheet for face, silhouette, proportions, markings and rear/side details; render exactly one instance of this character unless the script explicitly requires otherwise. Do not use the sheet layout as the shot composition.\n\nAUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Listeners remain silent and closed-mouth unless they are the named speaker for that exact line. No narration, no extra words, and no subtitles or captions. Dialogue language: English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. Use @Audio1 as the only voice authority. Only the character currently speaking in @Audio1 may move their mouth. Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; it must not generate speech, sung lyrics or vocal music. VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Zenny; @图3=Fuzzby; @图4=Keen; @图5=prop; @图6=location; @Audio1=audio; never swap.\nAngles: @图2=one Zenny; @图3=one Fuzzby; @图4=one Keen; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Zenny identity, proportions, scale and approved wearable state: Zenny identity, proportions, scale and approved wearable state; Zenny approved wearable state: round glasses. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图3 defines exactly one Fuzzby identity, proportions, scale and approved wearable state: Fuzzby identity, proportions, scale and approved wearable state; Fuzzby approved wearable state: round wire-frame spectacles. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图4 defines exactly one Keen identity, proportions, scale and approved wearable state: Keen identity, proportions, scale and approved wearable state; Keen approved wearable state: gold wrist cuffs with aquamarine gems. Refer to that wearable state strictly; exclude background, pose, unrelated props and scene.\n@图5 defines the exact woodland-catapult design, materials, construction, scale and approved carried state. Exclude its background, people and composition.\n@图6 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nBegin on the exact approved opening, already cocked and aimed. Keen releases at once. Camera accelerates alongside the oversized blueberry over the creek toward the back tree and catches its splat on Zenny before her approved line begins at 1.1s. No fresh aiming pause or opening reset.\n\n[ACTION OWNERSHIP]\nKeen is the only actor who may visibly launch the catapult.\nZenny is the only target who may visibly receive the berry mark.\nFuzzby is the only witness who may visibly own the honeycomb payoff.\nThe catapult recoil belongs to the prop and Keen’s reaction; do not assign it to Zenny or Fuzzby.\n\n[ATTRIBUTE OWNERSHIP]\nKeen owns the catapult operation and the shameful retreat; no other character may appear to launch it.\nZenny owns the berry mark and the deadpan reset; no other character should seem to absorb or erase it.\nFuzzby begins asleep on the honeycomb. Keen alone snatches and carries it, then loses it at the tail hit; it finally rolls back to Fuzzby.\nThe catapult remains a grounded wooden prop with recoil weight; do not reassign it as a floating gag device.\nKeen approved wearable state: gold wrist cuffs with aquamarine gems\nZenny approved wearable state: round glasses\nFuzzby approved wearable state: round wire-frame spectacles\n\n[ENVIRONMENT CONTRACT]\nWarm morning light stays constant through the unit.\nThe ground plane remains continuous and usable for the honeycomb roll.\nThe catapult recoil must stay physically legible and not teleport between positions.\nThe berry splats Zenny before her line; she licks and finally wipes it away.\nThe ruined catapult may collapse only after Keen’s attempted recovery in the final stage.\n\n[One-Sentence Summary]\nKeen’s overconfident oversized-blueberry launch splats the meditating Zenny; Fuzzby wakes into ridiculous upside-down laughter, giving Keen the chance to snatch the honeycomb, before the catapult punishes Keen and collapses beneath his attempt to save face.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Inherit the exact approved @图1 opening: Keen and loaded catapult on the near left bank; across the visible creek corridor, Fuzzby sleeps ON the hanging honeycomb at the back-right tree, with Zenny meditating ON the nearby leaf. Preserve that distance and those landmarks. The oversized blueberry is already seated in the rearward cup. Follow its flight toward the back tree; do not teleport bees into the foreground. Later Keen must visibly cross to the honeycomb to snatch it.\n\n[Crystal Energy Law]\nCRYSTAL ENERGY LAW - SHOW-WIDE\n\nCrystal energy and every Crystal Call are vibrational, living and beautiful. The\nenergy emerges as softly luminous crystal motes, translucent colour, shimmer and\ngentle pulses that float, drift, gather, curl and ripple through the air. It may\nsettle across the ground, wrap softly around a character or make nearby crystal\nsurfaces resonate with light.\n\nCrystal energy is never a hard-edged beam, laser ray, projectile, weapon, rigid\nshaft of light or explosive blast. Its movement must feel harmonic, weightless,\nemotion-led and welcoming, with the colour belonging to the active crystal.\n\n[Living Performance]\nLiving performance lock: Keen, Zenny, Fuzzby has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression.\n\n[Timed Action Phases — One Continuous Render]\nOne continuous Seedance render: these are timed action phases, not coverage cuts, not separate setups, and not permission to invent a new final tableau.\nPhase 1: Camera: Begin exactly on the approved wide opening. Accelerate alongside the blueberry across the creek to the back-right tree, then settle on Zenny and Fuzzby together. Action: Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 within the approved @Audio1 placement window. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together. Performance: Fuzzby startles into a pompous upright pose, tips upside down gripping the honeycomb with his feet, and shakes with excessive laughter. Zenny stays almost motionless. End state: Zenny has delivered her calm warning; Fuzzby is awake and laughing on the still-attached honeycomb; Keen is emerging from cover. Spoken action: Zenny, OK, Fuzzby, calm down. It’s not that funny: {OK, Fuzzby, calm down. It’s not that funny.} Hold: 0.2s — Read Zenny’s stillness against Fuzzby’s foolishness during her line, without delaying the launch.\nPhase 2: Camera: Track Keen visibly from near bank to honeycomb and back along the same route; widen for the tail hit, rock bounce and log roll. Keep the catapult fixed on the near bank. Action: Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen. Performance: Keen exploits the distraction, then scrambles back with stolen honeycomb. Fuzzby lands in a harmless untidy heap. End state: Fuzzby is on the ground beside the recovered honeycomb; Keen is beside the catapult with his sore tail. Spoken action: Keen, Uh-oh—: {Uh-oh—} Spoken action: Keen, Ow!: {Ow!} Hold: 2.0s — A brief stunned recognition after the honeycomb stops, within the approved audio timing.\nPhase 3: Camera: Stay on the same geographic axis. Read Fuzzby’s dry verdict and Keen’s comeback, then the collapse; settle on Zenny’s calm reset. Action: Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters. Performance: Fuzzby suddenly composes himself for his dry line; Keen tries to save face, then deflates when the machine collapses. End state: Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position. Spoken action: Fuzzby, Nice machine: {Nice machine.} Spoken action: Keen, It almost worked: {It almost worked.} Hold: 0.5s — Let Zenny settle after the collapse; no extension beyond the 24-second approved track.\nWitness staging: Keen side: low left, partly hidden behind the catapult, angled away from Zenny. Zenny side: center, seated and settled, facing forward with the berry streak visible. Fuzzby side: upper right near the honeycomb, facing the others as awake amused witness. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Audio]\n@Audio1 is the sole authority and sole performance authority for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its named speaker and @Audio1. No alternative performance is permitted; listeners remain silent and closed-mouth unless they are the named speaker for that line. No narration or extra words. Use Seedance-generated non-dialogue SFX, ambience and instrumental musical underscore only underneath the approved dialogue rhythm. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words. No watermark.\n\n[AUDIO AND EXCLUSIONS]\nNo narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance 2.5 must provide instrumental music, ambience and non-verbal SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words.\n\n[Global Supplement]\nExactly one Keen, one Zenny and one Fuzzby throughout; no duplicates of any character. Maintain all three identities readable throughout the same space. Safeguard: the berry splat, licking and final wipe in script order. Safeguard: Do not obscure the honeycomb’s final stop in front of Fuzzby. Living performance lock: Keen, Zenny, Fuzzby has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Zenny is clean-faced and meditating; Keen walks away; Fuzzby is beside the recovered honeycomb; the catapult has collapsed in its original position.\n\n[CHANNEL TIMING]\naction: 0 seconds until 5.66 seconds: Release immediately. Track the oversized blueberry across the established distance and land with the SPLAT on Zenny before 1.1s. Keen ducks behind cover in the near bank background. Fuzzby jolts awake ON the honeycomb, attempts a pompous upright pose, overbalances and tips upside down over its edge, gripping it with his feet; wings flutter uselessly as he bursts into excessive exaggerated whole-body laughter, shoulders bouncing and wings trembling, without adding a voice or disturbing Zenny’s line. Zenny barely twitches, calmly licks the juice and delivers her approved line while Fuzzby keeps wobbling upside down. Zenny performs the assigned dialogue placement Her mouth timing follows @Audio1 within the approved @Audio1 placement window. The honeycomb stays attached and supports Fuzzby until Keen snatches it. Camera settles where Zenny’s face and Fuzzby’s foolishness read together.\naction: 5.66 seconds until 16.5 seconds: Fuzzby struggles back onto the honeycomb, laughing so hard he misses Keen approaching. Visibly track Keen’s hurried approach across the established distance. Keen performs the assigned dialogue placement at the approved 7.9–9.02s. He snatches the honeycomb; Fuzzby drops with BUZZ-CRASH, harmlessly landing in a sprawled heap. Keen sprints back along the same creek route carrying the honeycomb; he reaches the catapult again by 10s; its loaded branch snaps against his tail. Keen performs the assigned dialogue placement at 10–11.28s. The honeycomb flies from Keen’s grasp, bounces on a rock, rolls over a log and stops in front of Fuzzby. Keep the mechanical chain visible and spatially plausible, never teleport the catapult or bees. Hold just enough for Fuzzby to lift his head, see the honey, then look at Keen.\naction: 16.5 seconds until 24 seconds: Fuzzby abruptly composes himself from his ridiculous heap for the dry verdict, with a little residual wing tremble. Fuzzby performs the assigned dialogue placement at 16.5–17.94s. Keen performs the assigned dialogue placement at 18.19–20.27s, matching the approved performance unchanged. Only after Keen’s line does the catapult collapse with CLATTER. Keen sighs and walks away. Zenny calmly wipes any remaining juice, closes her eyes and resumes meditation. Finish on her settled stillness against the comic wreckage, with Fuzzby beside the recovered honeycomb. Do not freeze the living characters.\n\n[SOUND HANDOFF]\nShape the permitted soundtrack as part of the surrounding scene, preserving dialogue and action timing.\nGive the ending an intentional sound handoff. Avoid an unrequested closing crescendo followed by a fresh loud entrance; preserve a story-motivated accent when directed. Do not invent a fixed pause or stretch the performance.\nSound entrance: Warm morning ambience with soft creek water, leaf rustle, and a light comic tension under the catapult setup.\nSound exit: A tiny recovery hush under Zenny’s reset, then Fuzzby’s amused breath and Keen’s embarrassed retreat.\nCarry sound: Catapult twang, berry splat, tail smack, small roll of honeycomb, then a soft lingering creek bed.\nIntentional contrast: Starts held and careful, ends with quiet shame easing into amused witness energy."
+}

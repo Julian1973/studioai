@@ -1,0 +1,77 @@
+{
+ "batchId": "S1.SH1-b1-20260909T002500-1ed42820",
+ "references": [
+  {
+   "slot": "@图1",
+   "role": "opening keyframe",
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+   "hashMatches": true
+  },
+  {
+   "slot": "@图2",
+   "role": "Zenny",
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+   "hashMatches": true
+  },
+  {
+   "slot": "@图3",
+   "role": "Fuzzby",
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+   "hashMatches": true
+  },
+  {
+   "slot": "@图4",
+   "role": "Keen",
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+   "hashMatches": true
+  },
+  {
+   "slot": "@图5",
+   "role": "prop:woodland-catapult",
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+   "hashMatches": true
+  },
+  {
+   "slot": "@图6",
+   "role": "scene plate",
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+   "hashMatches": true
+  },
+  {
+   "slot": "@Audio1",
+   "role": "approved HEAR",
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_vo_candidate_a8b19435.wav",
+   "hashMatches": true
+  }
+ ],
+ "fuzzbyWakeGagPresent": true,
+ "cameraTracksBlueberry": true,
+ "transport": {
+  "1": {
+   "segments": [],
+   "status": "submitting",
+   "activeSegment": 1,
+   "lastProviderEvent": {
+    "event": "submitting",
+    "at": "2026-09-09T00:25:00",
+    "segmentIndex": 1,
+    "requestBytes": 14726977,
+    "imageRefs": 6,
+    "audioRefs": 1,
+    "duration": 24
+   },
+   "providerEvents": [
+    {
+     "event": "submitting",
+     "at": "2026-09-09T00:25:00",
+     "segmentIndex": 1,
+     "requestBytes": 14726977,
+     "imageRefs": 6,
+     "audioRefs": 1,
+     "duration": 24
+    }
+   ]
+  }
+ },
+ "status": "generating"
+}

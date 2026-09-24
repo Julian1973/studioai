@@ -1,0 +1,50 @@
+[
+  {
+    "scene": 1,
+    "status": "sources-ready",
+    "shots": 3,
+    "missing": []
+  },
+  {
+    "scene": 2,
+    "status": "sources-ready",
+    "shots": 2,
+    "missing": []
+  },
+  {
+    "scene": 3,
+    "status": "sources-ready",
+    "shots": 5,
+    "missing": []
+  },
+  {
+    "scene": 4,
+    "status": "sources-ready",
+    "shots": 2,
+    "missing": []
+  },
+  {
+    "scene": 5,
+    "status": "sources-ready",
+    "shots": 1,
+    "missing": []
+  },
+  {
+    "scene": 6,
+    "status": "sources-ready",
+    "shots": 2,
+    "missing": []
+  },
+  {
+    "scene": 7,
+    "status": "sources-ready",
+    "shots": 2,
+    "missing": []
+  },
+  {
+    "scene": 8,
+    "status": "sources-ready",
+    "shots": 2,
+    "missing": []
+  }
+]

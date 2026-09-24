@@ -1,0 +1,90 @@
+{
+ "episode": "Ep3",
+ "canonVersion": "1.0",
+ "builtAt": "2026-09-11T15:04:29",
+ "sources": {
+  "showBible": {
+   "path": "shows/crystal-bears/canon/LOCKED_CANON.md",
+   "sha256": "f1e29a9f8e32cf85f6b9969eee822dd1899044e2a0364725a9882b83b0412c67"
+  },
+  "studioBible": {
+   "path": "CRYSTAL_BEARS_STUDIO_BIBLE.md",
+   "sha256": "51b44ba88d6134f40c6e6864d13416358b9149ec945557a4fc839e578e716215"
+  },
+  "characters": {
+   "path": "shows/crystal-bears/canon/characters.json",
+   "sha256": "93cd620ad4f23d6edfe32d3970e87b0cb5c75a4d6ceeec540d4f37f822320949"
+  },
+  "locations": {
+   "path": "shows/crystal-bears/canon/locations.json",
+   "sha256": "700db5114d5ae703f55e76f8308a5db33fc8eaa1ecbd4a15392a639899302df0"
+  },
+  "continuity": {
+   "path": "shows/crystal-bears/canon/continuity.json",
+   "sha256": "db8bf00f2bf37ddf94159881fe65c70b72b0db9c6ce1d80f903e562f890261db"
+  },
+  "styleLaw": {
+   "path": "shows/crystal-bears/laws/style.txt",
+   "sha256": "7c70a512cb5528f5609cb2f46e9f72a85e735c8bc5007aa33792146b7a290f83"
+  },
+  "showrunnerTaste": {
+   "path": "shows/crystal-bears/creative/SHOWRUNNER_TASTE_CANON.md",
+   "sha256": "f89cdcd52882922e24dac387a3e8801f87e59a8ebf05ca00869ea5a5e54a3855"
+  },
+  "directorTaste": {
+   "path": "shows/crystal-bears/creative/DIRECTOR_TASTE_CANON.md",
+   "sha256": "ae3dcfea84ca1b0c207a04e3cc7bfbc9684e298b5db34188613bf2558131e69e"
+  },
+  "cinematographyTaste": {
+   "path": "shows/crystal-bears/creative/CINEMATOGRAPHY_TASTE_CANON.md",
+   "sha256": "f780ea63c4afafa3c0c8370360f6842a6b07180bf76e14c14dc39384786f6257"
+  },
+  "voiceTaste": {
+   "path": "shows/crystal-bears/creative/VOICE_PERFORMANCE_CANON.md",
+   "sha256": "0adf591d9e879f2d07fe4e816f78c3b7d48bfa67fe839e53a119e430889d9d1c"
+  },
+  "characterPerformance": {
+   "path": "shows/crystal-bears/creative/CHARACTER_PERFORMANCE_CANON.json",
+   "sha256": "e6b1a669a8e2a937596a6fb4b953d49e2946420b23c4370b395d14e3f9418b2d"
+  },
+  "relationships": {
+   "path": "shows/crystal-bears/creative/RELATIONSHIP_CANON.json",
+   "sha256": "92c06386fec26a7173d5fd962394e8b161f6295141a5fdf51000c9c5a6398fd0"
+  },
+  "exemplars": {
+   "path": "shows/crystal-bears/creative/EXEMPLAR_LIBRARY.json",
+   "sha256": "241c010233906c2fd67c2f467913d06dd124e3da1aeac335a517e1458d7bf443"
+  },
+  "scriptPackage": {
+   "path": "cb-output/Ep3_Perfectly_Rainy_beat_package.json",
+   "sha256": "66c98705c14a9de507051aac3bf9a7604f4244672ed78db5d9929888ec7d4724"
+  }
+ },
+ "gaps": [],
+ "conflicts": [],
+ "canonLock": {
+  "manifestDigest": "9ccaa2b218c280bff8bce864c8ad8dc215372fe9e70b7a446c8f62d3fad93a7a",
+  "profile": "storyboard",
+  "profileDigest": "0e72b1347d97aae3d1b2ea17973683391de151e7e338d02091261ee0e7958d55",
+  "sourceHashes": {
+   "showBible": "f1e29a9f8e32cf85f6b9969eee822dd1899044e2a0364725a9882b83b0412c67",
+   "studioBible": "51b44ba88d6134f40c6e6864d13416358b9149ec945557a4fc839e578e716215",
+   "characters": "93cd620ad4f23d6edfe32d3970e87b0cb5c75a4d6ceeec540d4f37f822320949",
+   "locations": "700db5114d5ae703f55e76f8308a5db33fc8eaa1ecbd4a15392a639899302df0",
+   "continuity": "db8bf00f2bf37ddf94159881fe65c70b72b0db9c6ce1d80f903e562f890261db",
+   "episodeArc": "7e06f051effa4eacaae41410f6170aed86772a3ed23599d599cec610d572ed2b",
+   "gagLocks": "8693e988ca59aec4e2be24cd3357504ad281e4ed96d6300596554628d9d143d3",
+   "bannedVocabulary": "2dedb1c356b1d9b8d3a55a3a3fd658594309717f84438cf8491a99171deb6897",
+   "characterPerformance": "e6b1a669a8e2a937596a6fb4b953d49e2946420b23c4370b395d14e3f9418b2d",
+   "relationships": "92c06386fec26a7173d5fd962394e8b161f6295141a5fdf51000c9c5a6398fd0",
+   "exemplars": "241c010233906c2fd67c2f467913d06dd124e3da1aeac335a517e1458d7bf443",
+   "showrunnerTaste": "f89cdcd52882922e24dac387a3e8801f87e59a8ebf05ca00869ea5a5e54a3855",
+   "directorTaste": "ae3dcfea84ca1b0c207a04e3cc7bfbc9684e298b5db34188613bf2558131e69e",
+   "cinematographyTaste": "f780ea63c4afafa3c0c8370360f6842a6b07180bf76e14c14dc39384786f6257",
+   "voicePerformance": "0adf591d9e879f2d07fe4e816f78c3b7d48bfa67fe839e53a119e430889d9d1c",
+   "runtimeDirector": "1b8c77a03e76b9ddf02a978d33cbed6a21b78544d2eefae16526e2a82e3fbcd1",
+   "runtimeCinematographer": "d5f7268f7899fdb27c3b892b779bf81103727ad507cc96bafc17d723d7376eb3",
+   "runtimeVoice": "91e8a3b816fc9a192b4ee22ad7a7e293ae83acdd75be2aef8ad3a7b39da0b1ad"
+  }
+ }
+}

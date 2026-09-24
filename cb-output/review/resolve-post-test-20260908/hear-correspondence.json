@@ -1,0 +1,86 @@
+[
+  {
+    "shotId": "S1.SH2",
+    "correlation": 0.0166,
+    "sourceLagVsHearSec": 1.31775,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S1.SH3",
+    "correlation": 0.2586,
+    "sourceLagVsHearSec": 0.57525,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S2.SH2",
+    "correlation": 0.3667,
+    "sourceLagVsHearSec": 0.825,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S3.SH1",
+    "correlation": 0.1489,
+    "sourceLagVsHearSec": -1.225,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S3.SH2",
+    "correlation": 0.1478,
+    "sourceLagVsHearSec": 1.375,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S3.SH3",
+    "correlation": 0.2897,
+    "sourceLagVsHearSec": 1.875,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S3.SH4",
+    "correlation": 0.1736,
+    "sourceLagVsHearSec": -0.45,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S3.SH5",
+    "correlation": 0.1327,
+    "sourceLagVsHearSec": -0.45,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S4.SH1",
+    "correlation": 0.0507,
+    "sourceLagVsHearSec": 0.71675,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S4.SH2",
+    "correlation": 0.0309,
+    "sourceLagVsHearSec": 1.72625,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S5.SH1",
+    "correlation": 0.033,
+    "sourceLagVsHearSec": -1.837,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S6.SH2",
+    "correlation": 0.0275,
+    "sourceLagVsHearSec": -1.1525,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S7.SH1",
+    "correlation": 0.0453,
+    "sourceLagVsHearSec": -1.99975,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  },
+  {
+    "shotId": "S8.SH2",
+    "correlation": 0.0271,
+    "sourceLagVsHearSec": 0.846,
+    "meaning": "waveform correspondence only; not perceptual lip-sync"
+  }
+]

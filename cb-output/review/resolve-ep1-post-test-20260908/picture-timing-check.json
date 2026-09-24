@@ -1,0 +1,27 @@
+[
+  {
+    "seconds": 5,
+    "bestSourceSeekOffsetSeconds": 0.041666666666666664,
+    "lumaError": 0.3883333333333333
+  },
+  {
+    "seconds": 100,
+    "bestSourceSeekOffsetSeconds": 0.08333333333333333,
+    "lumaError": 0.3541666666666667
+  },
+  {
+    "seconds": 250,
+    "bestSourceSeekOffsetSeconds": 0.08333333333333333,
+    "lumaError": 0.25416666666666665
+  },
+  {
+    "seconds": 400,
+    "bestSourceSeekOffsetSeconds": 0.041666666666666664,
+    "lumaError": 0.32166666666666666
+  },
+  {
+    "seconds": 565,
+    "bestSourceSeekOffsetSeconds": 0.041666666666666664,
+    "lumaError": 0.2875
+  }
+]

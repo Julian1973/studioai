@@ -1,0 +1,732 @@
+{
+ "schemaVersion": 1,
+ "approvalState": "approved",
+ "approvedAt": "2026-09-24T08:00:05",
+ "approvedBy": "Julian",
+ "kind": "dialogue-correction",
+ "scene": "4",
+ "shotId": "S4.SH3",
+ "scriptVersionId": "sha256:a782d08e0f15bf9c5d8c8c92d62785fd2b981e62d440383dc7234140fd13ea86",
+ "previousScriptVersionId": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+ "baseScriptVersionId": "sha256:eee45840ac475706f035afd261e499a46451824299cf3b85e114e37466d5b407",
+ "previousDialogueOccurrenceId": "dialogue-occurrence:sha256:33409d04bafec818642f37d681f565df596e8664c2e6722bf90089a369bbd3d1",
+ "dialogueOccurrenceId": "dialogue-occurrence:sha256:7fffec6432cd84538b9f1123bda8005557ef21424c36bd1314537d8b38e4bf12",
+ "previousSourceEventId": "script-event:sha256:74bbcc8d6685bfeb31e0b95903a5e6eebe0fcf184809628040b04352dfbfcfb7",
+ "sourceEventId": "script-event:sha256:c8884a3683295641ccb79c1255ebd18ec68c67e2ed20d1a3dc61c4c30e6224e8",
+ "previousExactText": "Oof! I can’t see! He waddles around angrily, waving blindly. ZENNY watches Fuzzby stuck in the honey pot. A beat. She tries to stay composed. Her face tightens — but a small laugh slips out.",
+ "correctedExactText": "Oof! I can’t see!",
+ "shot": {
+  "shotId": "S4.SH3",
+  "beatCode": "S4.B4",
+  "beatCodes": [
+   "S4.B4"
+  ],
+  "shotRole": "coverage",
+  "establishJob": null,
+  "buttonChange": null,
+  "frameSource": null,
+  "durationSec": 13.0,
+  "purpose": "Escalate the mess from wet floor to a friend's sticky humiliation while keeping the joke character-specific.",
+  "performanceAssignment": "Performance phases: anticipation: ENVIRONMENT Lantern, stool, Howey, Misty and honey pot line up in a cramped route with the wet floor still active below them; action: ENVIRONMENT The lantern bumps the stool, the stool knocks Howey, Howey bumps Misty, and Misty’s paw sends the honey pot toward Fuzzby; reaction: Fuzzby The honey pot lands over Fuzzby; he waddles with blocked vision, waving paws and moving more slowly where honey sticks him; settle: Zenny Zenny holds her composed face, tightens by degrees, then lets a small laugh escape while Fuzzby remains stuck at frame edge. Cause and effect: Sunny’s prior rushing leaves objects unstable; each contact transfers force to the next object or body; the honey pot’s weight and stickiness change Fuzzby’s silhouette and movement; Zenny’s stillness makes the absurd state land. Visible turn: The mess stops being a floor problem and becomes a friend’s bodily discomfort, with comedy sharpened by Zenny’s almost-contained reaction. Land on: Fuzzby must remain honey-pot trapped and sticky while Zenny’s tiny break has just happened, ready for Sunny to force the next performance. Acting freedom: Allow small variations in wobble, bump spacing and Fuzzby’s waddle path, but keep every domino contact visible in order and Zenny’s reaction minimal.",
+  "camera": "Make every domino contact visible in order, then stop on Fuzzby's sticky helmet and Zenny's almost-contained laugh; do not overplay Zenny.",
+  "openingPose": "A low lantern, wobbling stool, Howey, Misty and the honey pot line up in a crowded route that Sunny's rushing body is about to disturb.",
+  "sourceType": "opener",
+  "sourceShotId": null,
+  "stateSourceShotId": "S4.SH2",
+  "motionContinuityRequired": false,
+  "cutInMotivation": "MOVE: the action chain needs continuity from first contact to honey pot.",
+  "dialogueBinding": "Fuzzby's vocal beat performs per the approved voice design.",
+  "dialogueLines": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:7fffec6432cd84538b9f1123bda8005557ef21424c36bd1314537d8b38e4bf12",
+    "sourceEventId": "script-event:sha256:c8884a3683295641ccb79c1255ebd18ec68c67e2ed20d1a3dc61c4c30e6224e8",
+    "speaker": "Fuzzby",
+    "exactText": "Oof! I can’t see!",
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "delivery": "Oof! I can’t see!",
+    "startSec": 0.0,
+    "endSec": 8.8,
+    "sourceSegmentation": {
+     "occurrenceId": "dialogue-occurrence:sha256:7fffec6432cd84538b9f1123bda8005557ef21424c36bd1314537d8b38e4bf12",
+     "speaker": "Fuzzby",
+     "rawSourceText": "Oof! I can’t see!",
+     "spokenText": "Oof! I can’t see!",
+     "actionBefore": null,
+     "actionAfter": null,
+     "sourceSpan": {
+      "spokenText": [
+       5557,
+       5574
+      ]
+     },
+     "scriptRevision": "sha256:a782d08e0f15bf9c5d8c8c92d62785fd2b981e62d440383dc7234140fd13ea86",
+     "segmentationStatus": "VERIFIED",
+     "evidence": {
+      "scriptRevision": "sha256:a782d08e0f15bf9c5d8c8c92d62785fd2b981e62d440383dc7234140fd13ea86",
+      "occurrenceId": "dialogue-occurrence:sha256:7fffec6432cd84538b9f1123bda8005557ef21424c36bd1314537d8b38e4bf12",
+      "speaker": "Fuzzby",
+      "authority": "structural_line_types",
+      "evidenceId": "script-event:sha256:c8884a3683295641ccb79c1255ebd18ec68c67e2ed20d1a3dc61c4c30e6224e8",
+      "spans": {
+       "spokenText": [
+        5557,
+        5574
+       ]
+      }
+     },
+     "spokenTextHash": "8fc4d39d90b6d96f13c2b04ee82a2ca7e1ee1fb94a59724f5fecbad9b39b4a83"
+    }
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:95b7430e21dc419cab19d20d1ef632984566897cb9e1190b3920f3eee88e8bf5",
+    "sourceEventId": "script-event:sha256:62f3e2fc156102257102bdb0457fb0dd363d50846fee549e13fb61d804de2b67",
+    "speaker": "Fuzzby",
+    "exactText": "I have been HONEYED!",
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "delivery": "I have been HONEYED!",
+    "startSec": 8.9,
+    "endSec": 10.6,
+    "sourceSegmentation": {
+     "occurrenceId": "dialogue-occurrence:sha256:95b7430e21dc419cab19d20d1ef632984566897cb9e1190b3920f3eee88e8bf5",
+     "speaker": "Fuzzby",
+     "rawSourceText": "I have been HONEYED!",
+     "spokenText": "I have been HONEYED!",
+     "actionBefore": null,
+     "actionAfter": null,
+     "sourceSpan": {
+      "spokenText": [
+       5758,
+       5778
+      ]
+     },
+     "scriptRevision": "sha256:a782d08e0f15bf9c5d8c8c92d62785fd2b981e62d440383dc7234140fd13ea86",
+     "segmentationStatus": "VERIFIED",
+     "evidence": {
+      "scriptRevision": "sha256:a782d08e0f15bf9c5d8c8c92d62785fd2b981e62d440383dc7234140fd13ea86",
+      "occurrenceId": "dialogue-occurrence:sha256:95b7430e21dc419cab19d20d1ef632984566897cb9e1190b3920f3eee88e8bf5",
+      "speaker": "Fuzzby",
+      "authority": "structural_line_types",
+      "evidenceId": "script-event:sha256:62f3e2fc156102257102bdb0457fb0dd363d50846fee549e13fb61d804de2b67",
+      "spans": {
+       "spokenText": [
+        5758,
+        5778
+       ]
+      }
+     },
+     "spokenTextHash": "f2e9c88b03692b7a73be6aa99817d6bc0ff2b432595c4db7a39ff720cc86b14f"
+    }
+   }
+  ],
+  "visualPayoff": "Zenny's restrained face has just cracked while Fuzzby remains stuck and honeyed at the frame edge.",
+  "physicalStaging": {
+   "staysVisible": "Each domino contact must be readable in order: lantern to stool, stool to Howey, Howey into Misty, Misty into honey pot, honey pot onto Fuzzby.",
+   "contactAndWeight": "Objects shove and wobble with wet-floor momentum; the honey pot has enough weight to drop over Fuzzby and enough stickiness to slow his angry waddle.",
+   "payoffShape": "A clean party prop becomes a helmet that turns Fuzzby’s pride into blind, sticky indignation.",
+   "prohibitedStaging": [
+    "Do not teleport the honey pot onto Fuzzby without the chain.",
+    "Do not let the pot look weightless.",
+    "Do not overplay Zenny; her tiny break is the joke."
+   ]
+  },
+  "physicalStagings": [
+   {
+    "staysVisible": "Each domino contact must be readable in order: lantern to stool, stool to Howey, Howey into Misty, Misty into honey pot, honey pot onto Fuzzby.",
+    "contactAndWeight": "Objects shove and wobble with wet-floor momentum; the honey pot has enough weight to drop over Fuzzby and enough stickiness to slow his angry waddle.",
+    "payoffShape": "A clean party prop becomes a helmet that turns Fuzzby’s pride into blind, sticky indignation.",
+    "prohibitedStaging": [
+     "Do not teleport the honey pot onto Fuzzby without the chain.",
+     "Do not let the pot look weightless.",
+     "Do not overplay Zenny; her tiny break is the joke."
+    ],
+    "beatCode": "S4.B4"
+   }
+  ],
+  "prohibited": [
+   "Keep every domino contact readable in order.",
+   "Keep Fuzzby’s honeyed obstruction weighty and sticky, not weightless.",
+   "Maintain the exact cast listed for this shot boundary; no extras or omissions."
+  ],
+  "charactersInFrame": [
+   "Sunny",
+   "Howey",
+   "Misty",
+   "Fuzzby",
+   "Zenny"
+  ],
+  "offscreenSpeakers": [],
+  "requiredPropReferences": [],
+  "openingCharactersInFrame": [
+   "Sunny",
+   "Howey",
+   "Misty",
+   "Fuzzby"
+  ],
+  "closingCharactersInFrame": null,
+  "continuityIn": {
+   "lighting": "wobbling warm lantern light over wet floor",
+   "cameraSide": "Sunny-adjacent along the domino route",
+   "characters": [
+    {
+     "character": "Sunny",
+     "screenZone": "left-mid",
+     "facing": "through the crowded route",
+     "pose": "still in rushing motion",
+     "expression": "ahead of herself",
+     "visibleMarks": [
+      "wet paws"
+     ],
+     "heldProps": []
+    },
+    {
+     "character": "Howey",
+     "screenZone": "mid-left",
+     "facing": "toward the chain route",
+     "pose": "caught in the bump sequence",
+     "expression": "reactive",
+     "visibleMarks": [],
+     "heldProps": []
+    },
+    {
+     "character": "Misty",
+     "screenZone": "mid-right",
+     "facing": "toward the chain route",
+     "pose": "caught in the bump sequence",
+     "expression": "reactive",
+     "visibleMarks": [],
+     "heldProps": []
+    },
+    {
+     "character": "Fuzzby",
+     "screenZone": "right-rear",
+     "facing": "toward the chain route",
+     "pose": "about to receive the payoff",
+     "expression": "unaware",
+     "visibleMarks": [],
+     "heldProps": []
+    },
+    {
+     "character": "Zenny",
+     "screenZone": "right-rear edge",
+     "facing": "toward Fuzzby",
+     "pose": "still witness",
+     "expression": "composed",
+     "visibleMarks": [],
+     "heldProps": []
+    }
+   ]
+  },
+  "continuityOut": {
+   "lighting": "warm light catches honey, but mud still dulls the floor",
+   "cameraSide": "Zenny-facing witness angle",
+   "characters": [
+    {
+     "character": "Sunny",
+     "screenZone": "left-edge",
+     "facing": "toward Fuzzby and Zenny",
+     "pose": "still in the rush aftermath",
+     "expression": "not yet fully stopped",
+     "visibleMarks": [
+      "wet paws"
+     ],
+     "heldProps": []
+    },
+    {
+     "character": "Howey",
+     "screenZone": "left-mid",
+     "facing": "toward the chain aftermath",
+     "pose": "part of the disrupted route",
+     "expression": "reactive",
+     "visibleMarks": [],
+     "heldProps": []
+    },
+    {
+     "character": "Misty",
+     "screenZone": "mid-left",
+     "facing": "toward the chain aftermath",
+     "pose": "part of the disrupted route",
+     "expression": "reactive",
+     "visibleMarks": [],
+     "heldProps": []
+    },
+    {
+     "character": "Fuzzby",
+     "screenZone": "center-right",
+     "facing": "obstructed forward",
+     "pose": "blind waddle, angry waving",
+     "expression": "indignant",
+     "visibleMarks": [
+      "honey-covered silhouette"
+     ],
+     "heldProps": [
+      "honey_pot"
+     ]
+    },
+    {
+     "character": "Zenny",
+     "screenZone": "right-center",
+     "facing": "Fuzzby",
+     "pose": "almost still, composed but cracked",
+     "expression": "tiny laugh slipping out",
+     "visibleMarks": [],
+     "heldProps": []
+    }
+   ]
+  },
+  "shotTransition": {
+   "type": "cut",
+   "stateSourceShotId": "S4.SH2",
+   "reason": "MOVE: the action chain needs continuity from first contact to honey pot.",
+   "openingImage": "A low lantern, wobbling stool, Howey, Misty and the honey pot line up in a crowded route that Sunny's rushing body is about to disturb.",
+   "camera": "Make every domino contact visible in order, then stop on Fuzzby's sticky helmet and Zenny's almost-contained laugh; do not overplay Zenny."
+  },
+  "continuityProseIn": "The muddy splash and rejected play carry in; Sunny’s control is already getting narrower.",
+  "continuityProseOut": "The domino chain has landed its honeyed consequence on Fuzzby, and Zenny’s composure has cracked by a tiny amount.",
+  "dialogueTimingProse": "Read the domino chain first, then keep the honey-pot impact and Fuzzby’s indignation clear; hold Zenny’s almost-still break long enough for the tiny laugh to register before Fuzzby’s official complaint lands.",
+  "referenceRolesProse": "The domino route as cause-and-effect; Fuzzby’s honeyed silhouette as the comic payoff; Zenny’s tiny laugh as the restraint break.",
+  "principalPerformanceApproved": "Fuzzby turns the accident into grand injured status; Zenny's near-stillness makes her tiny laugh count.",
+  "physicalPerformanceApproved": "Sunny’s rush clips the unstable party route: lantern swings, stool tips, Howey and Misty are bumped through the chain, and the honey pot launches. It drops over Fuzzby with sticky weight; he waddles blindly and grandly offended. Zenny holds almost still until one tiny laugh leaks out, which makes Fuzzby stiffen into larger indignation.",
+  "animationTimingApproved": "Crisp domino contacts with no teleporting; pot impact has weight and sticky drag; hold on Zenny long enough for restraint to break by the smallest amount.",
+  "performanceContractApproved": {
+   "beatOwner": "S4.B4",
+   "playableIntention": "The environment exposes the cost of Sunny’s speed, while Fuzzby treats the accident as a formal insult and Zenny tries not to reward it.",
+   "phases": [
+    {
+     "phase": "anticipation",
+     "performer": "ENVIRONMENT",
+     "observableAction": "Lantern, stool, Howey, Misty and honey pot line up in a cramped route with the wet floor still active below them."
+    },
+    {
+     "phase": "action",
+     "performer": "ENVIRONMENT",
+     "observableAction": "The lantern bumps the stool, the stool knocks Howey, Howey bumps Misty, and Misty’s paw sends the honey pot toward Fuzzby."
+    },
+    {
+     "phase": "reaction",
+     "performer": "Fuzzby",
+     "observableAction": "The honey pot lands over Fuzzby; he waddles with blocked vision, waving paws and moving more slowly where honey sticks him."
+    },
+    {
+     "phase": "settle",
+     "performer": "Zenny",
+     "observableAction": "Zenny holds her composed face, tightens by degrees, then lets a small laugh escape while Fuzzby remains stuck at frame edge."
+    }
+   ],
+   "physicalCauseAndEffect": "Sunny’s prior rushing leaves objects unstable; each contact transfers force to the next object or body; the honey pot’s weight and stickiness change Fuzzby’s silhouette and movement; Zenny’s stillness makes the absurd state land.",
+   "visibleEmotionalTurn": "The mess stops being a floor problem and becomes a friend’s bodily discomfort, with comedy sharpened by Zenny’s almost-contained reaction.",
+   "requiredLanding": "Fuzzby must remain honey-pot trapped and sticky while Zenny’s tiny break has just happened, ready for Sunny to force the next performance.",
+   "performanceFreedom": "Allow small variations in wobble, bump spacing and Fuzzby’s waddle path, but keep every domino contact visible in order and Zenny’s reaction minimal.",
+   "characterTruths": [
+    {
+     "character": "Fuzzby",
+     "canonTrait": "Canon: manic, pompous-then-undercut Laughter Maker who commits fully and turns crashes into comic relief.",
+     "playableWant": "Reclaim dignity after being turned into the gag’s evidence.",
+     "pressureResponse": "He inflates the accident into official outrage even while his body is obstructed.",
+     "observableSignature": "Blocked-face waddle, waving paws, stiff offended posture, sticky drag fighting his momentum.",
+     "substitutionTest": "A bear would read mainly as hurt or surprised; Fuzzby uniquely makes the sticky failure a status injury and comedy valve."
+    },
+    {
+     "character": "Zenny",
+     "canonTrait": "Supplied treatment and Fuzzby canon: Zenny is the calm, dry, smaller counterpart whose stillness contrasts Fuzzby’s chaos.",
+     "playableWant": "Maintain composure while watching an absurdly clear consequence unfold.",
+     "pressureResponse": "She becomes more still, then cracks only by a tiny leak of laughter.",
+     "observableSignature": "Fixed eyeline, controlled face, gradual tightening, smallest possible laugh release.",
+     "substitutionTest": "Fuzzby would escalate; Sunny would manage; Zenny’s restrained break is the joke because she almost never gives the chaos a reaction."
+    }
+   ],
+   "comedyStaging": {
+    "staysVisible": "Each domino contact must be readable in order: lantern to stool, stool to Howey, Howey into Misty, Misty into honey pot, honey pot onto Fuzzby.",
+    "contactAndWeight": "Objects shove and wobble with wet-floor momentum; the honey pot has enough weight to drop over Fuzzby and enough stickiness to slow his angry waddle.",
+    "payoffShape": "A clean party prop becomes a helmet that turns Fuzzby’s pride into blind, sticky indignation.",
+    "prohibitedStaging": [
+     "Do not teleport the honey pot onto Fuzzby without the chain.",
+     "Do not let the pot look weightless.",
+     "Do not overplay Zenny; her tiny break is the joke."
+    ]
+   }
+  },
+  "characterTruthsApproved": [
+   {
+    "character": "Fuzzby",
+    "canonTrait": "Canon: manic, pompous-then-undercut Laughter Maker who commits fully and turns crashes into comic relief.",
+    "playableWant": "Reclaim dignity after being turned into the gag’s evidence.",
+    "pressureResponse": "He inflates the accident into official outrage even while his body is obstructed.",
+    "observableSignature": "Blocked-face waddle, waving paws, stiff offended posture, sticky drag fighting his momentum.",
+    "substitutionTest": "A bear would read mainly as hurt or surprised; Fuzzby uniquely makes the sticky failure a status injury and comedy valve."
+   },
+   {
+    "character": "Zenny",
+    "canonTrait": "Supplied treatment and Fuzzby canon: Zenny is the calm, dry, smaller counterpart whose stillness contrasts Fuzzby’s chaos.",
+    "playableWant": "Maintain composure while watching an absurdly clear consequence unfold.",
+    "pressureResponse": "She becomes more still, then cracks only by a tiny leak of laughter.",
+    "observableSignature": "Fixed eyeline, controlled face, gradual tightening, smallest possible laugh release.",
+    "substitutionTest": "Fuzzby would escalate; Sunny would manage; Zenny’s restrained break is the joke because she almost never gives the chaos a reaction."
+   }
+  ],
+  "comedyStagingApproved": {
+   "staysVisible": "Each domino contact must be readable in order: lantern to stool, stool to Howey, Howey into Misty, Misty into honey pot, honey pot onto Fuzzby.",
+   "contactAndWeight": "Objects shove and wobble with wet-floor momentum; the honey pot has enough weight to drop over Fuzzby and enough stickiness to slow his angry waddle.",
+   "payoffShape": "A clean party prop becomes a helmet that turns Fuzzby’s pride into blind, sticky indignation.",
+   "prohibitedStaging": [
+    "Do not teleport the honey pot onto Fuzzby without the chain.",
+    "Do not let the pot look weightless.",
+    "Do not overplay Zenny; her tiny break is the joke."
+   ]
+  },
+  "comedyStagingsApproved": [
+   {
+    "beatCode": "S4.B4",
+    "staysVisible": "Each domino contact must be readable in order: lantern to stool, stool to Howey, Howey into Misty, Misty into honey pot, honey pot onto Fuzzby.",
+    "contactAndWeight": "Objects shove and wobble with wet-floor momentum; the honey pot has enough weight to drop over Fuzzby and enough stickiness to slow his angry waddle.",
+    "payoffShape": "A clean party prop becomes a helmet that turns Fuzzby’s pride into blind, sticky indignation.",
+    "prohibitedStaging": [
+     "Do not teleport the honey pot onto Fuzzby without the chain.",
+     "Do not let the pot look weightless.",
+     "Do not overplay Zenny; her tiny break is the joke."
+    ]
+   }
+  ],
+  "comedyContractsApproved": [
+   {
+    "beatCode": "S4.B4",
+    "mode": "BIG",
+    "mechanism": "Concealment → revelation",
+    "comicOwner": "Fuzzby",
+    "straightCharacter": "Zenny",
+    "setup": "A honey pot is part of the crowded party clutter.",
+    "expectation": "The domino chain will make a mess around the bears.",
+    "disruption": "The pot lands over Fuzzby like a sticky helmet.",
+    "button": "Fuzzby indignantly declares the condition as if it is an official injury.",
+    "hold": "Hold on Zenny’s almost-still face until the tiny laugh escapes, then let Fuzzby claim the button.",
+    "physicalStaging": {
+     "staysVisible": "Each domino contact must be readable in order: lantern to stool, stool to Howey, Howey into Misty, Misty into honey pot, honey pot onto Fuzzby.",
+     "contactAndWeight": "Objects shove and wobble with wet-floor momentum; the honey pot has enough weight to drop over Fuzzby and enough stickiness to slow his angry waddle.",
+     "payoffShape": "A clean party prop becomes a helmet that turns Fuzzby’s pride into blind, sticky indignation.",
+     "prohibitedStaging": [
+      "Do not teleport the honey pot onto Fuzzby without the chain.",
+      "Do not let the pot look weightless.",
+      "Do not overplay Zenny; her tiny break is the joke."
+     ]
+    }
+   }
+  ],
+  "emotionContractsApproved": [
+   {
+    "beatCode": "S4.B4",
+    "owner": "Sunny",
+    "entryState": "Too rushed to track consequences.",
+    "pressure": "Her movement triggers objects and friends in sequence.",
+    "choiceOrRealisation": "She does not yet stop; the room’s chaos outruns her attention.",
+    "exitState": "Still trying to manage the party, with bigger evidence she is causing harm.",
+    "observableEvidence": "The chain reaction crosses the cave while Sunny remains in rescue mode.",
+    "audienceAlignment": "ahead",
+    "heldAfterBeat": "Fuzzby is sticky and blinded; the party has become something friends must survive."
+   }
+  ],
+  "cinematographyContractApproved": {
+   "storyPointOfView": "Sunny's chaos as it lands on Fuzzby, judged by Zenny's stillness.",
+   "emotionalDistanceStart": "Energetic and close to the domino route.",
+   "emotionalDistanceEnd": "Intimate and still on Zenny's tiny reaction.",
+   "revealStrategy": "Show the chain in order, then reveal the honey-pot helmet as the completed consequence.",
+   "shotScale": "Crowded WS for route, MS for Fuzzby payoff, MCU for Zenny reaction.",
+   "lensIntent": "24 mm for chain energy, 35 mm for bodily comedy, 85 mm for the small facial break.",
+   "cameraHeight": "Object-route height for the chain, Fuzzby's body level for the pot, Zenny's eye-line for restraint.",
+   "composition": "Clutter narrows the chain; Fuzzby's pot dominates his silhouette; Zenny is given a simple frame for contrast.",
+   "depthStrategy": "Use depth to keep Zenny as witness before she owns the reaction.",
+   "cameraBehavior": "Whip-follow only while cause-and-effect travels; then settle and lock for reaction.",
+   "focusStrategy": "Sequential contact focus, then pot rim/body, then Zenny's face.",
+   "lightingFunction": "Wobbling warm lantern light turns unstable; honey highlights are tempting but heavy.",
+   "paletteFunction": "Gold honey looks party-bright for a second, then reads sticky against mud and wet stone.",
+   "performanceVisibility": "Fuzzby's waddle must show obstruction and resistance; Zenny's laugh must be tiny, not broad.",
+   "editorialPurpose": "Deliver the last clean comedy peak before Sunny forces the room into performance.",
+   "memorableLandingImage": "Zenny nearly composed with Fuzzby honeyed at the edge.",
+   "providerInstruction": "Make every domino contact visible in order, then stop on Fuzzby's sticky helmet and Zenny's almost-contained laugh; do not overplay Zenny."
+  },
+  "performanceBudgetApproved": {
+   "emotionalTurnCount": 2,
+   "propStateChangeCount": 3,
+   "dialogueHeavy": false,
+   "silentActingReserveSec": 1.2,
+   "landingHoldSec": 0.5,
+   "minimumHonestDurationSec": 12.0,
+   "decision": "single-unit",
+   "rationale": "The domino chain, honey reveal and Zenny reaction form one compact gag arc with three views."
+  },
+  "storyIntentApproved": {
+   "narrativeFunction": "Escalate Sunny's rushed control into a bodily consequence for Fuzzby.",
+   "primaryAudienceFeeling": "Anticipatory laughter.",
+   "secondaryAudienceFeeling": "Unease that the mess is no longer harmless.",
+   "outerAction": "Lantern, stool, friends and honey pot collide until Fuzzby is trapped.",
+   "innerAction": "Sunny still has not stopped to see the harm; Fuzzby feels his dignity attacked.",
+   "performanceDirection": "Keep the chain crisp; play Fuzzby's outrage as sincere rank injury, Zenny's laugh as a leak in composure.",
+   "mutedRead": "A chain reaction puts a honey pot on Fuzzby; Zenny tries and fails not to laugh.",
+   "environmentPressure": "Cramped party clutter and wet floor turn every rescue object into a hazard.",
+   "soundStory": "Contacts should travel clearly—wobble, bump, spin, PLOOP—then give room for Fuzzby's muffled outrage and Zenny's small laugh.",
+   "motifUse": "Party props are no longer decorations; they are obstacles carrying Sunny's overcontrol.",
+   "thoughtChangeAndCut": "The room changes from watching mess happen to watching a friend carry it; cut to Sunny next because she will try to sell that failure as fun.",
+   "mustUnderstand": "The honeyed Fuzzby is caused by the chain, not random magic.",
+   "mustNotKnowYet": "Sunny will turn the honey problem into a forced dance.",
+   "reactionBeat": "Zenny's tiny laugh is meaningful because restraint breaks.",
+   "relationshipDistance": "Fuzzby and Zenny share a comic witness distance; Sunny is emotionally absent from the payoff.",
+   "relationshipPowerDynamic": "The environment temporarily has more control than Sunny.",
+   "touchOrAvoidance": "The honey pot attaches to Fuzzby; Zenny does not help yet, only witnesses.",
+   "eyelineRule": "Zenny's eyeline stays on Fuzzby's absurd silhouette; Fuzzby cannot see clearly.",
+   "silhouetteRead": "Fuzzby must read instantly as honey-pot helmeted and sticky.",
+   "silenceRule": "Protect the beat before Zenny's laugh.",
+   "scoreInstruction": "Let object percussion lead; thin music for Zenny's held composure, then a small comic lift under Fuzzby's declaration."
+  },
+  "targetDurationSecApproved": 13,
+  "storyboardStagePlanApproved": [
+   {
+    "stageNumber": 1,
+    "beatIds": [
+     "S4.B4"
+    ],
+    "purpose": "Make the domino disaster causal, not random.",
+    "primaryEvent": "Sunny's rush sets lantern, stool, Howey, Misty and honey pot into sequential collision.",
+    "emotionalOrComicTurn": "The cave begins throwing her control back through friends' bodies.",
+    "cameraAndTransition": "Whip-follow the chain along a visible route in the crowded cave.",
+    "observableEndState": "Honey pot is launched toward Fuzzby."
+   },
+   {
+    "stageNumber": 2,
+    "beatIds": [
+     "S4.B4"
+    ],
+    "purpose": "Land the gag on Fuzzby's body.",
+    "primaryEvent": "The honey pot drops over Fuzzby and turns him into a sticky, blinded silhouette.",
+    "emotionalOrComicTurn": "The mess becomes personal and funny, but uncomfortable.",
+    "cameraAndTransition": "Cut after impact to the reveal and his obstructed waddle, with Zenny in depth.",
+    "observableEndState": "Fuzzby is honey-pot trapped and sticky."
+   },
+   {
+    "stageNumber": 3,
+    "beatIds": [
+     "S4.B4"
+    ],
+    "purpose": "Let the joke breathe through Zenny's restraint.",
+    "primaryEvent": "Zenny tries to stay composed, a tiny laugh slips out, and Fuzzby claims indignity.",
+    "emotionalOrComicTurn": "Stillness becomes the punchline before Fuzzby's official complaint.",
+    "cameraAndTransition": "Locked MCU on Zenny, Fuzzby present at edge.",
+    "observableEndState": "Comedy peaks while the sticky state remains unresolved."
+   }
+  ],
+  "storyboardInternalShotPlanApproved": [
+   {
+    "shotNumber": 1,
+    "viewId": "S4_V10",
+    "transitionType": "cut",
+    "staging": "Lantern hangs low near a wobbling stool; Howey and Misty are positioned in the midground; honey pot waits beyond them near Fuzzby’s area.",
+    "startState": "Objects are unstable but not yet colliding.",
+    "endState": "Honey pot is launched toward Fuzzby.",
+    "cutTo": "Fuzzby receiving the honey-pot payoff.",
+    "timing": "Brief silent chain before Fuzzby’s impact line.",
+    "purpose": "Read every physical cause without losing the trapped-room feeling.",
+    "framingAndCamera": "Crowded WS with domino route visible.. Make the mess causal, not random decoration.",
+    "storyAction": "Sunny’s rush sets the lantern moving; it knocks the stool, which bumps Howey, who knocks Misty, who sends the honey pot moving.",
+    "performanceFocus": "Sunny is still ahead of herself; Howey and Misty react physically to being caught in the chain, not as intentional clowns.",
+    "landingImage": "Honey pot is launched toward Fuzzby.",
+    "cutReason": "MOVE: the action chain needs continuity from first contact to honey pot.",
+    "framing": "Crowded WS with domino route visible.",
+    "continuity": "Wet floor and fallen garland remain; lantern, stool and honey pot occupy the route.",
+    "viewpointOwner": "Sunny",
+    "listenerReaction": "Howey and Misty become part of the chain before they can help.",
+    "visibleEntities": [
+     "char:Sunny",
+     "char:Howey",
+     "char:Misty",
+     "prop:lantern",
+     "prop:stool",
+     "prop:honey_pot",
+     "effect:muddy_puddle",
+     "set:party_cave"
+    ],
+    "cinematography": {
+     "owner": "Sunny",
+     "emotionalAction": "rush past consequence",
+     "cameraState": "near her movement, discovering the chain too late",
+     "stateChangeTrigger": "Sunny's continued motion clips the first unstable party object",
+     "viewpoint": "Sunny-adjacent, tracking the object path",
+     "lens": "24 mm for crowded comic cause-and-effect",
+     "composition": "WS compressed by foreground clutter, not a safe master; chain route visible",
+     "movement": "whip-follow from lantern to stool to Howey to Misty to honey pot",
+     "focus": "sequential rack along each contact",
+     "light": "lantern light wobbles as it is struck",
+     "kind": "match_on_action",
+     "motivation": "MOVE",
+     "cutTiming": "on",
+     "actionPhase": "contact",
+     "functions": [],
+     "attention": "physical action"
+    }
+   },
+   {
+    "shotNumber": 2,
+    "viewId": "S4_V11",
+    "transitionType": "cut",
+    "staging": "Fuzzby stands in the path of the honey pot; Zenny is seated or still nearby with clear eyeline to him.",
+    "startState": "Honey pot incoming; Fuzzby unobstructed.",
+    "endState": "Fuzzby is honeyed and blind; Zenny is nearly laughing.",
+    "cutTo": "Zenny’s tiny break and Fuzzby’s official indignation.",
+    "timing": "Covers Fuzzby: “Oof! I can’t see! He waddles around angrily, waving blindly. ZENNY watches Fuzzby stuck in the honey pot. A beat. She tries to stay composed. Her face tightens — but a small laugh slips out.”",
+    "purpose": "Laugh at the clear honeyed image while seeing it is uncomfortable for Fuzzby.",
+    "framingAndCamera": "MS on Fuzzby with Zenny in depth.. Deliver the honey-pot reveal and keep the witness for the next beat.",
+    "storyAction": "Honey pot lands over Fuzzby; he waddles blindly and waves angrily.",
+    "performanceFocus": "Fuzzby commits fully to outrage; his body pushes forward but the sticky pot slows him. Zenny’s stillness contrasts his flailing.",
+    "landingImage": "Fuzzby is honeyed and blind; Zenny is nearly laughing.",
+    "cutReason": "LAUGH: the domino payoff is Fuzzby’s changed silhouette and indignation.",
+    "framing": "MS on Fuzzby with Zenny in depth.",
+    "continuity": "Honey pot is now attached over Fuzzby; honey stickiness affects his movement.",
+    "viewpointOwner": "Fuzzby",
+    "listenerReaction": "Zenny watches from stillness, registering the absurdity without fully breaking yet.",
+    "visibleEntities": [
+     "char:Fuzzby",
+     "prop:honey_pot",
+     "effect:honey_stickiness",
+     "set:party_cave_floor",
+     "char:Zenny"
+    ],
+    "cinematography": {
+     "owner": "Fuzzby",
+     "emotionalAction": "turn accident into offended status injury",
+     "cameraState": "low and close to honey-pot helmet level",
+     "stateChangeTrigger": "honey pot drops over Fuzzby",
+     "viewpoint": "Fuzzby's obstructed space, with Zenny visible beyond",
+     "lens": "35 mm for bodily comedy with readable weight",
+     "composition": "MS; pot dominates Fuzzby's silhouette while Zenny is a still background witness",
+     "movement": "settle after pot impact, then follow his blind waddle a short distance",
+     "focus": "pot rim and Fuzzby's blocked face, then his waving paws",
+     "light": "sticky honey catches warm light but mud dulls floor reflections",
+     "kind": "reveal",
+     "motivation": "LAUGH",
+     "cutTiming": "after",
+     "actionPhase": "consequence",
+     "functions": [],
+     "attention": "comedy"
+    }
+   },
+   {
+    "shotNumber": 3,
+    "viewId": "S4_V12",
+    "transitionType": "cut",
+    "staging": "Zenny holds her composed position while Fuzzby wobbles in her eyeline with the honey pot stuck over him.",
+    "startState": "Zenny nearly composed; Fuzzby already stuck.",
+    "endState": "Comedy has peaked, but the sticky mess remains unsolved.",
+    "cutTo": "Sunny noticing everyone watching and forcing the dance.",
+    "timing": "Covers the beat after Fuzzby’s first line and Fuzzby: “I have been HONEYED!”",
+    "purpose": "See the joke live in restraint, not extra motion.",
+    "framingAndCamera": "MCU reaction on Zenny with Fuzzby present at edge.. Make Zenny’s small laugh meaningful because she is usually still.",
+    "storyAction": "Zenny tries not to laugh; Fuzzby declares his honeyed state.",
+    "performanceFocus": "Zenny’s face tightens by degrees, then a small laugh escapes. Fuzzby stiffens and claims the injury with grand indignation.",
+    "landingImage": "Comedy has peaked, but the sticky mess remains unsolved.",
+    "cutReason": "REACT: the witness’s break is the comedy value now.",
+    "framing": "MCU reaction on Zenny with Fuzzby present at edge.",
+    "continuity": "Fuzzby remains honey-pot trapped near Zenny.",
+    "viewpointOwner": "Zenny",
+    "listenerReaction": "Fuzzby takes the tiny laugh as further evidence of indignity.",
+    "visibleEntities": [
+     "char:Zenny",
+     "char:Fuzzby",
+     "prop:honey_pot",
+     "effect:honey_stickiness",
+     "set:party_cave"
+    ],
+    "cinematography": {
+     "owner": "Zenny",
+     "emotionalAction": "hold composure until the image beats her",
+     "cameraState": "locked and still against Fuzzby's waddle",
+     "stateChangeTrigger": "Fuzzby's honey-pot silhouette crosses her eyeline",
+     "viewpoint": "Zenny's calm eye-line",
+     "lens": "85 mm for the tiny facial break",
+     "composition": "MCU on Zenny with Fuzzby blurred but identifiable in foreground edge",
+     "movement": "hold; no drift",
+     "focus": "Zenny's tightening face and tiny laugh slip",
+     "light": "soft warm side light; sticky highlights flicker in foreground",
+     "kind": "reaction",
+     "motivation": "REACT",
+     "cutTiming": "after",
+     "actionPhase": "reaction",
+     "functions": [],
+     "attention": "reaction"
+    }
+   }
+  ],
+  "transitionType": "PLANNED_CUT",
+  "providerBoundaryReasonApproved": "duration_limit",
+  "providerBoundaryExplanationApproved": "This honey gag plus the forced dance crash would exceed 30 seconds and the dance needs a fresh anchor with all watching friends in depth.",
+  "voiceDirectorBrief": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:7fffec6432cd84538b9f1123bda8005557ef21424c36bd1314537d8b38e4bf12",
+    "sourceEventId": "script-event:sha256:c8884a3683295641ccb79c1255ebd18ec68c67e2ed20d1a3dc61c4c30e6224e8",
+    "speaker": "Fuzzby",
+    "exactDialogue": "Oof! I can’t see!",
+    "elevenLabsV3Direction": "Oof! I can’t see!",
+    "expectedTiming": "After pot impact and sticky settle; about 8.0–9.0s including the held beat on Zenny.",
+    "physicalActionRelationship": "Voice lets the sticky, heavy body lead; indignation grows because Zenny’s stillness makes the laugh worse.",
+    "dramaticIntention": "Make the room recognise his accident as a major personal event.",
+    "subtext": "If I am going to be ridiculous, I demand dignity while doing it.",
+    "relationshipTarget": "The whole room, especially Zenny once he senses her watching.",
+    "emotionalEntry": "Impact shock under the honey pot.",
+    "emotionalExit": "Suspicious and primed for indignation after Zenny’s tiny laugh.",
+    "operativeWords": [
+     "Oof",
+     "can’t see",
+     "A beat",
+     "small laugh"
+    ],
+    "pace": "Impact first, then waddling narration with offended ceremony; slow through Zenny’s restraint.",
+    "rhythm": "Thud, complaint, blind pomp, held silence, tiny betrayal.",
+    "pauses": "Hold on “A beat.” long enough for Zenny’s restraint to matter.",
+    "breaths": "Compressed grunt on “Oof!”; muffled breath under the pot."
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:95b7430e21dc419cab19d20d1ef632984566897cb9e1190b3920f3eee88e8bf5",
+    "sourceEventId": "script-event:sha256:62f3e2fc156102257102bdb0457fb0dd363d50846fee549e13fb61d804de2b67",
+    "speaker": "Fuzzby",
+    "exactDialogue": "I have been HONEYED!",
+    "elevenLabsV3Direction": "I have been HONEYED!",
+    "expectedTiming": "After Zenny’s tiny laugh lands; about 1.7s.",
+    "physicalActionRelationship": "Voice inflates as the body is physically diminished by honey.",
+    "dramaticIntention": "Upgrade embarrassment into official injured status.",
+    "subtext": "Do not laugh; this is historic.",
+    "relationshipTarget": "Zenny first, then the whole room.",
+    "emotionalEntry": "Stiffened by Zenny’s tiny laugh.",
+    "emotionalExit": "Grandly offended and awaiting respect.",
+    "operativeWords": [
+     "HONEYED"
+    ],
+    "pace": "Deliberate and ceremonial, with a big final declaration.",
+    "rhythm": "One pompous announcement; no extra chatter.",
+    "pauses": "Micro-pause before “HONEYED” to crown the word.",
+    "breaths": "Offended inhale before “I.”"
+   }
+  ],
+  "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby, @图4 only for Sunny, @图5 only for Misty, @图6 only for Howey, @图7 only for the cave set and @图8 only for previous shot final frame.\n\nBegin exactly on @图1, the approved opening frame — make every domino contact visible in order, then stop on Fuzzby's sticky helmet and Zenny's almost-contained laugh; do not overplay Zenny. Performance phases: anticipation: ENVIRONMENT Lantern, stool, Howey, Misty and honey pot line up in a cramped route with the wet floor still active below them; action: ENVIRONMENT The lantern bumps the stool, the stool knocks Howey, Howey bumps Misty, and Misty’s paw sends the honey pot toward Fuzzby; reaction: Fuzzby The honey pot lands over Fuzzby; he waddles with blocked vision, waving paws and moving more slowly where honey sticks him; settle: Zenny Zenny holds her composed face, tightens by degrees, then lets a small laugh escape while Fuzzby remains stuck at frame edge. Cause and effect: Sunny’s prior rushing leaves objects unstable; each contact transfers force to the next object or body; the honey pot’s weight and stickiness change Fuzzby’s silhouette and movement; Zenny’s stillness makes the absurd state land. Visible turn: The mess stops being a floor problem and becomes a friend’s bodily discomfort, with comedy sharpened by Zenny’s almost-contained reaction. Land on: Fuzzby must remain honey-pot trapped and sticky while Zenny’s tiny break has just happened, ready for Sunny to force the next performance. Acting freedom: Allow small variations in wobble, bump spacing and Fuzzby’s waddle path, but keep every domino contact visible in order and Zenny’s reaction minimal. Zenny's restrained face has just cracked while Fuzzby remains stuck and honeyed at the frame edge.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Fuzzby; Sunny and Howey and Misty and Zenny keep their mouths closed. Preserve character identity and relative scale. Keep Each domino contact must be readable in order: lantern to stool, stool to Howey, Howey into Misty, Misty into honey pot, honey pot onto Fuzzby. Begin with wet paws visible. End with wet paws, honey-covered silhouette visible.",
+  "promptWords": 352,
+  "referenceSlots": {
+   "@图1": "opening keyframe",
+   "@图2": "Zenny",
+   "@图3": "Fuzzby",
+   "@图4": "Sunny",
+   "@图5": "Misty",
+   "@图6": "Howey",
+   "@图7": "scene plate",
+   "@图8": "previous shot final frame",
+   "@Audio1": "voice track"
+  },
+  "audioBrief": "SHOT S4.SH3 — voice-only performance for @Audio1.\nFuzzby: \"Oof! I can’t see!\" — Oof! I can’t see!. Target 0.0-8.8s.\nFuzzby: \"I have been HONEYED!\" — I have been HONEYED!. Target 8.9-10.6s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+  "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Fuzzby (@图1, bee) is in frame. A low lantern, wobbling stool, Howey (@图4, bear), Misty (@图3, bear) and the honey pot line up in a crowded route that Sunny (@图2, bear)'s rushing body is about to disturb.\n\nContinuity in: wobbling warm lantern light over wet floor; Sunny-adjacent along the domino route. @图5 scene plate anchors palette, materials and lighting and world-space geography; preserve landmarks without copying its camera composition.\n\n@图6 is the approved continuity-state reference from S4.SH2. Use it for current character, prop and effect state and the same story moment; when an editorial relay frame is declared, follow that relay state rather than blindly copying the literal final frame. Compose the new camera angle described by the opening pose; do not copy the prior framing.\n\nLiving performance lock: Sunny, Howey, Misty, Fuzzby each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+  "keyframePromptWords": 209,
+  "keyframeReferenceSlots": {
+   "@图1": "Fuzzby",
+   "@图2": "Sunny",
+   "@图3": "Misty",
+   "@图4": "Howey",
+   "@图5": "scene plate",
+   "@图6": "previous shot final frame"
+  },
+  "internalConstraints": "Hard constraints: Do not teleport the honey pot onto Fuzzby without the chain; Do not let the pot look weightless; Do not overplay Zenny; her tiny break is the joke; Keep every domino contact readable in order; Keep Fuzzby’s honeyed obstruction weighty and sticky, not weightless; Maintain the exact cast listed for this shot boundary; no extras or omissions; no character redesign; no extra characters; no on-screen text; no invented voices; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+ }
+}

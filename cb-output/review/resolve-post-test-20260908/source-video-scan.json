@@ -1,0 +1,116 @@
+[
+  {
+    "shotId": "S1.SH1",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S1.SH2",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S1.SH3",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S2.SH1",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S2.SH2",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S3.SH1",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S3.SH2",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S3.SH3",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S3.SH4",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S3.SH5",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S4.SH1",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S4.SH2",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S5.SH1",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S6.SH1",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S6.SH2",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S7.SH1",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S7.SH2",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S8.SH1",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  },
+  {
+    "shotId": "S8.SH2",
+    "exitCode": 0,
+    "detections": [],
+    "errors": []
+  }
+]

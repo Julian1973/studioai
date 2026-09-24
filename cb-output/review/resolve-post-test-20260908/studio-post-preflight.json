@@ -1,0 +1,42 @@
+[
+  {
+    "scene": 1,
+    "status": "blocked",
+    "reason": "REFUSED \u2014 lock the current Director's Seat cut before building the master"
+  },
+  {
+    "scene": 2,
+    "status": "blocked",
+    "reason": "REFUSED \u2014 lock the current Director's Seat cut before building the master"
+  },
+  {
+    "scene": 3,
+    "status": "blocked",
+    "reason": "REFUSED \u2014 lock the current Director's Seat cut before building the master"
+  },
+  {
+    "scene": 4,
+    "status": "blocked",
+    "reason": "REFUSED \u2014 lock the current Director's Seat cut before building the master"
+  },
+  {
+    "scene": 5,
+    "status": "blocked",
+    "reason": "REFUSED \u2014 lock the current Director's Seat cut before building the master"
+  },
+  {
+    "scene": 6,
+    "status": "blocked",
+    "reason": "REFUSED \u2014 lock the current Director's Seat cut before building the master"
+  },
+  {
+    "scene": 7,
+    "status": "blocked",
+    "reason": "REFUSED \u2014 lock the current Director's Seat cut before building the master"
+  },
+  {
+    "scene": 8,
+    "status": "blocked",
+    "reason": "REFUSED \u2014 lock the current Director's Seat cut before building the master"
+  }
+]

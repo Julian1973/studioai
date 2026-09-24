@@ -1,0 +1,122 @@
+{
+  "id": "d64dbfdca2e34fd6ab6859e1df284d0b",
+  "episode": "Ep2",
+  "status": "prepared",
+  "config": {
+    "title": "Bo's Big Day",
+    "character": "Bo",
+    "background": "#A41524",
+    "cards": [
+      [
+        "CREATED BY",
+        "Lloyd Knight & Julian Jenkins"
+      ],
+      [
+        "WRITTEN BY",
+        "Lloyd Knight & Pete Young"
+      ],
+      [
+        "VOICE CAST",
+        "Lloyd Knight\nPete Young\nJulian Jenkins"
+      ],
+      [
+        "ANIMATION & VISUAL PRODUCTION",
+        "Julian Jenkins\nLloyd Knight\nPete Young"
+      ],
+      [
+        "MUSIC & SOUND",
+        "Julian Jenkins & Lloyd Knight"
+      ],
+      [
+        "WITH THANKS TO",
+        "Mike Young & Liz Young\nand everyone who believed in the magic."
+      ],
+      [
+        "AN ENAID CREATIVE PRODUCTION",
+        "© 2026 Enaid Creative. All rights reserved."
+      ]
+    ]
+  },
+  "token": "e732a8556a72472aa2310df38c88a3df",
+  "envelopeHash": "2cbeb0aa4763e3b50b410ceadf22d7b4b4b0d111cd2b7f8dbaf4a0c445b45b3d",
+  "envelope": {
+    "candidateCount": 1,
+    "config": {
+      "title": "Bo's Big Day",
+      "character": "Bo",
+      "background": "#A41524",
+      "cards": [
+        [
+          "CREATED BY",
+          "Lloyd Knight & Julian Jenkins"
+        ],
+        [
+          "WRITTEN BY",
+          "Lloyd Knight & Pete Young"
+        ],
+        [
+          "VOICE CAST",
+          "Lloyd Knight\nPete Young\nJulian Jenkins"
+        ],
+        [
+          "ANIMATION & VISUAL PRODUCTION",
+          "Julian Jenkins\nLloyd Knight\nPete Young"
+        ],
+        [
+          "MUSIC & SOUND",
+          "Julian Jenkins & Lloyd Knight"
+        ],
+        [
+          "WITH THANKS TO",
+          "Mike Young & Liz Young\nand everyone who believed in the magic."
+        ],
+        [
+          "AN ENAID CREATIVE PRODUCTION",
+          "© 2026 Enaid Creative. All rights reserved."
+        ]
+      ]
+    },
+    "reference": {
+      "path": "cb-seed/assets/final_turnarounds/CB_Bo_with_satchel.png",
+      "sha256": "b629adae815ccb4cb70e8fd9a6ea1c774beb14fbf15118dd38666fed24086855"
+    },
+    "fonts": [
+      {
+        "name": "Bangers-Regular.ttf",
+        "sha256": "1083c68486ff28030d717cce88479515a9b35e30a18852cea56bcd8fee0467d3"
+      },
+      {
+        "name": "NunitoSans-Variable.ttf",
+        "sha256": "f934d7142fb4784bf828da485b7dcbd90c0c80d514e9d49a5da0ed3a1ae2491d"
+      }
+    ],
+    "prompt": "Create one continuous 30-second silent 3D animated end-credit presenter plate.\n@Image1 is the approved Bo character reference. Its multiple views depict ONE character. Preserve exact identity, proportions, costume and accessories; never reproduce the reference sheet or labels.\nUse the established warm tactile Crystal Bears animation aesthetic. Exactly one Bo is visible.\nLocked wide 16:9 camera. Seamless studio background and matching floor in colour #A41524. Soft frontal light, gentle spotlight and subtle contact shadows. Show the full character and all extremities comfortably inside the LEFT THIRD. Keep every gesture left of the centre line. The RIGHT TWO THIRDS are empty for credits.\nBo is a playful, warm silent presenter: stand with grounded feet, use open-hand presentation gestures, a small bow and one jaunty side-step within the stage mark. Look between the audience and the empty space to frame-right, presenting the changing cards. Mouth stays naturally closed; facial expression remains lively. Keep movement charming, readable and unhurried.\n0–4s: welcome the audience, then present the right-hand space.\n4–8s: a small courteous bow, rise and present the next card.\n8–12s: a playful sequential presenting flourish to the right.\n12–17s: a jaunty movement within the left-third stage mark, settle and present proudly.\n17–21s: a gentle rhythmic bounce or hover bob, followed by another rightward presenting gesture.\n21–26s: an appreciative nod and warm gesture of thanks toward the credits.\n26–30s: one slow friendly farewell wave or equivalent wing gesture, settle by 29s and hold the smiling living pose through the end.\nNo text, lettering, logo, symbols or additional props anywhere: all typography is added separately using the actual font files. No speech, music or sound effects. Character identity and accessories stay stable throughout.",
+    "contract": {
+      "providerModelId": "dreamina-seedance-2-5-260628",
+      "provider": "byteplus",
+      "modelVersion": "2.5-260628",
+      "transport": "byteplus-async",
+      "mode": "reference-to-video",
+      "endpoint": "/api/v3/contents/generations/tasks",
+      "resolution": "480p",
+      "duration": 30,
+      "costRateKey": "seedance_25_byteplus_480p_per_sec",
+      "capabilityVerifiedAt": "2026-08-16",
+      "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757"
+    },
+    "duration": 30,
+    "generateAudio": false,
+    "maxBatchCostUsd": 3.123
+  },
+  "disclosure": {
+    "candidateCount": 1,
+    "duration": 30,
+    "resolution": "480p",
+    "provider": "Seedance 2.5",
+    "maxBatchCostUsd": 3.123
+  },
+  "referenceUrl": "/cb-seed/assets/final_turnarounds/CB_Bo_with_satchel.png",
+  "previewUrl": "/engine/media/credits_maker/Ep2/d64dbfdca2e34fd6ab6859e1df284d0b/cards/preview.jpg",
+  "humanReview": "pending",
+  "updatedAt": 1788770493.2977831
+}

@@ -1,0 +1,1373 @@
+{
+ "schemaVersion": 1,
+ "approvalState": "approved",
+ "approvedAt": "2026-09-22T11:56:47.303044+00:00",
+ "approvedBy": "Julian",
+ "kind": "shot-visual-contract-correction",
+ "revisionId": "ep4-s2-sh1-vision-v3",
+ "scene": "2",
+ "shotId": "S2.SH1",
+ "scriptVersionId": "sha256:eee45840ac475706f035afd261e499a46451824299cf3b85e114e37466d5b407",
+ "baseScriptVersionId": "sha256:eee45840ac475706f035afd261e499a46451824299cf3b85e114e37466d5b407",
+ "preservedStages": [
+  "scenelook",
+  "keyframe"
+ ],
+ "invalidatedStages": [
+  "direction",
+  "voice",
+  "animation",
+  "continuity",
+  "final"
+ ],
+ "sceneLookContentHash": "2340d8825bb9f33d545df16d7ce795999272937f74c816183fcf50216426d68e",
+ "sceneLookPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep4_S2_plate_candidate_197848b6.png",
+ "sourceDirection": "Julian: keep the approved scene plate and S2.SH1 opening keyframe; use the exact Ep4 S3.SH2 keyframe as the pond vision content while Aida remains the foreground subject looking at its reflection.",
+ "visionReferencePolicy": "The exact approved Ep4 S3.SH2 keyframe is bound as @图4 and uploaded to WATCH as vision content only. It controls what Aida sees inside the pond reflection; it does not control Aida identity, S2 geography, foreground cast, or a literal location cutaway.",
+ "visionReferenceBinding": {
+  "providerSlot": "@图4",
+  "role": "vision:S3.SH2 keyframe pond reflection",
+  "sourceShotId": "S3.SH2",
+  "sourcePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep4_S3.SH2_keyframe_candidate_b156d56c.png",
+  "sourceSha256": "6cb81ad0b70841e82896ecf6978cfc193c497f171630594a13e4cf159932053c",
+  "assetId": "86c5a66d9e899ec0592a1150",
+  "scope": "pond reflection vision content only"
+ },
+ "shot": {
+  "shotId": "S2.SH1",
+  "beatCode": "S2.B1",
+  "beatCodes": [
+   "S2.B1"
+  ],
+  "shotRole": "coverage",
+  "establishJob": null,
+  "buttonChange": null,
+  "frameSource": null,
+  "durationSec": 11.0,
+  "purpose": "Reveal the coming weather through Aida's calm witnessing from the near pool rock: the pool holds a perfect party promise, one raindrop breaks it, and she lets the warning remain beautifully unresolved.",
+  "performanceAssignment": "Performance phases: anticipation: Aida Sits grounded beside the glass-still pool with eyes closed, relaxed paws away from the water, and a steady pendant glow; action: ENVIRONMENT One raindrop strikes the centre of the reflected party image; circular ripples spread outward, bending the shapes and dulling the surface; reaction: Aida Opens her eyes without a startle, looks from the disturbed pool up toward the gathering clouds, holds, then brings her gaze back to the water; her shoulders gather slightly while her paws stay still; settle: Aida Maintains calm through the spoken beat, then rises with controlled weight, brushes down her robes, and stands beside the still-disturbed reflection. Cause and effect: The pool begins smooth enough to carry a clear reflected party. The raindrop impact sends rings through the image, so the warning becomes physically visible. Because Aida does not touch the surface, the reflection remains imperfect while she shifts from seated weight into a quiet stand. Visible turn: Aida changes from open, eyes-closed stillness to a slightly tighter, ready stillness: eyes open, gaze checks the sky, shoulders gather, hands remain restrained. Land on: Aida is upright beside the Moonlit Pool after brushing herself down, with the party reflection still visibly rippled and unresolved. Acting freedom: Keep freedom in breath length, blink placement, tiny mouth-corner change, robe follow-through, pendant glow softness, and water secondary motion, as long as Aida never startles, rushes, or fixes the pool.",
+  "camera": "Open on seated Aida with eyes closed beside a glass-still pool, rose quartz pendant softly glowing; hold as Sunny’s party image appears and one raindrop breaks it, then cut closer to keep Aida and the rippled water together as she looks to暗",
+  "openingPose": "Aida is already seated on the near mossy rock at the Moonlit Pool, grounded through her hips and turned three-quarters toward the water, eyes open and calmly aimed at the ordinary reflection, paws away from the surface, rose quartz pendant glowing softly.",
+  "sourceType": "opener",
+  "sourceShotId": null,
+  "stateSourceShotId": null,
+  "motionContinuityRequired": false,
+  "cutInMotivation": "Hold because the same composition carries the promise, the raindrop, and Aida’s refusal to overreact; cutting earlier would turn the warning into spectacle.",
+  "dialogueBinding": "Aida's vocal beat performs per the approved voice design.",
+  "dialogueLines": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:61997930abc49451940d6dd710bbd9ecca3668c51e056984f679b7a9fa933805",
+    "sourceEventId": "script-event:sha256:675ade2a1ddaca8ba2b532f503576047c949a645ac529742da47f3893ec9ec0f",
+    "speaker": "Aida",
+    "exactText": "Someone’s day might be a little dampened.",
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "delivery": "[quietly] Someone’s day might be a little dampened.",
+    "startSec": 4.5,
+    "endSec": 7.0
+   }
+  ],
+  "visualPayoff": "Aida stands beside the Moonlit Pool after brushing herself down, while softened ripples still disturb Sunny’s party reflection.",
+  "physicalStaging": null,
+  "physicalStagings": [],
+  "prohibited": [
+   "Do not let Aida touch or smooth the water; the reflection must remain visibly disturbed.",
+   "Keep the shot on the approved pool-edge relationship framing and do not introduce extra characters or props.",
+   "The spoken line must remain verbatim and land over the softened ripple, not before the first ripple reads."
+  ],
+  "charactersInFrame": [
+   "Aida"
+  ],
+  "offscreenSpeakers": [],
+  "requiredPropReferences": [],
+  "openingCharactersInFrame": [
+   "Aida"
+  ],
+  "closingCharactersInFrame": null,
+  "continuityIn": null,
+  "continuityOut": {
+   "lighting": "soft golden morning over cool moonlit pool haze, with a slightly cooler rainy cast after the raindrop",
+   "cameraSide": "pool-edge relationship view at Aida's eye-line",
+   "characters": [
+    {
+     "character": "Aida",
+     "screenZone": "beside the pool edge, held with the water in the same frame",
+     "facing": "toward the disturbed pool, then briefly upward to the clouds",
+     "pose": "upright after a quiet rise, with a calm grounded stance",
+     "expression": "warm, restrained, and lightly amused under the warning",
+     "visibleMarks": [],
+     "heldProps": []
+    }
+   ]
+  },
+  "shotTransition": {
+   "type": "scene-start",
+   "stateSourceShotId": null,
+   "reason": "Hold because the same composition carries the promise, the raindrop, and Aida’s refusal to overreact; cutting earlier would turn the warning into spectacle.",
+   "openingImage": "Aida sits beside the glass-still Moonlit Pool with eyes closed, her rose quartz pendant glowing softly against the quiet morning water.",
+   "camera": "Open on seated Aida with eyes closed beside a glass-still pool, rose quartz pendant softly glowing; hold as Sunny’s party image appears and one raindrop breaks it, then cut closer to keep Aida and the rippled water together as she looks to暗"
+  },
+  "continuityProseIn": "",
+  "continuityProseOut": "Aida ends seated or just beginning her quiet rise from the same near mossy rock, with the reflected party still visibly rippled and unresolved.",
+  "dialogueTimingProse": "The line lands only after the first ripple is fully legible and Aida has checked the clouds; keep it brief and understated, then allow a quiet after-hold before she rises.",
+  "referenceRolesProse": "Aida performance anchor; Moonlit Pool and reflected party image anchor the environment; soft morning-to-rainy light anchors the weather pressure.",
+  "principalPerformanceApproved": "Aida begins seated, still, peaceful, eyes closed. After the raindrop breaks the image, she opens her eyes, looks up to the gathering clouds, holds the knowledge, returns to the water, speaks with warm understatement, then rises quietly and brushes herself down without telling anyone.",
+  "physicalPerformanceApproved": "Aida holds a grounded seated stillness beside the pool, eyes closed, pendant softly steady. The raindrop disturbs the reflected party before she reacts; she opens her eyes without flinching, checks the sky, returns to the water, keeps her paws away from the surface, lets a small inward smile sit under the spoken beat, then rises quietly and brushes herself down.",
+  "animationTimingApproved": "Unhurried opening hold; let the raindrop contact and first full ripple read before Aida moves. Her recognition is slow and economical, with a protected pause before speech and a brief after-hold before the quiet rise. Robes, pendant, and water carry soft follow-through.",
+  "performanceContractApproved": {
+   "beatOwner": "S2.B1",
+   "playableIntention": "Aida wants to acknowledge the coming weather without taking control of Sunny’s day.",
+   "phases": [
+    {
+     "phase": "anticipation",
+     "performer": "Aida",
+     "observableAction": "Sits grounded on the near mossy pool rock with eyes open and calmly aimed at the ordinary woodland reflection, paws away from the water, pendant softly glowing."
+    },
+    {
+     "phase": "action",
+     "performer": "ENVIRONMENT",
+     "observableAction": "One raindrop strikes the pond; circular ripples spread and resolve into the exact S3.SH2 keyframe content inside the water as a brief luminous vision."
+    },
+    {
+     "phase": "reaction",
+     "performer": "Aida",
+     "observableAction": "Opens her eyes without a startle, looks directly at the S3.SH2 vision held in the reflection, brings one hand to her heart, and lets the meaning land before speaking."
+    },
+    {
+     "phase": "settle",
+     "performer": "Aida",
+     "observableAction": "Delivers the exact line with warm understatement, then rises and walks out of frame with quiet purpose as the vision fades."
+    }
+   ],
+   "physicalCauseAndEffect": "The rock gives Aida grounded weight; the raindrop breaks the reflected party; her restrained response keeps the water imperfect and lets the warning stay safe.",
+   "visibleEmotionalTurn": "Aida changes from open, eyes-closed stillness to a slightly tighter, ready stillness: eyes open, gaze checks the sky, shoulders gather, hands remain restrained.",
+   "requiredLanding": "Aida is ready to rise from the near rock beside the Moonlit Pool, with the party reflection still visibly rippled and unresolved.",
+   "performanceFreedom": "Keep freedom in breath length, blink placement, tiny mouth-corner change, robe follow-through, pendant glow softness, and water secondary motion, as long as Aida never startles, rushes, or fixes the pool.",
+   "characterTruths": [
+    {
+     "character": "Aida",
+     "canonTrait": "Aida is the warm elder anchor whose stillness holds a space safe; she tends to carry responsibility for others without making a show of it.",
+     "playableWant": "She wants to witness the warning and keep the moment safe without taking over Sunny’s experience.",
+     "pressureResponse": "Under the first sign of trouble, she becomes more contained rather than bigger: no flinch, no rescue gesture, a measured sky check, and a quiet rise.",
+     "observableSignature": "Rooted seated posture, slow gaze path, paws withheld from the water, steady rose-quartz presence, robes moving only after her body commits to standing.",
+     "substitutionTest": "Another bear could notice rain, but Aida alone makes non-intervention feel like active care; her elder stillness turns the broken image into a safe warning instead of alarm."
+    }
+   ],
+   "comedyStaging": null
+  },
+  "characterTruthsApproved": [
+   {
+    "character": "Aida",
+    "canonTrait": "Aida is the warm elder anchor whose stillness holds a space safe; she tends to carry responsibility for others without making a show of it.",
+    "playableWant": "She wants to witness the warning and keep the moment safe without taking over Sunny’s experience.",
+    "pressureResponse": "Under the first sign of trouble, she becomes more contained rather than bigger: no flinch, no rescue gesture, a measured sky check, and a quiet rise.",
+    "observableSignature": "Rooted seated posture, slow gaze path, paws withheld from the water, steady rose-quartz presence, robes moving only after her body commits to standing.",
+    "substitutionTest": "Another bear could notice rain, but Aida alone makes non-intervention feel like active care; her elder stillness turns the broken image into a safe warning instead of alarm."
+   }
+  ],
+  "comedyStagingApproved": null,
+  "comedyStagingsApproved": [],
+  "comedyContractsApproved": [
+   {
+    "beatCode": "S2.B1",
+    "mode": "SMALL",
+    "mechanism": "Gentle understatement: a whole party image trembles in the water, and Aida gives it the smallest possible wording.",
+    "comicOwner": "Aida",
+    "straightCharacter": null,
+    "setup": "The pool presents Sunny’s party as a flawless promise.",
+    "expectation": "A warning might produce alarm or urgent action.",
+    "disruption": "Aida stays calm and reduces the omen to “a little dampened.”",
+    "button": "The locked line lands over the softened ripple without erasing it.",
+    "hold": "Hold briefly after the line so the audience catches both the warning and the dry warmth.",
+    "physicalStaging": null
+   }
+  ],
+  "emotionContractsApproved": [
+   {
+    "beatCode": "S2.B1",
+    "owner": "Aida",
+    "entryState": "Warm, watchful, lightly protective beside the still pool.",
+    "pressure": "The perfect party image is physically broken by the first raindrop, asking whether she will smooth it over or rush to protect Sunny’s day.",
+    "choiceOrRealisation": "She allows the broken image to remain broken for a beat and treats the dampness as real but not disastrous.",
+    "exitState": "Grounded, softly knowing, still beside the unresolved warning.",
+    "observableEvidence": "Her body does not startle; her stillness tightens by one degree, she keeps her paws from reaching toward the water, then lifts her gaze with small knowing softness before the line.",
+    "audienceAlignment": "with",
+    "heldAfterBeat": "The water remains rippled and the party reflection remains changed."
+   }
+  ],
+  "cinematographyContractApproved": {
+   "storyPointOfView": "Aida’s responsible witnessing: the camera belongs to the caregiver who sees trouble coming and chooses not to over-control it.",
+   "emotionalDistanceStart": "Respectfully near but not intrusive, allowing her seated ritual and pendant glow to feel protected.",
+   "emotionalDistanceEnd": "Slightly closer and more intimate, near enough to read her understated choice while still holding the unresolved pool image.",
+   "revealStrategy": "Begin with Aida’s calm and the flawless pool promise; let the raindrop create the first break; reveal dark clouds through Aida’s lifted gaze, then return to the water for the line.",
+   "shotScale": "Starts MWS relationship frame, moves by cut to pool-edge MS/MCU relationship frame.",
+   "lensIntent": "50 mm for honest stillness at the opening; 85 mm after the ripple to compress Aida and the disturbed water into one restrained emotional fact.",
+   "cameraHeight": "At Aida’s eye-line while seated, adjusting with her quiet rise so her grounded presence remains the measure of the scene.",
+   "composition": "Aida is anchored on the near mossy rock; the pool is the luminous horizontal mirror below her; the reflected party and the crystal woodland share the frame without turning the reflection into a second location.",
+   "depthStrategy": "Tactile rock foreground, Aida in the middle plane, glass pool and rose-gold woodland beyond; the reflection adds wonder while the real rock keeps the camera honest.",
+   "cameraBehavior": "A purposeful hold through seated ritual and raindrop, one motivated cut as the pond vision resolves, then a gentle follow through Aida's hand-to-heart, line, rise and walk-off.",
+   "focusStrategy": "Shared focus between Aida, pendant glow, and still water at entry; favor ripple at contact; return shared attention to Aida and the unresolved water for the line.",
+   "lightingFunction": "Soft golden morning over cool moonlit pool haze protects the calm; after the drop, cooler rainy cast dulls the reflected party without turning the scene frightening.",
+   "paletteFunction": "Rose quartz warmth and party colours begin clear; the ripple and cloud cast make them wobble and soften, leaving the promise changed but not destroyed.",
+   "performanceVisibility": "The pond vision must read before Aida reacts; her eyes recognise it, one hand reaches her heart, the exact line lands, and her rise and walk-off are clearly motivated.",
+   "editorialPurpose": "One sustained warning beat: promise, disturbance, recognition, understatement, quiet readiness.",
+   "memorableLandingImage": "Aida walks away from the mossy rock while the luminous party vision fades inside the last ripple of the pond.",
+   "providerInstruction": "Use @图3 as the approved Moonlit Pool geography and light. Use @图2 for Aida identity only and @图1 as the approved S2.SH1 opening frame. Use @图4, the exact approved Ep4 S3.SH2 keyframe, as the content authority for the vision inside the pond reflection only. Do not copy @图4's foreground character, table, party layout or location into the real S2.SH1 world. Open on Aida already seated on the near mossy rock, eyes closed, pendant softly glowing. Hold the beauty and silence. One raindrop hits the pond; the ripple expands and @图4 resolves visibly inside the water as the luminous vision. This is Aida looking at a reflection, not a literal cutaway, overlay, second location or live Sunny foreground appearance. Keep Aida clearly in the foreground looking down at the reflected vision; her eyes track it, one hand reaches her heart, and she holds one breath of wonder. Deliver the exact Audio1 line with warm understatement, then rise and walk out of frame as the reflection fades. Preserve tactile rock contact, luminous rose-gold wonder, cool teal pool haze, motivated focus, readable cause-and-effect and a clear emotional walk-off. Keep @Audio1 as the only spoken source."
+  },
+  "performanceBudgetApproved": {
+   "emotionalTurnCount": 2,
+   "propStateChangeCount": 3,
+   "dialogueHeavy": false,
+   "silentActingReserveSec": 6.0,
+   "landingHoldSec": 1.0,
+   "minimumHonestDurationSec": 10.0,
+   "decision": "single-unit",
+   "rationale": "The beat needs time for seated ritual, image appearance, raindrop contact, Aida’s recognition, the line, and her quiet rise. It remains under provider duration and carries one coherent restraint arc."
+  },
+  "storyIntentApproved": {
+   "narrativeFunction": "Reveal the weather pressure that will test Sunny’s perfect party while establishing Aida’s calm choice not to over-function.",
+   "primaryAudienceFeeling": "A safe little vision-reveal wrapped in luminous wonder, followed by a purposeful emotional move.",
+   "secondaryAudienceFeeling": "Tender amusement at Aida’s tiny wording for a real warning.",
+   "outerAction": "Aida sits on the near mossy rock beside the Moonlit Pool; one raindrop strikes the pond and the exact S3.SH2 keyframe content appears inside the ripple as the vision; Aida looks at the reflection, puts one hand to her heart, delivers her line, rises, and walks away.",
+   "innerAction": "Aida receives the vision as a tender warning, feels its meaning, and chooses to act without turning it into panic.",
+   "performanceDirection": "Play stillness as practiced care: eyes closed and peaceful at first, then one-degree tightening after the raindrop, warm understatement, quiet readiness on the rise.",
+   "mutedRead": "With no dialogue, viewers still understand: a perfect image breaks, Aida sees the clouds, chooses calm, and leaves the warning unresolved.",
+   "environmentPressure": "The Moonlit Pool turns the party into a beautiful reflected promise. The raindrop does not destroy the world; it makes the truth gently visible.",
+   "soundStory": "Near-silence, soft pool air, one clear raindrop plink, gentle ripple bloom, then Aida’s low line; sound deepens restraint rather than explaining danger.",
+   "motifUse": "The rock is Aida's grounded care; the pool is the fragile promise; the first ripple is the smallest possible change that opens the weather story.",
+   "thoughtChangeAndCut": "Aida moves from holding the wider picture steady to accepting that the picture must stay imperfect; the cut comes only after the ripple changes the information.",
+   "mustUnderstand": "Rain is coming to test Sunny’s perfect day, and Aida knows it without panicking.",
+   "mustNotKnowYet": "How Sunny will respond to the rain or how the mess will become playable joy.",
+   "reactionBeat": "Aida’s meaning-changing reaction is her non-reaction: no startle, no rescue gesture, just recognition and quiet readiness.",
+   "relationshipDistance": "Aida is physically distant from Sunny but emotionally attentive through the pool image.",
+   "relationshipPowerDynamic": "Aida has elder awareness but does not use it to control the younger bear’s day.",
+   "touchOrAvoidance": "She does not touch or smooth the water; after the line she only brushes herself down as she rises.",
+   "eyelineRule": "Her attention moves from closed inward stillness to the pool, up to the clouds, then back to the disturbed water before the line.",
+   "silhouetteRead": "Aida's seated silhouette is rooted to the rock and framed by the water; after the warning she becomes a quiet ready shape without losing her warmth.",
+   "silenceRule": "Protect silence before the raindrop, after the skyward look, and briefly after the line; do not fill the restraint with extra business.",
+   "scoreInstruction": "Keep score withheld or barely present under the pool tone; let the plink and Aida’s voice carry the turn, with no swell that tells the audience to worry."
+  },
+  "targetDurationSecApproved": 11,
+  "storyboardStagePlanApproved": [
+   {
+    "stageNumber": 1,
+    "beatIds": [
+     "S2.B1"
+    ],
+    "purpose": "Restore the scripted ritual before the warning: Aida’s calm is active, not decorative.",
+    "primaryEvent": "Aida sits still beside the glass-still Moonlit Pool with eyes closed; her rose quartz pendant glows softly, and the pool begins to hold Sunny’s party image.",
+    "emotionalOrComicTurn": "Protected stillness: the audience trusts Aida’s quiet before anything goes wrong.",
+    "cameraAndTransition": "Open in a respectful held relationship frame at Aida’s eye-line; no cut because the ritual, pendant glow, and pool stillness belong together.",
+    "observableEndState": "Aida remains seated and peaceful, eyes closed or just beginning to attend; the pendant glow is legible and Sunny’s party reflection is present in the still water."
+   },
+   {
+    "stageNumber": 2,
+    "beatIds": [
+     "S2.B1"
+    ],
+    "purpose": "Let the warning arrive as one small natural interruption.",
+    "primaryEvent": "A single raindrop falls into the centre of Sunny’s reflected party, sending a circular ripple through the image.",
+    "emotionalOrComicTurn": "Tiny gasp: the perfect party promise is physically disturbed.",
+    "cameraAndTransition": "Stay through contact and the first completed ripple so the audience sees the image break in Aida’s calm space, not as spectacle.",
+    "observableEndState": "The reflected party is wobbled and broken by the first ripple; Aida has not reached to fix it."
+   },
+   {
+    "stageNumber": 3,
+    "beatIds": [
+     "S2.B1"
+    ],
+    "purpose": "Make Aida’s restraint visible as responsibility arriving.",
+    "primaryEvent": "Aida opens her eyes, looks up to the gathering dark clouds, holds a long beat, then looks back to the disturbed water.",
+    "emotionalOrComicTurn": "Care tightens by one degree without becoming panic.",
+    "cameraAndTransition": "Cut only after the ripple’s first deformation to a closer pool-edge relationship view; the view includes Aida, the unresolved water, and her skyward recognition.",
+    "observableEndState": "Aida has understood the warning and returned her attention to the still-disturbed pool."
+   },
+   {
+    "stageNumber": 4,
+    "beatIds": [
+     "S2.B1"
+    ],
+    "purpose": "Land the gentle understatement while preserving the unresolved warning.",
+    "primaryEvent": "Aida softly says, “Someone’s day might be a little dampened.”",
+    "emotionalOrComicTurn": "Warm dry amusement: a whole party trembles in the water and Aida gives it the smallest possible wording.",
+    "cameraAndTransition": "Hold the closer relationship frame so the line lands over softened ripples rather than over an isolated reaction.",
+    "observableEndState": "The warning remains visible in the water after the line; Aida stays grounded and calm."
+   },
+   {
+    "stageNumber": 5,
+    "beatIds": [
+     "S2.B1"
+    ],
+    "purpose": "Complete the approved source action and leave the scene in quiet restraint.",
+    "primaryEvent": "Aida rises quietly, brushes herself down, and says nothing to anyone.",
+    "emotionalOrComicTurn": "She chooses readiness without announcement or rescue.",
+    "cameraAndTransition": "Let the camera remain settled; the departure begins quietly inside the same restrained tone.",
+    "observableEndState": "Aida is upright beside the pool after brushing herself down; the rippled party image remains unresolved."
+   }
+  ],
+  "storyboardInternalShotPlanApproved": [
+   {
+    "shotNumber": 1,
+    "viewId": "S2.V01",
+    "transitionType": "opening",
+    "staging": "Aida is already seated on the broad mossy rock at the near edge of the Moonlit Pool, her weight grounded and her body turned three-quarters toward the water. The approved pool plate remains the fixed world: luminous trees, crystals, flowers and the glass surface. The S3.SH2 keyframe is not a second set: it is the exact visual content that will appear later inside the pond's reflection, like a beautiful promise Aida can see but cannot touch.",
+    "startState": "Aida seated on the near pool rock, eyes open and calmly aimed toward the ordinary woodland reflection; pool glass-still with no party vision yet; morning light warm and rose-gold.",
+    "endState": "The completed ripple opens a living vision inside the pond: Sunny's party appears in the water as a brief luminous future-image. Aida has seen it and begins to turn toward it.",
+    "cutTo": "A closer rock-and-pool relationship view where Aida reads the vision, brings one hand to her heart, and delivers the line before rising.",
+    "timing": "Planned opening hold from 0.0–4.5 seconds; the raindrop contact and first completed ripple must read before the cut.",
+    "purpose": "Let the audience fall in love with the impossible calm of Aida, the rock and the luminous pool before one tiny natural event breaks the perfect image.",
+    "framingAndCamera": "MWS at Aida's seated eye-line, low enough to give the rock tactile weight and wide enough to hold Aida, the pool edge and the reflected party together. The camera holds its breath; no decorative drift.",
+    "storyAction": "Aida sits in protected stillness. The pond initially shows only its ordinary woodland reflection. A single raindrop lands in the centre. The ripple blooms outward and the exact S3.SH2 keyframe content resolves inside the water as a brief luminous vision. Aida looks down at that reflection; it is an authored story image inside the pond, not a second location or a live Sunny cutaway.",
+    "performanceFocus": "Aida's stillness is active care, not emptiness. Her eyelids remain peaceful until the plink; then her eyes open without a flinch as the vision resolves in the water. Her breath catches softly and her attention locks to the image.",
+    "landingImage": "The pond holds the luminous vision inside its completed ripple; Aida has seen it and the wonder has given her a reason to move.",
+    "cutReason": "Hold through the first completed ripple so the audience experiences the break inside Aida's calm. Cut only after the changed information is readable.",
+    "framing": "MWS at Aida's seated eye-line: rock in tactile foreground, Aida as the stable vertical presence, pool and reflected party carrying the luminous horizontal image.",
+    "continuity": "Aida owns the near rock throughout the opening view. The pond begins glass-still; the raindrop creates one completed ripple that briefly contains the authored party vision. The vision is water-born and ephemeral, never a literal cutaway or second location.",
+    "viewpointOwner": "Aida",
+    "listenerReaction": null,
+    "visibleEntities": [
+     "Aida",
+     "near mossy pool rock",
+     "Moonlit Pool",
+     "S3.SH2 keyframe content inside the pond reflection",
+     "crystal trees and flowers",
+     "lighting:pool_grove_light"
+    ],
+    "cinematography": {
+     "owner": "Aida",
+     "emotionalAction": "protecting stillness while witnessing a beautiful promise become fragile",
+     "cameraState": "low, respectful observational hold from the real pool edge; the rock gives Aida weight and the water gives the frame wonder",
+     "stateChangeTrigger": "the first raindrop contacts the pond and the vision resolves inside the ripple",
+     "kind": "hold",
+     "cutTiming": "after",
+     "actionPhase": "contact",
+     "functions": [
+      "establish mood",
+      "plant",
+      "create anticipation",
+      "create emotion"
+     ],
+     "attention": "relationship",
+     "viewpoint": "real space beside Aida, never inside the reflection",
+     "lensRelationship": "50 mm, honest and gently intimate; enough width for geography and enough falloff for the reflection to feel enchanted",
+     "composition": "The mossy rock anchors the foreground, Aida is the calm vertical centre of gravity, and the pool opens a luminous horizontal mirror beneath her gaze.",
+     "movementHold": "Nearly locked. A tiny organic settling movement follows the ripple rather than announcing it; no generic push-in.",
+     "focus": "Begin shared between Aida's pendant, rock texture and ordinary glass water; transfer attention to the ripple at contact, then retain Aida in readable softness as the vision resolves.",
+     "light": "Warm amber canopy light and rose-quartz glow against cool teal pool haze; the first ripple cools the reflected colours without making the world frightening.",
+     "cutInReason": "The ripple has become a vision, and the audience must read Aida reading it before her body answers the discovery.",
+     "exitFrame": "The pond still carries the fading party vision; Aida has turned toward it and is ready to bring one hand to her heart."
+    }
+   },
+   {
+    "shotNumber": 2,
+    "viewId": "S2.V02",
+    "transitionType": "cut",
+    "staging": "Stay on the same side of the pool and the same rock. Aida remains seated in the foreground, looking directly at the S3.SH2 keyframe content held inside the softened pond reflection; the water is foreground truth and her face is the quiet human reading of it.",
+    "startState": "The first ripple has completed and the exact S3.SH2 keyframe content is visibly alive inside the pond reflection; Aida is seated on the rock, eyes open, absorbing what she has seen.",
+    "endState": "Aida's hand rests over her heart; her line has landed warmly; she rises from the rock and walks out of frame, leaving the pond vision to fade.",
+    "cutTo": "The next beat inherits Aida's movement away from the pond and the emotional knowledge carried by the vision.",
+    "timing": "Approximately 4.5–11.0 seconds; allow the vision to register, then hand-to-heart, line, rise, and a clear walk-off landing.",
+    "purpose": "Turn the pond vision into an emotional invitation: Aida sees the future trouble, feels it in her heart, speaks with warm understatement, then physically commits to leaving.",
+    "framingAndCamera": "Pool-edge MS/MCU relationship frame, still grounded on the rock. Let the rippled reflection occupy the lower foreground while Aida's eyes travel from water to clouds and back.",
+    "storyAction": "Aida watches the exact S3.SH2 keyframe vision glow within the ripple. She brings one hand to her heart, keeps her gaze on the reflection for one breath, looks to the path ahead, and says, “Someone’s day might be a little dampened.” After the line lands, she rises and walks out of frame with quiet purpose.",
+    "performanceFocus": "The vision lands first in Aida's eyes, then in the hand-to-heart gesture. She speaks warmly and privately, not as a joke or alarm. The line completes before she rises; her walk-off is the physical punctuation.",
+    "landingImage": "Aida has walked away from the rock; the pond vision fades through the last ripple, leaving the beautiful warning behind.",
+    "cutReason": "Cut after the ripple has changed the information, so the closer view reads Aida's choice rather than manufacturing a reaction.",
+    "framing": "MS/MCU at Aida's seated eye-line with rock edge and disturbed pool together; never isolate Aida from the geography that gives the line meaning.",
+    "continuity": "Same rock, same pond side, same screen direction. The authored vision remains inside the water until the line completes, then fades as Aida rises and walks off in the established exit direction.",
+    "viewpointOwner": "Aida",
+    "listenerReaction": null,
+    "visibleEntities": [
+     "Aida",
+     "near mossy pool rock",
+     "softened circular ripples",
+     "exact S3.SH2 keyframe content inside the pond reflection",
+     "lighting:pool_grove_light",
+     "crystal flowers at pool edge"
+    ],
+    "cinematography": {
+     "owner": "Aida",
+     "emotionalAction": "receiving the vision, feeling it at her heart, then choosing to move",
+     "cameraState": "quiet motivated cut-in that preserves the rock, water, vision and Aida as one relationship before easing with her exit",
+     "stateChangeTrigger": "the pond vision resolves and Aida understands its warning",
+     "kind": "cut_in",
+     "motivation": "KNOW",
+     "cutTiming": "after",
+     "actionPhase": "reaction",
+     "functions": [
+      "pay off",
+      "create comedy",
+      "create emotion"
+     ],
+     "attention": "relationship",
+     "viewpoint": "low pool-edge relationship angle, never a magical POV",
+     "lensRelationship": "85 mm for intimate restraint while keeping the rock and disturbed water legible",
+     "composition": "Rippled reflection in the lower frame, Aida seated on the rock in the middle plane, cloud pressure and crystals breathing behind her.",
+     "movementHold": "Settled hold; a tiny gaze-led reframing is enough. No sudden push-in on worry.",
+     "focus": "Start on the S3.SH2 keyframe content inside the ripple, rack to Aida's eyes as she recognises it, hold the hand-to-heart gesture and line, then follow her rise and walk-off while the pond vision fades.",
+     "light": "The vision briefly blooms with warm party colour inside cool teal water haze; Aida keeps a rose-gold edge light as wonder becomes tender resolve.",
+     "cutInReason": "The audience must see the exact moment the pond gives Aida the vision, then watch the knowledge travel through her body into action.",
+     "exitFrame": "Aida has walked out of frame; the fading vision remains in the pond for one final readable ripple."
+    }
+   }
+  ],
+  "transitionType": "PLANNED_CUT",
+  "providerBoundaryReasonApproved": "scene_end",
+  "providerBoundaryExplanationApproved": "The beat completes the pool warning, Aida’s line, and her quiet rise; the next material should inherit the safe rainy pressure as a new scene or beat rather than continue this pool-side restraint.",
+  "voiceDirectorBrief": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:61997930abc49451940d6dd710bbd9ecca3668c51e056984f679b7a9fa933805",
+    "sourceEventId": "script-event:sha256:675ade2a1ddaca8ba2b532f503576047c949a645ac529742da47f3893ec9ec0f",
+    "speaker": "Aida",
+    "exactDialogue": "Someone’s day might be a little dampened.",
+    "elevenLabsV3Direction": "[quietly] Someone’s day might be a little dampened.",
+    "expectedTiming": "Estimated only: delay start until after the first ripple fully reads and Aida has checked the clouds; line should feel brief and understated, followed by a quiet after-hold before rising.",
+    "physicalActionRelationship": "The voice supports the body’s restraint: still, knowing, and gentle while the water and pendant carry the unease she does not announce."
+   }
+  ],
+  "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Aida and @图3 only for the pool set.\n\nBegin exactly on @图1, the approved opening frame — open on seated Aida with eyes closed beside a glass-still pool, rose quartz pendant softly glowing; hold as Sunny’s party image appears and one raindrop breaks it, then cut closer to keep Aida and the rippled water together as she looks to暗. Performance phases: anticipation: Aida Sits grounded beside the glass-still pool with eyes closed, relaxed paws away from the water, and a steady pendant glow; action: ENVIRONMENT One raindrop strikes the centre of the reflected party image; circular ripples spread outward, bending the shapes and dulling the surface; reaction: Aida Opens her eyes without a startle, looks from the disturbed pool up toward the gathering clouds, holds, then brings her gaze back to the water; her shoulders gather slightly while her paws stay still; settle: Aida Maintains calm through the spoken beat, then rises with controlled weight, brushes down her robes, and stands beside the still-disturbed reflection. Cause and effect: The pool begins smooth enough to carry a clear reflected party. The raindrop impact sends rings through the image, so the warning becomes physically visible. Because Aida does not touch the surface, the reflection remains imperfect while she shifts from seated weight into a quiet stand. Visible turn: Aida changes from open, eyes-closed stillness to a slightly tighter, ready stillness: eyes open, gaze checks the sky, shoulders gather, hands remain restrained. Land on: Aida is upright beside the Moonlit Pool after brushing herself down, with the party reflection still visibly rippled and unresolved. Acting freedom: Keep freedom in breath length, blink placement, tiny mouth-corner change, robe follow-through, pendant glow softness, and water secondary motion, as long as Aida never startles, rushes, or fixes the pool. Aida stands beside the Moonlit Pool after brushing herself down, while softened ripples still disturb Sunny’s party reflection.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Aida. Preserve character identity and relative scale.",
+  "promptWords": 335,
+  "referenceSlots": {
+   "@图1": "opening keyframe",
+   "@图2": "Aida",
+   "@图3": "scene plate",
+   "@图4": "vision:S3.SH2 keyframe pond reflection",
+   "@Audio1": "voice track"
+  },
+  "audioBrief": "SHOT S2.SH1 — voice-only performance for @Audio1.\nAida: \"Someone’s day might be a little dampened.\" — [quietly] Someone’s day might be a little dampened.. Target 4.5-7.0s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+  "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Aida (@图1, bear) sits beside the glass-still Moonlit Pool with eyes closed, her rose quartz pendant glowing softly against the quiet morning water.\n\n@图2 scene plate anchors palette, materials and lighting and world-space geography; preserve landmarks without copying its camera composition.\n\nLiving performance lock: Aida has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+  "keyframePromptWords": 120,
+  "keyframeReferenceSlots": {
+   "@图1": "Aida",
+   "@图2": "scene plate"
+  },
+  "internalConstraints": "Hard constraints: Do not let Aida touch or smooth the water; the reflection must remain visibly disturbed; Keep the shot on the approved pool-edge relationship framing and do not introduce extra characters or props; no The spoken line must remain verbatim and land over the softened ripple, not before the first ripple reads; no character redesign; no extra characters; no on-screen text; no invented voices; no foreign-language speech; no floating or sinking through ground.",
+  "openingImage": "Aida is already seated on the near mossy rock beside the glass-still Moonlit Pool, eyes open and calmly aimed toward the ordinary woodland reflection, pendant glowing softly; no party vision is present at entry.",
+  "principalPerformance": "Aida sits on the rock in protected stillness. The pond initially carries only the ordinary woodland reflection. The first raindrop breaks it; the exact S3.SH2 keyframe vision appears inside the water, and Aida looks at it in the foreground. Her gaze recognises it, one hand reaches her heart, the exact line lands warmly, then she rises quietly without rescuing the image.",
+  "physicalOrEmotionalChange": "The pool changes from a flawless reflected promise to a rippled warning; Aida changes from rooted stillness to quiet readiness while remaining the safe emotional anchor.",
+  "closingImage": "Aida remains beside the near rock and disturbed pool, ready to rise; the beautiful reflection is imperfect but not destroyed.",
+  "directorCard": {
+   "instructions": [],
+   "audienceFocus": "Rain is coming to test Sunny’s perfect day, and Aida knows it without panicking.",
+   "cameraPurpose": "Aida moves from holding the wider picture steady to accepting that the picture must stay imperfect; the cut comes only after the ripple changes the information.",
+   "editIn": "Aida seated on the near pool rock, eyes open and calmly aimed toward the ordinary woodland reflection; pool glass-still with no party vision yet; morning light warm and rose-gold.",
+   "editOut": "Aida's hand rests over her heart; her line has landed warmly; she rises from the rock and walks out of frame, leaving the pond vision to fade.",
+   "handoff": "Aida is ready to rise from the near rock beside the Moonlit Pool, with the party reflection still visibly rippled and unresolved.",
+   "intendedState": "Aida's hand rests over her heart; her line has landed warmly; she rises from the rock and walks out of frame, leaving the pond vision to fade.",
+   "acting": [
+    {
+     "character": "Aida",
+     "intention": "She wants to witness the warning and keep the moment safe without taking over Sunny’s experience.",
+     "attention": "She wants to witness the warning and keep the moment safe without taking over Sunny’s experience.",
+     "observableBehaviour": "Rooted seated posture, slow gaze path, paws withheld from the water, steady rose-quartz presence, robes moving only after her body commits to standing.",
+     "startingPose": "Aida seated on the near pool rock, eyes open and calmly aimed toward the ordinary woodland reflection; pool glass-still with no party vision yet; morning light warm and rose-gold.",
+     "endingPose": "Aida is ready to rise from the near rock beside the Moonlit Pool, with the party reflection still visibly rippled and unresolved.",
+     "timing": "Within the approved coverage and measured audio intervals",
+     "listening": "Under the first sign of trouble, she becomes more contained rather than bigger: no flinch, no rescue gesture, a measured sky check, and a quiet rise."
+    }
+   ],
+   "views": [
+    {
+     "atSec": 0.0,
+     "visibleEntities": [
+      "character:Aida",
+      "support:near_mossy_pool_rock",
+      "environment:Moonlit_Pool",
+      "effect:pool_ripples",
+      "effect:future_party_vision_reflection",
+      "effect:single_raindrop",
+      "environment:crystal_trees_and_flowers",
+      "environment:morning_light"
+     ],
+     "criticalStateEntities": [
+      "character:Aida",
+      "environment:Moonlit_Pool",
+      "effect:pool_ripples",
+      "effect:future_party_vision_reflection",
+      "effect:single_raindrop",
+      "support:near_mossy_pool_rock"
+     ],
+     "storyRelationship": null,
+     "stateAtEntry": {},
+     "sourceBeat": null,
+     "viewpointOwner": "Aida",
+     "listenerReaction": null,
+     "cinematography": {
+      "owner": "Aida",
+      "emotionalAction": "protecting stillness while witnessing a beautiful promise become fragile",
+      "cameraState": "low, respectful observational hold from the real pool edge; the rock gives Aida weight and the water gives the frame wonder",
+      "stateChangeTrigger": "the first raindrop contacts the pond and the vision resolves inside the ripple",
+      "kind": "hold",
+      "cutTiming": "after",
+      "actionPhase": "contact",
+      "functions": [
+       "establish mood",
+       "plant",
+       "create anticipation",
+       "create emotion"
+      ],
+      "attention": "relationship",
+      "viewpoint": "real space beside Aida, never inside the reflection",
+      "lensRelationship": "50 mm, honest and gently intimate; enough width for geography and enough falloff for the reflection to feel enchanted",
+      "composition": "The mossy rock anchors the foreground, Aida is the calm vertical centre of gravity, and the pool opens a luminous horizontal mirror beneath her gaze.",
+      "movementHold": "Nearly locked. A tiny organic settling movement follows the ripple rather than announcing it; no generic push-in.",
+      "focus": "Begin shared between Aida's pendant, rock texture and ordinary glass water; transfer attention to the ripple at contact, then retain Aida in readable softness as the vision resolves.",
+      "light": "Warm amber canopy light and rose-quartz glow against cool teal pool haze; the first ripple cools the reflected colours without making the world frightening.",
+      "cutInReason": "The ripple has become a vision, and the audience must read Aida reading it before her body answers the discovery.",
+      "exitFrame": "The pond still carries the fading party vision; Aida has turned toward it and is ready to bring one hand to her heart."
+     },
+     "viewId": "S2.V01",
+     "audienceNeed": "Let the audience fall in love with the impossible calm of Aida, the rock and the luminous pool before one tiny natural event breaks the perfect image.",
+     "framing": "MWS at Aida's seated eye-line: rock in tactile foreground, Aida as the stable vertical presence, pool and reflected party carrying the luminous horizontal image.",
+     "cameraPurpose": "Let the audience fall in love with the impossible calm of Aida, the rock and the luminous pool before one tiny natural event breaks the perfect image.",
+     "cutReason": "Hold through the first completed ripple so the audience experiences the break inside Aida's calm. Cut only after the changed information is readable.",
+     "continuity": "Aida owns the near rock throughout the opening view. The pond begins glass-still; the raindrop creates one completed ripple that briefly contains the authored party vision. The vision is water-born and ephemeral, never a literal cutaway or second location.",
+     "productionChoice": "controlled multi-shot clip",
+     "entry": "opening",
+     "staging": "Aida is already seated on the broad mossy rock at the near edge of the Moonlit Pool, her weight grounded and her body turned three-quarters toward the water. The approved pool plate remains the fixed world: luminous trees, crystals, flowers and the glass surface. The S3.SH2 keyframe is not a second set: it is the exact visual content that will appear later inside the pond's reflection, like a beautiful promise Aida can see but cannot touch.",
+     "action": "Aida sits in protected stillness. The pond initially shows only its ordinary woodland reflection. A single raindrop lands in the centre. The ripple blooms outward and the exact S3.SH2 keyframe content resolves inside the water as a brief luminous vision. Aida looks down at that reflection; it is an authored story image inside the pond, not a second location or a live Sunny cutaway.",
+     "performance": "Aida's stillness is active care, not emptiness. Her eyelids remain peaceful until the plink; then her eyes open without a flinch as the vision resolves in the water. Her breath catches softly and her attention locks to the image.",
+     "timing": "0–4.5s",
+     "startState": "Aida seated on the near pool rock, eyes open and calmly aimed toward the ordinary woodland reflection; pool glass-still with no party vision yet; morning light warm and rose-gold.",
+     "endState": "The completed ripple opens a living vision inside the pond: Sunny's party appears in the water as a brief luminous future-image. Aida has seen it and begins to turn toward it.",
+     "cutTo": "A closer rock-and-pool relationship view where Aida reads the vision, brings one hand to her heart, and delivers the line before rising."
+    },
+    {
+     "atSec": 4.5,
+     "visibleEntities": [
+      "character:Aida",
+      "support:near_mossy_pool_rock",
+      "environment:Moonlit_Pool",
+      "effect:pool_ripples",
+      "effect:future_party_vision_reflection",
+      "environment:sky_cloud_pressure",
+      "environment:cooler_rainy_cast",
+      "environment:crystal_flowers_at_pool_edge"
+     ],
+     "criticalStateEntities": [
+      "character:Aida",
+      "support:near_mossy_pool_rock",
+      "environment:Moonlit_Pool",
+      "effect:pool_ripples",
+      "effect:future_party_vision_reflection",
+      "environment:sky_cloud_pressure",
+      "environment:cooler_rainy_cast"
+     ],
+     "storyRelationship": null,
+     "stateAtEntry": {},
+     "sourceBeat": null,
+     "viewpointOwner": "Aida",
+     "listenerReaction": null,
+     "cinematography": {
+      "owner": "Aida",
+      "emotionalAction": "receiving the vision, feeling it at her heart, then choosing to move",
+      "cameraState": "quiet motivated cut-in that preserves the rock, water, vision and Aida as one relationship before easing with her exit",
+      "stateChangeTrigger": "the pond vision resolves and Aida understands its warning",
+      "kind": "cut_in",
+      "motivation": "KNOW",
+      "cutTiming": "after",
+      "actionPhase": "reaction",
+      "functions": [
+       "pay off",
+       "create comedy",
+       "create emotion"
+      ],
+      "attention": "relationship",
+      "viewpoint": "low pool-edge relationship angle, never a magical POV",
+      "lensRelationship": "85 mm for intimate restraint while keeping the rock and disturbed water legible",
+      "composition": "Rippled reflection in the lower frame, Aida seated on the rock in the middle plane, cloud pressure and crystals breathing behind her.",
+      "movementHold": "Settled hold; a tiny gaze-led reframing is enough. No sudden push-in on worry.",
+      "focus": "Start on the S3.SH2 keyframe content inside the ripple, rack to Aida's eyes as she recognises it, hold the hand-to-heart gesture and line, then follow her rise and walk-off while the pond vision fades.",
+      "light": "The vision briefly blooms with warm party colour inside cool teal water haze; Aida keeps a rose-gold edge light as wonder becomes tender resolve.",
+      "cutInReason": "The audience must see the exact moment the pond gives Aida the vision, then watch the knowledge travel through her body into action.",
+      "exitFrame": "Aida has walked out of frame; the fading vision remains in the pond for one final readable ripple."
+     },
+     "viewId": "S2.V02",
+     "audienceNeed": "Turn the pond vision into an emotional invitation: Aida sees the future trouble, feels it in her heart, speaks with warm understatement, then physically commits to leaving.",
+     "framing": "MS/MCU at Aida's seated eye-line with rock edge and disturbed pool together; never isolate Aida from the geography that gives the line meaning.",
+     "cameraPurpose": "Turn the pond vision into an emotional invitation: Aida sees the future trouble, feels it in her heart, speaks with warm understatement, then physically commits to leaving.",
+     "cutReason": "Cut after the ripple has changed the information, so the closer view reads Aida's choice rather than manufacturing a reaction.",
+     "continuity": "Same rock, same pond side, same screen direction. The authored vision remains inside the water until the line completes, then fades as Aida rises and walks off in the established exit direction.",
+     "productionChoice": "controlled multi-shot clip",
+     "entry": "cut",
+     "staging": "Stay on the same side of the pool and the same rock. Aida remains seated in the foreground, looking directly at the S3.SH2 keyframe content held inside the softened pond reflection; the water is foreground truth and her face is the quiet human reading of it.",
+     "action": "Aida watches the exact S3.SH2 keyframe vision glow within the ripple. She brings one hand to her heart, keeps her gaze on the reflection for one breath, looks to the path ahead, and says, “Someone’s day might be a little dampened.” After the line lands, she rises and walks out of frame with quiet purpose.",
+     "performance": "The vision lands first in Aida's eyes, then in the hand-to-heart gesture. She speaks warmly and privately, not as a joke or alarm. The line completes before she rises; her walk-off is the physical punctuation.",
+     "timing": "4.5–11s",
+     "startState": "The first ripple has completed and the exact S3.SH2 keyframe content is visibly alive inside the pond reflection; Aida is seated on the rock, eyes open, absorbing what she has seen.",
+     "endState": "Aida's hand rests over her heart; her line has landed warmly; she rises from the rock and walks out of frame, leaving the pond vision to fade.",
+     "cutTo": "The next beat inherits Aida's movement away from the pond and the emotional knowledge carried by the vision."
+    }
+   ],
+   "soundOwnership": "Near-silence, soft pool air, one clear raindrop plink, gentle ripple bloom, then Aida’s low line; sound deepens restraint rather than explaining danger.",
+   "stateChanges": [
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "character:Aida",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 0.0,
+     "beforeValues": {},
+     "afterValues": {
+      "location": "seated on near mossy pool rock",
+      "posture": "seated upright and grounded",
+      "gazeTarget": "toward ordinary pool reflection",
+      "handState": "paws resting low, not over heart",
+      "expression": "warm calm",
+      "speechState": "silent",
+      "framePresence": "visible in frame"
+     },
+     "storyRelationship": "continuous",
+     "subject": "character:Aida",
+     "before": "{}",
+     "cause": "Approved opening image and S2.SH1 approved direction establish the starting state.",
+     "after": "{'location': 'seated on near mossy pool rock', 'posture': 'seated upright and grounded', 'gazeTarget': 'toward ordinary pool reflection', 'handState': 'paws resting low, not over heart', 'expression': 'warm calm', 'speechState': 'silent', 'framePresence': 'visible in frame'}",
+     "timing": "0s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "support:near_mossy_pool_rock",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 0.0,
+     "beforeValues": {},
+     "afterValues": {
+      "occupancy": "occupied by seated Aida",
+      "surfaceState": "mossy and dry"
+     },
+     "storyRelationship": "continuous",
+     "subject": "support:near_mossy_pool_rock",
+     "before": "{}",
+     "cause": "Approved opening image establishes Aida grounded on the near rock.",
+     "after": "{'occupancy': 'occupied by seated Aida', 'surfaceState': 'mossy and dry'}",
+     "timing": "0s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:Moonlit_Pool",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 0.0,
+     "beforeValues": {},
+     "afterValues": {
+      "surfaceState": "glass-still",
+      "reflectionContent": "ordinary crystal woodland reflection",
+      "waterTouchState": "undisturbed"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:Moonlit_Pool",
+     "before": "{}",
+     "cause": "Approved opening image and source direction establish the pool before the warning.",
+     "after": "{'surfaceState': 'glass-still', 'reflectionContent': 'ordinary crystal woodland reflection', 'waterTouchState': 'undisturbed'}",
+     "timing": "0s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:pool_ripples",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 0.0,
+     "beforeValues": {},
+     "afterValues": {
+      "state": "absent"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:pool_ripples",
+     "before": "{}",
+     "cause": "Approved opening state shows no completed ripple yet.",
+     "after": "{'state': 'absent'}",
+     "timing": "0s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:future_party_vision_reflection",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 0.0,
+     "beforeValues": {},
+     "afterValues": {
+      "visibility": "not visible",
+      "content": "none"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:future_party_vision_reflection",
+     "before": "{}",
+     "cause": "Source direction states the S3.SH2 vision appears later inside the pond reflection.",
+     "after": "{'visibility': 'not visible', 'content': 'none'}",
+     "timing": "0s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:single_raindrop",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 0.0,
+     "beforeValues": {},
+     "afterValues": {
+      "state": "not visible",
+      "location": "offscreen above pool"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:single_raindrop",
+     "before": "{}",
+     "cause": "Source direction places the raindrop after the opening hold.",
+     "after": "{'state': 'not visible', 'location': 'offscreen above pool'}",
+     "timing": "0s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:morning_light",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 0.0,
+     "beforeValues": {},
+     "afterValues": {
+      "quality": "warm rose-gold morning over cool pool haze"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:morning_light",
+     "before": "{}",
+     "cause": "Approved opening image establishes the initial light.",
+     "after": "{'quality': 'warm rose-gold morning over cool pool haze'}",
+     "timing": "0s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:sky_cloud_pressure",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 0.0,
+     "beforeValues": {},
+     "afterValues": {
+      "visibility": "not yet revealed as warning"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:sky_cloud_pressure",
+     "before": "{}",
+     "cause": "The warning clouds are withheld until Aida's later recognition.",
+     "after": "{'visibility': 'not yet revealed as warning'}",
+     "timing": "0s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:cooler_rainy_cast",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 0.0,
+     "beforeValues": {},
+     "afterValues": {
+      "visibility": "absent"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:cooler_rainy_cast",
+     "before": "{}",
+     "cause": "Approved opening image establishes warm morning light before the later cooler rainy cast.",
+     "after": "{'visibility': 'absent'}",
+     "timing": "0s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:single_raindrop",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 2.2,
+     "beforeValues": {
+      "state": "not visible",
+      "location": "offscreen above pool"
+     },
+     "afterValues": {
+      "state": "absorbed into pool surface",
+      "location": "pool center"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:single_raindrop",
+     "before": "{'state': 'not visible', 'location': 'offscreen above pool'}",
+     "cause": "One raindrop falls and completes contact with the pond.",
+     "after": "{'state': 'absorbed into pool surface', 'location': 'pool center'}",
+     "timing": "2.2s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:Moonlit_Pool",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 2.2,
+     "beforeValues": {
+      "surfaceState": "glass-still",
+      "reflectionContent": "ordinary crystal woodland reflection",
+      "waterTouchState": "undisturbed"
+     },
+     "afterValues": {
+      "surfaceState": "contact dimple forming",
+      "reflectionContent": "ordinary crystal woodland reflection distorted at impact",
+      "waterTouchState": "raindrop contact completed"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:Moonlit_Pool",
+     "before": "{'surfaceState': 'glass-still', 'reflectionContent': 'ordinary crystal woodland reflection', 'waterTouchState': 'undisturbed'}",
+     "cause": "The raindrop strikes the pool surface.",
+     "after": "{'surfaceState': 'contact dimple forming', 'reflectionContent': 'ordinary crystal woodland reflection distorted at impact', 'waterTouchState': 'raindrop contact completed'}",
+     "timing": "2.2s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:pool_ripples",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 2.2,
+     "beforeValues": {
+      "state": "absent"
+     },
+     "afterValues": {
+      "state": "first circular ripple forming"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:pool_ripples",
+     "before": "{'state': 'absent'}",
+     "cause": "Raindrop contact begins the circular ripple.",
+     "after": "{'state': 'first circular ripple forming'}",
+     "timing": "2.2s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:Moonlit_Pool",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 3.6,
+     "beforeValues": {
+      "surfaceState": "contact dimple forming",
+      "reflectionContent": "ordinary crystal woodland reflection distorted at impact",
+      "waterTouchState": "raindrop contact completed"
+     },
+     "afterValues": {
+      "surfaceState": "completed circular ripple",
+      "reflectionContent": "S3.SH2 party vision visible inside pond reflection",
+      "waterTouchState": "raindrop contact completed"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:Moonlit_Pool",
+     "before": "{'surfaceState': 'contact dimple forming', 'reflectionContent': 'ordinary crystal woodland reflection distorted at impact', 'waterTouchState': 'raindrop contact completed'}",
+     "cause": "The first ripple completes and resolves the approved S3.SH2 content inside the water.",
+     "after": "{'surfaceState': 'completed circular ripple', 'reflectionContent': 'S3.SH2 party vision visible inside pond reflection', 'waterTouchState': 'raindrop contact completed'}",
+     "timing": "3.6s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:pool_ripples",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 3.6,
+     "beforeValues": {
+      "state": "first circular ripple forming"
+     },
+     "afterValues": {
+      "state": "completed circular ripple"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:pool_ripples",
+     "before": "{'state': 'first circular ripple forming'}",
+     "cause": "The ripple bloom reaches its readable completed shape.",
+     "after": "{'state': 'completed circular ripple'}",
+     "timing": "3.6s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:future_party_vision_reflection",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 3.6,
+     "beforeValues": {
+      "visibility": "not visible",
+      "content": "none"
+     },
+     "afterValues": {
+      "visibility": "visible inside pond reflection",
+      "content": "exact S3.SH2 keyframe content as water-born vision"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:future_party_vision_reflection",
+     "before": "{'visibility': 'not visible', 'content': 'none'}",
+     "cause": "The completed ripple reveals the luminous future-party image in the pond.",
+     "after": "{'visibility': 'visible inside pond reflection', 'content': 'exact S3.SH2 keyframe content as water-born vision'}",
+     "timing": "3.6s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "character:Aida",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 3.6,
+     "beforeValues": {
+      "gazeTarget": "toward ordinary pool reflection",
+      "expression": "warm calm"
+     },
+     "afterValues": {
+      "gazeTarget": "future-party vision inside pond reflection",
+      "expression": "quiet recognition"
+     },
+     "storyRelationship": "continuous",
+     "subject": "character:Aida",
+     "before": "{'gazeTarget': 'toward ordinary pool reflection', 'expression': 'warm calm'}",
+     "cause": "Aida sees the vision resolve inside the completed ripple.",
+     "after": "{'gazeTarget': 'future-party vision inside pond reflection', 'expression': 'quiet recognition'}",
+     "timing": "3.6s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:sky_cloud_pressure",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 4.2,
+     "beforeValues": {
+      "visibility": "not yet revealed as warning"
+     },
+     "afterValues": {
+      "visibility": "gathering dark clouds visible to Aida"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:sky_cloud_pressure",
+     "before": "{'visibility': 'not yet revealed as warning'}",
+     "cause": "Aida's lifted gaze reveals the weather pressure behind the vision.",
+     "after": "{'visibility': 'gathering dark clouds visible to Aida'}",
+     "timing": "4.2s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:morning_light",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 4.2,
+     "beforeValues": {
+      "quality": "warm rose-gold morning over cool pool haze"
+     },
+     "afterValues": {
+      "quality": "warm rose-gold morning with slightly cooler rainy cast"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:morning_light",
+     "before": "{'quality': 'warm rose-gold morning over cool pool haze'}",
+     "cause": "The revealed cloud pressure cools the reflected party mood.",
+     "after": "{'quality': 'warm rose-gold morning with slightly cooler rainy cast'}",
+     "timing": "4.2s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:cooler_rainy_cast",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 4.2,
+     "beforeValues": {
+      "visibility": "absent"
+     },
+     "afterValues": {
+      "visibility": "visible"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:cooler_rainy_cast",
+     "before": "{'visibility': 'absent'}",
+     "cause": "The revealed cloud pressure introduces the cooler rainy cast.",
+     "after": "{'visibility': 'visible'}",
+     "timing": "4.2s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "character:Aida",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 4.2,
+     "beforeValues": {
+      "gazeTarget": "future-party vision inside pond reflection",
+      "expression": "quiet recognition"
+     },
+     "afterValues": {
+      "gazeTarget": "gathering clouds",
+      "expression": "contained knowing"
+     },
+     "storyRelationship": "continuous",
+     "subject": "character:Aida",
+     "before": "{'gazeTarget': 'future-party vision inside pond reflection', 'expression': 'quiet recognition'}",
+     "cause": "Aida checks the sky without startling.",
+     "after": "{'gazeTarget': 'gathering clouds', 'expression': 'contained knowing'}",
+     "timing": "4.2s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "character:Aida",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 4.5,
+     "beforeValues": {
+      "gazeTarget": "gathering clouds",
+      "handState": "paws resting low, not over heart",
+      "speechState": "silent"
+     },
+     "afterValues": {
+      "gazeTarget": "disturbed pool vision",
+      "handState": "one hand resting over heart",
+      "speechState": "speaking approved line"
+     },
+     "storyRelationship": "continuous",
+     "subject": "character:Aida",
+     "before": "{'gazeTarget': 'gathering clouds', 'handState': 'paws resting low, not over heart', 'speechState': 'silent'}",
+     "cause": "Before the closer view and locked dialogue, Aida brings the recognition back to the water and begins the approved Audio1 line at 4.5 seconds.",
+     "after": "{'gazeTarget': 'disturbed pool vision', 'handState': 'one hand resting over heart', 'speechState': 'speaking approved line'}",
+     "timing": "4.5s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "character:Aida",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 7.0,
+     "beforeValues": {
+      "speechState": "speaking approved line",
+      "expression": "contained knowing"
+     },
+     "afterValues": {
+      "speechState": "approved line complete",
+      "expression": "warm understated amusement"
+     },
+     "storyRelationship": "continuous",
+     "subject": "character:Aida",
+     "before": "{'speechState': 'speaking approved line', 'expression': 'contained knowing'}",
+     "cause": "Aida completes: “Someone’s day might be a little dampened.”",
+     "after": "{'speechState': 'approved line complete', 'expression': 'warm understated amusement'}",
+     "timing": "7s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "character:Aida",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 8.2,
+     "beforeValues": {
+      "location": "seated on near mossy pool rock",
+      "posture": "seated upright and grounded",
+      "handState": "one hand resting over heart"
+     },
+     "afterValues": {
+      "location": "standing beside near mossy pool rock at pool edge",
+      "posture": "upright and calm",
+      "handState": "lowered from heart for balance"
+     },
+     "storyRelationship": "continuous",
+     "subject": "character:Aida",
+     "before": "{'location': 'seated on near mossy pool rock', 'posture': 'seated upright and grounded', 'handState': 'one hand resting over heart'}",
+     "cause": "After the line has landed, Aida completes her quiet rise from the rock.",
+     "after": "{'location': 'standing beside near mossy pool rock at pool edge', 'posture': 'upright and calm', 'handState': 'lowered from heart for balance'}",
+     "timing": "8.2s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "support:near_mossy_pool_rock",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 8.2,
+     "beforeValues": {
+      "occupancy": "occupied by seated Aida"
+     },
+     "afterValues": {
+      "occupancy": "empty"
+     },
+     "storyRelationship": "continuous",
+     "subject": "support:near_mossy_pool_rock",
+     "before": "{'occupancy': 'occupied by seated Aida'}",
+     "cause": "Aida has stood up from the rock.",
+     "after": "{'occupancy': 'empty'}",
+     "timing": "8.2s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "character:Aida",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 8.8,
+     "beforeValues": {
+      "handState": "lowered from heart for balance"
+     },
+     "afterValues": {
+      "handState": "brush-down complete, hands restrained at sides"
+     },
+     "storyRelationship": "continuous",
+     "subject": "character:Aida",
+     "before": "{'handState': 'lowered from heart for balance'}",
+     "cause": "Aida quietly brushes herself down after rising.",
+     "after": "{'handState': 'brush-down complete, hands restrained at sides'}",
+     "timing": "8.8s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "character:Aida",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 10.4,
+     "beforeValues": {
+      "location": "standing beside near mossy pool rock at pool edge",
+      "posture": "upright and calm",
+      "framePresence": "visible in frame"
+     },
+     "afterValues": {
+      "location": "offscreen in established exit direction from pool edge",
+      "posture": "walking away with quiet purpose",
+      "framePresence": "out of frame"
+     },
+     "storyRelationship": "continuous",
+     "subject": "character:Aida",
+     "before": "{'location': 'standing beside near mossy pool rock at pool edge', 'posture': 'upright and calm', 'framePresence': 'visible in frame'}",
+     "cause": "Aida walks away from the mossy rock with the warning accepted.",
+     "after": "{'location': 'offscreen in established exit direction from pool edge', 'posture': 'walking away with quiet purpose', 'framePresence': 'out of frame'}",
+     "timing": "10.4s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:future_party_vision_reflection",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 10.8,
+     "beforeValues": {
+      "visibility": "visible inside pond reflection",
+      "content": "exact S3.SH2 keyframe content as water-born vision"
+     },
+     "afterValues": {
+      "visibility": "fading inside pond reflection",
+      "content": "softened S3.SH2 party vision"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:future_party_vision_reflection",
+     "before": "{'visibility': 'visible inside pond reflection', 'content': 'exact S3.SH2 keyframe content as water-born vision'}",
+     "cause": "As Aida leaves, the water-born party vision fades through the last ripple.",
+     "after": "{'visibility': 'fading inside pond reflection', 'content': 'softened S3.SH2 party vision'}",
+     "timing": "10.8s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:pool_ripples",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 10.8,
+     "beforeValues": {
+      "state": "completed circular ripple"
+     },
+     "afterValues": {
+      "state": "fading circular ripple"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:pool_ripples",
+     "before": "{'state': 'completed circular ripple'}",
+     "cause": "The completed ripple loses energy after the line and walk-off.",
+     "after": "{'state': 'fading circular ripple'}",
+     "timing": "10.8s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:future_party_vision_reflection",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 11.0,
+     "beforeValues": {
+      "visibility": "fading inside pond reflection",
+      "content": "softened S3.SH2 party vision"
+     },
+     "afterValues": {
+      "visibility": "not visible",
+      "content": "none"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:future_party_vision_reflection",
+     "before": "{'visibility': 'fading inside pond reflection', 'content': 'softened S3.SH2 party vision'}",
+     "cause": "The approved shot ends with the vision faded from the pond.",
+     "after": "{'visibility': 'not visible', 'content': 'none'}",
+     "timing": "11s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "environment:Moonlit_Pool",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 11.0,
+     "beforeValues": {
+      "surfaceState": "completed circular ripple",
+      "reflectionContent": "S3.SH2 party vision visible inside pond reflection",
+      "waterTouchState": "raindrop contact completed"
+     },
+     "afterValues": {
+      "surfaceState": "last ripple settling",
+      "reflectionContent": "ordinary crystal woodland reflection returning",
+      "waterTouchState": "raindrop contact completed"
+     },
+     "storyRelationship": "continuous",
+     "subject": "environment:Moonlit_Pool",
+     "before": "{'surfaceState': 'completed circular ripple', 'reflectionContent': 'S3.SH2 party vision visible inside pond reflection', 'waterTouchState': 'raindrop contact completed'}",
+     "cause": "The vision fades as the ripple settles at the end of the shot.",
+     "after": "{'surfaceState': 'last ripple settling', 'reflectionContent': 'ordinary crystal woodland reflection returning', 'waterTouchState': 'raindrop contact completed'}",
+     "timing": "11s"
+    },
+    {
+     "actionId": null,
+     "repeatAuthorisation": null,
+     "entityId": "effect:pool_ripples",
+     "entityCount": 1,
+     "unique": true,
+     "atSec": 11.0,
+     "beforeValues": {
+      "state": "fading circular ripple"
+     },
+     "afterValues": {
+      "state": "last ripple settling"
+     },
+     "storyRelationship": "continuous",
+     "subject": "effect:pool_ripples",
+     "before": "{'state': 'fading circular ripple'}",
+     "cause": "The pond reaches the final readable settling state at the cut.",
+     "after": "{'state': 'last ripple settling'}",
+     "timing": "11s"
+    }
+   ],
+   "soundCues": [],
+   "storyTime": "next_beat",
+   "playability": null,
+   "characterRoles": [],
+   "characterRoleEvents": [],
+   "sharedIdentityExceptions": []
+  },
+  "directorCardSource": {
+   "version": "director-handoff-1.0",
+   "sourceHash": "727f6f83a8936f85e3e7540620035672a0f005ae34211d004e0e2970f3f92f62",
+   "directionHash": "052de7e84423de3c0af37b38ec14b2e3a0ab6f500f1645c0b17b70dbca1c857d",
+   "kind": "derived intended direction; not media approval"
+  },
+  "referenceStateBindings": {
+   "@图1": {
+    "stateEvidenceHash": "0c87274099204c63470c89e030ed9a4f",
+    "depictedStates": {
+     "character:Aida": {
+      "location": "seated on near mossy pool rock",
+      "posture": "seated upright and grounded",
+      "gazeTarget": "toward ordinary pool reflection",
+      "handState": "paws resting low, not over heart",
+      "expression": "warm calm",
+      "framePresence": "visible in frame",
+      "costumeVisible": "purple robe and jeweled headpiece visible"
+     },
+     "support:near_mossy_pool_rock": {
+      "occupancy": "occupied by seated Aida",
+      "surfaceState": "mossy and dry"
+     },
+     "environment:Moonlit_Pool": {
+      "surfaceState": "glass-still",
+      "reflectionContent": "ordinary crystal woodland reflection",
+      "waterTouchState": "undisturbed"
+     },
+     "effect:pool_ripples": {
+      "state": "absent"
+     },
+     "effect:future_party_vision_reflection": {
+      "visibility": "not visible",
+      "content": "none"
+     },
+     "effect:single_raindrop": {
+      "state": "not visible"
+     },
+     "environment:crystal_trees_and_flowers": {
+      "visibility": "visible around pool",
+      "appearance": "rose, teal and gold crystalline woodland"
+     },
+     "environment:morning_light": {
+      "quality": "warm rose-gold morning over cool pool haze"
+     },
+     "environment:sky_cloud_pressure": {
+      "visibility": "not yet revealed as warning"
+     },
+     "environment:cooler_rainy_cast": {
+      "visibility": "absent"
+     }
+    },
+    "observationMethod": "director model inspected opening image",
+    "observationLimitations": "Opening observations come only from the supplied still image. The still verifies Aida seated by a still reflective pool in warm crystal-woodland light; it does not verify later raindrop motion, ripple timing, hidden vision content, dialogue, walk-off, or unseen cloud development.",
+    "stateScope": {
+     "authority": "opening_state",
+     "controlsDynamicState": true,
+     "startSec": 0,
+     "endSec": 0,
+     "openingObservationPolicy": "unobserved_entities_are_authored_intent"
+    }
+   }
+  },
+  "directorDirectionLocked": true,
+  "directorDirectionLock": {
+   "locked": true,
+   "lockedBy": "Julian",
+   "lockedAt": "2026-09-22T10:59:54.217263+00:00",
+   "revisionId": "ep4-s2-sh1-vision-v2",
+   "directionHash": "d94f95f45050ef62df876a033bf3a42d06a2cce89c16c2706fea0cd953e8270e",
+   "sourceHash": "4b2c0586d9088a498baa1fbac1bf79ca78d26eeb9d59fabc85d65f88ecd6ba53",
+   "scope": "S2.SH1 Director authority through WATCH compilation",
+   "preserved": [
+    "scene plate",
+    "opening keyframe",
+    "Audio1"
+   ],
+   "requiredSequence": [
+    "raindrop hits pond",
+    "vision appears inside ripple",
+    "Aida recognises vision",
+    "hand to heart",
+    "exact Audio1 line",
+    "rise and walk off",
+    "vision fades in final ripple"
+   ]
+  },
+  "animationReferenceRoles": {
+   "@图1": "opening keyframe",
+   "@图2": "Aida",
+   "@图3": "scene plate",
+   "@图4": "vision:S3.SH2 keyframe pond reflection",
+   "@Audio1": "voice track"
+  },
+  "visionReferenceBinding": {
+   "role": "vision:S3.SH2 keyframe pond reflection",
+   "sourceShotId": "S3.SH2",
+   "sourcePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep4_S3.SH2_keyframe_candidate_b156d56c.png",
+   "sourceSha256": "6cb81ad0b70841e82896ecf6978cfc193c497f171630594a13e4cf159932053c",
+   "providerSlot": "@图4",
+   "scope": "pond reflection vision content only",
+   "foregroundSubject": "Aida",
+   "doNotUseAs": [
+    "Aida identity",
+    "S2 geography",
+    "live foreground cast",
+    "literal location cutaway"
+   ]
+  }
+ }
+}

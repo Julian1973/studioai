@@ -1,0 +1,15 @@
+{
+  "episode": "Ep1",
+  "status": "awaiting-budget-approval",
+  "proposedMaximumUsd": 5,
+  "scope": [
+    "Review full episode picture and original soundtrack",
+    "Inspect all 26 joins with overlapping context",
+    "Apply supported reversible post repairs in Resolve",
+    "Review repaired sections before final delivery"
+  ],
+  "source": "engine/media/post95/Ep1_episode/Ep1_DaVinci_SuperScale_4K_20260908_v03.mp4",
+  "sourceSha256": "571bf1c57fcf9d05331e7b35650a4cec53ba92f14acabec2e79bae32012c5e51",
+  "billing": "Reserve conservative cost before each request; no requests exceeding cumulative USD 5 estimate; no automatic retry of uncertain submissions",
+  "approval": null
+}

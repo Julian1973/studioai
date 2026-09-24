@@ -1,0 +1,53 @@
+{
+  "status": "baseline-test-rendered-and-uploaded-not-final-post",
+  "project": "crystal-bears",
+  "episode": "Ep2",
+  "resolveProject": "Crystal Bears - Approved Shots Post Test 2026-09-08",
+  "timeline": "Ep2 - All 19 Approved Shots - Post Test v01",
+  "sourceShots": 19,
+  "pictureFrames": 10672,
+  "pictureFps": 24,
+  "pictureDurationSec": 444.6666666666667,
+  "width": 3840,
+  "height": 2160,
+  "enhancement": "Native Resolve Studio Super Scale 4x on source media, followed by UHD sizing",
+  "sha256": "ff949409daba3ba8327ab16aa6949e23a12bbbb1f251e3d016399d79d2e440f1",
+  "bytes": 860110544,
+  "fullDecode": {
+    "exitCode": 0,
+    "errorLogEmpty": true
+  },
+  "cloud": {
+    "id": "1J5WdbLh289CBZsgBfITGU0Rck9eS5UXv",
+    "title": "Ep2 - All approved shots - Super Scale 4K TEST v01.mp4",
+    "mime_type": "video/mp4",
+    "size": "860110544",
+    "url": "https://drive.google.com/file/d/1J5WdbLh289CBZsgBfITGU0Rck9eS5UXv/view?usp=drivesdk",
+    "file_or_folder": "file",
+    "created_time": null,
+    "modified_time": null,
+    "parent_ids": [
+      "1QG-Exgk-OjePwhbeyZ3luyQGCAO-ucM0"
+    ],
+    "drive_id": null,
+    "current_user_can_share": null,
+    "has_augmented_permissions": null,
+    "shared": null,
+    "permissions": null,
+    "source_visibility_status": "access_not_verified"
+  },
+  "cloudPlayback": "processing-or-unverified",
+  "fullPost": {
+    "editorialMotionReview": "pending",
+    "soundMusicMix": "pending - baked source mix retained",
+    "approvedVoiceRestoration": "pending - 13 matching HEAR references staged on muted A2 in separate v02 workbench",
+    "finalShotAudioLineage": "S8.SH2 references an older take in its audio provenance",
+    "perceptualEnhancementReview": "pending",
+    "approval": "not-approved"
+  },
+  "softwareFindings": [
+    "Legacy render registration helper assumes 30 fps despite 24 fps approved source footage; not used to mislabel this test.",
+    "HEAR references exist but complete dialogue replacement and M&E mix are not an automatic completed post process.",
+    "Current final-shot audio provenance needs reconciliation against the newly approved render."
+  ]
+}

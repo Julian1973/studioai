@@ -1,0 +1,68 @@
+{
+  "status": "completed",
+  "usage": {
+    "total_tokens": 7844,
+    "total_input_tokens": 7134,
+    "input_tokens_by_modality": [
+      {
+        "modality": "video",
+        "tokens": 6982
+      },
+      {
+        "modality": "text",
+        "tokens": 152
+      }
+    ],
+    "total_cached_tokens": 0,
+    "total_output_tokens": 106,
+    "total_tool_use_tokens": 0,
+    "total_thought_tokens": 604,
+    "raw_prompt_token": 8591,
+    "model_invocation_token_counts": [
+      {
+        "prompt_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 583
+          },
+          {
+            "modality": "video",
+            "tokens": 6982
+          }
+        ],
+        "candidates_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 110
+          }
+        ],
+        "thoughts_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 604
+          }
+        ]
+      }
+    ]
+  },
+  "created": "2026-09-08T17:50:32Z",
+  "updated": "2026-09-08T17:50:32Z",
+  "service_tier": "standard",
+  "steps": [
+    {
+      "signature": "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",
+      "type": "thought"
+    },
+    {
+      "content": [
+        {
+          "text": "```json\n{\n  \"audioAvailable\": true,\n  \"bowlResult\": \"Smooth transition at 00:03.32 without audible clicks or abrupt cutoffs.\",\n  \"endingResult\": \"Visual fade to black and music fade-out conclude smoothly in unison.\",\n  \"speechPreserved\": true,\n  \"residualDefects\": [],\n  \"confidence\": 7,\n  \"limitations\": \"Review limited to excerpt audio-visual playback quality.\"\n}\n```",
+          "type": "text"
+        }
+      ],
+      "type": "model_output"
+    }
+  ],
+  "object": "interaction",
+  "model": "gemini-3.8-flash"
+}

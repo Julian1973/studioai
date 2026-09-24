@@ -1,0 +1,19 @@
+{
+  "humanApproval": false,
+  "status": "needs-visual-correction",
+  "source": "engine/media/shots/Ep3_S1_two_shot_trial_v03_shot2.mp4",
+  "sourceSha256": "8f0a95c2535b69bf95b2156380c137f5849fa033b3e0642f6cb63171585a82de",
+  "coverage": "1 fps sampled frame inspection, not continuous audiovisual playback",
+  "findings": [
+    {
+      "rangeSeconds": [
+        12,
+        15
+      ],
+      "observation": "A blue object reappears inside the catapult cup despite the empty-cup contract.",
+      "severity": "continuity",
+      "repairIntent": "Keep cup empty; remove loaded-prop reference influence before any authorised revision."
+    }
+  ],
+  "audioReview": "unverified"
+}

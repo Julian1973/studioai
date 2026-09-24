@@ -1,0 +1,44 @@
+{
+  "episode": "Ep1",
+  "reviewedSourceSha256": "14142e15d9031403851e8356bc5470ab81ecaedad62fcf4c31403f7f21942d7c",
+  "coverage": {
+    "fullEpisode": "Gemini audiovisual review of complete 577.667 second 720p proxy at 4 fps",
+    "targetedReview": "8 fps excerpts plus native rendered ending",
+    "everyFramePerceptualReview": false
+  },
+  "repairs": [
+    {
+      "id": "scene1-fade",
+      "rangeSec": [
+        43.75,
+        44.3
+      ],
+      "disposition": "dismissed after frame inspection and focused audiovisual review",
+      "action": "Retained intentional scene fade"
+    },
+    {
+      "id": "bowl-tail",
+      "rangeSec": [
+        56.2,
+        56.32
+      ],
+      "action": "Sample-accurate cosine audio fade; original mixed audio retained outside this range",
+      "disposition": "verified by targeted audiovisual review and final export correspondence"
+    },
+    {
+      "id": "ending",
+      "rangeSec": [
+        576.1666667,
+        577.6666667
+      ],
+      "action": "Cosine soundtrack fade plus native Fusion picture gain fade, preserving laughter and dialogue",
+      "disposition": "verified by targeted audiovisual review and final export correspondence"
+    }
+  ],
+  "sourceNotes": [
+    "Flattened hash-verified assembly; missing individual approved shot remains contained in assembly.",
+    "No replacement voices/music, synthetic motion, or story revisions."
+  ],
+  "renderJobId": "1f9f7db0-4c6e-4591-8c5d-c08bf05b096d",
+  "finalSha256": "90b98688433e5492c97e10539c155ebfaeb34831bd3b1279e26ee4fac04ed545"
+}

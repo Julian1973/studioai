@@ -1,0 +1,308 @@
+{
+  "project": "crystal-bears",
+  "episode": "Ep3",
+  "scene": 1,
+  "trial": true,
+  "shotId": "S1.SH1",
+  "humanApproval": false,
+  "preservesCurrentProduction": true,
+  "state": "http-400-rejected-no-task-id",
+  "task": {
+    "type": "storyboard_grid",
+    "goal": "Keen\u2019s confident berry launch hits the wrong target. Zenny\u2019s restraint contrasts with Fuzzby\u2019s unbroken laughter; Keen spots an opportunity but has not acted on it yet.",
+    "duration_seconds": 12,
+    "resolution": "480p",
+    "storyboard_tag": "@Image 7",
+    "storyboard_reading_order": "top to bottom, one column",
+    "references": [
+      {
+        "tag": "@Image 1",
+        "subject": "Approved opening frame",
+        "defines": "exact opening composition, initial world positions and finished visual style",
+        "exclude": "repeated opening poses or a fixed camera for the entire sequence"
+      },
+      {
+        "tag": "@Image 2",
+        "subject": "Zenny",
+        "defines": "Zenny identity and relative proportions",
+        "exclude": "turnaround layouts or Fuzzby identity"
+      },
+      {
+        "tag": "@Image 3",
+        "subject": "Fuzzby",
+        "defines": "Fuzzby identity and relative proportions",
+        "exclude": "turnaround layouts or Zenny identity"
+      },
+      {
+        "tag": "@Image 4",
+        "subject": "Keen",
+        "defines": "Keen identity and relative proportions",
+        "exclude": "turnaround poses or sheet backgrounds"
+      },
+      {
+        "tag": "@Image 5",
+        "subject": "Catapult",
+        "defines": "wooden catapult materials and construction",
+        "exclude": "the wool ball or a reloaded cup after launch"
+      },
+      {
+        "tag": "@Image 6",
+        "subject": "Buzzing Nook",
+        "defines": "established scene environment and landmarks",
+        "exclude": "architectural honey houses as the removable prop"
+      },
+      {
+        "tag": "@Image 7",
+        "subject": "Coverage board",
+        "defines": "ordered coverage views for THIS clip only, top to bottom; camera and action guide, not initial state",
+        "exclude": "the grid, gutters, still-image holds or any identity drift in the board"
+      },
+      {
+        "tag": "@Audio1",
+        "subject": "Approved spoken performance",
+        "defines": "exact dialogue, speaker identity, performance, cadence and measured lip-sync timing",
+        "exclude": "replacement, time-stretched, paraphrased or invented speech"
+      }
+    ],
+    "assets": {
+      "images": [
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+          "tag": "@Image 1"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+          "tag": "@Image 2"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+          "tag": "@Image 3"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+          "tag": "@Image 4"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+          "tag": "@Image 5"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+          "tag": "@Image 6"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v01_board1.png",
+          "tag": "@Image 7"
+        }
+      ],
+      "audio": [
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v01_audio1.wav",
+          "tag": "@Audio1",
+          "duration_seconds": 12
+        }
+      ]
+    },
+    "stages": [
+      {
+        "purpose": "View 1",
+        "event": "0\u20133s. Wide exact @Image 1 opening. Keen releases once. Follow alongside and slightly behind the berry across the creek, keeping Zenny ahead until FIRST contact on her forehead. One splat, no overshoot or spatial reset. The catapult cup is now empty.",
+        "end_state": "Zenny remains on the far leaf with berry juice. Keen stays beside the near-bank empty machine."
+      },
+      {
+        "purpose": "View 2",
+        "event": "3\u20135s. Cut to Fuzzby waking on the suspended honeycomb and exploding into rocking belly-led laughter. Keen ducks beside his machine.",
+        "end_state": "Fuzzby stays on the comb; laughter continues into the next view."
+      },
+      {
+        "purpose": "View 3",
+        "event": "5\u20139.68s. Cut to Zenny\u2019s settled close-up for her exact recorded response. She licks the juice with composed restraint. Fuzzby\u2019s offscreen laugh continues uninterrupted beneath her words, gently lowered for clarity.",
+        "end_state": "Zenny settles with a small purple mark. Comb still hangs, Fuzzby still on it."
+      },
+      {
+        "purpose": "View 4",
+        "event": "9.68s\u2013end. Cut back to the established wide geography. Keen peeks from beside the near-bank machine and glances towards distracted Fuzzby on the far-tree honeycomb; a small intent smile. He does not cross yet. Settle this wide so the entire spatial handoff is readable.",
+        "end_state": "Keen beside EMPTY near-bank catapult, paws empty. Zenny on original far-bank leaf with mark; Fuzzby on WHOLE hanging honeycomb at far tree. Original route and distances unchanged. No wink, grab or collapse yet."
+      }
+    ],
+    "scene_style": "Original stylised 3D feature animation matching the approved opening frame: warm woodland morning light, tactile materials and glistening golden honey. Deliberate comic pace and character-specific acting.",
+    "camera": "Follow @Image 7 coverage top to bottom for launch, impact, laugh and response. End with the explicit wide handoff described below. Use full-screen moving CGI, not a board. Same launch axis: Zenny remains ahead of the berry until impact; cuts change camera, never geography.",
+    "consistency": [
+      "Only the single launched berry; cup remains empty after release.",
+      "Keen near bank; Zenny and Fuzzby at the distant tree across the creek. No character crosses during this clip.",
+      "Fuzzby keeps his perch on the whole comb; honey houses remain architecture. Only Zenny has purple juice."
+    ],
+    "audio": "Dialogue language: English.\n@Audio1 is the sole authority for voice identity, cadence, timing and silence. Spoken lines appear only where assigned, in the locked order, with no extra dialogue. The non-speaking characters remain silent throughout each other\u2019s lines.\nZENNY at 5s\u20139.68s: {OK, Fuzzby, calm down. It\u2019s not that funny.}\nUse the supplied recorded performances exactly at these local timings. Only the named speaker articulates each line. Fuzzby\u2019s nonverbal laughter is generated Seedance SFX, not additional speech: sustain it through the cut to Zenny and underneath her response at a lower level. Natural woodland ambience, wing buzz and physical effects; a gentle playful score stays low and does not restart loudly at cuts."
+  },
+  "prompt": "[Storyboard Role]\n@Image 7 defines the storyboard grid for shot order and approximate composition. Follow it panel by panel, top to bottom, one column. Do not use its gutters, line-art style, text labels, or placeholder characters; render full-screen moving scenes.\n[Reference Roles]\n@Image 1 defines <Approved opening frame>'s exact opening composition, initial world positions and finished visual style. Do not use repeated opening poses or a fixed camera for the entire sequence.\n@Image 2 defines <Zenny>'s Zenny identity and relative proportions. Do not use turnaround layouts or Fuzzby identity.\n@Image 3 defines <Fuzzby>'s Fuzzby identity and relative proportions. Do not use turnaround layouts or Zenny identity.\n@Image 4 defines <Keen>'s Keen identity and relative proportions. Do not use turnaround poses or sheet backgrounds.\n@Image 5 defines <Catapult>'s wooden catapult materials and construction. Do not use the wool ball or a reloaded cup after launch.\n@Image 6 defines <Buzzing Nook>'s established scene environment and landmarks. Do not use architectural honey houses as the removable prop.\n@Image 7 defines <Coverage board>'s ordered coverage views for THIS clip only, top to bottom; camera and action guide, not initial state. Do not use the grid, gutters, still-image holds or any identity drift in the board.\n@Audio1 defines <Approved spoken performance>'s exact dialogue, speaker identity, performance, cadence and measured lip-sync timing. Do not use replacement, time-stretched, paraphrased or invented speech.\n[Generation Goal]\nKeen\u2019s confident berry launch hits the wrong target. Zenny\u2019s restraint contrasts with Fuzzby\u2019s unbroken laughter; Keen spots an opportunity but has not acted on it yet.\n[Shot Plan]\nShot 1: 0\u20133s. Wide exact @Image 1 opening. Keen releases once. Follow alongside and slightly behind the berry across the creek, keeping Zenny ahead until FIRST contact on her forehead. One splat, no overshoot or spatial reset. The catapult cup is now empty. End state: Zenny remains on the far leaf with berry juice. Keen stays beside the near-bank empty machine.\nShot 2: 3\u20135s. Cut to Fuzzby waking on the suspended honeycomb and exploding into rocking belly-led laughter. Keen ducks beside his machine. End state: Fuzzby stays on the comb; laughter continues into the next view.\nShot 3: 5\u20139.68s. Cut to Zenny\u2019s settled close-up for her exact recorded response. She licks the juice with composed restraint. Fuzzby\u2019s offscreen laugh continues uninterrupted beneath her words, gently lowered for clarity. End state: Zenny settles with a small purple mark. Comb still hangs, Fuzzby still on it.\nShot 4: 9.68s\u2013end. Cut back to the established wide geography. Keen peeks from beside the near-bank machine and glances towards distracted Fuzzby on the far-tree honeycomb; a small intent smile. He does not cross yet. Settle this wide so the entire spatial handoff is readable. End state: Keen beside EMPTY near-bank catapult, paws empty. Zenny on original far-bank leaf with mark; Fuzzby on WHOLE hanging honeycomb at far tree. Original route and distances unchanged. No wink, grab or collapse yet.\n[Scene and Visual Style]\nOriginal stylised 3D feature animation matching the approved opening frame: warm woodland morning light, tactile materials and glistening golden honey. Deliberate comic pace and character-specific acting.\n[Camera]\nFollow @Image 7 coverage top to bottom for launch, impact, laugh and response. End with the explicit wide handoff described below. Use full-screen moving CGI, not a board. Same launch axis: Zenny remains ahead of the berry until impact; cuts change camera, never geography.\n[Maintain Consistency]\nOnly the single launched berry; cup remains empty after release. Keen near bank; Zenny and Fuzzby at the distant tree across the creek. No character crosses during this clip. Fuzzby keeps his perch on the whole comb; honey houses remain architecture. Only Zenny has purple juice.\n[Audio]\nDialogue language: English.\n@Audio1 is the sole authority for voice identity, cadence, timing and silence. Spoken lines appear only where assigned, in the locked order, with no extra dialogue. The non-speaking characters remain silent throughout each other\u2019s lines.\nZENNY at 5s\u20139.68s: {OK, Fuzzby, calm down. It\u2019s not that funny.}\nUse the supplied recorded performances exactly at these local timings. Only the named speaker articulates each line. Fuzzby\u2019s nonverbal laughter is generated Seedance SFX, not additional speech: sustain it through the cut to Zenny and underneath her response at a lower level. Natural woodland ambience, wing buzz and physical effects; a gentle playful score stays low and does not restart loudly at cuts.\n[Forbidden]\ndo not mix identities between references, do not use reference backgrounds unless explicitly assigned, do not reproduce storyboard text labels, do not retain line-art styling unless explicitly requested.",
+  "promptSha256": "b8d2e9e61d7cf892380c6011ecb6ca98fda214e3a2a5b142e498023acbe3b009",
+  "references": [
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+      "sha256": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+      "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+      "sha256": "fb455325843d9068ad3982767c6fa047556f58d9bfa1062f0afb7465367eecc8"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+      "sha256": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v01_board1.png",
+      "sha256": "ab20a62465a573a265961312d301fd62abcfaf3baa8ed4f05faff0c5107c8c6a"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v01_audio1.wav",
+      "sha256": "c8f472ab1673e335ae696d1286311332b6c756ada4b0e0ef18872d8cc3246cde"
+    }
+  ],
+  "audio": {
+    "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v01_audio1.wav",
+    "sha256": "c8f472ab1673e335ae696d1286311332b6c756ada4b0e0ef18872d8cc3246cde",
+    "duration": 12,
+    "dialogue": [
+      {
+        "speaker": "ZENNY",
+        "exactText": "OK, Fuzzby, calm down. It\u2019s not that funny.",
+        "startSec": 5.0,
+        "endSec": 9.68,
+        "sourceStartSec": 3.1,
+        "sourceEndSec": 7.78,
+        "sampleRange": [
+          143040,
+          379200
+        ],
+        "copiedSamplesSha256": "998a0d6f6381a8214109668be10e0271c654fa625b8d3dde6917b9ddd7168afe"
+      }
+    ],
+    "status": "derived-trial-not-new-human-approval"
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": [
+      "1 audio reference clip(s) fall outside the recommended 5-10 second range"
+    ],
+    "assets": {
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "1 audio reference clip(s) fall outside the recommended 5-10 second range."
+      ],
+      "counts": {
+        "images": 7,
+        "videos": 0,
+        "audio": 1,
+        "combined": 8
+      },
+      "durations": {
+        "videos": 0,
+        "audio": 12.0
+      },
+      "subjectCounts": {
+        "images": 0,
+        "videos": 0
+      },
+      "limits": {
+        "images": {
+          "max_count": 30,
+          "recommended_subjects": [
+            1,
+            8
+          ]
+        },
+        "videos": {
+          "max_count": 10,
+          "max_combined_duration_seconds": 30,
+          "recommended_subjects": [
+            1,
+            5
+          ],
+          "recommended_clip_length_seconds": [
+            5,
+            10
+          ]
+        },
+        "audio": {
+          "max_count": 10,
+          "max_combined_duration_seconds": 30,
+          "recommended_clip_length_seconds": [
+            5,
+            10
+          ]
+        },
+        "combined": {
+          "max_count": 50
+        },
+        "video_editing": {
+          "recommended_source_video_seconds": 20,
+          "recommended_reference_images": [
+            1,
+            5
+          ]
+        }
+      }
+    },
+    "timeline": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "timed": false,
+      "ranges": []
+    }
+  },
+  "provider": {
+    "checked": true,
+    "ready": true,
+    "providerCalled": false,
+    "reason": "The request fits the enabled, verified provider contract.",
+    "mode": "reference-to-video",
+    "providerModelId": "dreamina-seedance-2-5-260628",
+    "provider": "byteplus",
+    "modelVersion": "2.5-260628",
+    "capabilityVerifiedAt": "2026-08-16",
+    "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757"
+  },
+  "promptPreflight": {
+    "score": 9.0,
+    "advisoryScoreTarget": 9.5,
+    "scoreAdvisoryOnly": true,
+    "verdict": "PASS",
+    "findings": [
+      {
+        "severity": "POLISH",
+        "rule": "button-hold",
+        "message": "No protected post-line hold is visible in the specialist draft.",
+        "fix": "The deterministic emitter must add holds to non-immediate recognition/reaction lines.",
+        "deduction": 0.25
+      },
+      {
+        "severity": "FIX",
+        "rule": "audio-policy",
+        "message": "Music/SFX policy is absent.",
+        "fix": "State either No music or the approved Seedance non-verbal music/SFX policy.",
+        "deduction": 0.75
+      }
+    ],
+    "clean": false
+  },
+  "estimateUsd": 1.2492,
+  "progress": {
+    "event": "submitting"
+  },
+  "recovery": "Compact storyboard layout submitted as v02; original failed record preserved. Transport labelled rejection unknown; no billed-outcome claim."
+}

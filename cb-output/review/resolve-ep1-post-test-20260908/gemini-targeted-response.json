@@ -1,0 +1,68 @@
+{
+  "status": "completed",
+  "usage": {
+    "total_tokens": 12877,
+    "total_input_tokens": 11612,
+    "input_tokens_by_modality": [
+      {
+        "modality": "text",
+        "tokens": 206
+      },
+      {
+        "modality": "video",
+        "tokens": 11406
+      }
+    ],
+    "total_cached_tokens": 0,
+    "total_output_tokens": 467,
+    "total_tool_use_tokens": 0,
+    "total_thought_tokens": 798,
+    "raw_prompt_token": 13861,
+    "model_invocation_token_counts": [
+      {
+        "prompt_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 781
+          },
+          {
+            "modality": "video",
+            "tokens": 11406
+          }
+        ],
+        "candidates_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 471
+          }
+        ],
+        "thoughts_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 798
+          }
+        ]
+      }
+    ]
+  },
+  "created": "2026-09-08T17:48:08Z",
+  "updated": "2026-09-08T17:48:08Z",
+  "service_tier": "standard",
+  "steps": [
+    {
+      "signature": "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",
+      "type": "thought"
+    },
+    {
+      "content": [
+        {
+          "text": "```json\n{\n  \"segment_A\": {\n    \"episode_time_range\": \"00:40.000 - 00:48.000\",\n    \"observed_facts\": \"A gradual fade-to-black occurs between 00:43.750 and 00:44.250 transitioning between the bee flower scene and the bear meditation scene.\",\n    \"intentional_fade\": true,\n    \"verdict\": \"retain\",\n    \"rationale\": \"Standard visual transition between scenes; not a dropout defect.\",\n    \"uncertainty\": 3\n  },\n  \"segment_B\": {\n    \"episode_time_range\": \"00:53.000 - 00:59.000\",\n    \"observed_facts\": \"The singing bowl resonance ends abruptly at 00:56.320 with the hard cut to the dock scene.\",\n    \"last_dialogue\": \"None (non-verbal bowl tone and ambient audio only)\",\n    \"safe_repair\": true,\n    \"rationale\": \"Applying a 0.12-second audio crossfade or fade ending at 00:56.320 removes the abrupt cutoff without masking dialogue.\",\n    \"uncertainty\": 3\n  },\n  \"segment_C\": {\n    \"episode_time_range\": \"05:71.000 - 05:77.667\",\n    \"observed_facts\": \"Characters laugh together at 05:71.000 - 05:72.500, followed solely by instrumental score as the camera pulls back across the beach.\",\n    \"dialogue\": \"Group laughter ending around 05:72.500; no spoken lines thereafter.\",\n    \"safe_fade\": true,\n    \"rationale\": \"A 1.5-second audio and video fadeout at the end covers only instrumental music and wide scenery, leaving dialogue unaffected.\",\n    \"uncertainty\": 3\n  }\n}\n```",
+          "type": "text"
+        }
+      ],
+      "type": "model_output"
+    }
+  ],
+  "object": "interaction",
+  "model": "gemini-3.8-flash"
+}

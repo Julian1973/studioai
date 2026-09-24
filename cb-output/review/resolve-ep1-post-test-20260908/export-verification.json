@@ -1,0 +1,241 @@
+{
+  "audioAnchors": [
+    {
+      "seconds": 5,
+      "lagSamplesAt4k": 0,
+      "correlation": 0.9999876311756009
+    },
+    {
+      "seconds": 100,
+      "lagSamplesAt4k": 0,
+      "correlation": 0.999996462928207
+    },
+    {
+      "seconds": 250,
+      "lagSamplesAt4k": 0,
+      "correlation": 0.9999906684633996
+    },
+    {
+      "seconds": 400,
+      "lagSamplesAt4k": 0,
+      "correlation": 0.9999890958013001
+    },
+    {
+      "seconds": 565,
+      "lagSamplesAt4k": 0,
+      "correlation": 0.9999964643959617
+    }
+  ],
+  "pictureSamples": [
+    {
+      "seconds": 5,
+      "meanAbsoluteLumaDifference": 26.786666666666665
+    },
+    {
+      "seconds": 100,
+      "meanAbsoluteLumaDifference": 0.7239583333333334
+    },
+    {
+      "seconds": 250,
+      "meanAbsoluteLumaDifference": 7.366944444444444
+    },
+    {
+      "seconds": 400,
+      "meanAbsoluteLumaDifference": 7.6113888888888885
+    },
+    {
+      "seconds": 565,
+      "meanAbsoluteLumaDifference": 1.1015277777777779
+    }
+  ],
+  "probe": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_long_name": "H.265 / HEVC (High Efficiency Video Coding)",
+        "profile": "Main 10",
+        "codec_type": "video",
+        "codec_tag_string": "hvc1",
+        "codec_tag": "0x31637668",
+        "width": 1280,
+        "height": 720,
+        "coded_width": 1280,
+        "coded_height": 720,
+        "has_b_frames": 2,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "16:9",
+        "pix_fmt": "yuv420p10le",
+        "level": 93,
+        "color_range": "tv",
+        "color_space": "bt709",
+        "color_transfer": "bt709",
+        "color_primaries": "bt709",
+        "chroma_location": "left",
+        "field_order": "progressive",
+        "refs": 1,
+        "view_ids_available": "",
+        "view_pos_available": "",
+        "id": "0x1",
+        "r_frame_rate": "24/1",
+        "avg_frame_rate": "24/1",
+        "time_base": "1/12288",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 7098368,
+        "duration": "577.666667",
+        "bit_rate": "7993543",
+        "nb_frames": "13864",
+        "extradata_size": 105,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "creation_time": "2026-09-08T16:46:10.000000Z",
+          "language": "und",
+          "handler_name": "VideoHandler",
+          "vendor_id": "[0][0][0][0]",
+          "encoder": "H.265 10-bit",
+          "timecode": "01:00:00:00"
+        }
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_long_name": "AAC (Advanced Audio Coding)",
+        "profile": "LC",
+        "codec_type": "audio",
+        "codec_tag_string": "mp4a",
+        "codec_tag": "0x6134706d",
+        "sample_fmt": "fltp",
+        "sample_rate": "48000",
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bits_per_sample": 0,
+        "initial_padding": 0,
+        "id": "0x2",
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/48000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 27731968,
+        "duration": "577.749333",
+        "bit_rate": "319999",
+        "nb_frames": "27082",
+        "extradata_size": 2,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "creation_time": "2026-09-08T16:46:10.000000Z",
+          "language": "und",
+          "handler_name": "SoundHandler",
+          "vendor_id": "[0][0][0][0]"
+        }
+      },
+      {
+        "index": 2,
+        "codec_type": "data",
+        "codec_tag_string": "tmcd",
+        "codec_tag": "0x64636d74",
+        "id": "0x3",
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "12288/512",
+        "time_base": "1/12288",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 7098368,
+        "duration": "577.666667",
+        "nb_frames": "1",
+        "extradata_size": 20,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "creation_time": "2026-09-08T16:46:10.000000Z",
+          "language": "eng",
+          "handler_name": "TimeCodeHandler",
+          "timecode": "01:00:00:00"
+        }
+      }
+    ],
+    "format": {
+      "filename": "engine/media/post95/Ep1_episode/Ep1_DaVinci_post_test_20260908_v01.mp4",
+      "nb_streams": 3,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "format_long_name": "QuickTime / MOV",
+      "start_time": "0.000000",
+      "duration": "577.749333",
+      "size": "600606495",
+      "bit_rate": "8316499",
+      "probe_score": 100,
+      "tags": {
+        "major_brand": "isom",
+        "minor_version": "512",
+        "compatible_brands": "isomiso2mp41",
+        "creation_time": "2026-09-08T16:46:10.000000Z",
+        "encoder": "Blackmagic Design DaVinci Resolve Studio"
+      }
+    }
+  },
+  "sha256": "d5c8fdba37bcd56cbf4f5f87e014356eecba2d1d452b57c1a8c3b976677441be",
+  "bytes": 600606495,
+  "inspection": "Technical comparison; not full motion or perceptual listening approval"
+}

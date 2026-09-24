@@ -1,0 +1,28 @@
+import sys,json
+from pathlib import Path
+sys.path.insert(0,str(Path.cwd()/'engine'))
+import cb_gen, cb_render as R
+refs=[str(Path('engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg').resolve())]+[str(Path('cb-seed/assets/final_turnarounds')/('CB_'+n+'.jpeg')) for n in ['Keen','Zenny','Fuzzby']]+[str(Path('engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg').resolve())]
+prompt='''Create one 16:9 cinematic opening keyframe, before release, for Crystal Bears Scene1 Shot1.
+Primary outcome: clearly establish a correctly oriented catapult launching from Keen in the foreground toward the honeycomb at the distant back tree.
+References: Image1 is the outdoor Buzzing Nook environment authority; preserve tree and stream geography and morning lighting. Image2 is @Keen identity only; Image3 is @Zenny identity only; Image4 is @Fuzzby identity only. Preserve exact identities and accessories from complete turnaround references, without duplicating their views. Image5 supplies the wooden catapult design and materials; replace its ball with a real blueberry.
+Composition: wide three-quarter view beside and behind @Keen in foreground left, with face readable in concentrated profile, one eye closed and tongue out. Catapult next to him on near bank. Its base points diagonally away from Keen toward the distant tree at upper right. Tall upright stop frame is on the forward target-facing end. Pivot is low; long throwing arm is cocked BACK toward Keen, blueberry cup on rearward end nearest Keen, BEHIND the forward stop. On release it will swing forward/up toward the honeycomb. Keen stands behind the machine holding release rope. This image is before firing: blueberry remains in cup. Across several Keen body lengths of open middle ground, a separate portable golden honeycomb hangs from a low branch at back tree, with @Fuzzby sleeping on top. @Zenny sits cross-legged on a leaf nearby at that same distant tree, slightly below and beside target, eyes closed, face clean. Exactly these three characters. Make distance and unobstructed launch corridor readable, with believable scale and deep enough focus to identify bees. Honeycomb must be portable enough for Keen's later snatch, distinct from background houses.
+Visual direction: expressive feature-animation 3D CGI matching references, plush surfaces, rounded forms, warm harmonious palette and soft volumetric morning light.
+Physical integration: consistent perspective, contact shadows, rope tension and grounded wooden supports; believable throwing mechanism aimed away from operator. Keep background target readable.
+Preserve: reference identities, environment, three characters, foreground-to-background distance and pre-release state.
+Exclude: additional cuffs or limbs, duplicate characters, backward catapult, handheld slingshot, giant wool ball, doors or windows on portable honeycomb, impact, juice, airborne berry, flight trails, arrows, text, watermark, multiple panels.'''
+refs.append('/Users/julianjenkins/.codex/generated_images/01a07b67-a686-7843-9132-4158e9707e97/exec-db122413-b8a8-4517-a1f3-1d9c8868ab5e.png')
+prompt += """
+REVISION PRIORITIES, overriding any ambiguous framing above:
+Image6 is a composition and launch-orientation guide ONLY. Use its foreground Keen and rear-cocked cup, with upright stop ahead toward the target. Do not copy its modified environment or enlarge its background characters. Image1 remains the exact background camera and geography authority: retain the stream's full winding path, left foreground honeycomb house, right tree and its small elevated honeycomb house, branch silhouettes, root shapes and existing crystals. Build into that image rather than inventing a different forest or zooming in. Wide establishing view at the same field of view as Image1.
+Foreground Keen occupies approximately x=8-28 percent, y=52-95 percent. Catapult x=27-45 percent,y=64-94 percent. The two bees and portable honeycomb belong back by the distant tree at x=65-78 percent,y=33-56 percent; keep their entire cluster compact. Fuzzby and Zenny should each occupy only about 3-5 percent of image height, readable but clearly far away. Preserve a long, visibly empty middle-ground flight corridor. Do not bring the target tree toward camera. Target is several bear body lengths from the launch point.
+The portable honeycomb is a small natural hanging slab of exposed hexagonal wax cells, rich vibrant golden amber, wet glistening honey filling the cells with warm sunlit specular highlights and a few glossy honey droplets. No large spherical hive, entrance hole, door or window. Fuzzby sleeps on its upper edge. This small separate object can be lifted by Keen later.
+Mechanism: one low transverse pivot, one continuous throwing arm with its cup drawn rearward toward Keen, and a forward crossbar to stop the arm. Clearly show the blueberry inside that rear cup and a taut release line. The cup is part of the moving arm, not a loose bowl on the base. No arm intersections, extra disconnected lever, slack string masquerading as a power source, or front-facing loaded cup. Preserve user-approved reference character identities exactly.
+"""
+record={'episode':'Ep3','scene':'1','shot':'S1.SH1','status':'unapproved-comparison','model':cb_gen.SEEDREAM_MODEL_ID,'prompt':prompt,'references':refs}
+Path('cb-output/image-trials/Ep3_S1_SH1_seedream_trial_v02.json').write_text(json.dumps(record,indent=2))
+R._require_confirmed_billing('byteplus')
+out=cb_gen.generate_image(prompt,refs=refs,out='Ep3_S1_SH1_seedream_prompt_trial_v02.png',image_size='2K',production_route='cb_render')
+record['output']=out
+Path('cb-output/image-trials/Ep3_S1_SH1_seedream_trial_v02.json').write_text(json.dumps(record,indent=2))
+print(out)

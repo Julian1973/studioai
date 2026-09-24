@@ -1,0 +1,62 @@
+{
+  "status": "completed",
+  "usage": {
+    "total_tokens": 171654,
+    "total_input_tokens": 168311,
+    "input_tokens_by_modality": [
+      {
+        "modality": "video",
+        "tokens": 166969
+      },
+      {
+        "modality": "text",
+        "tokens": 1342
+      }
+    ],
+    "total_cached_tokens": 0,
+    "total_output_tokens": 3343,
+    "total_tool_use_tokens": 0,
+    "total_thought_tokens": 0,
+    "raw_prompt_token": 200121,
+    "model_invocation_token_counts": [
+      {
+        "prompt_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 7151
+          },
+          {
+            "modality": "video",
+            "tokens": 166969
+          }
+        ],
+        "candidates_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 3347
+          }
+        ]
+      }
+    ]
+  },
+  "created": "2026-09-08T17:46:27Z",
+  "updated": "2026-09-08T17:46:27Z",
+  "service_tier": "standard",
+  "steps": [
+    {
+      "signature": "EmcKZQERTTIPTp0AXLuHc+p1mLrxikUxcSEe82fU1DMYVHQqX5Zm16ovSc83XCletvI1oPHAd9H5qjfZ5n91ygN1kNRSGwXsU39Tq0Sm+ofU/hK8+wtTF+oZLCjCbmHPwW5A9XauJRfK",
+      "type": "thought"
+    },
+    {
+      "content": [
+        {
+          "text": "```json\n{\n \"overview\": \"The episode runs for 577.667 seconds and consists of 26 animated shots joined across multiple scenes depicting the bees and bears storyline. The audio track is a flattened composite mix containing dialogue, musical score, ambient audio, and sound effects. Overall scene geography, narrative progression, and character lip sync are mostly continuous, but several critical join defects exist, including an unintended full-black gap between shots at ~00:44, audio collisions/abrupt cuts, visual jumps in character positions and lighting, and a hard audio dropout at the end of the episode without a proper fade-out.\",\n \"audioAvailable\": true,\n \"reviewedRange\": \"00:00.000 - 09:37.667\",\n \"joins\": [\n  {\n   \"timeSec\": 9.056,\n   \"from\": \"S1.SH1A\",\n   \"to\": \"S1.SH1B\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut from Fuzzby landing with a pollen mustache to flying up into the flower. Visual action and ambient meadow sound are continuous.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 17.12,\n   \"from\": \"S1.SH1B\",\n   \"to\": \"S1.SH1C\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut back to the two bees discussing the mustache. Smooth character reaction and dialogue timing.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 29.184,\n   \"from\": \"S1.SH1C\",\n   \"to\": \"S1.SH2\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Transition from close-up dialogue to wider shot of the meadow with dark storm clouds approaching on the horizon. Natural progression.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 44.256,\n   \"from\": \"S1.SH2\",\n   \"to\": \"2.B1.S1\",\n   \"sceneBoundary\": true,\n   \"observation\": \"Hard cut to full black frames between ~00:43.900 and 00:44.256 before cutting to the bear matriarch meditating with the singing bowl on the beach. Complete silence and missing visual transition.\",\n   \"severity\": \"critical\",\n   \"repairNeeded\": true\n  },\n  {\n   \"timeSec\": 56.32,\n   \"from\": \"2.B1.S1\",\n   \"to\": \"2.B2.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut from singing bowl meditation to the dock with two bears and the sailboat. Ambient crystal chime tone cuts abruptly on the frame line.\",\n   \"severity\": \"minor\",\n   \"repairNeeded\": true\n  },\n  {\n   \"timeSec\": 62.336,\n   \"from\": \"2.B2.S1\",\n   \"to\": \"2.B3.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut back to close-up of the matriarch bear opening her eyes. Musical drone continues smoothly.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 74.4,\n   \"from\": \"2.B3.S1\",\n   \"to\": \"3.B1.S1\",\n   \"sceneBoundary\": true,\n   \"observation\": \"Cut from matriarch saying 'It's time' to Keene packing the boat. Normal cut, audio transition is acceptable.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 104.48,\n   \"from\": \"3.B1.S1\",\n   \"to\": \"3.B3.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut between dialogue exchanges on the dock regarding the wristbands. Continuous conversation and ocean background.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 134.56,\n   \"from\": \"3.B3.S1\",\n   \"to\": \"3.B5.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut to Keene readying the sail on the boat. Natural dialogue and action pacing.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 164.64,\n   \"from\": \"3.B5.S1\",\n   \"to\": \"3.B7.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut from boat departing dock to Keene waving from the sailboat. Mild position shift of boat velocity but acceptable animation flow.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 188.704,\n   \"from\": \"3.B7.S1\",\n   \"to\": \"4.B1.S1\",\n   \"sceneBoundary\": true,\n   \"observation\": \"Cut to open ocean sailing and dolphin jumping beside the boat. Music score continues cleanly.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 218.746,\n   \"from\": \"4.B1.S1\",\n   \"to\": \"4.B3.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut to stormy clouds gathering over the water while Keene consults the map. Consistent mood change.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 248.826,\n   \"from\": \"4.B3.S1\",\n   \"to\": \"4.B5.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Keene looking around anxiously as waves swell. Audio storm rumble is continuous.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 278.906,\n   \"from\": \"4.B5.S1\",\n   \"to\": \"5.B1.S1\",\n   \"sceneBoundary\": true,\n   \"observation\": \"Cut to bees flying through the jungle forest warning of the storm. Sound transitions cleanly from ocean storm to forest canopy.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 306.97,\n   \"from\": \"5.B1.S1\",\n   \"to\": \"6.B1.S1\",\n   \"sceneBoundary\": true,\n   \"observation\": \"Cut from bees spotting the sailboat in trouble to bears standing on the shore looking out to sea.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 330.05,\n   \"from\": \"6.B1.S1\",\n   \"to\": \"6.B3.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut from wide shore view of bears to Fuzzby crash-landing on the wet sand. Continuity of action and dialogue works well.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 356.139,\n   \"from\": \"6.B3.S1\",\n   \"to\": \"7.B1.S1\",\n   \"sceneBoundary\": true,\n   \"observation\": \"Cut from shore back to Keene's boat adrift in rough waters near rocks.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 372.203,\n   \"from\": \"7.B1.S1\",\n   \"to\": \"7.B3.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Keene spotting Squeaky tangled in the fishing net; jump to Keene diving into the sea.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 402.283,\n   \"from\": \"7.B3.S1\",\n   \"to\": \"7.B9.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Underwater rescue sequence; Keene swimming toward the net.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 412.363,\n   \"from\": \"7.B9.S1\",\n   \"to\": \"S8.SH1\",\n   \"sceneBoundary\": true,\n   \"observation\": \"Cut from underwater struggling with the net to the bears watching from the beach, observing Keene rescue the dolphin.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 442.443,\n   \"from\": \"S8.SH1\",\n   \"to\": \"S8.SH2\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut back to Keene riding Squeaky through the waves onto the beach. Cheerful landing and reunion.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 468.523,\n   \"from\": \"S8.SH2\",\n   \"to\": \"9.B1.S1\",\n   \"sceneBoundary\": true,\n   \"observation\": \"Cut to peaceful shoreline later in the evening as Keene says goodbye to Squeaky.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 480.565,\n   \"from\": \"9.B1.S1\",\n   \"to\": \"9.B2.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Dolphin swims away into the sunset. Pacing and emotional tone continuous.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 500.565,\n   \"from\": \"9.B2.S1\",\n   \"to\": \"9.B3.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut from shoreline to clearing in the crystal forest where the council gathers around Keene.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 524.565,\n   \"from\": \"9.B3.S1\",\n   \"to\": \"10.B1.S1\",\n   \"sceneBoundary\": true,\n   \"observation\": \"Council ceremony conferring the glowing aquamarine crystal power onto Keene's wristbands.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  },\n  {\n   \"timeSec\": 547.565,\n   \"from\": \"10.B1.S1\",\n   \"to\": \"10.B2.S1\",\n   \"sceneBoundary\": false,\n   \"observation\": \"Cut to the whole group walking happily together along the beach at golden hour.\",\n   \"severity\": \"none\",\n   \"repairNeeded\": false\n  }\n ],\n \"defects\": [\n  {\n   \"startSec\": 43.85,\n   \"endSec\": 44.3,\n   \"category\": \"black_frames\",\n   \"evidence\": \"From 00:43.850 to 00:44.256, the visual frame drops completely to black with a sudden silence dropout on the composite audio track right at the transition from scene 1 to scene 2.\",\n   \"confidence\": 0.98,\n   \"smallestSafeRepair\": \"Trim the trailing dead black frames (approx. 00:43.900 to 00:44.256) or butt-splice the heads and tails with a 4-frame video cross-dissolve and seamless audio cross-fade.\",\n   \"dialogueAffected\": false\n  },\n  {\n   \"startSec\": 56.1,\n   \"endSec\": 56.4,\n   \"category\": \"audio_click_or_pop\",\n   \"evidence\": \"At 00:56.320, the sustained ringing tone of the crystal singing bowl is abruptly hard-gated/truncated when switching to the shot of the dock, causing a sharp acoustic cutoff.\",\n   \"confidence\": 0.92,\n   \"smallestSafeRepair\": \"Apply a short 100ms audio exponential fade-out on the tail of shot 2.B1.S1 to smooth out the ringing resonance into shot 2.B2.S1.\",\n   \"dialogueAffected\": false\n  },\n  {\n   \"startSec\": 575.5,\n   \"endSec\": 577.667,\n   \"category\": \"ending_cut\",\n   \"evidence\": \"At 09:36.500 - 09:37.667, the camera pulls back on the bears on the beach while the background music abruptly cuts off without completing the musical resolution cadence or performing an audio fade-out before the file termination.\",\n   \"confidence\": 0.95,\n   \"smallestSafeRepair\": \"Apply a 1.5-second video fade to black and corresponding audio logarithmic fade-out from 09:36.167 to 09:37.667.\",\n   \"dialogueAffected\": false\n  }\n ],\n \"endingAssessment\": \"The episode concludes with an ensemble wide shot on the sunset beach, but both the picture and audio end abruptly on a held frame and sudden waveform truncation without a formal fade to black or audio tail.\",\n \"limitations\": \"The audio track is flattened (dialogue, music, and sound effects are premixed on a single stereo stem). Any local audio cross-fade or trim at join points must be executed precisely within brief gaps between dialogue lines to avoid altering speech.\"\n}\n```",
+          "type": "text"
+        }
+      ],
+      "type": "model_output"
+    }
+  ],
+  "object": "interaction",
+  "model": "gemini-3.8-flash"
+}

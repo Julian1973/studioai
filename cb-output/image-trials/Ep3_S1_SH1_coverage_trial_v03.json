@@ -1,0 +1,57 @@
+{
+  "version": "1.0.2",
+  "project": "crystal-bears",
+  "episode": "Ep3",
+  "scene": 1,
+  "shotId": "S1.SH1",
+  "status": "returned-awaiting-review",
+  "parent": "Ep3_S1_SH1_coverage_trial_v02",
+  "prompt": "Edit ONLY panel8 (row3, centre column) of Image1 inside <bbox>345 515 658 733</bbox>. Preserve all eleven other panels and every gutter exactly. The deliverable remains the same 3-column 4-row storyboard sheet. Image2 controls Keen identity. Image5 supplies the wood and rope materials of the original machine only; there is NO BERRY at this late moment. Do not change the other panels.\nReplace panel8 with a TIGHT LOW SIDE INSERT: fill the panel with Keen's LOWER BACK, SHORT TAIL and the end of the catapult's wooden throwing arm. The EMPTY wooden scoop at the end of the arm is visibly TOUCHING and slightly compressing the top of Keen's short tail at the precise comic impact. The tail remains attached to Keen's lower back. The lower portion of the golden honeycomb is visible at the top edge, still held in his paws; his face and head are cropped out of this close insert. Show only this single clear contact event, no full-body pose. The loose arm has fallen onto the tail after Keen backed against the support. The cup is completely empty and its concave interior is visible. Preserve Keen from Image2, the same warm light and 3D materials. Do not show Keen kicking the machine or stepping over it. No blueberry, wool ball, duplicate tail, stretched tail, arrows, labels or written sound effects. The camera is close enough to make wooden scoop-to-tail contact unmistakable. All other eleven panels stay unchanged.",
+  "model": "dola-seedream-5-0-pro-260628",
+  "references": [
+    {
+      "slot": 1,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_SH1_coverage_trial_v02.png",
+      "sha256": "4ba0fe6eba58b32479067f2c2708b474de34992922ef49272d296c6c440e66be"
+    },
+    {
+      "slot": 2,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+    },
+    {
+      "slot": 3,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+    },
+    {
+      "slot": 4,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+      "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+    },
+    {
+      "slot": 5,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+      "sha256": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a"
+    }
+  ],
+  "humanApproval": false,
+  "productionMutation": false,
+  "output": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_SH1_coverage_trial_v03.png",
+  "review": {
+    "reviewer": "Codex visual inspection",
+    "humanApproval": false,
+    "imageSha256": "4ca8abd84a1192544b8a707b8969c3f72618ffc12fb43b5dbd76d012de058e47",
+    "decision": "usable-for-authorised-render-trial",
+    "limitations": [
+      "Board indicates coverage and approximate composition; actual movement, mechanical causality and sound remain unverified until rendered."
+    ],
+    "passed": [
+      "12 ordered views",
+      "whole-comb ownership path",
+      "empty cup in tail insert",
+      "Fuzzby clean and beside comb",
+      "Zenny final wink and residual mark"
+    ]
+  }
+}

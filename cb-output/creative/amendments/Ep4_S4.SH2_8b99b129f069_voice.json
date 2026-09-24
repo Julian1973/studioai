@@ -1,0 +1,962 @@
+{
+ "schemaVersion": 1,
+ "approvalState": "approved",
+ "approvedAt": "2026-09-23T22:32:08",
+ "approvedBy": "Julian",
+ "kind": "voice-contract-correction",
+ "scene": "4",
+ "shotId": "S4.SH2",
+ "scriptVersionId": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+ "previousScriptVersionId": "sha256:eee45840ac475706f035afd261e499a46451824299cf3b85e114e37466d5b407",
+ "baseScriptVersionId": "sha256:eee45840ac475706f035afd261e499a46451824299cf3b85e114e37466d5b407",
+ "correction": "Move two screenplay action passages out of spoken dialogue; keep speakers, words, SEE and current episode storage unchanged.",
+ "shot": {
+  "shotId": "S4.SH2",
+  "beatCode": "S4.B3",
+  "beatCodes": [
+   "S4.B3"
+  ],
+  "shotRole": "coverage",
+  "establishJob": null,
+  "buttonChange": null,
+  "frameSource": null,
+  "durationSec": 20.0,
+  "purpose": "Turn the first fix into visible proof that Sunny is making the party wetter and less free.",
+  "performanceAssignment": "Performance phases: anticipation: ENVIRONMENT The soaked garland sags against the cave wall; drops gather, fall, and mark the floor beneath it; action: Sunny Sunny’s paws tense, then release the garland; it falls flat and pushes muddy water outward onto Keen’s toes; reaction: Keen Keen looks down, wiggles his toes in the new puddle and gives one happy stomp that sends a small splash up; settle: Sunny Sunny recoils from the splash area, face tightening as she stands between wet ribbons and the fallen garland. Cause and effect: Water weight makes the garland sag and drip; Sunny’s release turns the overhead drip into a floor impact; the impact spreads muddy water to Keen; Keen’s stomp proves the puddle can become play; Sunny’s recoil stops that possibility. Visible turn: The room briefly opens into fun through Keen, then narrows again when Sunny treats the same water as a threat to her plan. Land on: The fallen garland, active muddy puddle, stalled Keen and tightened Sunny must all remain visible as the handoff to her next rush. Acting freedom: Let the drip rhythm, splash height and Keen’s toe wiggle vary, but preserve the cause chain from sag to drop to splash to Sunny’s recoil.",
+  "camera": "Keep the garland, drip, fall, splash and puddle in readable cause-and-effect; make the frame tighten only when Sunny refuses Keen's play.",
+  "openingPose": "A heavy wet garland sags above Keen, drops already gathering beneath Sunny's tense paws.",
+  "sourceType": "opener",
+  "sourceShotId": null,
+  "stateSourceShotId": "S4.SH1",
+  "motionContinuityRequired": false,
+  "cutInMotivation": "SEE: the drip is the physical proof of the emotional problem.",
+  "dialogueBinding": "Perform only the ordered approved dialogue occurrences. Screenplay action, sound labels and BEAT are silent. Only the active speaker moves their mouth; every other character reacts silently.",
+  "dialogueLines": [
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:4adb1cac82133147d3c436e537e8fd70f4579c13d49b1f8fd545dbe855823e91",
+    "sourceEventId": "script-event:sha256:9875c5437bf1881758015fe0568712c638071f9bb862177c5c30e7e33479ff11",
+    "speaker": "Keen",
+    "exactText": "Oh… no sunshine today? Just a drop?",
+    "delivery": "Oh… no sunshine today? Just a drop?",
+    "startSec": 0.0,
+    "endSec": 4.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "Oh… no sunshine today? Just a drop?",
+    "sourceSegmentation": {
+     "occurrenceId": "dialogue-occurrence:sha256:4adb1cac82133147d3c436e537e8fd70f4579c13d49b1f8fd545dbe855823e91",
+     "speaker": "Keen",
+     "rawSourceText": "Oh… no sunshine today? Just a drop?",
+     "spokenText": "Oh… no sunshine today? Just a drop?",
+     "actionBefore": null,
+     "actionAfter": null,
+     "sourceSpan": {
+      "spokenText": [
+       4658,
+       4693
+      ]
+     },
+     "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+     "segmentationStatus": "VERIFIED",
+     "evidence": {
+      "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+      "occurrenceId": "dialogue-occurrence:sha256:4adb1cac82133147d3c436e537e8fd70f4579c13d49b1f8fd545dbe855823e91",
+      "speaker": "Keen",
+      "authority": "structural_line_types",
+      "evidenceId": "script-event:sha256:9875c5437bf1881758015fe0568712c638071f9bb862177c5c30e7e33479ff11",
+      "spans": {
+       "spokenText": [
+        4658,
+        4693
+       ]
+      }
+     },
+     "spokenTextHash": "ad8f4bea8c367428a433ea3d821024cf9c8e4ebea75d652ef6e997ad1605ef84"
+    }
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:9d3046cb108f62b560e11c587478fd6731389fef7c97097702905b2bb009f36c",
+    "sourceEventId": "script-event:sha256:de8f04654e7d47a0701dba9e0cb1d9c982eb62d02b14b16f6c1bb7c658632694",
+    "speaker": "Sunny",
+    "exactText": "Oh no! I’m making it rain inside! The party is getting wetter, not better!",
+    "delivery": "[gasps] Oh no! I’m making it rain inside! The party is getting wetter, not better!",
+    "startSec": 4.1,
+    "endSec": 11.8,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "Oh no! I’m making it rain inside! The party is getting wetter, not better!",
+    "sourceSegmentation": {
+     "occurrenceId": "dialogue-occurrence:sha256:9d3046cb108f62b560e11c587478fd6731389fef7c97097702905b2bb009f36c",
+     "speaker": "Sunny",
+     "rawSourceText": "Oh no! I’m making it rain inside! The party is getting wetter, not better!",
+     "spokenText": "Oh no! I’m making it rain inside! The party is getting wetter, not better!",
+     "actionBefore": null,
+     "actionAfter": null,
+     "sourceSpan": {
+      "spokenText": [
+       4763,
+       4837
+      ]
+     },
+     "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+     "segmentationStatus": "VERIFIED",
+     "evidence": {
+      "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+      "occurrenceId": "dialogue-occurrence:sha256:9d3046cb108f62b560e11c587478fd6731389fef7c97097702905b2bb009f36c",
+      "speaker": "Sunny",
+      "authority": "structural_line_types",
+      "evidenceId": "script-event:sha256:de8f04654e7d47a0701dba9e0cb1d9c982eb62d02b14b16f6c1bb7c658632694",
+      "spans": {
+       "spokenText": [
+        4763,
+        4837
+       ]
+      }
+     },
+     "spokenTextHash": "5d4775543606caadf224e2339439ce21684fd544cb3c24e9e07078c3914dcaac"
+    }
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:7bb37aa80d093ea711ab50f60a68ad74eace9bc1850b02f6fff47d58fba86d1b",
+    "sourceEventId": "script-event:sha256:2eda47fb6bac092f14819d61c249d155ffb90060fe5965312cf07083f1f8a82d",
+    "speaker": "Misty",
+    "exactText": "Sunny, wait, it’s just a little water —",
+    "delivery": "[quietly] Sunny, wait, it’s just a little water —",
+    "startSec": 12.0,
+    "endSec": 14.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "Sunny, wait, it’s just a little water —",
+    "sourceSegmentation": {
+     "occurrenceId": "dialogue-occurrence:sha256:7bb37aa80d093ea711ab50f60a68ad74eace9bc1850b02f6fff47d58fba86d1b",
+     "speaker": "Misty",
+     "rawSourceText": "Sunny, wait, it’s just a little water —",
+     "spokenText": "Sunny, wait, it’s just a little water —",
+     "actionBefore": null,
+     "actionAfter": null,
+     "sourceSpan": {
+      "spokenText": [
+       4969,
+       5008
+      ]
+     },
+     "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+     "segmentationStatus": "VERIFIED",
+     "evidence": {
+      "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+      "occurrenceId": "dialogue-occurrence:sha256:7bb37aa80d093ea711ab50f60a68ad74eace9bc1850b02f6fff47d58fba86d1b",
+      "speaker": "Misty",
+      "authority": "structural_line_types",
+      "evidenceId": "script-event:sha256:2eda47fb6bac092f14819d61c249d155ffb90060fe5965312cf07083f1f8a82d",
+      "spans": {
+       "spokenText": [
+        4969,
+        5008
+       ]
+      }
+     },
+     "spokenTextHash": "94c30909a7c4b93853616b07a49abf2d6a4b3e817f9aeb88c3fae48b080b8f31"
+    }
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:ce6ff25f8185ad402cebd573c388dd69ead25841a0102780651d71a59a7d79a2",
+    "sourceEventId": "script-event:sha256:f269815afb983eafee37a06f2f33d2f3c4b030d24bb0cf735035b19c2e34e6b5",
+    "speaker": "Keen",
+    "exactText": "Actually… don’t worry! I love to splash in muddy puddles!",
+    "delivery": "Actually… don’t worry! I love to splash in muddy puddles!",
+    "startSec": 14.1,
+    "endSec": 17.1,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "Actually… don’t worry! I love to splash in muddy puddles!",
+    "sourceSegmentation": {
+     "occurrenceId": "dialogue-occurrence:sha256:ce6ff25f8185ad402cebd573c388dd69ead25841a0102780651d71a59a7d79a2",
+     "speaker": "Keen",
+     "rawSourceText": "Actually… don’t worry! I love to splash in muddy puddles!",
+     "spokenText": "Actually… don’t worry! I love to splash in muddy puddles!",
+     "actionBefore": null,
+     "actionAfter": null,
+     "sourceSpan": {
+      "spokenText": [
+       5056,
+       5113
+      ]
+     },
+     "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+     "segmentationStatus": "VERIFIED",
+     "evidence": {
+      "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+      "occurrenceId": "dialogue-occurrence:sha256:ce6ff25f8185ad402cebd573c388dd69ead25841a0102780651d71a59a7d79a2",
+      "speaker": "Keen",
+      "authority": "structural_line_types",
+      "evidenceId": "script-event:sha256:f269815afb983eafee37a06f2f33d2f3c4b030d24bb0cf735035b19c2e34e6b5",
+      "spans": {
+       "spokenText": [
+        5056,
+        5113
+       ]
+      }
+     },
+     "spokenTextHash": "631fe51b8f51831b5cc69620cd5e9695b20c1b1eb0794be3a5dbef7ac0bd0219"
+    }
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:e3e7b7bf902807c30c18bfe18cf60e1e82d38b84583a3fd7bd5067b06e971372",
+    "sourceEventId": "script-event:sha256:e01eb4706d999d449c0dd5e55b749d37b1be715614a195f83c987a543cad558f",
+    "speaker": "Sunny",
+    "exactText": "Muddy puddles?! At a perfect party?! No, no, no!",
+    "delivery": "[nervous] Muddy puddles?! At a perfect party?! No, no, no!",
+    "startSec": 17.2,
+    "endSec": 19.7,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": [],
+    "performanceText": "Muddy puddles?! At a perfect party?! No, no, no!",
+    "sourceSegmentation": {
+     "occurrenceId": "dialogue-occurrence:sha256:e3e7b7bf902807c30c18bfe18cf60e1e82d38b84583a3fd7bd5067b06e971372",
+     "speaker": "Sunny",
+     "rawSourceText": "Muddy puddles?! At a perfect party?! No, no, no!",
+     "spokenText": "Muddy puddles?! At a perfect party?! No, no, no!",
+     "actionBefore": null,
+     "actionAfter": null,
+     "sourceSpan": {
+      "spokenText": [
+       5165,
+       5213
+      ]
+     },
+     "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+     "segmentationStatus": "VERIFIED",
+     "evidence": {
+      "scriptRevision": "sha256:8b99b129f0699010ed8ee61e16d8a71e6ee4526600c6009eb8f55451cd4315f4",
+      "occurrenceId": "dialogue-occurrence:sha256:e3e7b7bf902807c30c18bfe18cf60e1e82d38b84583a3fd7bd5067b06e971372",
+      "speaker": "Sunny",
+      "authority": "structural_line_types",
+      "evidenceId": "script-event:sha256:e01eb4706d999d449c0dd5e55b749d37b1be715614a195f83c987a543cad558f",
+      "spans": {
+       "spokenText": [
+        5165,
+        5213
+       ]
+      }
+     },
+     "spokenTextHash": "491e6d59b210eb0ddae80abc053619e1063bc641bfc8dfe0942fe22be04420e3"
+    }
+   }
+  ],
+  "visualPayoff": "Sunny boxed by wet ribbons above the muddy puddle, her face tightened against the play she just stopped.",
+  "physicalStaging": {
+   "staysVisible": "The soaked garland remains visible from Sunny’s paws to the floor so the drip, release and splat read as one cause-and-effect chain.",
+   "contactAndWeight": "The garland hangs heavy with water, sags, slips from Sunny’s grip, lands flat with a wet slap and pushes muddy water outward onto Keen’s toes.",
+   "payoffShape": "A neat decoration becomes an ugly puddle exactly where Keen can splash.",
+   "prohibitedStaging": [
+    "Do not hide the garland’s fall behind bodies.",
+    "Do not make the splash dry or weightless.",
+    "Do not let Keen already be splashing before the water hits."
+   ]
+  },
+  "physicalStagings": [
+   {
+    "staysVisible": "The soaked garland remains visible from Sunny’s paws to the floor so the drip, release and splat read as one cause-and-effect chain.",
+    "contactAndWeight": "The garland hangs heavy with water, sags, slips from Sunny’s grip, lands flat with a wet slap and pushes muddy water outward onto Keen’s toes.",
+    "payoffShape": "A neat decoration becomes an ugly puddle exactly where Keen can splash.",
+    "prohibitedStaging": [
+     "Do not hide the garland’s fall behind bodies.",
+     "Do not make the splash dry or weightless.",
+     "Do not let Keen already be splashing before the water hits."
+    ],
+    "beatCode": "S4.B3"
+   }
+  ],
+  "prohibited": [
+   "Keep the garland fall readable from sag to release to floor impact.",
+   "Keep Keen’s playful response after the splash as a brief offered alternative.",
+   "Maintain the exact cast listed for this shot boundary; no extras or omissions."
+  ],
+  "charactersInFrame": [
+   "Sunny",
+   "Keen",
+   "Misty"
+  ],
+  "offscreenSpeakers": [],
+  "requiredPropReferences": [],
+  "openingCharactersInFrame": [
+   "Sunny",
+   "Keen"
+  ],
+  "closingCharactersInFrame": null,
+  "continuityIn": {
+   "lighting": "warm cave light dulled by wet paper",
+   "cameraSide": "Keen-facing under the garland",
+   "characters": [
+    {
+     "character": "Sunny",
+     "screenZone": "upper-left",
+     "facing": "toward the wall and Keen below",
+     "pose": "on or near ladder, tense hands on soaked garland",
+     "expression": "alarm building",
+     "visibleMarks": [
+      "wet fur",
+      "dripping water trail"
+     ],
+     "heldProps": [
+      "soaked_decorations",
+      "lanterns",
+      "ribbons"
+     ]
+    },
+    {
+     "character": "Keen",
+     "screenZone": "lower-center",
+     "facing": "up toward Sunny",
+     "pose": "waiting under the drip path",
+     "expression": "cautious optimism",
+     "visibleMarks": [],
+     "heldProps": [
+      "ladder"
+     ]
+    },
+    {
+     "character": "Misty",
+     "screenZone": "rear-left",
+     "facing": "toward Sunny and Keen",
+     "pose": "small, careful presence",
+     "expression": "attentive",
+     "visibleMarks": [
+      "wet shine"
+     ],
+     "heldProps": []
+    }
+   ]
+  },
+  "continuityOut": {
+   "lighting": "warm light refracted by drops and mud, party colour dulled",
+   "cameraSide": "Keen-facing floor and wall line",
+   "characters": [
+    {
+     "character": "Sunny",
+     "screenZone": "upper-right then center",
+     "facing": "down toward the mess",
+     "pose": "recoiling after release",
+     "expression": "panicked, tightening",
+     "visibleMarks": [
+      "wet paws"
+     ],
+     "heldProps": []
+    },
+    {
+     "character": "Keen",
+     "screenZone": "lower-center",
+     "facing": "toward puddle then Sunny",
+     "pose": "feet in muddy splash, then playful stance",
+     "expression": "brightening then caution under Sunny’s refusal",
+     "visibleMarks": [
+      "muddy toes"
+     ],
+     "heldProps": []
+    },
+    {
+     "character": "Misty",
+     "screenZone": "left-rear",
+     "facing": "toward Sunny and Keen",
+     "pose": "leaning in carefully",
+     "expression": "gentle",
+     "visibleMarks": [],
+     "heldProps": []
+    }
+   ]
+  },
+  "shotTransition": {
+   "type": "cut",
+   "stateSourceShotId": "S4.SH1",
+   "reason": "SEE: the drip is the physical proof of the emotional problem.",
+   "openingImage": "A heavy wet garland sags above Keen, drops already gathering beneath Sunny's tense paws.",
+   "camera": "Keep the garland, drip, fall, splash and puddle in readable cause-and-effect; make the frame tighten only when Sunny refuses Keen's play."
+  },
+  "continuityProseIn": "Sunny’s command burst is already established; the towel-offer beat carries directly in from the previous shot.",
+  "continuityProseOut": "The indoor-rain mistake is now visible, the garland has fallen, and Keen’s puddle play has been rejected by Sunny’s tightening rule.",
+  "dialogueTimingProse": "Let the drip build read first, then land Sunny’s panic through the release-and-splat action; protect the small pause before Keen’s playful recovery and Sunny’s tightening refusal.",
+  "referenceRolesProse": "The dripping garland as physical proof; Keen’s toes as the comic consequence; Misty as the gentle witness; Sunny’s refusal as the emotional turn.",
+  "principalPerformanceApproved": "Sunny's panic jumps from hands to face: she freezes, releases, then recoils from Keen's joy.",
+  "physicalPerformanceApproved": "The garland sags in Sunny’s tense paws and drips onto Keen below. Sunny freezes, panics and releases it; the heavy wet mass slaps the floor and splashes Keen’s toes. Misty leans in carefully, Keen brightens into brief floor play, then Sunny recoils and boxes herself behind wet clutter.",
+  "animationTimingApproved": "Readable drip build, sudden drop with heavy splat, a small playful hold on Keen’s toes, then a tightening push into Sunny’s refusal.",
+  "performanceContractApproved": {
+   "beatOwner": "S4.B3",
+   "playableIntention": "Sunny wants her wall decoration to prove the party can still look right; Keen wants to rescue the accident by making it playable.",
+   "phases": [
+    {
+     "phase": "anticipation",
+     "performer": "ENVIRONMENT",
+     "observableAction": "The soaked garland sags against the cave wall; drops gather, fall, and mark the floor beneath it."
+    },
+    {
+     "phase": "action",
+     "performer": "Sunny",
+     "observableAction": "Sunny’s paws tense, then release the garland; it falls flat and pushes muddy water outward onto Keen’s toes."
+    },
+    {
+     "phase": "reaction",
+     "performer": "Keen",
+     "observableAction": "Keen looks down, wiggles his toes in the new puddle and gives one happy stomp that sends a small splash up."
+    },
+    {
+     "phase": "settle",
+     "performer": "Sunny",
+     "observableAction": "Sunny recoils from the splash area, face tightening as she stands between wet ribbons and the fallen garland."
+    }
+   ],
+   "physicalCauseAndEffect": "Water weight makes the garland sag and drip; Sunny’s release turns the overhead drip into a floor impact; the impact spreads muddy water to Keen; Keen’s stomp proves the puddle can become play; Sunny’s recoil stops that possibility.",
+   "visibleEmotionalTurn": "The room briefly opens into fun through Keen, then narrows again when Sunny treats the same water as a threat to her plan.",
+   "requiredLanding": "The fallen garland, active muddy puddle, stalled Keen and tightened Sunny must all remain visible as the handoff to her next rush.",
+   "performanceFreedom": "Let the drip rhythm, splash height and Keen’s toe wiggle vary, but preserve the cause chain from sag to drop to splash to Sunny’s recoil.",
+   "characterTruths": [
+    {
+     "character": "Sunny",
+     "canonTrait": "Supplied treatment: Sunny’s care is outrun by her need to restore the exact celebration in her head.",
+     "playableWant": "Keep the decoration from becoming proof that her plan is failing.",
+     "pressureResponse": "She enlarges the problem with panic, then rejects the friendlier reading of the mess.",
+     "observableSignature": "Tense paws, freeze, sudden release, pulled-back torso, tight face aimed at the floor mess.",
+     "substitutionTest": "Keen would accept the puddle; Misty would soften it; only Sunny turns a playable accident into a rule-bound crisis."
+    },
+    {
+     "character": "Keen",
+     "canonTrait": "Supplied treatment: Keen softens the room, then adapts into puddle play.",
+     "playableWant": "Make the accident safe and fun enough that Sunny can stop fighting it.",
+     "pressureResponse": "He tests the mess with his body rather than blaming anyone.",
+     "observableSignature": "Downward glance, toe wiggle, brightening posture, small stomp contained to the puddle.",
+     "substitutionTest": "Sunny cannot do this because she sees mess as failure; Keen’s adaptable play is the alternate party the scene needs to show."
+    }
+   ],
+   "comedyStaging": {
+    "staysVisible": "The soaked garland remains visible from Sunny’s paws to the floor so the drip, release and splat read as one cause-and-effect chain.",
+    "contactAndWeight": "The garland hangs heavy with water, sags, slips from Sunny’s grip, lands flat with a wet slap and pushes muddy water outward onto Keen’s toes.",
+    "payoffShape": "A neat decoration becomes an ugly puddle exactly where Keen can splash.",
+    "prohibitedStaging": [
+     "Do not hide the garland’s fall behind bodies.",
+     "Do not make the splash dry or weightless.",
+     "Do not let Keen already be splashing before the water hits."
+    ]
+   }
+  },
+  "characterTruthsApproved": [
+   {
+    "character": "Sunny",
+    "canonTrait": "Supplied treatment: Sunny’s care is outrun by her need to restore the exact celebration in her head.",
+    "playableWant": "Keep the decoration from becoming proof that her plan is failing.",
+    "pressureResponse": "She enlarges the problem with panic, then rejects the friendlier reading of the mess.",
+    "observableSignature": "Tense paws, freeze, sudden release, pulled-back torso, tight face aimed at the floor mess.",
+    "substitutionTest": "Keen would accept the puddle; Misty would soften it; only Sunny turns a playable accident into a rule-bound crisis."
+   },
+   {
+    "character": "Keen",
+    "canonTrait": "Supplied treatment: Keen softens the room, then adapts into puddle play.",
+    "playableWant": "Make the accident safe and fun enough that Sunny can stop fighting it.",
+    "pressureResponse": "He tests the mess with his body rather than blaming anyone.",
+    "observableSignature": "Downward glance, toe wiggle, brightening posture, small stomp contained to the puddle.",
+    "substitutionTest": "Sunny cannot do this because she sees mess as failure; Keen’s adaptable play is the alternate party the scene needs to show."
+   }
+  ],
+  "comedyStagingApproved": {
+   "staysVisible": "The soaked garland remains visible from Sunny’s paws to the floor so the drip, release and splat read as one cause-and-effect chain.",
+   "contactAndWeight": "The garland hangs heavy with water, sags, slips from Sunny’s grip, lands flat with a wet slap and pushes muddy water outward onto Keen’s toes.",
+   "payoffShape": "A neat decoration becomes an ugly puddle exactly where Keen can splash.",
+   "prohibitedStaging": [
+    "Do not hide the garland’s fall behind bodies.",
+    "Do not make the splash dry or weightless.",
+    "Do not let Keen already be splashing before the water hits."
+   ]
+  },
+  "comedyStagingsApproved": [
+   {
+    "beatCode": "S4.B3",
+    "staysVisible": "The soaked garland remains visible from Sunny’s paws to the floor so the drip, release and splat read as one cause-and-effect chain.",
+    "contactAndWeight": "The garland hangs heavy with water, sags, slips from Sunny’s grip, lands flat with a wet slap and pushes muddy water outward onto Keen’s toes.",
+    "payoffShape": "A neat decoration becomes an ugly puddle exactly where Keen can splash.",
+    "prohibitedStaging": [
+     "Do not hide the garland’s fall behind bodies.",
+     "Do not make the splash dry or weightless.",
+     "Do not let Keen already be splashing before the water hits."
+    ]
+   }
+  ],
+  "comedyContractsApproved": [
+   {
+    "beatCode": "S4.B3",
+    "mode": "BIG",
+    "mechanism": "Environmental participation",
+    "comicOwner": "Sunny",
+    "straightCharacter": "Misty",
+    "setup": "Sunny tries to hang sunshine using soaking decorations.",
+    "expectation": "Decorations will brighten the cave.",
+    "disruption": "They drip on Keen, then fall and make a puddle he wants to enjoy.",
+    "button": "Sunny treats muddy puddles as an emergency at a party already inside because of rain.",
+    "hold": "Hold on Keen’s toes in the splash before Sunny’s horror cuts off the fun.",
+    "physicalStaging": {
+     "staysVisible": "The soaked garland remains visible from Sunny’s paws to the floor so the drip, release and splat read as one cause-and-effect chain.",
+     "contactAndWeight": "The garland hangs heavy with water, sags, slips from Sunny’s grip, lands flat with a wet slap and pushes muddy water outward onto Keen’s toes.",
+     "payoffShape": "A neat decoration becomes an ugly puddle exactly where Keen can splash.",
+     "prohibitedStaging": [
+      "Do not hide the garland’s fall behind bodies.",
+      "Do not make the splash dry or weightless.",
+      "Do not let Keen already be splashing before the water hits."
+     ]
+    }
+   }
+  ],
+  "emotionContractsApproved": [
+   {
+    "beatCode": "S4.B3",
+    "owner": "Sunny",
+    "entryState": "Determined to make the cave look sunny.",
+    "pressure": "The garland physically proves her fix is making the problem worse.",
+    "choiceOrRealisation": "She names the wetness as disaster instead of accepting Keen’s playful reframing.",
+    "exitState": "More controlling and more visibly rattled.",
+    "observableEvidence": "She throws her hands up, releases the garland, and recoils from muddy puddles as if they threaten the whole party.",
+    "audienceAlignment": "ahead",
+    "heldAfterBeat": "The audience has seen a possible fun version of the party, and Sunny has rejected it."
+   }
+  ],
+  "cinematographyContractApproved": {
+   "storyPointOfView": "Sunny's fix seen through Keen's immediate bodily consequence.",
+   "emotionalDistanceStart": "Close to the physical problem under the garland.",
+   "emotionalDistanceEnd": "Tight on Sunny's rule-bound panic.",
+   "revealStrategy": "Let the audience see the drip and puddle possibility before Sunny can reframe either as disaster.",
+   "shotScale": "MS physical chain, cut-in floor impact, low MS puddle play, MCU refusal.",
+   "lensIntent": "35 mm for proximity to drip and puddle, 24 mm for splash energy, 50 mm to compress Sunny against clutter.",
+   "cameraHeight": "Starts at Keen's upward eye-line and floor-level puddle height; ends at Sunny's eye-line as control narrows.",
+   "composition": "Ceiling, garland and ribbons press down; puddle foreground offers freedom that Sunny visually stands outside.",
+   "depthStrategy": "Keep Sunny, Keen and Misty staggered so the failed decoration, play offer and refusal share geography.",
+   "cameraBehavior": "Tilt/drop with cause and effect; hold for the playable puddle; push in only when Sunny rejects it.",
+   "focusStrategy": "Physical proof first—drip, paws, splash, toes—then Sunny's thought.",
+   "lightingFunction": "Warm party light refracts in drops and mud, making the attempted sunshine look damp.",
+   "paletteFunction": "Yellow garland loses cheer as grey water and brown mud take over the frame.",
+   "performanceVisibility": "Keen's hopeful play and Sunny's recoil must both be readable without making Misty a scold.",
+   "editorialPurpose": "Complete the first accident and show Sunny rejecting the better version of the party.",
+   "memorableLandingImage": "Sunny trapped behind wet ribbons, saying no to the muddy fun at her feet.",
+   "providerInstruction": "Keep the garland, drip, fall, splash and puddle in readable cause-and-effect; make the frame tighten only when Sunny refuses Keen's play."
+  },
+  "performanceBudgetApproved": {
+   "emotionalTurnCount": 3,
+   "propStateChangeCount": 4,
+   "dialogueHeavy": true,
+   "silentActingReserveSec": 0.8,
+   "landingHoldSec": 0.5,
+   "minimumHonestDurationSec": 19.0,
+   "decision": "single-unit",
+   "rationale": "The garland accident is one complete causal chain with four motivated views and enough time for puddle play before Sunny's refusal."
+  },
+  "storyIntentApproved": {
+   "narrativeFunction": "Pay off Sunny's homemade-sunshine promise by making it indoor rain.",
+   "primaryAudienceFeeling": "Funny physical surprise turning into nervous tightness.",
+   "secondaryAudienceFeeling": "Recognition that Sunny is rejecting help disguised as play.",
+   "outerAction": "Sunny hangs, drops and reacts to the soaking garland; Keen splashes; Sunny refuses it.",
+   "innerAction": "Sunny cannot tolerate the party becoming real instead of planned.",
+   "performanceDirection": "Let Sunny's alarm outrun the scale of the problem; let Keen's puddle joy be sincere and brief.",
+   "mutedRead": "A decoration makes rain, becomes mud, a friend finds play, and Sunny shuts it down.",
+   "environmentPressure": "Wet garland, ladder height, slick stone and muddy water turn her plan against her.",
+   "soundStory": "Drip, squish, SPLAT and splash should escalate from small to undeniable, then thin under Sunny's no.",
+   "motifUse": "Soaked paper visibly transforms from precious decoration into the exact mess Sunny fears.",
+   "thoughtChangeAndCut": "Sunny moves from 'I can make sunshine' to 'mud means ruined'; cut onward because her refusal launches the rush that triggers the domino chain.",
+   "mustUnderstand": "Sunny caused the puddle and rejected the fun alternative.",
+   "mustNotKnowYet": "The honey-pot chain and final silence are still ahead.",
+   "reactionBeat": "Keen's brightening is the meaningful reaction Sunny fails to receive.",
+   "relationshipDistance": "Keen and Misty are close enough to help, but Sunny stands apart from their play.",
+   "relationshipPowerDynamic": "Keen briefly leads with play; Sunny reasserts control by naming it unacceptable.",
+   "touchOrAvoidance": "Sunny avoids the puddle and clings to visual perfection; Keen contacts the puddle with toes.",
+   "eyelineRule": "Keen looks down then up with optimism; Sunny looks down as if the floor has accused her.",
+   "silhouetteRead": "Garland overhead, Keen below, Sunny tight behind clutter: the cave is starting to trap her.",
+   "silenceRule": "Allow a breath after Keen's happy splash before Sunny shuts it down.",
+   "scoreInstruction": "Let percussive drip and splat carry the comedy; reduce score under Sunny's narrowing reaction."
+  },
+  "targetDurationSecApproved": 20,
+  "storyboardStagePlanApproved": [
+   {
+    "stageNumber": 1,
+    "beatIds": [
+     "S4.B3"
+    ],
+    "purpose": "Prove Sunny's sunshine fix behaves like indoor rain.",
+    "primaryEvent": "The soaked garland squishes onto the wall and drips onto Keen below.",
+    "emotionalOrComicTurn": "Keen tries to make the failure small while Sunny sees disaster.",
+    "cameraAndTransition": "Start under the garland with ceiling pressing down; tilt from forming drops to Keen.",
+    "observableEndState": "The garland is visibly dripping onto Keen."
+   },
+   {
+    "stageNumber": 2,
+    "beatIds": [
+     "S4.B3"
+    ],
+    "purpose": "Make Sunny the cause of the puddle she fears.",
+    "primaryEvent": "Sunny panics, releases the garland, and it splats onto the floor, splashing muddy water onto Keen's toes.",
+    "emotionalOrComicTurn": "Her attempt to stop indoor rain creates a bigger mess.",
+    "cameraAndTransition": "Match-on-action drop from Sunny's paws to floor impact.",
+    "observableEndState": "Fallen garland and muddy puddle surround Keen's toes."
+   },
+   {
+    "stageNumber": 3,
+    "beatIds": [
+     "S4.B3"
+    ],
+    "purpose": "Show the fun Sunny could accept.",
+    "primaryEvent": "Misty softens the accident and Keen turns the puddle into play with a happy splash.",
+    "emotionalOrComicTurn": "The room briefly offers a joyful version of the ruined party.",
+    "cameraAndTransition": "Low calmer puddle-level hold after the impact.",
+    "observableEndState": "Keen has made the puddle playful."
+   },
+   {
+    "stageNumber": 4,
+    "beatIds": [
+     "S4.B3"
+    ],
+    "purpose": "Narrow the room by rejecting spontaneous joy.",
+    "primaryEvent": "Sunny recoils from muddy puddles at her perfect party.",
+    "emotionalOrComicTurn": "The comedy turns controlling; her rule crushes the possible fun.",
+    "cameraAndTransition": "Tighten to Sunny through wet clutter and muddy reflection.",
+    "observableEndState": "Sunny is rattled and primed to rush again."
+   }
+  ],
+  "storyboardInternalShotPlanApproved": [
+   {
+    "shotNumber": 1,
+    "viewId": "S4_V06",
+    "transitionType": "cut",
+    "staging": "Garland stretches from Sunny’s paws toward the cave wall; Keen is below, looking up as drops gather and fall.",
+    "startState": "Garland is being lifted as indoor sunshine.",
+    "endState": "Garland is clearly causing indoor rain.",
+    "cutTo": "Sunny’s panic and release of the garland.",
+    "timing": "Covers Keen: “Oh… no sunshine today? Just a drop? Instead of calming down, Sunny throws her hands in the air.”",
+    "purpose": "See the water problem before Sunny’s panic names it.",
+    "framingAndCamera": "MS under garland, ceiling low in frame.. Make the cave feel like it is raining indoors from Sunny’s fix.",
+    "storyAction": "Drops fall from the garland onto Keen’s area as he speaks the approved line.",
+    "performanceFocus": "Keen tries to keep it light, eyes tracking a drop with cautious optimism; Sunny’s hands tense on the garland above him.",
+    "landingImage": "Garland is clearly causing indoor rain.",
+    "cutReason": "SEE: the drip is the physical proof of the emotional problem.",
+    "framing": "MS under garland, ceiling low in frame.",
+    "continuity": "Sunny is on/near the ladder hanging the soaked garland; Keen is beneath it.",
+    "viewpointOwner": "Keen",
+    "listenerReaction": "Keen notices the drip before Sunny accepts what it means.",
+    "visibleEntities": [
+     "char:Sunny",
+     "char:Keen",
+     "prop:ladder",
+     "prop:soaked_garland",
+     "effect:drips",
+     "set:party_cave_ceiling"
+    ],
+    "cinematography": {
+     "owner": "Keen",
+     "emotionalAction": "try to make a tiny failure harmless",
+     "cameraState": "below the garland with Keen in the drip path",
+     "stateChangeTrigger": "first visible drop lands near/on Keen",
+     "viewpoint": "Keen's upward eye-line to the garland",
+     "lens": "35 mm for physical proximity to the drip",
+     "composition": "MS, garland overhead pressing down, Keen below, Sunny on ladder edge",
+     "movement": "small tilt from garland drip down to Keen",
+     "focus": "drip forming, then Keen's face/toes",
+     "light": "warm lantern attempt refracted through grey water drops",
+     "kind": "cut_in",
+     "motivation": "SEE",
+     "cutTiming": "before",
+     "actionPhase": "preparation",
+     "functions": [],
+     "attention": "physical action"
+    }
+   },
+   {
+    "shotNumber": 2,
+    "viewId": "S4_V07",
+    "transitionType": "cut",
+    "staging": "Sunny’s paws release the soaked garland above the slick floor; Keen’s toes are close enough for the splash.",
+    "startState": "Garland suspended and dripping.",
+    "endState": "Garland lies on floor; muddy puddle exists around Keen’s toes.",
+    "cutTo": "Misty and Keen trying to rescue the emotional meaning of the water.",
+    "timing": "Covers Sunny’s long locked line ending with the splash on Keen’s toes.",
+    "purpose": "Track cause, contact and consequence in one readable chain.",
+    "framingAndCamera": "Cut_in on paws, garland, floor and Keen’s toes.. Show that Sunny causes the muddy splash while trying to stop the rain.",
+    "storyAction": "Sunny panics through the locked line, lets go, garland splats, muddy water splashes Keen’s toes.",
+    "performanceFocus": "Sunny’s face flashes from command to alarm; Keen flinches down at his toes after impact.",
+    "landingImage": "Garland lies on floor; muddy puddle exists around Keen’s toes.",
+    "cutReason": "MOVE: follow the dropped garland into its consequence.",
+    "framing": "Cut_in on paws, garland, floor and Keen’s toes.",
+    "continuity": "Garland detaches from Sunny’s hold and lands on the cave floor; water spreads onto Keen.",
+    "viewpointOwner": "Sunny",
+    "listenerReaction": "Keen’s toes receive the consequence before he can fully react.",
+    "visibleEntities": [
+     "char:Sunny",
+     "char:Keen",
+     "prop:soaked_garland",
+     "prop:ladder",
+     "effect:muddy_water_splash",
+     "set:party_cave_floor"
+    ],
+    "cinematography": {
+     "owner": "Sunny",
+     "emotionalAction": "turn a small drip into disaster",
+     "cameraState": "tight and unstable near her hands then drops with the garland",
+     "stateChangeTrigger": "Sunny lets go",
+     "viewpoint": "Sunny's hand height falling to floor consequence",
+     "lens": "24 mm for sudden physical drop and splash energy",
+     "composition": "cut_in from paws to floor, Keen's toes in splash zone",
+     "movement": "tilt/drop with the garland, landing on the splat",
+     "focus": "Sunny's releasing paws, then wet garland impact",
+     "light": "warm light wobbles as the wet paper hits dull stone",
+     "kind": "match_on_action",
+     "motivation": "MOVE",
+     "cutTiming": "on",
+     "actionPhase": "contact",
+     "functions": [],
+     "attention": "physical action"
+    }
+   },
+   {
+    "shotNumber": 3,
+    "viewId": "S4_V08",
+    "transitionType": "cut",
+    "staging": "Keen stands in the muddy splash; Misty is near enough to intervene gently; Sunny hovers just outside, unable to accept the mess.",
+    "startState": "Muddy puddle reads as accident.",
+    "endState": "Keen has offered it as play.",
+    "cutTo": "Sunny crushing the puddle possibility.",
+    "timing": "Covers Misty: “Sunny, wait, it’s just a little water —” and Keen: “Actually… don’t worry! I love to splash in muddy puddles!”",
+    "purpose": "See the fun Sunny could accept.",
+    "framingAndCamera": "Low MS with puddle foreground.. Make puddle play look possible, not wrong.",
+    "storyAction": "Misty starts to minimize the water; Keen reframes it as puddle play.",
+    "performanceFocus": "Misty’s attention is on Sunny, careful and steady. Keen brightens honestly at the puddle, lifting the room’s possibility for a second.",
+    "landingImage": "Keen has offered it as play.",
+    "cutReason": "FEEL: the consequence is more important than the accident source.",
+    "framing": "Low MS with puddle foreground.",
+    "continuity": "Fallen garland remains on the floor; puddle is active and muddy.",
+    "viewpointOwner": "Keen",
+    "listenerReaction": "Misty softens the event; Keen chooses play; Sunny resists both.",
+    "visibleEntities": [
+     "char:Misty",
+     "char:Keen",
+     "char:Sunny",
+     "prop:fallen_garland",
+     "effect:muddy_puddle",
+     "set:party_cave_floor"
+    ],
+    "cinematography": {
+     "owner": "Keen",
+     "emotionalAction": "make room for fun inside the mistake",
+     "cameraState": "lower and calmer at puddle level",
+     "stateChangeTrigger": "Keen decides to splash rather than blame",
+     "viewpoint": "Keen's floor-level relation to the puddle",
+     "lens": "35 mm, close enough for toes and faces",
+     "composition": "MS with puddle foreground, Misty and Sunny staggered behind",
+     "movement": "hold on the puddle becoming play, then Sunny's intrusion tightens it",
+     "focus": "Keen's toes in water, then his face",
+     "light": "muddy reflections dull the warm party colour",
+     "kind": "two_shot",
+     "motivation": "FEEL",
+     "cutTiming": "after",
+     "actionPhase": "reaction",
+     "functions": [],
+     "attention": "relationship"
+    }
+   },
+   {
+    "shotNumber": 4,
+    "viewId": "S4_V09",
+    "transitionType": "cut",
+    "staging": "Sunny stands between the fallen garland and the next cluster of party props, with ladder and wet ribbons crowding her route.",
+    "startState": "Keen has offered play.",
+    "endState": "Sunny has rejected play and is primed to rush again.",
+    "cutTo": "The next rush triggering the domino chain.",
+    "timing": "Covers Sunny: “Muddy puddles?! At a perfect party?! No, no, no!”",
+    "purpose": "Feel the cave get smaller when Sunny refuses fun.",
+    "framingAndCamera": "MCU on Sunny blocked by wet party clutter.. Make her perfect-party rule feel like pressure, not a cute preference.",
+    "storyAction": "Sunny recoils from the idea of muddy puddles at the party.",
+    "performanceFocus": "Her face tightens; smile becomes a command-mask again; she looks at the puddle as if it is evidence against her.",
+    "landingImage": "Sunny has rejected play and is primed to rush again.",
+    "cutReason": "FEEL: Sunny’s reaction is the beat turn.",
+    "framing": "MCU on Sunny blocked by wet party clutter.",
+    "continuity": "Puddle remains at Keen’s feet; no cleanup occurs.",
+    "viewpointOwner": "Sunny",
+    "listenerReaction": "Keen’s playful posture stalls under her horror.",
+    "visibleEntities": [
+     "char:Sunny",
+     "char:Keen",
+     "effect:muddy_puddle",
+     "prop:fallen_garland",
+     "prop:ladder"
+    ],
+    "cinematography": {
+     "owner": "Sunny",
+     "emotionalAction": "defend the perfect picture against real play",
+     "cameraState": "tightening close to Sunny for the first hard narrowing",
+     "stateChangeTrigger": "Sunny hears 'muddy puddles' as threat",
+     "viewpoint": "Sunny's eye-line down to puddle then back to her face",
+     "lens": "50 mm compressing her against clutter",
+     "composition": "MCU with wet ribbons crossing frame; puddle reflection below",
+     "movement": "small push in as she repeats no",
+     "focus": "Sunny's smile breaking into panic",
+     "light": "warm light dulled by muddy reflection under her chin",
+     "kind": "cut_in",
+     "motivation": "FEEL",
+     "cutTiming": "on",
+     "actionPhase": null,
+     "functions": [],
+     "attention": "character thought"
+    }
+   }
+  ],
+  "transitionType": "PLANNED_CUT",
+  "providerBoundaryReasonApproved": "duration_limit",
+  "providerBoundaryExplanationApproved": "This accident arc plus the domino honey arc would exceed 30 seconds; the next unit needs a fresh crowded route for lantern, stool, bears and honey pot.",
+  "voiceDirectorBrief": [
+   {
+    "expectedTiming": "During the drip; leave the later hands-in-air reaction silent.",
+    "physicalActionRelationship": "Voice keeps the drip small while Sunny reacts silently.",
+    "dramaticIntention": "Turn the drip into harmless play so Sunny does not feel accused.",
+    "subtext": "Maybe if I make this tiny, she won’t panic.",
+    "relationshipTarget": "Sunny, with a glance to the dripping garland.",
+    "emotionalEntry": "Curious, trying to be light.",
+    "emotionalExit": "Concerned when Sunny reacts beyond the joke.",
+    "operativeWords": [
+     "no sunshine",
+     "drop"
+    ],
+    "pace": "Softly playful, then watch Sunny.",
+    "rhythm": "A small joke followed by a checking pause.",
+    "pauses": "Brief pause after ‘drop?’ to read Sunny’s face.",
+    "breaths": "Small amused breath before ‘Just a drop?’",
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:4adb1cac82133147d3c436e537e8fd70f4579c13d49b1f8fd545dbe855823e91",
+    "sourceEventId": "script-event:sha256:9875c5437bf1881758015fe0568712c638071f9bb862177c5c30e7e33479ff11",
+    "speaker": "Keen",
+    "exactDialogue": "Oh… no sunshine today? Just a drop?",
+    "elevenLabsV3Direction": "Oh… no sunshine today? Just a drop?",
+    "startSec": 0.0,
+    "endSec": 4.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "expectedTiming": "Panic line first; garland release and heavy splat are silent action.",
+    "physicalActionRelationship": "Voice ends before the release; react silently to the splash.",
+    "dramaticIntention": "Name the disaster before anyone else can.",
+    "subtext": "My fixing is hurting the party, and I cannot stop it.",
+    "relationshipTarget": "Keen and the room witnessing her mistake.",
+    "emotionalEntry": "Panic jumps from paws to face.",
+    "emotionalExit": "Exposed as the garland falls.",
+    "operativeWords": [
+     "rain inside",
+     "wetter",
+     "not better"
+    ],
+    "pace": "Fast and high, tightening on ‘not better’.",
+    "rhythm": "Alarm, self-blame, dread.",
+    "pauses": "Tiny catch after ‘Oh no!’",
+    "breaths": "Gasp before ‘Oh no!’; breath drops after ‘better!’",
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:9d3046cb108f62b560e11c587478fd6731389fef7c97097702905b2bb009f36c",
+    "sourceEventId": "script-event:sha256:de8f04654e7d47a0701dba9e0cb1d9c982eb62d02b14b16f6c1bb7c658632694",
+    "speaker": "Sunny",
+    "exactDialogue": "Oh no! I’m making it rain inside! The party is getting wetter, not better!",
+    "elevenLabsV3Direction": "[gasps] Oh no! I’m making it rain inside! The party is getting wetter, not better!",
+    "startSec": 4.1,
+    "endSec": 11.8,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:7bb37aa80d093ea711ab50f60a68ad74eace9bc1850b02f6fff47d58fba86d1b",
+    "sourceEventId": "script-event:sha256:2eda47fb6bac092f14819d61c249d155ffb90060fe5965312cf07083f1f8a82d",
+    "speaker": "Misty",
+    "exactDialogue": "Sunny, wait, it’s just a little water —",
+    "elevenLabsV3Direction": "[quietly] Sunny, wait, it’s just a little water —",
+    "expectedTiming": "After splash and before Keen’s playful recovery; about 2.0s, interrupted at the dash.",
+    "physicalActionRelationship": "Voice is a careful reach; body does not crowd Sunny.",
+    "dramaticIntention": "Interrupt Sunny’s spiral before it becomes another action.",
+    "subtext": "This can still be small if you let it be small.",
+    "relationshipTarget": "Sunny.",
+    "emotionalEntry": "Leaning in cautiously.",
+    "emotionalExit": "Cut off by Sunny’s momentum or the room’s next beat.",
+    "operativeWords": [
+     "wait",
+     "little water"
+    ],
+    "pace": "Gentle but urgent; not scolding.",
+    "rhythm": "Name, stop, reframe; the dash catches on interruption.",
+    "pauses": "Tiny pause after “wait” to soften the stop.",
+    "breaths": "Careful inhale before speaking, as if approaching a skittish friend.",
+    "startSec": 12.0,
+    "endSec": 14.0,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:ce6ff25f8185ad402cebd573c388dd69ead25841a0102780651d71a59a7d79a2",
+    "sourceEventId": "script-event:sha256:f269815afb983eafee37a06f2f33d2f3c4b030d24bb0cf735035b19c2e34e6b5",
+    "speaker": "Keen",
+    "exactDialogue": "Actually… don’t worry! I love to splash in muddy puddles!",
+    "elevenLabsV3Direction": "Actually… don’t worry! I love to splash in muddy puddles!",
+    "expectedTiming": "Land after a small visual hold on muddy toes; about 3.0s.",
+    "physicalActionRelationship": "Voice supports the playful toe hold, sincerely offering Sunny a release valve.",
+    "dramaticIntention": "Convert the mess into play so Sunny feels forgiven.",
+    "subtext": "See? You did not ruin me; I can still have fun.",
+    "relationshipTarget": "Sunny.",
+    "emotionalEntry": "Brief surprise at muddy toes.",
+    "emotionalExit": "Bright, inviting, hoping she joins the joke.",
+    "operativeWords": [
+     "don’t worry",
+     "love",
+     "muddy puddles"
+    ],
+    "pace": "Warm and buoyant; “Actually…” buys time to choose kindness.",
+    "rhythm": "Tiny reassessment, reassurance, playful declaration.",
+    "pauses": "Ellipsis after “Actually” is him deciding to help instead of react.",
+    "breaths": "Little breathy smile before “don’t worry!”",
+    "startSec": 14.1,
+    "endSec": 17.1,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   },
+   {
+    "dialogueOccurrenceId": "dialogue-occurrence:sha256:e3e7b7bf902807c30c18bfe18cf60e1e82d38b84583a3fd7bd5067b06e971372",
+    "sourceEventId": "script-event:sha256:e01eb4706d999d449c0dd5e55b749d37b1be715614a195f83c987a543cad558f",
+    "speaker": "Sunny",
+    "exactDialogue": "Muddy puddles?! At a perfect party?! No, no, no!",
+    "elevenLabsV3Direction": "[nervous] Muddy puddles?! At a perfect party?! No, no, no!",
+    "expectedTiming": "Immediately after Keen’s invitation; about 2.5s, ending in a tightening push.",
+    "physicalActionRelationship": "Voice and body both shrink from play into refusal.",
+    "dramaticIntention": "Reject Keen’s joy because it proves the party has become the opposite of her plan.",
+    "subtext": "If you enjoy the mess, then I have lost control of what this party means.",
+    "relationshipTarget": "Keen, then herself.",
+    "emotionalEntry": "Recoiling from his playful solution.",
+    "emotionalExit": "Boxed-in, refusing help.",
+    "operativeWords": [
+     "Muddy puddles",
+     "perfect party",
+     "No"
+    ],
+    "pace": "Quick, incredulous, tightening with each “no.”",
+    "rhythm": "Shock, offended standard, spiral.",
+    "pauses": "Tiny stunned beat between the first two questions.",
+    "breaths": "Sharp inhale before “Muddy”; breath pinches on the repeated “no.”",
+    "startSec": 17.2,
+    "endSec": 19.7,
+    "voiceTreatment": "single_voice",
+    "chorusMembers": []
+   }
+  ],
+  "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Sunny, @图3 only for Keen, @图4 only for Misty, @图5 only for the cave set and @图6 only for previous shot final frame.\n\nBegin exactly on @图1, the approved opening frame — keep the garland, drip, fall, splash and puddle in readable cause-and-effect; make the frame tighten only when Sunny refuses Keen's play. Performance phases: anticipation: ENVIRONMENT The soaked garland sags against the cave wall; drops gather, fall, and mark the floor beneath it; action: Sunny Sunny’s paws tense, then release the garland; it falls flat and pushes muddy water outward onto Keen’s toes; reaction: Keen Keen looks down, wiggles his toes in the new puddle and gives one happy stomp that sends a small splash up; settle: Sunny Sunny recoils from the splash area, face tightening as she stands between wet ribbons and the fallen garland. Cause and effect: Water weight makes the garland sag and drip; Sunny’s release turns the overhead drip into a floor impact; the impact spreads muddy water to Keen; Keen’s stomp proves the puddle can become play; Sunny’s recoil stops that possibility. Visible turn: The room briefly opens into fun through Keen, then narrows again when Sunny treats the same water as a threat to her plan. Land on: The fallen garland, active muddy puddle, stalled Keen and tightened Sunny must all remain visible as the handoff to her next rush. Acting freedom: Let the drip rhythm, splash height and Keen’s toe wiggle vary, but preserve the cause chain from sag to drop to splash to Sunny’s recoil. Sunny boxed by wet ribbons above the muddy puddle, her face tightened against the play she just stopped.\n\n\n\nUse @Audio1 as the only voice. Lip-sync Keen and Sunny and Misty. Preserve character identity and relative scale. The soaked garland remains visible from Sunny’s paws to the floor so the drip, release and splat read as one cause-and-effect chain. Begin with wet fur, dripping water trail, wet shine visible. End with wet paws, muddy toes visible.",
+  "promptWords": 339,
+  "referenceSlots": {
+   "@图1": "opening keyframe",
+   "@图2": "Sunny",
+   "@图3": "Keen",
+   "@图4": "Misty",
+   "@图5": "scene plate",
+   "@图6": "previous shot final frame",
+   "@Audio1": "voice track"
+  },
+  "audioBrief": "SHOT S4.SH2 — voice-only performance for @Audio1.\nKeen: \"Oh… no sunshine today? Just a drop?\" — Oh… no sunshine today? Just a drop? Target 0-4s.\nSunny: \"Oh no! I’m making it rain inside! The party is getting wetter, not better!\" — [gasps] Oh no! I’m making it rain inside! The party is getting wetter, not better! Target 4.1-11.8s.\nMisty: \"Sunny, wait, it’s just a little water —\" — [quietly] Sunny, wait, it’s just a little water — Target 12-14s.\nKeen: \"Actually… don’t worry! I love to splash in muddy puddles!\" — Actually… don’t worry! I love to splash in muddy puddles! Target 14.1-17.1s.\nSunny: \"Muddy puddles?! At a perfect party?! No, no, no!\" — [nervous] Muddy puddles?! At a perfect party?! No, no, no! Target 17.2-19.7s.\nPreserve the exact words. No narration, ad-libs, action labels, sound effects or music.",
+  "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: A heavy wet garland sags above Keen (@图2, larger bear), drops already gathering beneath Sunny (@图1, smaller bear)'s tense paws.\n\nContinuity in: warm cave light dulled by wet paper; Keen-facing under the garland. @图3 scene plate anchors palette, materials and lighting and world-space geography; preserve landmarks without copying its camera composition.\n\n@图4 is the approved continuity-state reference from S4.SH1. Use it for current character, prop and effect state and the same story moment; when an editorial relay frame is declared, follow that relay state rather than blindly copying the literal final frame. Compose the new camera angle described by the opening pose; do not copy the prior framing.\n\nLiving performance lock: Sunny, Keen each have a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+  "keyframePromptWords": 189,
+  "keyframeReferenceSlots": {
+   "@图1": "Sunny",
+   "@图2": "Keen",
+   "@图3": "scene plate",
+   "@图4": "previous shot final frame"
+  },
+  "internalConstraints": "Hard constraints: Do not hide the garland’s fall behind bodies; Do not make the splash dry or weightless; Do not let Keen already be splashing before the water hits; Keep the garland fall readable from sag to release to floor impact; Keep Keen’s playful response after the splash as a brief offered alternative; Maintain the exact cast listed for this shot boundary; no extras or omissions; no character redesign; no extra characters; no on-screen text; no invented voices; no foreign-language speech; no body inflation; no full-body deflation."
+ }
+}

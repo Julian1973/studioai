@@ -1,0 +1,62 @@
+{
+  "episode": "Ep1",
+  "mode": "legacy-post-review",
+  "sourceSha256": "14142e15d9031403851e8356bc5470ab81ecaedad62fcf4c31403f7f21942d7c",
+  "proxySha256": "bd7a9f1e19e54efafb338d3b8a1c51feb293d889d41e4f18432367abbec2c302",
+  "model": "gemini-3.8-flash",
+  "sampleFPS": 8,
+  "uploads": [
+    {
+      "name": "files/21haj3su55vs",
+      "deleted": true
+    }
+  ],
+  "phase": "cleanup",
+  "reservation": "b509dd8316b74005baf85139837d903e",
+  "status": "completed",
+  "usage": {
+    "total_tokens": 7844,
+    "total_input_tokens": 7134,
+    "input_tokens_by_modality": [
+      {
+        "modality": "video",
+        "tokens": 6982
+      },
+      {
+        "modality": "text",
+        "tokens": 152
+      }
+    ],
+    "total_cached_tokens": 0,
+    "total_output_tokens": 106,
+    "total_tool_use_tokens": 0,
+    "total_thought_tokens": 604,
+    "raw_prompt_token": 8591,
+    "model_invocation_token_counts": [
+      {
+        "prompt_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 583
+          },
+          {
+            "modality": "video",
+            "tokens": 6982
+          }
+        ],
+        "candidates_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 110
+          }
+        ],
+        "thoughts_tokens_details": [
+          {
+            "modality": "text",
+            "tokens": 604
+          }
+        ]
+      }
+    ]
+  }
+}

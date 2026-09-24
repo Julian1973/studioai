@@ -1,0 +1,89 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S3_plate_candidate_f47df247.jpg",
+  "hash": "a3f8be293782dee84f9692516f67f18fe48046322e07cbd8e0b101e941f122b8",
+  "inputSignature": {
+   "canonProfileDigest": "3c9b079de6bc02e28d0f3344d22c4c1a2ac1510775581b4b6d6054a86ea2f1d4",
+   "briefHash": "bf20a18a031de8405c04af5303ba3f07bc7710ab690bfcb99b2aab8f86288b84",
+   "referenceHashes": {},
+   "plateHash": "a3f8be293782dee84f9692516f67f18fe48046322e07cbd8e0b101e941f122b8"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-11T15:26:45",
+  "source": "uploaded",
+  "preservedOriginal": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/uploads/Ep3_S3_scenelook_upload_415ba976.jpg",
+  "packageRevision": 1,
+  "approvalMethod": "explicit-upload-selection",
+  "approvedAt": "2026-09-11T15:26:45",
+  "reviewedBy": "Julian"
+ },
+ "candidate": null,
+ "history": [
+  {
+   "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S3_plate_candidate_544f42c3.png",
+   "hash": "e3bee1921d30a3dc89c288b7222866088a8e5ccd11f176aefb348f02653aaff9",
+   "inputSignature": {
+    "canonProfileDigest": "3c9b079de6bc02e28d0f3344d22c4c1a2ac1510775581b4b6d6054a86ea2f1d4",
+    "briefHash": "bf20a18a031de8405c04af5303ba3f07bc7710ab690bfcb99b2aab8f86288b84",
+    "referenceHashes": {},
+    "plateHash": "e3bee1921d30a3dc89c288b7222866088a8e5ccd11f176aefb348f02653aaff9"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-09-11T15:17:37",
+   "packageRevision": 1,
+   "approvedAt": "2026-09-11T15:17:37",
+   "reviewedBy": "Studio Director — internal scene reference",
+   "outcome": "superseded",
+   "supersededAt": "2026-09-11T15:26:45",
+   "archivedFile": "media/archive/scenelook_superseded/20260911T152645/Ep3_S3_plate_candidate_544f42c3.png"
+  }
+ ],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-09-11T15:15:55",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "creativeDirectingStandardVersion": 4,
+    "sourceHash": "2b7df88ba21f11d48135569d425ff0330d3307f9bec3c70afb723b34f6c98374",
+    "output": {
+     "creativeIntent": "A tidy outdoor party setup in a wide clearing that feels lovingly arranged but vulnerable to rain, so the space itself tells the story of control beginning to fail.",
+     "storyOfPlace": "A broad Great Clearing prepared for a cheerful gathering: neat party lines, handmade decorations, and careful placement that looks deliberate at a glance, but with the first signs of weather pressure entering the space.",
+     "paletteAndLighting": "Warm saturated daytime colors against an overcast sky; bright party accents softened by cool rain light. Keep the scene legible with gentle contrast, damp highlights, and a slightly dimmed atmosphere as clouds take over.",
+     "materialsAndAtmosphere": "3D CGI environment with grassy ground, simple wooden picnic surfaces, paper decorations, fabric bunting, small lanterns, cups and plates arranged with care. Fresh air turning heavy, faint misty moisture, soft wet sheen beginning on surfaces, and a sky that feels much too large for the small control below it.",
+     "continuityRules": [
+      "Great Clearing location only; no characters in frame.",
+      "Party arrangement must read as intentionally neat and ready before rain damage.",
+      "Weather should feel like the first interruption, not a full storm.",
+      "Keep object placement coherent for later rain-wet continuity.",
+      "Leave clear open space and strong horizon/sky scale for the scene's emotional contrast."
+     ],
+     "providerPrompt": "Wide environment-only establishing plate of the GREAT CLEARING, a carefully arranged outdoor party scene before the rain fully takes over: neat picnic tables, handmade garlands, paper lanterns, cups and plates set in orderly lines across a grassy clearing, warm cheerful party colors under an increasingly overcast sky, visible wetness beginning on a few surfaces, damp air, soft clouded daylight, gentle misty atmosphere, strong sense of a small organized celebration beneath a very large sky, original 3D CGI animation, family-friendly, richly readable layout, warm saturated accents against cool rain light, no characters, no close-up, no text, no logo"
+    },
+    "reviewObservations": "",
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "productionStandardHash": "1a05d0b236f0177b4a598b4e0cae221ef296a07510a5b9197abfb99cc98c2c60",
+     "directingContractHash": "fa0ddbaa08a2a96b9e5366b37fd0f9198d185683997b4127add6f38e7c11f2b0",
+     "skillHashes": {
+      "cinematography": "d5f7268f7899fdb27c3b892b779bf81103727ad507cc96bafc17d723d7376eb3"
+     },
+     "canonProfileDigest": "3c9b079de6bc02e28d0f3344d22c4c1a2ac1510775581b4b6d6054a86ea2f1d4",
+     "sceneContextHash": "f90f5942612f3ca74f9358b33f7b35150343c2cc3cac0dd0701d7d952d3f5795"
+    },
+    "outcome": "approved",
+    "decisionAt": "2026-09-11T15:15:55",
+    "reviewedBy": "Studio Director",
+    "note": "Automatic technical preparation for outcome review."
+   },
+   "candidate": null,
+   "history": []
+  }
+ }
+}

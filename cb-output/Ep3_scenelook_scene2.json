@@ -1,0 +1,65 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S2_plate_candidate_b985c2ae.png",
+  "hash": "2340d8825bb9f33d545df16d7ce795999272937f74c816183fcf50216426d68e",
+  "inputSignature": {
+   "canonProfileDigest": "3c9b079de6bc02e28d0f3344d22c4c1a2ac1510775581b4b6d6054a86ea2f1d4",
+   "briefHash": "b0ab85612532866600bdcda4baf5efbf0b774b66d609815b0f5bae307d4a64e1",
+   "referenceHashes": {},
+   "plateHash": "2340d8825bb9f33d545df16d7ce795999272937f74c816183fcf50216426d68e"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-09-11T13:31:41",
+  "source": "uploaded",
+  "preservedOriginal": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/uploads/Ep3_S2_scenelook_upload_f3a04685.png",
+  "packageRevision": 1,
+  "approvedAt": "2026-09-11T13:37:00",
+  "reviewedBy": "Julian"
+ },
+ "candidate": null,
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": null,
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-09-11T13:23:56",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "creativeDirectingStandardVersion": 4,
+    "sourceHash": "a2e9b1bba960cce26f73c8d2ead379a9e154bcafebe4434446d2b7a34df0887f",
+    "output": {
+     "creativeIntent": "Moonlit Pool as an active, knowing place: calm on the surface, quietly charged underneath, with the first hint that something is about to change.",
+     "storyOfPlace": "A serene pool at morning, still holding moonlit magic in its identity while the day begins to lean in. The space should feel like it senses the coming rain before anyone else does.",
+     "paletteAndLighting": "Warm morning ambient with lingering cool moonlit blues in the water, soft teal shadows, and a delicate silver highlight on ripples. Gentle overcast brightness building at the edges, with a subtle rain-darkened shift in the distance.",
+     "materialsAndAtmosphere": "Glass-smooth water, soft stone, damp moss, faint mist, and fine suspended moisture in the air. The atmosphere should feel hush-quiet, alive, and slightly expectant, as if the pool itself is listening.",
+     "continuityRules": [
+      "No characters present; environment-only plate.",
+      "The pool remains the emotional and visual focus, not decoration.",
+      "Preserve the magical moonlit identity of the location even in morning light.",
+      "Rain is only an approaching physical pressure, not a dramatic event yet.",
+      "Keep the space calm, readable, and grounded with child-friendly clarity."
+     ],
+     "providerPrompt": "Environment-only 3D CGI establishing plate of the Moonlit Pool at morning: a serene magical pool with glass-still water, soft stone edges, damp moss, faint mist, and a quiet air of expectation. Warm morning light is beginning to lift the scene while cool moonlit blues still glow in the water and silver highlights catch subtle ripples. The atmosphere is hushed, slightly charged, and gently anticipatory, with a distant suggestion of incoming rain in the sky and air, but no storm action yet. Original animated feature look, warm saturated color, real material weight, clear readable shapes, soft cinematic depth, no characters, no text, no signage."
+    },
+    "reviewObservations": "",
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "productionStandardHash": "1a05d0b236f0177b4a598b4e0cae221ef296a07510a5b9197abfb99cc98c2c60",
+     "directingContractHash": "fa0ddbaa08a2a96b9e5366b37fd0f9198d185683997b4127add6f38e7c11f2b0",
+     "skillHashes": {
+      "cinematography": "d5f7268f7899fdb27c3b892b779bf81103727ad507cc96bafc17d723d7376eb3"
+     },
+     "canonProfileDigest": "3c9b079de6bc02e28d0f3344d22c4c1a2ac1510775581b4b6d6054a86ea2f1d4",
+     "sceneContextHash": "d2911601b011767d4d6a18bbab88850464ecb80f2553e7129d6a047ccda3c638"
+    }
+   },
+   "history": []
+  }
+ }
+}

@@ -1,0 +1,342 @@
+{
+  "version": "1.0.0",
+  "project": "crystal-bears",
+  "episode": "Ep3",
+  "scene": 1,
+  "shotId": "S1.SH1",
+  "trial": true,
+  "humanApproval": false,
+  "sourceDirection": "User authorised restored successful whole-honeycomb grab, visible loose-arm tail accident, fast paced 30-second storyboard trial.",
+  "supersedesForThisTrialOnly": "honey-piece mechanics",
+  "preservesCurrentProduction": true,
+  "sources": [
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+      "sha256": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+      "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+      "sha256": "fb455325843d9068ad3982767c6fa047556f58d9bfa1062f0afb7465367eecc8"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+      "sha256": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_SH1_coverage_trial_v03.png",
+      "sha256": "4ca8abd84a1192544b8a707b8969c3f72618ffc12fb43b5dbd76d012de058e47"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_vo_30s_revision_v03.wav",
+      "sha256": "65cae1ecd1d741143b3b41f0cc6de8b5023ae047a713641692c16832126d9b82"
+    }
+  ],
+  "task": {
+    "type": "storyboard_grid",
+    "goal": "Keen successfully steals the honeycomb during Fuzzby\u2019s laughter, but his own unstable catapult sends the prize back to Fuzzby; Zenny\u2019s wink lands the final joke.",
+    "duration_seconds": 30,
+    "resolution": "480p",
+    "storyboard_tag": "@Image 7",
+    "storyboard_reading_order": "left to right, top to bottom, three columns by four rows",
+    "references": [
+      {
+        "tag": "@Image 1",
+        "subject": "Approved opening frame",
+        "defines": "exact opening composition, initial world positions and finished visual style",
+        "exclude": "repeated opening poses or a fixed camera for the entire sequence"
+      },
+      {
+        "tag": "@Image 2",
+        "subject": "Zenny",
+        "defines": "Zenny identity and relative proportions",
+        "exclude": "turnaround layouts or Fuzzby identity"
+      },
+      {
+        "tag": "@Image 3",
+        "subject": "Fuzzby",
+        "defines": "Fuzzby identity and relative proportions",
+        "exclude": "turnaround layouts or Zenny identity"
+      },
+      {
+        "tag": "@Image 4",
+        "subject": "Keen",
+        "defines": "Keen identity and relative proportions",
+        "exclude": "turnaround poses or sheet backgrounds"
+      },
+      {
+        "tag": "@Image 5",
+        "subject": "Catapult",
+        "defines": "wooden catapult materials and construction",
+        "exclude": "the wool ball or a reloaded cup after launch"
+      },
+      {
+        "tag": "@Image 6",
+        "subject": "Buzzing Nook",
+        "defines": "established scene environment and landmarks",
+        "exclude": "architectural honey houses as the removable prop"
+      },
+      {
+        "tag": "@Image 7",
+        "subject": "Coverage board",
+        "defines": "twelve views in reading order and approximate framing",
+        "exclude": "the grid, gutters, still-image holds or any identity drift in the board"
+      },
+      {
+        "tag": "@Audio1",
+        "subject": "Approved spoken performance",
+        "defines": "exact dialogue, speaker identity, performance, cadence and measured lip-sync timing",
+        "exclude": "replacement, time-stretched, paraphrased or invented speech"
+      }
+    ],
+    "assets": {
+      "images": [
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+          "tag": "@Image 1"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+          "tag": "@Image 2"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+          "tag": "@Image 3"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+          "tag": "@Image 4"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+          "tag": "@Image 5"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+          "tag": "@Image 6"
+        },
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_SH1_coverage_trial_v03.png",
+          "tag": "@Image 7"
+        }
+      ],
+      "audio": [
+        {
+          "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_vo_30s_revision_v03.wav",
+          "tag": "@Audio1",
+          "duration_seconds": 30.0
+        }
+      ]
+    },
+    "stages": [
+      {
+        "purpose": "Coverage view 1",
+        "event": "Wide, start from the EXACT full composition of @Image 1, already loaded and aiming. Keen commits immediately, one eye narrowed, tongue out. Never start zoomed into the blueberry.",
+        "end_state": "Keen starts releasing the loaded arm; Zenny on her far leaf, Fuzzby asleep on top of the distant suspended comb."
+      },
+      {
+        "purpose": "Coverage view 2",
+        "event": "Follow the ONE oversized blueberry across the creek toward Zenny. Keep the camera alongside and slightly behind the travelling berry, with Zenny always AHEAD of it on her fixed far-bank leaf until contact. Never show Zenny behind the berry and then ahead again. The cup becomes empty at release.",
+        "end_state": "The berry approaches Zenny for its FIRST and ONLY contact; the near-bank catapult remains empty."
+      },
+      {
+        "purpose": "Coverage view 3",
+        "event": "Match the incoming berry direction into the close impact view: its first contact is Zenny\u2019s forehead, immediately becoming purple splat. No overshoot, reversal, repeated approach or second impact. Zenny stays on her original distant leaf; use camera movement or a matched cut to reach her, never relocate her. Her eye twitches; Keen ducks beside his machine offscreen.",
+        "end_state": "Zenny remains seated on the same far-bank leaf with purple juice; the intact berry is gone."
+      },
+      {
+        "purpose": "Coverage view 4",
+        "event": "Cut upward to Fuzzby waking on the hanging comb, surprised and then bursting into exuberant belly-led laughter. Wings buzz, body rocks with laughter; this is generated character SFX, never spoken words. Begin one continuous nonverbal laughing performance that carries audibly across the next picture cut and underneath Zenny\u2019s line; do not stop or restart the laugh at the cut.",
+        "end_state": "Fuzzby laughs on the comb, distracted; the audience understands the opportunity."
+      },
+      {
+        "purpose": "Coverage view 5",
+        "event": "Cut to Zenny\u2019s composed close-up for her exact first @Audio1 line. She licks juice with calm restraint, addresses Fuzzby, then settles. Keep her listening/meditation purposeful. Fuzzby\u2019s offscreen laughter continues underneath her entire line at a lower level, then tapers naturally. Whenever visible, his laughing body and wing movement continue.",
+        "end_state": "Zenny remains on the original leaf with a small remaining purple mark. Fuzzby is distracted."
+      },
+      {
+        "purpose": "Coverage view 6",
+        "event": "Cut wide enough to show Keen cross the stepping route to the far tree. He quickly lifts the WHOLE golden comb clear in both paws, exploiting the laughter. Fuzzby\u2019s feet lose their support; wings flutter as he drops harmlessly to soft moss.",
+        "end_state": "Keen holds the whole comb, the original branch is EMPTY, and Fuzzby has lost his perch. No piece breaks off."
+      },
+      {
+        "purpose": "Coverage view 7",
+        "event": "Track Keen retreating across the same route with the comb. His glance back earns the exact Uh-oh line from @Audio1 after the drop. Fuzzby recovers and flies after him with continuous wing motion while airborne.",
+        "end_state": "Keen returns beside the original near-bank catapult holding his prize. Fuzzby follows into the near-bank action area."
+      },
+      {
+        "purpose": "Coverage view 8",
+        "event": "Cut tight to the tail/mechanism insert. Keen\u2019s backward hip contact dislodges the loose support; the empty wooden throwing arm falls and taps his SHORT tail. Show cause then contact, synchronized to his exact Ow from @Audio1. Cut briefly to his startled recoil. No unexplained reset, rope trap or self-reloading.",
+        "end_state": "The recoil lifts the comb out of Keen\u2019s paws; the catapult is destabilised and wobbling, its cup EMPTY."
+      },
+      {
+        "purpose": "Coverage view 9",
+        "event": "Follow the whole honeycomb bouncing once on the low rock and rolling along the short log toward Fuzzby, now on the near bank. Allow the absurd delivery to register.",
+        "end_state": "One whole comb stops immediately in front of Fuzzby. Keen has empty paws; the original hanging branch remains empty."
+      },
+      {
+        "purpose": "Coverage view 10",
+        "event": "Cut medium to Fuzzby looking from his unexpected honey to Keen and delivering his exact Nice machine line from @Audio1. His smug delight contrasts with Keen\u2019s embarrassment.",
+        "end_state": "Fuzzby stands beside the comb; he has NO berry stain. He listens silently as Keen answers."
+      },
+      {
+        "purpose": "Coverage view 11",
+        "event": "Reverse medium to Keen for his exact It almost worked line from @Audio1: a small hopeful attempt at dignity gives way to deflation. AFTER the line, the loosened catapult collapses with a single wooden clatter.",
+        "end_state": "Keen stands embarrassed beside the collapsed EMPTY machine; Fuzzby has the whole comb. No new stunt."
+      },
+      {
+        "purpose": "Coverage view 12",
+        "event": "Cut to Zenny on her original leaf and SETTLE the close-up before the gesture. She meets the camera with both eyes visibly open, closes ONE eye in a clear small knowing wink while the other stays open, then opens it again. Only afterward close both eyes and hold peaceful meditation through the ending. Do not hide the wink inside the camera move or merge it into an ordinary blink. Retain the tiny purple mark.",
+        "end_state": "Final close-up: Zenny peacefully meditating on her original leaf, eyes closed, residual berry mark. No further dialogue, wink or gag."
+      }
+    ],
+    "scene_style": "Original stylised 3D feature animation matching the approved opening frame: warm woodland morning light, tactile materials and glistening golden honey. Deliberate comic pace and character-specific acting.",
+    "camera": "Follow @Image 7 as the storyboard, panel by panel, left to right and top to bottom. Preserve its shot order, action progression and camera coverage. Begin at @Image 1 in full. Rapid launch, travelling berry follow, motivated cuts, clear mechanism insert, matched reaction reverses, then Zenny\u2019s intimate locked button. Animate each view as full-screen moving film; never reproduce the storyboard grid or gutters. The board supplies coverage, not a mandate to pause on twelve static tableaux. The early launch, impact and wake establish the gag before Zenny\u2019s first recorded line. Let remaining action flow around the exact recorded speech. Maintain world positions, creek crossing direction and eyelines through changes of angle.",
+    "consistency": [
+      "Only Keen, Zenny and Fuzzby; each retains its own reference identity.",
+      "Keen starts near-bank camera-left, Zenny and the hanging comb start at the far tree. Show the crossing route and return; no teleporting.",
+      "One whole comb: branch, Keen\u2019s paws, rolling on ground, finally beside Fuzzby. The original branch stays empty after the successful grab.",
+      "One blueberry launch only; the catapult cup remains EMPTY thereafter. Only Zenny carries purple berry juice; Fuzzby and Keen stay clean.",
+      "Fuzzby flutters his wings whenever airborne. Zenny\u2019s restrained listening, wink and meditation are intentional acting."
+    ],
+    "audio": "Dialogue language: English.\n@Audio1 is the sole authority for voice identity, cadence, timing and silence. Spoken lines appear only where assigned, in the locked order, with no extra dialogue. The non-speaking characters remain silent throughout each other\u2019s lines.\nZenny at 3.1s\u20137.78s: {OK, Fuzzby, calm down. It\u2019s not that funny.}\nKeen at 11.9s\u201313.14s: {Uh-oh\u2014}\nKeen at 14s\u201315.4s: {Ow!}\nFuzzby at 20.5s\u201322.06s: {Nice machine.}\nKeen at 22.19s\u201324.39s: {It almost worked.}\nThese are the exact measured windows of the unchanged approved @Audio1 recording. Only the named speaker articulates each line; no repetitions or additional spoken voices. Fuzzby\u2019s exuberant NONVERBAL LAUGHTER is explicitly generated SFX by Seedance, outside the spoken track, alongside wing buzz, berry whoosh/splat, wooden tail tap and final clatter. Keep the dialogue intelligible. Seedance may generate non-verbal music, ambience and SFX. Natural woodland ambience and light playful underscore may support the action, settling beneath Zenny\u2019s final meditation; no abrupt musical climax. Carry Fuzzby\u2019s generated nonverbal laugh continuously across the wake-to-Zenny picture cut and under her approved line, lowering its level for intelligibility without stopping it; taper naturally afterward. Preserve @Audio1 unchanged."
+  },
+  "prompt": "[Storyboard Role]\n@Image 7 defines the storyboard grid for shot order and approximate composition. Follow it panel by panel, left to right, top to bottom, three columns by four rows. Do not use its gutters, line-art style, text labels, or placeholder characters; render full-screen moving scenes.\n[Reference Roles]\n@Image 1 defines <Approved opening frame>'s exact opening composition, initial world positions and finished visual style. Do not use repeated opening poses or a fixed camera for the entire sequence.\n@Image 2 defines <Zenny>'s Zenny identity and relative proportions. Do not use turnaround layouts or Fuzzby identity.\n@Image 3 defines <Fuzzby>'s Fuzzby identity and relative proportions. Do not use turnaround layouts or Zenny identity.\n@Image 4 defines <Keen>'s Keen identity and relative proportions. Do not use turnaround poses or sheet backgrounds.\n@Image 5 defines <Catapult>'s wooden catapult materials and construction. Do not use the wool ball or a reloaded cup after launch.\n@Image 6 defines <Buzzing Nook>'s established scene environment and landmarks. Do not use architectural honey houses as the removable prop.\n@Image 7 defines <Coverage board>'s twelve views in reading order and approximate framing. Do not use the grid, gutters, still-image holds or any identity drift in the board.\n@Audio1 defines <Approved spoken performance>'s exact dialogue, speaker identity, performance, cadence and measured lip-sync timing. Do not use replacement, time-stretched, paraphrased or invented speech.\n[Generation Goal]\nKeen successfully steals the honeycomb during Fuzzby\u2019s laughter, but his own unstable catapult sends the prize back to Fuzzby; Zenny\u2019s wink lands the final joke.\n[Shot Plan]\nShot 1: Wide, start from the EXACT full composition of @Image 1, already loaded and aiming. Keen commits immediately, one eye narrowed, tongue out. Never start zoomed into the blueberry. End state: Keen starts releasing the loaded arm; Zenny on her far leaf, Fuzzby asleep on top of the distant suspended comb.\nShot 2: Follow the ONE oversized blueberry across the creek toward Zenny. Keep the camera alongside and slightly behind the travelling berry, with Zenny always AHEAD of it on her fixed far-bank leaf until contact. Never show Zenny behind the berry and then ahead again. The cup becomes empty at release. End state: The berry approaches Zenny for its FIRST and ONLY contact; the near-bank catapult remains empty.\nShot 3: Match the incoming berry direction into the close impact view: its first contact is Zenny\u2019s forehead, immediately becoming purple splat. No overshoot, reversal, repeated approach or second impact. Zenny stays on her original distant leaf; use camera movement or a matched cut to reach her, never relocate her. Her eye twitches; Keen ducks beside his machine offscreen. End state: Zenny remains seated on the same far-bank leaf with purple juice; the intact berry is gone.\nShot 4: Cut upward to Fuzzby waking on the hanging comb, surprised and then bursting into exuberant belly-led laughter. Wings buzz, body rocks with laughter; this is generated character SFX, never spoken words. Begin one continuous nonverbal laughing performance that carries audibly across the next picture cut and underneath Zenny\u2019s line; do not stop or restart the laugh at the cut. End state: Fuzzby laughs on the comb, distracted; the audience understands the opportunity.\nShot 5: Cut to Zenny\u2019s composed close-up for her exact first @Audio1 line. She licks juice with calm restraint, addresses Fuzzby, then settles. Keep her listening/meditation purposeful. Fuzzby\u2019s offscreen laughter continues underneath her entire line at a lower level, then tapers naturally. Whenever visible, his laughing body and wing movement continue. End state: Zenny remains on the original leaf with a small remaining purple mark. Fuzzby is distracted.\nShot 6: Cut wide enough to show Keen cross the stepping route to the far tree. He quickly lifts the WHOLE golden comb clear in both paws, exploiting the laughter. Fuzzby\u2019s feet lose their support; wings flutter as he drops harmlessly to soft moss. End state: Keen holds the whole comb, the original branch is EMPTY, and Fuzzby has lost his perch. No piece breaks off.\nShot 7: Track Keen retreating across the same route with the comb. His glance back earns the exact Uh-oh line from @Audio1 after the drop. Fuzzby recovers and flies after him with continuous wing motion while airborne. End state: Keen returns beside the original near-bank catapult holding his prize. Fuzzby follows into the near-bank action area.\nShot 8: Cut tight to the tail/mechanism insert. Keen\u2019s backward hip contact dislodges the loose support; the empty wooden throwing arm falls and taps his SHORT tail. Show cause then contact, synchronized to his exact Ow from @Audio1. Cut briefly to his startled recoil. No unexplained reset, rope trap or self-reloading. End state: The recoil lifts the comb out of Keen\u2019s paws; the catapult is destabilised and wobbling, its cup EMPTY.\nShot 9: Follow the whole honeycomb bouncing once on the low rock and rolling along the short log toward Fuzzby, now on the near bank. Allow the absurd delivery to register. End state: One whole comb stops immediately in front of Fuzzby. Keen has empty paws; the original hanging branch remains empty.\nShot 10: Cut medium to Fuzzby looking from his unexpected honey to Keen and delivering his exact Nice machine line from @Audio1. His smug delight contrasts with Keen\u2019s embarrassment. End state: Fuzzby stands beside the comb; he has NO berry stain. He listens silently as Keen answers.\nShot 11: Reverse medium to Keen for his exact It almost worked line from @Audio1: a small hopeful attempt at dignity gives way to deflation. AFTER the line, the loosened catapult collapses with a single wooden clatter. End state: Keen stands embarrassed beside the collapsed EMPTY machine; Fuzzby has the whole comb. No new stunt.\nShot 12: Cut to Zenny on her original leaf and SETTLE the close-up before the gesture. She meets the camera with both eyes visibly open, closes ONE eye in a clear small knowing wink while the other stays open, then opens it again. Only afterward close both eyes and hold peaceful meditation through the ending. Do not hide the wink inside the camera move or merge it into an ordinary blink. Retain the tiny purple mark. End state: Final close-up: Zenny peacefully meditating on her original leaf, eyes closed, residual berry mark. No further dialogue, wink or gag.\n[Scene and Visual Style]\nOriginal stylised 3D feature animation matching the approved opening frame: warm woodland morning light, tactile materials and glistening golden honey. Deliberate comic pace and character-specific acting.\n[Camera]\nFollow @Image 7 as the storyboard, panel by panel, left to right and top to bottom. Preserve its shot order, action progression and camera coverage. Begin at @Image 1 in full. Rapid launch, travelling berry follow, motivated cuts, clear mechanism insert, matched reaction reverses, then Zenny\u2019s intimate locked button. Animate each view as full-screen moving film; never reproduce the storyboard grid or gutters. The board supplies coverage, not a mandate to pause on twelve static tableaux. The early launch, impact and wake establish the gag before Zenny\u2019s first recorded line. Let remaining action flow around the exact recorded speech. Maintain world positions, creek crossing direction and eyelines through changes of angle.\n[Maintain Consistency]\nOnly Keen, Zenny and Fuzzby; each retains its own reference identity. Keen starts near-bank camera-left, Zenny and the hanging comb start at the far tree. Show the crossing route and return; no teleporting. One whole comb: branch, Keen\u2019s paws, rolling on ground, finally beside Fuzzby. The original branch stays empty after the successful grab. One blueberry launch only; the catapult cup remains EMPTY thereafter. Only Zenny carries purple berry juice; Fuzzby and Keen stay clean. Fuzzby flutters his wings whenever airborne. Zenny\u2019s restrained listening, wink and meditation are intentional acting.\n[Audio]\nDialogue language: English.\n@Audio1 is the sole authority for voice identity, cadence, timing and silence. Spoken lines appear only where assigned, in the locked order, with no extra dialogue. The non-speaking characters remain silent throughout each other\u2019s lines.\nZenny at 3.1s\u20137.78s: {OK, Fuzzby, calm down. It\u2019s not that funny.}\nKeen at 11.9s\u201313.14s: {Uh-oh\u2014}\nKeen at 14s\u201315.4s: {Ow!}\nFuzzby at 20.5s\u201322.06s: {Nice machine.}\nKeen at 22.19s\u201324.39s: {It almost worked.}\nThese are the exact measured windows of the unchanged approved @Audio1 recording. Only the named speaker articulates each line; no repetitions or additional spoken voices. Fuzzby\u2019s exuberant NONVERBAL LAUGHTER is explicitly generated SFX by Seedance, outside the spoken track, alongside wing buzz, berry whoosh/splat, wooden tail tap and final clatter. Keep the dialogue intelligible. Seedance may generate non-verbal music, ambience and SFX. Natural woodland ambience and light playful underscore may support the action, settling beneath Zenny\u2019s final meditation; no abrupt musical climax. Carry Fuzzby\u2019s generated nonverbal laugh continuously across the wake-to-Zenny picture cut and under her approved line, lowering its level for intelligibility without stopping it; taper naturally afterward. Preserve @Audio1 unchanged.\n[Forbidden]\ndo not mix identities between references, do not use reference backgrounds unless explicitly assigned, do not reproduce storyboard text labels, do not retain line-art styling unless explicitly requested.",
+  "promptSha256": "f886b98eb96f2980b690f6e57bcf0a4146c627ee8cef8d2a330d06a31d846e80",
+  "compiler": "cb_seedance_pipeline.build_seedance_prompt/storyboard_grid",
+  "skill": "sd25-pe v0.3.3 storyboard-grid template; seedance-production-director",
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": [
+      "1 audio reference clip(s) fall outside the recommended 5-10 second range",
+      "For 16-30 second work, timestamped stages provide stronger pacing control"
+    ],
+    "assets": {
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "1 audio reference clip(s) fall outside the recommended 5-10 second range."
+      ],
+      "counts": {
+        "images": 7,
+        "videos": 0,
+        "audio": 1,
+        "combined": 8
+      },
+      "durations": {
+        "videos": 0,
+        "audio": 30.0
+      },
+      "subjectCounts": {
+        "images": 0,
+        "videos": 0
+      },
+      "limits": {
+        "images": {
+          "max_count": 30,
+          "recommended_subjects": [
+            1,
+            8
+          ]
+        },
+        "videos": {
+          "max_count": 10,
+          "max_combined_duration_seconds": 30,
+          "recommended_subjects": [
+            1,
+            5
+          ],
+          "recommended_clip_length_seconds": [
+            5,
+            10
+          ]
+        },
+        "audio": {
+          "max_count": 10,
+          "max_combined_duration_seconds": 30,
+          "recommended_clip_length_seconds": [
+            5,
+            10
+          ]
+        },
+        "combined": {
+          "max_count": 50
+        },
+        "video_editing": {
+          "recommended_source_video_seconds": 20,
+          "recommended_reference_images": [
+            1,
+            5
+          ]
+        }
+      }
+    },
+    "timeline": {
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "For 16-30 second work, timestamped stages provide stronger pacing control."
+      ],
+      "timed": false,
+      "ranges": []
+    }
+  },
+  "provider": {
+    "checked": true,
+    "ready": true,
+    "providerCalled": false,
+    "reason": "The request fits the enabled, verified provider contract.",
+    "mode": "reference-to-video",
+    "providerModelId": "dreamina-seedance-2-5-260628",
+    "provider": "byteplus",
+    "modelVersion": "2.5-260628",
+    "capabilityVerifiedAt": "2026-08-16",
+    "capabilitySource": "https://docs.byteplus.com/en/docs/modelark/1520757"
+  },
+  "estimateUsd": 3.1229999999999998,
+  "candidateCount": 1,
+  "state": "returned-awaiting-human-review",
+  "parentTrial": "Ep3_S1_SH1_storyboard_render_trial_v01",
+  "corrections": [
+    "single berry trajectory to first contact",
+    "continuous Fuzzby SFX laugh under Zenny",
+    "settled readable wink then meditation"
+  ],
+  "promptPreflight": {
+    "score": 9.75,
+    "advisoryScoreTarget": 9.5,
+    "scoreAdvisoryOnly": true,
+    "verdict": "PASS",
+    "findings": [
+      {
+        "severity": "POLISH",
+        "rule": "button-hold",
+        "message": "No protected post-line hold is visible in the specialist draft.",
+        "fix": "The deterministic emitter must add holds to non-immediate recognition/reaction lines.",
+        "deduction": 0.25
+      }
+    ],
+    "clean": false
+  },
+  "progress": {
+    "event": "downloaded",
+    "taskId": "cgt-20260909161812-76tqb",
+    "outputPath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_SH1_storyboard_render_trial_v02.mp4",
+    "outputBytes": 17146236
+  },
+  "providerTaskId": "cgt-20260909161812-76tqb",
+  "output": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_SH1_storyboard_render_trial_v02.mp4",
+  "assetId": "1380432cd1d41b576017425c"
+}

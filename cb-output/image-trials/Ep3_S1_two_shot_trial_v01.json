@@ -1,0 +1,98 @@
+{
+  "version": "1.0.0",
+  "project": "crystal-bears",
+  "episode": "Ep3",
+  "scene": 1,
+  "parentTrial": "Ep3_S1_SH1_storyboard_render_trial_v02",
+  "humanApproval": false,
+  "preservesCurrentProduction": true,
+  "audioSource": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_vo_30s_revision_v03.wav",
+  "audioSourceSha256": "65cae1ecd1d741143b3b41f0cc6de8b5023ae047a713641692c16832126d9b82",
+  "audio": [
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v01_audio1.wav",
+      "sha256": "c8f472ab1673e335ae696d1286311332b6c756ada4b0e0ef18872d8cc3246cde",
+      "duration": 12,
+      "dialogue": [
+        {
+          "speaker": "ZENNY",
+          "exactText": "OK, Fuzzby, calm down. It\u2019s not that funny.",
+          "startSec": 5.0,
+          "endSec": 9.68,
+          "sourceStartSec": 3.1,
+          "sourceEndSec": 7.78,
+          "sampleRange": [
+            143040,
+            379200
+          ],
+          "copiedSamplesSha256": "998a0d6f6381a8214109668be10e0271c654fa625b8d3dde6917b9ddd7168afe"
+        }
+      ],
+      "status": "derived-trial-not-new-human-approval"
+    },
+    {
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v01_audio2.wav",
+      "sha256": "57f8297abe8a7023fb046ab2c45aba751705a23a184eaee4ecca17727b40623a",
+      "duration": 26,
+      "dialogue": [
+        {
+          "speaker": "KEEN",
+          "exactText": "Uh-oh\u2014",
+          "startSec": 8.0,
+          "endSec": 9.24,
+          "sourceStartSec": 11.9,
+          "sourceEndSec": 13.14,
+          "sampleRange": [
+            565440,
+            636480
+          ],
+          "copiedSamplesSha256": "a709a6db602e77f5f07b22d61aedd6fe844cb82b39826c88604cfa264ca6d015"
+        },
+        {
+          "speaker": "KEEN",
+          "exactText": "Ow!",
+          "startSec": 12.0,
+          "endSec": 13.4,
+          "sourceStartSec": 14,
+          "sourceEndSec": 15.4,
+          "sampleRange": [
+            666240,
+            744960
+          ],
+          "copiedSamplesSha256": "3b1667cd657c9091d08e31f4231ebcc772d51d429f2e656ec0ca6f5ab1180d6d"
+        },
+        {
+          "speaker": "FUZZBY",
+          "exactText": "Nice machine.",
+          "startSec": 18.0,
+          "endSec": 19.56,
+          "sourceStartSec": 20.5,
+          "sourceEndSec": 22.06,
+          "sampleRange": [
+            978240,
+            1064640
+          ],
+          "copiedSamplesSha256": "c940acaef6f8d1325a18382b2094dee8d66bad49dac5ad7b795e8f501e9ece53"
+        },
+        {
+          "speaker": "KEEN",
+          "exactText": "It almost worked.",
+          "startSec": 20.0,
+          "endSec": 22.2,
+          "sourceStartSec": 22.19,
+          "sourceEndSec": 24.39,
+          "sampleRange": [
+            1059360,
+            1176480
+          ],
+          "copiedSamplesSha256": "e171f9567a9a3b34c1100204b732075390c8d8a063a61ecd5ce4765930a32d82"
+        }
+      ],
+      "status": "derived-trial-not-new-human-approval"
+    }
+  ],
+  "joinType": "PLANNED_CUT",
+  "cutAuthority": "outgoing exact final frame = dynamic continuity only; newly generated keyframe = incoming exact opening",
+  "status": "prepared",
+  "userAuthorization": "Two returned shots requested; draft-source handoff and both generation actions authorised in this task."
+}

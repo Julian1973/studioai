@@ -1,0 +1,69 @@
+{
+  "version": "1.0.0",
+  "project": "crystal-bears",
+  "episode": "Ep3",
+  "scene": 1,
+  "shotId": "S1.SH2",
+  "trial": true,
+  "humanApproval": false,
+  "joinType": "PLANNED_CUT",
+  "sourceFinalFrame": {
+    "source": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1_two_shot_trial_v03_shot1.mp4",
+    "sourceSha256": "6e00d0ef8586db324d42df74af3513f5ced9dd9019160c4d314a87f09f6c2676",
+    "frameIndex": 288,
+    "framePath": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_last1.png",
+    "frameSha256": "d1a6b00dfa2c1040db4bce0c2a790785ac1f8dccdd06ee93a840bb1fe927a27c",
+    "duration": "12.064000",
+    "frameRate": "24/1",
+    "dimensions": [
+      854,
+      480
+    ],
+    "audioPresent": true,
+    "humanApproval": false,
+    "basis": "Exact final decoded frame from new authorised draft clip; not an approved production shot."
+  },
+  "references": [
+    {
+      "slot": 1,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_last1.png",
+      "sha256": "d1a6b00dfa2c1040db4bce0c2a790785ac1f8dccdd06ee93a840bb1fe927a27c"
+    },
+    {
+      "slot": 2,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_plate_candidate_c66c0c33.jpeg",
+      "sha256": "6398102ca1596e6cd36e48cb1263ebdeffb0039219182623da0ae34ca53d361f"
+    },
+    {
+      "slot": 3,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/shots/Ep3_S1.SH1_keyframe_candidate_e867481d.png",
+      "sha256": "3c11a483486c45cfb45c494859f42e1adc776f202c79423892cff1aa3745c01a"
+    },
+    {
+      "slot": 4,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+    },
+    {
+      "slot": 5,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+    },
+    {
+      "slot": 6,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+      "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+    },
+    {
+      "slot": 7,
+      "path": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/asset-registry/Ep3_S1_woodland_catapult.jpeg",
+      "sha256": "fb455325843d9068ad3982767c6fa047556f58d9bfa1062f0afb7465367eecc8"
+    }
+  ],
+  "prompt": "Create one 16:9 CGI opening keyframe for the NEXT camera shot at the SAME STORY MOMENT as Image 1. This is a clean editorial cut to a different viewpoint, with absolutely no character or prop advancing in time.\nImage 1 is the actual final frame of the preceding draft clip: it controls the visible current state, especially Zenny on her leaf with purple juice. Offscreen positions and props remain as established in Image 3 after the berry has fired: catapult EMPTY, Fuzzby still on the hanging comb. Its camera composition must change, but its physical state must not.\nImage 2 controls the established Buzzing Nook environment, tree and creek landmark relationships, morning light and ground support; it must not reset current character or prop states.\nImage 3 supplies the original set depth, distances and finished CGI material treatment only, not the initial loaded berry or initial character poses.\nImage 4 defines @KEEN identity only. Image 5 defines @ZENNY identity only. Image 6 defines @FUZZBY identity only. Preserve each exact reference identity, proportions and details; do not reproduce turnaround layouts.\nImage 7 supplies only wooden catapult construction and rope materials. Exclude its wool ball. The throwing cup is visibly EMPTY.\nCamera: cut approximately 35 degrees along the same near bank, remaining on the established side of the creek/action axis. Compose a medium-wide three-quarter rear view beside Keen, with his shoulder and the empty catapult on the near bank framing the view toward the distant original honeycomb tree and Zenny leaf across the creek. Keep the route between them clearly visible. The angle is new; the creek and trees are not mirrored. Do not move the far tree or leaf nearer to Keen for convenience.\nState: Keen is still beside his original near-bank machine, paws EMPTY, noticing the opportunity. He has not begun crossing. Fuzzby is still on the whole hanging honeycomb at the far tree; the honeycomb has not been grabbed. Zenny remains seated on her original far-bank leaf with the residual purple berry mark. There is no intact blueberry anywhere. Match the actual preceding frame wherever it establishes more precise pose or placement.\nStyle: original stylised 3D CGI, tactile plush/materials and warm volumetric woodland morning light matching the source. The glistening golden removable honeycomb remains separate from architectural honey houses. Preserve physical contacts, scale and fixed landmark relationships under the camera change. Clean single full-screen frame, no storyboard, text, split view, inset or transition morph.",
+  "state": "returned-awaiting-review",
+  "model": "dola-seedream-5-0-pro-260628",
+  "estimateUsd": 0.108,
+  "output": "/Users/julianjenkins/Desktop/Ai Studio/engine/media/Ep3_S1_two_shot_trial_v03_opening2.png",
+  "outputSha256": "e6d3c8e4c33e4c3d32e83df11f40e3b9772a52b8688f3bcde3d1d386d5350e61"
+}

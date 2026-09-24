@@ -2256,7 +2256,7 @@ def create_policy(m):
             # record. This changes provenance metadata only; approval remains the explicit
             # human action below and no provider is contacted.
             candidate["inputSignature"] = expected
-        if (candidate.get("inputSignature") != expected or
+        if (m._signature_diff(candidate.get("inputSignature"), expected) or
                 candidate.get("contentHash") != file_sha256(candidate.get("path"))):
             raise m.Refused(f"REFUSED — {shot_id}'s keyframe inputs changed; regenerate or reselect it")
         m._save(pkg, path)
@@ -2288,8 +2288,8 @@ def create_policy(m):
             (record.get("conformanceScreening") or {}).get("status") == "pass" or
             human_advisory_accepted)
         stored_signature = record.get("inputSignature") or {}
-        signatures_match = stored_signature == expected
         signature_diff = set(m._signature_diff(stored_signature, expected))
+        signatures_match = not signature_diff
         human_lineage_carry = bool(
             (record.get("lineageCarryForward") or {}).get("reviewedBy"))
         amendment = (m._ledger(pkg, shot["shotId"]).get("scopedAmendment") or {})

@@ -6981,7 +6981,25 @@ def _signature_diff(old, new):
     """The list of top-level keys where two input signatures differ — empty means every
     direct input this artefact depends on is unchanged; the artefact is still current."""
     keys = sorted(set(old or {}) | set(new or {}))
-    return [k for k in keys if (old or {}).get(k) != (new or {}).get(k)]
+    changed = []
+    for key in keys:
+        before, after = (old or {}).get(key), (new or {}).get(key)
+        if before == after:
+            continue
+        if key == "referenceHashes" and isinstance(before, dict) and isinstance(after, dict):
+            removed, added = set(before) - set(after), set(after) - set(before)
+            shared = set(before) & set(after)
+            # Reference filenames are labels, not image content. A renamed asset is
+            # unchanged only when every stable entry still matches and all renamed
+            # entries retain the same hashes. Real image/slot swaps still invalidate.
+            if (removed and len(removed) == len(added) and
+                    (shared or len(before) == 1) and
+                    all(before[name] == after[name] for name in shared) and
+                    sorted(before[name] for name in removed) ==
+                    sorted(after[name] for name in added)):
+                continue
+        changed.append(key)
+    return changed
 
 
 def reassess_keyframe(scene, shot_id, episode="Ep1"):
@@ -7684,8 +7702,8 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
                           f"({conformance.get('status') or 'missing'}). The candidate remains "
                           "visible for Julian to reject or refire; it is never auto-archived.")
         current_sig = _keyframe_input_signature(pkg, shot, scene, episode)
-        if cand.get("inputSignature") != current_sig:
-            diff = _signature_diff(cand.get("inputSignature"), current_sig)
+        diff = _signature_diff(cand.get("inputSignature"), current_sig)
+        if diff:
             raise Refused(f"REFUSED — {shot_id}'s direct input(s) changed since this candidate "
                           f"was generated ({', '.join(diff)}); a candidate can never be approved "
                           f"against inputs it wasn't actually generated from. Regenerate against "

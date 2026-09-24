@@ -444,3 +444,10 @@ REVIEW_CRITERIA = {
     'dialogue': 'Assess actual audible performance and picture sync only when audio was inspected; input binding alone is not audible verification.',
     'physicalContinuity': 'Compare prop/effect ownership, state, contact and cause with intended state; do not promote output errors to canon.',
     'scope': 'State exact inspected media, sampling and missing audio/neighbours. Review is advisory, never approval.'}
+
+
+def review_criteria_sha256():
+    """Hash review guidance data, not comments or unrelated module implementation."""
+    payload = json.dumps(REVIEW_CRITERIA, sort_keys=True, ensure_ascii=False,
+                         separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()

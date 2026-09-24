@@ -327,14 +327,20 @@ def create_policy(m):
             "review-animation": ("review",),
             "review-final": ("post",),
         }[stage]
-        return {
+        signature = {
             "model": m.cb_departments.cb_llm.DIRECTOR_MODEL,
             "productionStandardHash": file_sha256(m.ROOT / "skills/production-standard.md"),
-            "directingContractHash": file_sha256(m.ROOT / "engine/studio_director_card.py"),
             "skillHashes": {
-                key: file_sha256(m.cb_departments.SKILLS[key]) for key in keys
+                key: m.cb_departments.runtime_skill_sha256(key) for key in keys
             },
         }
+        if stage.startswith("review-"):
+            from studio_director_card import review_criteria_sha256
+            signature["reviewCriteriaHash"] = review_criteria_sha256()
+        else:
+            signature["directingContractHash"] = file_sha256(
+                m.ROOT / "engine/studio_director_card.py")
+        return signature
 
     def ordered_slot_signature(shot, slots_key, anchor, scene, episode,
                                include_technical_controls=True):

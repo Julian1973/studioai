@@ -9,6 +9,7 @@ approved provider text.  No function in this module calls cb_gen or spends media
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
 import re
@@ -153,14 +154,47 @@ def load_runtime_skill(worker, standard_version=0):
     worker = SKILL_ALIASES.get(worker, worker)
     path = SKILLS[worker]
     text = path.read_text(encoding="utf-8")
-    if RUNTIME_START not in text or RUNTIME_END not in text:
-        raise RuntimeError(f"{path} has no executable runtime worker contract")
-    role = text.split(RUNTIME_START, 1)[1].split(RUNTIME_END, 1)[0].strip()
+    return _assemble_runtime_skill(worker, text, allow_unmarked=False)
+
+
+def _extract_runtime_contract(text):
+    start = text.find(RUNTIME_START)
+    end = text.find(RUNTIME_END, start + len(RUNTIME_START)) if start >= 0 else -1
+    if start < 0 or end < 0:
+        raise RuntimeError("skill has no executable runtime worker contract")
+    return text[start + len(RUNTIME_START):end].strip()
+
+
+def _assemble_runtime_skill(worker, skill_text, *, allow_unmarked):
+    try:
+        role = _extract_runtime_contract(skill_text)
+    except RuntimeError:
+        if not allow_unmarked:
+            raise RuntimeError(f"{SKILLS[worker]} has no executable runtime worker contract")
+        role = skill_text
     standard = (ROOT / "skills/production-standard.md").read_text(encoding="utf-8").strip()
     if worker == 'animation':
         from studio_prompt_structure import WRITING_BRIEF
         role += '\n\n' + WRITING_BRIEF
     return standard + "\n\n" + role
+
+
+def runtime_skill_contract_text(worker, text=None):
+    """Return only marked worker instructions; malformed legacy files return whole source."""
+    worker = SKILL_ALIASES.get(worker, worker)
+    source = SKILLS[worker].read_text(encoding="utf-8") if text is None else str(text)
+    try:
+        return _extract_runtime_contract(source)
+    except RuntimeError:
+        return source
+
+
+def runtime_skill_sha256(worker, text=None):
+    """Hash exact worker prompt returned by load_runtime_skill, including runtime add-ons."""
+    worker = SKILL_ALIASES.get(worker, worker)
+    source = SKILLS[worker].read_text(encoding="utf-8") if text is None else str(text)
+    prompt = _assemble_runtime_skill(worker, source, allow_unmarked=True)
+    return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
 
 
 class LookDirection(BaseModel):

@@ -1,7 +1,7 @@
 import copy
 import json
 import pytest
-from studio_director_card import card, stage_decisions, CONTRACT
+from studio_director_card import card, stage_decisions, CONTRACT, review_criteria_sha256
 from studio_editing import fields, impact
 from test_studio_production import setup, command, approve
 
@@ -41,6 +41,14 @@ def test_directed_revision_reaches_provider_and_preserves_origin(setup):
     assert 'Grip relaxes after listening' in request['prompt']
     assert 'Cut on attention shift' in request['prompt']
     assert CONTRACT
+
+
+def test_review_signature_hash_tracks_review_criteria_data(monkeypatch):
+    import studio_director_card
+
+    original = review_criteria_sha256()
+    monkeypatch.setitem(studio_director_card.REVIEW_CRITERIA, "scope", "Review evidence rule changed.")
+    assert review_criteria_sha256() != original
 
 
 def test_specialist_context_never_truncates_tail_direction():

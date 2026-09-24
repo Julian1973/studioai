@@ -98,10 +98,17 @@ def shot_next_action(row):
     if accepted.get("intact") and not (row.get("amendment") or {}).get("active"):
         return step("review-cut", "continuity", "Review the accepted take in the scene cut", "accepted")
     if row.get("needsKeyframe", not row.get("keyframeSatisfied")) and not current.get("keyframe", row.get("keyframeSatisfied")):
+        if row.get("kf") == "staleInputs":
+            return step("prepare-keyframe", "keyframe", "Choose a refreshed opening image", "ready",
+                        "Shot direction changed. Generate, upload, or choose an image from Library.")
         if pending.get("keyframe"):
             return step("review-keyframe", "keyframe", "Review your keyframe", "review" if allowed.get("approveKeyframe") else "needs-attention", row.get("sub"))
         return step("prepare-keyframe", "keyframe", "Prepare your keyframe")
     if row.get("talky") and not current.get("voice"):
+        if not current.get("seePackage"):
+            return step("complete-see-handoff", "keyframe",
+                        "Choose storyboard or continue to HEAR", "ready",
+                        (row.get("reasons") or {}).get("seePackage"))
         return step("review-voice" if pending.get("voice") else "prepare-voice", "voice",
                     "Listen to your voice performance" if pending.get("voice") else "Prepare your voice performance",
                     "review" if pending.get("voice") else "ready")
@@ -185,10 +192,15 @@ def shot_handoff_instruction(shot, *, still=False):
         return ""
     source = transition.get("stateSourceShotId") or "the preceding shot"
     if kind == "cut":
+        if still:
+            return (
+                f"Cut from {source}: use its accepted final frame for world, "
+                "character/prop state, action phase and emotion only. Start at this shot's "
+                "approved opening and camera; do not copy prior framing or show later action."
+            )
         instruction = (
             f"EDITORIAL HANDOFF — planned cut from {source}. "
-            + ("Compose this shot's new opening keyframe in its authored camera view. "
-               if still else "Begin on this shot's own approved opening keyframe and authored camera view. ")
+            + "Begin on this shot's own approved opening keyframe and authored camera view. "
             + "Inherit world positions, "
             "prop ownership, action phase and emotional state from the incoming continuity "
             "record; do not inherit the previous camera composition. For reverse coverage, "
@@ -198,6 +210,12 @@ def shot_handoff_instruction(shot, *, still=False):
             "The edit joins the separate shots."
         )
     else:
+        if still:
+            return (
+                f"Continue from {source}: inherit the accepted character/prop state, "
+                "action phase, eyelines, light and emotion. Use this shot's opening pose "
+                "and camera; do not replay the action."
+            )
         instruction = (
             f"EDITORIAL HANDOFF — continuous action from {source}. Use its approved "
             "landing frame as the opening anchor and carry positions, facing, movement "

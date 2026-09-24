@@ -15,7 +15,7 @@ class Direction(BaseModel):
 def test_final_revision_is_returned_with_receipt(monkeypatch):
     draft=Direction(shotId='S3.SH1',composition='cups in foreground',charactersInFrame=['Sunny'],canonicalStyleVersion='1',canonicalStyleParagraph='canon')
     def reviewer(system,user,schema,**kw):
-        assert kw['model']=='gpt-6-astra';assert kw['reasoning_effort']=='high'
+        assert kw['model']=='gpt-6-luna';assert kw['reasoning_effort']=='high'
         assert json.loads(user)['currentProduction']['storyboard']=='Sunny sets table'
         return draft.model_copy(update={'composition':'Sunny paw touching cup on existing table'})
     monkeypatch.setattr(F.cb_llm,'structured',reviewer)

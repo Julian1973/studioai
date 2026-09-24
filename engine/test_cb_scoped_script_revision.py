@@ -515,18 +515,36 @@ def test_same_scene_dialogue_amendment_preserves_see_but_closes_hear_watch(
                         lambda *args, **kwargs: dict(neutral))
     monkeypatch.setattr(cb_state, "_keyframe_candidate_current",
                         lambda *args, **kwargs: False)
+    monkeypatch.setattr(cb_render, "_direct_keyframe_direction",
+                        lambda shot: {})
+    monkeypatch.setattr(cb_render, "_approved_voice_lines",
+                        lambda pkg, shot: [])
     monkeypatch.setattr(cb_state.cb_audio_authority, "spoken_dialogue_lines",
                         lambda shot: shot.get("dialogueLines") or [])
 
     state = cb_state._shot_state(
         package, package["shots"][0], "1", "Ep2", True, True,
-        amendment={"shotId": "S1.SH3", "active": True})
+        amendment={"shotId": "S1.SH3", "active": True},
+        see_status={"approved": False, "reason": "Choose the SEE handoff."})
 
     assert state["current"]["keyframe"] is True
     assert state["keyframeSatisfied"] is True
     assert state["current"]["voice"] is False
     assert state["current"]["animation"] is False
     assert state["allowedActions"]["fireAnimation"] is False
+    assert state["allowedActions"]["generateVoice"] is False
+    assert state["current"]["seePackage"] is False
+
+
+
+def test_voice_fire_requires_every_upstream_production_approval():
+    ready = dict(package_current=True, keyframe_satisfied=True,
+                 see_package_current=True, talky=True,
+                 voice_direction_current=True, voice_approved=False)
+    assert cb_state._voice_generation_allowed(**ready)
+    assert not cb_state._voice_generation_allowed(**{**ready, "see_package_current": False})
+    assert not cb_state._voice_generation_allowed(**{**ready, "keyframe_satisfied": False})
+    assert not cb_state._voice_generation_allowed(**{**ready, "voice_approved": True})
 
 
 def test_current_voice_approval_completes_hear_amendment_without_reopening_see(

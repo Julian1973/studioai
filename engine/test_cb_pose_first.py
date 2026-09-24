@@ -602,3 +602,78 @@ def test_next_pose_prompt_consumes_the_last_recorded_correction(monkeypatch):
 
     assert "[Correction From The Previous Attempt]" in prompt
     assert "Restore the turnaround's slimmer torso and smaller belly." in prompt
+
+
+def test_scale_revision_passes_keyframe_contract_without_dropping_staging(monkeypatch):
+    style_version, style_text = cb_departments.canonical_style_paragraph()
+    correction = (
+        "Scale-only correction: preserve the approved camera and positions. "
+        "Set Keen/Sunny full-body height ratio to 1.14:1. No other changes.\n"
+        "Visible result required: Keen reads visibly taller.\n"
+        "Keep locked: camera, positions, poses, action, references and lighting.")
+    direction = {
+        "audienceRead": "The dripping garland makes the problem visible.",
+        "lensAndCameraRelationship": "Eye-level medium shot.",
+        "lightingAndDepth": "Warm cave light with cool rain at the entrance.",
+        "canonicalStyleVersion": style_version,
+        "canonicalStyleParagraph": style_text,
+        "geography": ["The party cave remains unchanged."],
+        "charactersInFrame": ["Sunny", "Keen"],
+        "negativeSpace": ["Keep the garland visible above Keen."],
+        "openingFrameLayout": {"sameDepth": False, "placements": [
+            {"character": "Sunny", "centerX": 0.33, "centerY": 0.6,
+             "pose": "holding wet garland", "facing": "up"},
+            {"character": "Keen", "centerX": 0.67, "centerY": 0.6,
+             "pose": "looking up", "facing": "up"},
+        ]},
+    }
+    shot = {"shotId": "S4.SH2", "charactersInFrame": ["Sunny", "Keen"],
+            "openingCharactersInFrame": ["Sunny", "Keen"],
+            "keyframeReferenceSlots": {
+                "@图1": "Sunny", "@图2": "Keen", "@图3": "scene plate"}}
+    package = {"continuityLedger": [{"shotId": "S4.SH2",
+        "keyframeRejections": [{"reason": correction,
+                                "rejectedAt": "2026-09-23T19:29:18"}]}]}
+    characters = {"Sunny": {"heightIn": 50}, "Keen": {"heightIn": 57}}
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: characters)
+    reference_plan = [
+        {"slot": "@图1", "sourceSlot": "@图1", "role": "Sunny"},
+        {"slot": "@图2", "sourceSlot": "@图2", "role": "Keen"},
+        {"slot": "@图3", "sourceSlot": "@图3", "role": "scene plate"},
+    ]
+    monkeypatch.setattr(
+        cb_render, "_expanded_reference_blueprint",
+        lambda *args, **kwargs: reference_plan)
+    monkeypatch.setattr(cb_render, "_direct_keyframe_direction", lambda _shot: direction)
+    monkeypatch.setattr(
+        cb_render.studio_prompt_aliases, "honeycomb_lifecycle_prompt_rules",
+        lambda _shot: {"preserve": [], "exclude": []})
+
+    prompt = cb_render._resolve_keyframe_prompt(package, shot)
+    contract = cb_render._keyframe_prompt_contract(package, shot, prompt)
+    sections = cb_departments.prompt_sections(prompt)
+    target = cb_render._latest_keyframe_revision_target(package, "S4.SH2")
+
+    assert "- Sunny middle-left; holding wet garland; faces up." in sections["SUBJECTS"]
+    assert "- Keen middle-right; looking up; faces up." in sections["SUBJECTS"]
+    assert "Preserve canon scale" not in sections["SUBJECTS"]
+    assert "Keen/Sunny full-body height ratio to 1.14:1" in sections["MUST PRESERVE"]
+    assert contract["promptHash"]
+    without_target = prompt.replace(f"Latest reviewed correction: {target}",
+                                    "Reviewed correction omitted")
+    with pytest.raises(cb_render.Refused, match=r"keyframe prompt \[MUST PRESERVE\]"):
+        cb_render._keyframe_prompt_contract(package, shot, without_target)
+    assert "Physical staging scale" in cb_render._keyframe_frame_section(
+        direction, characters, "")
+
+    # A new automatic invalidation must not be treated as reviewed direction;
+    # the same prompt/validator route used at Fire must agree before any spend.
+    package["continuityLedger"][0]["keyframeRejected"] = {
+        "reason": "Superseded automatically because keyframe inputs changed before review.",
+        "reviewedAt": "2026-09-24T12:21:25",
+        "category": "stale-inputs",
+    }
+    refreshed_prompt = cb_render._resolve_keyframe_prompt(package, shot)
+    assert "Superseded automatically" not in refreshed_prompt
+    assert "Latest reviewed correction:" not in refreshed_prompt
+    assert cb_render._keyframe_prompt_contract(package, shot, refreshed_prompt)["promptHash"]

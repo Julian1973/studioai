@@ -10,13 +10,13 @@ import cb_llm
 VERSION = 'final-direction-1.1.0'
 
 def model_options():
-    return {'model': os.environ.get('OPENAI_STUDIO_AGENT_MODEL', 'gpt-6-astra'),
+    return {'model': os.environ.get('OPENAI_STUDIO_AGENT_MODEL', 'gpt-6-luna'),
             'reasoning_effort': os.environ.get('OPENAI_STUDIO_AGENT_REASONING', 'high'),
             'max_output_tokens': 10000}
 
 def prompt_director_options():
     """Independent final WATCH review route; does not change SEE/HEAR directors."""
-    return {'model': os.environ.get('OPENAI_PROMPT_DIRECTOR_MODEL', 'gpt-5.6-sol'),
+    return {'model': os.environ.get('OPENAI_PROMPT_DIRECTOR_MODEL', 'gpt-6-luna'),
             'reasoning_effort': os.environ.get('OPENAI_PROMPT_DIRECTOR_REASONING', 'low'),
             'max_output_tokens': 10000}
 

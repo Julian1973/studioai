@@ -4,6 +4,7 @@ The translation is derived, source-bound direction. It grants no media approval 
 is rebuilt through normal specialist preparation when its source changes.
 """
 from copy import deepcopy
+import re
 from pydantic import BaseModel, ConfigDict, Field
 from studio_director_card import ShotDirection, CONTRACT, legacy_decisions
 from studio_request_evidence import digest
@@ -19,6 +20,32 @@ def source(shot):
             'approvedDirection': legacy_decisions(shot, 'post')}
 
 
+def causal_audio_checkpoint_issues(shot):
+    """Check explicit 'after this line' events against the current bound cue end."""
+    problems = []
+    direction = shot.get('directorCard') or {}
+    for event in direction.get('stateChanges', []):
+        cause = str(event.get('cause') or '')
+        match = re.search(
+            r"\bafter\s+([\w -]+?)\s+finishes\s+['\u2018\"](.+?)['\u2019\"]",
+            cause, re.I)
+        if not match:
+            continue
+        speaker, phrase = match.group(1).strip(), match.group(2).strip()
+        lines = [line for line in shot.get('dialogueLines') or []
+                 if str(line.get('speaker') or '').casefold() == speaker.casefold()
+                 and isinstance(line.get('endSec'), (int, float))
+                 and phrase in str(line.get('exactText') or line.get('text') or '')
+                 and str(line.get('exactText') or line.get('text') or '').rstrip().endswith(phrase)]
+        if lines and isinstance(event.get('atSec'), (int, float)):
+            end = max(float(line['endSec']) for line in lines)
+            if float(event['atSec']) < end:
+                problems.append(
+                    f"DIRECT_AUDIO_TIMING_CONFLICT: {event.get('entityId')} checkpoint at "
+                    f"{event['atSec']:g}s follows {speaker}'s approved line, which ends at {end:g}s")
+    return problems
+
+
 def card_issues(shot):
     """An unversioned card is not automatically a complete authored plan."""
     direction = shot.get('directorCard') or {}
@@ -32,6 +59,7 @@ def card_issues(shot):
     for index, event in enumerate(direction.get('stateChanges', [])):
         if event.get('atSec') is None or not event.get('entityId') or not event.get('afterValues'):
             problems.append(f'stateChanges/{index}: timed entity state is incomplete')
+    problems.extend(causal_audio_checkpoint_issues(shot))
     if not direction.get('stateChanges') and any(v.get('criticalStateEntities') for v in direction.get('views', [])):
         problems.append('Critical coverage has no state history')
     return problems
@@ -101,6 +129,9 @@ Use numeric atSec and explicit numeric timing intervals. Resolve approximate vis
 intervals into an executable allocation within the approved duration, while leaving
 every measured speech interval untouched. A cause that must follow a line needs visible
 time after that line ends and before the next cut. Do not silently compress that cause.
+Every event completion atSec must remain within 0..durationSec. When verified measured
+audio intervals are supplied, use them instead of estimated script dialogue times; never
+place an event after the shot because a stale dialogue estimate extends beyond the clip.
 Use stable state keys and entity IDs: detached objects, their empty supports, character
 positions, mechanism state and persistent marks. Include visible background state at
 return views. Declare criticalStateEntities where a reset would break an approved event.
@@ -131,8 +162,12 @@ def validate(prepared, shot):
     times = [v['atSec'] for v in value['timedViews']]
     if not times or times[0] != 0 or any(t is None or not 0 <= t < duration for t in times) or times != sorted(set(times)):
         raise ValueError('Director handoff needs ordered numeric view times within the clip.')
-    if any(not 0 <= e['atSec'] <= duration for e in value['stateChanges']):
-        raise ValueError('Director handoff needs explicit event completion times.')
+    outside = [e for e in value['stateChanges'] if not 0 <= e['atSec'] <= duration]
+    if outside:
+        event = outside[0]
+        raise ValueError(
+            f"DIRECTOR_EVENT_OUTSIDE_CLIP: {event['entityId']} completes at "
+            f"{event['atSec']:g}s, beyond this {duration:g}s shot.")
     if not value['stateChanges'] and any(v['criticalStateEntities'] for v in value['timedViews']):
         raise ValueError('Critical coverage cannot omit the intended state history.')
     for index, v in enumerate(value['timedViews']):
@@ -153,7 +188,7 @@ def validate(prepared, shot):
         # that the allocation kept as a hold. Older plans without them still read.
         transition = old.get('transitionType')
         views.append(dict(viewId=old['viewId'], atSec=timing['atSec'],
-            timing=f"{timing['atSec']:g}–{timing['endSec']:g}s",
+            timing=f"{timing['atSec']:.15g}–{timing['endSec']:.15g}s",
             visibleEntities=timing['visibleEntities'] if timing.get('visibleEntities') is not None else old.get('visibleEntities'),
             criticalStateEntities=timing['criticalStateEntities'],
             audienceNeed=old.get('purpose') or old.get('storyAction'),
@@ -170,7 +205,7 @@ def validate(prepared, shot):
             cinematography=dict(old.get('cinematography') or {})))
     events = [dict(entityId=e['entityId'], atSec=e['atSec'], subject=e['entityId'],
         before=str(properties(e['before'])), after=str(properties(e['after'])), cause=e['cause'],
-        beforeValues=properties(e['before']), afterValues=properties(e['after']), timing=f"{e['atSec']:g}s")
+        beforeValues=properties(e['before']), afterValues=properties(e['after']), timing=f"{e['atSec']:.15g}s")
         for e in value['stateChanges']]
     direction = ShotDirection.model_validate(dict(
         audienceFocus=story.get('mustUnderstand') or story.get('outerAction'),
@@ -185,8 +220,26 @@ def validate(prepared, shot):
             listening=c['pressureResponse']) for c in performance.get('characterTruths', [])], views=views,
         soundOwnership=story.get('soundStory') or 'Preserve approved audio and existing sound direction',
         stateChanges=events)).model_dump()
+    conflicts = causal_audio_checkpoint_issues({**shot, 'directorCard': direction})
+    if conflicts:
+        raise ValueError(conflicts[0])
     return {'direction': direction, 'openingObservedStates': {e['entityId']: properties(e['values']) for e in value['openingObservedStates']},
             'observationLimitations': value['observationLimitations']}
+
+
+def measured_audio_context(shot, ledger):
+    """Return the shot projected through its verified HEAR placement receipt."""
+    approval = ledger.get('voiceApproval') or {}
+    if not approval.get('approved') or not ledger.get('voPlacementPath'):
+        return shot, []
+    from studio_approved_media_projection import watch_shot
+    # This timing read is an input to building the missing card. WATCH still
+    # requires the completed, current card on its own provider-facing path.
+    projected = watch_shot(shot, ledger, require_current_direction=False)
+    intervals = [{key: line.get(key) for key in
+                  ('dialogueOccurrenceId', 'speaker', 'exactText', 'startSec', 'endSec')}
+                 for line in projected.get('dialogueLines') or []]
+    return projected, intervals
 
 
 class ScopeCorrection(Record):
@@ -356,6 +409,13 @@ def prepare_native(runtime, scene, shot_id, episode, log=print, *, stage='animat
     shot = runtime._shot(pkg, shot_id)
     ledger = runtime._ledger(pkg, shot_id)
     refresh_previous_frame(runtime, pkg, path, shot, log)
+    if (stage == 'animation' and shot.get('sourceType') == 'opener' and
+            callable(getattr(runtime, 'reassess_keyframe', None))):
+        opening_status = runtime.reassess_keyframe(scene, shot_id, episode)
+        if opening_status.get('verdict') != 'carry_forward':
+            raise ValueError('WATCH_CONFIGURATION_REQUIRED: refresh the opening keyframe in SEE '
+                             'against the current continuity references before preparing WATCH; '
+                             'the approved voice take is preserved.')
     prepare_unit_scope(runtime, pkg, path, shot, ledger, log)
     if stage == 'cinematography':
         # SEE authors the opening from approved coverage and scene/reference inputs.
@@ -372,20 +432,28 @@ def prepare_native(runtime, scene, shot_id, episode, log=print, *, stage='animat
     if feedback.get('text') is not None:
         shot['watchDirectorFeedbackApproved'] = str(feedback['text'])
     if shot.get('directorCard') and not errors(shot) and not card_issues(shot):
-        return shot['directorCard']
+        try:
+            from studio_storyboard_prompt import view_timings
+            view_timings(shot, len(shot['directorCard'].get('views') or []))
+        except (TypeError, ValueError):
+            pass  # Rebuild managed coverage whose serialized times no longer round-trip.
+        else:
+            return shot['directorCard']
     import cb_llm, json
     opening = opening_image or (ledger.get('keyframeApproval') or {}).get('path') or ledger.get('keyframePath')
     if not opening:
         raise ValueError('Director handoff needs the selected opening image for action-state preparation.')
     inputs = source(shot)
+    timing_shot, measured_intervals = measured_audio_context(shot, ledger)
     log('DIRECTOR HANDOFF — translating approved coverage into current timed state and visibility')
-    user = json.dumps(inputs, ensure_ascii=False)
+    user_payload = {**inputs, 'verifiedMeasuredAudioIntervals': measured_intervals}
+    user = json.dumps(user_payload, ensure_ascii=False)
     for attempt in range(2):
         prepared = cb_llm.structured_with_repair(SYSTEM, user, Preparation, tier='premium',
             reasoning_effort='medium', max_output_tokens=24000,
             images=[opening], label='director_state_handoff' if not attempt else 'director_state_handoff_repair')
         try:
-            value = validate(prepared, shot)
+            value = validate(prepared, timing_shot)
             candidate = deepcopy(shot)
             candidate['directorCard'] = value['direction']
             candidate['directorCardSource'] = {'version': VERSION, 'sourceHash': digest(inputs),
@@ -395,9 +463,15 @@ def prepare_native(runtime, scene, shot_id, episode, log=print, *, stage='animat
                 'depictedStates': value['openingObservedStates'],
                 'observationMethod': 'director model inspected opening image',
                 'observationLimitations': value['observationLimitations'],
-                'stateScope': {'authority': 'opening_state', 'controlsDynamicState': True, 'startSec': 0, 'endSec': 0}}
+                'stateScope': {'authority': 'opening_state', 'controlsDynamicState': True, 'startSec': 0, 'endSec': 0,
+                               'openingObservationPolicy': 'unobserved_entities_are_authored_intent'}}
             from studio_dynamic_state import resolve
-            resolution = resolve({'shot': candidate}, [dict(binding, role='opening frame')])
+            # Validate downstream state against verified HEAR intervals. Keep the
+            # source package unchanged; its dialogue estimates remain provenance.
+            timing_candidate = deepcopy(timing_shot)
+            timing_candidate['directorCard'] = candidate['directorCard']
+            timing_candidate.pop('directorCardSource', None)
+            resolution = resolve({'shot': timing_candidate}, [dict(binding, role='opening frame')])
             if resolution['errors']:
                 raise ValueError('; '.join(resolution['errors']))
             break
@@ -410,8 +484,9 @@ def prepare_native(runtime, scene, shot_id, episode, log=print, *, stage='animat
             _write(runtime.ROOT / 'cb-output/state/director-handoff' / (digest(record) + '.json'), record)
             if attempt:
                 raise ValueError('Director handoff incomplete: ' + str(exc)) from exc
-            user = json.dumps({'source': inputs, 'previous': prepared.model_dump(), 'errors': str(exc),
-                'repair': 'Repair only these structural errors. Establish an initial atSec=0 event for every critical visible entity. '
+            user = json.dumps({'source': inputs, 'verifiedMeasuredAudioIntervals': measured_intervals,
+                'previous': prepared.model_dump(), 'errors': str(exc),
+                'repair': 'Repair only these structural errors. Keep every event completion within 0..durationSec; use verified measured audio intervals, not estimated dialogue times. Establish an initial atSec=0 event for every critical visible entity. '
                 'When actual visible state agrees with intended opening state, use identical concise property keys and values '
                 'in both records, not paraphrases. Do not claim invisible mechanisms as observed. Preserve all events, '
                 'view IDs, exact audio and duration.'}, ensure_ascii=False)

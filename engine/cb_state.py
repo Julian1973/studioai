@@ -265,8 +265,34 @@ def _storyboard_status(scene, episode, intake):
     return storyboard, current, reason
 
 
+def _see_package_status(scene, episode, shot_id):
+    """Read the same SEE approval Fire requires; never auto-approve from status."""
+    try:
+        import studio_see_service
+        status = studio_see_service.current(cb_render.ROOT, {
+            "projectId": "crystal-bears", "episode": episode,
+            "scene": str(scene), "unit": shot_id,
+        })
+        return {
+            "approved": status.get("approved") is True,
+            "reason": None if status.get("approved") is True else
+                ((status.get("issues") or [None])[0] or
+                 "Review the current SEE inputs before continuing."),
+        }
+    except Exception as exc:
+        return {"approved": False,
+                "reason": f"Current SEE approval could not be checked: {exc}"}
+
+
+def _voice_generation_allowed(*, package_current, keyframe_satisfied,
+                              see_package_current, talky,
+                              voice_direction_current, voice_approved):
+    return bool(package_current and keyframe_satisfied and see_package_current and
+                talky and voice_direction_current and not voice_approved)
+
+
 def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
-                amendment=None):
+                amendment=None, see_status=None):
     shot_id = shot["shotId"]
     ledger = cb_render._ledger(pkg, shot_id)
     needs_keyframe = cb_render._shot_uses_own_keyframe(shot, ledger)
@@ -356,12 +382,28 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
 
     voice = cb_render._voice_approval_status(pkg, shot, scene, episode)
     voice_ok = voice["current"]
+    see_package_current = bool((see_status or {}).get("approved"))
     # Once HEAR is signed, the immutable approved media bundle is the operational
     # performance direction. A later unapproved draft cannot make that decision stale.
     voice_direction_current = bool(voice_direction["current"] or voice_ok)
     animation = cb_render._animation_approval_status(
         pkg, shot, scene, episode)
     batch_current = _batch_current(pkg, shot, ledger, scene, episode)
+    # A completed approved take is a signed production result, not a draft to be
+    # reopened because a later scene-world revision changed an upstream signature.
+    # Preserve the finished shot in the workflow when its approved media and opening
+    # frame are still intact. New renders still use the strict freshness checks in
+    # cb_render; this only prevents SEE from reopening a completed shot.
+    accepted = contracts.accepted_asset(ledger)
+    approved_take_path = ledger.get("approvedTake")
+    terminal_approved = bool(
+        ledger.get("status") == "approved" and
+        approved_take_path and os.path.exists(approved_take_path) and
+        _approved_file_intact(keyframe_approval))
+    if terminal_approved:
+        kf = "approved" if needs_keyframe else kf
+        keyframe_satisfied = True
+        animation = {**animation, "current": True, "reason": None}
     if animation["current"]:
         animation_state = "approved"
     elif ledger.get("status") == "approved":
@@ -369,7 +411,9 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
     elif ledger.get("status") == "candidates-pending":
         animation_state = "candidates-pending" if batch_current else "stale-batch"
     elif ledger.get("status") == "model-limited":
-        animation_state = "model-limited"
+        # Legacy packages may still carry this status. The former two-batch stop is
+        # advisory now, so keep those shots actionable without rewriting history.
+        animation_state = "designed"
     else:
         animation_state = "designed"
 
@@ -380,7 +424,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
         package_current and scene_look_current and keyframe_satisfied and voice_ok and
         (not needs_keyframe or stage_contract["ready"]) and
         animation_direction["current"] and
-        animation_state not in ("approved", "candidates-pending", "model-limited"))
+        animation_state not in ("approved", "candidates-pending"))
 
     if not package_current:
         label, sub, badge = (
@@ -396,9 +440,9 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
         )
     elif kf == "staleInputs":
         label, sub, badge = (
-            "Opening-frame inputs changed",
-            "generate or select a fresh candidate from current inputs",
-            "blocked",
+            "Choose a refreshed opening image",
+            "Shot direction changed. Generate, upload, or choose an image from Library.",
+            "ready",
         )
     elif kf == "screening":
         label, sub, badge = (
@@ -430,11 +474,13 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "ready",
         )
     elif not voice_ok:
+        timing_repair = str(voice.get("reason") or "").startswith("HEAR timing")
         label, sub, badge = (
-            "Opening frame ready",
-            (voice_direction["reason"]
-             if not voice_direction["current"] else
-             "generate, listen and choose Accept or Iterate"),
+            ("HEAR timing needs rebuild" if timing_repair else "Opening frame ready"),
+            (voice.get("reason") if timing_repair else
+             (voice_direction["reason"]
+              if not voice_direction["current"] else
+              "generate, listen and choose Accept or Iterate")),
             "ready",
         )
     elif animation_state == "approved":
@@ -455,8 +501,6 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "reject this batch and generate from current inputs",
             "blocked",
         )
-    elif animation_state == "model-limited":
-        label, sub, badge = "Animation blocked", "needs human redesign", "blocked"
     elif animation_state == "stale":
         label, sub, badge = (
             "Accepted animation is stale",
@@ -473,6 +517,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
         "needsKeyframe": needs_keyframe,
         "kf": kf,
         "keyframeSatisfied": keyframe_satisfied,
+        "seePackageCurrent": see_package_current,
         "talky": talky,
         "voiceOk": voice_ok,
         "animState": animation_state,
@@ -486,6 +531,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "cinematographyDirection": cine["current"],
             "keyframe": keyframe_satisfied,
             "keyframeCandidate": candidate_current,
+            "seePackage": see_package_current,
             "voiceDirection": voice_direction_current,
             "voice": voice_ok,
             "animationDirection": animation_direction["current"],
@@ -497,6 +543,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
         "reasons": {
             "cinematographyDirection": cine["reason"],
             "keyframe": keyframe.get("reason"),
+            "seePackage": (see_status or {}).get("reason"),
             "voiceDirection": None if voice_direction_current else voice_direction["reason"],
             "voice": voice["reason"],
             "animationDirection": animation_direction["reason"],
@@ -521,9 +568,13 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "rescreenKeyframe": bool(
                 package_current and scene_look_current and kf == "screening"),
             "prepareVoice": False,
-            "generateVoice": bool(
-                package_current and talky and voice_direction_current and
-                not voice["approved"]),
+            "generateVoice": _voice_generation_allowed(
+                package_current=package_current,
+                keyframe_satisfied=keyframe_satisfied,
+                see_package_current=see_package_current,
+                talky=talky,
+                voice_direction_current=voice_direction_current,
+                voice_approved=voice["approved"]),
             "approveVoice": bool(
                 talky and ledger.get("voPath") and not voice_ok),
             "prepareAnimation": False,
@@ -565,8 +616,19 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
                 result["current"]["voice"] = False
             result["animState"] = "amendment-pending"
             result["readyToAnimate"] = False
-            phase = {"direction": "DIRECTION", "keyframe": "SEE",
-                     "voice": "HEAR", "animation": "WATCH"}[changed_stage]
+            # Show the first genuinely unfinished stage, not merely the stage
+            # named by the amendment. A preserved HEAR amendment can still need a
+            # replacement opening frame or the explicit SEE handoff first.
+            if not result["current"].get("cinematographyDirection"):
+                phase = "DIRECTION"
+            elif ((result.get("needsKeyframe") and
+                   not result["current"].get("keyframe")) or
+                  not result["current"].get("seePackage")):
+                phase = "SEE"
+            elif result.get("talky") and not result["current"].get("voice"):
+                phase = "HEAR"
+            else:
+                phase = "WATCH"
             result["label"] = f"Shot amendment needs {phase}"
             result["sub"] = (
                 "Earlier approved stages are preserved. Review this scoped change; only its "
@@ -611,11 +673,16 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
             "changedShotId": amendment.get("shotId"),
         }
     # Historical acceptance is independent of whether a new draft can be generated.
-    accepted = contracts.accepted_asset(ledger)
     result["acceptedAsset"] = accepted
     result["draftReadiness"] = {"label": result["label"], "sub": result["sub"],
                                 "readyToAnimate": result["readyToAnimate"]}
-    if accepted["intact"]:
+    if terminal_approved:
+        result["label"] = "Approved take"
+        result["badgeState"] = "approved"
+        result["sub"] = (
+            "The accepted render is preserved. Its missing extracted landing frame "
+            "does not reopen SEE or block the next shot.")
+    elif accepted["intact"]:
         result["label"] = "Approved take"
         result["badgeState"] = "approved"
         result["sub"] = ("A revised draft needs preparation; your accepted take is preserved."
@@ -677,7 +744,12 @@ def production_state(scene, episode="Ep1", intake=None):
         stages["storyboard"] = _stage(
             "rejected", storyboard.get("humanNote") or storyboard_reason)
     elif storyboard.get("approvalState") == "approved":
-        stages["storyboard"] = _stage("blocked", storyboard_reason)
+        # Keep an older approved direction visible while its production handover is
+        # refreshed.  The stale graph remains a blocker for current WATCH preparation,
+        # but it must not hide the SEE/HEAR review surface or its zero-spend source controls.
+        stages["storyboard"] = _stage(
+            "approved", storyboard_reason or
+            "approved direction retained; refresh the production handover before Fire")
     else:
         stages["storyboard"] = _stage("awaiting", storyboard_reason)
 
@@ -752,11 +824,9 @@ def production_state(scene, episode="Ep1", intake=None):
             }],
         })
 
-    if not package_current:
-        production_block = _stage(
-            "blocked", "production handover does not match the active script and storyboard")
-    else:
-        production_block = None
+    production_block = None
+    stale_handover = not package_current
+    stale_handover_message = "production handover does not match the active script and storyboard"
 
     scene_look = cb_render.scenelook_status(scene, episode)
     look_record = cb_render._load_scenelook_rec(scene, episode)
@@ -795,19 +865,19 @@ def production_state(scene, episode="Ep1", intake=None):
         stages["scenelook"] = _stage(
             "ready", "direction ready; generate or select one plate candidate")
 
-    shots = [
-        _shot_state(pkg, shot, scene, episode, scene_look_current, package_current,
-                    amendment=amendment)
-        for shot in _active_package_shots(pkg)
-    ]
+    shots = []
+    for shot in _active_package_shots(pkg):
+        talky = bool(cb_audio_authority.spoken_dialogue_lines(shot))
+        see_status = _see_package_status(scene, episode, shot["shotId"]) if talky else None
+        shots.append(_shot_state(
+            pkg, shot, scene, episode, scene_look_current, package_current,
+            amendment=amendment, see_status=see_status))
 
     talky = [shot for shot in shots if shot["talky"]]
     approved_voice = sum(1 for shot in talky if shot["current"]["voice"])
     pending_voice = sum(1 for shot in talky if shot["pending"]["voice"])
     timing = cb_render.timing_slate_status(scene, episode)
-    if production_block:
-        stages["voice"] = production_block
-    elif not talky:
+    if not talky:
         stages["voice"] = (
             _stage("approved", "silent timing slate is current")
             if timing.get("current") else
@@ -833,9 +903,7 @@ def production_state(scene, episode="Ep1", intake=None):
         1 for shot in openers if shot["pending"]["keyframe"])
     stale_keyframes = sum(
         1 for shot in openers if shot["kf"] == "staleInputs")
-    if production_block:
-        stages["keyframe"] = production_block
-    elif not scene_look_current:
+    if not scene_look_current:
         stages["keyframe"] = _stage("locked", "generate the current scene world first")
     elif not openers:
         stages["keyframe"] = _stage("approved", "no shot needs a separate opening frame")
@@ -860,10 +928,10 @@ def production_state(scene, episode="Ep1", intake=None):
         1 for shot in shots if shot["animState"] == "candidates-pending")
     blocked_animation = sum(
         1 for shot in shots
-        if shot["animState"] in ("stale", "stale-batch", "model-limited"))
+        if shot["animState"] in ("stale", "stale-batch"))
     ready_animation = sum(1 for shot in shots if shot["readyToAnimate"])
-    if production_block:
-        stages["animation"] = production_block
+    if stale_handover:
+        stages["animation"] = _stage("blocked", stale_handover_message)
     elif not scene_look_current:
         stages["animation"] = _stage("locked", "generate the current scene world first")
     elif blocked_animation:

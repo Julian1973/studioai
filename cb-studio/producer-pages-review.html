@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Producer page design review · Crystal Bears</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0d0e14;--panel:#171923;--panel2:#1d202b;--line:#303341;--text:#f5f3f8;--muted:#b1afbd;--quiet:#838292;--violet:#b18bc0;--violet-bg:#292231;--gold:#d6b06b;--green:#78c7a1;--yellow:#e4c27c;--red:#e58a92}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,textarea{font:inherit}button{cursor:pointer}
+    .topbar{height:58px;display:flex;align-items:center;gap:18px;padding:0 max(22px,calc((100vw - 1180px)/2));border-bottom:1px solid var(--line);background:#101117}.brand{font-weight:800;white-space:nowrap}.brand-mark{display:inline-grid;place-items:center;width:28px;height:28px;margin-right:9px;border:1px solid var(--violet);border-radius:7px;color:var(--violet)}.crumbs{color:var(--muted);font-size:12px}.test-tag{margin-left:auto;color:var(--gold);font-size:11px;font-weight:700;white-space:nowrap}
+    main{width:min(1120px,calc(100% - 36px));margin:26px auto 56px}.intro{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:18px}.eyebrow{color:var(--violet);font-size:10px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}.intro h1{margin:5px 0 5px;font-size:28px;line-height:1.15;letter-spacing:-.025em}.intro p{max-width:690px;margin:0;color:var(--muted);font-size:13px}.prototype-note{max-width:255px;padding:10px 12px;border:1px solid #665638;border-radius:8px;background:#211d16;color:#e8d5aa;font-size:11px;line-height:1.4}
+    .shotbar{display:flex;align-items:center;gap:8px;overflow:auto;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}.shot-context{margin-right:10px;color:var(--muted);font-size:11px;white-space:nowrap}.shot{padding:7px 10px;border:1px solid transparent;border-radius:7px;color:var(--muted);font-size:11px;font-weight:700;white-space:nowrap}.shot.active{border-color:var(--gold);background:#28231a;color:var(--text)}.audio-slot{display:flex;align-items:center;gap:12px;margin-top:8px;padding:10px 13px;border:1px solid var(--line);border-radius:9px;background:#12141b}.audio-icon{display:grid;place-items:center;width:29px;height:29px;border-radius:50%;background:var(--panel2);color:var(--quiet)}.audio-copy{min-width:0}.audio-copy b{display:block;font-size:11px}.audio-copy span{display:block;color:var(--quiet);font-size:10px}.audio-bar{height:4px;flex:1;min-width:30px;border-radius:5px;background:var(--line)}.audio-time{color:var(--quiet);font-size:10px;white-space:nowrap}
+    .stage-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 10px}.stage-tab{display:flex;align-items:center;gap:10px;min-height:58px;padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--muted);text-align:left}.stage-tab:hover{border-color:#5b5065}.stage-tab[aria-selected="true"]{border-color:var(--violet);background:var(--violet-bg);color:var(--text);box-shadow:inset 0 0 0 1px #654f70}.stage-number{display:grid;place-items:center;width:27px;height:27px;border:1px solid var(--line);border-radius:50%;font-size:11px;font-weight:800}.stage-tab[aria-selected="true"] .stage-number{border-color:var(--violet);color:var(--violet)}.stage-name{display:block;font-weight:800}.stage-sub{display:block;color:var(--quiet);font-size:10px}
+    .next-action{position:sticky;top:8px;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px;padding:12px 15px;border:1px solid #594963;border-radius:10px;background:rgba(24,23,31,.97);box-shadow:0 8px 24px #0005;backdrop-filter:blur(10px)}.next-copy{min-width:0}.next-label{color:var(--violet);font-size:9px;font-weight:850;letter-spacing:.12em}.next-copy h2{margin:2px 0;font-size:15px}.next-copy p{margin:0;color:var(--muted);font-size:11px}.next-buttons{display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap}.next-buttons[hidden]{display:none}.btn{min-height:40px;padding:9px 15px;border:1px solid var(--violet);border-radius:7px;background:#9c75aa;color:white;font-size:12px;font-weight:800;white-space:nowrap}.btn:hover{filter:brightness(1.12)}.btn.secondary{border-color:var(--line);background:var(--panel2);color:var(--text)}.btn.quiet{min-height:34px;padding:7px 11px;background:transparent;color:var(--muted)}.btn:focus-visible,.stage-tab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+    .stage-page[hidden]{display:none}.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:18px 0 10px}.page-head h2{margin:3px 0 0;font-size:20px}.page-head p{margin:3px 0 0;color:var(--muted);font-size:12px}.status-pill{padding:5px 9px;border:1px solid var(--line);border-radius:20px;color:var(--muted);font-size:10px;font-weight:750;white-space:nowrap}.card{margin:10px 0;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:11px}.card-head h3{margin:0;font-size:14px}.card-head p{margin:3px 0 0;color:var(--muted);font-size:11px}.small-label{color:var(--quiet);font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.frame{display:grid;place-items:center;min-height:250px;aspect-ratio:16/8.5;overflow:hidden;border:1px dashed #4a4654;border-radius:7px;background:radial-gradient(ellipse at 50% 76%,#4b3b47 0,transparent 48%),linear-gradient(148deg,#17232c,#211c2a 52%,#3a2c24);color:#d5cbd8;text-align:center}.frame.keyframe{background:radial-gradient(ellipse at 68% 72%,#5a442b 0,transparent 28%),radial-gradient(ellipse at 30% 63%,#253c53 0,transparent 42%),linear-gradient(154deg,#151923,#29222b 63%,#35281f)}.frame span{display:block}.frame b{display:block;font-size:13px}.frame small{display:block;margin-top:4px;color:#b9b0c0;font-size:10px}.source-row,.decision-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:11px}.source-row{padding-bottom:11px;border-bottom:1px solid var(--line)}.row-label{margin-right:auto;color:var(--muted);font-size:10px;font-weight:700}.decision-row .btn{min-width:112px}.decision-row .btn.secondary{min-width:90px}.direction-strip{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.info-tile{padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#12141b}.info-tile b{display:block;font-size:11px}.info-tile p{margin:4px 0 0;color:var(--muted);font-size:11px}.locked-note{margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--gold);background:#211d17;color:#e8d9b9;font-size:11px}
+    .dialogue-list{display:grid;gap:8px}.dialogue-line{display:grid;grid-template-columns:112px minmax(0,1fr);gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#12141b}.speaker{color:var(--violet);font-size:10px;font-weight:800}.script-words{font-size:13px;font-weight:650}.cue{display:block;margin-top:4px;color:var(--muted);font-size:10px}.prompt-line{margin-top:11px;padding:12px;border:1px solid var(--line);border-radius:8px;background:#12141b}.prompt-line label{display:flex;justify-content:space-between;gap:8px;margin-bottom:7px;color:var(--text);font-size:11px;font-weight:750}.prompt-line textarea{width:100%;min-height:56px;resize:vertical;padding:9px;border:1px solid #444653;border-radius:6px;background:#0e1016;color:var(--text);font:12px/1.5 inherit}.prompt-line small{display:block;margin-top:5px;color:var(--quiet);font-size:10px}.warning{margin:10px 0 0;padding:9px 11px;border-left:3px solid var(--yellow);background:#242016;color:#e8d8ad;font-size:11px}.player{position:relative;display:grid;place-items:center;min-height:220px;aspect-ratio:16/9;border:1px solid var(--line);border-radius:9px;background:radial-gradient(ellipse at center,#242531 0,#101117 65%);text-align:center}.play-mark{display:grid;place-items:center;width:48px;height:48px;margin:0 auto 9px;border:1px solid #555363;border-radius:50%;color:#d7d1df;font-size:17px}.player b{display:block;font-size:13px}.player small{display:block;margin-top:4px;color:var(--muted);font-size:10px}.player-controls{display:flex;align-items:center;gap:9px;margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#12141b}.player-controls .audio-bar{background:linear-gradient(90deg,var(--violet) 0 0%,var(--line) 0)}.player-controls button{width:29px;height:29px;border:1px solid var(--line);border-radius:50%;background:var(--panel2);color:var(--muted)}.post-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}.post-actions .hint{margin-left:auto;color:var(--quiet);font-size:10px}
+    .timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.beat{padding:11px;border:1px solid var(--line);border-radius:8px;background:#12141b}.beat b{display:block;font-size:11px}.beat span{display:block;margin-top:4px;color:var(--muted);font-size:10px}.refs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ref{overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#12141b}.ref-visual{display:grid;place-items:center;min-height:90px;background:linear-gradient(140deg,#223343,#282330 58%,#3c3023);color:#bdb5c5;font-size:10px}.ref:nth-child(2) .ref-visual{background:linear-gradient(140deg,#253e50,#27222c 60%,#523d25)}.ref:nth-child(3) .ref-visual{background:linear-gradient(140deg,#4c3728,#252631 58%,#273d4a)}.ref figcaption{padding:8px 9px}.ref figcaption b{display:block;font-size:10px}.ref figcaption span{display:block;margin-top:2px;color:var(--quiet);font-size:9px}.end-note{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);color:var(--quiet);font-size:10px}.details{margin-top:12px;border-top:1px solid var(--line);color:var(--muted)}.details summary{padding:11px 0;cursor:pointer;font-size:11px;font-weight:700}.details p{margin:0 0 11px;font-size:10px}
+    #demoNotice{position:fixed;right:18px;bottom:18px;z-index:20;max-width:min(420px,calc(100vw - 36px));padding:12px 15px;border:1px solid var(--gold);border-radius:8px;background:#242016;color:#f2e6c7;box-shadow:0 8px 30px #0008;font-size:12px}#demoNotice[hidden]{display:none}
+    @media(max-width:680px){.topbar{padding:0 14px;gap:10px}.crumbs{display:none}.test-tag{font-size:9px}main{width:calc(100% - 24px);margin-top:18px}.intro{align-items:flex-start;flex-direction:column}.intro h1{font-size:24px}.prototype-note{max-width:none}.stage-tabs{gap:5px}.stage-tab{min-height:53px;padding:8px;gap:6px}.stage-sub{font-size:9px}.stage-number{width:23px;height:23px}.next-action{top:4px;align-items:flex-start;padding:10px;gap:8px}.next-copy h2{font-size:13px}.next-copy p{max-width:48vw;font-size:10px}.next-buttons{flex-direction:column}.next-action .btn{min-height:38px;padding:8px 10px;font-size:10px}.shot-context{display:none}.frame{min-height:190px}.card{padding:12px}.direction-strip,.timeline{grid-template-columns:1fr}.refs{grid-template-columns:1fr 1fr}.dialogue-line{grid-template-columns:1fr;gap:4px}.decision-row .btn{flex:1}.post-actions .hint{width:100%;margin-left:0}.audio-slot{gap:8px}.audio-time{display:none}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">◇</span>Animation <span style="font-size:9px;letter-spacing:.08em;color:var(--muted)">STUDIO</span></div>
+    <div class="crumbs">Crystal Bears &nbsp; / &nbsp; Episode 4 &nbsp; / &nbsp; Scene 4</div>
+    <div class="test-tag">LOCAL DESIGN TEST · NOT LIVE</div>
+  </header>
+  <main>
+    <section class="intro">
+      <div><div class="eyebrow">Producer review · shared page layout</div><h1>One shot. Three clear decisions.</h1><p>Same shot context and approval pattern across SEE, HEAR and WATCH. Only the work you need for that stage changes.</p></div>
+      <div class="prototype-note">Design test only. Buttons below do not save, upload, generate media or spend credits.</div>
+    </section>
+
+    <nav class="shotbar" aria-label="Scene shots">
+      <span class="shot-context">EPISODE 4 · SCENE 4 · PARTY CAVE</span>
+      <span class="shot">S4.SH1 · Accepted</span><span class="shot">S4.SH2 · Accepted</span><span class="shot active" aria-current="step">S4.SH3 · Current design sample</span><span class="shot">S4.SH4</span><span class="shot">S4.SH5</span>
+    </nav>
+    <div class="audio-slot" aria-label="Current audio take location">
+      <span class="audio-icon" aria-hidden="true">♫</span><span class="audio-copy"><b>Current voice take · S4.SH3 · 0:13</b><span>Earlier prompt version · approval paused until take and saved prompt match.</span></span><span class="audio-bar" aria-hidden="true"></span><span class="audio-time">0:00 / 0:13</span>
+    </div>
+
+    <nav class="stage-tabs" role="tablist" aria-label="Production stage">
+      <button class="stage-tab" id="tab-see" role="tab" aria-selected="false" aria-controls="page-see" data-stage="see"><span class="stage-number">1</span><span><span class="stage-name">SEE</span><span class="stage-sub">Choose and approve images</span></span></button>
+      <button class="stage-tab" id="tab-hear" role="tab" aria-selected="true" aria-controls="page-hear" data-stage="hear"><span class="stage-number">2</span><span><span class="stage-name">HEAR</span><span class="stage-sub">Review and create voice</span></span></button>
+      <button class="stage-tab" id="tab-watch" role="tab" aria-selected="false" aria-controls="page-watch" data-stage="watch"><span class="stage-number">3</span><span><span class="stage-name">WATCH</span><span class="stage-sub">Render and approve take</span></span></button>
+    </nav>
+
+    <section class="next-action" aria-live="polite">
+      <div class="next-copy"><div class="next-label" id="nextLabel">YOUR NEXT MOVE · HEAR · S4.SH3</div><h2 id="nextTitle">Resolve the prompt change</h2><p id="nextText">This take predates the saved prompt. Restore the matching prompt or create a corrected take.</p></div>
+      <div class="next-buttons" id="nextButtons"><button class="btn" id="nextButton" type="button" data-demo="Regenerate corrected performance">Regenerate corrected take</button><button class="btn secondary" id="nextAltButton" type="button" data-demo="Review current prompt">Review prompt</button></div>
+    </section>
+
+    <section class="stage-page" id="page-see" role="tabpanel" aria-labelledby="tab-see" hidden>
+      <header class="page-head"><div><div class="eyebrow">SEE · S4.SH3</div><h2>Choose the opening image</h2><p>See the continuity handoff, select an image source, then make one clear approval decision.</p></div><span class="status-pill">Opening image review</span></header>
+      <div class="direction-strip">
+        <div class="info-tile"><b>What this shot must show</b><p>Opening composition and the required first visible beat from the approved shot direction.</p></div>
+        <div class="info-tile"><b>How it connects</b><p>Previous shot’s accepted final frame and the planned cut stay visible as continuity evidence.</p></div>
+      </div>
+      <article class="card" id="scenePlate">
+        <header class="card-head"><div><span class="small-label">World and lighting</span><h3>Scene plate</h3><p>Sets the cave environment, light and colour for this scene.</p></div><span class="status-pill">Scene-level image</span></header>
+        <div class="frame"><span><b>Scene plate preview</b><small>Approved environment image appears here</small></span></div>
+        <div class="source-row"><span class="row-label">Choose or replace image</span><button class="btn secondary" type="button" data-demo="Generate scene plate">Generate</button><button class="btn secondary" type="button" data-demo="Upload scene plate">Upload</button><button class="btn secondary" type="button" data-demo="Choose scene plate from Library">From library</button></div>
+        <div class="decision-row"><span class="row-label">Your decision</span><button class="btn" type="button" data-demo="Approve scene plate">Approve</button><button class="btn secondary" type="button" data-demo="Reject scene plate">Reject</button><button class="btn quiet" type="button" data-demo="Amend scene plate direction">Amend</button></div>
+      </article>
+      <article class="card" id="openingFrame">
+        <header class="card-head"><div><span class="small-label">This shot’s first frame</span><h3>Opening keyframe</h3><p>One still image. It defines the start; performance and movement belong in WATCH.</p></div><span class="status-pill">Shot-level image</span></header>
+        <div class="frame keyframe"><span><b>Opening keyframe preview</b><small>Compare with the previous accepted final frame</small></span></div>
+        <div class="source-row"><span class="row-label">Choose or replace image</span><button class="btn secondary" type="button" data-demo="Generate opening keyframe">Generate</button><button class="btn secondary" type="button" data-demo="Upload opening keyframe">Upload</button><button class="btn secondary" type="button" data-demo="Choose opening keyframe from Library">From library</button></div>
+        <div class="decision-row"><span class="row-label">Your decision</span><button class="btn" type="button" data-demo="Approve opening keyframe">Approve</button><button class="btn secondary" type="button" data-demo="Reject opening keyframe">Reject</button><button class="btn quiet" type="button" data-demo="Amend opening-frame direction">Amend</button></div>
+        <p class="locked-note">Approved script and Director Card remain authoritative. This page shows the handoff; it cannot rewrite either.</p>
+      </article>
+      <details class="details"><summary>Direction and technical evidence</summary><p>Keep reference provenance, prompt details and automated checks available here, collapsed until the producer needs them.</p></details>
+    </section>
+
+    <section class="stage-page" id="page-hear" role="tabpanel" aria-labelledby="tab-hear">
+      <header class="page-head"><div><div class="eyebrow">HEAR · S4.SH3</div><h2>Resolve the voice prompt change</h2><p>The saved prompt changed after this take was created. Approve returns when audio matches the prompt.</p></div><span class="status-pill">Take · prompt mismatch</span></header>
+      <article class="card" id="hear-dialogue">
+        <header class="card-head"><div><span class="small-label">Source of truth</span><h3>Dialogue · exact script words</h3><p>Only approved spoken words belong here. Silent action stays out.</p></div><span class="status-pill">2 lines · Fuzzby</span></header>
+        <div class="dialogue-list">
+          <div class="dialogue-line"><span class="speaker">Fuzzby · line 1</span><span><span class="script-words">“Oof! I can’t see!”</span><small class="cue">Director intent: impact shock, then suspicion.</small></span></div>
+          <div class="dialogue-line"><span class="speaker">Fuzzby · line 2</span><span><span class="script-words">“I have been HONEYED!”</span><small class="cue">Director intent: stiffen, then land grandly offended.</small></span></div>
+        </div>
+      </article>
+      <article class="card" id="elevenPrompt">
+        <header class="card-head"><div><span class="small-label">Provider-facing text · inspect before Create</span><h3>ElevenLabs v3 prompt</h3><p>Show the exact text sent for every line. Edit cues without changing approved dialogue.</p></div><span class="status-pill">Editable</span></header>
+        <div class="prompt-line"><label for="prompt1"><span>Fuzzby · line 1</span><span>ElevenLabs text</span></label><textarea id="prompt1">[surprised] Oof! wow I can’t see! Help me help me</textarea><small>Sample from the screen: this adds spoken words beyond the approved line. Keep exact dialogue; add delivery with tags only.</small></div>
+        <div class="prompt-line"><label for="prompt2"><span>Fuzzby · line 2</span><span>ElevenLabs text</span></label><textarea id="prompt2">[shocked] I have been HONEYED!</textarea><small>Keep emphasis and cadence in vocal tags; do not add or remove script words.</small></div>
+        <div class="warning">This take was generated from earlier text. Saving edits does not change audio. Correct the prompt, review exact text and cost, then regenerate if you want to hear it.</div>
+        <div class="post-actions"><button class="btn" type="button" data-demo="Regenerate corrected performance">Regenerate corrected performance</button><button class="btn secondary" type="button" data-demo="Ask Director to improve acting cues">Ask Director to improve cues</button><span class="hint">Exact dialogue and cost review appears before Fire.</span></div>
+      </article>
+      <article class="card" id="hearResolution">
+        <header class="card-head"><div><span class="small-label">Current take · 0:13</span><h3>Choose how to resolve the mismatch</h3><p>Keep approval safe and give the producer a clear next step.</p></div><span class="status-pill">No approval yet</span></header>
+        <div class="player"><div><span class="play-mark">▶</span><b>Current voice preview</b><small>Illustrative player · no audio was generated by this design test.</small></div></div>
+        <div class="warning">Approve is unavailable because this take does not match the saved prompt. Resolve the mismatch first.</div>
+        <div class="post-actions"><button class="btn" type="button" data-demo="Regenerate from the saved prompt after exact-text and cost review">Regenerate from saved prompt</button><button class="btn secondary" type="button" data-demo="Reject voice take and add a note">Reject and add note</button><button class="btn quiet" type="button" data-demo="Review the editable prompt">Review prompt</button></div>
+        <p class="locked-note">Approve returns after a new take matches the saved prompt. Offer a no-cost restore only when Studio can verify the exact prompt used for this audio.</p>
+      </article>
+      <details class="details"><summary>What changes after a matching take returns</summary><p>The new audio replaces the pending preview and appears beneath the shot buttons. The decision becomes Approve, Reject / add a note, or Regenerate. Approval stays unavailable while audio and saved prompt differ.</p></details>
+      <details class="details"><summary>Sound effects and timing</summary><p>Keep SFX routing, timing checks and production detail available without crowding the dialogue or prompt review.</p></details>
+    </section>
+
+    <section class="stage-page" id="page-watch" role="tabpanel" aria-labelledby="tab-watch" hidden>
+      <header class="page-head"><div><div class="eyebrow">WATCH · S4.SH3</div><h2>See the render first</h2><p>Review the compiled action, approved opening and references before firing.</p></div><span class="status-pill">No render submitted</span></header>
+      <article class="card" id="watchPlayer">
+        <header class="card-head"><div><span class="small-label">Render result · always first</span><h3>Shot preview</h3><p>Returned candidate plays here before any approval decision.</p></div><span class="status-pill">Seedance 2.5</span></header>
+        <div class="player"><div><span class="play-mark">▶</span><b>Render preview will appear here</b><small>One returned candidate at a time, ready to play and review.</small></div></div>
+        <div class="post-actions"><button class="btn" type="button" data-demo="Approve rendered take">Approve take</button><button class="btn secondary" type="button" data-demo="Reject render and add a note">Reject and add note</button><span class="hint">Approval and correction stay with this shot.</span></div>
+      </article>
+      <article class="card" id="watchBeats">
+        <header class="card-head"><div><span class="small-label">From approved direction</span><h3>Action and camera timeline</h3><p>Exact beats and timing come from the locked Director Card.</p></div><span class="status-pill">Read-only handoff</span></header>
+        <div class="timeline"><div class="beat"><b>Opening beat</b><span>Opening pose, screen position and first action.</span></div><div class="beat"><b>Performance beat</b><span>Character action, reaction and camera move.</span></div><div class="beat"><b>Landing beat</b><span>End pose, hold and next-shot continuity.</span></div></div>
+        <p class="locked-note">WATCH packages the approved script, Director Card, keyframe, references and approved voice. No creative rewrite at render time.</p>
+      </article>
+      <article class="card" id="watchRefs">
+        <header class="card-head"><div><span class="small-label">Pinned render inputs</span><h3>Scene and continuity references</h3><p>Show what Seedance will receive, with source and approval state.</p></div><span class="status-pill">Current approved assets</span></header>
+        <div class="refs"><figure class="ref"><div class="ref-visual">Scene plate</div><figcaption><b>Scene Look</b><span>Approved world, lighting and palette</span></figcaption></figure><figure class="ref"><div class="ref-visual">Opening frame</div><figcaption><b>S4.SH3 keyframe</b><span>Approved start composition</span></figcaption></figure><figure class="ref"><div class="ref-visual">Previous final</div><figcaption><b>Continuity anchor</b><span>Accepted predecessor frame</span></figcaption></figure></div>
+      </article>
+      <div class="post-actions"><button class="btn" type="button" data-demo="Review render and cost">Review render and cost</button><span class="hint">Final Fire review shows model, inputs and estimated cost.</span></div>
+      <details class="details"><summary>Compiled prompt and technical checks</summary><p>Keep full request text, preflight evidence and recovery detail accessible here, collapsed during normal review.</p></details>
+    </section>
+
+    <footer class="end-note">Layout rule for review: stable header, shot selector, audio location, stage tabs and next-action bar. Stage content changes; page structure stays fixed unless the producer requests a change.</footer>
+  </main>
+  <div id="demoNotice" role="status" aria-live="polite" hidden></div>
+  <script>
+    const stageTabs=[...document.querySelectorAll('[data-stage]')];
+    const copy={
+      see:{label:'YOUR NEXT MOVE · SEE · S4.SH3',title:'Choose and review the opening image',text:'Check continuity, choose a source under the frame, then approve, reject or amend.',button:'Go to opening frame',target:'openingFrame'},
+      hear:{label:'YOUR NEXT MOVE · HEAR · S4.SH3',title:'Resolve the prompt change',text:'This take predates the saved prompt. Restore the matching prompt or create a corrected take.',button:'Regenerate corrected take',target:'hearResolution'},
+      watch:{label:'YOUR NEXT MOVE · WATCH · S4.SH3',title:'Review the shot inputs before render',text:'See the result area, beat timeline and pinned references before Fire.',button:'Review render setup',target:'watchPlayer'}
+    };
+    function selectStage(id){
+      for(const tab of stageTabs){const active=tab.dataset.stage===id;tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;document.getElementById(tab.getAttribute('aria-controls')).hidden=!active;}
+      const item=copy[id];document.getElementById('nextLabel').textContent=item.label;document.getElementById('nextTitle').textContent=item.title;document.getElementById('nextText').textContent=item.text;
+      const button=document.getElementById('nextButton'),alt=document.getElementById('nextAltButton');button.textContent=item.button;button.dataset.demo=item.button;button.onclick=()=>document.getElementById(item.target).scrollIntoView({behavior:'smooth',block:'start'});
+      if(id==='hear'){alt.hidden=false;alt.dataset.demo='Review current prompt';alt.onclick=()=>document.getElementById('elevenPrompt').scrollIntoView({behavior:'smooth',block:'start'});}else{alt.hidden=true;alt.onclick=null;}
+    }
+    stageTabs.forEach((tab,index)=>{tab.addEventListener('click',()=>selectStage(tab.dataset.stage));tab.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();const step=event.key==='ArrowRight'?1:-1;const next=stageTabs[(index+step+stageTabs.length)%stageTabs.length];next.focus();selectStage(next.dataset.stage);}});});
+    const notice=document.getElementById('demoNotice');let noticeTimer;
+    document.addEventListener('click',event=>{const button=event.target.closest('[data-demo]');if(!button)return;notice.textContent=`${button.dataset.demo}: prototype only. Nothing saved, uploaded, generated or sent to a provider.`;notice.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>notice.hidden=true,4200);});
+    selectStage('hear');
+  </script>
+</body>
+</html>

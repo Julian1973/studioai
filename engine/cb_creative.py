@@ -76,6 +76,7 @@ import cb_lineage
 import cb_db
 import cb_scripts
 import cb_unit_packing
+import studio_episode_direction as episode_direction
 from cb_source_refresh import refresh_source_extraction
 from contextvars import ContextVar
 
@@ -649,11 +650,29 @@ class VoicePerformance(BaseModel):
     pauses: str
     breaths: str
     nonVerbalActions: str
-    elevenLabsV3Direction: str
+    elevenLabsV3Direction: str = Field(description=(
+        "Executable ElevenLabs v3 performance text: exactDialogue verbatim with sparse "
+        "square-bracket vocal-delivery tags inserted at the relevant phrase boundaries. "
+        "Translate dramaticIntention, subtext, emotionalEntry/Exit, pace and relationship "
+        "into audible choices, e.g. [shy], [nervous], [confident], [whispering] when justified. "
+        "Place a changed emotion where the turn occurs, not all tags at the start. "
+        "Usually one or two compatible cues per phrase; restraint or no tag may be intentional. "
+        "Never put explanatory prose, camera/action instructions, speaker labels, new spoken "
+        "words or unapproved vocalisations in this field. Keep rationale in the other fields. "
+        "Preserve exact words and punctuation; tags guide performance, not guaranteed results."))
     physicalActionRelationship: str
     expectedTiming: str
     generatedAsset: Optional[str] = None
     approvalState: str = "draft"
+
+
+class VoicePromptRepairLine(BaseModel):
+    dialogueOccurrenceId: str
+    elevenLabsV3Direction: str
+
+
+class VoicePromptRepair(BaseModel):
+    lines: List[VoicePromptRepairLine]
 
 
 class Scene(BaseModel):
@@ -754,6 +773,7 @@ class EpisodeVision(BaseModel):
     resolution: str
     intendedFinalFeeling: str
     storyArchitecture: Optional[EpisodeStoryArchitecture] = None
+    visualLanguage: Optional[episode_direction.VisualLanguage] = None
 
 
 from studio_director_card import SceneCoverage, CONTRACT as COVERAGE_CONTRACT
@@ -910,7 +930,8 @@ def plan_camera_allocation(episode, scene_num, vision, selection, treatment, rea
     for attempt in range(2):
         try:
             shots = gate4_shot_conference(episode, scene_num, selection, treatment, sd,
-                heart=heart, review_notes=review_notes, ambition_brief=ready['brief'], log=log)
+                heart=heart, review_notes=review_notes, ambition_brief=ready['brief'], log=log,
+                vision=vision)
             return sd, shots
         except RuntimeError as error:
             if (attempt or not (isinstance(error, CoverageAllocationError) or
@@ -1302,13 +1323,12 @@ PROV = lambda role: Provenance(role=role, model=cb_llm.DIRECTOR_MODEL, at=_now()
 # ── EPISODE VISION (Showrunner — unchanged from v1; not part of the rejected process) ────
 def episode_vision(episode="Ep1", log=print):
     beats, d = _script_beats(episode)
-    script = "\n".join(
-        f"[Scene {b.get('sceneNumber')} · {b.get('beatCode')}] {b.get('storyBeat','')}\n"
-        + "\n".join(f"  {c.get('dialogue')}" for c in (b.get('cuts') or []) if c.get('dialogue'))
-        for b in beats)
+    # The beat package is an interpretation, not the complete screenplay. Read the
+    # verified immutable source so physical business and silent beats are not lost.
+    script = SCRIPT_STORE.content_path(episode).read_text(encoding="utf-8")
     v = cb_llm.structured(
         _mind("SHOWRUNNER AND EPISODE STORY ARCHITECT", ["showrunnerTaste"],
-              "Read the COMPLETE episode before anything is directed. Establish what this "
+              episode_direction.CONTRACT + "\nRead the COMPLETE episode before anything is directed. Establish what this "
               "episode is really about beneath the plot, what changes, which relationship "
               "carries its heart, where the audience laughs, leans forward, becomes still, "
               "and what remains after it ends. Include storyArchitecture: one action-based "
@@ -1426,7 +1446,7 @@ def emotional_story_contract(episode, scene_num, vision, ready, log=print):
               "storyArchitecture: preserve its sequence objective, audience feeling and "
               "tapestry trajectory, and never manufacture a local emotional resolution that "
               "contradicts or arrives before the episode transformation."),
-        f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:6000]}\n\n"
+        f"EPISODE VISION:\n{episode_direction.prompt_context(vision)}\n\n"
         f"LOCKED SCENE SCRIPT:\n{script}\n\n"
         f"CHARACTER + RELATIONSHIP CANON:\n{_characters_for(ready['cast'])[:9000]}"
         + brief_line,
@@ -1463,7 +1483,7 @@ def gate1_treatments(episode, scene_num, vision, ready, heart=None, log=print):
               "experientially — it does not have to wait anywhere safe. No fixed screen "
               "sides; no automatic action/consequence/reaction coverage; no mechanical shot "
               "thinking at this stage at all."),
-        f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:6000]}\n\n"
+        f"EPISODE VISION:\n{episode_direction.prompt_context(vision)}\n\n"
         + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
            f"{heart.model_dump_json()}\n\n" if heart else "")
         + f"THE SCENE'S APPROVED SCRIPT (dialogue verbatim-locked):\n{script}\n\n"
@@ -1491,7 +1511,7 @@ def gate2_select(vision, treatments, ready, heart=None, log=print):
               "'cinematic' terminology; or merely illustrating the script — and say so in "
               "rejectionChecks. State the ONE governing audience experience the selected "
               "treatment commits the scene to."),
-        f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:5000]}\n\n"
+        f"EPISODE VISION:\n{episode_direction.prompt_context(vision)}\n\n"
         + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
            f"{heart.model_dump_json()}\n\n" if heart else "")
         + ("USER AMBITION: " + ready["brief"] + "\n\n" if ready["brief"] else "")
@@ -1558,7 +1578,7 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
         + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
            f"{heart.model_dump_json()}\n\n" if heart else "")
         + f"THE SHOWRUNNER'S SELECTION:\n{selection.model_dump_json()}\n\n"
-        f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:4000]}\n\n"
+        f"EPISODE VISION:\n{episode_direction.prompt_context(vision)}\n\n"
         f"THE SCENE'S APPROVED SCRIPT (dialogue verbatim-locked):\n{script}\n\n"
         f"CHARACTER CANON:\n{_characters_for(ready['cast'])[:8000]}{notes}\n\n"
         f"Return the Scene record and EXACTLY one Beat per script beat, in the same order "
@@ -1714,7 +1734,8 @@ def _validate_gate4_production_units(shots, beats):
 
 
 def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
-                          heart=None, review_notes="", ambition_brief="", log=print):
+                          heart=None, review_notes="", ambition_brief="", log=print,
+                          vision=None):
     notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (revise staging and sequence, preserving "
              f"approved source actions and words even if a review asks to remove them): {review_notes}"
              if review_notes else "")
@@ -1806,6 +1827,7 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "such as cinematic, beautiful, award-winning or Pixar."),
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
         f"{treatment.model_dump_json()}\n\n"
+        + f"EPISODE VISION:\n{episode_direction.prompt_context(vision or {})}\n\n"
         + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
            f"{heart.model_dump_json()}\n\n" if heart else "")
         + (f"HUMAN-LOCKED ITERATION BRIEF (literal production constraints; preserve them "
@@ -2081,6 +2103,21 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
     lines = _locked_dialogue(beats)
     if not lines:
         return []
+    scene_context = (sd.scene.model_dump(include={
+        "purpose", "dramaticQuestion", "emotionalOwner",
+        "connectionFromPreviousScene", "handoverToNextScene"})
+        if sd is not None else {})
+    beat_context = ([beat.model_dump(include={
+        "beatId", "whatChanges", "whoDrives", "audienceAnticipation",
+        "actionOrChoice", "consequence", "emotionalOrComicHandover"})
+        for beat in sd.beats] if sd is not None else [])
+    from cb_voice_director import voice_cards
+    cards = voice_cards().get("characters") or {}
+    speaker_cards = {name.casefold(): {key: card.get(key) for key in (
+        "cadenceSignature", "defaultTags", "bannedTags")}
+        for name, card in cards.items()
+        if any((line.get("speaker") if isinstance(line, dict) else line[0]).casefold()
+               == name.casefold() for line in lines)}
     vs = cb_llm.structured(
         _mind("VOICE DIRECTOR", ["voiceTaste"],
               "Transform each locked line into truthful, character-specific vocal acting "
@@ -2088,10 +2125,21 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
               "is what the character is doing while speaking. What does the character want "
               "FROM THE LISTENER; what changes during the line; which words carry "
               "intention; where do they breathe or hesitate. Every v3 tag has a dramatic "
-              "purpose. Dialogue never automatically starts at frame one — its timing may "
-              "shape editorial rhythm, but never replaces the selected treatment."),
-        f"THE SHOTS (body + timing to reconcile with):\n"
-        + "\n".join(f"{s.shotId}: {s.principalPerformance} | body: {s.physicalPerformance} "
+              "purpose. Put the audible choice in elevenLabsV3Direction: copy the exact "
+              "spoken words and punctuation, then insert sparse allowed v3 vocal tags "
+              "where the feeling changes. A deliberate neutral line may stay untagged. "
+              "Never send acting rationale, physical action, sound effects or new words "
+              "as speech. Dialogue never automatically starts at frame one — its timing "
+              "may shape editorial rhythm, but never replaces the selected treatment."),
+        "SCENE SITUATION AND DESIRED OUTCOME:\n"
+        + json.dumps(scene_context, ensure_ascii=False)
+        + "\n\nCAUSAL BEATS IN STORY ORDER:\n"
+        + json.dumps(beat_context, ensure_ascii=False)
+        + "\n\nCANON VOICE CADENCE AND PERMITTED TAGS:\n"
+        + json.dumps(speaker_cards, ensure_ascii=False)
+        + "\n\nTHE SHOTS (audience outcome, body + timing to reconcile with):\n"
+        + "\n".join(f"{s.shotId}: {s.purpose} | audience: {s.audienceExperience} "
+                     f"| acting: {s.principalPerformance} | body: {s.physicalPerformance} "
                      f"| timing: {s.animationTiming}" for s in shots)
         + "\n\nTHE LOCKED OCCURRENCES (return exactly this order and copy every ID, "
           "speaker and exactDialogue VERBATIM):\n"
@@ -2139,6 +2187,66 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
                 raise RuntimeError(
                     f"VOICE PASS DROPPED/REWORDED locked occurrence {index}: expected "
                     f"{speaker}: {exact_text!r}, got {voice.speaker}: {voice.exactDialogue!r}")
+    # Luna authored the intention above. One bounded text-only repair makes a
+    # missing audible turn executable, without a model call on HEAR page load.
+    repair_lines = []
+    for voice in vs.performances:
+        direction = voice.elevenLabsV3Direction
+        spoken = " ".join(re.sub(r"\[[^\]]+\]", "", direction).split())
+        exact = " ".join(voice.exactDialogue.split())
+        plain_turn = (spoken == exact and not re.search(r"\[[^\]]+\]", direction)
+                      and voice.emotionalEntry.strip().casefold() !=
+                      voice.emotionalExit.strip().casefold())
+        if voice.dialogueOccurrenceId and (spoken != exact or plain_turn):
+            repair_lines.append(voice)
+    if repair_lines:
+        try:
+            repair = cb_llm.structured(
+                "You are the Voice Director. Change only ElevenLabs v3 delivery text. "
+                "Keep every approved spoken word and punctuation exactly. Insert only "
+                "character-permitted vocal tags at the emotional turns; do not narrate "
+                "action or add sound effects. Return exactly the requested occurrence IDs.",
+                json.dumps([{
+                    "dialogueOccurrenceId": voice.dialogueOccurrenceId,
+                    "speaker": voice.speaker,
+                    "exactDialogue": voice.exactDialogue,
+                    "dramaticIntention": voice.dramaticIntention,
+                    "subtext": voice.subtext,
+                    "emotionalEntry": voice.emotionalEntry,
+                    "emotionalExit": voice.emotionalExit,
+                    "pace": voice.pace, "rhythm": voice.rhythm,
+                    "pauses": voice.pauses, "breaths": voice.breaths,
+                    "voiceCard": speaker_cards.get(voice.speaker.casefold(), {}),
+                } for voice in repair_lines], ensure_ascii=False),
+                VoicePromptRepair, tier="premium",
+                label=f"gate5_voice_prompt_repair_s{scene_num}",
+                max_output_tokens=min(6000, max(1600, len(repair_lines) * 250)), log=log)
+            proposed = {row.dialogueOccurrenceId: row.elevenLabsV3Direction
+                        for row in repair.lines}
+            if (len(repair.lines) == len(repair_lines) and
+                    set(proposed) == {voice.dialogueOccurrenceId for voice in repair_lines}):
+                for voice in repair_lines:
+                    candidate = proposed[voice.dialogueOccurrenceId]
+                    spoken = " ".join(re.sub(r"\[[^\]]+\]", "", candidate).split())
+                    tags = [tag.strip().casefold() for tag in re.findall(
+                        r"\[([^\]]+)\]", candidate)]
+                    card = speaker_cards.get(voice.speaker.casefold(), {})
+                    allowed = {str(tag).casefold() for tag in card.get("defaultTags") or []}
+                    banned = {str(tag).casefold() for tag in card.get("bannedTags") or []}
+                    if (spoken == " ".join(voice.exactDialogue.split()) and tags and
+                            all(tag in allowed and tag not in banned for tag in tags)):
+                        voice.elevenLabsV3Direction = candidate
+                    else:
+                        log(f"VOICE PROMPT REVIEW — {voice.dialogueOccurrenceId}: "
+                            "Luna's revised text was not source-exact or used off-palette tags; "
+                            "keep the original for producer review")
+            else:
+                log("VOICE PROMPT REVIEW — Luna omitted an occurrence; keep original "
+                    "directions for producer review")
+        except Exception as exc:
+            log(f"VOICE PROMPT REVIEW — optional Luna repair unavailable "
+                f"({type(exc).__name__}); "
+                "keep original directions for producer review")
     return vs.performances
 
 
@@ -2187,7 +2295,7 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
         + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
            f"{heart.model_dump_json()}\n\n" if heart else "")
         + f"GOVERNING EXPERIENCE: {selection.governingAudienceExperience}\n\n"
-        f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:3500]}\n\n"
+        f"EPISODE VISION:\n{episode_direction.prompt_context(vision)}\n\n"
         f"APPROVED SOURCE ACTIONS AND WORDS (authority above creative interpretation):\n"
         + "\n".join(json.dumps({'beatId': b.beatId, 'sourceScript': b.sourceScript,
                                 'exactDialogue': b.exactDialogue}, ensure_ascii=False) for b in sd.beats)
@@ -2708,6 +2816,7 @@ def build_scene_direction_card(vision, scene, beats, shots, voices, details):
         "episodeDirection": {
             "version": vision.get("directionVersion"),
             "signature": vision.get("directionSignature"),
+            "treatment": episode_direction.context(vision),
             "northStar": {
                 "theme": vision.get("theme"),
                 "emotionalThesis": vision.get("emotionalThesis"),
@@ -2842,6 +2951,7 @@ def build_scene_direction_card(vision, scene, beats, shots, voices, details):
     }
     signature_inputs = {
         "episodeDirectionDigest": (vision.get("directionSignature") or {}).get("digest"),
+        "episodeTreatment": episode_direction.context(vision),
         "scene": scene_doc,
         "beats": beat_docs,
         "shots": shot_docs,

@@ -115,6 +115,16 @@ def test_timing_is_not_invented_from_duration_or_stage_ordinal():
                   {'viewId': 'V2', 'timing': 'handoff'}]}}, 2) == [None, None]
 
 
+def test_timing_accepts_display_rounding_but_not_real_drift():
+    shot = {'durationSec': 30, 'directorCard': {'views': [
+        {'viewId': 'A', 'atSec': 0, 'timing': '0–12.6163s'},
+        {'viewId': 'B', 'atSec': 12.616279, 'timing': '12.6163–30s'}]}}
+    assert view_timings(shot, 2) == [(0, 12.6163), (12.6163, 30)]
+    shot['directorCard']['views'][1]['atSec'] = 12.6165
+    with pytest.raises(ValueError, match='Storyboard interval disagrees'):
+        view_timings(shot, 2)
+
+
 def test_explicit_typed_visual_edit_reaches_source_without_changing_timing_or_audio():
     from studio_director_handoff import synchronise_visual_coverage
     shot, direction = example()

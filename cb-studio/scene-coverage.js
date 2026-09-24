@@ -6,7 +6,7 @@
     const units = board?.units || [];
     const count = units.reduce((n, u) => n + (u.panels?.length || 0), 0);
     if (!count) return '';
-    return `<details class="studio-coverage sp-box" data-coverage-revision="${esc(board.revision || '')}"><summary>Scene storyboard · ${count} planned views</summary>
+    return `<details class="studio-coverage sp-box" data-coverage-revision="${esc(board.revision || '')}"><summary>Optional storyboard · ${count} planned views</summary>
       ${board.audienceJourney ? `<p>${esc(board.audienceJourney)}</p>` : ''}
       ${board.soundPlan?.length ? `<details><summary>Scene sound plan</summary>${board.soundPlan.map(s=>`<p><b>${esc(s.shotId)}</b> ${(s.cues||[]).map(c=>esc(`${c.timing}: ${c.instruction} (${c.destination})`)).join('<br>')}</p>`).join('')}</details>` : ''}
       <p class="dec-caption">Current camera and acting plan. Drawings and rendered outcomes are reviewed separately.</p><button type="button" class="btn ghost" data-coverage-play>Play timed plan</button><span data-coverage-status aria-live="polite"> Text plan only · picture and audio unverified</span>
@@ -17,8 +17,9 @@
         ${[['Viewpoint owner',p.viewpointOwner],['Camera',Object.entries(p.cinematography||{}).map(([k,v])=>`${k}: ${v}`).join('; ')],['Listening',p.listenerReaction],['Staging',p.staging],['Opening',p.startState],['Action',p.action],['Acting',p.performance],['Landing',p.endState],['Next view reveals',p.cutTo],['Why this cut',p.cutReason]].filter(([,v])=>v).map(([label,v])=>`<p style="overflow-wrap:anywhere"><b>${label}:</b> ${esc(v)}</p>`).join('')}
         </article>`)).join('')}</div></details>`;
   }
-  function legacy(pkg) {
-    return html({units:(pkg?.shots || []).map(s => ({shotId:s.shotId, panels:(s.storyboardInternalShotPlanApproved || []).map((v,i)=>({number:i+1,entry:v.transitionType||'view',framing:v.framingAndCamera,purpose:v.purpose,action:v.storyAction,performance:v.performanceFocus,staging:v.staging,startState:v.startState,endState:v.endState||v.landingImage,cutTo:v.cutTo,cutReason:v.cutReason,timing:v.timing}))}))});
+  function legacy(pkg, selectedShotId) {
+    const shots=(pkg?.shots || []).filter(s => !selectedShotId || s.shotId===selectedShotId);
+    return html({units:shots.map(s => ({shotId:s.shotId, panels:(s.storyboardInternalShotPlanApproved || []).map((v,i)=>({number:i+1,entry:v.transitionType||'view',framing:v.framingAndCamera,purpose:v.purpose,action:v.storyAction,performance:v.performanceFocus,staging:v.staging,startState:v.startState,endState:v.endState||v.landingImage,cutTo:v.cutTo,cutReason:v.cutReason,timing:v.timing}))}))});
   }
   let timer=null, active=null;
   globalThis.document?.addEventListener('click', event => {

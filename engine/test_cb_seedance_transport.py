@@ -110,6 +110,8 @@ def test_comparison_plan_keeps_one_studio_unit_and_derives_two_prompts():
     assert "First locked line" not in plan["segments"][1]["prompt"]
     for segment in plan["segments"]:
         assert "no alternative performance is permitted" in segment["prompt"]
+        from cb_emission_conformance import STANDARD_DIALOGUE_AUDIO_AUTHORITY
+        assert STANDARD_DIALOGUE_AUDIO_AUTHORITY in segment['prompt']
 
 
 def test_comparison_translates_studio_slots_to_provider_upload_tags():

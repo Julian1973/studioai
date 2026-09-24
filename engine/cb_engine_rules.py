@@ -517,9 +517,17 @@ def playable_stage_report(shot, cinematography):
     opening_motion_text = re.sub(
         r"\b(?:later|subsequent|next shot(?:'s)?)\b[^.;]*", "",
         _norm(shot.get("purpose")) + " " + geography, flags=re.I)
+    # A prop chain can have a "route" without any character travelling in frame one.
+    # Keep the travel gate for a named actor's route or explicit motion.
+    actor_routes = any(
+        re.search(rf"\b{re.escape(_norm(name))}(?:'s)? route\b", opening_motion_text)
+        for name in (cine.get("charactersInFrame") or
+                     [item.get("character") for item in placements])
+        if _norm(name)
+    )
     travelling = bool(re.search(
-        r"\b(chase|travel|route|flight|fly|barrel|pursu|toward frame|toward screen)\w*\b",
-        opening_motion_text, re.I))
+        r"\b(chase|travel|flight|fly|barrel|pursu|toward frame|toward screen)\w*\b",
+        opening_motion_text, re.I)) or actor_routes
     if travelling:
         depth_planes = {
             str(item.get("depthPlane") or "").strip()

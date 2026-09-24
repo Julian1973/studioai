@@ -108,6 +108,71 @@ def test_unknown_or_active_submission_blocks(tmp_path):
     assert not recovery.pre_submit_failure(recovery.get(tmp_path,op['operationId']))
 
 
+def test_explicitly_rejected_download_allows_replacement(tmp_path):
+    op = recovery.register(tmp_path, ['cb_studio_director.py', 'prepare-render', '2', 'S2.SH1', 'Ep4'])
+    submission = recovery.register(tmp_path, [
+        'cb_render.py', 'fire', '2', 'S2.SH1', 'Ep4',
+        '--spend-token', 'token-123',
+    ])
+    recovery.change(tmp_path, submission['operationId'], 'reviewing', 'Returned media is saved',
+                    mediaSubmitted=True, providerTaskIds=['provider-123'],
+                    returnedPaths=['/tmp/S2.SH1_c1.mp4'],
+                    transportEvidence=[{'lastProviderEvent': {'outputPath': '/tmp/S2.SH1_c1.mp4'}}])
+    ledger = {'rejections': [{'archivedCandidates': [{'originalPath': '/tmp/S2.SH1_c1.mp4'}]}]}
+    recovery.require_no_provider_operation(tmp_path, 'Ep4', '2', 'S2.SH1', ledger)
+
+
+def test_verified_later_batch_supersedes_stale_submission(tmp_path):
+    submission = recovery.register(tmp_path, [
+        'cb_render.py', 'fire', '2', 'S2.SH1', 'Ep4',
+        '--candidates', '1', '--spend-token', 'token-123',
+    ])
+    recovery.change(tmp_path, submission['operationId'], 'reconciling-submission',
+                    'old request unresolved', mediaSubmitted=None)
+    output = tmp_path / 'S2.SH1_c1.mp4'
+    output.write_bytes(b'verified')
+    ledger = {'status': 'candidates-pending', 'batchId': 'S2.SH1-b2',
+              'candidatePaths': [str(output)],
+              'batch': {'status': 'complete', 'batchId': 'S2.SH1-b2'}}
+    recovery.require_no_provider_operation(tmp_path, 'Ep4', '2', 'S2.SH1', ledger)
+
+
+def test_explicit_no_submit_preflight_clears_phantom_submission(tmp_path):
+    submission = recovery.register(tmp_path, [
+        'cb_render.py', 'fire', '2', 'S2.SH1', 'Ep4',
+        '--candidates', '1', '--spend-token', 'token-123',
+    ])
+    recovery.change(tmp_path, submission['operationId'], 'reconciling-submission',
+                    'preparation record was misclassified', mediaSubmitted=None)
+    attempts = tmp_path / 'cb-output' / 'state' / 'preflight-attempts'
+    attempts.mkdir(parents=True)
+    (attempts / 'attempt.json').write_text(__import__('json').dumps({
+        'operationId': submission['operationId'], 'providerCallOccurred': False,
+        'mediaSubmissionAttempted': False, 'spendOccurred': False,
+    }))
+    recovery.require_no_provider_operation(tmp_path, 'Ep4', '2', 'S2.SH1', {})
+
+
+def test_cross_cut_action_does_not_repeat_approved_audio(current):
+    shot = current['authorities']['shot']
+    shot['dialogueLines'][0].update(startSec=2, endSec=6)
+    shot['directorCard']['views'][1]['action'] = 'Oren turns and says "Here you are."'
+    prompt, _ = E.compile_prompt(current, audit(current))
+    assert prompt.count('Here you are.') == 1
+    assert 'continues the already-started approved line' in prompt
+
+
+def test_cross_cut_completion_never_quotes_placeholder(current):
+    shot = current['authorities']['shot']
+    shot['dialogueLines'][0].update(startSec=2, endSec=6)
+    shot['directorCard']['views'][1]['action'] = 'Oren completes the ongoing line “Here you are.” by 6s.'
+    prompt, _ = E.compile_prompt(current, audit(current))
+    assert '“the already-started approved line”' not in prompt
+    assert 'completes the ongoing line the already-started approved line by 6s.' in prompt
+    assert prompt.count('Here you are.') == 1
+    assert 'same approved line ends at 6s' in prompt
+
+
 def test_specialist_history_does_not_change_fingerprint(tmp_path,current):
     shot=deepcopy(current['authorities']['shot']);shot['shotId']='S2.SH1'
     pkg={'shots':[shot],'continuityLedger':[{'shotId':'S2.SH1'}]}

@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 
-def watch_shot(shot, ledger):
+def watch_shot(shot, ledger, *, require_current_direction=True):
     result = copy.deepcopy(shot)
     approval = ledger.get('voiceApproval') or {}
     receipt_path = ledger.get('voPlacementPath')
@@ -17,7 +17,7 @@ def watch_shot(shot, ledger):
         return result
     from studio_director_handoff import errors as direct_errors, source as direct_source
     from studio_request_evidence import digest as direct_digest
-    faults = direct_errors(shot)
+    faults = direct_errors(shot) if require_current_direction else []
     if faults:
         raise ValueError('DIRECTOR_REVISION_REQUIRED: ' + faults[0])
     original_source = direct_digest(direct_source(shot))

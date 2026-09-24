@@ -226,5 +226,8 @@ def test_astra_rates_and_long_context_estimate(monkeypatch):
     assert L._model_rates('gpt-6-astra') == {'input':10.0,'cached_input':1.0,'output':50.0}
     monkeypatch.setattr(L,'_estimated_input_tokens',lambda *a:10000)
     assert L._estimated_call_cost('gpt-6-astra','','',None,None,2000)[0] == pytest.approx(.20)
+    assert L._model_rates('gpt-6-luna') == {'input':.1,'cached_input':.01,'output':.5}
+    assert L._estimated_call_cost('gpt-6-luna','','',None,None,2000)[0] == pytest.approx(.002)
     monkeypatch.setattr(L,'_estimated_input_tokens',lambda *a:300000)
     assert L._estimated_call_cost('gpt-6-astra','','',None,None,2000)[0] == pytest.approx(6.15)
+    assert L._estimated_call_cost('gpt-6-luna','','',None,None,2000)[0] == pytest.approx(.0615)

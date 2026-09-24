@@ -14,6 +14,20 @@ Do not invent numeric timings from target duration. Put provider duration, aspec
 ratio and resolution in settings. Include only exclusions needed for this shot.
 Do not repeat the same rule in several sections, dump internal registries, add
 unrelated show laws, or replace an ambiguous story with contradictory instructions.
+Make emotion playable: name its trigger, the visible response and the resulting
+change, not a pile of micro-expressions. Show the cause before its reaction unless
+the approved edit deliberately withholds it. A camera move names its subject,
+starting position, trigger and finish; a focus shift names both focal targets.
+An insert makes contact, weight and prop ownership readable without adding business.
+Reserve authored time for the decisive reaction; do not make every line a cut or
+force a camera move where a living hold carries the performance. Slow motion must
+not silently stretch approved speech. Keep the final state usable for the next edit.
+Use the project's own visual language. Labels such as Pixar-quality, best-in-class
+or cinematic do not replace staging, light, material response or acting decisions.
+Word budgets are ceilings and diagnostics, never targets to pad toward. Keep all
+unique story and performance instructions; remove only actual redundancy. When a
+plan is too dense to play, return the specific source decision for revision rather
+than dropping a beat or compressing approved dialogue to fit.
 If sources conflict, identify the source correction; do not silently alter the story.
 The final compiler owns provider emission. No text is appended after final review.'''
 

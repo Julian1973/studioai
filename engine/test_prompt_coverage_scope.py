@@ -23,4 +23,6 @@ def test_final_reviewer_distinguishes_included_next_view_from_out_of_scope_actio
     assert "A 'next view' action is valid when that view is included" in P.SYSTEM
     assert 'incomplete semantic clauses with exact payload quotes' in P.SYSTEM
     assert 'unavailable pixel evidence' in P.SYSTEM
-    assert 'Never edit audio/speech/lip-sync instructions' in P.SYSTEM
+    assert 'Preserve exact dialogue, speaker/timing, Audio1' in P.SYSTEM
+    assert 'No correction may change approved shot/card decisions, dialogue, speaker/timing,' in P.SYSTEM
+    assert 'reference tags, audio policy or contract settings.' in P.SYSTEM

@@ -10,6 +10,37 @@ def digest(value):
         separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 
+def resolve_timing_choice(text, card, shot, start, end):
+    """Resolve an authored alternative only from an unambiguous typed checkpoint.
+
+    This is deterministic lowering, not permission to rewrite creative action.
+    Keep source wording and the exact supporting event in the emitted evidence.
+    """
+    phrase = 'during or just after the line'
+    if text.count(phrase) != 1:
+        return text, None
+    suffix = text.split(phrase, 1)[1]
+    events = [e for e in card.get('stateChanges') or []
+              if isinstance(e.get('atSec'), (int, float)) and start <= e['atSec'] < end]
+    if len(events) != 1:
+        return text, None
+    event = events[0]
+    # A named entity must bind the checkpoint to the action after the alternative.
+    noun = re.split(r'[.:]', event.get('entityId') or '')[-1].removesuffix('s')
+    if not noun or not re.search(r'\b' + re.escape(noun) + r's?\b', suffix, re.I):
+        return text, None
+    if not re.search(r'\bafter\b.*\bline\b.*\b(?:ends|completes)\b', event.get('cause') or '', re.I):
+        return text, None
+    ends = [line.get('endSec') for line in shot.get('dialogueLines') or []
+            if isinstance(line.get('endSec'), (int, float)) and start < line['endSec'] <= end]
+    if len(ends) != 1 or ends[0] >= event['atSec']:
+        return text, None
+    replacement = f"at {event['atSec']:g}s, after the line ends at {max(ends):g}s"
+    return text.replace(phrase, replacement), dict(
+        sourceText=text, sourceTextHash=digest(text), checkpoint=deepcopy(event),
+        dialogueEndSec=max(ends), rule='explicit-after-line-checkpoint@1')
+
+
 def actions(shot, source_unit=None):
     """Bind existing authored coverage; never use specialist or provider prose."""
     from studio_storyboard_prompt import view_timings
@@ -35,7 +66,8 @@ def actions(shot, source_unit=None):
         offset = source_unit['globalStartSec']
         for view, (start, end) in zip(views, intervals):
             record = deepcopy(original[view['viewId']])
-            if (record['startSec'], record['endSec']) != (start + offset, end + offset) or view.get('action') not in (None, record['text']):
+            original_text = (record.get('timingResolution') or {}).get('sourceText', record['text'])
+            if (record['startSec'], record['endSec']) != (start + offset, end + offset) or view.get('action') not in (None, original_text):
                 raise ValueError('WATCH_AUTHORED_ACTION_DRIFT: segment changed DIRECT action or timing')
             record.update(origin='/sourceUnit' + record['origin'], emissionStartSec=start, emissionEndSec=end)
             result.append(record)
@@ -57,11 +89,14 @@ def actions(shot, source_unit=None):
             raise ValueError(f'WATCH_AUTHORED_TIMED_ACTION_MISSING: unit={unit}; view={view.get("viewId")}; revise DIRECT')
         if re.search(r'(?m)^(?:Shot \d+:|Action:|Performance:|\[)', text):
             raise ValueError(f'DIRECTOR_REVISION_REQUIRED: unit={unit}; action contains ambiguous provider section syntax')
+        text, timing_resolution = resolve_timing_choice(text, card, shot, start, end)
         record = dict(sceneId=scene, generationUnitId=unit,
             viewId=view['viewId'], startSec=start, endSec=end, text=text,
             storyboardRevision=(shot.get('sourceStoryboard') or {}).get('sha256') or digest(legacy or views),
             directorCardRevision=digest(card), coverageRevision=digest([(v['viewId'], t) for v,t in zip(views,intervals)]),
             sourceBeatIds=shot.get('beatIds', shot.get('beatCodes', [])), sourceBeat=view.get('sourceBeat'))
+        if timing_resolution:
+            record['timingResolution'] = timing_resolution
         record['authoredActionHash'] = digest(record)
         record.update(origin=origin, emissionStartSec=start, emissionEndSec=end)
         result.append(record)

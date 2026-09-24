@@ -23,6 +23,8 @@ def character_id(value):
     value = str(value or '').strip()
     if value.startswith('char:'):
         value = 'character:' + value[len('char:'):]
+    if value.startswith('char.'):
+        value = 'character:' + value[len('char.'):]
     if value.startswith('character.'):
         value = 'character:' + value[len('character.'):]
     return value if value.startswith('character:') else 'character:' + value
@@ -44,8 +46,8 @@ def resolve(snapshot):
     """Resolve current source roles against the actual, ordered image manifest."""
     shot = snapshot.get('authorities', {}).get('shot', {})
     card = shot.get('directorCard') or {}
-    cast = list(dict.fromkeys(character_id(n) for n in
-                shot.get('charactersInFrame', shot.get('characters', [])) or []))
+    from studio_reference_contract import animation_required_cast
+    cast = list(dict.fromkeys(character_id(n) for n in animation_required_cast(shot)))
     authored = {character_id(r['character']): r for r in card.get('characterRoles', [])}
     for cid in authored:
         if cid not in cast:

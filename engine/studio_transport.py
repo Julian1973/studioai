@@ -113,8 +113,12 @@ class Shot(StrictModel):
     directorCard: ShotDirection | None = None
 
 
+from studio_episode_direction import VisualLanguage
+
+
 class EpisodePlan(StrictModel):
     message: str
+    visualLanguage: VisualLanguage | None = Field(default=None, description="Whole-script director's treatment before scene coverage; use this project's medium, canon and emotional progression.")
     sceneCoverage: list[SceneCoverage] = Field(default_factory=list, description="Plan audience journey and motivated coverage BEFORE allocating the following generation shots.")
     shots: list[Shot] = Field(min_length=1, max_length=120)
 

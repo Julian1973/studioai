@@ -751,7 +751,7 @@ def test_credits_endpoint_requires_auth_and_routes_one_explicit_fire(studio, mon
     ('chat:approve:voice', True, 'animation'),
     ('chat:approve:render', True, 'keyframe'),
 ])
-def test_chat_approval_prepares_only_next_outcome(monkeypatch, tmp_path, gate, spoken, next_stage):
+def test_chat_approval_opens_next_outcome_without_preparing_or_spending(monkeypatch, tmp_path, gate, spoken, next_stage):
     module = _load_server_module('outcome_transition_' + next_stage)
     import cb_episode_budget as budget
     import cb_render as render
@@ -765,10 +765,10 @@ def test_chat_approval_prepares_only_next_outcome(monkeypatch, tmp_path, gate, s
     job = {'status': 'finalizing', 'gate': gate,
            'args': ['cb_outcome_chat.py','Ep3','1','S1.SH1','keyframe','hash','Julian']}
     module._finalize_automatic_direction(job)
-    assert calls[0][0] == 'chat:prepare:' + next_stage
-    assert calls[0][1][-1] == next_stage
+    assert calls == []
+    assert job['nextOutcomeScope']['stage'] == next_stage
     assert job['nextOutcomeScope']['shotId'] == ('S1.SH2' if gate.endswith(':render') else 'S1.SH1')
-    assert len(calls) == 1
+    assert 'nextOutcomeJobId' not in job
 
 
 def test_budget_approval_does_not_approve_any_media(monkeypatch, tmp_path):

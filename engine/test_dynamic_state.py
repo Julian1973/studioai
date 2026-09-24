@@ -246,3 +246,17 @@ def test_native_see_context_keeps_same_file_bound_state_authority(monkeypatch,tm
     ref=result['references'][0]
     assert ref['depictedStates']==binding['depictedStates']
     assert ref['stateScope']==binding['stateScope']
+
+
+def test_handoff_scopes_unobserved_opening_entity_as_authored_intent():
+    data = source('condition', 'dry', 'wet', critical=True)
+    reference = refs('condition', 'dry')[0]
+    reference['depictedStates'] = {}
+    reference['stateScope'] = {
+        'authority': 'opening_state', 'controlsDynamicState': True,
+        'startSec': 0, 'endSec': 0,
+        'openingObservationPolicy': 'unobserved_entities_are_authored_intent',
+    }
+    out = resolve(data, [reference])
+    assert not any('without observed state evidence' in error for error in out['errors'])
+    assert out['revisitChecks'][0]['unknownReferences'] == [1]

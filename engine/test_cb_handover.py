@@ -1357,7 +1357,7 @@ def test_cut_keeps_separate_ending_reference_and_explicit_shot_prop(monkeypatch)
         assert 'prop:empty-machine' in roles
         assert 'prop:other' not in roles and 'prop:unapproved' not in roles
     assert compiled['referenceSlots']['@图1'] == 'opening keyframe'
-    assert 'do not copy the prior framing' in compiled['keyframePrompt']
+    assert 'not its framing' in compiled['keyframePrompt']
 
 
 def test_anyone_at_frame_one_is_in_the_unit_cast():

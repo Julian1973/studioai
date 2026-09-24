@@ -72,6 +72,9 @@ button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 3px sol
 .topbar-context { min-width: 0; display: flex; align-items: center; gap: 12px; padding: 0 22px; }
 .project-name { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .save-state { color: #9aaba6; font-size: 12px; }
+.topbar-links { display: flex; align-items: center; gap: 16px; margin-right: 18px; }
+.projects-link { color: #d4dcda; font-size: 12px; text-decoration: none; border-bottom: 1px solid #63706c; }
+.projects-link:hover { color: #fff; }
 .inspector-link { margin-right: 18px; color: #d4dcda; font-size: 12px; text-decoration: none; border-bottom: 1px solid #63706c; }
 .inspector-link:hover { color: #fff; }
 

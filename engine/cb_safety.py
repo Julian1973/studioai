@@ -630,6 +630,15 @@ def create_policy(m):
         )
         same_approved_candidate = _same_approved_scene_media(
             candidate, approved, trusted_roots)
+        scoped_visual_plate_carry = bool(
+            pkg and approved and any(
+                item.get("shotId") and
+                item.get("kind") == "shot-visual-contract-correction" and
+                "scenelook" in (item.get("preservedStages") or []) and
+                item.get("sceneLookContentHash") == approved.get("hash")
+                for item in (pkg.get("scopedAmendments") or [])
+            )
+        )
         def plate_current(record):
             if not record:
                 return False
@@ -649,7 +658,9 @@ def create_policy(m):
                 return bool(
                     file_current and
                     (record.get("inputSignature") == current_sig or
-                     record is candidate and same_approved_candidate))
+                     record is candidate and same_approved_candidate or
+                     record is approved and scoped_visual_plate_carry and
+                     record.get("hash") == approved.get("hash")))
             except (m.Refused, OSError, ValueError):
                 return False
 
@@ -959,25 +970,11 @@ def create_policy(m):
 
     def keyframe_prompt(pkg, shot):
         direction = m._direct_keyframe_direction(shot)
-        prompt = m._compile_keyframe_integration_prompt(direction, shot)
-        ledger = m._ledger(pkg, shot["shotId"])
-        pending = ledger.get("pendingKeyframeCorrection") or (
-            (ledger.get("keyframeRejections") or [])[-1:]
-            or [ledger.get("keyframeRejected") or {}])[0]
-        correction = " ".join(str(pending.get("reason") or "").split())
-        if pending.get("category") == "stale-inputs":
-            # Dependency invalidation is provenance, not creative direction.
-            correction = ""
+        correction = m._latest_keyframe_revision_target(pkg, shot["shotId"])
+        direction.pop("latestRevisionTarget", None)
         if correction:
-            iteration = (
-                "\n\nDirector iteration: Correct only this observed issue in the next "
-                f"revision: {correction}\nPreserve every successful identity, canon, "
-                "geography, lighting, reference-role and continuity decision from the "
-                "current signed direction."
-            )
-            # Keep corrections inside the existing composition section. Adding a
-            # standalone heading violates the provider compiler's ordered contract.
-            prompt = prompt.replace("\n\n[LIGHTING]", iteration + "\n\n[LIGHTING]", 1)
+            direction["latestRevisionTarget"] = correction
+        prompt = m._compile_keyframe_integration_prompt(direction, shot)
         return studio_prompt_aliases.protect_honeycomb_aliases(prompt, shot)
 
     def voice_lines(pkg, shot):
@@ -1084,6 +1081,60 @@ def create_policy(m):
         )
         return [{key: line.get(key) for key in keys} for line in lines or []]
 
+    def _approved_audio_timing_mismatch(shot, placement_path, tolerance=0.05,
+                                       approved_timing=None):
+        """Detect a DIRECT timing revision that the approved HEAR take cannot satisfy.
+
+        Audio approval may remain provider-equivalent when only timing fields change.
+        That is safe for a completed animation take, but it is not safe for an
+        unfinished WATCH request: the prompt would assign mouths and actions to the
+        wrong director views.  Keep this check deterministic and zero-spend.
+        """
+        if approved_timing is not None:
+            # Authored estimates and measured performance legitimately differ at
+            # approval. Detect edits AFTER that decision; WATCH separately projects
+            # the verified placement receipt into its dialogue and direction.
+            current = {
+                "durationSec": shot.get("durationSec"),
+                "lines": [{key: line.get(key) for key in
+                           ("dialogueOccurrenceId", "startSec", "startsAtSec", "endSec", "estimatedDurationSec")}
+                          for line in shot.get("dialogueLines") or []],
+            }
+            return None if current == approved_timing else [{"reason": "DIRECT timing changed after HEAR approval"}]
+        if not placement_path or not os.path.exists(placement_path):
+            return None
+        try:
+            with open(placement_path, encoding="utf-8") as handle:
+                record = json.load(handle)
+        except (OSError, ValueError, TypeError):
+            return None
+        placements = record.get("placements") or []
+        by_occurrence = {
+            item.get("dialogueOccurrenceId"): item
+            for item in placements
+            if item.get("dialogueOccurrenceId")
+        }
+        mismatches = []
+        for line in shot.get("dialogueLines") or []:
+            occurrence = line.get("dialogueOccurrenceId")
+            placement = by_occurrence.get(occurrence)
+            if not placement:
+                continue
+            start = line.get("startSec")
+            end = line.get("endSec")
+            placed_start = placement.get("targetStartSec")
+            # An isolated take can finish early within its approved window.
+            # Compare DIRECT with that recorded window, not measured speech end;
+            # WATCH projects the measured end separately for mouth timing.
+            placed_end = placement.get("approvedWindowEndSec", placement.get("targetEndSec"))
+            if None in (start, end, placed_start, placed_end):
+                continue
+            if (abs(float(start) - float(placed_start)) > tolerance or
+                    abs(float(end) - float(placed_end)) > tolerance):
+                mismatches.append((float(start), float(end),
+                                   float(placed_start), float(placed_end)))
+        return mismatches or None
+
     def voice_approval_status(pkg, shot, scene=None, episode=None):
         if not cb_audio_authority.spoken_dialogue_lines(shot):
             return {"required": False, "approved": True, "current": True, "reason": None,
@@ -1092,6 +1143,17 @@ def create_policy(m):
         episode = episode or pkg.get("episode", "Ep1")
         ledger = m._ledger(pkg, shot["shotId"])
         approval = ledger.get("voiceApproval") or {}
+        working_lines = (ledger.get("workingVoice") or {}).get("lines") or []
+        producer_override = approval.get("producerOverride") or {}
+        if working_lines:
+            validation = m._voice_performance_word_validation(
+                cb_audio_authority.spoken_dialogue_lines(shot), working_lines)
+            if not validation["ready"] and not (
+                    approval.get("approved") and producer_override):
+                return {"required": True, "approved": bool(approval.get("approved")),
+                        "current": False, "reason": validation["message"],
+                        "record": approval, "expectedInputSignature": None,
+                        "providerEquivalentContract": False, "timingMismatch": []}
         # The accepted media bundle is the authority after HEAR. A later duration-only
         # visual edit may make an unapproved Voice Director draft stale, but it cannot
         # retroactively invalidate the exact provider request Julian heard and accepted.
@@ -1132,11 +1194,25 @@ def create_policy(m):
             approval.get("rawContentHash") == file_sha256(raw_path) and
             approval.get("timingContentHash") == file_sha256(timing_path) and
             approval.get("placementContentHash") == file_sha256(placement_path))
+        timing_mismatch = None
+        # A completed approved render owns its already-delivered audio. Do not
+        # reopen it because a later draft changed timing. Before WATCH, however,
+        # the current DIRECT timing must be the same timing HEAR approved.
+        if current and ledger.get("status") != "approved":
+            timing_mismatch = _approved_audio_timing_mismatch(
+                shot, placement_path, approved_timing=approval.get("directTimingAtApproval"))
+            if timing_mismatch:
+                current = False
         return {"required": True, "approved": bool(approval.get("approved")),
                 "current": current,
-                "reason": None if current else "voice-approval-input-or-content-mismatch",
+                "reason": ("HEAR timing no longer matches the current DIRECT storyboard; "
+                           "rebuild and approve the voice track before WATCH"
+                           if timing_mismatch else
+                           (None if current else "voice-approval-input-or-content-mismatch")),
                 "providerEquivalentContract": provider_equivalent,
-                "record": approval, "expectedInputSignature": signature}
+                "timingMismatch": timing_mismatch or [],
+                "record": approval, "expectedInputSignature": signature,
+                "producerOverride": bool(approval.get("producerOverride"))}
 
     def animation_input_signature(pkg, shot, scene, episode):
         """Bind Animation direction to every direct visual and performance input.
@@ -1517,7 +1593,23 @@ def create_policy(m):
             log(f"VOICE DIRECTOR - {shot_id}: {len(requests)} auditions ready for Julian")
             return str(bundle["candidates"][0]["path"])
 
-        if (ledger.get("voiceApproval") or {}).get("approved"):
+        prior_voice_approval = dict(ledger.get("voiceApproval") or {})
+        reusable_voice_approval = prior_voice_approval
+        if not reusable_voice_approval.get("approved"):
+            reusable_voice_approval = dict(
+                (ledger.get("voicePrevious") or {}).get("approval") or {})
+        approved_budget = m._performance_budget_report(shot, ledger)
+        landing_repair = any(
+            reason.startswith("final voice ends at ")
+            for reason in approved_budget.get("reasons") or [])
+        timing_repair = bool(
+            reusable_voice_approval.get("approved") and
+            (_approved_audio_timing_mismatch(shot, ledger.get("voPlacementPath"),
+                approved_timing=reusable_voice_approval.get("directTimingAtApproval")) or
+             landing_repair) and
+            ledger.get("voRawPath") and os.path.exists(ledger.get("voRawPath")) and
+            ledger.get("voTimingPath") and os.path.exists(ledger.get("voTimingPath")))
+        if prior_voice_approval.get("approved") and not timing_repair:
             raise m.Refused(
                 f"REFUSED - {shot_id}'s complete voice track is already approved; "
                 "auditions may be heard, but reject the approved track before replacing it")
@@ -1537,8 +1629,13 @@ def create_policy(m):
         reuse_failed_take = bool(
             failed.get("generatedFrom") == lines and reusable_raw.is_file() and
             reusable_timing.is_file())
+        reuse_approved_take = bool(timing_repair)
         isolated_assembly = uses_isolated_voice_assembly(shot, lines)
-        if reuse_failed_take:
+        if reuse_approved_take:
+            raw_out = pathlib.Path(ledger["voRawPath"])
+            timing_path = pathlib.Path(ledger["voTimingPath"])
+            log(f"VOICE TIMING — {shot_id}: repairing the approved placement locally; no provider call")
+        elif reuse_failed_take:
             raw_out, timing_path = reusable_raw, reusable_timing
             log(f"VOICE — {shot_id}: recovering the existing paid take; no provider call")
         elif isolated_assembly:
@@ -1571,10 +1668,37 @@ def create_policy(m):
             if timed.get("endSec") is None and directed.get("estimatedDurationSec") is not None:
                 timed["estimatedDurationSec"] = directed.get("estimatedDurationSec")
             timed_dialogue_lines.append(timed)
+        if timing_repair and timed_dialogue_lines:
+            # A text-to-dialogue take is one continuous acted performance. If DIRECT
+            # later inserted gaps that no longer fit that paid take, repair the
+            # storyboard timing to the provider's timestamped line boundaries before
+            # rebuilding the local receipt. This keeps DIRECT, HEAR and WATCH aligned
+            # without another provider call or a misleading approval candidate.
+            try:
+                first_line = timed_dialogue_lines[0]
+                first_start = (first_line.get("startSec") if first_line.get("startSec") is not None
+                               else first_line.get("startsAtSec"))
+                timing_repair_result = cb_audio_timing.continuous_lines_from_provider_timing(
+                    raw_out, timing_path, timed_dialogue_lines, first_start)
+            except cb_audio_timing.AudioTimingError:
+                timing_repair_result = None
+            if timing_repair_result and timing_repair_result.get("changes"):
+                timed_dialogue_lines = timing_repair_result["lines"]
+                shot["dialogueLines"] = timed_dialogue_lines
+                ledger.setdefault("dialogueTimingRepairs", []).append({
+                    "at": m._now(), "providerCalled": False,
+                    "changes": timing_repair_result["changes"],
+                    "reason": "DIRECT timing reconciled to the unchanged timestamped HEAR performance",
+                })
+                log(f"DIRECT/HEAR — {shot_id}: reconciled dialogue timing locally; no provider call")
+        landing_room_sec = max(
+            cb_audio_timing.CONTINUOUS_END_ROOM_SEC,
+            float(((shot.get("performanceBudgetApproved") or
+                    shot.get("performanceBudget") or {}).get("landingHoldSec") or 0)))
         try:
             placement = cb_audio_timing.render_timed_dialogue_master(
                 raw_out, timing_path, timed_dialogue_lines,
-                shot.get("durationSec"), out)
+                shot.get("durationSec"), out, landing_room_sec=landing_room_sec)
         except cb_audio_timing.AudioTimingError as exc:
             current_duration = float(shot.get("durationSec") or 0)
             cascade = None
@@ -1590,9 +1714,14 @@ def create_policy(m):
             else:
                 try:
                     retimed_duration = cb_audio_timing.natural_master_duration(
-                        required_duration)
+                        required_duration, landing_room_sec=landing_room_sec)
                 except cb_audio_timing.AudioTimingError:
-                    retimed_duration = None
+                    try:
+                        retimed_duration = cb_audio_timing.continuous_fit_duration(
+                            raw_out, timing_path, timed_dialogue_lines,
+                            landing_room_sec=landing_room_sec)
+                    except cb_audio_timing.AudioTimingError:
+                        retimed_duration = None
             if retimed_duration is not None:
                 if cascade:
                     timed_dialogue_lines = cascade["lines"]
@@ -1640,7 +1769,12 @@ def create_policy(m):
                     animation_work["candidate"] = None
                 placement = cb_audio_timing.render_timed_dialogue_master(
                     raw_out, timing_path, timed_dialogue_lines,
-                    retimed_duration, out)
+                    retimed_duration, out, landing_room_sec=landing_room_sec)
+                if placement.get("tempoAdjusted"):
+                    ledger["durationRetimes"][-1].update({
+                        "reason": "Preserve every word using the bounded pitch-preserving tempo fit; requires HEAR review.",
+                        "tempoFactor": placement["tempoFactor"],
+                    })
                 if retimed_duration > current_duration + 0.001:
                     timing_message = (
                         f"expanded {current_duration:g}s to {retimed_duration:g}s")
@@ -1674,6 +1808,15 @@ def create_policy(m):
                 "generatedFrom": ledger.get("voGeneratedFrom"),
                 "supersededAt": m._now(),
             }
+            if timing_repair:
+                ledger["voicePrevious"]["approval"] = reusable_voice_approval
+                ledger["voiceApproval"] = {
+                    "approved": False,
+                    "supersededAt": m._now(),
+                    "reason": ("approved landing hold was not met; placement repaired locally"
+                               if landing_repair else
+                               "DIRECT storyboard timing changed; placement repaired locally"),
+                }
         ledger.update({"voPath": str(out), "voGeneratedFrom": lines,
                        "voRawPath": str(raw_out),
                        "voTimingPath": str(timing_path),
@@ -1685,7 +1828,8 @@ def create_policy(m):
         log(f"VOICE — {shot_id}: {len(turns)} approved line(s) -> {out.name} (awaiting approval)")
         return str(out)
 
-    def approve_voice(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
+    def approve_voice(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print,
+                      *, producer_override=False, override_reason=None):
         pkg, path = current_package(scene, episode)
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
         current_lines = voice_lines(pkg, shot)
@@ -1701,26 +1845,96 @@ def create_policy(m):
         same_provider_request = (
             voice_provider_projection(ledger.get("voGeneratedFrom") or []) ==
             voice_provider_projection(current_lines))
+        if producer_override:
+            if not str(override_reason or "").strip():
+                raise m.Refused("REFUSED — confirm why this HEAR take is being approved as heard")
+            if not ledger.get("voGeneratedFrom") or not generated_signature:
+                raise m.Refused(
+                    f"REFUSED — {shot_id} has no saved generation record to review for an override")
+            if same_provider_request:
+                raise m.Refused(
+                    f"REFUSED — {shot_id}'s exact HEAR provider input already matches; use normal approval")
+            # A producer may override changed dialogue/performance wording, but not
+            # a changed voice identity, canon, voice system or voice compiler.
+            protected_keys = (
+                "canonProfileDigest", "voiceCardsHash", "voiceRegistersHash",
+                "voiceRulebookHash", "voiceCompilerVersion", "pronunciationOverrides",
+                "voiceIds",
+            )
+            if any(generated_signature.get(key) != signature.get(key)
+                   for key in protected_keys):
+                raise m.Refused(
+                    f"REFUSED — {shot_id}'s cast or voice authority changed; prepare a matching take")
+            # The override is creative, not temporal: keep the current DIRECT timing
+            # and every dialogue occurrence bound to the generated placement receipt.
+            placement_path = ledger.get("voPlacementPath")
+            try:
+                with open(placement_path, encoding="utf-8") as handle:
+                    placement_record = json.load(handle)
+            except (OSError, ValueError, TypeError) as exc:
+                raise m.Refused(
+                    f"REFUSED — {shot_id}'s HEAR timing receipt cannot be verified") from exc
+            expected_occurrences = [
+                line.get("dialogueOccurrenceId")
+                for line in cb_audio_authority.spoken_dialogue_lines(shot)
+            ]
+            placed_occurrences = [
+                item.get("dialogueOccurrenceId")
+                for item in (placement_record.get("placements") or [])
+            ]
+            placements_by_occurrence = {
+                item.get("dialogueOccurrenceId"): item
+                for item in (placement_record.get("placements") or [])
+            }
+            timing_is_current = bool(expected_occurrences) and expected_occurrences == placed_occurrences
+            for line in cb_audio_authority.spoken_dialogue_lines(shot):
+                placement = placements_by_occurrence.get(line.get("dialogueOccurrenceId")) or {}
+                start = line.get("startSec") if line.get("startSec") is not None else line.get("startsAtSec")
+                end = line.get("endSec")
+                placed_start = placement.get("targetStartSec")
+                placed_end = placement.get("approvedWindowEndSec", placement.get("targetEndSec"))
+                try:
+                    timing_is_current = timing_is_current and all(
+                        value is not None for value in (start, end, placed_start, placed_end))
+                    if timing_is_current:
+                        timing_is_current = (
+                            abs(float(start) - float(placed_start)) <= 0.05 and
+                            abs(float(end) - float(placed_end)) <= 0.05)
+                except (TypeError, ValueError):
+                    timing_is_current = False
+            if not timing_is_current:
+                raise m.Refused(
+                    f"REFUSED — {shot_id}'s HEAR timing no longer fits DIRECT; repair timing before approval")
         if generated_signature != signature and not (
                 same_nonperformance_inputs and same_provider_request):
-            # A local timing edit reuses the paid performance. Verify its source and
-            # reproduce the reviewed WAV before accepting the new timing signature.
-            from cb_voice_retime import verify_reviewed_retime
-            previous = (ledger.get("voicePrevious") or {}).get("approval") or {}
-            if not verify_reviewed_retime(
-                    ledger, shot, generated_signature, signature,
-                    same_provider_request, previous):
-                raise m.Refused(f"REFUSED — {shot_id}'s voice was not generated from current signed direction")
-            ledger["voInputSignature"] = signature
-            m._save(pkg, path)
+            if not producer_override:
+                # A local timing edit reuses the paid performance. Verify its source and
+                # reproduce the reviewed WAV before accepting the new timing signature.
+                from cb_voice_retime import verify_reviewed_retime
+                previous = (ledger.get("voicePrevious") or {}).get("approval") or {}
+                if not verify_reviewed_retime(
+                        ledger, shot, generated_signature, signature,
+                        same_provider_request, previous):
+                    raise m.Refused(f"REFUSED — {shot_id}'s voice was not generated from current signed direction")
+                ledger["voInputSignature"] = signature
+                m._save(pkg, path)
         for field in ("voPath", "voRawPath", "voTimingPath", "voPlacementPath"):
             value = ledger.get(field)
-            if not value or not os.path.exists(value):
+            if not value or not os.path.isfile(value):
                 raise m.Refused(
                     f"REFUSED — {shot_id}'s timestamped voice bundle is incomplete ({field})")
-        result = original["approve_voice"](scene, shot_id, episode, reviewed_by, log)
-        pkg, path = m.load_pkg(scene, episode); ledger = m._ledger(pkg, shot_id)
+        result = original["approve_voice"](
+            scene, shot_id, episode, reviewed_by, log,
+            producer_override=producer_override)
+        pkg, path = m.load_pkg(scene, episode)
+        shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
         ledger["voiceApproval"].update({"packageRevision": pkg.get("revision"),
+                                         "directTimingAtApproval": {
+                                             "durationSec": shot.get("durationSec"),
+                                             "lines": [{key: line.get(key) for key in
+                                                        ("dialogueOccurrenceId", "startSec", "startsAtSec", "endSec", "estimatedDurationSec")}
+                                                       for line in shot.get("dialogueLines") or []],
+                                         },
                                          "inputSignature": signature,
                                          "contentHash": file_sha256(ledger.get("voPath")),
                                          "rawContentHash": file_sha256(ledger.get("voRawPath")),
@@ -1728,6 +1942,49 @@ def create_policy(m):
                                              ledger.get("voTimingPath")),
                                          "placementContentHash": file_sha256(
                                              ledger.get("voPlacementPath"))})
+        if producer_override:
+            ledger["voiceApproval"]["producerOverride"] = {
+                "approvedAsHeard": True,
+                "at": m._now(),
+                "reviewedBy": reviewed_by,
+                "reason": str(override_reason).strip(),
+                "generatedInputSignature": generated_signature,
+                "acceptedInputSignature": signature,
+                "acceptedAudioSha256": ledger["voiceApproval"]["contentHash"],
+            }
+        else:
+            ledger["voiceApproval"].pop("producerOverride", None)
+        # A locally reconciled continuous take can change authored dialogue
+        # intervals before HEAR approval. Once that exact Audio1 is approved,
+        # bind the timing-only source projection so WATCH does not mistake the
+        # derived timestamps for an unreviewed DIRECT edit.
+        handoff = ledger.get("directorCardHandoff") or {}
+        card_source = shot.get("directorCardSource") or {}
+        timing_repairs = ledger.get("dialogueTimingRepairs") or []
+        timing_repair = next((item for item in reversed(timing_repairs)
+                              if item.get("reason") ==
+                              "DIRECT timing reconciled to the unchanged timestamped HEAR performance"), None)
+        if (timing_repair and handoff.get("version") == card_source.get("version") and
+                handoff.get("sourceHash") == card_source.get("sourceHash") and
+                handoff.get("directionHash") == card_source.get("directionHash")):
+            from studio_director_handoff import source as direct_source
+            from studio_request_evidence import digest
+            placement_path = pathlib.Path(ledger["voPlacementPath"])
+            placement_hash = file_sha256(placement_path)
+            approval = ledger["voiceApproval"]
+            ledger_authority = {
+                "placementPath": str(placement_path),
+                "placementSha256": placement_hash,
+                "audioSha256": approval["contentHash"],
+                "directProjection": {
+                    "originalSourceHash": card_source["sourceHash"],
+                    "originalDirectionHash": card_source["directionHash"],
+                    "projectedSourceHash": digest(direct_source(shot)),
+                    "projectedDirectionHash": digest(shot.get("directorCard") or {}),
+                    "kind": "verified Audio1 timing projection; not direction approval",
+                },
+            }
+            shot["approvedAudioTimingAuthority"] = ledger_authority
         m._save(pkg, path)
         return ledger["voiceApproval"]
 
@@ -1776,7 +2033,7 @@ def create_policy(m):
         canon_digest = require_canon(pkg, episode, "cinematography")
         if candidate.get("source", "generated") == "generated":
             return m._keyframe_input_signature(pkg, shot, scene, episode)
-        status = scene_status(scene, episode)
+        status = scene_status(scene, episode, pkg=pkg)
         return {"cardHash": m._live_card_hash(shot["shotId"], scene, episode),
                 "canonProfileDigest": canon_digest,
                 "sceneLookHash": (status.get("active") or {}).get("hash") if status.get("current") else None,
@@ -1905,8 +2162,12 @@ def create_policy(m):
         # earlier selection was interrupted after the file copy. Re-seal the unchanged
         # file against current SEE inputs so it can return to the human approval screen.
         record["packageRevision"] = pkg.get("revision")
-        record["inputSignature"] = keyframe_signature(pkg, shot, record, scene, episode)
-        record["contentHash"] = file_sha256(record.get("path"))
+        # Rechecking the pixels must not re-sign a generated image against a brief
+        # it never received. Imported choices are selected visual evidence instead.
+        if record.get("source", "generated") != "generated":
+            record["inputSignature"] = keyframe_signature(
+                pkg, shot, record, scene, episode)
+            record["contentHash"] = file_sha256(record.get("path"))
         m._save(pkg, path)
         if (ledger.get("keyframeCandidate") is record and
                 record.get("source", "generated") == "generated" and
@@ -1920,9 +2181,24 @@ def create_policy(m):
             )
         return screening
 
-    def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
+    def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print, *, reuse_prompt_change=False):
         pkg, path = current_package(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
+        if reuse_prompt_change:
+            from copy import deepcopy
+            from studio_keyframe_selection import can_reuse_prompt_change
+            candidate = ledger.get("keyframeCandidate") or {}
+            expected = keyframe_signature(pkg, shot, candidate, scene, episode)
+            if (len(ledger.get("keyframeCandidates") or []) > 1 or
+                    not can_reuse_prompt_change(candidate, expected, file_sha256(candidate.get("path")))):
+                raise m.Refused("This image or its visual inputs changed. Review the current keyframe before reuse.")
+            ledger.setdefault("keyframeHistory", []).append({**deepcopy(candidate),
+                "outcome": "explicit-prompt-change-reuse", "reviewedBy": reviewed_by,
+                "supersededAt": m._now()})
+            candidate.update(source="library", libraryOriginal=candidate["path"],
+                             reuseDecision={"reviewedBy": reviewed_by, "at": m._now(),
+                                           "reason": "Explicitly reused after prompt-only change"})
+            candidate["inputSignature"] = keyframe_signature(pkg, shot, candidate, scene, episode)
         from studio_keyframe_selection import retire_comparison
         # Recover external selections saved before comparison retirement existed.
         # Generated A/B candidates still require their explicit selected ID.
@@ -1958,9 +2234,6 @@ def create_policy(m):
             # keeps the failed/unknown check attached to lineage instead of silently blocking
             # or rejecting the candidate.
             candidate["packageRevision"] = pkg.get("revision")
-            candidate["inputSignature"] = keyframe_signature(
-                pkg, shot, candidate, scene, episode)
-            candidate["contentHash"] = file_sha256(candidate.get("path"))
             candidate["conformanceAdvisoryDecision"] = {
                 "acceptedBy": reviewed_by,
                 "acceptedAt": m._now(),
@@ -2043,6 +2316,25 @@ def create_policy(m):
         # case; generated keyframes remain bound to their full prompt/reference graph.
         non_generated_source = record.get("source") in (
             "uploaded", "library", "previousFinalFrame")
+        # A scoped visual direction amendment may intentionally preserve a human-
+        # approved non-generated opening frame while changing the typed Director
+        # card. Keep the frame current only when the amendment explicitly names the
+        # keyframe as preserved and every asset/file/location binding is unchanged.
+        # This is not a generic card-hash bypass: the exact bytes, selected asset,
+        # canon, Scene Look and source mode must still match.
+        scoped_visual_carry = any(
+            item.get("shotId") == shot.get("shotId") and
+            item.get("kind") == "shot-visual-contract-correction" and
+            "keyframe" in (item.get("preservedStages") or []) and
+            item.get("sceneLookContentHash") == expected.get("sceneLookHash")
+            for item in (pkg.get("scopedAmendments") or [])
+        )
+        if (not signatures_match and non_generated_source and scoped_visual_carry and
+                signature_diff.issubset({"cardHash", "briefHash", "canonProfileDigest", "sceneLookHash"}) and
+                stored_signature.get("selectedAssetHash") == expected.get("selectedAssetHash") and
+                stored_signature.get("sceneLookHash") == expected.get("sceneLookHash") and
+                stored_signature.get("source") == expected.get("source")):
+            signatures_match = True
         if (not signatures_match and non_generated_source and
                 signature_diff == {"canonProfileDigest"} and
                 stored_signature.get("cardHash") == expected.get("cardHash") and
@@ -2056,22 +2348,35 @@ def create_policy(m):
         # and prove that its protected Director sections still match current direction.
         # Changes to references, canon, Scene Look, media bytes or protected creative fields
         # continue to invalidate the approval normally.
-        if (not signatures_match and
+        if (not signatures_match and record.get("approved") and
                 record.get("source", "generated") == "generated" and
-                signature_diff == {"briefHash"}):
+                signature_diff and
+                signature_diff.issubset({"briefHash", "promptCompilerStandard"}) and
+                not m._latest_keyframe_revision_target(pkg, shot["shotId"])):
             prompt_contract = record.get("promptContract") or {}
             historical_prompt = str(prompt_contract.get("prompt") or "")
             historical_hash = hashlib.sha256(historical_prompt.encode()).hexdigest()
-            try:
-                historical_contract = m._keyframe_prompt_contract(
-                    pkg, shot, historical_prompt)
+            historical_seal_valid = bool(
+                historical_prompt and
+                stored_signature.get("briefHash") == historical_hash and
+                prompt_contract.get("promptHash") == historical_hash)
+            if signature_diff == {"briefHash"}:
+                try:
+                    historical_contract = m._keyframe_prompt_contract(
+                        pkg, shot, historical_prompt)
+                    signatures_match = bool(
+                        historical_seal_valid and
+                        historical_contract.get("directionContract"))
+                except (m.Refused, KeyError, TypeError, ValueError):
+                    signatures_match = False
+            else:
+                # A versioned compiler change changes prose, not an already human-
+                # approved image. All non-compiler source hashes still match above.
                 signatures_match = bool(
-                    historical_prompt and
-                    stored_signature.get("briefHash") == historical_hash and
-                    prompt_contract.get("promptHash") == historical_hash and
-                    historical_contract.get("directionContract"))
-            except (m.Refused, KeyError, TypeError, ValueError):
-                signatures_match = False
+                    historical_seal_valid and
+                    prompt_contract.get("promptStandard") ==
+                    stored_signature.get("promptCompilerStandard") and
+                    prompt_contract.get("directionContract"))
         current = bool(
             record.get("approved") and path and os.path.exists(path) and
             signatures_match and

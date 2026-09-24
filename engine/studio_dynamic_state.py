@@ -208,7 +208,14 @@ def resolve(authorities, references):
                 current=sc.get('controlsDynamicState') and sc.get('authority') in ('current_dynamic_state','current_motion_evidence','opening_state') and valid_time
                 if depicted is None:
                     unknown.append(n+1)
-                    if current: unknown_current.append(n+1)
+                    # An approved opening may deliberately leave an entity
+                    # unobserved. Keep that as authored intent rather than
+                    # treating the missing pixels as a current-state conflict.
+                    opening_unobserved = (
+                        current and at == 0 and
+                        sc.get('openingObservationPolicy') == 'unobserved_entities_are_authored_intent'
+                    )
+                    if current and not opening_unobserved: unknown_current.append(n+1)
                     continue
                 # A still cannot observe every intended property (e.g. concealed
                 # spring tension). Missing fields are unknown, not contradictory.

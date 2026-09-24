@@ -444,6 +444,7 @@ def test_browser_durable_operation_hides_stale_cost_and_shows_real_recovery(stat
 const assert=require('node:assert/strict');
 const SH_EP='Ep3',SH_SC='1',PSHOT_I=0;
 const pShots=()=>[{shotId:'S1.SH2'}],pFocusedStage=()=> 'animation';
+const shotPipelineState=()=>({current:{},needsKeyframe:false});
 const shLedger=()=>({pendingSpendAuth:{token:'stale'},watchRetake:{status:'preparing'}});
 const _esc=x=>String(x||''),_attr=_esc,durableWatchJob=()=>null;
 const PJOBS={current:{scene:'1',args:['S1.SH2'],status:state==='preparing'?'running':'failed',

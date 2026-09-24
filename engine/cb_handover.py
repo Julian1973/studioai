@@ -829,6 +829,10 @@ def _voice_director_brief_lines(vps):
              "elevenLabsV3Direction": (vp.get("elevenLabsV3Direction") or "").strip(),
              "expectedTiming": (vp.get("expectedTiming") or "").strip(),
              "physicalActionRelationship": (vp.get("physicalActionRelationship") or "").strip()}
+            | {key: vp.get(key) for key in (
+                "dramaticIntention", "subtext", "relationshipTarget", "emotionalEntry",
+                "emotionalExit", "operativeWords", "pace", "rhythm", "pauses", "breaths")
+               if vp.get(key) is not None}
             for vp in vps]
 
 

@@ -57,6 +57,20 @@ def test_active_graph_and_expected_spend_outcome():
     assert contracts.command_outcome(1, 'shot:compare', ['SPEND NOT APPROVED']) == 'needs_spend_approval'
 
 
+def test_dialogue_shot_offers_the_see_handoff_before_hear():
+    row={
+        'shotId':'S4.SH3','talky':True,'needsKeyframe':True,'keyframeSatisfied':True,
+        'current':{'keyframe':True,'seePackage':False,'voice':False},
+        'allowedActions':{},'pending':{},'reasons':{'seePackage':'Choose storyboard or skip it.'},
+    }
+    action=contracts.shot_next_action(row)
+    assert action['code']=='complete-see-handoff'
+    assert action['stage']=='keyframe'
+    assert 'storyboard' in action['reason']
+    row['current']['seePackage']=True
+    assert contracts.shot_next_action(row)['code']=='prepare-voice'
+
+
 def test_outcome_survives_restart(tmp_path):
     cb_db.persist_job(tmp_path, {'jobId': 'quote', 'status': 'done',
                                 'outcome': 'needs_spend_approval'})

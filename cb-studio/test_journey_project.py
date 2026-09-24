@@ -46,3 +46,5 @@ def test_allowance_configuration_does_not_start_competing_legacy_path(setup):
     assert t.calls==[]
     source=(ROOT/'cb-studio/project-production.js').read_text()
     assert 'prepare:!window.StudioJourney' in source
+    assert "'gpt-6-luna'" in source
+    assert 'All text directions use GPT-6 Luna.' in source

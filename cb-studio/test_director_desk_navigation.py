@@ -30,3 +30,27 @@ def test_explicit_review_stays_visible_when_generation_is_locked():
     PSTAGE='voice';assert.equal(pFocusedStage(),'voice');
     """
     subprocess.run(['node','-e',function+harness],check=True,capture_output=True,text=True)
+
+
+def test_hear_uses_dedicated_editor_and_canonical_spoken_words():
+    assert "['storyboard','keyframe','animation'].includes(stage)" in APP
+    assert 'spokenLines=SH_VOICE_CACHE[tok]?.approvedLines||[]' in APP
+    assert 'pFocusedStage()==="voice"' in APP
+    assert "openHear:()=>openShotOutcome('voice',PSHOT_I)" in APP
+
+
+def test_unsaved_voice_or_dialogue_edits_block_fire():
+    functions = '\n'.join(re.search(r'function '+name+r'\([^)]*\)\{.*?\n\}', APP, re.S).group()
+                          for name in ('shVoiceMarkDirty', 'shHearHasUnsavedEdits', 'shHearSyncFire'))
+    harness = """
+    const assert=require('node:assert/strict');
+    const SH_VOICE_DIRTY={},SH_VOICE_CACHE={s:{currentLines:[{text:'[happy] Hello'}]}};
+    let scriptDirty=false;const buttons=[{},{}];
+    const document={querySelector:()=>scriptDirty?{}:null,querySelectorAll:()=>buttons};
+    assert.equal(shHearHasUnsavedEdits('s'),false);
+    shVoiceMarkDirty('s',0,'[quiet] Hello');assert(buttons.every(b=>b.disabled));
+    shVoiceMarkDirty('s',0,'[happy] Hello');assert(buttons.every(b=>!b.disabled));
+    scriptDirty=true;shHearSyncFire('s');assert(buttons.every(b=>b.disabled));
+    scriptDirty=false;SH_VOICE_CACHE.s.loading=true;shHearSyncFire('s');assert(buttons.every(b=>b.disabled));
+    """
+    subprocess.run(['node','-e',functions+harness],check=True,capture_output=True,text=True)

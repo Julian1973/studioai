@@ -57,6 +57,8 @@ MUTATING_OPERATIONS = (
     "reject_scenelook",
     "select_scenelook_source",
     "prepare_department",
+    "review_voice_source_boundaries",
+    "prepare_voice_cues",
     "save_department_candidate",
     "decide_department",
     "save_voice_working",

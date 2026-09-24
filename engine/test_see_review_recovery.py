@@ -34,12 +34,19 @@ def test_rejection_reason_reaches_active_keyframe_compiler():
     tree=ast.parse((Path(__file__).parent/'cb_safety.py').read_text())
     fn=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='keyframe_prompt')
     ledger={'keyframeRejections':[{'reason':'Keep the pool clear; move Aida left.'}]}
+    package={'continuityLedger':[{'shotId':'X',**ledger}]}
+    direction={}
     ns={'current_direction_output':lambda *a:{},
-        'm':SimpleNamespace(_ledger=lambda *a:ledger,_compile_keyframe_integration_prompt=lambda *a:'AUTHORED PROMPT\n\n[LIGHTING]\nCamera direction'),
+        'm':SimpleNamespace(_direct_keyframe_direction=lambda *a:{},
+            _latest_keyframe_revision_target=R._latest_keyframe_revision_target,
+            _compile_keyframe_integration_prompt=lambda current,*a:
+                'AUTHORED PROMPT\n\n[MUST PRESERVE]\n'+current.get('latestRevisionTarget','')),
         'studio_prompt_aliases':SimpleNamespace(protect_honeycomb_aliases=lambda p,s:p)}
+    ns['m']._direct_keyframe_direction=lambda *a:direction
     exec(compile(ast.Module(body=[fn],type_ignores=[]),'active-compiler','exec'),ns)
-    result=ns['keyframe_prompt']({}, {'shotId':'X'})
+    result=ns['keyframe_prompt'](package, {'shotId':'X'})
     assert 'Keep the pool clear; move Aida left.' in result
+    assert direction['latestRevisionTarget']=='Keep the pool clear; move Aida left.'
     assert result.startswith('AUTHORED PROMPT')
 
 
@@ -48,16 +55,35 @@ def test_retake_preserves_ordered_sections_and_ignores_admin_invalidation():
     fn=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='keyframe_prompt')
     base='\n\n'.join(f'[{name}]\nAuthored {name}' for name in R.SEEDREAM_KEYFRAME_PROMPT_SECTIONS)
     ledger={'keyframeRejected':{'reason':'Superseded automatically','category':'stale-inputs'}}
+    package={'continuityLedger':[{'shotId':'X',**ledger}]}
+    direction={}
+    def compile_direction(current, *_):
+        target=current.get('latestRevisionTarget')
+        return (base.replace('[MUST PRESERVE]\nAuthored MUST PRESERVE',
+                             '[MUST PRESERVE]\n'+target+'\nAuthored MUST PRESERVE')
+                if target else base)
     ns={'current_direction_output':lambda *a:{},
-        'm':SimpleNamespace(_ledger=lambda *a:ledger,_compile_keyframe_integration_prompt=lambda *a:base),
+        'm':SimpleNamespace(_direct_keyframe_direction=lambda *a:direction,
+            _latest_keyframe_revision_target=R._latest_keyframe_revision_target,
+            _compile_keyframe_integration_prompt=compile_direction),
         'studio_prompt_aliases':SimpleNamespace(protect_honeycomb_aliases=lambda p,s:p)}
     exec(compile(ast.Module(body=[fn],type_ignores=[]),'active-compiler','exec'),ns)
-    assert ns['keyframe_prompt']({}, {'shotId':'X'})==base
+    assert ns['keyframe_prompt'](package, {'shotId':'X'})==base
     ledger['keyframeRejected']={'reason':'Move Sunny left.\nKeep the cups straight.'}
-    result=ns['keyframe_prompt']({}, {'shotId':'X'})
+    ledger['pendingKeyframeCorrection']={'reason':'Stale pre-build instruction.'}
+    ledger['keyframeRejections']=[ledger['keyframeRejected']]
+    package['continuityLedger'][0].update(ledger)
+    result=ns['keyframe_prompt'](package, {'shotId':'X'})
     sections=R.cb_departments.prompt_sections(result)
     assert tuple(sections)==R.SEEDREAM_KEYFRAME_PROMPT_SECTIONS
-    assert 'Move Sunny left. Keep the cups straight.' in sections['COMPOSITION']
+    assert 'Move Sunny left. Keep the cups straight.' in sections['MUST PRESERVE']
+    assert 'Stale pre-build instruction.' not in result
+    ledger['pendingKeyframeCorrection']={
+        'reason':'Ground Sunny beside the ladder.', 'recordedAt':'2026-09-24T10:00:00'}
+    package['continuityLedger'][0].update(ledger)
+    newer=ns['keyframe_prompt'](package, {'shotId':'X'})
+    assert 'Ground Sunny beside the ladder.' in (
+        R.cb_departments.prompt_sections(newer)['MUST PRESERVE'])
 
 
 def test_human_image_approval_preserves_blocked_watch_evidence_without_model_call(tmp_path):

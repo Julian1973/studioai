@@ -13,3 +13,4 @@
 .journey-reference-inputs{margin:0 0 14px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
 .journey-reference-warning{margin:0 0 8px;color:var(--warning,#e3b341);font-size:12px;line-height:1.4}
 .journey-reference-input figcaption{white-space:normal;overflow-wrap:anywhere}
+.journey-sequence{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface2)}.journey-sequence h3{margin:2px 0 8px;font-size:16px}.journey-sequence p{margin:5px 0;font-size:13px}.journey-sequence-state{margin-bottom:5px;color:var(--muted);font-size:11px}.journey-sequence details{margin-top:8px}.journey-sequence summary{cursor:pointer;font-size:12px}.journey-sequence details p{font-size:12px;color:var(--muted)}

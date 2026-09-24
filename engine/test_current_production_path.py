@@ -195,6 +195,69 @@ def _sign_specialist_inputs(pkg):
                 R._department_input_signature(pkg, stage, shot["shotId"], "9", "EpT")
 
 
+def test_producer_can_confirm_an_exact_stale_hear_take(world, monkeypatch):
+    _, _, pkg_path = world
+    monkeypatch.setattr(R, "_voice_source_validation",
+                        lambda _shot: {"ready": True, "message": None})
+    pkg = json.loads(pkg_path.read_text())
+    _approve_specialist_inputs(pkg)
+    _sign_specialist_inputs(pkg)
+    pkg_path.write_text(json.dumps(pkg, indent=1))
+    shot = next(item for item in pkg["shots"] if item.get("dialogueLines"))
+
+    R.regen_voice_shot("9", shot["shotId"], "EpT", log=lambda *_args, **_kwargs: None)
+    status = R.voice_performance_status("9", shot["shotId"], "EpT")
+    revised_lines = []
+    for line in status["currentLines"]:
+        text = line["text"]
+        spoken = text.split("] ", 1)[-1] if text.startswith("[") else text
+        revised_lines.append({
+            "dialogueOccurrenceId": line["dialogueOccurrenceId"],
+            "speaker": line["speaker"],
+            "text": "[surprised] " + spoken,
+        })
+    R.save_voice_working("9", shot["shotId"], revised_lines, "EpT",
+                         log=lambda *_args, **_kwargs: None)
+    assert R.voice_performance_status("9", shot["shotId"], "EpT")[
+        "takeMatchesCurrent"] is False
+
+    current_pkg, current_path = R.load_pkg("9", "EpT")
+    current_shot = R._shot(current_pkg, shot["shotId"])
+    authored_line = current_shot["dialogueLines"][0]
+    authored_end = authored_line["endSec"]
+    authored_line["endSec"] = float(authored_end) + 0.2
+    R._save(current_pkg, current_path)
+    with pytest.raises(R.Refused, match="HEAR timing no longer fits DIRECT"):
+        R.approve_voice(
+            "9", shot["shotId"], "EpT", reviewed_by="Test Producer",
+            log=lambda *_args, **_kwargs: None, producer_override=True,
+            override_reason="Producer listened and approved this exact take as heard.")
+    current_pkg, current_path = R.load_pkg("9", "EpT")
+    R._shot(current_pkg, shot["shotId"])["dialogueLines"][0]["endSec"] = authored_end
+    R._save(current_pkg, current_path)
+
+    with pytest.raises(R.Refused, match="not generated from current signed direction"):
+        R.approve_voice("9", shot["shotId"], "EpT", reviewed_by="Test",
+                        log=lambda *_args, **_kwargs: None)
+
+    approval = R.approve_voice(
+        "9", shot["shotId"], "EpT", reviewed_by="Test Producer",
+        log=lambda *_args, **_kwargs: None, producer_override=True,
+        override_reason="Producer listened and approved this exact take as heard.")
+    assert approval["producerOverride"]["approvedAsHeard"] is True
+    assert approval["producerOverride"]["reviewedBy"] == "Test Producer"
+    current_pkg, current_path = R.load_pkg("9", "EpT")
+    current_shot = R._shot(current_pkg, shot["shotId"])
+    assert R._voice_approval_status(current_pkg, current_shot)["current"] is True
+
+    current_ledger = R._ledger(current_pkg, shot["shotId"])
+    current_ledger["workingVoice"]["lines"][0]["text"] += " now"
+    R._save(current_pkg, current_path)
+    changed_pkg, _ = R.load_pkg("9", "EpT")
+    changed_shot = R._shot(changed_pkg, shot["shotId"])
+    assert R._voice_approval_status(changed_pkg, changed_shot)["current"] is False
+
+
 def _disclose_and_fire(shot_id):
     _approve_animation_direction(shot_id)
     with pytest.raises(R.Refused, match="SPEND NOT APPROVED"):
@@ -395,15 +458,16 @@ def test_editorial_handoff_reaches_both_provider_compilers(world, kind):
     }
     still = R._compile_keyframe_integration_prompt(_cinematography_output(shot), shot, [])
     animation = _animation_direction_output(shot)["providerPrompt"]
-    for prompt in (still, animation):
-        assert "EDITORIAL HANDOFF" in prompt
-        assert "9.PREV" in prompt
-        assert "Reveal Zenny's listening reaction." in prompt
-        if kind == "cut":
-            assert "preserve matched eyelines" in prompt
-            assert "never mirror the set" in prompt
-        else:
-            assert "landing frame as the opening anchor" in prompt
+    assert "9.PREV" in still and "Reveal Zenny's listening reaction." not in still
+    assert "EDITORIAL HANDOFF" in animation
+    assert "9.PREV" in animation
+    assert "Reveal Zenny's listening reaction." in animation
     if kind == "cut":
-        assert "Compose this shot's new opening keyframe" in still
+        assert "do not copy prior framing" in still
+        assert "preserve matched eyelines" in animation
+        assert "never mirror the set" in animation
+    else:
+        assert "accepted character/prop state" in still
+        assert "landing frame as the opening anchor" in animation
+    if kind == "cut":
         assert "Begin on this shot's own approved opening keyframe" in animation

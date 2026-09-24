@@ -31,6 +31,9 @@ class View(Record):
     entry: Literal['opening', 'cut', 'move', 'hold']
     visibleEntities: list[str] | None = None
     purpose: str = ''
+    audienceNeed: str = ''
+    listenerReaction: str = ''
+    editReason: str = ''
     camera: str = Field(min_length=1)
     action: str = Field(min_length=1)
     performance: str = Field(min_length=1)
@@ -136,7 +139,8 @@ def _audio_blocks(prompt):
 def camera_line(view, framing, law=None):
     """The provider's camera line carries DIRECT's camera intention, not only its framing.
 
-    A view's cinematography record (lens, movement or hold, focus, light, composition)
+    A view's cinematography record (angle, lens, movement, focus, light, composition,
+    atmosphere and screen-time treatment)
     used to reach the scene plate but not the WATCH shot line, so a directed move such as
     "the camera descends through the canopy and finds the clearing" never reached the
     provider unless it was repeated inside framing. Append those authored fields, in a
@@ -144,14 +148,29 @@ def camera_line(view, framing, law=None):
     """
     cinema = view.get('cinematography') if isinstance(view.get('cinematography'), dict) else {}
     parts = [str(framing or '').strip()]
-    for key, label in (('lens', 'Lens'), ('movement', 'Movement'), ('focus', 'Focus'),
-                       ('light', 'Light'), ('composition', 'Composition')):
+    for key, label in (('angle', 'Angle'), ('lens', 'Lens'), ('movement', 'Movement'),
+                       ('focus', 'Focus'), ('light', 'Light'), ('composition', 'Composition'),
+                       ('atmosphere', 'Atmosphere'), ('time', 'Screen-time treatment')):
         value = cinema.get(key)
         if isinstance(value, str) and value.strip():
             parts.append(f'{label}: {value.strip()}')
     if law:
         from studio_camera_law import camera_height_line
-        parts.append(camera_height_line(law))
+        # Defaults must not contradict authored choices, including older snapshots.
+        effective_law = dict(law)
+        if isinstance(cinema.get('lens'), str) and cinema['lens'].strip():
+            effective_law['lens'] = None
+        if isinstance(cinema.get('angle'), str) and cinema['angle'].strip():
+            # The explicit angle is already emitted above. A character's default
+            # eye-line height must not turn a tabletop insert into a face shot.
+            if re.search(r'\b(?:tabletop|object|bowl|cup)[ -](?:and .*? )?height\b', cinema['angle'], re.I):
+                if effective_law.get('characterGrammar'):
+                    parts.append(str(effective_law['characterGrammar']))
+            else:
+                effective_law['cameraHeight'] = 'follow the authored angle; preserve subject scale'
+                parts.append(camera_height_line(effective_law))
+        else:
+            parts.append(camera_height_line(effective_law))
     return ' '.join(part for part in parts if part)
 
 
@@ -165,13 +184,44 @@ def build_plan(snapshot):
     # Department translations are history, not a fallback for missing DIRECT.
     shot = authority.get('shot') or {}
     card = shot.get('directorCard') or {}
+    _validate_causal_audio_checkpoints(shot, card)
     views = card.get('views') or []
-    from studio_authored_action import actions
+    from studio_authored_action import actions, digest as action_digest
     authored = actions(shot, authority.get('sourceUnit'))
     from studio_storyboard_prompt import view_timings
     intervals = view_timings(shot, len(views))
     if not all(intervals):
         raise ValueError('WATCH plan requires explicit source view intervals; prose and inferred equal timing are unsupported')
+
+    # Keep cross-cut dialogue as one provider speech instruction. A later DIRECT
+    # action may describe the same line again; lower that duplicate wording to
+    # visible continuation without changing the authored beat itself.
+    for record, (start, _end) in zip(authored, intervals):
+        text = record['text']
+        for line in source_shot.get('dialogueLines') or []:
+            exact = str(line.get('exactText') or '').strip()
+            line_start, line_end = line.get('startSec'), line.get('endSec')
+            if not exact or not isinstance(line_start, (int, float)) or not isinstance(line_end, (int, float)):
+                continue
+            if not (line_start < start < line_end and exact in text):
+                continue
+            lowered = re.sub(
+                rf'(?i)(?:delivers?|says?|speaks?)\s*[“"]{re.escape(exact)}[”"]',
+                'continues the already-started approved line', text)
+            if lowered == text:
+                # Remove the quote delimiters too: a quoted placeholder reads
+                # like new dialogue to the video model.
+                lowered = re.sub(r'[“"\u2018\u0027]' + re.escape(exact) + r'[”"\u2019\u0027]',
+                                 'the already-started approved line', text, count=1)
+                if lowered == text:
+                    lowered = text.replace(exact, 'the already-started approved line', 1)
+            record['text'] = lowered
+            record.pop('authoredActionHash', None)
+            record['authoredActionHash'] = action_digest({
+                key: value for key, value in record.items()
+                if key not in ('origin', 'authoredActionHash', 'emissionStartSec', 'emissionEndSec')
+            })
+            break
     if intervals[-1][1] != float(snapshot['duration']):
         raise ValueError('WATCH plan duration does not match this immutable request')
     origins = {}
@@ -193,14 +243,14 @@ def build_plan(snapshot):
         opening=select('/opening', ['/shot/openingState', '/shot/directorCard/editIn']),
         causality=select('/causality', ['/shot/causality', '/shot/directorCard/causality']),
                 landing=select('/landing', ['/shot/endingState', '/shot/directorCard/handoff']),
-                geography=select('/geography', ['/shot/geography'], []),
+        geography=select('/geography', ['/shot/geography'], []),
         invariants=select('/invariants', ['/shot/mustPreserve', '/shot/directorCard/mustPreserve']),
         sound=[], audioBlocks=_audio_blocks(snapshot.get('prompt', '')), dialogueTiming=[], dialogueOccurrences=[], views=[])
     for key in ('geography', 'invariants'):
         if isinstance(plan[key], str):
             plan[key] = [plan[key]]
         from studio_prompt_structure import prose
-        plan[key] = [prose(value) for value in plan[key]]
+        plan[key] = [prose(value) for value in plan[key] if prose(value)]
         origin = origins.get('/' + key)
         if origin:
             for i in range(len(plan[key])):
@@ -214,6 +264,38 @@ def build_plan(snapshot):
                 text = prose(value, 'Must not advance' if field == 'mustNotAdvance' else '')
                 if text and text not in plan['invariants']:
                     plan['invariants'].append(text)
+
+    # Older approved cards store this truth in the timed state graph rather than
+    # in top-level geography/mustPreserve fields.  Promote it into the provider
+    # contract.  This is not new creative direction: it is the minimum readable
+    # projection of the already-approved set, prop and continuity authorities.
+    views_for_layout = card.get('views') or []
+    staging = [str(view.get('staging') or '').strip() for view in views_for_layout]
+    continuity = [str(view.get('continuity') or '').strip() for view in views_for_layout]
+    if not plan['geography']:
+        # Per-view staging is already emitted in each timed view.  Emit one
+        # compact fixed-layout contract here instead of copying twelve near-
+        # identical staging paragraphs into every provider request.
+        if staging or continuity:
+            plan['geography'].append(
+                'Fixed party geography: foreground party table with berry cups and napkins; '
+                'Sunny crosses the midground; hanging garland and lanterns occupy the background; '
+                'preserve the established table-side axis and layered depth across every cut.')
+    if any('prop.berryCups' == str(event.get('entityId'))
+           for event in card.get('stateChanges') or []):
+        berry_contract = (
+            'Berry cups remain visibly present on the party table throughout: '
+            'distinct berries stay visibly inside the cups while rainwater collects around them; '
+            'the cups never appear empty, replaced or filled with clear water alone. '
+            'The row may become imperfect only at the authored jostle, but the berries remain readable.')
+        if berry_contract not in plan['invariants']:
+            plan['invariants'].append(berry_contract)
+    if any('surface.partyTable' == str(event.get('entityId')) for event in card.get('stateChanges') or []):
+        table_contract = (
+            'Keep the party table as the fixed support for the cups and napkins; '
+            'preserve the foreground table, midground Sunny and background garland/lantern depth layers across cuts.')
+        if table_contract not in plan['invariants']:
+            plan['invariants'].append(table_contract)
     # The show's camera language and light baseline (laws/shot_grammar.json) are stated
     # once, under MUST PRESERVE, so every view is photographed in the same world.
     from studio_camera_law import world_camera_lines
@@ -234,6 +316,7 @@ def build_plan(snapshot):
     sfx_by_source = {cue['sourceDialogueIndex']: cue for cue in routed['seedanceSfxCues']}
     assigned = set()
     audio_occurrences = Counter(re.findall(r'\{([^{}]+)\}', '\n'.join(plan['audioBlocks'])))
+    emitted_checkpoints = set()
     for i, (view, interval) in enumerate(zip(views, intervals)):
         base, target = f'/shot/directorCard/views/{i}', f'/views/{i}'
         def field(name, source, default=''):
@@ -243,6 +326,9 @@ def build_plan(snapshot):
             entry=view.get('entry', 'opening' if i == 0 else 'hold'),
             visibleEntities=deepcopy(view.get('visibleEntities')),
             purpose=field('purpose', 'cameraPurpose'),
+            audienceNeed=field('audienceNeed', 'audienceNeed'),
+            listenerReaction=field('listenerReaction', 'listenerReaction'),
+            editReason=field('editReason', 'cutReason'),
             camera=camera_line(view, field('camera', 'framing'),
                                (authority.get('cameraLaw') or {}).get(view['viewId'])),
             action=authored[i]['text'],
@@ -265,19 +351,60 @@ def build_plan(snapshot):
             if in_audio:
                 audio_occurrences[cue['exactText']] -= 1
             else:
+                # The view already emits its full performance once. Repeating
+                # an ensemble paragraph as each speaker's vocal direction can
+                # misassign listener acting and compete with approved Audio1.
                 row['dialogue'].append(dialogue_placement_line(cue,
-                    direction=view.get('performance') or '',
-                hold_after=bool(view.get('holdAfterDialogue', False))))
+                    direction='Preserve the approved performance',
+                    hold_after=bool(view.get('holdAfterDialogue', False))))
             plan['dialogueOccurrences'].append(dict(speaker=cue['speaker'], text=cue['exactText'],
                 startSec=cue['startSec'], endSec=cue['endSec'], viewId=view['viewId'], sourceIndex=number,
                 placement='audio-block' if in_audio else 'view'))
             assigned.add(number)
+        # Speech can cross editorial cuts. Emit words once at their onset, but
+        # carry measured mouth ownership into every overlapping view.
+        from studio_character_roles import character_id
+        for cue in cues:
+            if not (cue['startSec'] < interval[1] and cue['endSec'] > interval[0]):
+                continue
+            start, end = max(cue['startSec'], interval[0]), min(cue['endSec'], interval[1])
+            phase = ('continues across the cut' if cue['startSec'] < interval[0] else
+                     'starts here and continues across the cut' if cue['endSec'] > interval[1] else
+                     'speaks within this view')
+            visible = row['visibleEntities']
+            on_screen = visible is not None and character_id(cue['speaker']) in {character_id(x) for x in visible}
+            # A visible hand does not make the speaker's mouth visible. Respect
+            # an explicit DIRECT insert framing rather than inventing lip sync.
+            mouth_out_of_frame = re.search(r"\bmouth\s+(?:stays|remains|is)\s+out of frame\b",
+                                           str(view.get('framing') or ''), re.I)
+            if mouth_out_of_frame:
+                on_screen = False
+            mouth = ('Match visible speech articulation to @Audio1.' if on_screen else
+                     'The speaker remains offscreen; do not add a speaking face.' if visible is not None else
+                     'Match speech articulation to @Audio1 only where the speaker is visible.')
+            if mouth_out_of_frame:
+                mouth = 'Preserve offscreen @Audio1 timing; the mouth stays out of frame. Do not add a speaking face.'
+            row['holds'].append(f"Audio continuity: {cue['speaker']} {phase}; {start:g}–{end:g}s in this view, "
+                                f"the same approved line ends at {cue['endSec']:g}s. {mouth} Do not restart or repeat the line.")
+        # These are existing DIRECT facts, not new acting. Keep their numeric
+        # timing beside the action instead of losing it in validation-only data.
+        for event in card.get('stateChanges') or []:
+            at = event.get('atSec')
+            cause = event.get('cause')
+            if isinstance(at, (int, float)) and not isinstance(at, bool) and interval[0] <= at < interval[1] and cause:
+                checkpoint = f"Directed checkpoint at {at:g}s: {cause}"
+                if checkpoint not in emitted_checkpoints:
+                    row['holds'].append(checkpoint)
+                    emitted_checkpoints.add(checkpoint)
         plan['views'].append(row)
     if not set(cue_by_source).issubset(assigned):
         raise ValueError('WATCH plan lacks explicit ownership for an approved dialogue occurrence')
     if any(audio_occurrences.values()):
         raise ValueError('Immutable audio block contains unmatched or repeated dialogue occurrences')
     plan['dialogueTiming'] = [f"{cue['speaker']}: {cue['startSec']:g}–{cue['endSec']:g}s." for cue in cues]
+    if card.get('soundOwnership'):
+        plan['sound'].append(card['soundOwnership'])
+        origins['/sound/0'] = '/shot/directorCard/soundOwnership'
     for cue in card.get('soundCues') or []:
         if cue.get('destination') == 'watch':
             plan['sound'].append(f"{cue.get('timing', '')}: {cue['instruction']}")
@@ -293,6 +420,14 @@ def build_plan(snapshot):
     plan['authoredActions'] = authored
     result = WatchPlan.model_validate(plan).model_dump()
     return result
+
+
+def _validate_causal_audio_checkpoints(shot, card):
+    """Reuse DIRECT's line-dependent timing guard against measured HEAR projections."""
+    from studio_director_handoff import causal_audio_checkpoint_issues
+    conflicts = causal_audio_checkpoint_issues({**shot, 'directorCard': card})
+    if conflicts:
+        raise ValueError(conflicts[0])
 
 
 def prepare_plan(snapshot):

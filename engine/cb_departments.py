@@ -944,6 +944,9 @@ class EpisodeStoryArchitectureDirection(BaseModel):
 
 
 
+from studio_episode_direction import VisualLanguage, CONTRACT as EPISODE_DIRECTION_CONTRACT
+
+
 class EpisodeVisionDirection(BaseModel):
     """The complete cb_creative.EpisodeVision schema used by approved story intake."""
     premise: str
@@ -961,6 +964,7 @@ class EpisodeVisionDirection(BaseModel):
     resolution: str
     intendedFinalFeeling: str
     storyArchitecture: EpisodeStoryArchitectureDirection
+    visualLanguage: Optional[VisualLanguage] = None
 
 
 class StoryIntakeDirection(BaseModel):
@@ -982,7 +986,7 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
     the Director never even sees, let alone preserves, everything past the cut."""
     return cb_llm.structured(
         _system("director",
-                load_runtime_skill("story-architect") + "\n\n"
+                load_runtime_skill("story-architect") + "\n\n" + EPISODE_DIRECTION_CONTRACT + "\n\n"
                 "You are breaking a LOCKED, already-approved script into its scenes and "
                 "beats for this studio's storyboard pipeline. The script's scene order, "
                 "its characters and every spoken line are LOCKED SOURCE EVIDENCE — you "
@@ -1107,11 +1111,10 @@ def prepare_cinematography(context, images, *, log=print):
 
 
 _TAG = re.compile(r"\[[^\]]+\]")
-_WORD = re.compile(r"[A-Za-z0-9']+")
 
 
 def _spoken_words(text):
-    return [w.lower() for w in _WORD.findall(_TAG.sub("", text or ""))]
+    return cb_voice_director.spoken_words(text)
 
 
 def _locked_line_text(line):
@@ -2137,10 +2140,20 @@ def provider_audio_routing(shot):
         text = str(line.get("exactText") or line.get("text") or "")
         for name in sorted(names, key=len, reverse=True):
             text = re.sub(rf"\b{re.escape(name.upper())}\b", name, text)
-        if line.get("exactText") is not None:
-            line["exactText"] = text
-        else:
-            line["text"] = text
+        # Verified source-bound rows are already partitioned against the exact
+        # screenplay payload. Do not rewrite the raw line before
+        # studio_source_segmentation validates it; even harmless casing changes
+        # in an action tail (for example ``SUNNY`` -> ``Sunny``) otherwise look
+        # like a changed source and stop WATCH at Fire. Legacy rows without a
+        # segmentation record keep the existing provider-safe casing behaviour.
+        segmentation = line.get("sourceSegmentation")
+        source_bound = (isinstance(segmentation, dict) and
+                        segmentation.get("segmentationStatus") == "VERIFIED")
+        if not source_bound:
+            if line.get("exactText") is not None:
+                line["exactText"] = text
+            else:
+                line["text"] = text
         lines.append(line)
     return cb_audio_authority.route_lines(lines)
 
@@ -2319,18 +2332,7 @@ def compile_animation_provider_prompt(shot, direction):
                 "words. No subtitles or captions. Dialogue language: English. "
                 + SEEDANCE_EXACT_AUDIO_DIALOGUE_LOCK)
         else:
-            authority = (
-                "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority "
-                "for every English dialogue line, voice identity, cadence, delivery, mouth "
-                "timing and silence. Each exact dialogue line appears once in braces in the "
-                "Shot Sequence and is bound to its named speaker and @Audio1. The exact braced "
-                "dialogue markers place approved words only; no alternative performance is "
-                "permitted. Listeners remain silent and closed-mouth unless they are the named "
-                "speaker for that exact line. No narration, no extra words, and no subtitles or "
-                "captions. Dialogue language: English. No music comes from @Audio1; Seedance "
-                "generates separate synchronized non-dialogue SFX, ambience and instrumental "
-                "musical underscore beneath the approved dialogue rhythm. "
-                + emission.SINGLE_INSTANCE_DIALOGUE_LOCK)
+            authority = emission.STANDARD_DIALOGUE_AUDIO_AUTHORITY
         sections.append(authority)
 
     exclusions = {
@@ -3599,7 +3601,16 @@ def review_keyframe_conformance(context, images, *, log=print):
             "anatomy and readable silhouettes; a loose performance-ready opening composition; "
             "and no forbidden props, duplicate subjects, duplicate tracked story objects, text, logo or watermark. Score 2 only "
             "when the requirement clearly passes, 1 when ambiguous or materially weak, and 0 "
-            "when wrong. Any non-2 dimension makes the verdict revise or block. Return one concise "
+            "when wrong. Apply each identity contract's mustNotBorrow list only to its named "
+            "character; another character's canonical distinguishing features remain allowed. "
+            "For any forbidden accessory, identify its exact location on the named character "
+            "in Image 1; do not mistake another character's jewellery or a background crystal "
+            "for an accessory on that character. If visibility is uncertain, say so instead "
+            "of claiming the accessory is present. "
+            "When openingFrameLayoutAuthority is derived_advisory, normalized character "
+            "centers are loose placeholders, not approved screen positions. Judge character "
+            "visibility and the authored opening state instead; do not require exact centers. "
+            "Any non-2 dimension makes the verdict revise or block. Return one concise "
             "prompt-ready correction that changes only failed features and preserves what worked. "
             "This qualification can block Accept but can never approve creative quality."),
         "KEYFRAME CONTRACT AND ORDERED IMAGE ROLES:\n" + _j(context) +

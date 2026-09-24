@@ -150,6 +150,55 @@ def cascade_retime_for_natural_performance(raw_audio_path, timing_path, dialogue
             "changes": changes, "providerCalled": False}
 
 
+def continuous_lines_from_provider_timing(raw_audio_path, timing_path, dialogue_lines,
+                                          first_start_sec):
+    """Repair DIRECT timing to match one continuous acted performance.
+
+    Text-to-Dialogue returns one performance. When a later storyboard revision leaves
+    less room than that performance needs, preserving discretionary gaps would make
+    the visible beat and audible mouth timing disagree. Collapse only those gaps and
+    keep the first authored anchor fixed. Script words and provider audio are untouched.
+    """
+    raw_audio_path = pathlib.Path(raw_audio_path)
+    timing_path = pathlib.Path(timing_path)
+    timing = _read_json(timing_path)
+    if timing.get("audioSha256") != file_sha256(raw_audio_path):
+        raise AudioTimingError("dialogue timing metadata does not match the raw audio bytes")
+    ranges = _source_ranges(timing, len(dialogue_lines))
+    if not ranges:
+        raise AudioTimingError("continuous dialogue timing has no provider ranges")
+    if not _needs_continuous_assembly(raw_audio_path, timing, ranges):
+        # Isolated lines were generated to support independent DIRECT anchors.
+        # Their source-file offsets are assembly coordinates, not scene timings.
+        return {"lines": [dict(line) for line in dialogue_lines],
+                "changes": [], "providerCalled": False}
+    try:
+        first_start = float(first_start_sec)
+    except (TypeError, ValueError) as exc:
+        raise AudioTimingError("dialogue line 1 has no approved start anchor") from exc
+    if first_start < 0:
+        raise AudioTimingError("dialogue line 1 starts before the shot")
+    repaired, changes = [], []
+    for index, (line, source_range) in enumerate(zip(dialogue_lines, ranges)):
+        source_start, source_end = source_range
+        start = first_start + source_start
+        end = first_start + source_end
+        updated = dict(line)
+        old_start = line.get("startSec") if line.get("startSec") is not None else line.get("startsAtSec")
+        old_end = line.get("endSec")
+        updated["startSec"] = round(start, 3)
+        updated["endSec"] = round(end, 3)
+        updated.pop("startsAtSec", None)
+        if (old_start is None or abs(float(old_start) - start) > 0.001 or
+                (old_end is not None and abs(float(old_end) - end) > 0.001)):
+            changes.append({"dialogueIndex": index, "fromStartSec": old_start,
+                            "fromEndSec": old_end, "toStartSec": updated["startSec"],
+                            "toEndSec": updated["endSec"],
+                            "reason": "continuous provider performance requires authored gaps to collapse"})
+        repaired.append(updated)
+    return {"lines": repaired, "changes": changes, "providerCalled": False}
+
+
 def natural_master_duration(required_duration_sec, maximum_duration_sec=30.0,
                             landing_room_sec=MIN_LANDING_ROOM_SEC):
     """Choose a whole-second slate, preferring landing room without rejecting a fitting take."""
@@ -163,6 +212,25 @@ def natural_master_duration(required_duration_sec, maximum_duration_sec=30.0,
             f"natural performance requires {required:.2f}s plus "
             f"{landing_room_sec:.2f}s landing room in a {maximum:g}s maximum")
     return target
+
+
+def continuous_fit_duration(raw_audio_path, timing_path, dialogue_lines,
+                            maximum_duration_sec=30.0,
+                            landing_room_sec=CONTINUOUS_END_ROOM_SEC):
+    """Use the existing bounded tempo policy only for a verified continuous take."""
+    timing = _read_json(timing_path)
+    if timing.get("audioSha256") != file_sha256(raw_audio_path):
+        raise AudioTimingError("dialogue timing metadata does not match the raw audio bytes")
+    ranges = _source_ranges(timing, len(dialogue_lines))
+    if not dialogue_lines or not _needs_continuous_assembly(raw_audio_path, timing, ranges):
+        raise AudioTimingError("duration recovery requires a continuous dialogue performance")
+    first = dialogue_lines[0]
+    start = float(first.get("startSec") if first.get("startSec") is not None else first.get("startsAtSec"))
+    raw_duration = _probe_duration(raw_audio_path)
+    available = float(maximum_duration_sec) - start - landing_room_sec
+    if start < 0 or available <= 0 or raw_duration / available > MAX_CONTINUOUS_TEMPO_FACTOR + 0.0001:
+        raise AudioTimingError("continuous performance exceeds the bounded tempo fit; split the directed unit")
+    return float(maximum_duration_sec)
 
 
 def dialogue_timing_path(audio_path):
@@ -296,7 +364,7 @@ def _needs_continuous_assembly(raw_audio_path, timing, ranges):
 
 
 def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, out,
-                                       ranges, timing_path):
+                                       ranges, timing_path, landing_room_sec=CONTINUOUS_END_ROOM_SEC):
     """Place a Text-to-Dialogue conversation once when per-turn timestamps are unsafe."""
     first = dialogue_lines[0]
     try:
@@ -309,19 +377,22 @@ def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, 
     authored_target_start = target_start
     target_end = target_start + raw_duration
     tempo_factor = 1.0
-    if raw_duration > duration_sec:
-        available = duration_sec - target_start - CONTINUOUS_END_ROOM_SEC
+    required_end_room = (landing_room_sec if landing_room_sec > CONTINUOUS_END_ROOM_SEC
+                         else 0.0)
+    if raw_duration > duration_sec or (required_end_room and
+                                       target_end > duration_sec - required_end_room):
+        available = duration_sec - target_start - landing_room_sec
         required_tempo = raw_duration / available if available > 0 else float("inf")
         if required_tempo <= MAX_CONTINUOUS_TEMPO_FACTOR + 0.0001:
             tempo_factor = required_tempo
             target_end = target_start + (raw_duration / tempo_factor)
-    if target_end > duration_sec and raw_duration <= duration_sec:
+    if target_end > duration_sec - required_end_room and raw_duration <= duration_sec - required_end_room:
         # The returned performance already contains the actors' natural pauses.
         # Use available headroom at the front of the slate instead of clipping the
         # final line or rejecting an already-paid take.
-        target_start = max(0.0, duration_sec - raw_duration)
+        target_start = max(0.0, duration_sec - required_end_room - raw_duration)
         target_end = target_start + raw_duration
-    if target_start < 0 or target_end > duration_sec + 0.001:
+    if target_start < 0 or target_end > duration_sec - required_end_room + 0.001:
         raise AudioTimingError(
             f"continuous dialogue performance needs {target_end:.2f}s but the shot is "
             f"{duration_sec:.2f}s")
@@ -388,7 +459,7 @@ def _render_continuous_dialogue_master(raw_audio, dialogue_lines, duration_sec, 
 
 
 def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
-                                 duration_sec, out):
+                                 duration_sec, out, landing_room_sec=CONTINUOUS_END_ROOM_SEC):
     """Place exact acted ranges at approved starts without clipping natural delivery."""
     raw_audio = pathlib.Path(raw_audio).resolve()
     timing_path = pathlib.Path(timing_path).resolve()
@@ -405,7 +476,8 @@ def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
     if _needs_continuous_assembly(raw_audio, timing, ranges):
         out.parent.mkdir(parents=True, exist_ok=True)
         return _render_continuous_dialogue_master(
-            raw_audio, dialogue_lines, duration_sec, out, ranges, timing_path)
+            raw_audio, dialogue_lines, duration_sec, out, ranges, timing_path,
+            landing_room_sec=landing_room_sec)
 
     authored = []
     for index, (line, source_range) in enumerate(zip(dialogue_lines, ranges)):

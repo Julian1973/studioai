@@ -23,7 +23,6 @@ PLAYBOOK_PATH = ROOT / "shows/crystal-bears/creative/learning/VOICE_PLAYBOOK.jso
 COMPILER_VERSION = "voice-director-v1"
 
 _TAG_RE = re.compile(r"\[([^\]]+)\]")
-_WORD_RE = re.compile(r"[A-Za-z0-9']+")
 _SEGMENT_RE = re.compile(r"[^.!?…\n]+[.!?…]*|\n+")
 _SCRIPT_NUMBER_RE = re.compile(r"^\s*\d+\s*\t")
 _TRAILING_STAGE_NOTE_RE = re.compile(r"\s*\([^)]*\)\s*$")
@@ -59,10 +58,17 @@ def _spoken_text(text):
 
 
 def _words(text):
-    return [
-        word.casefold()
-        for word in _WORD_RE.findall(_TAG_RE.sub("", _spoken_text(text)))
-    ]
+    return spoken_words(text)
+
+
+def spoken_words(text):
+    """Normalize spoken tokens once for every voice-stage word lock."""
+    return emission.dialogue_words(_TAG_RE.sub("", _spoken_text(text)))
+
+
+def same_spoken_words(first, second):
+    """Compare dialogue words while ignoring V3 tags and typographic apostrophes."""
+    return spoken_words(first) == spoken_words(second)
 
 
 def _locked_text(line):
@@ -489,11 +495,26 @@ def compile_direct_track(shot, locked_lines):
             normalized = tag.strip().casefold()
             if normalized and normalized not in tags:
                 tags.append(normalized)
-        performed = ((" ".join(f"[{tag}]" for tag in tags) + " ")
-                     if tags else "") + exact
+        # Preserve authored phrase-level turns. Legacy prose is never spoken;
+        # only an exact dialogue-plus-tags record can enter the provider intact.
+        untagged = " ".join(_TAG_RE.sub("", direction).split())
+        if untagged == " ".join(exact.split()):
+            performed = _TAG_RE.sub(lambda match: '[' + match.group(1).strip().casefold() + ']', direction)
+        else:
+            performed = ((" ".join(f"[{tag}]" for tag in tags) + " ")
+                         if tags else "") + exact
         recipe = {"recipeId": f"{shot.get('shotId')}-DIRECT-{index}",
                   "label": "DIRECT performance", "performedText": performed,
                   "primary": True, "takesCount": 1}
+        prose_warning = ("DIRECT contains prose rather than executable dialogue with v3 tags. "
+                         "Review the audible delivery in HEAR; prose notes are not sent to ElevenLabs."
+                         if untagged != " ".join(exact.split()) else None)
+        plain_turn_warning = (
+            "Acting changes across this line, but the provider text has no vocal cue. "
+            "Review the delivery in HEAR before firing."
+            if not tags and brief.get("emotionalEntry") and brief.get("emotionalExit") and
+            str(brief["emotionalEntry"]).strip().casefold() !=
+            str(brief["emotionalExit"]).strip().casefold() else None)
         item = {
             "dialogueOccurrenceId": occurrence,
             "sourceEventId": locked.get("sourceEventId"),
@@ -510,8 +531,13 @@ def compile_direct_track(shot, locked_lines):
                 (locked.get("endSec") or 0) - (locked.get("startSec") or 0))),
             "takeRecipes": [recipe],
             "directPerformanceDirection": direction,
+            "performanceNotes": {key: deepcopy(brief[key]) for key in (
+                "dramaticIntention", "subtext", "relationshipTarget", "emotionalEntry",
+                "emotionalExit", "operativeWords", "pace", "rhythm", "pauses", "breaths") if key in brief},
+            "performanceWarning": prose_warning or plain_turn_warning,
         }
-        item["compiledHash"] = _digest(item)
+        item["compiledHash"] = _digest({key: value for key, value in item.items()
+                                        if key not in ("performanceNotes", "performanceWarning")})
         compiled.append(item)
         previous = exact
     track = {"compiler": "direct-elevenlabs-v3@1", "shotId": shot.get("shotId"),

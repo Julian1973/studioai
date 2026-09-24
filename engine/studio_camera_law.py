@@ -88,7 +88,7 @@ def _species(name, entry_species, grammar):
 
 def _character_name(entity):
     text = str(entity or '').strip()
-    for prefix in ('character:', 'char:', 'character.'):
+    for prefix in ('character:', 'char:', 'character.', 'char.'):
         if text.startswith(prefix):
             return text[len(prefix):]
     if ':' in text:  # prop:, part:, atmosphere: are not characters
@@ -104,6 +104,12 @@ def featured_subject(view, characters):
     cinema = view.get('cinematography') if isinstance(view.get('cinematography'), dict) else {}
     kind = str(cinema.get('kind') or '').lower().replace(' ', '_')
     if kind in NON_CHARACTER_KINDS:
+        return None
+    # Explicit object-only visibility wins over a viewpoint owner or a name in
+    # prose. Emotional ownership does not put that character in an insert.
+    visible = view.get('visibleEntities')
+    if isinstance(visible, list) and not any(
+            _height_in(_character_name(entity), characters) is not None for entity in visible):
         return None
     owner = view.get('viewpointOwner')
     if owner and _height_in(owner, characters) is not None:

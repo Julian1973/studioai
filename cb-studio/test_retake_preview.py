@@ -137,7 +137,7 @@ const renderWorkspaceBody=()=>{},renderStageRail=()=>retakePreparationHTML();
 const fetch=async(url,opts)=>{requested=JSON.parse(opts.body);return await new Promise(resolve=>resolveFetch=resolve)};
 '''+functions+r'''
 (async()=>{
- const pending=prepareWatchRetake('S2.SH1','fix vision','prior');
+ const pending=previewWatchRetake('S2.SH1','fix vision','prior');
  assert.equal(requested.cmd,'PREPARE_RETAKE');
  assert.match(retakePreparationHTML(),/PREPARING RETAKE PACKAGE/);
  assert.equal(fires,0);

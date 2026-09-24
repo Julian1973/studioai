@@ -145,6 +145,27 @@ def test_playable_stage_allows_stationary_witness_in_a_cross_bank_travel_setup()
     assert rules.playable_stage_report(shot, cinematography)["ready"] is True
 
 
+def test_playable_stage_does_not_treat_prop_chain_route_as_character_travel():
+    shot = {"purpose": "Escalate the mess from wet floor to a friend's sticky humiliation."}
+    cinematography = {
+        "geography": [
+            "Lantern hangs low near a wobbling stool; Howey and Misty are in the midground; "
+            "honey pot waits beyond them.",
+            "Wet floor and fallen garland remain; lantern, stool and honey pot occupy the route.",
+        ],
+        "negativeSpace": ["Keep every subject and story-critical prop visible."],
+        "charactersInFrame": ["Sunny", "Howey", "Misty", "Fuzzby"],
+        "openingFrameLayout": {"placements": [
+            {"character": "Sunny", "pose": "at the start of the chain"},
+        ]},
+    }
+
+    assert rules.playable_stage_report(shot, cinematography)["ready"] is True
+    cinematography["geography"].append("Sunny's route crosses the room.")
+    assert "opening frame does not reserve lead room for travel" in (
+        rules.playable_stage_report(shot, cinematography)["errors"])
+
+
 def test_provider_dialogue_uses_character_name_casing_without_changing_words():
     lines = cb_departments.provider_dialogue_lines({
         "charactersInFrame": ["Bo"],

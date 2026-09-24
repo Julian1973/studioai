@@ -649,6 +649,25 @@ def test_duration_only_visual_change_does_not_stale_human_approved_voice_take(
     assert status["providerEquivalentContract"] is True
 
 
+def test_watch_rejects_unsynchronized_spoken_word_edits(tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    shot["dialogueLines"] = [{
+        "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
+        "speaker": "Fuzzby", "exactText": "Oof! I can't see!",
+    }]
+    ledger = render._ledger(package, shot["shotId"])
+    ledger["workingVoice"] = {"lines": [{
+        "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
+        "speaker": "Fuzzby", "text": "[shocked] Oof! Wow, I can't see! Help me!",
+    }]}
+
+    status = render._voice_approval_status(package, shot)
+
+    assert status["approved"] is False
+    assert status["current"] is False
+    assert "Save corrected words" in status["reason"]
+
+
 def test_keyframe_approval_survives_revision_but_not_input_or_file_change(
         tmp_path, monkeypatch):
     package, shot, frame = _pkg(tmp_path)

@@ -33,6 +33,30 @@ def test_parse_script_stops_dialogue_before_possessive_action_without_blank_line
     ]
 
 
+def test_shortened_dialogue_correction_preserves_mixed_script_tail_as_action():
+    old = ("Oof! I can’t see! He waddles around angrily, waving blindly. "
+           "ZENNY watches Fuzzby stuck in the honey pot. A beat. She tries to stay composed. "
+           "Her face tightens — but a small laugh slips out.")
+    spoken = "Oof! I can’t see!"
+    script = (
+        "INT. PARTY CAVE - CONTINUOUS 4\n\n"
+        f"FUZZBY\n{old}\n\n"
+        "FUZZBY\nI have been HONEYED!\n"
+    )
+
+    corrected = cb_intake.correct_dialogue_source(script, old, spoken)
+    parsed = cb_intake.parse_script(corrected, log=lambda *_: None)
+
+    assert spoken in corrected
+    assert old[len(spoken):].strip() in corrected
+    assert [(event["type"], event.get("speaker"), event["text"])
+            for event in parsed["events"]] == [
+        ("dialogue", "Fuzzby", spoken),
+        ("action", None, old[len(spoken):].strip()),
+        ("dialogue", "Fuzzby", "I have been HONEYED!"),
+    ]
+
+
 def _canon_status(episode="Ep1", cast=None, root=None, *, asset_scope=None):
     return {
         "current": True, "episodeReady": True,

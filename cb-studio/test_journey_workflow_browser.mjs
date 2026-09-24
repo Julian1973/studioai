@@ -14,6 +14,9 @@ const baseView={phase:'images',primary:'Approve SEE & Create Audio',revision:1,b
  {component:'plate',label:'Scene plate',url:'/plate.png',reviewStatus:'pending'},
  {component:'opening',label:'Opening keyframe',url:'/opening.png',reviewStatus:'approved'}],
  storyboard:[{viewId:'S3-V01',action:'Sunny places the cup.',camera:'Low close view'}],
+ sceneSequence:{approved:false,purpose:'Turn help into a choice.',dramaticQuestion:'Will Sunny accept help?',
+  entry:'Sunny refuses the towel.',exit:'Sunny lets a friend help.',beats:{beginning:'Offer the towel',turn:'Sunny accepts help',landing:'The room settles'},
+  coverage:[{shotId:'S3.SH1',durationSec:20,purpose:'Read Sunny’s refusal',landingImage:'The towel remains offered'}]},
  storyboardRequired:true,seePackage:{binding:'see-v1',panels:[],issues:[],providerSheet:{}},
  references:{keyframe:{references:[{role:'Sunny',status:'missing',message:'Sunny identity reference is missing'}]},animation:{references:[{role:'scene plate',status:'ready',url:'/plate.png'}]}}}};
 let view=structuredClone(baseView);
@@ -38,7 +41,7 @@ try{
  await page.goto(origin);
  await page.evaluate(()=>{
   window.calls=[];
-  window.options={reviewer:'Julian',changes:()=>{},
+  window.options={reviewer:'Julian',changes:()=>calls.push({direct:true}),openHear:()=>calls.push({hear:true}),
    imageSourceAction:async d=>{calls.push({source:d.action,component:d.component});},
    imageAction:async d=>{calls.push({review:d.action});throw new Error('Current approval could not be saved');},
    storyboardAction:async d=>calls.push({required:d.required}),
@@ -54,6 +57,9 @@ try{
  };
  const refresh=async next=>{view=structuredClone(next);await page.evaluate(()=>document.querySelector('main').journeyHandle.refresh());};
  await page.getByRole('button',{name:'Approve Scene plate',exact:true}).waitFor();
+ assert.equal(await page.getByText('Scene direction · review before production',{exact:true}).count(),1);
+ assert.equal(await page.getByText('Question · Will Sunny accept help?',{exact:true}).count(),1);
+ assert.equal(await page.getByText('S3.SH1 · 20s · Read Sunny’s refusal · The towel remains offered',{exact:true}).count(),1);
  assert.equal(await primary.isDisabled(),true);
  assert.equal(await page.locator('img[alt^="Visual storyboard panel"]').count(),0,'Planning references must not impersonate generated panels');
  assert.equal(await page.getByText(/SEE references used for creation/).count(),1);
@@ -95,6 +101,20 @@ try{
  await refresh({...baseView,operation:{id:'failed',status:'needs-decision',decision:{issue:'Input changed',proposed:'Review current input'}}});
  assert.equal(await primary.isEnabled(),true,'Recovery must stay reachable with missing storyboard');
  await decide('recover');assert.equal(requests.some(r=>r.command==='recover'),true);
+
+ await refresh({...baseView,operation:{id:'review-failed',status:'needs-decision',grant:{limitUsd:2.5},
+  decision:{issue:'WATCH_PROMPT_REVIEW_REQUIRED',proposed:'Retry review',
+   producer:{category:'direction',headline:'Review could not verify its evidence.',meaning:'Approved work is retained.',nextAction:'Retry or review direction.',button:'Retry review',preserved:'Everything approved is saved.'}}}});
+ assert.match(await page.locator('.journey-cost').innerText(),/original action cap of \$2\.50/);
+ assert.equal(await page.getByRole('button',{name:'Review in DIRECT',exact:true}).count(),1);
+ await page.getByRole('button',{name:'Review in DIRECT',exact:true}).click();
+ assert.equal(await page.evaluate(()=>calls.some(c=>c.direct)),true,'Producer can choose manual direction review');
+ await refresh({...baseView,phase:'audio',operation:{id:'audio-failed',status:'needs-decision',grant:{limitUsd:0},
+  decision:{issue:'Audio needs review',proposed:'Open HEAR',
+   producer:{category:'audio',headline:'Audio needs review.',meaning:'Approved work is retained.',nextAction:'Open HEAR.',button:'Retry',preserved:'Everything approved is saved.'}}}});
+ assert.equal(await page.getByRole('button',{name:'Open HEAR',exact:true}).count(),1);
+ await page.getByRole('button',{name:'Open HEAR',exact:true}).click();
+ assert.equal(await page.evaluate(()=>calls.some(c=>c.hear)),true,'Producer can choose HEAR without retrying generation');
 
  await refresh({...skipped,phase:'audio',busy:true,operation:{id:'watch',status:'running',requestDisplayHash:'sealed',receipts:{prepare_render:{requestDisplay:{prompt:'Exact sealed prompt',maximumUsd:2}}}}});
  await page.getByText('WATCH · Final request',{exact:true}).waitFor();

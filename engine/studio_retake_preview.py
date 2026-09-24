@@ -92,8 +92,13 @@ def _prepare(root, episode, scene, shot_id, correction='', expected_batch_id=Non
                 for op in operations:
                     for at, data in conn.execute('SELECT at,data_json FROM production_operation_events WHERE operation_id=? ORDER BY event_id', (op['operationId'],)):
                         card['lineage']['events'].append({'operationId': op['operationId'], 'at': at, 'event': json.loads(data)})
+                from cb_recovery import (provider_operation_explicitly_not_submitted,
+                                         provider_operation_superseded_by_verified_batch)
                 if any(op.get('kind') == 'submit-watch' and op.get('state') in
-                       {'queued', 'running', 'needs-attention', 'recovering'} for op in operations):
+                       {'queued', 'running', 'needs-attention', 'recovering', 'reconciling-submission'}
+                       and not (provider_operation_superseded_by_verified_batch(op, led) or
+                                provider_operation_explicitly_not_submitted(root, op))
+                       for op in operations):
                     return stop('RECOVERY REQUIRED', 'A previous submission requires reconciliation.',
                                 'Reconcile the existing submission before any new Fire.', ['WATCH'])
         except (sqlite3.Error, OSError, ValueError):

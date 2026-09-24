@@ -537,9 +537,10 @@ def test_one_consistent_anchor_matching_style_rule():
         assert "Stylised feature-quality 3D CGI matching @图1." in p
         assert "Pixar-caliber" not in p and "squash-and-stretch" not in p
         assert "only for the set" in p                        # the plate has a declared job
-    # the frozen keyframe IMAGE compiler is untouched by the rule
+    # Keyframes use only the approved references for look and light.
     kf, _, _ = E.compile_keyframe_prompt(d.shots[0], {}, CFG)
-    assert "Stylised feature-quality 3D CGI with natural weight" in kf
+    assert "Use the character references for identity and the scene plate for approved look and light." in kf
+    assert "Stylised feature-quality" not in kf
     assert "Pixar-caliber" not in kf and "squash-and-stretch" not in kf
 
 
@@ -631,8 +632,12 @@ def test_keyframe_prompt_omits_continuity_paragraph_when_nothing_inherited():
     kf, wc, _ = E.compile_keyframe_prompt(shot, {}, CFG)
     assert "continuity in" not in kf.lower()
     assert "world-space geography" in kf.lower()
-    assert "without copying its camera composition" in kf.lower()
+    assert "do not copy its camera composition" in kf.lower()
     assert wc == len(kf.split())
+    assert wc < 180
+    assert "Opening frame:" in kf
+    assert "Stylised feature-quality" not in kf
+    assert "frozen smile" not in kf
 
 
 def test_keyframe_prompt_prints_continuity_paragraph_when_real_state_inherited():
@@ -657,7 +662,7 @@ def test_keyframe_prompt_is_reference_first_and_appearance_free():
     kf, wc, _ = E.compile_keyframe_prompt(_clean_design().shots[0], {}, CFG)
     assert "wider" not in kf.lower()                  # the room-to-breathe law is GONE
     assert "world-space geography" in kf.lower()
-    assert "without copying its camera composition" in kf.lower()
+    assert "do not copy its camera composition" in kf.lower()
     assert wc == len(kf.split())
     # rule 5: the compiler's own fixed text never describes appearance
     for banned in ("yellow", "stripe", "spectacles", "glasses", "fur", "fuzzy"):

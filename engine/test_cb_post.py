@@ -413,7 +413,8 @@ def test_conform_plan_applies_manual_director_trim(monkeypatch):
     assert plan[0]["sceneEndSec"] == 7.25
 
 
-def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_path):
+@pytest.mark.parametrize('preserve_mix', [False, True])
+def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_path, preserve_mix):
     clip = tmp_path / "approved.mp4"
     clip.write_bytes(b"approved take")
     voice = tmp_path / "approved_voice.wav"
@@ -468,6 +469,15 @@ def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_pa
               "dialogueLines": [{"dialogueOccurrenceId": "occ:first",
                                   "sourceEventId": "event:first", "speaker": "Fuzzby",
                                   "exactText": "Again.", "startSec": 0.5, "endSec": 1.2}]}]
+    if preserve_mix:
+        shots[0]['audioProvenance']['policyVersion'] = 'provider-final-mix-v1'
+        monkeypatch.setattr(cb_post, 'replace_guide_dialogue',
+                            lambda *a: pytest.fail('Must not strip approved final mix'))
+        def keep_mix(clips):
+            assert clips == [str(clip)]
+            assert clip.read_bytes() == b'approved take'
+            return clips
+        monkeypatch.setattr(cb_post, '_norm', keep_mix)
     root = tmp_path / "post"
     manifest = cb_post.build_scene_post(
         shots, root, "EpT", "9", {"kind": "scene-post", "digest": "abc"},

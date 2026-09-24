@@ -21,7 +21,7 @@ approval. Asserts:
   4. a failed-validation package cannot fire anything
   5. a pending batch cannot be re-fired past
   6. batch rejection archives everything, the reroll uses the UNCHANGED package, and two
-     failed batches hard-stop the shot as model-limited
+     repeated failed batches remain advisory and the shot stays actionable
   7. the QC-passed final master contains every approved shot, in order, and is not final
      until a separate human review approves it
 
@@ -1152,6 +1152,46 @@ def test_failed_keyframe_identity_screen_preserves_candidate_for_human_decision(
     assert "The staging does not match" in ledger["keyframeRejected"]["reason"]
 
 
+def test_generate_refreshes_failed_candidate_without_losing_it_on_provider_failure(
+        world, monkeypatch):
+    prov, _, _ = world
+    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a: None)
+    pkg, path = R.load_pkg("9", "EpT")
+    old = R._ledger(pkg, "1.B1.S1")["keyframeCandidate"]
+    old_path = old["path"]
+    old["conformanceScreening"] = {"status": "fail", "reason": "wrong scale"}
+    R._ledger(pkg, "1.B1.S1")["keyframeCandidates"][0]["conformanceScreening"] = (
+        old["conformanceScreening"])
+    R._save(pkg, path)
+
+    def provider_failure(*args, **kwargs):
+        raise RuntimeError("provider unavailable")
+
+    real_generator = R.cb_gen.generate_image
+    monkeypatch.setattr(R.cb_gen, "generate_image", provider_failure)
+    with pytest.raises(RuntimeError, match="provider unavailable"):
+        R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a: None)
+    assert R._ledger(R.load_pkg("9", "EpT")[0], "1.B1.S1")["keyframeCandidate"]["path"] == old_path
+
+    monkeypatch.setattr(R.cb_gen, "generate_image", real_generator)
+    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a: None)
+    refreshed = R._ledger(R.load_pkg("9", "EpT")[0], "1.B1.S1")
+    assert refreshed["keyframeCandidate"]["path"] != old_path
+    assert any(item["path"] == old_path and
+               item["outcome"] == "superseded-by-refreshed-candidate"
+               for item in refreshed["keyframeHistory"])
+    assert pathlib.Path(old_path).exists()
+    assert len(prov.image_calls) == 2
+
+
+def test_generate_does_not_duplicate_current_pending_candidate(world):
+    prov, _, _ = world
+    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a: None)
+    with pytest.raises(R.Refused, match="current keyframe candidate"):
+        R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a: None)
+    assert len(prov.image_calls) == 1
+
+
 def test_unavailable_keyframe_identity_screen_preserves_candidate_for_human_accept(
         world, monkeypatch):
     prov, _, _ = world
@@ -1822,15 +1862,15 @@ def test_failure_ladder_unchanged_reroll_then_model_limited(world):
     R.fire_shot("9", "1.B1.S1", "EpT", candidates=2, spend_token=t1b,
                 log=lambda *a, **k: None)
     assert prov.fire_calls[-1]["prompt"] == first_prompt
-    # second failed batch -> MODEL-LIMITED; a third fire refuses by name
+    # second failed batch remains advisory; a third fire stays available
     R.reject_shot("9", "1.B1.S1", "still no readable impact",
                   category="action-timing", episode="EpT", log=lambda *a, **k: None)
-    assert _led()["1.B1.S1"]["status"] == "model-limited"
-    with pytest.raises(R.Refused, match="MODEL-LIMITED"):
-        R.fire_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
-    # and the walk refuses at it too — a model-limited shot blocks, never silently skipped
-    with pytest.raises(R.Refused, match="model-limited"):
-        R.next_shot("9", "EpT", log=lambda *a, **k: None)
+    assert _led()["1.B1.S1"]["status"] == "designed"
+    assert _led()["1.B1.S1"]["rejectionAdvisory"]["batchAttempts"] == 2
+    t2 = _token("1.B1.S1", candidates=2)
+    R.fire_shot("9", "1.B1.S1", "EpT", candidates=2, spend_token=t2,
+                log=lambda *a, **k: None)
+    assert _led()["1.B1.S1"]["status"] == "candidates-pending"
 
 
 def test_stitch_refuses_with_unapproved_shots(world):

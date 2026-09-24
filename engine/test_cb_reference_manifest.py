@@ -116,20 +116,12 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
         ("@图2", "Fuzzby", "complete-turnaround"),
         ("@图3", "scene plate", None),
     ]
-    assert "@图1: Zenny's complete, uncropped 360 turnaround is the 100% identity authority" in prompt
-    assert "Match Zenny exactly as the same character shown in the turnaround" in prompt
-    assert "@图2: Fuzzby's complete, uncropped 360 turnaround is the 100% identity authority" in prompt
-    assert "Natural staging lock:" in prompt
-    assert "Never copy a turnaround's front, side or presentation pose" in prompt
-    assert "no arms held out from the body, T-pose" in prompt
+    assert "@图1: Zenny identity and proportions only." in prompt
+    assert "@图2: Fuzzby identity and proportions only." in prompt
     assert "round glasses" not in prompt
     assert "rosy blush" not in prompt
-    assert "@图3: exact approved location authority" in prompt
-    assert "Project-stable slots: @图1=Zenny; @图2=Fuzzby; @图3=scene plate." in prompt
-    assert ("Multi-angle collapse: @图1=one Zenny; @图2=one Fuzzby; views are angles, "
-            "not extra characters.") in prompt
-    assert "do not describe, redesign, simplify, beautify" in prompt
-    assert "omitted reference features" in prompt
+    assert "@图3: approved set" in prompt
+    assert "Keep identities distinct." in prompt
     assert "[PURPOSE]" in prompt
     assert "[REFERENCE AUTHORITY]" in prompt
     assert "[COMPOSITION]" in prompt
@@ -138,6 +130,9 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
         cb_render.SEEDREAM_KEYFRAME_PROMPT_SECTIONS
     assert "Hold frame-right open for the later flower reveal." in prompt
     assert "Hold frame-right open for the later flower reveal." in prompt
+    assert "Feature-quality stylized 3D CGI" not in prompt
+    assert cb_render.cb_departments.prompt_sections(prompt)["STYLE"] == (
+        "Match Crystal Bears canon and the approved Scene Look; no new styling.")
 
 
 def test_project_policy_stabilizes_slots_independent_of_authored_slot_order(monkeypatch):
@@ -280,7 +275,8 @@ def test_reference_manifest_exposes_keyframe_and_animation_in_provider_order(
                 "@图1": "Fuzzby", "@图2": "scene plate"},
             "referenceSlots": {
                 "@图1": "opening keyframe", "@图2": "Fuzzby",
-                "@图3": "scene plate", "@Audio1": "voice track"},
+                "@图3": "scene plate", "@图4": "previous shot final frame",
+                "@Audio1": "voice track"},
         }],
         "continuityLedger": [{
             "shotId": "S1.SH1", "voPath": str(audio),
@@ -549,10 +545,10 @@ def test_composition_and_scale_controls_remain_local_while_locked_assets_own_pro
         direction, shot, keyframe_blueprint)
     animation_prompt = cb_render._with_character_scale_control(
         "Animate the approved performance.", shot, "referenceSlots", "1", "Ep1")
-    assert "@图1: Zenny's single-subject character anchor is the 100% identity authority" in keyframe_prompt
-    assert "@图2: Fuzzby's single-subject character anchor is the 100% identity authority" in keyframe_prompt
+    assert "@图1: Zenny identity and proportions only." in keyframe_prompt
+    assert "@图2: Fuzzby identity and proportions only." in keyframe_prompt
     assert "round glasses" not in keyframe_prompt
-    assert "@图3: exact approved location authority" in keyframe_prompt
+    assert "@图3: approved set" in keyframe_prompt
     assert "[DO NOT SHOW YET]" in keyframe_prompt
     assert cb_render.OPENING_COMPOSITION_ROLE not in keyframe_prompt
     assert cb_render.CHARACTER_SCALE_CONTROL_MARKER not in keyframe_prompt
@@ -602,6 +598,7 @@ def test_prop_binding_prefers_approved_shot_state_to_generic_design(monkeypatch,
 def test_cut_keyframe_prefers_approved_editorial_relay_state(monkeypatch, tmp_path):
     final_frame = _write(tmp_path / "literal_final.png")
     relay_frame = _write(tmp_path / "editorial_relay.png")
+    plate = _write(tmp_path / "scene-plate.png")
     source = {
         "shotId": "S1.SH1",
         "status": "approved",
@@ -615,6 +612,7 @@ def test_cut_keyframe_prefers_approved_editorial_relay_state(monkeypatch, tmp_pa
     }
     monkeypatch.setattr(cb_render, "load_pkg", lambda *args: ({"continuityLedger": [source]}, None))
     monkeypatch.setattr(cb_render, "_reference_path_is_approved", lambda path: True)
+    monkeypatch.setattr(cb_render, "_plate_path", lambda *args: str(plate))
     shot = {
         "shotId": "S1.SH2",
         "sourceType": "opener",
@@ -625,9 +623,10 @@ def test_cut_keyframe_prefers_approved_editorial_relay_state(monkeypatch, tmp_pa
     plan = cb_render._provider_attachment_plan(
         shot, "keyframeReferenceSlots", None, "1", "EpT", {})
 
-    assert len(plan) == 1
-    assert plan[0]["role"] == "previous shot state reference"
-    assert plan[0]["path"] == str(relay_frame)
+    state_ref = next(item for item in plan if item["role"] == "previous shot state reference")
+    assert state_ref["path"] == str(relay_frame)
+    assert any(item["role"] == "scene plate" and item["path"] == str(plate)
+               for item in plan)
 
     relay_frame.write_bytes(b"changed-relay")
     with pytest.raises(cb_render.Refused, match="editorial relay frame changed"):
@@ -637,24 +636,133 @@ def test_cut_keyframe_prefers_approved_editorial_relay_state(monkeypatch, tmp_pa
 
 def test_cut_keyframe_attaches_accepted_state_without_using_it_as_opening(monkeypatch, tmp_path):
     frame = _write(tmp_path / "landing.png")
+    plate = _write(tmp_path / "scene-plate.png")
     source = {"shotId": "S1.SH1", "status": "approved", "harvestFrame": str(frame),
               "approval": {"harvestHash": cb_render._sha256_file(frame)}}
     monkeypatch.setattr(cb_render, "load_pkg", lambda *args: ({"continuityLedger": [source]}, None))
     monkeypatch.setattr(cb_render, "_reference_path_is_approved", lambda path: True)
+    monkeypatch.setattr(cb_render, "_plate_path", lambda *args: str(plate))
     shot = {"shotId": "S1.SH2", "sourceType": "opener", "keyframeReferenceSlots": {},
             "shotTransition": {"type": "cut", "stateSourceShotId": "S1.SH1"}}
     plan = cb_render._provider_attachment_plan(shot, "keyframeReferenceSlots", None, "1", "EpT", {})
-    assert len(plan) == 1
-    assert plan[0]["role"] == "previous shot state reference"
-    assert plan[0]["path"] == str(frame)
+    state_ref = next(item for item in plan if item["role"] == "previous shot state reference")
+    assert state_ref["path"] == str(frame)
+    assert any(item["role"] == "scene plate" and item["path"] == str(plate)
+               for item in plan)
     assert cb_render._shot_uses_own_keyframe(shot)
-    assert not cb_render._expanded_reference_blueprint(shot, "referenceSlots", {})
+    animation_roles = [item["role"] for item in cb_render._expanded_reference_blueprint(
+        shot, "referenceSlots", {})]
+    assert "opening keyframe" in animation_roles
+    assert "previous shot state reference" not in animation_roles
     frame.write_bytes(b"changed")
     with pytest.raises(cb_render.Refused, match="landing frame changed"):
         cb_render._provider_attachment_plan(shot, "keyframeReferenceSlots", None, "1", "EpT", {})
     source["status"] = "designed"
     with pytest.raises(cb_render.Refused, match="approve the preceding render"):
         cb_render._provider_attachment_plan(shot, "keyframeReferenceSlots", None, "1", "EpT", {})
+
+
+def test_s4_sh2_cut_adds_prior_ending_as_state_reference(monkeypatch):
+    monkeypatch.setattr(
+        cb_render, "_provider_identity_records",
+        lambda role, cfg, usage, **kwargs: [{"character": role, "path": f"/{role}.png"}],
+    )
+    shot = {
+        "shotId": "S4.SH2",
+        "sourceType": "opener",
+        "charactersInFrame": ["Keen", "Sunny"],
+        "keyframeReferenceSlots": {
+            "@图1": "Keen", "@图2": "Sunny", "@图3": "scene plate",
+        },
+        "shotTransition": {"type": "cut", "stateSourceShotId": "S4.SH1"},
+    }
+    plan = cb_render._expanded_reference_blueprint(
+        shot, "keyframeReferenceSlots", {"Keen": {}, "Sunny": {}}, scene="4", episode="Ep4")
+    roles = [item["role"] for item in plan]
+    assert "previous shot state reference" in roles
+    assert "opening keyframe" not in roles
+    assert {"Keen", "Sunny", "scene plate"}.issubset(set(roles))
+    direction = {
+        **_approved_keyframe_fields(),
+        "charactersInFrame": ["Keen", "Sunny"],
+        "audienceRead": "See the drip as proof of the emotional problem.",
+        "lensAndCameraRelationship": "Keen-facing under the garland.",
+        "lightingAndDepth": "Keep the approved cave light and depth.",
+        "openingFrameLayout": {
+            "sameDepth": False,
+            "placements": [{"character": "Keen"}, {"character": "Sunny"}],
+        },
+    }
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, shot, plan)
+    state_slot = next(item["slot"] for item in plan
+                      if item["role"] == "previous shot state reference")
+    assert f"{state_slot}: previous accepted frame" in prompt
+    assert "not identity or framing" in prompt
+
+
+def test_see_prompt_uses_one_still_brief_not_raw_storyboard_performance(monkeypatch):
+    direction = {
+        **_approved_keyframe_fields(),
+        "charactersInFrame": ["Keen", "Sunny"],
+        "audienceRead": "Keen sees the first drip beneath the held garland.",
+        "lensAndCameraRelationship": "35 mm medium-wide view beneath the garland.",
+        "lightingAndDepth": "Approved warm cave light.",
+        "cameraConsciousness": {
+            "dramaticOwner": "Keen", "emotionalAction": "Notice the drip.",
+            "cameraState": "controlled", "viewpoint": "Keen looking up.",
+            "lensFamily": "35 mm medium-wide.",
+            "movementTrigger": "Tilt down after the drop lands.",
+            "movementFinish": "Continue into Keen's reaction.",
+            "focusPlan": "Rack focus from garland to Keen.",
+            "exitCondition": "Cut after Keen reacts.",
+        },
+        "latestRevisionTarget": (
+            "Put Sunny on the floor beside the ladder; both feet grounded. "
+            "Visible result required: show both feet. Keep locked: approved camera."
+        ),
+        "openingFrameLayout": {"sameDepth": True, "placements": [
+            {"character": "Keen", "pose": "standing on the cave floor",
+             "facing": "looking up"},
+            {"character": "Sunny", "pose": "standing beside the ladder, holding the garland",
+             "facing": "toward Keen"},
+        ]},
+    }
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
+        "Keen": {"heightIn": 57}, "Sunny": {"heightIn": 50}})
+    shot = {
+        "shotId": "S4.SH2", "charactersInFrame": ["Keen", "Sunny"],
+        "keyframeReferenceSlots": {
+            "@图1": "Keen", "@图2": "Sunny", "@图3": "scene plate"},
+        "directorCard": {"views": [{
+            "startState": "Garland is being lifted as indoor sunshine.",
+            "staging": "Sunny perched on the ladder; Keen reacts after the drop.",
+            "cinematography": {"movement": "tilt down", "focus": "rack to Keen"},
+        }]},
+        "openingFrameLayoutApproved": direction["openingFrameLayout"],
+    }
+
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, shot)
+    sections = cb_departments.prompt_sections(prompt)
+
+    assert "standing beside the ladder, holding the garland" in sections["SUBJECTS"]
+    assert "Sunny perched on the ladder" not in prompt
+    assert "Garland is being lifted as indoor sunshine" not in prompt
+    assert "movementTrigger:" not in sections["COMPOSITION"]
+    assert "movementFinish:" not in sections["COMPOSITION"]
+    assert "focusPlan:" not in sections["COMPOSITION"]
+    assert "exitCondition:" not in sections["COMPOSITION"]
+    assert "Tilt down after the drop lands." not in sections["COMPOSITION"]
+    assert "Keen looking up." not in sections["COMPOSITION"]
+    assert "Put Sunny on the floor beside the ladder; both feet grounded." in (
+        sections["MUST PRESERVE"])
+    assert "Visible result required:" not in sections["MUST PRESERVE"]
+    assert "Keep locked:" not in sections["MUST PRESERVE"]
+    assert "overrides older prompt wording for this issue only" in sections["MUST PRESERVE"]
+    projected = cb_render._direct_keyframe_direction(shot)
+    assert projected["geography"] == [
+        "The approved Scene Plate defines fixed environment geography; SUBJECTS and "
+        "OPENING STATE define frame-one character and prop placement."
+    ]
 
 
 def test_keyframe_location_reference_is_geography_not_character():
@@ -669,8 +777,8 @@ def test_keyframe_location_reference_is_geography_not_character():
     prompt = cb_render._compile_keyframe_integration_prompt(direction, shot, [
         {'slot': '@图1', 'role': 'location:established wide'},
     ])
-    assert '@图1: established geography reference only' in prompt
-    assert 'Do not copy historical character positions or restore removed objects' in prompt
+    assert '@图1: fixed location and landmark relationships only' in prompt
+    assert 'not character staging' in prompt
     assert "location:established wide's complete" not in prompt
     assert 'one location:established wide' not in prompt
 
@@ -692,14 +800,8 @@ def test_scene_plate_authority_reaches_emitted_keyframe_prompt():
     prompt = cb_render._compile_keyframe_integration_prompt(direction, shot, [
         {'slot': '@图6', 'role': 'scene plate'},
     ])
-    assert '@图6: exact approved location authority' in prompt
-    assert 'Use this plate as the opening background' in prompt
-    assert 'never restore a removed object' in prompt
-    shot['shotTransition'] = {'type': 'cut'}
-    prompt = cb_render._compile_keyframe_integration_prompt(direction, shot, [
-        {'slot': '@图6', 'role': 'scene plate'},
-    ])
-    assert 'Reframe only for the authored camera view' in prompt
+    assert '@图6: approved set' in prompt
+    assert 'no redesign or restored props' in prompt
 
 
 def test_vision_reference_is_content_not_additional_cast():
@@ -709,3 +811,37 @@ def test_vision_reference_is_content_not_additional_cast():
     assert len(lines)==1 and '@图4' in lines[0]
     assert 'water surface only' in lines[0]
     assert 'do not place them physically at the pool' in lines[0]
+
+
+def test_keyframe_screen_keeps_bee_jewellery_ban_character_scoped(monkeypatch, tmp_path):
+    candidate = _write(tmp_path / "candidate.png")
+    bee = _write(tmp_path / "bee.jpeg")
+    bear = _write(tmp_path / "bear.jpeg")
+    captured = {}
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
+        "Fuzzby": {"heightIn": 14}, "Misty": {"heightIn": 65}})
+    monkeypatch.setattr(cb_render, "_provider_attachment_plan", lambda *args: [
+        {"slot": "@图1", "role": "Fuzzby", "path": str(bee), "identity": {
+            "character": "Fuzzby", "mustNotBorrow": ["any pendant, necklace, medallion or crystal"]}},
+        {"slot": "@图2", "role": "Misty", "path": str(bear), "identity": {
+            "character": "Misty", "distinguishingFeatures": ["blue teardrop pendant"]}},
+    ])
+    monkeypatch.setattr(cb_render, "_direct_keyframe_direction", lambda shot: {
+        "openingFrameLayout": {"placements": []}})
+
+    def review(context, images, **kwargs):
+        captured.update(context)
+        return {"verdict": "revise", "expectedCharacters": ["Misty", "Fuzzby"],
+                "expectedSubjectCount": 2, "summary": "scale needs review"}
+
+    monkeypatch.setattr(cb_departments, "review_keyframe_conformance", review)
+    cb_render.screen_keyframe_conformance({}, {
+        "shotId": "S1.SH1", "openingCharactersInFrame": ["Misty", "Fuzzby"]},
+        candidate, 1)
+
+    identities = {item["character"]: item for item in captured["identityContracts"]}
+    assert "any pendant, necklace, medallion or crystal" in identities["Fuzzby"]["mustNotBorrow"]
+    assert "blue teardrop pendant" in identities["Misty"]["distinguishingFeatures"]
+    assert "any pendant, necklace, medallion or crystal" not in captured["forbidden"]
+    assert "pendants, necklaces, medallions or crystals on either bee" in captured["forbidden"]
+    assert captured["openingFrameLayoutAuthority"] == "derived_advisory"

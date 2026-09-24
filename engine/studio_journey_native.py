@@ -80,6 +80,30 @@ def authority(shot):
     return source(shot)
 
 
+def _phase_from_policy(board, policy, shot_state, ledger):
+    """Project the single approval policy into the producer journey's next stage."""
+    # `packageCurrent` already includes the canonical Storyboard approval/lineage
+    # check. Do not re-check a second board projection here; it can be absent or stale
+    # even when the server's authoritative package policy is current.
+    if not policy.get('packageExists') and not board:
+        return 'prepare'
+    if not policy.get('packageCurrent'):
+        return 'plan'
+    if not shot_state:
+        return 'images'
+    if shot_state.get('kf') == 'waitingPrev':
+        return 'dependency'
+    if (ledger.get('status') == 'candidates-pending' and
+            shot_state.get('animState') in ('candidates-pending', 'stale-batch')):
+        return 'film'
+    current = shot_state.get('current') or {}
+    if ledger.get('status') == 'approved' and current.get('animation'):
+        return 'complete'
+    if current.get('keyframe'):
+        return 'audio'
+    return 'images'
+
+
 class Native:
     def __init__(self, root, server):
         self.root, self.server = Path(root), server
@@ -89,6 +113,18 @@ class Native:
             raise ValueError('The selected project uses its project production service.')
         pkg, board, shot, led = read(self.root, scope)
         R = self.server._canonical_cb_render()
+        state_reader = getattr(self.server, '_production_state', None)
+        if state_reader:
+            policy = state_reader(scope['scene'], scope['episode'])
+        else:
+            state_module = getattr(self.server, '_canonical_cb_state', None)
+            if state_module:
+                policy = state_module().production_state(scope['scene'], scope['episode'])
+            else:
+                import cb_state
+                policy = cb_state.production_state(scope['scene'], scope['episode'])
+        shot_state = next((row for row in policy.get('shots', [])
+                           if row.get('shotId') == scope['unit']), None)
         plate_status = R.scenelook_status(scope['scene'],scope['episode']) if shot else {}
         plate = file_record(self.root,(plate_status.get('active') or plate_status.get('candidate') or plate_status.get('approved') or {}).get('path'))
         see = led.get('keyframeCandidate') or led.get('keyframeApproval') or {}
@@ -112,29 +148,23 @@ class Native:
                       for line in board.get('voicePerformances', [])]
         has_audio = bool(spoken)
         projection_issues = []
-        see_current = bool(image and (led.get('keyframeApproval') or {}).get('approved') and not led.get('keyframeCandidate'))
-        if see_current:
-            try:
-                see_current = bool(R._keyframe_record_status(
-                    pkg, shot, led['keyframeApproval'], scope['scene'],
-                    scope['episode']).get('current'))
-            except (R.Refused, OSError, ValueError, KeyError) as exc:
-                see_current = False
-                projection_issues.append(str(exc))
+        current_state = (shot_state or {}).get('current') or {}
+        see_current = bool(image and current_state.get('keyframe'))
         try:
             voice_status = R._voice_approval_status(
                 pkg, shot, scope['scene'], scope['episode']) if shot else {}
         except (R.Refused, OSError, ValueError, KeyError) as exc:
             voice_status = {'current': False, 'reason': str(exc)}
             projection_issues.append(str(exc))
-        audio_current = not has_audio or bool(voice_status.get('current'))
-        phase = ('complete' if led.get('status') == 'approved' else
-                 'film' if videos and led.get('status') == 'candidates-pending' else
-                 'audio' if see_current and (audio or not has_audio) else
-                 'images' if image else 'plan' if board else 'prepare')
-        if see_current and audio_current and phase != 'film' and phase != 'complete':
-            # Already accepted performances are reused, with a single render decision.
-            phase = 'audio'
+        audio_current = not has_audio or bool(current_state.get('voice'))
+        # An approved storyboard is the SEE handoff. Keep the existing image
+        # review surface visible even when its media is missing or stale so the
+        # producer can upload, refire, choose from the library, or review it.
+        phase = _phase_from_policy(board, policy, shot_state, led)
+        # Keep an existing candidate visible for an explicit human decision, even
+        # when its dependency check now marks it stale. Approval remains guarded.
+        if led.get('status') == 'candidates-pending' and videos and phase != 'dependency':
+            phase = 'film'
         dependency = None
         reference_issue = None
         try:
@@ -161,6 +191,15 @@ class Native:
         storyboard_choice = Package(self.root, scope).read().get('storyboardChoice')
         storyboard_required = True if storyboard_choice is None else bool(storyboard_choice.get('required'))
         review_images = ([{**image, 'label':'Opening keyframe', 'component':'opening', 'reviewStatus':opening_review}] if image else [])
+        if image and led.get('keyframeCandidate') and see.get('inputSignature'):
+            from studio_keyframe_selection import can_reuse_prompt_change
+            try:
+                expected = R._keyframe_record_input_signature(pkg, shot, see, scope['scene'], scope['episode'])
+                review_images[0]['reusePromptChange'] = bool(
+                    len(led.get('keyframeCandidates') or []) <= 1 and
+                    can_reuse_prompt_change(see, expected, image['sha256']))
+            except (R.Refused, OSError, ValueError):
+                review_images[0]['reusePromptChange'] = False
         review_images += ([{**plate, 'label':'Scene plate', 'component':'plate', 'reviewStatus':plate_review}] if plate else [])
         reference_inputs = []
         for section_name, section in references.items():
@@ -169,8 +208,11 @@ class Native:
             for item in section.get('references') or []:
                 reference_inputs.append({**item, 'stage': section_name,
                                          'label': item.get('role') or item.get('fileName') or 'Reference'})
+        from studio_coverage import producer_scene_sequence
         review = {'references':references, 'referenceInputs':reference_inputs,
                   'referenceIssue':reference_issue,
+                  'sceneSequence':producer_scene_sequence(
+                      board.get('sceneDirectionCard'), board.get('approvalState')),
                   'title': shot.get('purpose') or board.get('scene', {}).get('title') or 'Scene direction',
                   'direction': shot.get('openingPose') or board.get('scene', {}).get('purpose') or '',
                   'actionPlan':[{'timing':v.get('timing',''),'action':v.get('action','')} for v in (shot.get('directorCard') or {}).get('views',[])],

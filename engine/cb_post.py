@@ -823,6 +823,21 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                 if provenance.get("postLaneStatus") != "required":
                     raise ValueError(
                         f"dialogue shot {shot.get('shotId')} has no audio provenance ledger")
+                if provenance.get("policyVersion") == "provider-final-mix-v1":
+                    # This is the human-approved complete mix, including directed
+                    # SFX and music. Replacing it with VO would silently erase them.
+                    post_sources.append(clip)
+                    audio_provenance.append({
+                        "shotId": shot.get("shotId"),
+                        "postSourcePath": clip,
+                        "postSourceSha256": _sha256(clip),
+                        "approvedVoicePath": voice,
+                        "approvedVoiceSha256": _sha256(voice),
+                        "providerFinalMixPreserved": True,
+                        "guideDialogueRemoved": False,
+                        "approvedDialogueRestored": False,
+                    })
+                    continue
                 restored = temp_dir / f"shot_{index:02d}_approved_dialogue.mp4"
                 if not replace_guide_dialogue(clip, voice, restored):
                     raise RuntimeError(
@@ -901,7 +916,9 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                 abs(picture_probe["durationSec"] - master_probe["durationSec"]) <= 0.25),
             "dialogueOccurrenceCoverage": caption_occurrences == expected_occurrences,
             "approvedDialoguePostLane": all(
-                item["guideDialogueRemoved"] and item["approvedDialogueRestored"]
+                (item["guideDialogueRemoved"] and item["approvedDialogueRestored"])
+                or (item.get("providerFinalMixPreserved") is True
+                    and item["postSourceSha256"] == _sha256(item["postSourcePath"]))
                 for item in audio_provenance),
             "programAudioPresent": temp["programAudio"].exists() and
                 temp["programAudio"].stat().st_size > 0,

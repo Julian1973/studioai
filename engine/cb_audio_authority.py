@@ -1,6 +1,8 @@
 """Deterministic routing between ElevenLabs dialogue and Seedance non-verbal audio."""
 import re
 
+import cb_emission_conformance as emission
+
 
 _TAG = re.compile(r"\[(snor(?:e|es|ing)?|snort(?:s|ing)?|sneez(?:e|es|ing)|laugh(?:s|ing)?|giggl(?:e|es|ing))\]", re.I)
 _PERFORMANCE_TAG = re.compile(r"\[[^\]]+\]")
@@ -59,23 +61,35 @@ def _kind(value):
 def route_line(line):
     """Keep the script line immutable while deriving provider-facing audio lanes."""
     original = str(line.get("exactText") if line.get("exactText") is not None else line.get("text") or "")
+    verified_source = line.get("sourceSegmentation") is not None
+    if verified_source:
+        # Use the existing source-span authority, not English-pattern guessing or
+        # a delivery note. Invalid/stale projections must fail before generation.
+        from studio_source_segmentation import voice_projection
+        line = voice_projection(line)
+        original = line["scriptExactText"]
     # Script numbering and trailing parenthetical action are production metadata. They
     # must remain in scriptExactText for provenance, but they are neither spoken text nor
     # independent SFX cues. Explicit authored sound tokens outside the stage note still
     # route to Seedance below.
-    provider_text = _SCRIPT_NUMBER.sub("", original).strip()
-    provider_text = _TRAILING_STAGE_NOTE.sub("", provider_text).strip()
-    provider_text = _STAGE_BEAT.sub(" ", provider_text).strip()
-    provider_text, screenplay_action = _trailing_screenplay_action(provider_text)
-    provider_text, nonverbal_action = _trailing_nonverbal_action(
-        provider_text, line.get("speaker"))
+    if verified_source:
+        provider_text = line.get("exactText", line.get("text", ""))
+        screenplay_action = nonverbal_action = None
+    else:
+        provider_text = _SCRIPT_NUMBER.sub("", original).strip()
+        provider_text = _TRAILING_STAGE_NOTE.sub("", provider_text).strip()
+        provider_text = _STAGE_BEAT.sub(" ", provider_text).strip()
+        provider_text, screenplay_action = _trailing_screenplay_action(provider_text)
+        provider_text, nonverbal_action = _trailing_nonverbal_action(
+            provider_text, line.get("speaker"))
     trailing_action = screenplay_action or nonverbal_action
     tag_matches = list(_TAG.finditer(provider_text))
     sound_matches = list(_SOUND.finditer(provider_text))
     matches = tag_matches + sound_matches
-    kinds = list(dict.fromkeys(
-        [_kind(trailing_action)] if trailing_action else []
-        + [_kind(match.group(0)) for match in matches]))
+    # A lantern hit is not laughter. Only recognised vocal events may create a
+    # character SFX cue; environmental action remains in the authored coverage.
+    trailing_sounds = list(_SOUND.finditer(trailing_action or ""))
+    kinds = list(dict.fromkeys(_kind(match.group(0)) for match in trailing_sounds + matches))
     if not matches and not trailing_action:
         return {**line, "scriptExactText": original, "exactText": provider_text}, None
     # A leading authored vocal event followed by words is one ordered performance,
@@ -168,7 +182,8 @@ def route_voice_direction(direction, original_lines):
     """Project an existing Voice Director record onto the spoken-only provider lane."""
     routed = route_lines(original_lines)
     spoken = routed["spokenDialogue"]
-    if not routed["seedanceSfxCues"]:
+    if not routed["seedanceSfxCues"] and not any(
+            row.get("scriptExactText") != row["exactText"] for row in spoken):
         return dict(direction), spoken
     by_id = {line.get("dialogueOccurrenceId"): line for line in spoken
              if line.get("dialogueOccurrenceId")}
@@ -199,9 +214,8 @@ def _project_performed_text(performed_text, locked_text):
     """Preserve acting tags only when provider words still match the spoken lane."""
     candidate = str(performed_text or "").strip()
     locked = str(locked_text or "").strip()
-    candidate_words = re.findall(r"[A-Za-z0-9']+", _PERFORMANCE_TAG.sub(" ", candidate))
-    locked_words = re.findall(r"[A-Za-z0-9']+", _PERFORMANCE_TAG.sub(" ", locked))
-    if [word.casefold() for word in candidate_words] == [word.casefold() for word in locked_words]:
+    if emission.dialogue_words(_PERFORMANCE_TAG.sub(" ", candidate)) == emission.dialogue_words(
+            _PERFORMANCE_TAG.sub(" ", locked)):
         return candidate or locked
     safe_tags = [
         match.group(0) for match in _PERFORMANCE_TAG.finditer(candidate)

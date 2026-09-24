@@ -311,13 +311,7 @@ def build_comparison_plan(*, shot, approved_direction, base_task, parent_prompt,
                 f"could not compile provider segment {segment['segmentIndex']}: {exc}"
             ) from exc
         if dialogue_speakers:
-            prompt = (
-                "AUDIO-AUTHORITY: @Audio1 is the sole authority for English voice identity, "
-                "cadence, delivery, mouth timing and silence; no alternative performance "
-                "is permitted. Listeners remain silent and closed-mouth. No narration, no "
-                "extra words, and no subtitles or captions. "
-                + emission.SINGLE_INSTANCE_DIALOGUE_LOCK + "\n" + prompt
-            )
+            prompt = emission.STANDARD_DIALOGUE_AUDIO_AUTHORITY + "\n" + prompt
             synthesis = emission.validate_dialogue_synthesis(
                 prompt, segment_dialogue)
             if not synthesis["ready"]:

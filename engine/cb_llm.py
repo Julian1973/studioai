@@ -9,8 +9,8 @@ ENVIRONMENT only (engine/.env) — never hardcoded in source, never sent to app.
 
 Configuration (env, with safe defaults):
     OPENAI_API_KEY          required — clean failure (SystemExit) if missing
-    OPENAI_DIRECTOR_MODEL   default gpt-5.5        — premium Story & Direction only
-    OPENAI_VALIDATOR_MODEL  default gpt-5.4-mini   — routine departments, formatting and validation
+    OPENAI_DIRECTOR_MODEL   default gpt-6-luna     — all Story & Direction work
+    OPENAI_VALIDATOR_MODEL  default gpt-6-luna     — routine departments, formatting and validation
     OPENAI_MAX_CALL_USD     default 1.00           — conservative pre-call ceiling
     OPENAI_DAILY_BUDGET_USD default 5.00           — daily text-direction budget; 0 disables cap
     DIRECTOR_GEMINI_MODEL   default gemini-3.1-pro-preview — the FALLBACK model id
@@ -33,8 +33,8 @@ import cb_episode_budget as episode_budget
 import cb_costs
 
 # models — environment first, defaults second (rule: read from env; never hardcode secrets)
-DIRECTOR_MODEL = os.environ.get("OPENAI_DIRECTOR_MODEL", "gpt-5.5")
-VALIDATOR_MODEL = os.environ.get("OPENAI_VALIDATOR_MODEL", "gpt-5.4-mini")
+DIRECTOR_MODEL = os.environ.get("OPENAI_DIRECTOR_MODEL", "gpt-6-luna")
+VALIDATOR_MODEL = os.environ.get("OPENAI_VALIDATOR_MODEL", "gpt-6-luna")
 GEMINI_MODEL = os.environ.get("DIRECTOR_GEMINI_MODEL", "gemini-3.1-pro-preview")   # FALLBACK only (kept, not used by default)
 # Gemini is currently the UNSTABLE Director path, so its fallback is OFF BY DEFAULT. When false, an OpenAI failure
 # STOPS with the EXACT OpenAI error instead of silently producing inconsistent Gemini results. Set =true to re-enable.
@@ -49,13 +49,15 @@ OPENAI_RESPONSE_CACHE = os.environ.get("OPENAI_RESPONSE_CACHE", "true").strip().
 OPENAI_CACHE_DIR = pathlib.Path(__file__).resolve().parent / "_llm_response_cache"
 OPENAI_COST_LOCK_PATH = pathlib.Path(__file__).resolve().parent / ".openai_cost_guard.lock"
 
-# Published OpenAI API text-token prices, USD per one million tokens (2026-09-02).
+# Published OpenAI API text-token prices, USD per one million tokens; GPT-6 rates verified 2026-09-23.
 # Unknown models are refused because their spend cannot be bounded honestly.
 OPENAI_TEXT_RATES = {
     # https://developers.openai.com/api/docs/models/gpt-5.6-sol (2026-09-11)
     "gpt-5.6-sol": {"input": 4.00, "cached_input": 0.40, "output": 20.00},
     # https://developers.openai.com/api/docs/models/gpt-5.6-luna (2026-09-11)
     "gpt-5.6-luna": {"input": 0.20, "cached_input": 0.02, "output": 1.20},
+    # https://developers.openai.com/api/docs/models/gpt-6-luna (2026-09-23), short context.
+    "gpt-6-luna": {"input": 0.10, "cached_input": 0.01, "output": 0.50},
     "gpt-6-astra": {"input": 10.00, "cached_input": 1.00, "output": 50.00},
     "gpt-5.5": {"input": 5.00, "cached_input": 0.50, "output": 30.00},
     "gpt-5.4": {"input": 2.50, "cached_input": 0.25, "output": 15.00},
@@ -139,7 +141,7 @@ def _estimated_input_tokens(system, user, schema, images=None):
 def _estimated_call_cost(model, system, user, schema, images, max_output_tokens):
     rates = _model_rates(model)
     input_tokens = _estimated_input_tokens(system, user, schema, images)
-    if str(model).startswith("gpt-6-astra") and input_tokens > 272000:
+    if str(model).startswith(("gpt-6-astra", "gpt-6-luna")) and input_tokens > 272000:
         rates = {"input": rates["input"] * 2, "output": rates["output"] * 1.5}
     return ((input_tokens * rates["input"] + max_output_tokens * rates["output"]) / 1_000_000.0,
             input_tokens)
@@ -302,7 +304,7 @@ def _log_openai_usage(resp, model, label, estimated_max_cost):
         usage, "input_tokens_details", None)
     cached_tokens = min(input_tokens, _usage_value(details, "cached_tokens"))
     rates = _model_rates(model)
-    if str(model).startswith("gpt-6-astra") and input_tokens > 272000:
+    if str(model).startswith(("gpt-6-astra", "gpt-6-luna")) and input_tokens > 272000:
         rates = {"input": rates["input"] * 2, "cached_input": rates["cached_input"] * 2,
                  "output": rates["output"] * 1.5}
     cost = (((input_tokens - cached_tokens) * rates["input"] +
@@ -312,7 +314,8 @@ def _log_openai_usage(resp, model, label, estimated_max_cost):
         "model": model, "label": label, "inputTokens": input_tokens,
         "cachedInputTokens": cached_tokens, "outputTokens": output_tokens,
         "estimatedMaximumCostUsd": round(estimated_max_cost, 6),
-        "pricingAsOf": "2026-09-11" if str(model).startswith("gpt-6-astra") else "2026-09-02",
+        "pricingAsOf": ("2026-09-23" if model == "gpt-6-luna" else
+                        "2026-09-11" if str(model).startswith("gpt-6-astra") else "2026-09-02"),
     })
     return cost
 

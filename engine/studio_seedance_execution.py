@@ -53,6 +53,70 @@ def _remove_sections(prompt, headings):
     clean = re.sub(r'\n{3,}', '\n\n', clean)
     return clean, removed
 
+
+def compact_visual_repetition(prompt, rules=None):
+    """Compact only repeatable visual boilerplate when the provider cap is exceeded.
+
+    Typed action, camera intent, references, dialogue and audio sections remain intact.
+    This is a wording pass over compiler-owned labels, never a truncation or semantic
+    rewrite. A compacted prompt is still checked by the normal action/audio contracts.
+    """
+    rules = rules or policy()
+    if len(prompt.split()) <= rules['maxWords']:
+        return prompt, []
+    matches = list(re.finditer(r'^\[([^\n]+)\][ \t]*\n', prompt, re.M))
+    if not matches:
+        return prompt, []
+    edits = []
+    out = []
+    cursor = 0
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(prompt)
+        heading = match[1]
+        block = prompt[match.start():end]
+        if heading == 'TIMED ACTION':
+            replacements = (
+                ("Continue within the current camera shot; make the directed camera move.",
+                 "Continue current shot; execute the directed camera move."),
+                ("Continue within the current camera shot; hold this motivated view.",
+                 "Continue current shot; hold the motivated view."),
+                ("Cut to this view.", "Cut."),
+                ("Setting / light / materials:", "Setting/light:"),
+                ("Cut / hold motivation:", "Edit motive:"),
+                ("Starting state:", "Start:"),
+                ("End state:", "End:"),
+            )
+            for old, new in replacements:
+                count = block.count(old)
+                if count:
+                    block = block.replace(old, new)
+                    edits.append({"from": old, "to": new, "count": count})
+            block, count = re.subn(
+                r"Camera height: at the featured character's eye-line — ([^\n]+?)'s eye-line is ([0-9.]+) in above the ground\.",
+                r"Camera height: \1 eye-line, \2 in above ground.", block)
+            if count:
+                edits.append({"from": "expanded camera-height boilerplate",
+                              "to": "compact camera-height authority", "count": count})
+            checkpoint_pattern = re.compile(
+                r"Directed checkpoint at 0s: source-based entry state from exact approved opening image for [^\n]+")
+            checkpoints = checkpoint_pattern.findall(block)
+            checkpoint_count = len(checkpoints)
+            if checkpoint_count > 1:
+                block = checkpoint_pattern.sub("Entry checkpoint: preserve the approved preceding landing.",
+                                               block, count=checkpoint_count - 1)
+                edits.append({"from": "repeated directed checkpoint", "to":
+                              "compact preceding-landing checkpoint", "count": checkpoint_count - 1})
+            cast_count = len(re.findall(r"Visible cast: ([^\n]+) only\.", block))
+            if cast_count:
+                block = re.sub(r"Visible cast: ([^\n]+) only\.", r"Cast: \1.", block)
+                edits.append({"from": "Visible cast: ... only.", "to": "Cast: ...", "count": cast_count})
+        out.append(prompt[cursor:match.start()])
+        out.append(block)
+        cursor = end
+    out.append(prompt[cursor:])
+    compacted = ''.join(out)
+    return compacted, edits
+
 def policy():
     values = json.loads(POLICY_PATH.read_text())
     lo, hi, warn, hard = [values[k] for k in ('preferredMinWords', 'preferredMaxWords', 'warnWords', 'maxWords')]
@@ -70,12 +134,16 @@ def budget(prompt, authorities, rules=None):
         a.get('shotId') == shot.get('shotId', shot.get('id')) and
         a.get('sourceHash') == digest(shot) and a.get('promptHash') == digest(prompt) and
         isinstance(a.get('maxWords'), int) and not isinstance(a['maxWords'], bool) and a['maxWords'] >= count), None)
-    blocked = count > rules['maxWords'] and not exception
+    over_budget = count > rules['maxWords'] and not exception
+    # Prompt length is a creative-quality advisory. Hard production gates remain
+    # responsible for missing approvals, invalid references, audio integrity and
+    # provider-spend safety; word count alone must not strand a prepared request.
     return dict(wordCount=count, policy=deepcopy(rules),
-                status='BLOCKED' if blocked else 'WARN' if count > rules['warnWords'] else 'PASS',
+                status='WARN' if count > rules['warnWords'] else 'PASS',
                 withinPreferred=count <= rules['preferredMaxWords'],
                 exceptionId=exception['id'] if exception else None,
-                reason=f'{count} words exceeds {rules["maxWords"]}; shorten visual repetition without removing protected content.' if blocked else None)
+                advisory=over_budget,
+                reason=f'{count} words exceeds the advisory {rules["maxWords"]}-word target; shorten visual repetition when convenient.' if over_budget else None)
 
 
 def supported(snapshot):
@@ -251,7 +319,11 @@ def compile_prompt(snapshot, roles, *, reference_root=None, reference_resolver=N
         parts = [f"Shot {i+1}: {view['startSec']:g}–{view['endSec']:g}s",
             'Camera: ' + view['camera'], transition, cast,
             visual('Purpose', view['purpose']), visual('Starting state', view['opening']),
+            visual('Audience attention', view.get('audienceNeed', '')
+                   if view.get('audienceNeed') != view['purpose'] else ''),
+            visual('Cut / hold motivation', view.get('editReason', '')),
             'Action: ' + slot(plan['authoredActions'][i], i), visual('Performance', view['performance']),
+            visual('Silent listener reaction', view.get('listenerReaction', '')),
             visual('Setting / light / materials', view['setting']), visual('End state', view['landing']),
             *view['dialogue'], *view['holds'],
             'Keep identities and actions distinct.' if len(active) > 1 else '']
@@ -274,6 +346,11 @@ def compile_prompt(snapshot, roles, *, reference_root=None, reference_resolver=N
     prompt = bind_visual_names('\n\n'.join(piece for piece in pieces if piece), roles)
     prompt = purpose_first(apply_provider_clauses(protect_honeycomb_aliases(prompt, shot), shot))
     prompt = assemble(prompt, plan['authoredActions'])
+    prompt, compaction = compact_visual_repetition(prompt)
+    from cb_emission_conformance import ensure_standard_audio_template
+    from cb_departments import provider_dialogue_lines
+    prompt = ensure_standard_audio_template(
+        prompt, provider_dialogue_lines(shot))
     evidence['actionIntegrity'] = proof(prompt, plan['authoredActions'])
     for block in plan['audioBlocks']:
         if block not in prompt:
@@ -284,15 +361,20 @@ def compile_prompt(snapshot, roles, *, reference_root=None, reference_resolver=N
     from collections import Counter
     if Counter(re.findall(r'\{([^{}]+)\}', prompt)) != Counter(cue['text'] for cue in plan['dialogueOccurrences']):
         raise ValueError('Compiler changed exact dialogue occurrence counts')
-    evidence.update(audioBlocks={heading: digest(block) for heading, block in sections(prompt) if heading in AUDIO_HEADINGS},
+    evidence.update(compaction=compaction,
+        audioBlocks={heading: digest(block) for heading, block in sections(prompt) if heading in AUDIO_HEADINGS},
         audioPolicy='no-dialogue/no-Audio1' if _no_dialogue_policy(prepared, prompt) else 'preserve-audio-blocks',
         promptHash=digest(prompt), budget=budget(prompt, authority))
+    from cb_emission_conformance import STANDARD_AUDIO_TEMPLATE_VERSION, STANDARD_DIALOGUE_AUDIO_AUTHORITY
+    if STANDARD_DIALOGUE_AUDIO_AUTHORITY in prompt:
+        evidence['audioTemplate'] = dict(version=STANDARD_AUDIO_TEMPLATE_VERSION,
+            hash=digest(STANDARD_DIALOGUE_AUDIO_AUTHORITY))
     return prompt, evidence
 
 
 def final_check(snapshot, evidence):
     result = budget(snapshot['prompt'], snapshot.get('authorities', {}))
-    errors = [result['reason']] if result['status'] == 'BLOCKED' else []
+    errors = []
     if not evidence.get('applied') or evidence.get('version') != VERSION:
         errors.append('WATCH request has no current typed-plan compiler evidence; legacy prose cannot bypass compilation')
     else:
@@ -306,6 +388,17 @@ def final_check(snapshot, evidence):
             errors.append('Protected Audio1 provider text changed during review')
         if evidence.get('promptHash') != digest(snapshot['prompt']):
             errors.append('Provider prompt differs from its deterministic compiler output')
+        from cb_emission_conformance import (
+            STANDARD_AUDIO_TEMPLATE_VERSION, STANDARD_DIALOGUE_AUDIO_AUTHORITY)
+        template = evidence.get('audioTemplate')
+        from cb_departments import provider_dialogue_lines
+        dialogue = provider_dialogue_lines(
+            (snapshot.get('authorities') or {}).get('shot') or {})
+        if dialogue or template or STANDARD_DIALOGUE_AUDIO_AUTHORITY in snapshot['prompt']:
+            expected_template = dict(version=STANDARD_AUDIO_TEMPLATE_VERSION,
+                hash=digest(STANDARD_DIALOGUE_AUDIO_AUTHORITY))
+            if template != expected_template or STANDARD_DIALOGUE_AUDIO_AUTHORITY not in snapshot['prompt']:
+                errors.append('Locked Audio1 template differs from the reviewed compiler version')
         try:
             from studio_watch_plan import prepare_plan, digest as plan_digest
             prepared = prepare_plan(snapshot)

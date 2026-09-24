@@ -45,6 +45,21 @@ def test_conservative_routing(kind,shot,message,expected):
     assert b['model']=='original'
 
 
+def test_luna_is_default_for_every_direction_route():
+    assert {item['model'] for item in PRESET.values()} == {'gpt-6-luna'}
+
+
+def test_gpt6_luna_usage_uses_verified_long_context_rates():
+    r = response()
+    r.model = 'gpt-6-luna'
+    r.usage = {
+        'input_tokens': 300_000, 'output_tokens': 2_000,
+        'input_tokens_details': {'cached_tokens': 40_000, 'cache_write_tokens': 20_000}}
+    usage = usage_record(r, 'gpt-6-luna')
+    assert usage['estimatedUsd'] == pytest.approx(.0553)
+    assert usage['rateDate'] == '2026-09-23'
+
+
 def test_old_services_remain_pinned():
     b={'model':'custom','estimateUsd':3}
     assert route(b,'plan',None,'')==b
@@ -75,7 +90,7 @@ def test_route_is_reserved_pinned_and_usage_persisted_before_validation(setup):
     with ws.db() as db:
         job=json.loads(db.execute("SELECT data FROM jobs ORDER BY rowid LIMIT 1").fetchone()[0])
     assert job['binding']['route']=='creative'
-    assert job['binding']['model']=='gpt-6-astra'
+    assert job['binding']['model']=='gpt-6-luna'
     assert job['estimate']==2000000
     assert state['costs']['pricedRequests']==1
     assert state['costs']['inputTokens']==10000

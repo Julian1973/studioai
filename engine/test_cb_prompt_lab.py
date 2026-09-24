@@ -48,6 +48,31 @@ def test_keyframe_analysis_marks_motion_only_dimensions_not_applicable():
     assert result["maximum"] == 12
 
 
+def test_see_defers_action_triggered_light_when_opening_is_pre_contact():
+    shot = {
+        "shotId": "S4.SH3",
+        "openingCharactersInFrame": ["Sunny", "Howey", "Misty", "Fuzzby"],
+        "openingPose": "The route is set; Sunny is about to disturb it.",
+        "storyboardInternalShotPlanApproved": [{
+            "purpose": "Read every physical cause.",
+            "staging": "Lantern, stool and honey pot line the route.",
+            "startState": "Objects are unstable but not yet colliding.",
+            "timing": "Brief silent chain before Fuzzby's impact line.",
+            "framing": "Crowded wide shot with the domino route visible.",
+            "cinematography": {
+                "lens": "24 mm",
+                "light": "Lantern light wobbles as it is struck.",
+            },
+        }],
+    }
+
+    direction = cb_render._direct_keyframe_direction(shot)
+
+    assert direction["lightingAndDepth"] == (
+        "Use the approved Scene Plate's current lighting at frame one; defer the "
+        "action-triggered change until contact.")
+
+
 def test_analysis_flags_conflicts_density_and_locked_dialogue_leak():
     prompt = (
         "Camera is locked with no camera movement. Camera zooms and pans. "
@@ -294,6 +319,8 @@ def test_keyframe_prompt_contract_detects_record_tampering(monkeypatch):
         "Fuzzby": {"heightIn": 14}})
     monkeypatch.setattr(cb_render, "_approved_department_output",
                         lambda pkg, shot_id, stage: direction)
+    monkeypatch.setattr(cb_render, "_direct_keyframe_direction",
+                        lambda shot: direction)
     prompt = cb_render._compile_keyframe_integration_prompt(direction, shot, [])
     contract = cb_render._keyframe_prompt_contract(
         pkg, shot, prompt)
@@ -524,6 +551,28 @@ def test_prompt_lab_status_uses_the_sealed_animation_prompt_without_provider_cal
     assert status["correlation"]["scope"]["promptBinding"] == "sealed-batch-prompt"
     assert status["correlation"]["rows"][0]["directorWish"]["status"] == "recorded"
     assert status["seedancePromptContract"]["providerAvailabilityChecked"] is False
+
+
+def test_current_keyframe_prompt_lab_uses_the_same_compiler_as_keyframe_fire(monkeypatch):
+    shot = {"shotId": "S4.SH3", "keyframePrompt": "legacy storyboard prompt"}
+    package = {"shots": [shot]}
+    compiled = "[PURPOSE]\nCurrent SEE brief\n\n[OUTPUT]\n16:9 still."
+    monkeypatch.setattr(
+        cb_render, "_department_record_status",
+        lambda *_args, **_kwargs: {"current": True})
+    monkeypatch.setattr(
+        cb_render, "_inspection_department_output",
+        lambda *_args, **_kwargs: {"providerPrompt": "stale specialist prompt"})
+    monkeypatch.setattr(cb_render, "_resolve_keyframe_prompt", lambda *_args: compiled)
+    monkeypatch.setattr(
+        cb_render, "_keyframe_prompt_contract",
+        lambda _pkg, _shot, prompt: {"prompt": prompt, "promptHash": "current-hash"})
+
+    contract = cb_render._current_prompt_contract(package, shot, "keyframe")
+
+    assert contract["prompt"] == compiled
+    assert contract["promptHash"] == "current-hash"
+    assert contract["directionCurrent"] is True
 
 
 def test_studio_exposes_prompt_lab_without_replacing_approval_controls():

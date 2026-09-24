@@ -69,7 +69,8 @@ def locked_dialogue_text(line):
 
 def dialogue_words(value):
     text = str(value or "").replace("\u2018", "'").replace("\u2019", "'")
-    return [word.casefold() for word in re.findall(r"[A-Za-z0-9']+", text)]
+    return [word.casefold() for word in re.findall(
+        r"[^\W_]+(?:'[^\W_]+)*", text, re.UNICODE)]
 
 
 def dialogue_marker_pattern(value):
@@ -241,13 +242,51 @@ SINGLE_INSTANCE_DIALOGUE_LOCK = (
     "Use @Audio1 as the only voice authority. Only the character currently speaking "
     "in @Audio1 may move their mouth. "
     "Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and "
-    "instrumental music; it must not generate speech, sung lyrics or vocal music. "
+    "instrumental music where directed; honour explicit no-music or no-SFX direction. "
+    "It must not generate speech, sung lyrics or vocal music. "
     "VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists "
     "once in @Audio1. Use the written transcript only to assign the correct speaker and "
     "mouth timing. Do not synthesize, repeat, dub, echo, layer or replace any spoken line. "
     "The final render must contain exactly one audible dialogue performance: the supplied "
     "@Audio1, unchanged."
 )
+
+
+# Frozen from the submitted Ep4 S1.SH1 dialogue-authority block. The same
+# authority/brace/speaker pattern is present in Episode 2. Change only through
+# an explicitly approved template-version migration, never a creative rewrite.
+STANDARD_AUDIO_TEMPLATE_VERSION = "crystal-bears-s1-audio-v1"
+STANDARD_DIALOGUE_AUDIO_AUTHORITY = (
+    "AUDIO-AUTHORITY: @Audio1 is the sole authority and sole performance authority "
+    "for every English dialogue line, voice identity, cadence, delivery, mouth timing and silence. "
+    "Each exact dialogue line appears once in braces in the Shot Sequence and is bound to its "
+    "named speaker and @Audio1. The exact braced dialogue markers place approved words only; "
+    "no alternative performance is permitted. Listeners remain silent and closed-mouth except "
+    "during their explicitly timed nonverbal SFX; only the active @Audio1 speaker articulates "
+    "dialogue. No narration, no extra words, and no subtitles or captions. Dialogue language: "
+    "English. No music comes from @Audio1; Seedance generates separate synchronized non-dialogue "
+    "SFX, ambience and instrumental musical underscore beneath the approved dialogue rhythm. "
+    "Use @Audio1 as the only voice authority. Only the active @Audio1 speaker articulates dialogue. "
+    "Seedance 2.5 must provide the shot's directed non-verbal SFX, ambience and instrumental music; "
+    "it must not generate speech, sung lyrics or vocal music. "
+    "VERBATIM DIALOGUE LOCK — TRANSCRIPT ONLY. Every approved line below already exists once "
+    "in @Audio1. Use the written transcript only to assign the correct speaker and mouth timing. "
+    "Do not synthesize, repeat, dub, echo, layer or replace any spoken line. The final render "
+    "must contain exactly one audible dialogue performance: the supplied @Audio1, unchanged."
+)
+
+
+def ensure_standard_audio_template(prompt, dialogue_lines):
+    """Normalize every spoken-dialogue prompt to the locked Audio1 contract."""
+    text = str(prompt or "")
+    if not list(dialogue_lines or []):
+        return text
+    if STANDARD_DIALOGUE_AUDIO_AUTHORITY in text:
+        return text
+    if SINGLE_INSTANCE_DIALOGUE_LOCK in text:
+        return text.replace(SINGLE_INSTANCE_DIALOGUE_LOCK,
+                           STANDARD_DIALOGUE_AUDIO_AUTHORITY)
+    return STANDARD_DIALOGUE_AUDIO_AUTHORITY + "\n\n" + text
 
 
 def validate_dialogue_synthesis(prompt, dialogue_lines):

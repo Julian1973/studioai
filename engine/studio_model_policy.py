@@ -10,10 +10,11 @@ import re
 
 from studio_workspace import StudioError
 
-PRESET = {'creative': {'model': 'gpt-6-astra', 'estimateUsd': 2},
-          'routine': {'model': 'gpt-5.6-terra', 'estimateUsd': .5},
-          'assistant': {'model': 'gpt-5.6-luna', 'estimateUsd': .1}}
-RATES = {'gpt-6-astra': (10, 50), 'gpt-5.6-terra': (2, 12), 'gpt-5.6-luna': (.2, 1.2)}
+PRESET = {'creative': {'model': 'gpt-6-luna', 'estimateUsd': 2},
+          'routine': {'model': 'gpt-6-luna', 'estimateUsd': .5},
+          'assistant': {'model': 'gpt-6-luna', 'estimateUsd': .1}}
+RATES = {'gpt-6-astra': (10, 50), 'gpt-6-luna': (.1, .5),
+         'gpt-5.6-terra': (2, 12), 'gpt-5.6-luna': (.2, 1.2)}
 
 
 def validate_routes(value):
@@ -68,15 +69,21 @@ def usage_record(response, requested_model):
     # Price only the verified short-context standard models, with complete counters.
     # Do not guess alias, long-context, residency, account discount or future prices.
     model = record['model']
+    gpt6 = model in {'gpt-6-astra', 'gpt-6-luna'}
     if (model in RATES and record['serviceTier'] == 'default' and date.today() <= date(2026, 12, 31)
             and all(k in record for k in ('inputTokens', 'outputTokens', 'cachedTokens', 'cacheWriteTokens'))
-            and record['inputTokens'] <= 100000
+            and record['inputTokens'] <= (1_050_000 if gpt6 else 100_000)
             and record['cachedTokens'] + record['cacheWriteTokens'] <= record['inputTokens']):
         rate_in, rate_out = map(lambda v: Decimal(str(v)), RATES[model])
         ordinary = record['inputTokens'] - record['cachedTokens'] - record['cacheWriteTokens']
-        cost = (ordinary * rate_in + record['cachedTokens'] * rate_in / 10
-                + record['cacheWriteTokens'] * rate_in * Decimal('1.25') + record['outputTokens'] * rate_out) / 1000000
-        record.update(estimatedUsd=float(cost), rateDate='2026-09-08',
+        long_context = gpt6 and record['inputTokens'] > 272000
+        input_multiplier = Decimal('2') if long_context else Decimal('1')
+        output_multiplier = Decimal('1.5') if long_context else Decimal('1')
+        cost = ((ordinary * rate_in + record['cachedTokens'] * rate_in / 10
+                 + record['cacheWriteTokens'] * rate_in * Decimal('1.25')) * input_multiplier
+                + record['outputTokens'] * rate_out * output_multiplier) / 1000000
+        record.update(estimatedUsd=float(cost),
+                      rateDate='2026-09-23' if gpt6 else '2026-09-08',
                       pricingSource='https://developers.openai.com/api/docs/pricing',
                       priceBasis='Standard list price from measured tokens; not a provider invoice')
     return record

@@ -70,6 +70,7 @@ def image_review(server, data):
     result = see_request(server, {'scope': scope, 'command': 'review-component',
                                   'component': component, 'decision': decision,
                                   'reason': str(data.get('reason') or '').strip(), 'by': actor,
+                                  'reusePromptChange': data.get('reusePromptChange') is True,
                                   'binding': status.get('binding')})
     return {'ok': True, 'component': component, 'decision': decision,
             'zeroSpend': True, 'see': result}
@@ -139,6 +140,21 @@ def request(server,data):
     request_id=str(data.get('requestId') or ('journey_'+uuid.uuid4().hex[:12]))
     try:
         scope_key(scope)
+        if action in ('watch-input-review', 'accept-watch-inputs'):
+            if active_engine(scope) != CRYSTAL_BEARS_ACTIVE_ENGINE:
+                raise ValueError('Use the current project review.')
+            from studio_see_service import request as see_request
+            if action == 'watch-input-review':
+                return {'ok': True, 'see': see_request(server, {'scope': scope, 'command': 'status'})}
+            if data.get('withoutStoryboard') is not True or not str(data.get('by') or '').strip():
+                raise ValueError('Review the inputs and explicitly accept continuing without storyboard images.')
+            return {'ok': True, 'see': see_request(server, {'scope': scope,
+                'command': 'continue-without-storyboard', 'binding': data.get('binding'), 'by': data['by']})}
+        if action == 'next-shot-guidance':
+            if active_engine(scope) != CRYSTAL_BEARS_ACTIVE_ENGINE:
+                raise ValueError('Use the selected project next-shot review.')
+            from studio_next_shot_guidance import recommend
+            return {'ok': True, 'guidance': recommend(server, scope)}
         if action == 'image-review':
             return image_review(server, data)
         if action == 'storyboard-choice':

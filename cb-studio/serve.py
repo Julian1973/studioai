@@ -1550,6 +1550,21 @@ def _outcome_chat_command(d, ep, scene, shot_id, stage):
         job = _start(_jid("chat_approval"), "chat:approve:" + current["kind"], scene,
                      ["cb_outcome_chat.py", ep, scene, shot_id, stage, current["hash"], str(d.get("by") or "Julian")] + ([action["candidateId"]] if action.get("candidateId") else []))
         message = "Recording your approval of this " + current["label"] + "."
+    elif action["kind"] == "approve-voice-override":
+        if stage != "voice" or not shot_id:
+            raise ValueError("Open the current HEAR take before approving it as heard.")
+        if d.get("producerOverrideAcknowledged") is not True:
+            raise ValueError("Listen to the take and confirm the producer override first.")
+        current = outcomes.target(ep, scene, shot_id, stage)
+        expected = d.get("reviewTarget") or {}
+        if (not current or current.get("kind") != "voice" or
+                expected.get("hash") != current["hash"]):
+            raise ValueError("The HEAR take changed. Reopen its current audio before overriding.")
+        job = _start(_jid("chat_approval"), "chat:approve:voice", scene,
+                     ["cb_outcome_chat.py", ep, scene, shot_id, stage,
+                      current["hash"], str(d.get("by") or "Julian"),
+                      "--producer-override"])
+        message = "Recording your confirmed approval of this exact HEAR take as heard. The saved script stays unchanged."
     elif action["kind"] == "retake-keyframe":
         if stage != "keyframe" or not shot_id:
             raise ValueError("Open the SEE candidate to apply and refire its correction.")
@@ -1565,9 +1580,7 @@ def _outcome_chat_command(d, ep, scene, shot_id, stage):
             raise ValueError("That correction belongs to an earlier SEE review. Describe the change against the current image.")
         if not budget.status(ep)["approved"]:
             raise ValueError("Approve the episode allowance first.")
-        correction = latest["correction"]
-        if latest.get("protectedElements"):
-            correction += "\nKeep unchanged: " + "; ".join(latest["protectedElements"])
+        correction = cb_director_chat.production_instruction(latest)
         job = _start(_jid("chat_keyframe_retake"), "chat:retake:keyframe", scene,
                      ["cb_outcome_chat.py", "retake-keyframe", ep, scene, shot_id,
                       current["hash"], correction, str(d.get("by") or "Julian")])
@@ -1631,8 +1644,8 @@ def _finalize_automatic_direction(job):
             if stage == "voice" and not R.cb_audio_authority.spoken_dialogue_lines(R._shot(pkg, shot_id)):
                 stage = "animation"
             job["nextOutcomeScope"] = {"episode": episode, "scene": scene, "shotId": shot_id, "stage": stage}
-            job["nextOutcomeJobId"] = _start(_jid("automatic_outcome"), "chat:prepare:" + stage, scene,
-                ["cb_outcome_chat.py", "prepare", episode, scene, shot_id, stage])
+            # Approval opens the next review surface. It never authorizes its
+            # preparation/generation; the producer reviews and Fires separately.
         return None
     if gate == "storyintake":
         episode = str(args[-1] if args else "Ep1")
@@ -1702,7 +1715,7 @@ GATE_SEQ = ["1", "1.6", "2a", "2b", "3", "4", "5"]   # 1.6 = THE PREVIZ REEL (20
 # Director's Eye (cb_director_eye.py), an unrelated automatic flag-only review with no lock state of its
 # own, never a member of this list. See engine/cb_previz.py's module docstring for the full note.
 # Current shot production commands; all workers use the shared job runner.
-SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "approve-timing-slate", "reject-timing-slate", "scenelook", "approve-scenelook", "reject-scenelook",
+SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "prepare-voice", "animatic", "approve-timing-slate", "reject-timing-slate", "scenelook", "approve-scenelook", "reject-scenelook",
              "pose", "approve-pose", "reject-pose", "select-pose-upload",
              "build-keyframe", "keyframe", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
              "select-upload", "select-library",
@@ -2496,7 +2509,7 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
         return _start(_jid(f"watchprepare_s{scene}"), "shot:fire:" + str(shot_id), scene,
                       ["cb_studio_director.py", "prepare-render", str(scene), str(shot_id), str(episode)])
     args = ["cb_render.py", cmd, str(scene)]
-    if cmd in ("fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+    if cmd in ("fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "prepare-voice", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
                "pose", "approve-pose", "reject-pose", "select-pose-upload",
                "select-upload", "select-library", "select-render-upload",
                "approve-voice", "reject-voice", "regen-voice",
@@ -3708,8 +3721,15 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as exc:
                 message = str(exc).removeprefix("REFUSED — ").removeprefix("REFUSED - ")
                 code = message.split(":", 1)[0] if ":" in message else "WATCH_CONFIGURATION_REQUIRED"
+                lower = message.lower()
+                target_stage = (
+                    "voice" if code.startswith("HEAR_") else
+                    "keyframe" if "opening-frame" in lower or "keyframe" in lower else
+                    "animation"
+                )
                 return self._json(200, {"ready": False, "zeroSpend": True,
                                         "code": code,
+                                        "targetStage": target_stage,
                                         "nextAction": "Resolve this current production input",
                                         "message": message})
         if self.path == "/api/scenelook-request" or self.path.startswith("/api/scenelook-request?"):
@@ -4047,6 +4067,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             try:
                 services = types.SimpleNamespace(ROOT=ROOT, _start=_start,
                     _canonical_cb_render=_canonical_cb_render,
+                    _production_state=_cached_production_state,
                     decode_image_upload=decode_image_upload,
                     _storyboard_approval=_storyboard_approval)
                 result = request(services, self._body())
@@ -4692,6 +4713,21 @@ class H(http.server.SimpleHTTPRequestHandler):
                 "error": "RETIRED_ROUTE: current production direction is authored in DIRECT.",
                 "zeroSpend": True,
             })
+        if self.path == "/api/watch-director-revision":
+            try:
+                d = self._body()
+                import studio_watch_revision as revision
+                if d.get('command') == 'apply':
+                    return self._json(200, revision.apply(d.get('revisionId'), str(d.get('by') or 'Julian')))
+                ep, scene, sid = [str(d.get(k) or '').strip() for k in ('episode', 'scene', 'shotId')]
+                if not all(_SHOT_TOKEN.fullmatch(v) for v in (ep, scene, sid)):
+                    raise ValueError('Invalid Director revision scope')
+                import cb_episode_budget
+                with cb_episode_budget.quote(ep, None, 'watch-director-revision'):
+                    result = revision.prepare(ep, scene, sid, d.get('correction'), d.get('expectedBatchId'))
+                return self._json(200, {'ok': True, 'revision': result, 'zeroMediaSpend': True})
+            except Exception as exc:
+                return self._json(400, {'error': str(exc), 'zeroMediaSpend': True})
         if self.path == "/api/director-chat":
             # A small-context OpenAI text call. It can discuss and propose one bounded
             # Creative discussion proposes scoped changes; explicit outcome commands use the existing production jobs.
@@ -5563,6 +5599,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     sys.path.insert(0, str(CBGEN))
                 import cb_render as _CBR
                 if self.path == "/api/script-dialogue-correction":
+                    import cb_intake
                     old_text = str(d.get("oldExactText") or "")
                     new_text = str(d.get("newExactText") or "").strip()
                     speaker = str(d.get("speaker") or "").strip()
@@ -5593,7 +5630,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                         raise ValueError(
                             "the exact approved line was not found once in the active script; "
                             "the correction was not applied")
-                    corrected_text = script_text.replace(old_text, new_text, 1)
+                    corrected_text = cb_intake.correct_dialogue_source(
+                        script_text, old_text, new_text)
                     change_scope = {
                         "kind": "dialogue-correction",
                         "scene": scene,
@@ -5691,7 +5729,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 correction = str(d.get("correction")).strip() if d.get("correction") not in (None, "") else None
                 if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(episode):
                     self._json(400, {"error": "scene and episode must be plain tokens (e.g. 1, Ep1)"}); return
-                if cmd in ("retake", "fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+                if cmd in ("retake", "fire", "compare-fire", "approve-comparison", "reject-comparison", "voice-shot", "prepare-voice", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
                            "pose", "approve-pose", "reject-pose", "select-pose-upload",
                            "select-upload", "select-library", "select-render-upload",
                            "approve-voice", "reject-voice", "regen-voice",

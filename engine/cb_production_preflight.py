@@ -87,6 +87,35 @@ def _department(ledger, stage):
     return (((ledger.get("departmentWork") or {}).get(stage) or {}).get("approved") or {})
 
 
+def _causal_timing_compliance(package):
+    """Find authored after-line checkpoints that contradict approved HEAR timing."""
+    from studio_director_handoff import causal_audio_checkpoint_issues
+    from studio_approved_media_projection import watch_shot
+    findings = []
+    for shot in package.get("shots") or []:
+        sid = shot.get("shotId")
+        if not sid:
+            continue
+        ledger = cb_render._ledger(package, sid)
+        approval = ledger.get("voiceApproval") or {}
+        if not approval.get("approved") or not ledger.get("voPlacementPath"):
+            continue
+        try:
+            measured = watch_shot(shot, ledger)
+            conflicts = causal_audio_checkpoint_issues(measured)
+        except (OSError, KeyError, TypeError, ValueError) as exc:
+            findings.append({"code": "HEAR_TIMING_UNVERIFIED", "shotId": sid,
+                "stage": "voice", "message": f"Approved voice timing could not be verified for {sid}: {exc}",
+                "action": "Review the current HEAR timing receipt before continuing."})
+            continue
+        findings.extend({"code": "DIRECT_AUDIO_TIMING_CONFLICT", "shotId": sid,
+            "stage": "storyboard", "message": conflict,
+            "action": ("Revise the conflicting DIRECT checkpoint against the measured HEAR interval; "
+                       "keep approved audio unless you choose otherwise.")}
+            for conflict in conflicts)
+    return findings
+
+
 def _legacy_production_preflight(scene, episode="Ep1"):
     """Return every known blocker together; never mutate state or call a provider."""
     pkg, _ = cb_render.load_pkg(scene, episode)
@@ -389,6 +418,14 @@ def production_preflight(scene, episode="Ep1", state=None):
         if package and state.get("packageCurrent") and
         not state.get("carriedProduction") else {"look": None, "shots": {}}
     )
+
+    # Compliance belongs before the next stage, not at the final WATCH button.
+    # Compare authored causal checkpoints with verified HEAR placements so a
+    # measured-audio drift is routed back to DIRECT across every shot/episode.
+    if package and state.get("packageCurrent") and not state.get("carriedProduction"):
+        for finding in _causal_timing_compliance(package):
+            block(finding["code"], finding["stage"], finding["message"],
+                  finding["action"], finding["shotId"])
 
     provider_capabilities = cb_providers.capability_report()
     if not provider_capabilities["selectionReady"]:

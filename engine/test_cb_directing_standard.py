@@ -116,6 +116,42 @@ def test_voice_timing_blocks_prompt_complete_but_overloaded_action():
     assert report["recommendedAction"] == "split-at-strongest-story-boundary"
 
 
+def test_performance_budget_uses_assembled_audio_and_protects_final_landing(tmp_path):
+    audio = tmp_path / "Audio1.wav"
+    audio.write_bytes(b"approved audio")
+    raw_timing = tmp_path / "raw.dialogue.json"
+    raw_timing.write_text(json.dumps({"voiceSegments": [
+        {"startTimeSec": 0, "endTimeSec": 31},
+    ]}))
+    placement = tmp_path / "Audio1.wav.timing.json"
+    placement.write_text(json.dumps({
+        "durationSec": 30, "outputSha256": R._sha256_file(audio),
+        "placements": [{"targetStartSec": 2.5, "targetEndSec": 29.9}],
+    }))
+    shot = {"durationSec": 30, "performanceBudgetApproved": {
+        "decision": "single-unit", "minimumHonestDurationSec": 19,
+        "silentActingReserveSec": 1, "landingHoldSec": .5,
+    }}
+    ledger = {"voPath": str(audio), "voTimingPath": str(raw_timing),
+              "voPlacementPath": str(placement)}
+
+    report = R._performance_budget_report(shot, ledger)
+    assert report["measuredVoiceTiming"] is True
+    assert report["availableUnvoicedSec"] == 2.6
+    assert report["ready"] is False
+    assert any("0.10s for the 0.50s landing hold" in reason
+               for reason in report["reasons"])
+
+    placement.write_text(json.dumps({
+        "durationSec": 30, "outputSha256": R._sha256_file(audio),
+        "placements": [{"targetStartSec": 2.5, "targetEndSec": 29.4}],
+    }))
+    assert R._performance_budget_report(shot, ledger)["ready"] is True
+
+    audio.write_bytes(b"changed audio")
+    assert "does not match Audio1" in R._performance_budget_report(shot, ledger)["reasons"][0]
+
+
 def test_timing_slate_requires_and_records_human_rhythm_approval(tmp_path, monkeypatch):
     here = tmp_path / "engine"
     media = here / "media"
@@ -157,17 +193,18 @@ def test_fresh_validation_keeps_full_script_occurrences_for_mixed_sfx_dialogue()
 def test_fresh_validation_uses_approved_hear_when_beat_codes_were_rehomed(
         monkeypatch, tmp_path):
     import cb_engine as E
+    import copy
+    import studio_approved_media_projection as projection
 
-    (tmp_path / "cb-output").mkdir()
-    json.dump({
+    beat_package = {
         "beats": [{
             "sceneNumber": "7",
             "beatCode": "S7-B1",
             "storyBeat": "Current source package has rehomed the beat code.",
             "cuts": [],
         }],
-    }, open(tmp_path / "cb-output" / "EpT_rehomed_beat_package.json", "w"))
-    monkeypatch.setattr(E, "HERE", tmp_path / "engine")
+    }
+    monkeypatch.setattr(E, "_load_pkg", lambda _episode: (beat_package, None))
     monkeypatch.setattr(R, "_characters_cfg", lambda: {})
 
     line = {
@@ -177,7 +214,7 @@ def test_fresh_validation_uses_approved_hear_when_beat_codes_were_rehomed(
         "exactText": "That one is you. Look at your tail.",
         "delivery": "Warm and playful.",
         "startSec": 1.0,
-        "endSec": 3.0,
+        "endSec": 31.0,
     }
     pkg = {
         "sceneNumber": "7",
@@ -224,8 +261,16 @@ def test_fresh_validation_uses_approved_hear_when_beat_codes_were_rehomed(
         "continuityLedger": [{
             "shotId": "S7.SH1",
             "voiceApproval": {"approved": True, "path": "/tmp/approved.wav"},
+            "voPlacementPath": "/tmp/approved.wav.timing.json",
         }],
     }
+
+    def project_approved_audio(shot, _ledger):
+        projected = copy.deepcopy(shot)
+        projected["dialogueLines"][0]["endSec"] = 3.0
+        return projected
+
+    monkeypatch.setattr(projection, "watch_shot", project_approved_audio)
 
     assert R._fresh_validation(pkg, "EpT", "S7.SH1")["passed"] is True
 

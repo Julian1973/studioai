@@ -629,15 +629,14 @@ class Production:
                 raise StudioError("This voice performance exceeds 30 seconds. Split the source into shorter shots before rendering.", "timing_limit")
         source = "\n".join(context["script"].splitlines()[shot["startLine"] - 1:shot["endLine"]])
         prompt = self._prompt(context, shot, "watch", refs)
+        from studio_prompt_director import audio_policy
+        prompt += "\n" + audio_policy(bool(audio))
         if audio:
-            prompt += "\n[Audio]\n@Audio1 is the approved voice performance. Match its exact words, speaker timing and lip sync. No extra dialogue."
             from studio_voice_timing import dialogue_cues
             cues = dialogue_cues(shot['outcomes']['hear'].get('voiceTiming'), shot['dialogue'], audio[0]['hash'])
             # Exact words, speaker ownership and measured intervals enter the
             # authoritative typed plan through project_authorities. No JSON
             # control record is appended to the provider's audio block.
-        else:
-            prompt += "\n[Audio]\nNo spoken dialogue."
         # Keep source text in the review record, not as a second competing action/dialogue script.
         # Approved voice cues above remain the provider's spoken-word authority.
         # The provider payload is the deterministic compiler's output from the typed
@@ -746,6 +745,7 @@ class Production:
                "direction": message, "stage": payload.get("stage", "see"), "reviews": self.review_learning(db, pid, state),
                "messages": state["messages"][-12:], "standard": STANDARD_PATH.read_text() + "\n\n" + __import__("studio_director_card").CONTRACT, "status": "queued", "createdAt": time.time(), "pid": os.getpid()}
         from studio_prompt_structure import WRITING_BRIEF
+        job['episodeVisualLanguage'] = copy_json(state.get('visualLanguage'))
         job['standard'] += '\n\n' + WRITING_BRIEF
         job['standardHash'] = digest(job['standard'])
         if kind == "see":
@@ -982,6 +982,7 @@ class Production:
                         "selectedShot": ({k: job["shot"].get(k) for k in Shot.model_fields} if job["shot"] else None), "direction": job["direction"], "stage": job["stage"],
                         "reviewLearning": job["reviews"], "conversation": job["messages"]}
                 data["characterStates"] = context.get("characterStates", [])
+                data["episodeVisualLanguage"] = job.get('episodeVisualLanguage')
                 from studio_coverage import unit_board, panel_brief
                 if job['shot']:
                     from studio_director_card import stage_decisions
@@ -1183,6 +1184,7 @@ class Production:
                     self._replace(shot, 'request', result)
                     self._message(state, 'agent', result['promptDirector']['verdict'] + ' — ' + result['promptDirector']['summary'])
             elif kind == "plan":
+                state["visualLanguage"] = copy_json(result.get("visualLanguage"))
                 state["sceneCoverage"] = result.get("sceneCoverage", [])
                 state["shots"] = [{**shot, "outcomes": {}, "versions": [], "sourceSignature": self.source_signature(job["context"], shot),
                                    "directionPreparation": {'jobId': job['id'], 'kind': 'creative', 'standardHash': job['standardHash'], 'binding': job['binding']}} for shot in result["shots"]]

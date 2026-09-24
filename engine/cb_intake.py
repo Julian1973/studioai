@@ -296,6 +296,26 @@ _NUMBERED_CUE_RE = re.compile(
     r"(?:\s+\(CONT'D\))?\s*$")
 
 
+def correct_dialogue_source(text, old_text, new_text):
+    """Apply an exact dialogue correction without discarding a shortened script tail.
+
+    When the corrected line is a sentence-complete prefix of a mixed dialogue/action
+    paragraph, keep the remainder in the screenplay as a separate silent action paragraph.
+    This makes the source parse unambiguous while preserving every authored word.
+    """
+    source = str(text or "")
+    old = str(old_text or "")
+    new = str(new_text or "").strip()
+    if not old or not new or source.count(old) != 1:
+        raise ValueError("the exact source line must occur once before correction")
+    replacement = new
+    if (old.startswith(new) and old[len(new):].strip() and
+            new[-1:] in ".!?…"):
+        remainder = old[len(new):].strip()
+        replacement = f"{new}\n\n{remainder}"
+    return source.replace(old, replacement, 1)
+
+
 def parse_script(text, roster=None, log=print):
     """Mechanical, deterministic, never touches meaning. Returns
     {scenes: [{sceneNumber, headerRaw, location, time}],

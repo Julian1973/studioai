@@ -11,6 +11,8 @@ import cb_episode_budget as budget
 
 def intent(message):
     text = re.sub(r"[.!]+$", "", str(message).strip().lower())
+    if text in {"approve voice as heard", "approve this voice take as heard"}:
+        return {"kind": "approve-voice-override"}
     if text in {"apply and refire", "apply & refire", "apply and refire keyframe"}:
         return {"kind": "retake-keyframe"}
     match = re.fullmatch(r"approve (?:the )?episode budget (?:of )?\$([0-9]+(?:\.[0-9]{1,2})?)", text)
@@ -58,7 +60,11 @@ def target(episode, scene, shot_id, stage):
     elif stage == "voice" and led.get("voPath") and not (led.get("voiceApproval") or {}).get("approved"):
         kind = "voice"
         artifact = {"file": _file(led["voPath"]), "generatedFrom": led.get("voGeneratedFrom"),
-                    "timing": _file(led.get("voTimingPath"))}
+                    "generatedInputSignature": led.get("voInputSignature"),
+                    "workingVoice": led.get("workingVoice"),
+                    "raw": _file(led.get("voRawPath")),
+                    "timing": _file(led.get("voTimingPath")),
+                    "placement": _file(led.get("voPlacementPath"))}
     elif stage == "animation":
         if led.get("pendingSpendAuth"):
             kind, artifact = "request", led["pendingSpendAuth"]
@@ -76,7 +82,8 @@ def target(episode, scene, shot_id, stage):
                       "request": "WATCH prompt, references and script", "render": "finished render"}[kind]}
 
 
-def execute(episode, scene, shot_id, stage, reviewed_hash, reviewer="Julian", candidate_id=None):
+def execute(episode, scene, shot_id, stage, reviewed_hash, reviewer="Julian", candidate_id=None,
+            producer_override=False):
     with cb_db.scene_lease(R.ROOT, episode, scene, "chat-reviewed-decision"):
         current = target(episode, scene, shot_id, stage)
         if not current or current["hash"] != reviewed_hash:
@@ -84,11 +91,20 @@ def execute(episode, scene, shot_id, stage, reviewed_hash, reviewer="Julian", ca
         pkg, _ = R.load_pkg(scene, episode)
         led = R._ledger(pkg, shot_id)
         kind = current["kind"]
+        if producer_override and kind != "voice":
+            raise R.Refused("A producer override can approve only the exact HEAR take under review.")
         if kind == "keyframe":
             if candidate_id:
                 R.select_keyframe_candidate(scene, shot_id, candidate_id, episode)
             return R.approve_keyframe(scene, shot_id, episode, reviewed_by=reviewer)
         if kind == "voice":
+            if producer_override:
+                return R.approve_voice(
+                    scene, shot_id, episode, reviewed_by=reviewer,
+                    producer_override=True,
+                    override_reason=(
+                        "Producer listened to the exact current take and approved it as heard "
+                        "despite its difference from saved dialogue or voice direction."))
             return R.approve_voice(scene, shot_id, episode, reviewed_by=reviewer)
         if kind == "request":
             auth = led["pendingSpendAuth"]
@@ -152,16 +168,9 @@ def prepare(episode, scene, shot_id, stage):
             _direction(episode, scene, shot_id, "voice")
             return R.regen_voice_shot(scene, shot_id, episode)
         if stage == "animation":
-            if led.get("pendingSpendAuth"):
-                return {"existing": True}
-            _direction(episode, scene, shot_id, "animation")
-            try:
-                return R.fire_shot(scene, shot_id, episode, candidates=1)
-            except R.Refused:
-                pkg, _ = R.load_pkg(scene, episode)
-                if R._ledger(pkg, shot_id).get("pendingSpendAuth"):
-                    return {"requestReady": True}
-                raise
+            from cb_studio_director import prepare_render
+            prepare_render(scene, shot_id, episode)
+            return {"requestReady": True}
         raise ValueError("Unsupported outcome")
 
 
@@ -183,11 +192,21 @@ def retake_keyframe(episode, scene, shot_id, reviewed_hash, correction, reviewer
 
 if __name__ == "__main__":
     import sys
-    if sys.argv[1] == "retake-keyframe":
-        retake_keyframe(*sys.argv[2:])
-    elif sys.argv[1] == "prepare":
-        episode, scene, shot_id, stage = sys.argv[2:]
-        prepare(episode, scene, None if shot_id == "scene" else shot_id, stage)
-    else:
-        episode, scene, shot_id, stage, reviewed_hash, reviewer, *choice = sys.argv[1:]
-        execute(episode, scene, shot_id, stage, reviewed_hash, reviewer, choice[0] if choice else None)
+    try:
+        if sys.argv[1] == "retake-keyframe":
+            retake_keyframe(*sys.argv[2:])
+        elif sys.argv[1] == "prepare":
+            episode, scene, shot_id, stage = sys.argv[2:]
+            prepare(episode, scene, None if shot_id == "scene" else shot_id, stage)
+        else:
+            episode, scene, shot_id, stage, reviewed_hash, reviewer, *choice = sys.argv[1:]
+            producer_override = "--producer-override" in choice
+            candidate_id = next((item for item in choice if item != "--producer-override"), None)
+            execute(episode, scene, shot_id, stage, reviewed_hash, reviewer,
+                    candidate_id, producer_override=producer_override)
+    except Exception as exc:
+        # Worker callers already persist the full failure in the production
+        # operation record. Keep the process boundary machine-readable and
+        # human-sized; raw Python tracebacks must never become Studio UI copy.
+        print(f"STUDIO_OPERATION_FAILED: {type(exc).__name__}: {exc}", file=sys.stderr)
+        sys.exit(2)

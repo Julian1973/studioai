@@ -1404,21 +1404,17 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
             "identity and construction only, never its background or staging.")
     scene_plate_slot = next_slot + len(prop_lines)
     prompt = "\n\n".join([
-        _style_line(scene),
-        f"The literal OPENING FRAME of the shot, exactly as approved: {pose}.",
+        "Use the character references for identity and the scene plate for approved look and light.",
+        f"Opening frame: {pose}.",
         " ".join(prop_lines),
-        f"{continuity_clause}@图{scene_plate_slot} scene plate anchors palette, materials and "
-        f"lighting and world-space geography; preserve landmarks without copying its camera composition.",
-        (f"@图{scene_plate_slot + 1} is the approved continuity-state reference from {shot.stateSourceShotId}. "
-         "Use it for current character, prop and effect state and the same story moment; "
-         "when an editorial relay frame is declared, follow that relay state rather than blindly copying the literal final frame. "
-         "Compose the new camera angle described by the opening pose; do not copy the prior framing."
+        (f"Continuity: {continuity_clause.strip()} " if continuity_clause else "") +
+        f"Scene plate @图{scene_plate_slot} sets palette, materials, lighting and world-space geography; "
+        "do not copy its camera composition.",
+        (f"@图{scene_plate_slot + 1} is the accepted prior-shot state reference. "
+         "Match current character, prop and effect state, not its framing; use this shot's opening pose."
          if shot.stateSourceShotId else ""),
-        cb_engine_rules.living_performance_boilerplate(
-            {"charactersInFrame": list(opening_cast)}, medium="still"),
-        ("Negative: character redesign, appearance drift from the references, extra "
-         "characters, on-screen text."),
-    ].copy())
+        "Keep the approved cast and designs. No extra characters or on-screen text.",
+    ])
     prompt = "\n\n".join(section for section in prompt.split("\n\n") if section.strip())
     wc = len(prompt.split())
     _assert_no_spoken_words(prompt, shot, "keyframe prompt")

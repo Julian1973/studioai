@@ -208,10 +208,13 @@ def test_text_to_dialogue_is_preserved_and_rebased_inside_thirty_second_slate(tm
         ],
     }), encoding="utf-8")
 
+    lines = [{"startSec": 1.2, "endSec": 2.4}, {"startSec": 5.8, "endSec": 8.5}]
+    duration = cb_audio_timing.continuous_fit_duration(raw, timing, lines)
+    assert duration == 30
+    with pytest.raises(cb_audio_timing.AudioTimingError, match="bounded tempo"):
+        cb_audio_timing.continuous_fit_duration(raw, timing, lines, maximum_duration_sec=20)
     result = cb_audio_timing.render_timed_dialogue_master(
-        raw, timing,
-        [{"startSec": 1.2, "endSec": 2.4}, {"startSec": 5.8, "endSec": 8.5}],
-        30, tmp_path / "master.wav")
+        raw, timing, lines, duration, tmp_path / "master.wav")
 
     assert result["assemblyMode"] == "continuous-dialogue-performance"
     assert result["authoredPerformanceTargetStartSec"] == pytest.approx(1.2)
@@ -219,6 +222,72 @@ def test_text_to_dialogue_is_preserved_and_rebased_inside_thirty_second_slate(tm
     assert result["performanceTargetEndSec"] <= 30.001
     assert result["performanceStartShiftSec"] == pytest.approx(-0.73, abs=.03)
     assert result["placements"][1]["targetEndSec"] <= 30.001
+
+
+def test_continuous_voice_fit_preserves_approved_landing_room(tmp_path):
+    raw = tmp_path / "conversation.mp3"
+    _silent_audio(raw, 30.96)
+    timing = cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({
+        "audioSha256": cb_audio_timing.file_sha256(raw),
+        "endpoint": "/v1/text-to-dialogue/with-timestamps",
+        "voiceSegments": [{"dialogueInputIndex": 0,
+                           "startTimeSec": 0, "endTimeSec": 30.96}],
+    }))
+    result = cb_audio_timing.render_timed_dialogue_master(
+        raw, timing, [{"startSec": 2.5}], 30, tmp_path / "Audio1.wav",
+        landing_room_sec=0.5)
+
+    assert result["performanceTargetEndSec"] == pytest.approx(29.5, abs=.01)
+    assert result["tempoFactor"] < cb_audio_timing.MAX_CONTINUOUS_TEMPO_FACTOR
+    assert cb_audio_timing.file_sha256(result["outputPath"]) == result["outputSha256"]
+
+
+def test_continuous_timing_repair_collapses_director_gaps_to_provider_ranges(tmp_path):
+    raw = tmp_path / "dialogue-repair.mp3"
+    _silent_audio(raw, 15.68)
+    timing = cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({
+        "audioSha256": cb_audio_timing.file_sha256(raw),
+        "endpoint": "/v1/text-to-dialogue/with-timestamps",
+        "voiceSegments": [
+            {"dialogueInputIndex": 0, "startTimeSec": 0, "endTimeSec": 5.68},
+            {"dialogueInputIndex": 1, "startTimeSec": 5.68, "endTimeSec": 11.04},
+            {"dialogueInputIndex": 2, "startTimeSec": 11.04, "endTimeSec": 15.68},
+        ],
+    }), encoding="utf-8")
+    result = cb_audio_timing.continuous_lines_from_provider_timing(
+        raw, timing,
+        [{"startSec": .3, "endSec": 8.6},
+         {"startSec": 8.9, "endSec": 16.2},
+         {"startSec": 16.3, "endSec": 17.8}],
+        .3,
+    )
+    assert [(line["startSec"], line["endSec"]) for line in result["lines"]] == [
+        (.3, 5.98), (5.98, 11.34), (11.34, 15.98)
+    ]
+    assert len(result["changes"]) == 3
+    assert result["providerCalled"] is False
+
+
+def test_isolated_timing_repair_preserves_direct_reaction_gaps(tmp_path):
+    raw=tmp_path/'isolated.wav'
+    _silent_audio(raw,4)
+    timing=cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({
+        'audioSha256':cb_audio_timing.file_sha256(raw),
+        'separatedDialogueAssembly':True,
+        'voiceSegments':[
+            {'dialogueInputIndex':0,'startTimeSec':0,'endTimeSec':1},
+            {'dialogueInputIndex':1,'startTimeSec':2,'endTimeSec':3}]}))
+    lines=[{'startSec':.3,'endSec':1.3},{'startSec':4,'endSec':5}]
+    repaired=cb_audio_timing.continuous_lines_from_provider_timing(raw,timing,lines,.3)
+    assert repaired['lines']==lines
+    assert repaired['changes']==[]
+    placement=cb_audio_timing.render_timed_dialogue_master(
+        raw,timing,repaired['lines'],6,tmp_path/'repaired.wav')
+    assert [p['targetStartSec'] for p in placement['placements']]==[.3,4]
+    assert placement['placements'][1]['targetStartSec']-placement['placements'][0]['targetEndSec']==pytest.approx(2.7)
 
 
 def test_small_continuous_overrun_is_tempo_fitted_without_clipping_or_provider(tmp_path):

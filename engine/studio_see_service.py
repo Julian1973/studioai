@@ -22,6 +22,21 @@ def context(root, scope, server=None):
         R = server._canonical_cb_render() if server else cb_render
         pkg, board, shot, ledger = read(Path(root), scope)
         look = R.scenelook_status(scope['scene'], scope['episode']) if shot else {}
+        if shot and not look.get('current'):
+            # A scoped visual amendment may explicitly carry the exact approved
+            # scene plate while its historical look-direction signature is stale.
+            # Verify bytes and recorded hash before projecting it as current SEE
+            # geography; never infer currentness from a filename alone.
+            approved = look.get('approved') or {}
+            carried = next((item for item in (pkg.get('scopedAmendments') or [])
+                            if item.get('shotId') == shot.get('shotId') and
+                            'scenelook' in (item.get('preservedStages') or []) and
+                            item.get('sceneLookContentHash') == approved.get('hash')), None)
+            if carried and approved.get('path') and Path(approved['path']).is_file():
+                import cb_render as _render
+                if _render._sha256_file(approved['path']) == approved.get('hash'):
+                    look = {**look, 'current': True, 'active': approved,
+                            'activeSource': 'approved', 'approvedCurrent': True}
         plate = (look.get('active') or look.get('candidate') or look.get('approved') or {}).get('path')
         opening = (ledger.get('keyframeCandidate') or ledger.get('keyframeApproval') or {}).get('path') or ledger.get('keyframePath')
         refs = []
@@ -141,8 +156,37 @@ def native_references(root, scope, plan):
     return plan
 
 
+def _auto_approve_legacy_components(root, scope, status):
+    """Close the deterministic legacy corridor from already-approved SEE inputs.
+
+    Legacy shots have no separate storyboard asset when the producer has already
+    approved the scene plate and opening keyframe. Record the existing
+    "continue without storyboard" choice and package approval; never generate,
+    infer image evidence, or replace a human component decision.
+    """
+    ctx = context(root, scope)
+    choice = status.get('storyboardChoice') or {}
+    if (not ctx.get('legacy') or choice.get('required') is True or
+            ctx.get('componentReviews', {}).get('plate') != 'approved' or
+            ctx.get('componentReviews', {}).get('opening') != 'approved' or
+            not ctx.get('directorApproved') or status.get('issues')):
+        return status
+    package = Package(root, scope)
+    actor = 'StudioAI (approved SEE components)'
+    with package.lock():
+        saved = package.read()
+        if saved.get('storyboardChoice') is None:
+            package.choose_storyboard(False, actor)
+        reviewed = current(root, scope)
+        if reviewed.get('ready') and not reviewed.get('approved'):
+            package.approve(reviewed, reviewed['binding'], actor)
+    return current(root, scope)
+
+
 def gate(root, scope, reviewed=None, *, approved=False):
     status = current(root, scope)
+    if approved and not status.get('approved'):
+        status = _auto_approve_legacy_components(root, scope, status)
     if not status['ready'] or approved and not status['approved']:
         raise ValueError('WATCH_CONFIGURATION_REQUIRED: ' + ((status.get('issues') or [None])[0] or 'the selected SEE assets do not have a current package approval.'))
     if reviewed and status['binding'] != reviewed.get('binding'):
@@ -367,7 +411,9 @@ def request(server, data):
             if decision == 'rejected':
                 args.append(reason)
             name = ('approve_' if decision == 'approved' else 'reject_') + ('scenelook' if component == 'plate' else 'keyframe')
-            getattr(R, name)(*args, episode=scope['episode'], reviewed_by=actor, log=lambda line: None)
+            extra = ({'reuse_prompt_change': True}
+                     if component == 'opening' and decision == 'approved' and data.get('reusePromptChange') is True else {})
+            getattr(R, name)(*args, episode=scope['episode'], reviewed_by=actor, log=lambda line: None, **extra)
             saved = package.read()
             saved.pop('approval', None)
             package.save(saved)

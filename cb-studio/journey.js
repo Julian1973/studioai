@@ -6,7 +6,7 @@ const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefi
 async function api(body){const r=await fetch('/api/production-journey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok||data.ok===false){const e=data.error||{};const detail=[e.errorCode&&`errorCode=${e.errorCode}`,e.stage&&`stage=${e.stage}`,e.operation&&`operation=${e.operation}`,e.technicalMessage&&`error=${e.technicalMessage}`,e.humanMessage||e.message].filter(Boolean).join('\n');throw new Error(detail||'Studio could not load the current production action.');}return data;}
 function mount(host,scope,options={}){
  const scopeId=JSON.stringify(scope);if(host.journeyHandle?.scopeId===scopeId&&host.querySelector('.journey-head')){host.journeyHandle.refresh();return host.journeyHandle;}host.journeyHandle?.();
- const ticket=++sequence;let state=null,timer=null,submitted=false,awaitingNext=false,mediaSignature=null,settledSignature=null,montageActionable=false,approvalOnly=false,requestPending=false,refreshSequence=0;
+ const ticket=++sequence;let state=null,timer=null,submitted=false,awaitingNext=false,mediaSignature=null,settledSignature=null,montageActionable=false,montageMissing=false,approvalOnly=false,requestPending=false,refreshSequence=0;
  host.replaceChildren();host.classList.add('journey-workspace');
  const head=node('div',undefined,'journey-head'),title=node('h2',scope.unit),progress=node('p','Loading current production…');
  head.append(title,progress);const media=node('div',undefined,'journey-media'),storyboard=node('section',undefined,'journey-storyboard'),brief=node('div',undefined,'journey-brief');
@@ -15,7 +15,17 @@ function mount(host,scope,options={}){
  const evidence=node('details'),summary=node('summary','Direction, references and evidence'),evidenceBody=node('pre');evidence.append(summary,evidenceBody);
  const advanced=node('details'),advancedTitle=node('summary','Individual corrections and review tools');advanced.append(advancedTitle);
  if(options.advanced){advanced.addEventListener('toggle',()=>{if(advanced.open&&!advanced.dataset.loaded){advanced.dataset.loaded='1';options.advanced(advanced);}});}
- changes.onclick=()=>options.changes?.(state);
+ changes.onclick=()=>{
+  const category=state?.operation?.decision?.producer?.category;
+  if(category==='audio'&&options.openHear)return options.openHear();
+  if(['direction','request','stale'].includes(category)&&options.changes)return options.changes(state);
+  if(['references','images'].includes(category)&&options.imageSourceAction){
+   const record=(state.review?.images||[]).find(item=>item?.component==='plate')||{component:'plate',label:'Scene plate',reviewStatus:'missing'};
+   return options.imageSourceAction({action:'library',component:'plate',record,state});
+  }
+  if(state?.operation?.decision){evidence.open=true;return;}
+  return options.changes?.(state);
+ };
  actions.append(primary,changes);actions.setAttribute('aria-label','Next required action');host.append(head,actions,issue,cost,media,storyboard,brief,evidence);if(options.advanced)host.append(advanced);
  function imageAsset(record){
   if(!record)return;
@@ -23,6 +33,7 @@ function mount(host,scope,options={}){
   const image=record.url?node('img'):node('p','No image selected','journey-image-empty');if(record.url){image.src=record.url;image.alt=(record.label||'SEE image')+' for '+scope.unit;}
   figure.append(node('figcaption',record.label||'SEE image'),image);card.append(figure);
   const status=node('p',record.reviewStatus==='approved'?'Approved':record.reviewStatus==='pending'?'Awaiting decision':record.reviewStatus==='stale'?'Refresh required':'Needs image');status.className='journey-image-status';
+  if(record.reusePromptChange)status.textContent='Prompt changed. Approve to confirm reuse of this existing image; no regeneration.';
   const controls=node('div',undefined,'journey-image-actions');
   const sourceAction=options.imageSourceAction||(record.component==='plate'?options.scenePlateAction:null);
   const decisions=sourceAction
@@ -36,6 +47,7 @@ function mount(host,scope,options={}){
    button.onclick=async()=>{
     if(!options.imageAction||button.disabled)return;
     let reason='';
+    if(action==='approved'&&record.reusePromptChange&&!window.confirm('The prompt changed after this image was generated. Reuse and approve this existing image for the current direction? No new image will be generated.'))return;
     if(action==='rejected'){reason=window.prompt('Reason for rejecting '+(record.label||'this image')+':','Needs a different SEE treatment.');if(reason===null||!reason.trim())return;}
     controls.querySelectorAll('button').forEach(item=>{item.disabled=true;});status.textContent=action==='refire'?'Opening refire controls…':'Saving '+label.toLowerCase()+'…';
     try{const result=await options.imageAction({action,component:record.component,reason,record,state});status.textContent=result?.message||label+' recorded';}
@@ -56,7 +68,8 @@ function mount(host,scope,options={}){
     catch(error){status.textContent=error.message||'Image action failed';}
     finally{sourceControls.querySelectorAll('button').forEach(item=>{item.disabled=!!state.busy;});}
    };
-   const upload=node('button','Upload','btn ghost');upload.type='button';
+   const uploadLabel=record.component==='plate'?'Upload Scene Plate':'Upload Opening Keyframe';
+   const upload=node('button',uploadLabel,'btn ghost');upload.type='button';
    const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp';input.hidden=true;
    upload.onclick=()=>input.click();
    input.onchange=()=>input.files?.length&&run('upload',input);
@@ -163,14 +176,15 @@ function mount(host,scope,options={}){
   title.textContent=scope.unit+' · '+(review.title||'Scene production');
   progress.textContent=state.busy?(op?.message||'Preparing your next review'):state.phase==='complete'?'Accepted · ready for the next unit':state.primary||state.dependency||'Review the current issue';
   const images=[...(review.images||[])].sort((a,b)=>({plate:0,opening:1}[a?.component]??2)-({plate:0,opening:1}[b?.component]??2));
-  const seeSurface=!!options.imageSourceAction&&['plan','images','audio'].includes(state.phase);
+  const seePhase=options.phase==='keyframe';
+  const seeSurface=seePhase||!!options.imageSourceAction&&['plan','images','audio'].includes(state.phase);
   if(seeSurface){
    for(const [component,label] of [['plate','Scene plate'],['opening','Opening keyframe']])if(!images.some(r=>r.component===component))images.push({component,label,reviewStatus:'missing'});
    images.sort((a,b)=>({plate:0,opening:1}[a.component]??2)-({plate:0,opening:1}[b.component]??2));
   }
   const nextMediaSignature=JSON.stringify([state.phase,state.busy,review.videos,images,review.audio,review.plan,review.storyboard]);
   if(nextMediaSignature!==mediaSignature){mediaSignature=nextMediaSignature;media.replaceChildren();
-  if(state.phase==='film'||state.phase==='complete'){for(const r of review.videos||[])asset(r,'video');}
+  if(!seePhase&&(state.phase==='film'||state.phase==='complete')){for(const r of review.videos||[])asset(r,'video');}
   else if(state.phase==='audio'){asset(review.audio,'audio');for(const r of images)imageAsset(r);}
   else if(images.length&&(state.phase!=='plan'||seeSurface)){for(const r of images)imageAsset(r);}
   else{
@@ -178,7 +192,31 @@ function mount(host,scope,options={}){
   }
   }
   renderStoryboard(review);
-  brief.replaceChildren();if(review.direction)brief.append(node('p',review.direction));
+  brief.replaceChildren();
+  const sequence=review.sceneSequence;
+  if(sequence){
+   const card=node('section',undefined,'journey-sequence');
+   card.append(node('div',sequence.approved?'Approved scene direction':'Scene direction · review before production','journey-sequence-state'));
+   card.append(node('h3','Scene sequence'));
+   if(sequence.purpose)card.append(node('p','Objective · '+sequence.purpose));
+   if(sequence.dramaticQuestion)card.append(node('p','Question · '+sequence.dramaticQuestion));
+   if(sequence.entry||sequence.exit)card.append(node('p','Change · '+[sequence.entry,sequence.exit].filter(Boolean).join('  →  ')));
+   const beats=sequence.beats||{};
+   for(const [key,label] of [['beginning','Beginning'],['development','Escalation'],['turn','Turn'],['landing','Landing']]){
+    if(beats[key])card.append(node('p',label+' · '+beats[key]));
+   }
+   if(sequence.coverage?.length){
+    const coverage=node('details');coverage.open=state.phase==='plan';
+    coverage.append(node('summary','Coverage · '+sequence.coverage.length+' planned shot(s)'));
+    for(const shot of sequence.coverage){
+     const row=[shot.shotId,shot.durationSec?shot.durationSec+'s':null,shot.purpose,shot.landingImage].filter(Boolean).join(' · ');
+     coverage.append(node('p',row));
+    }
+    card.append(coverage);
+   }
+   brief.append(card);
+  }
+  if(review.direction)brief.append(node('p',review.direction));
   if(['audio','film'].includes(state.phase)&&review.actionPlan?.length){brief.append(node('h3','Action'));for(const beat of review.actionPlan){brief.append(node('p',(beat.timing?beat.timing+' · ':'')+beat.action));}}
   for(const line of review.script||[]){const p=node('p');p.append(node('b',(line.speaker||'')+' '),node('em','“'+(line.exactText||line.text||line.words||'')+'”'));brief.append(p);}
   if(state.phase==='audio'&&review.performancePrompt){const p=node('details');p.append(node('summary','ElevenLabs performance prompt'),node('pre',review.performancePrompt));brief.append(p);}
@@ -188,7 +226,7 @@ function mount(host,scope,options={}){
   // present an old failure as the current producer blocker.
   if(decision){const pr=decision.producer;if(pr){issue.append(node('strong',pr.headline),node('p',pr.meaning),node('p',pr.nextAction),node('p',pr.preserved+(pr.code?' Reference: '+pr.code:'')));const tech=node('details','');tech.append(node('summary','Technical detail for support'),node('p',decision.issue),node('p',decision.proposed));if(decision.trace){const pre=node('pre',decision.trace);pre.style.whiteSpace='pre-wrap';pre.style.fontSize='11px';tech.append(pre);}issue.append(tech);}else{issue.append(node('strong',decision.issue),node('p',decision.proposed),node('p','Preserved: '+(decision.preserved||[]).join(', ')));}}
   for(const concern of state.concerns||[]){issue.append(node('p',typeof concern==='string'?concern:concern.message||concern.observation||''));}
-  const seePackage=review.seePackage||{}, montageMissing=state.phase==='images'&&!!options.storyboardGridAction&&(seePackage.storyboardRequired??review.storyboardChoice?.required??review.storyboardRequired)!==false&&seePackage.providerSheet?.status!=='current';
+  const seePackage=review.seePackage||{};montageMissing=state.phase==='images'&&!!options.storyboardGridAction&&(seePackage.storyboardRequired??review.storyboardChoice?.required??review.storyboardRequired)!==false&&seePackage.providerSheet?.status!=='current';
   const imageRecords=Array.isArray(review.images)?review.images:[], plateApproved=imageRecords.some(item=>item?.component==='plate'&&item.reviewStatus==='approved'), openingApproved=imageRecords.some(item=>item?.component==='opening'&&item.reviewStatus==='approved');
   const montageIssues=Array.isArray(seePackage.issues)?seePackage.issues.filter(Boolean):[];
   montageActionable=montageMissing&&!montageIssues.length&&plateApproved&&openingApproved&&(seePackage.panels||[]).length>0&&seePackage.panels.every(p=>p.status==='current'&&p.reviewStatus==='approved');
@@ -202,7 +240,19 @@ function mount(host,scope,options={}){
   if(approvalOnly){primary.textContent=state.phase==='film'?'Approve & Next':state.creativeReview.approveLabel;primary.disabled=state.busy||submitted;}
   if(decision){primary.textContent=decision.producer?.button||'Check saved operation';primary.disabled=submitted;}
   if(requestPending){primary.textContent='Approve request & Fire';primary.disabled=submitted;const display=node('section');display.append(node('h3','WATCH · Final request'),node('pre',JSON.stringify(request,null,2)));brief.prepend(display);}
-  cost.textContent=approvalOnly||montageMissing||decision?'No new generation cost.':state.disclosure?.limitUsd?'Maximum authorised spend: $'+state.disclosure.limitUsd.toFixed(2)+'. '+(state.disclosure.basis||''):'No new generation cost.';
+  if(options.openHear&&!state.busy&&!decision&&!montageMissing&&plateApproved&&openingApproved&&['images','audio'].includes(state.phase)){
+   primary.textContent='Continue to HEAR · dialogue & voice';primary.disabled=submitted;
+  }
+  if(decision){
+   const cap=Number(op?.grant?.limitUsd||0);
+   cost.textContent=cap>0?'Recovery stays within the original action cap of $'+cap.toFixed(2)+'. It cannot approve or submit a render.':'Recovery cannot spend or submit a render.';
+   const category=decision.producer?.category;
+   const alternateLabel=category==='audio'?'Open HEAR':['references','images'].includes(category)?'Review SEE':['direction','request','stale'].includes(category)?'Review in DIRECT':'View technical details';
+   changes.textContent=alternateLabel;
+  }else{
+   changes.textContent='Edit / Request Changes';
+   cost.textContent=approvalOnly||montageMissing?'No new generation cost.':state.disclosure?.limitUsd?'Maximum authorised spend: $'+state.disclosure.limitUsd.toFixed(2)+'. '+(state.disclosure.basis||''):'No new generation cost.';
+  }
   changes.disabled=state.busy||!options.changes;
   evidenceBody.textContent=JSON.stringify({scope,state:state.phase,normalActions:state.normalActionCount,corrections:state.correctionActionCount,review,operation:op,qualification:'Software checks do not establish live visual compliance.'},null,2);
   const settledKey=op&&!state.busy?[op.id,op.status].join(':'):null;if(settledKey&&settledKey!==settledSignature){settledSignature=settledKey;options.settled?.(state);}
@@ -211,6 +261,15 @@ function mount(host,scope,options={}){
  }
  async function refresh(resume=false){clearTimeout(timer);if(ticket!==sequence||!host.isConnected)return;const revision=++refreshSequence;try{const value=await api({command:resume?'resume':'status',scope});if(ticket!==sequence||revision!==refreshSequence||!host.isConnected)return;show(value);if(state.busy||['queued','running'].includes(state.review?.seePackage?.job?.status))timer=setTimeout(()=>refresh(true),1800);}catch(e){if(ticket!==sequence||revision!==refreshSequence)return;issue.textContent=e.message;primary.disabled=true;}}
  primary.onclick=async()=>{if(!state||submitted||primary.disabled)return;const decision=state.operation?.status==='needs-decision';if(decision&&state.operation?.decision?.producer?.category==='images'&&options.imageSourceAction){const tile=media.querySelector('[data-component="plate"]');tile?.scrollIntoView({block:'center'});const record=(state.review?.images||[]).find(r=>r?.component==='plate')||{component:'plate',label:'Scene plate',reviewStatus:'missing'};try{await options.imageSourceAction({action:'library',component:'plate',record,state});}catch(e){issue.textContent=e.message;}return;}const gridButton=host.querySelector('[data-storyboard-grid]');if(!decision&&montageActionable&&gridButton&&!gridButton.disabled){gridButton.click();return;}submitted=true;primary.disabled=true;awaitingNext=state.phase==='film';try{const body=decision?{command:'recover',scope}:requestPending?{command:'request-displayed',scope,operationId:state.operation.id,requestHash:state.operation.requestDisplayHash}:{command:'decide',scope,action:state.phase,binding:state.binding,expectedRevision:state.revision,commandId:crypto.randomUUID(),by:options.reviewer||'Producer',...(approvalOnly?{intent:'approve'}:{})};show(await api(body));}catch(e){issue.textContent=e.message;}finally{submitted=false;if(ticket===sequence)refresh(true);}};
+ const journeyAction=primary.onclick;
+ primary.onclick=async()=>{
+  const images=state?.review?.images||[];
+  if(!primary.disabled&&options.openHear&&!state.busy&&!montageMissing&&state.operation?.status!=='needs-decision'&&
+     state.phase==='images'&&['plate','opening'].every(component=>images.some(image=>image.component===component&&image.reviewStatus==='approved'))){
+   options.openHear();return;
+  }
+  return journeyAction();
+ };
  const handle=()=>{clearTimeout(timer);if(ticket===sequence)sequence++;};handle.scopeId=scopeId;handle.refresh=()=>refresh(true);host.journeyHandle=handle;refresh(true);return handle;
 }
 global.StudioJourney={mount};

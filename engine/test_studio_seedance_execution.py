@@ -39,6 +39,30 @@ def compact_source(tmp_path, monkeypatch):
     return snapshot
 
 
+@pytest.mark.parametrize('medium,performance', [
+    ('animation', 'Anticipate the reach, then settle the weight through the wrist.'),
+    ('live action', 'Listen without speaking; relax the fingers after contact.'),
+])
+def test_cinematic_decisions_reach_final_prompt_without_rewriting_source(compact_source, medium, performance):
+    view = compact_source['authorities']['shot']['directorCard']['views'][0]
+    view['performance'] = performance
+    view['cinematography'] = {
+        'pattern': 'BUSY HANDS', 'angle': 'low across the tabletop',
+        'lens': '50mm', 'movement': 'dolly in as fingers touch the cup; settle at contact',
+        'focus': 'cup rim, then fingertips', 'light': 'window light from screen left',
+        'composition': 'cup foreground, listener beyond',
+        'atmosphere': 'quiet room; no added weather', 'time': 'real-time; preserve dialogue timing',
+    }
+    before = deepcopy(compact_source)
+    prompt, _ = E.compile_prompt(compact_source, audit(compact_source))
+    for key, value in view['cinematography'].items():
+        if key != 'pattern':
+            assert value in prompt, (medium, key)
+    assert performance in prompt
+    assert view['action'] in prompt
+    assert compact_source == before
+
+
 def test_native_compiler_uses_declared_visibility_not_mentions_or_offscreen_speech(compact_source):
     from studio_storyboard_prompt import subjects_for_view
     view = {'causalAction': 'Mira stays offscreen while Oren accepts the cup.'}
@@ -46,6 +70,36 @@ def test_native_compiler_uses_declared_visibility_not_mentions_or_offscreen_spee
         visible_entities=['character:Oren']) == 'Subjects: Oren from @图2.'
     assert 'Visible cast: Oren @图2 only.' in compact_source['prompt'].split('Shot 2:', 1)[1]
     assert 'Subjects: Oren from @图2; Mira' not in compact_source['prompt'].split('Shot 2:', 1)[1]
+
+
+def test_attention_listener_and_edit_intent_survive_real_compiler(compact_source):
+    import studio_watch_plan as plan
+    view = compact_source['authorities']['shot']['directorCard']['views'][0]
+    view.update(audienceNeed='Notice the offered space before the answer.',
+                listenerReaction='Oren watches the fingertips, then releases his shoulders.',
+                cutReason='Hold until acceptance becomes visible, not merely until speech ends.')
+    before = deepcopy(compact_source)
+    compiled, _ = E.compile_prompt(compact_source, audit(compact_source))
+    typed = plan.build_plan(compact_source)
+    for target, source in [('audienceNeed', 'audienceNeed'),
+                           ('listenerReaction', 'listenerReaction'), ('editReason', 'cutReason')]:
+        assert view[source] in compiled
+        assert typed['views'][0][target] == view[source]
+        assert typed['origins'][f'/views/0/{target}'] == f'/shot/directorCard/views/0/{source}'
+    assert compact_source == before
+
+
+def test_exact_duplicate_intent_and_performance_emit_once(compact_source):
+    view = compact_source['authorities']['shot']['directorCard']['views'][0]
+    view['cameraPurpose'] = view['audienceNeed'] = 'Notice the hesitation before acceptance.'
+    view['performance'] = 'The giver waits while the listener gradually releases the grip.'
+    before = deepcopy(compact_source)
+    prompt, _ = E.compile_prompt(compact_source, audit(compact_source))
+    assert prompt.count(view['cameraPurpose']) == 1
+    assert prompt.count(view['performance']) == 1
+    assert all(view['performance'] not in line for line in prompt.splitlines()
+               if line.startswith('Spoken action:'))
+    assert compact_source == before
 
 
 def test_provider_excludes_internal_dump_and_compacts_repeated_anchors(compact_source):
@@ -131,7 +185,7 @@ def test_required_state_and_immutable_audio_survive_real_compile_and_seal(compac
             assert check['status'] == 'pass', check
 
 
-@pytest.mark.parametrize('words,status', [(1400,'PASS'),(1600,'PASS'),(1601,'WARN'),(2200,'WARN'),(2201,'BLOCKED')])
+@pytest.mark.parametrize('words,status', [(1400,'PASS'),(1600,'PASS'),(1601,'WARN'),(2200,'WARN'),(2201,'WARN')])
 def test_configured_word_budget_never_truncates_content(words, status):
     prompt = 'word ' * words
     assert E.budget(prompt, {})['status'] == status
@@ -141,30 +195,21 @@ def test_configured_word_budget_never_truncates_content(words, status):
 def test_budget_exception_is_bound_to_source_and_exact_prompt():
     prompt = 'word ' * 2300
     auth = {'shot': {'shotId':'S4.SH3', 'revision':4, 'promptBudgetException':True}}
-    assert E.budget(prompt, auth)['status'] == 'BLOCKED'
+    assert E.budget(prompt, auth)['status'] == 'WARN'
     record = dict(id='explicit-1', authorisedBy='Test human', shotId='S4.SH3',
         sourceHash=E.digest(auth['shot']), promptHash=E.digest(prompt), maxWords=2300)
     auth['promptBudgetAuthorisations'] = [record]
     assert E.budget(prompt, auth)['exceptionId'] == 'explicit-1'
     auth['shot']['revision'] = 5
-    assert E.budget(prompt, auth)['status'] == 'BLOCKED'
+    assert E.budget(prompt, auth)['status'] == 'WARN'
 
 
-def test_early_budget_block_is_durable_and_never_calls_reviewer(compact_source, monkeypatch, tmp_path):
-    import cb_llm
-    monkeypatch.setattr(cb_llm, 'structured_with_repair', lambda *a, **k: pytest.fail('No model call'))
-    compact_source['authorities']['shot']['directorCard']['views'][1]['action'] += ' word' * 2300
-    prompt = compact_source['prompt']
-    env = dict(prompt=prompt, references=compact_source['references'], audio=compact_source['audio'], durationSec=8,
-        executionPlan={'segments':[dict(prompt=prompt,contract={})]})
-    with pytest.raises(ValueError, match='WATCH_CONFIGURATION_REQUIRED'):
-        PD.review_legacy_envelope(env, compact_source['authorities']['shot'], compact_source['authorities']['specialist'], archive_folder=tmp_path/'reports')
-    record=json.loads(next((tmp_path/'reports').glob('*.json')).read_text()); report=record['review']
-    for key in ('version','sourceHash','inputHash','payloadHash','correctiveAction','summary'):
-        assert report[key]
-    assert report['providerCalled'] is False and report['spendOccurred'] is False
-    assert record['snapshot']['references'] == compact_source['references']
-    assert report['providerPromptCompilation']['budget']['status'] == 'BLOCKED'
+def test_prompt_budget_overage_is_advisory_and_does_not_change_content():
+    prompt = 'word ' * 2301
+    result = E.budget(prompt, {})
+    assert result['status'] == 'WARN'
+    assert result['advisory'] is True
+    assert len(prompt.split()) == result['wordCount']
 
 
 @pytest.mark.parametrize('change', ['audio','metadata','budget'])

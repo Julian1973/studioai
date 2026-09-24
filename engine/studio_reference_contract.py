@@ -11,6 +11,24 @@ def required_cast(shot):
     return list(dict.fromkeys(str(v).strip() for v in values or [] if str(v).strip()))
 
 
+def animation_required_cast(shot):
+    """Return shot cast plus character identities explicitly visible in DIRECT views."""
+    values = shot.get('charactersInFrame', shot.get('characters', [])) or []
+    result = list(dict.fromkeys(str(v).strip() for v in values if str(v).strip()))
+    seen = {str(name).casefold() for name in result}
+    for view in (shot.get('directorCard') or {}).get('views') or []:
+        for entity in view.get('visibleEntities') or []:
+            value = str(entity or '').strip()
+            # Ignore props, locations, and other typed entities. Only an explicit
+            # character namespace can extend the approved shot-level cast.
+            if value.startswith(('character:', 'char:', 'character.', 'char.')):
+                name = value.split(':', 1)[1] if ':' in value else value.split('.', 1)[1]
+                if name and name.casefold() not in seen:
+                    result.append(name)
+                    seen.add(name.casefold())
+    return result
+
+
 def complete_identity_slots(slots, cast):
     result = dict(slots or {})
     existing = {str(v).casefold() for v in result.values()}

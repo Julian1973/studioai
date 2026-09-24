@@ -1,6 +1,22 @@
 import json
+from pathlib import Path
 
 import cb_director_chat as chat
+
+
+def test_applied_director_instruction_keeps_visible_result_and_removes_stale_slot_claim():
+    instruction = chat.production_instruction({
+        "correction": "Place Keen screen-left.",
+        "changeSummary": "Sunny lifts the garland. Use @图6 as continuity reference.",
+        "protectedElements": ["Keep the approved room lighting."],
+    })
+    assert "Place Keen screen-left." in instruction
+    assert "Visible result required: Sunny lifts the garland." in instruction
+    assert "the supplied reference as continuity reference" in instruction
+    assert "@图6" not in instruction
+    assert "Keep locked: Keep the approved room lighting." in instruction
+    source = (Path(__file__).resolve().parents[1] / "cb-studio" / "serve.py").read_text(encoding="utf-8")
+    assert "correction = cb_director_chat.production_instruction(latest)" in source
 
 
 def _package():
@@ -101,6 +117,41 @@ def test_chat_preserves_acting_coverage_and_dialogue_timing_authorities(monkeypa
     assert context["exactDialogue"][0]["exactText"] == "Today could be OK."
     assert "singleCameraTreatment" not in context
     assert package == original
+
+
+def test_director_repair_context_uses_hash_verified_approved_audio1_timing(monkeypatch, tmp_path):
+    import hashlib
+
+    package = _package()
+    shot = package["shots"][0]
+    shot.update(durationSec=30)
+    shot["dialogueLines"][0].update(
+        dialogueOccurrenceId="line-1", startSec=7.2, endSec=33.46)
+    audio = tmp_path / "approved.wav"
+    audio.write_bytes(b"approved audio bytes")
+    timing = tmp_path / "timing.json"
+    timing.write_text("{}", encoding="utf-8")
+    receipt = tmp_path / "placement.json"
+    receipt.write_text(json.dumps({
+        "outputPath": str(audio),
+        "outputSha256": hashlib.sha256(audio.read_bytes()).hexdigest(),
+        "dialogueTimingPath": str(timing),
+        "dialogueTimingSha256": hashlib.sha256(timing.read_bytes()).hexdigest(),
+        "placements": [{"dialogueOccurrenceId": "line-1", "targetStartSec": 7.4,
+                        "targetEndSec": 9.25}],
+    }), encoding="utf-8")
+    package["continuityLedger"][0].update(
+        voiceApproval={"approved": True, "path": str(audio)},
+        voPlacementPath=str(receipt))
+    monkeypatch.setattr(chat.cb_render, "load_pkg", lambda scene, episode: (package, tmp_path / "pkg.json"))
+
+    context = chat._scope_context("Ep2", "1", "S1.SH1", "storyboard", "Fix stale timing")
+
+    assert context["exactDialogue"][0]["startSec"] == 7.4
+    assert context["exactDialogue"][0]["endSec"] == 9.25
+    assert context["verifiedApprovedAudio1Intervals"][0]["measured"]["endSec"] == 9.25
+    assert "override every estimate, raw script interval, or prior conversation claim" in context["timingScope"]
+    assert shot["dialogueLines"][0]["endSec"] == 33.46
 
 
 def test_animation_edit_requires_explicit_valid_time_window():

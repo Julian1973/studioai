@@ -5,6 +5,7 @@ The same projection feeds the desk, specialists and the finishing handoff.
 """
 import hashlib
 import json
+from studio_episode_direction import CONTRACT as EPISODE_DIRECTION_CONTRACT
 
 VERSION = '1.0.0'
 CONTRACT = '''Prepare one scene coverage board from the current approved story and canon.
@@ -28,7 +29,55 @@ not another user task or approval step. Use it as provider input only on a verif
 Keep the board, SEE opening, performed voice and WATCH action aligned to the same source
 revision. Preserve approved audio and explicitly authorised generated SFX separately.
 User feedback changes the shared shot plan; do not keep a conflicting private prompt.
-Do not copy example scenes or new mechanics into the selected story.'''
+Do not copy example scenes or new mechanics into the selected story.
+
+OUTCOME-FIRST COVERAGE CHAIR — inside DIRECT, not another stage or model call.
+Work backward from the audience's emotional change and the final edited scene. Translate
+each important beat into observable behaviour, a readable image and an editorial purpose.
+Actively explore an expressive alternative to simply filming the speaker: a world entrance,
+listener reverse, thought before the line, meaningful hand/prop contact, motivated reveal,
+or purposeful hold. Choose what earns its screen time; neither cuts nor holds are quotas.
+Use cinematography.pattern optionally to name an organising idea: THE ENTRANCE,
+WHERE EVERYONE IS, THE LINE LANDING, THE TWO-SHOT, THE THOUGHT BEFORE THE LINE,
+BUSY HANDS, THE PILLOW SHOT, THE DEADPAN, THE CRASH, THE REALISATION, THE REVEAL,
+THE CHASE, THE CONFESSION, THE PLANT AND PAYOFF, THE BUTTON, THE RULE OF THREE.
+These are exploratory shapes, not compulsory shots or fixed durations. Explain the
+specific purpose in audienceNeed and cameraPurpose; a pattern name is not direction.
+Protect anticipation, contact, weight, consequence and a listener's changing thought.
+An insert of a hand or paw retains identity, scale, material, costume and prop continuity.
+Purposeful repetition may build a motif, callback or comic escalation; avoid empty repeats.
+Invent staging and cinematic execution within supplied story truth, not new canon, plot,
+dialogue, characters or unsupported world assets. Missing downstream images must not
+prevent developing coverage; mark unresolved references without claiming production ready.
+
+MEDIUM AND SHOW TASTE. Follow the supplied project's medium and approved visual language.
+Animation: readable silhouettes, eye direction, anticipation, weight, follow-through and
+character-specific acting; exaggeration only within this show's approved performance style.
+Live action: playable actor objectives, subtext, natural listening, physical blocking,
+plausible lens placement and motivated practical light. Do not impose cartoon performance
+or Crystal Bears camera rules on another project. If medium is unspecified, do not invent it.
+Lens/emotion pairings are possibilities, never universal laws: a quiet wide or fast telephoto
+may be right. Show-specific height and camera grammar apply only where that show supplies them.
+Write framing in framing; write angle, lens, movement (including trigger and finish), focus,
+light, composition, atmosphere and time in cinematography when relevant. time describes
+screen-time treatment, not weather or a replacement for numeric view timing. Real-time is
+valid; slow motion cannot silently stretch approved dialogue or change locked audio timing.
+
+PAPER REEL BEFORE PACKING. Read the entire scene's images, action, dialogue and sound in
+order during the existing creative review. Can the audience follow cause and consequence,
+feel the change, locate characters, read the contact and enjoy the landing? Remove decorative
+shots; strengthen weak staging or reactions. Check plausible time for speech, movement and
+holds against measured approved audio when available. Do not invent measurements or squeeze
+an impossible performance into a provider slot. Resolve timing in DIRECT before generation.
+Plan the scene before allocating provider units. Each unit needs a usable editorial exit,
+not an artificial mini-payoff; the emotional arc belongs to the scene. Keep the same views,
+script, approved audio and state continuity through SEE, HEAR, WATCH and the final edit.
+These craft judgements inform existing review, not new scores, gates or automatic retakes.
+Paper direction is not proof of cinematic quality. Judge actual returned media and the
+assembled scene through human review; preserve existing spend and approval safeguards.'''
+
+
+CONTRACT += '\n' + EPISODE_DIRECTION_CONTRACT
 
 
 def fingerprint(value):
@@ -93,6 +142,31 @@ def scene_boards(shots, coverage=()):
         row['soundPlan'] = sound.get(str(row['scene']), [])
         row['revision'] = fingerprint(row)
     return list(scenes.values())
+
+
+def producer_scene_sequence(direction_card, approval_state=None):
+    """Expose the existing scene-direction decision without creating new authority."""
+    if not isinstance(direction_card, dict):
+        return None
+    purpose = direction_card.get('scenePurposeAndEmotionalChange') or {}
+    beats = direction_card.get('dramaticBeats') or {}
+    shots = direction_card.get('cinematicShotPlan') or []
+    return {
+        'approvalState': approval_state or 'draft',
+        'approved': approval_state == 'approved',
+        'purpose': purpose.get('purpose'),
+        'dramaticQuestion': purpose.get('dramaticQuestion'),
+        'entry': purpose.get('entry'),
+        'exit': purpose.get('exit'),
+        'beats': {key: beats[key] for key in ('beginning', 'development', 'turn', 'landing')
+                  if beats.get(key)},
+        'coverage': [
+            {key: shot.get(key) for key in ('shotId', 'durationSec', 'purpose', 'landingImage')
+             if shot.get(key)}
+            for shot in shots if isinstance(shot, dict)
+        ],
+        'sourceRevision': direction_card.get('inputSignature'),
+    }
 
 
 def staging_instruction(shot, *, opening_only=False):

@@ -52,6 +52,20 @@ def test_missing_accepted_media_requests_recovery_not_new_paid_generation():
     assert C.shot_next_action(row)['code'] == 'recover-media'
 
 
+def test_changed_keyframe_inputs_offer_forward_choices_without_authorizing_spend():
+    row = {'shotId': 's', 'needsKeyframe': True, 'kf': 'staleInputs',
+           'pending': {'keyframe': True}, 'current': {'keyframe': False},
+           'allowedActions': {'approveKeyframe': False, 'generateKeyframe': False},
+           'sub': 'generate or select a fresh candidate from current inputs'}
+    before = deepcopy(row)
+    action = C.shot_next_action(row)
+    assert action['code'] == 'prepare-keyframe'
+    assert action['state'] == 'ready'
+    assert action['label'] == 'Choose a refreshed opening image'
+    assert action['reason'] == 'Shot direction changed. Generate, upload, or choose an image from Library.'
+    assert row == before
+
+
 def test_voice_revision_discloses_dependencies_without_rebuilding_see():
     impact = C.revision_impact('voice', 's')
     assert impact['rebuild'] == ['voice performance', 'animation request', 'new render']

@@ -232,6 +232,60 @@ def read_operations(root):
         return [json.loads(row[0]) for row in conn.execute('SELECT data_json FROM production_operations')]
 
 
+def _provider_output_explicitly_rejected(operation, ledger):
+    """Treat a downloaded output moved by explicit WATCH rejection as resolved."""
+    if operation.get('kind') != 'submit-watch':
+        return False
+    outputs = set(operation.get('returnedPaths') or [])
+    for evidence in operation.get('transportEvidence') or []:
+        event = evidence.get('lastProviderEvent') or {}
+        if event.get('outputPath'):
+            outputs.add(event['outputPath'])
+    if not outputs:
+        return False
+    for rejection in ledger.get('rejections') or []:
+        for archived in rejection.get('archivedCandidates') or []:
+            if archived.get('originalPath') in outputs:
+                return True
+    return False
+
+
+def provider_operation_superseded_by_verified_batch(operation, ledger):
+    """Allow stale submission history after a later batch returned verified media."""
+    if operation.get('kind') != 'submit-watch':
+        return False
+    batch = ledger.get('batch') or {}
+    if batch.get('status') != 'complete' or not ledger.get('batchId'):
+        return False
+    paths = list(ledger.get('candidatePaths') or [])
+    if not paths:
+        paths = [item.get('path') for item in batch.get('candidateHashes') or []]
+    return bool(paths and all(pathlib.Path(path).is_file() and pathlib.Path(path).stat().st_size > 0
+                              for path in paths if path))
+
+
+def provider_operation_explicitly_not_submitted(root, operation):
+    """Clear a phantom submit record only when preflight proves no provider call occurred."""
+    if operation.get('kind') != 'submit-watch':
+        return False
+    attempts = pathlib.Path(root) / 'cb-output' / 'state' / 'preflight-attempts'
+    if not attempts.is_dir():
+        return False
+    operation_id = operation.get('operationId')
+    for path in attempts.glob('*.json'):
+        try:
+            record = json.loads(path.read_text())
+        except (OSError, ValueError):
+            continue
+        if (operation_id not in json.dumps(record, sort_keys=True) or
+                record.get('providerCallOccurred') is not False or
+                record.get('mediaSubmissionAttempted') is not False or
+                record.get('spendOccurred') is not False):
+            continue
+        return True
+    return False
+
+
 def require_no_provider_operation(root, episode, scene, shot_id, ledger=None):
     """Read durable submission evidence without creating or updating the state DB."""
     ledger = ledger or {}
@@ -246,6 +300,10 @@ def require_no_provider_operation(root, episode, scene, shot_id, ledger=None):
         outputs = op.get('returnedPaths') or []
         complete = bool(outputs and all(pathlib.Path(p).is_file() and pathlib.Path(p).stat().st_size > 0 for p in outputs))
         uncertain = op.get('kind') == 'submit-watch' and not complete
+        if uncertain and (_provider_output_explicitly_rejected(op, ledger) or
+                          provider_operation_superseded_by_verified_batch(op, ledger) or
+                          provider_operation_explicitly_not_submitted(root, op)):
+            continue
         if (evidence and not complete) or uncertain:
             raise ValueError('WATCH_CONFIGURATION_REQUIRED: provider submission ' + op['operationId'] + ' has no verified completion; reconcile that request before preparing a replacement.')
 

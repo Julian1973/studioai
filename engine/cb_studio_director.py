@@ -1258,6 +1258,7 @@ def build_voice(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> No
 def watch_readiness(scene: str, shot_id: str, episode: str = "Ep1") -> dict[str, Any]:
     """Pure, zero-spend WATCH readiness used by preview and Fire."""
     import cb_audio_authority
+    import cb_departments
     import cb_costs
     import cb_providers
     import cb_render
@@ -1269,6 +1270,11 @@ def watch_readiness(scene: str, shot_id: str, episode: str = "Ep1") -> dict[str,
     model = cb_providers.video_model(require_enabled=True)
     package, _ = cb_render.load_pkg(scene, episode)
     cb_render._require_valid(package)
+    # Older in-memory/test packages do not carry a declared storyboard. The canonical
+    # production package always does; keep the compatibility path for legacy callers and
+    # let their existing package validator remain authoritative.
+    if package.get("sourceStoryboard"):
+        _require_watch_source_integrity(package, scene, shot_id, episode)
     cb_render._require_current_lineage(package, scene, episode)
     shot = cb_render._shot(package, shot_id)
     ledger = cb_render._ledger(package, shot_id)
@@ -1314,6 +1320,9 @@ def watch_readiness(scene: str, shot_id: str, episode: str = "Ep1") -> dict[str,
         source["durationSec"])
     prepared = prepare_plan(snapshot)
     prompt, evidence = compile_prompt(prepared, audit(prepared))
+    from studio_prompt_director import native_rule_inputs
+    cb_render._require_engine_rules(package, source,
+        native_rule_inputs(source, prompt), cinematography={})
     integrity = evidence["actionIntegrity"]
     if integrity["authoredActionHash"] != integrity["emittedActionHash"]:
         raise cb_render.Refused("WATCH_AUTHORED_ACTION_DRIFT")
@@ -1338,11 +1347,104 @@ def watch_readiness(scene: str, shot_id: str, episode: str = "Ep1") -> dict[str,
             "requestHash": digest(request_identity)}
 
 
+def _require_watch_source_integrity(package: dict[str, Any], scene: str,
+                                    shot_id: str, episode: str) -> dict[str, Any]:
+    """Check the complete WATCH source graph before compiling a request.
+
+    WATCH used to validate the package, storyboard lineage and dialogue projection in
+    separate places. That made a damaged or mixed pack surface as a late traceback, often
+    after the UI had already shown a different source. Keep this check read-only and
+    deterministic: it diagnoses the graph before DIRECTOR/SEE/HEAR compilation and never
+    rewrites approved source or spends with a provider.
+    """
+    import json
+    import cb_departments
+    import cb_render
+
+    errors: list[str] = []
+    storyboard_path = cb_render._declared_storyboard_path(package, scene, episode)
+    storyboard = None
+    if not storyboard_path.is_file():
+        errors.append("the declared Director storyboard is missing")
+    else:
+        try:
+            storyboard = json.loads(storyboard_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            errors.append("the declared Director storyboard is unreadable: " + str(exc))
+
+    if isinstance(storyboard, dict):
+        if storyboard.get("approvalState") != "approved":
+            errors.append("the Director storyboard is not currently approved")
+        board_shots = {str(item.get("shotId") or "") for item in storyboard.get("shots") or []}
+        package_shots = {str(item.get("shotId") or "") for item in package.get("shots") or []}
+        if board_shots != package_shots:
+            errors.append("the storyboard and production package contain different shot rosters")
+        if str(shot_id) not in board_shots:
+            errors.append(f"{shot_id} is not present in the approved Director storyboard")
+
+    shot = next((item for item in package.get("shots") or []
+                 if str(item.get("shotId") or "") == str(shot_id)), None)
+    if shot is None:
+        errors.append(f"{shot_id} is not present in the production package")
+    else:
+        try:
+            # This is deliberately the provider-facing projection. It catches changed
+            # source payloads before cb_render reaches the paid execution signature.
+            cb_departments.provider_dialogue_lines(shot)
+        except Exception as exc:
+            text = str(exc)
+            if "SOURCE_DIALOGUE_SEGMENTATION_UNRESOLVED" in text:
+                errors.append("approved dialogue provenance no longer matches the package source")
+            else:
+                errors.append("approved dialogue could not be projected: " + text)
+
+    if errors:
+        raise cb_render.Refused(
+            "WATCH_SOURCE_PACKAGE_MISMATCH: " + "; ".join(dict.fromkeys(errors)) +
+            ". Rebuild the current WATCH package from the approved DIRECT, SEE and HEAR sources.")
+    return {"current": True, "storyboardPath": str(storyboard_path),
+            "shotId": str(shot_id), "zeroSpend": True}
+
+
 def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
     """Validate current approved authorities and seal a reviewable WATCH request."""
     import cb_providers
     import cb_render
 
+    # Legacy approved coverage needs a source-bound translation before the pure
+    # readiness check can consume it. Never do this work inside read-only preview.
+    from studio_director_handoff import errors, card_issues, prepare_native, refresh_previous_frame
+    package, path = cb_render.load_pkg(scene, episode)
+    shot = cb_render._shot(package, shot_id)
+    # READ current continuity before any WATCH review or optional Luna handoff.
+    # A corrected predecessor frame changes a cut's opening reference, not its
+    # approved HEAR take; return to SEE with that take preserved.
+    refresh_previous_frame(cb_render, package, path, shot, log)
+    if shot.get("sourceType") == "opener":
+        opening_state = cb_render.reassess_keyframe(scene, shot_id, episode)
+        if opening_state.get("verdict") != "carry_forward":
+            raise cb_render.Refused(
+                f"WATCH_CONFIGURATION_REQUIRED: {shot_id} opening inputs changed; "
+                "review the saved image against the current prior final frame in SEE, "
+                "then choose Library, Upload or Generate. Approved Audio1 is preserved.")
+    if shot.get("storyboardInternalShotPlanApproved") and (errors(shot) or card_issues(shot)):
+        from cb_recovery import require_no_provider_operation
+        from studio_see_service import context as see_context
+        cb_render._require_valid(package)
+        cb_render._require_current_lineage(package, scene, episode)
+        ledger = cb_render._ledger(package, shot_id)
+        require_no_provider_operation(cb_render.ROOT, episode, scene, shot_id, ledger)
+        # Full SEE package readiness may itself need the timed Director Card.
+        # Require approved source images here; full package checks follow below.
+        images = see_context(cb_render.ROOT, {"projectId": package.get("projectId") or "crystal-bears",
+            "episode": episode, "scene": str(scene), "unit": shot_id})
+        if any(images.get("componentReviews", {}).get(key) != "approved" for key in ("plate", "opening")):
+            raise cb_render.Refused("WATCH_CONFIGURATION_REQUIRED: approve scene plate and opening before the WATCH handoff")
+        import cb_audio_authority
+        if cb_audio_authority.spoken_dialogue_lines(shot) and not cb_render._voice_approval_status(
+                package, shot, scene, episode).get("current"):
+            raise cb_render.Refused("HEAR_CONFIGURATION_REQUIRED: approve current Audio1 before the WATCH handoff")
+        prepare_native(cb_render, scene, shot_id, episode, log, package=(package, path))
     readiness = watch_readiness(scene, shot_id, episode)
     cb_render._require_confirmed_billing(readiness["provider"])
     try:

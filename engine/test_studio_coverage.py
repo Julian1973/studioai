@@ -41,6 +41,29 @@ def test_board_has_no_second_authority_and_opening_excludes_future_action():
     assert 'Door open; paw relaxed' in staging_instruction(shot)
 
 
+def test_producer_sequence_projects_existing_direction_and_approval_only():
+    from studio_coverage import producer_scene_sequence
+    card = {
+        'inputSignature': 'source-revision-1',
+        'scenePurposeAndEmotionalChange': {
+            'purpose': 'Turn the offer into a choice.',
+            'dramaticQuestion': 'Will the door open?',
+            'entry': 'The door is closed.',
+            'exit': 'The door is left ajar.',
+        },
+        'dramaticBeats': {'beginning': 'Offer towel', 'turn': 'Accept help', 'landing': 'Door ajar'},
+        'cinematicShotPlan': [{'shotId': 'S1.SH1', 'purpose': 'Read the offer',
+                               'landingImage': 'Towel remains offered'}],
+    }
+    projected = producer_scene_sequence(card, 'awaiting-human-storyboard-approval')
+    assert projected['approved'] is False
+    assert projected['purpose'] == 'Turn the offer into a choice.'
+    assert projected['beats']['turn'] == 'Accept help'
+    assert projected['coverage'][0]['shotId'] == 'S1.SH1'
+    assert projected['sourceRevision'] == card['inputSignature']
+    assert producer_scene_sequence(None) is None
+
+
 def test_clip_allocation_cannot_rewrite_scene_camera_or_acting():
     from types import SimpleNamespace
     from cb_creative import StoryboardInternalShot, _validate_scene_view_allocation
@@ -169,7 +192,12 @@ def test_authored_staging_flows_from_revision_to_actual_request_and_post(setup):
     approve(p,'see');approve(p,'hear')
     request=p.snapshot('first','1')['state']['shots'][0]['outcomes']['request']
     assert 'Door open; paw relaxed' in request['prompt']
-    assert 'Hero listens, loosens the grip' in request['prompt']
+    # Performance is emitted once with its bound visual identity, not copied
+    # untagged into the spoken-action cue as well.
+    from studio_character_roles import bind_visual_names
+    expected = bind_visual_names('Performance: Hero listens, loosens the grip, then exhales',
+        request['promptDirector']['characterRoleIntegrity'])
+    assert expected in request['prompt']
     approve(p,'request');approve(p,'watch')
     snapshot=p.snapshot('first','1')
     shot=snapshot['state']['shots'][0]
@@ -184,6 +212,17 @@ def test_authored_staging_flows_from_revision_to_actual_request_and_post(setup):
     assert brief['renderedDirectionEvidence']=='recorded at generation'
 
 
+def test_optional_start_time_uses_authored_interval_but_rejects_conflict():
+    import pytest
+    from studio_storyboard_prompt import view_timings
+    item = directed()
+    item['directorCard']['views'][0]['atSec'] = None
+    assert view_timings(item, 1) == [(0.0, 4.0)]
+    item['directorCard']['views'][0]['atSec'] = 1
+    with pytest.raises(ValueError):
+        view_timings(item, 1)
+
+
 def test_coverage_renderer_escapes_authored_text_and_does_not_invent_drawings():
     path=Path(__file__).resolve().parents[1]/'cb-studio/scene-coverage.js'
     script='global.window={};'+path.read_text()+''';
@@ -193,6 +232,23 @@ def test_coverage_renderer_escapes_authored_text_and_does_not_invent_drawings():
     assert(!out.includes('<script>'));
     assert(out.includes('&lt;script&gt;') && out.includes('Listen &amp; react'));
     assert(!out.includes('<img'));
+    '''
+    subprocess.run(['node','-e',script],check=True,capture_output=True)
+
+
+def test_legacy_coverage_focuses_on_the_selected_shot():
+    path=Path(__file__).resolve().parents[1]/'cb-studio/scene-coverage.js'
+    script='global.window={};'+path.read_text()+''';
+    const assert=require('node:assert/strict');
+    const pkg={shots:[
+      {shotId:'S4.SH2',storyboardInternalShotPlanApproved:[{purpose:'Previous beat'}]},
+      {shotId:'S4.SH3',storyboardInternalShotPlanApproved:[{purpose:'First beat'},{purpose:'Second beat'}]}
+    ]};
+    const focused=window.StudioCoverage.legacy(pkg,'S4.SH3');
+    assert(focused.includes('2 planned views'));
+    assert(focused.includes('S4.SH3'));
+    assert(!focused.includes('S4.SH2'));
+    assert(window.StudioCoverage.legacy(pkg).includes('3 planned views'));
     '''
     subprocess.run(['node','-e',script],check=True,capture_output=True)
 

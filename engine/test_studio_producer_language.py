@@ -7,12 +7,19 @@ from studio_producer_language import translate, stopped_message
     ('WATCH_CONFIGURATION_REQUIRED: Complete the timed action and visible checkpoint states in DIRECT before building this storyboard.', 'direction', 'Open direction'),
     ('DIRECTOR_REVISION_REQUIRED: WATCH_AUTHORED_TIMED_ACTION_MISSING: unit=S1.SH1; DIRECT must author timed views', 'direction', 'Open direction'),
     ('HEAR_CONFIGURATION_REQUIRED: DIRECT ElevenLabs v3 performance direction is missing for dialogue-1', 'audio', 'Open direction'),
+    ('DIRECT_AUDIO_TIMING_CONFLICT: char:Sunny checkpoint at 20.5s says it follows Sunny\'s approved line, which ends at 29.5s', 'audio', 'Review timing options'),
     ('WATCH_REFERENCE_MISSING: reference opening composition file is missing', 'references', 'Open images'),
     ('Approve the current WATCH request before firing its render.', 'request', 'Approve and film'),
     ('REFUSED — SPEND NOT APPROVED for 1.B1.S1', 'money', 'Approve spend'),
     ('openai.RateLimitError: credit_balance_exhausted', 'provider', 'Try again'),
-    ('APITimeoutError: Request timed out.', 'provider', 'Try again'),
+    ('APITimeoutError: Request timed out.', 'provider', 'Check existing job'),
+    ('immutable script content is missing', 'setup', 'Recover source files'),
+    ('REFUSED — S3.SH1 has no typed opening-frame layout', 'direction', 'Open direction'),
+    ('DIRECT_REVISION_REQUIRED: Director Card is incomplete', 'direction', 'Open direction'),
+    ('REFUSED — S3.SH1 has no current Director Review approval', 'review', 'Review film'),
     ('REFUSED — no current signed scene plate found for Ep1 scene 1 — generate the internal world anchor before the first keyframe', 'images', 'Open scene plate'),
+    ('WATCH_SOURCE_PACKAGE_MISMATCH: storyboard and production package contain different shot rosters', 'request', 'Rebuild WATCH'),
+    ('REFUSED — opening-frame approval is stale against its direct inputs', 'images', 'Review opening frame'),
     ('BLOCKED: STALE PACKAGE — Prompt Director evidence does not match this request', 'stale', 'Review update'),
     ("REFUSED — Law 5: 1.B1.S1's approved voice does not match current direction", 'audio', 'Create audio'),
     ('This production asset is outside the Studio media library.', 'setup', 'Contact support'),
@@ -34,6 +41,13 @@ def test_unknown_stop_never_says_unknown_to_the_producer():
     assert 'saved your approved work' in p['headline']
     line = stopped_message('ZeroDivisionError: division by zero')
     assert line.startswith('Studio stopped here') and 'Nothing you approved is lost' in line
+
+
+def test_timeout_never_claims_no_charge_or_invites_duplicate_submission():
+    copy = translate('APITimeoutError: Request timed out.')
+    assert 'may have accepted' in copy['meaning']
+    assert 'before retrying' in copy['nextAction']
+    assert 'nothing was charged' not in str(copy)
 
 
 def test_recovery_projection_classifies_known_stops_instead_of_unknown():

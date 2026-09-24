@@ -167,6 +167,28 @@ def test_budget_prepares_directed_shots_and_see_without_approving(setup):
     assert p.snapshot('second','1')['state']['shots']==[]
 
 
+def test_episode_visual_language_persists_and_reaches_later_direction(setup, monkeypatch):
+    from studio_episode_direction import VisualLanguage
+    p, ws, transport, _ = setup
+    language = {key: 'Project-specific ' + key for key in VisualLanguage.model_fields}
+    original = transport.direct
+    def direct(*args, **kwargs):
+        result = original(*args, **kwargs)
+        if kwargs.get('planning'):
+            result['visualLanguage'] = copy.deepcopy(language)
+        return result
+    monkeypatch.setattr(transport, 'direct', direct)
+    command(p, 'budget', amountUsd=3)
+    state = p.snapshot('first', '1')['state']
+    assert state['visualLanguage'] == language
+    before = copy.deepcopy(state['shots'][0]['outcomes'])
+    command(p, 'chat', shotId='S1.SH1', message='Explain the camera choice.')
+    contexts = [row[2] for row in transport.calls if row[0] == 'direction']
+    assert contexts[-1]['episodeVisualLanguage'] == language
+    assert p.snapshot('first', '1')['state']['shots'][0]['outcomes'] == before
+    assert not p.snapshot('second', '1')['state'].get('visualLanguage')
+
+
 @pytest.mark.parametrize('via_chat',[False,True])
 def test_see_hear_request_render_approvals_use_one_pipeline(setup,via_chat):
     p,ws,t,_=setup
@@ -191,6 +213,10 @@ def test_see_hear_request_render_approvals_use_one_pipeline(setup,via_chat):
     assert render['status']=='candidate'
     assert render['promptDirector']['payloadHash']==request['promptDirector']['payloadHash']
     assert [c[2] for c in t.calls if c[0]=='video'][-1]==request['prompt']
+    from cb_emission_conformance import STANDARD_DIALOGUE_AUDIO_AUTHORITY
+    assert STANDARD_DIALOGUE_AUDIO_AUTHORITY in request['prompt']
+    assert '[Dialogue timing]' in request['prompt']
+    assert request['prompt'].count('{Hello.}') == 1
     assert render['audioAuthority']['source']['hash']==state['shots'][0]['outcomes']['hear']['files'][0]['hash']
     assert ws.project_path('first',render['files'][0]['path']).is_file()
     approve(p,'watch',via_chat)

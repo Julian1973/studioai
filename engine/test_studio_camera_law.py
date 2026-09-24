@@ -42,6 +42,13 @@ def test_world_views_get_no_character_height():
     assert C.derive(_view('V', framing='ECU on the cup', visibleEntities=['prop:cup']), GRAMMAR, CHARS) is None
 
 
+@pytest.mark.parametrize('visible', [[], ['prop:napkin']])
+def test_object_insert_does_not_inherit_emotional_owners_eye_line(visible):
+    view = _view('V', framing='ECU on the napkin', viewpointOwner='Sunny',
+                 audienceNeed='See the rain before Sunny does.', visibleEntities=visible)
+    assert C.derive(view, GRAMMAR, CHARS) is None
+
+
 def test_show_without_grammar_derives_nothing():
     assert C.load(show_root='/nonexistent')[0] is None
     assert C.derive(_view('V', viewpointOwner='Sunny'), None, CHARS) is None
@@ -103,9 +110,24 @@ def test_world_camera_language_and_light_are_stated_once_under_must_preserve():
 def test_contract_asks_direct_for_camera_and_light_as_emotional_decisions():
     from studio_director_card import CONTRACT
     assert 'CAMERA AND LIGHT ARE EMOTIONAL DECISIONS, NEVER SPECS' in CONTRACT
-    for phrase in ('stated in millimetres', '50 mm honest and still', 'lock the camera', 'never flat, never from nowhere',
-                   'locked camera is a choice about stillness, never a default', 'composition in the view'):
+    for phrase in ('stated in millimetres', 'not a fixed emotion lookup', 'lock the camera',
+                   'locked camera is a choice about stillness, never a default',
+                   'atmosphere and time treatment'):
         assert phrase in CONTRACT, phrase
+
+
+def test_authored_angle_and_lens_override_defaults_without_mutating_authority():
+    from copy import deepcopy
+    from studio_watch_plan import camera_line
+    view = _view('V', framing='CU on Fuzzby', viewpointOwner='Fuzzby',
+                 cinematography={'angle': 'high angle looking down', 'lens': '35mm'})
+    law = C.derive(view, GRAMMAR, CHARS)
+    before = deepcopy(law)
+    line = camera_line(view, view['framing'], law)
+    assert 'Angle: high angle looking down' in line and 'Lens: 35mm' in line
+    assert 'long lens' not in line and 'world towers' not in line
+    assert "eye-line is 11.9 in" in line
+    assert law == before
 
 
 def test_broken_grammar_fails_loudly_and_missing_grammar_opts_out(tmp_path):

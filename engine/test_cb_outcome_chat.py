@@ -51,18 +51,21 @@ def test_request_approval_submits_only_sealed_request_not_render_approval(packag
 
 
 def test_voice_without_dialogue_prepares_request_and_never_invents_voice(package, monkeypatch):
-    C.budget.approve('Ep3', 10, 'Julian', 'script')
+    import cb_studio_director as D
+    monkeypatch.setattr(C.budget, 'status', lambda *a: {'approved': True})
     calls = []
-    monkeypatch.setattr(C, '_direction', lambda ep, scene, shot, stage: calls.append(stage))
+    monkeypatch.setattr(C, '_direction', lambda *a: pytest.fail('Retired department'))
     monkeypatch.setattr(C.R, 'regen_voice_shot', lambda *a, **k: pytest.fail('Silent shot'))
     def seal(*a, **kw):
-        assert 'spend_token' not in kw
+        assert kw.get('spend_token') is None
         calls.append('seal-request')
         package[0]['continuityLedger'][0]['pendingSpendAuth'] = {'token': 'fixture'}
         raise C.R.Refused('SPEND NOT APPROVED')
     monkeypatch.setattr(C.R, 'fire_shot', seal)
+    monkeypatch.setattr(D, 'watch_readiness', lambda *a: {'provider': 'fixture'})
+    monkeypatch.setattr(C.R, '_require_confirmed_billing', lambda *a: None)
     assert C.prepare('Ep3', '1', 'S1.SH1', 'voice') == {'requestReady': True}
-    assert calls == ['animation', 'seal-request']
+    assert calls == ['seal-request']
 
 
 def test_render_selection_is_bound_to_reviewed_batch(package, monkeypatch):

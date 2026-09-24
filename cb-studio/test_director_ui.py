@@ -1081,7 +1081,7 @@ def test_approved_take_flows_to_next_shot_through_its_own_opening_keyframe():
     assert 'openShotOutcome("keyframe",nextIndex)' in APP
     assert 'prepareDirectionThen("cinematography",next.shotId' not in APP
     assert "Use last frame from ${_esc(previousShot)} · no generation cost" not in APP
-    assert "Continue to HEAR" in APP
+    assert "Continue to voice" in APP
     assert "Continue to WATCH" in APP
 
 

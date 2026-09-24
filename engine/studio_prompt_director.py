@@ -512,12 +512,8 @@ def audio_policy(has_audio):
     """Transport instruction only. Words and intervals stay in approved cues."""
     if not has_audio:
         return '[Audio]\nNo dialogue.'
-    from cb_emission_conformance import SINGLE_INSTANCE_DIALOGUE_LOCK
-    return ('[Audio]\nApproved audio @Audio1 is the sole authority for voice identity, cadence, '
-            'delivery, mouth timing, pauses and silence. Preserve its words, speaker ownership and timing. '
-            'No alternative performance; no extra words; no narration; no subtitles or captions. '
-            'Listeners remain silent and closed-mouth. '
-            'Do not add vocal reactions absent from @Audio1. ' + SINGLE_INSTANCE_DIALOGUE_LOCK)
+    from cb_emission_conformance import STANDARD_DIALOGUE_AUDIO_AUTHORITY
+    return '[Audio]\n' + STANDARD_DIALOGUE_AUDIO_AUTHORITY
 
 
 def compile_native_source(shot, references, audio):

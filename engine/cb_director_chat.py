@@ -25,7 +25,7 @@ from studio_director_card import CONTRACT, card, stage_decisions
 
 ROOT = Path(__file__).resolve().parent.parent
 CHAT_DIR = ROOT / "cb-output" / "director-chat"
-CHAT_MODEL = os.environ.get("OPENAI_STUDIO_AGENT_MODEL", "gpt-6-astra")
+CHAT_MODEL = os.environ.get("OPENAI_STUDIO_AGENT_MODEL", "gpt-6-luna")
 CHAT_REASONING = os.environ.get("OPENAI_STUDIO_AGENT_REASONING", "high")
 CHAT_MAX_OUTPUT_TOKENS = int(os.environ.get("OPENAI_STUDIO_AGENT_MAX_OUTPUT_TOKENS", "6000"))
 VALID_STAGES = {
@@ -47,6 +47,20 @@ class DirectorChatReply(BaseModel):
 
 def _now():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def production_instruction(reply):
+    """Preserve the visible change and locks when a Director proposal is applied."""
+    correction = str((reply or {}).get("correction") or "").strip()
+    visible = str((reply or {}).get("changeSummary") or "").strip()
+    locked = [str(item).strip() for item in ((reply or {}).get("protectedElements") or [])
+              if str(item).strip()]
+    # Provider reference slots are assigned by the current compiled package, not chat text.
+    clean = lambda text: re.sub(r"@图\d+", "the supplied reference", text)
+    return "\n".join(part for part in (
+        clean(correction), "Visible result required: " + clean(visible) if visible else "",
+        "Keep locked: " + "; ".join(clean(item) for item in locked) if locked else "",
+    ) if part)
 
 
 def _token(value):
@@ -93,6 +107,13 @@ def _scope_context(episode, scene, shot_id, stage, issue):
                    if x.get("shotId") == shot_id), {})
     shot = cb_render._with_effective_dialogue_timing(
         cb_render._shot_creative_contract_view(pkg, shot, scene, episode), ledger)
+    # Director repair must see verified Audio1 timing even when stale direction is
+    # precisely why WATCH readiness currently fails.
+    approved_audio_timing = None
+    if ledger.get("voiceApproval", {}).get("approved") and ledger.get("voPlacementPath"):
+        from studio_approved_media_projection import watch_shot
+        shot = watch_shot(shot, ledger, require_current_direction=False)
+        approved_audio_timing = (shot.get("approvedAudioTimingAuthority") or {}).get("intervals")
     direction_stage = {"scenelook": "see", "keyframe": "see", "voice": "hear",
                        "animation": "watch", "animation-edit": "watch",
                        "animation-refire": "watch"}.get(stage, "post")
@@ -147,8 +168,15 @@ def _scope_context(episode, scene, shot_id, stage, issue):
                                   "startsAtSec", "estimatedDurationSec") if k in x}}
             for x in routed_audio["spokenDialogue"]
         ],
+        "verifiedApprovedAudio1Intervals": approved_audio_timing,
         "seedanceSfxCues": routed_audio["seedanceSfxCues"],
-        "timingScope": "Preserve recorded timing fields. Estimated duration is planning, not measured audio evidence.",
+        "timingScope": (
+            "verifiedApprovedAudio1Intervals are authoritative measured placements from the "
+            "hash-verified approval receipt and override every estimate, raw script interval, "
+            "or prior conversation claim. Never repeat stale timing as approved."
+            if approved_audio_timing is not None else
+            "Preserve recorded timing fields. Estimated duration is planning, not measured audio evidence."
+        ),
         "currentStatus": ledger.get("status"),
         "durationSec": shot.get("durationSec"),
         "approvedTake": ledger.get("approvedTake"),
@@ -250,7 +278,10 @@ def chat(episode, scene, shot_id, stage, message, issue="", reviewer="Julian"):
         "first failed production layer and propose the smallest bounded correction. Fill "
         "changeSummary with what will visibly change and protectedElements with the successful "
         "things that must remain unchanged. Never claim to approve, reject, generate, refire or "
-        "spend. Never rewrite exact dialogue. Keep the response under 220 words. Set readyToApply "
+        "spend. Never rewrite exact dialogue. When verifiedApprovedAudio1Intervals are present, "
+        "they are the sole timing authority and override raw dialogue estimates and prior chat "
+        "messages; explicitly reconcile direction to those measured intervals. Keep the response "
+        "under 220 words. Set readyToApply "
         "true only when the correction is precise enough to become a rejection/iteration brief."
     )
     system += "\nShared production direction:\n" + CONTRACT

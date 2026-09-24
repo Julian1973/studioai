@@ -46,10 +46,12 @@ def view_timings(shot, count):
             rows.append(None)
             continue
         start, end = map(float, match.groups())
-        at = view.get('atSec', start)
+        # Pydantic serialises the optional atSec as null. The authored interval
+        # already supplies its start; null must behave like an omitted value.
+        at = start if view.get('atSec') is None else view['atSec']
         duration = float(shot.get('durationSec', shot.get('duration')))
         if (not all(math.isfinite(v) for v in (start, end, duration)) or
-                not 0 <= start < end <= duration or at != start):
+                not 0 <= start < end <= duration or abs(at - start) > 5e-5):
             raise ValueError('Storyboard interval disagrees with the current shot timing.')
         rows.append((start, end))
     if all(row is not None for row in rows) and rows:

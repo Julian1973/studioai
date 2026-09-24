@@ -198,6 +198,17 @@ def test_structured_dialogue_and_action_owner_cannot_be_transferred(source):
     assert any(e['code'] == 'CHARACTER_ACTION_OWNER_MISMATCH' for e in audit(source)['errors'])
 
 
+def test_view_only_cast_is_part_of_identity_handoff_but_props_are_not(source):
+    from studio_reference_contract import animation_required_cast
+    shot = source['authorities']['shot']
+    shot['directorCard']['views'][0]['visibleEntities'].extend([
+        'character:Newcomer', 'prop:lantern', 'surface:partyTable'])
+    assert animation_required_cast(shot) == ['Zenny', 'Fuzzby', 'Keen', 'Newcomer']
+    assert any(error['code'] == 'CHARACTER_REFERENCE_ROLE_MISMATCH'
+               and error['expected'].get('character') == 'character:Newcomer'
+               for error in audit(source)['errors'])
+
+
 def test_role_seal_rechecked_and_inherited_by_returned_review(source):
     final, report = run(source, lambda *a: review())
     assert report['characterRoleIntegrity']['matrixHash']

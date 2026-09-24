@@ -14,15 +14,52 @@ function mount(host,scope,options={}){
  const cost=node('p',undefined,'journey-cost'),issue=node('div',undefined,'journey-issue');issue.setAttribute('role','status');progress.setAttribute('aria-live','polite');
  const evidence=node('details'),summary=node('summary','Direction, references and evidence'),evidenceBody=node('pre');evidence.append(summary,evidenceBody);
  const advanced=node('details'),advancedTitle=node('summary','Individual corrections and review tools');advanced.append(advancedTitle);
+ function producerTarget(decision){
+  const producer=decision?.producer||{};
+  if(producer.targetStage)return producer.targetStage;
+  if(producer.category==='images'||producer.category==='references')return 'see';
+  if(producer.category==='audio')return /performance direction is missing|no voice direction/i.test(decision?.issue||'')?'direct':'hear';
+  if(producer.category==='direction')return 'direct';
+  if(['request','money','review'].includes(producer.category))return 'watch';
+  if(producer.category==='setup')return 'details';
+  if(producer.category==='provider')return /Check existing job|timed out/i.test(producer.button||decision?.issue||'')?'recover':'details';
+  return 'details';
+ }
+ function producerComponent(decision){
+  const producer=decision?.producer||{};
+  if(producer.component)return producer.component;
+  const text=[decision?.issue,decision?.proposed,producer.headline].join(' ');
+  if(/opening[- ]frame|opening composition|keyframe/i.test(text))return 'opening';
+  if(/scene plate|background plate/i.test(text))return 'plate';
+  return null;
+ }
+ async function routeProducerDecision(decision){
+  if(!decision?.producer)return false;
+  const producer=decision.producer,target=producerTarget(decision),component=producerComponent(decision);
+  try{
+   if(target==='see'&&component&&options.imageSourceAction){
+    const record=(state?.review?.images||[]).find(item=>item?.component===component)||
+     {component,label:component==='opening'?'Opening keyframe':'Scene plate',reviewStatus:'missing'};
+    media.querySelector(`[data-component="${component}"]`)?.scrollIntoView({block:'center'});
+    await options.imageSourceAction({action:'library',component,record,state});return true;
+   }
+   if(target==='library'&&options.openLibrary){await options.openLibrary();return true;}
+   if(target==='hear'&&options.openHear){await options.openHear();return true;}
+   if(target==='see'&&options.openSee){await options.openSee();return true;}
+   if(['direct','see','hear','watch','library'].includes(target)&&options.openStage){await options.openStage(target);return true;}
+   if(target==='direct'&&options.changes){await options.changes(state);return true;}
+   if(target==='see'&&options.changes){await options.changes(state);return true;}
+   if(target==='hear'&&options.changes){await options.changes(state);return true;}
+   if(target==='watch'&&options.changes){await options.changes(state);return true;}
+   if(target==='library'&&options.changes){await options.changes(state);return true;}
+   if(target==='details'){evidence.open=true;return true;}
+  }catch(error){issue.textContent=error.message||'Could not open the recommended next step.';return true;}
+  return false;
+ }
  if(options.advanced){advanced.addEventListener('toggle',()=>{if(advanced.open&&!advanced.dataset.loaded){advanced.dataset.loaded='1';options.advanced(advanced);}});}
- changes.onclick=()=>{
-  const category=state?.operation?.decision?.producer?.category;
-  if(category==='audio'&&options.openHear)return options.openHear();
-  if(['direction','request','stale'].includes(category)&&options.changes)return options.changes(state);
-  if(['references','images'].includes(category)&&options.imageSourceAction){
-   const record=(state.review?.images||[]).find(item=>item?.component==='plate')||{component:'plate',label:'Scene plate',reviewStatus:'missing'};
-   return options.imageSourceAction({action:'library',component:'plate',record,state});
-  }
+ changes.onclick=async()=>{
+  const decision=state?.operation?.status==='needs-decision'?state.operation.decision:null;
+  if(decision&&await routeProducerDecision(decision))return;
   if(state?.operation?.decision){evidence.open=true;return;}
   return options.changes?.(state);
  };
@@ -246,21 +283,24 @@ function mount(host,scope,options={}){
   if(decision){
    const cap=Number(op?.grant?.limitUsd||0);
    cost.textContent=cap>0?'Recovery stays within the original action cap of $'+cap.toFixed(2)+'. It cannot approve or submit a render.':'Recovery cannot spend or submit a render.';
-   const category=decision.producer?.category;
-   const alternateLabel=category==='audio'?'Open HEAR':['references','images'].includes(category)?'Review SEE':['direction','request','stale'].includes(category)?'Review in DIRECT':'View technical details';
+   const producer=decision.producer||{},target=producerTarget(decision),component=producerComponent(decision);
+   const alternateLabel=producer.category==='images'?(component==='opening'?'Replace opening frame':'Choose scene plate'):
+    target==='hear'?'Open HEAR':target==='see'?'Review SEE':target==='watch'?'Review WATCH':target==='direct'?'Review in DIRECT':target==='library'?'Update project library':'View technical details';
    changes.textContent=alternateLabel;
   }else{
    changes.textContent='Edit / Request Changes';
    cost.textContent=approvalOnly||montageMissing?'No new generation cost.':state.disclosure?.limitUsd?'Maximum authorised spend: $'+state.disclosure.limitUsd.toFixed(2)+'. '+(state.disclosure.basis||''):'No new generation cost.';
   }
-  changes.disabled=state.busy||!options.changes;
+  const canRouteDecision=!!(state.operation?.status==='needs-decision'&&(
+   options.openStage||options.openLibrary||options.openSee||options.openHear||options.imageSourceAction));
+  changes.disabled=state.busy||!(options.changes||canRouteDecision);
   evidenceBody.textContent=JSON.stringify({scope,state:state.phase,normalActions:state.normalActionCount,corrections:state.correctionActionCount,review,operation:op,qualification:'Software checks do not establish live visual compliance.'},null,2);
   const settledKey=op&&!state.busy?[op.id,op.status].join(':'):null;if(settledKey&&settledKey!==settledSignature){settledSignature=settledKey;options.settled?.(state);}
   if(previousPhase&&previousPhase!==state.phase&&state.phase==='film')options.phaseChanged?.(state.phase,previousPhase);
   if(awaitingNext&&state.phase==='complete'&&state.next&&options.next){awaitingNext=false;options.next(state.next);return;}
  }
  async function refresh(resume=false){clearTimeout(timer);if(ticket!==sequence||!host.isConnected)return;const revision=++refreshSequence;try{const value=await api({command:resume?'resume':'status',scope});if(ticket!==sequence||revision!==refreshSequence||!host.isConnected)return;show(value);if(state.busy||['queued','running'].includes(state.review?.seePackage?.job?.status))timer=setTimeout(()=>refresh(true),1800);}catch(e){if(ticket!==sequence||revision!==refreshSequence)return;issue.textContent=e.message;primary.disabled=true;}}
- primary.onclick=async()=>{if(!state||submitted||primary.disabled)return;const decision=state.operation?.status==='needs-decision';if(decision&&state.operation?.decision?.producer?.category==='images'&&options.imageSourceAction){const tile=media.querySelector('[data-component="plate"]');tile?.scrollIntoView({block:'center'});const record=(state.review?.images||[]).find(r=>r?.component==='plate')||{component:'plate',label:'Scene plate',reviewStatus:'missing'};try{await options.imageSourceAction({action:'library',component:'plate',record,state});}catch(e){issue.textContent=e.message;}return;}const gridButton=host.querySelector('[data-storyboard-grid]');if(!decision&&montageActionable&&gridButton&&!gridButton.disabled){gridButton.click();return;}submitted=true;primary.disabled=true;awaitingNext=state.phase==='film';try{const body=decision?{command:'recover',scope}:requestPending?{command:'request-displayed',scope,operationId:state.operation.id,requestHash:state.operation.requestDisplayHash}:{command:'decide',scope,action:state.phase,binding:state.binding,expectedRevision:state.revision,commandId:crypto.randomUUID(),by:options.reviewer||'Producer',...(approvalOnly?{intent:'approve'}:{})};show(await api(body));}catch(e){issue.textContent=e.message;}finally{submitted=false;if(ticket===sequence)refresh(true);}};
+ primary.onclick=async()=>{if(!state||submitted||primary.disabled)return;const decision=state.operation?.status==='needs-decision';if(decision&&await routeProducerDecision(state.operation.decision))return;const gridButton=host.querySelector('[data-storyboard-grid]');if(!decision&&montageActionable&&gridButton&&!gridButton.disabled){gridButton.click();return;}submitted=true;primary.disabled=true;awaitingNext=state.phase==='film';try{const body=decision?{command:'recover',scope}:requestPending?{command:'request-displayed',scope,operationId:state.operation.id,requestHash:state.operation.requestDisplayHash}:{command:'decide',scope,action:state.phase,binding:state.binding,expectedRevision:state.revision,commandId:crypto.randomUUID(),by:options.reviewer||'Producer',...(approvalOnly?{intent:'approve'}:{})};show(await api(body));}catch(e){issue.textContent=e.message;}finally{submitted=false;if(ticket===sequence)refresh(true);}};
  const journeyAction=primary.onclick;
  primary.onclick=async()=>{
   const images=state?.review?.images||[];

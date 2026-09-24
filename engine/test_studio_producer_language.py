@@ -7,22 +7,28 @@ from studio_producer_language import translate, stopped_message
     ('WATCH_CONFIGURATION_REQUIRED: Complete the timed action and visible checkpoint states in DIRECT before building this storyboard.', 'direction', 'Open direction'),
     ('DIRECTOR_REVISION_REQUIRED: WATCH_AUTHORED_TIMED_ACTION_MISSING: unit=S1.SH1; DIRECT must author timed views', 'direction', 'Open direction'),
     ('HEAR_CONFIGURATION_REQUIRED: DIRECT ElevenLabs v3 performance direction is missing for dialogue-1', 'audio', 'Open direction'),
-    ('DIRECT_AUDIO_TIMING_CONFLICT: char:Sunny checkpoint at 20.5s says it follows Sunny\'s approved line, which ends at 29.5s', 'audio', 'Review timing options'),
+    ('DIRECT_AUDIO_TIMING_CONFLICT: char:Sunny checkpoint at 20.5s says it follows Sunny\'s approved line, which ends at 29.5s', 'audio', 'Review timing in DIRECT'),
+    ('WATCH_CONFIGURATION_REQUIRED: S4.SH3 opening inputs changed; review the saved image against the current prior final frame in SEE', 'images', 'Review opening frame'),
+    ('REFUSED — opening frame is not a playable stage: opening geography does not provide visible depth ahead; opening frame does not reserve lead room for travel', 'images', 'Review opening frame'),
+    ('REFUSED — keyframe prompt [SUBJECTS] does not contain the approved DIRECT direction in provider-safe wording', 'direction', 'Review in DIRECT'),
+    ('Director handoff incomplete: Director handoff needs explicit event completion times.', 'direction', 'Open direction'),
+    ('HEAR_CONFIGURATION_REQUIRED: voice leaves 0.10s for the 0.50s landing hold', 'direction', 'Review timing in DIRECT'),
     ('WATCH_REFERENCE_MISSING: reference opening composition file is missing', 'references', 'Open images'),
-    ('Approve the current WATCH request before firing its render.', 'request', 'Approve and film'),
-    ('REFUSED — SPEND NOT APPROVED for 1.B1.S1', 'money', 'Approve spend'),
-    ('openai.RateLimitError: credit_balance_exhausted', 'provider', 'Try again'),
+    ('WATCH_PROMPT_REVIEW_REQUIRED: reviewer evidence is invalid after correction', 'review', 'Review WATCH'),
+    ('Approve the current WATCH request before firing its render.', 'request', 'Review WATCH request'),
+    ('REFUSED — SPEND NOT APPROVED for 1.B1.S1', 'money', 'Review spend in WATCH'),
+    ('openai.RateLimitError: credit_balance_exhausted', 'provider', 'View details'),
     ('APITimeoutError: Request timed out.', 'provider', 'Check existing job'),
     ('immutable script content is missing', 'setup', 'Recover source files'),
     ('REFUSED — S3.SH1 has no typed opening-frame layout', 'direction', 'Open direction'),
     ('DIRECT_REVISION_REQUIRED: Director Card is incomplete', 'direction', 'Open direction'),
     ('REFUSED — S3.SH1 has no current Director Review approval', 'review', 'Review film'),
     ('REFUSED — no current signed scene plate found for Ep1 scene 1 — generate the internal world anchor before the first keyframe', 'images', 'Open scene plate'),
-    ('WATCH_SOURCE_PACKAGE_MISMATCH: storyboard and production package contain different shot rosters', 'request', 'Rebuild WATCH'),
+    ('WATCH_SOURCE_PACKAGE_MISMATCH: storyboard and production package contain different shot rosters', 'request', 'Open WATCH'),
     ('REFUSED — opening-frame approval is stale against its direct inputs', 'images', 'Review opening frame'),
     ('BLOCKED: STALE PACKAGE — Prompt Director evidence does not match this request', 'stale', 'Review update'),
     ("REFUSED — Law 5: 1.B1.S1's approved voice does not match current direction", 'audio', 'Create audio'),
-    ('This production asset is outside the Studio media library.', 'setup', 'Contact support'),
+    ('This production asset is outside the Studio media library.', 'setup', 'View file details'),
 ])
 def test_known_stops_read_as_plain_sentences(raw, category, button):
     p = translate(raw, stage='submit_render')
@@ -32,6 +38,27 @@ def test_known_stops_read_as_plain_sentences(raw, category, button):
         assert jargon not in p['headline'] and jargon not in p['nextAction']
     assert p['technical'] == raw  # support still gets the exact cause
     assert p['preserved'].startswith('Everything you approved')
+
+
+def test_recovery_points_to_the_stage_and_asset_that_can_fix_it():
+    opening = translate('REFUSED — opening-frame approval is stale against its direct inputs', stage='prepare_render')
+    assert (opening['targetStage'], opening['component']) == ('see', 'opening')
+    plate = translate('REFUSED — no current signed scene plate found', stage='prepare_render')
+    assert (plate['targetStage'], plate['component']) == ('see', 'plate')
+    direct = translate('HEAR_CONFIGURATION_REQUIRED: performance direction is missing', stage='create_audio')
+    assert direct['targetStage'] == 'direct'
+    voice = translate('Law 5: approved voice does not match current direction', stage='prepare_render')
+    assert voice['targetStage'] == 'hear'
+    timing = translate('DIRECT_AUDIO_TIMING_CONFLICT: a checkpoint overlaps the approved line', stage='prepare_render')
+    assert timing['targetStage'] == 'direct'
+    stale_watch_inputs = translate('WATCH_CONFIGURATION_REQUIRED: opening inputs changed; review in SEE against prior final frame', stage='prepare_render')
+    assert (stale_watch_inputs['targetStage'], stale_watch_inputs['component']) == ('see', 'opening')
+    hold = translate('HEAR_CONFIGURATION_REQUIRED: voice leaves 0.10s for landing hold', stage='create_audio')
+    assert hold['targetStage'] == 'direct'
+    review = translate('WATCH_PROMPT_REVIEW_REQUIRED: reviewer evidence is invalid after correction', stage='submit_render')
+    assert review['targetStage'] == 'watch'
+    render = translate('BLOCKED: STALE PACKAGE', stage='submit_render')
+    assert render['targetStage'] == 'watch'
 
 
 def test_unknown_stop_never_says_unknown_to_the_producer():
@@ -67,8 +94,8 @@ def test_review_card_shows_the_producer_sentence_when_stopped():
                        'producer': translate('Approve the current WATCH request before firing its render.')}}
     card = present(current, op)
     assert card['state'] == 'waiting'
-    assert card['message'] == 'The render request needs approving before filming. Approve the request to film this shot.'
-    assert card['producer']['button'] == 'Approve and film'
+    assert card['message'] == 'The render request needs approving before filming. Review the sealed request and its cost in WATCH. No provider call occurs until you explicitly approve Fire.'
+    assert card['producer']['button'] == 'Review WATCH request'
     assert 'Production support' not in card['message']
 
 

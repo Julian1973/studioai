@@ -13,22 +13,32 @@ RULES = (
      'request',
      "Studio found a mismatch between the approved production pack and its source board.",
      "No media or approved work was changed. The current DIRECT, SEE and HEAR sources need to be recompiled as one WATCH request.",
-     "Rebuild WATCH from the current approved pack; nothing is submitted until the sources agree.", "Rebuild WATCH"),
+     "Open WATCH and rebuild the request from the current approved pack; nothing is submitted until the sources agree.", "Open WATCH"),
     (r"opening-frame approval is stale|opening composition master is missing or stale",
      'images',
      "The approved opening frame no longer matches the current SEE inputs.",
      "The image is retained, but its approval was tied to an older direct input set.",
      "Open SEE, review the current scene plate and keyframe, then approve the current frame before WATCH.", "Review opening frame"),
-    (r"WATCH_PROMPT_REVIEW_REQUIRED",
+    (r"WATCH_CONFIGURATION_REQUIRED.*(?:opening inputs changed|opening frame|opening keyframe).*(?:SEE|prior final frame|continuity)|opening frame is not a playable stage|opening geography does not provide visible depth|reserve lead room for travel",
+     'images',
+     "The opening frame needs a current continuity update.",
+     "The saved image remains available, but its shot layout or prior-frame relationship needs another SEE review.",
+     "Open SEE and use Library, Upload or Generate to update the opening frame, then review and approve it.", "Review opening frame"),
+    (r"keyframe prompt.*\[SUBJECTS\].*approved DIRECT direction",
      'direction',
+     "The keyframe prompt does not match approved shot direction.",
+     "The character/subject wording in the keyframe brief did not preserve DIRECT's approved wording.",
+     "Open DIRECT and align the subject direction, then return to SEE to build the keyframe.", "Review in DIRECT"),
+    (r"WATCH_PROMPT_REVIEW_REQUIRED",
+     'review',
      "The prompt reviewer couldn't verify its quotations.",
      "This is a review-format problem, not a failed media or timing check. Your approved opening and voice are retained.",
-     "Retry the prompt review. Studio checks the exact request again; nothing is submitted until you approve Fire.", "Retry review"),
+     "Open WATCH, inspect the cited evidence and correct its source. The request remains unsubmitted until you approve Fire.", "Review WATCH"),
     (r"DIRECT_AUDIO_TIMING_CONFLICT",
      'audio',
      "The spoken line and Sunny’s movement don’t line up yet.",
      "The approved voice finishes after the direction schedules the turn and garland grip. Studio has kept the voice and direction unchanged.",
-     "Choose whether to revise the movement in DIRECT or review the voice timing in HEAR. WATCH stays unsubmitted until the revised sources agree.", "Review timing options"),
+     "Review the timed movement in DIRECT, or adjust the line timing in HEAR without changing its approved words. WATCH stays unsubmitted until the sources agree.", "Review timing in DIRECT"),
     (r"immutable script content is missing|missing trusted show data|canon lock refused",
      'setup',
      "Required production source files are missing.",
@@ -49,11 +59,21 @@ RULES = (
      "This shot's direction isn't finished.",
      "The Director Card has no timed views yet, so Studio cannot film it.",
      "Open DIRECT, complete the timed views, then continue.", "Open direction"),
+    (r"Director handoff incomplete.*(?:completion time|event time)|explicit event completion times",
+     'direction',
+     "The direction handoff needs event timing.",
+     "The Director Card needs explicit event-completion times before later stages can use the shot.",
+     "Open DIRECT and add the event completion times, then continue.", "Open direction"),
     (r"DIRECTOR_REVISION_REQUIRED|DIRECT_REVISION_REQUIRED",
      'direction',
      "The Director needs to revise this shot.",
      "Something in the direction is contradictory or incomplete.",
      "Open DIRECT, apply the noted revision, then continue.", "Open direction"),
+    (r"HEAR_CONFIGURATION_REQUIRED.*(?:unoccupied|landing hold|acting and landing|voice ends|voice leaves)",
+     'direction',
+     "The spoken line leaves too little time for the shot's action and landing.",
+     "Keep the approved dialogue; adjust the timed action or landing in DIRECT, or revise voice timing in HEAR.",
+     "Open DIRECT to review the action timeline; HEAR remains available for a timing-only change.", "Review timing in DIRECT"),
     (r"HEAR_CONFIGURATION_REQUIRED|performance direction is missing",
      'audio',
      "A line has no voice direction.",
@@ -68,22 +88,22 @@ RULES = (
      'request',
      "The render request no longer matches the approved direction.",
      "The direction changed after the request was prepared.",
-     "Prepare the request again; nothing you approved is lost.", "Prepare again"),
+     "Open WATCH and prepare a fresh request from the current approved direction; nothing you approved is lost.", "Open WATCH"),
     (r"Approve the current WATCH request before firing",
      'request',
      "The render request needs approving before filming.",
      "Studio prepared the request; it needs your approval to spend.",
-     "Approve the request to film this shot.", "Approve and film"),
+     "Review the sealed request and its cost in WATCH. No provider call occurs until you explicitly approve Fire.", "Review WATCH request"),
     (r"SPEND NOT APPROVED|spend envelope|allowance",
      'money',
      "This step costs money and hasn't been approved.",
      "The cost is shown before anything is charged.",
-     "Approve the shown cost to continue.", "Approve spend"),
+     "Review and approve the exact spend in WATCH before any provider request.", "Review spend in WATCH"),
     (r"credit_balance_exhausted|insufficient[_ ]credit|out of credit|quota",
      'provider',
      "The AI provider account is out of credit.",
      "Nothing here needs changing; the provider refused for lack of credit.",
-     "Top up the provider account, then continue.", "Try again"),
+     "No provider request can run until the account has available credit.", "View details"),
     (r"APITimeoutError|timed out|timeout",
      'provider',
      "The provider didn't answer in time.",
@@ -105,7 +125,7 @@ RULES = (
      "An image, voice or direction was updated after the last review.",
      "Review the updated version, then continue.", "Review update"),
     (r"BLOCKED: PROVIDER PROMPT COMPILATION|BLOCKED: DIRECTION PLAN|WATCH_CONFIGURATION_REQUIRED",
-     'request',
+     'direction',
      "Studio couldn't build the render request from the direction.",
      "The direction is missing something the render needs.",
      "Open DIRECT, complete what is noted, then prepare the request again.", "Open direction"),
@@ -128,7 +148,7 @@ RULES = (
      'setup',
      "A file this shot needs is outside the Studio's folders.",
      "The Studio only uses files inside its own production folders.",
-     "Ask support to move the file into the Studio folder; nothing you approved is lost.", "Contact support"),
+     "Review the blocked file path, then place the asset inside the configured Studio folder. Nothing you approved is lost.", "View file details"),
 )
 
 
@@ -137,18 +157,57 @@ def _code(raw):
     return match.group(1) if match else None
 
 
+def _next_stage(category, stage, text):
+    """Bind a producer stop to the stage that can actually resolve it."""
+    if category == 'audio' and re.search(r'performance direction is missing|no voice direction', text, re.I):
+        return 'direct'
+    if category == 'audio' and re.search(r'DIRECT_AUDIO_TIMING_CONFLICT', text, re.I):
+        return 'direct'
+    if category == 'images':
+        return 'see'
+    if category == 'references':
+        return 'see'
+    if category == 'direction':
+        return 'direct'
+    if category in {'request', 'money', 'review'}:
+        return 'watch'
+    if category == 'audio':
+        return 'hear'
+    if category == 'stale':
+        value = re.sub(r'[^a-z]+', '_', str(stage or '').lower()).strip('_')
+        if any(part in value for part in ('see', 'image', 'keyframe', 'plate', 'look')):
+            return 'see'
+        if any(part in value for part in ('hear', 'audio', 'voice')):
+            return 'hear'
+        if any(part in value for part in ('watch', 'render', 'film', 'animation', 'request')):
+            return 'watch'
+        return 'direct'
+    if category == 'provider':
+        return 'recover' if re.search(r'Check existing job|timed out', text, re.I) else 'details'
+    return 'details'
+
+
 def translate(raw, *, stage=None):
     """Return the producer-facing reading of a recorded stop. Never raises."""
     text = str(raw or '').strip()
     for pattern, category, headline, meaning, action, button in RULES:
         if re.search(pattern, text, re.I):
+            component = None
+            if category == 'images':
+                if re.search(r'opening[- ]frame|opening composition|opening inputs|keyframe', text, re.I):
+                    component = 'opening'
+                elif re.search(r'scene plate|background plate', text, re.I):
+                    component = 'plate'
             return dict(category=category, headline=headline, meaning=meaning,
                         nextAction=action, button=button, code=_code(text), technical=text,
-                        stage=stage, preserved="Everything you approved is saved.")
+                        stage=stage, targetStage=_next_stage(category, stage, text),
+                        component=component,
+                        preserved="Everything you approved is saved.")
     return dict(category='support', headline='Studio stopped here and saved your approved work.',
                 meaning='This stop is not one Studio can explain in plain words yet.',
-                nextAction='Nothing you approved is lost. Send the reference below to support.',
-                button='Contact support', code=_code(text), technical=text, stage=stage,
+                nextAction='Nothing you approved is lost. Open technical details to see the exact stop and the evidence needed to resolve it.',
+                button='View technical details', code=_code(text), technical=text, stage=stage,
+                targetStage='details', component=None,
                 preserved="Everything you approved is saved.")
 
 

@@ -282,6 +282,12 @@
       const key=[ctx.project.id,ctx.episode,shot?.id||'S1.SH1'].join(':');
       if(outcome.dataset.journeyKey!==key){outcome.dataset.journeyKey=key;StudioJourney.mount(outcome,{projectId:ctx.project.id,episode:ctx.episode,scene:String(shot?.scene||1),unit:shot?.id||'S1.SH1'},{
         changes:()=>{root.querySelector('#sp-direction').focus();root.querySelector('#sp-direction').scrollIntoView({block:'center'});},
+        openStage:target=>{
+          if(target==='library')return library(ctx.project);
+          if(target==='direct'){root.querySelector('#sp-direction').focus();root.querySelector('#sp-direction').scrollIntoView({block:'center'});return;}
+          outcome.querySelector('.journey-media')?.scrollIntoView({block:'center'});
+        },
+        openLibrary:()=>library(ctx.project),
         settled:()=>refresh(ctx),
         next:scope=>{ctx.shotId=scope.unit;ctx.signature='';refresh(ctx);}
       });}else outcome.journeyHandle?.refresh();

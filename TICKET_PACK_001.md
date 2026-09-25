@@ -115,6 +115,46 @@ DoD: Gate 0 receives the ledger as context; Gate 5 sign-off appends the episode'
 
 ---
 
+## THE VOICE CONTRACT (P0, 2026-09-25 — Julian's voice/dialogue contract)
+
+The contract, in Julian's words, is the DoD for this section: script is the source of truth; voice direction adds acting, not dialogue; two editors connected but distinct; create and review the actual take; approval creates `@Audio1`; WATCH inherits that exact audio. Acceptance checks: tag-only edits leave script words alone; saved word edits update the dialogue and require a new take; every returned take has a player plus approve/reject; approval makes that exact take `@Audio1`; WATCH uses that audio and its measured timing. Rulings the same day: Seedance 2.5 scores music + SFX; the guide voice is removed by local Demucs stem separation before the approved master is laid in; the showrunner's audio-sync sentence is added verbatim alongside the existing audio-authority wording; contract before Ep3.
+
+**T35 · Script fidelity on every voice path (clause 2, acceptance 1)** ✅ DONE (2026-09-25)
+cb_voice_director.py (`script_fidelity_problems`, `words_changed`, `punctuation_edits`, `allowed_tags_for`), cb_departments.py, cb_render.py, cb_safety.py, cb_gen.py, cb_intake.py, Studio Bible §3.3a. Words AND script punctuation locked for the Voice Director's line and every take recipe (pause marks may be added); `exactDialogue` re-tied to the script verbatim; an unexplained tag is refused (the generic filler purpose is gone); a HEAR prompt word edit is refused as an unsaved dialogue draft (`WordDraftRefused`), a punctuation glitch fix allowed and recorded, off-palette tags refused; the lock runs again before the paid request; the per-line fallback speaks each character with its own registered card settings; inline parentheticals are lifted out of spoken text at intake.
+DoD: every path that can put words in a provider request refuses a word change and a dropped/swapped script mark (tests: test_cb_script_fidelity.py, test_cb_voice_director.py, test_cb_departments.py). Known limit: ElevenLabs Text-to-Dialogue accepts one global stability only — per-character similarity/style reach the provider only on the per-line path.
+
+**T34 · Stable occurrence IDs and "Save corrected words" (clauses 1 and 3, acceptance 2)** ✅ DONE (2026-09-25)
+cb_scripts.py (the correction ledger, `apply_corrections`, `record_dialogue_correction`, `effective_script_text`), cb_intake.py (`correct_dialogue_line`, `scriptLines` on dialogue events), cb_engine.py, cb_handover.py, cb_render.py (`save_corrected_words`, `apply_dialogue_correction`, `_archive_voice_take`, per-line carry-forward in `_resolve_voice_lines`), serve.py (`POST /api/dialogue-correct`; a HEAR word edit returns 409 with its `wordDraft`), director.js/.css (the exact dialogue editor above the ElevenLabs prompt, a live "Unsaved draft", "Save corrected words" with a reason, "Discard draft"), Studio Bible §3.3b. Ruling (Julian, 2026-09-25): only that line's voice re-locks. The identity script and every approval stay bound; the occurrence keeps its ID; the corrected full text is its own immutable history version; that shot's take becomes historical and a new take is required; only that line's HEAR edit is dropped.
+DoD: tests in test_cb_dialogue_corrections.py and test_director_ui.py cover identity and history, chained corrections, refusals, the reason requirement, the canon guard, a new upload resetting the ledger, a rename keeping the corrected words, only that line's take becoming historical, the other lines' edits carrying forward, the stale-direction fallback, and the engine overlay.
+
+**T37 · The `@Audio1` record (clause 5, acceptance 4)** ✅ DONE (2026-09-25)
+cb_audio_timing.py (`measure_speech_intervals`, `write_audio1_record`), cb_safety.py (`approve_voice` builds the record; `audio1_record`, `current_audio1`; rejection keeps it only in the rejection bundle), cb_render.py (`audio1` in the take keys a correction archives; HEAR status returns the current `@Audio1`), Studio Bible §3.3c. Approval creates a named `@Audio1` record. It binds the approved file's hash to the exact dialogue version (script version, `dialogueHash`, line corrections), its measured duration, and each line's speaker with its measured speech interval, pauses included. The measurement comes from the master's bytes. A take whose line window holds no speech is refused before any approval is recorded. A saved prompt or a generated take is never approval.
+DoD: tests in test_cb_audio1.py cover measurement from the audio (pauses included), a missing line refused, a generated take not being `@Audio1`, approval creating the hash-bound, measured record, the record going stale on a byte or dialogue change, no approval left behind by a failed measurement, and a rejection keeping it only as history. The shared ElevenLabs test mock now emits an audible tone, so its takes can be measured.
+
+**T36 · The take review desk (clause 4, acceptance 3)** ✅ DONE (2026-09-25)
+Files: director.js/.css/.html (`takeReviewMarkup`, the worded note dialog, relay HEAR labels, Regenerate), cb_studio_director.py (contract labels, the audition dead-end removed, `build_voice` re-directs on an unanswered note, allowed actions), cb_safety.py (`as_heard_judgement`, `approve_voice(as_heard_reason=)`, superseded and rejected takes into `voiceTakeHistory`, `answersHearNotes`), cb_render.py (`hear_take_notes`, `hear_note_unanswered`, `hearTakeNotes` in the Voice Director's context, HEAR status `takeHistory`/`approvedAsHeard`/`hearNotePending`, the `approve-voice-as-heard` CLI), cb_departments.py (one HEAR NOTES line in the Voice Director's instructions), serve.py (`accept-voice-as-heard` needs a note; history URLs), golden_path_browser.mjs (walks the contract's words), and Studio Bible §3.3d.
+What changed:
+- "Create voice take" / "Regenerate" are the shot buttons, with the player directly beneath.
+- "Approve & continue to WATCH" is the forward action.
+- "Reject / add a note" is always available for a take. The note reaches the Voice Director before the next take.
+- "Approve this take as heard" needs a recorded reason and keeps the identity, voice and timing safeguards.
+- Rejected, superseded and historical takes all stay in history.
+- The audition dead-end is removed.
+DoD: tests in test_cb_take_review.py, test_cb_director.py and test_director_ui.py, plus the Golden Path. A one-off browser check covered the no-take, review, earlier-direction and approved-with-history states and a 390px phone.
+
+**T38 · WATCH inherits `@Audio1` and its measured timing (clause 6, acceptance 5)** ⏳ OPEN
+The compiler and captions take each line's interval from the `@Audio1` record, one binding per exact line to its speaker; the showrunner's audio-sync sentence added verbatim; golden diff shown to Julian before merge.
+
+**T39 · The final mix: Seedance music + SFX under the approved master (clause 6)** ⏳ OPEN
+Demucs removes the Seedance guide voice; the no-vocals stem stays; the approved `@Audio1` master is laid at its measured timing; `guideDialogueRemoved` is recorded only when measured true, otherwise the mix refuses. Studio Bible §3.3 updated to match.
+
+**T40 · Ep3 "The Perfectly Rainy Party" through the finished path** ⏳ OPEN
+The locked 19 Sep 2026 script through ScriptStore and intake; approved keyframes and character masters registered; Scene 1 through HEAR → approval → WATCH → mix.
+
+Order of play for this section: T35 → T34 → T37 → T36 → T38 → T39 → T40.
+
+---
+
 ## THE ORDER OF PLAY
 
 Week one: T1 to T6 and T16 (the floor) — ✅ done 2026-07-02. T21 and T20 — ✅ done.

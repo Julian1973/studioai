@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import pathlib
+import re
 import subprocess
 
 
@@ -315,3 +316,106 @@ def replace_timed_dialogue_segment(master_audio, replacement_audio,
                              encoding="utf-8")
     return {**contract, "contractPath": str(contract_path),
             "contractSha256": file_sha256(contract_path)}
+
+
+# ── @Audio1 measurement (T37, voice contract clause 5) ───────────────────────────────
+# The approved master's timing is measured from its own bytes, never taken from the
+# provider's reported ranges or from prompt wording. Speech is whatever rises above the
+# noise floor; a line is voiced where its placed window holds speech.
+SPEECH_NOISE_DB = -50.0
+SPEECH_MIN_SILENCE_SEC = 0.15
+SPEECH_MIN_VOICED_SEC = 0.03
+_SILENCE_START_RE = re.compile(r"silence_start:\s*(-?[0-9.]+)")
+_SILENCE_END_RE = re.compile(r"silence_end:\s*(-?[0-9.]+)")
+
+
+def _silences(path, duration):
+    result = subprocess.run(
+        [
+            "ffmpeg", "-hide_banner", "-nostats", "-i", str(path), "-af",
+            f"silencedetect=noise={SPEECH_NOISE_DB}dB:d={SPEECH_MIN_SILENCE_SEC}",
+            "-f", "null", "-",
+        ],
+        capture_output=True, text=True,
+    )
+    if result.returncode:
+        raise AudioTimingError("could not measure speech in the approved master: " +
+                               result.stderr[-400:])
+    silences, start = [], None
+    for line in result.stderr.splitlines():
+        opened = _SILENCE_START_RE.search(line)
+        if opened:
+            start = max(0.0, float(opened.group(1)))
+            continue
+        closed = _SILENCE_END_RE.search(line)
+        if closed and start is not None:
+            silences.append((start, min(duration, float(closed.group(1)))))
+            start = None
+    if start is not None:                      # silence runs to the end of the file
+        silences.append((start, duration))
+    return silences
+
+
+def _voiced(silences, duration):
+    voiced, cursor = [], 0.0
+    for start, end in sorted(silences):
+        if start > cursor:
+            voiced.append((cursor, start))
+        cursor = max(cursor, end)
+    if cursor < duration:
+        voiced.append((cursor, duration))
+    return voiced
+
+
+def measure_speech_intervals(master_audio, placements):
+    """Measure the approved master: its real duration, and for every placed line the
+    intervals that actually hold speech. A line whose placed window holds no speech is
+    refused - the take does not speak it, so nothing can be synced to it."""
+    master_audio = pathlib.Path(master_audio).resolve()
+    if not master_audio.is_file():
+        raise AudioTimingError(f"approved master is missing: {master_audio}")
+    if not placements:
+        raise AudioTimingError("the approved master has no placed dialogue to measure")
+    duration = _probe_duration(master_audio)
+    voiced = _voiced(_silences(master_audio, duration), duration)
+    lines = []
+    for placement in placements:
+        index = int(placement["dialogueIndex"])
+        window_start = float(placement["targetStartSec"])
+        window_end = min(duration, float(placement["targetEndSec"]))
+        spans = [
+            (round(max(start, window_start), 3), round(min(end, window_end), 3))
+            for start, end in voiced if end > window_start and start < window_end
+        ]
+        spans = [(start, end) for start, end in spans if end - start >= SPEECH_MIN_VOICED_SEC]
+        if not spans:
+            raise AudioTimingError(
+                f"no speech measured for dialogue line {index + 1} between "
+                f"{window_start:.2f}s and {window_end:.2f}s; the take does not speak it")
+        lines.append({
+            "dialogueIndex": index,
+            "dialogueOccurrenceId": placement.get("dialogueOccurrenceId"),
+            "placedStartSec": round(window_start, 3),
+            "placedEndSec": round(window_end, 3),
+            "measuredStartSec": spans[0][0],
+            "measuredEndSec": spans[-1][1],
+            "voicedIntervals": [[start, end] for start, end in spans],
+        })
+    return {
+        "durationSec": round(duration, 3),
+        "lines": lines,
+        "method": {"tool": "ffmpeg silencedetect", "noiseDb": SPEECH_NOISE_DB,
+                   "minSilenceSec": SPEECH_MIN_SILENCE_SEC,
+                   "minVoicedSec": SPEECH_MIN_VOICED_SEC},
+    }
+
+
+def audio1_record_path(master_audio):
+    return pathlib.Path(str(pathlib.Path(master_audio)) + ".audio1.json")
+
+
+def write_audio1_record(master_audio, record):
+    """Write the @Audio1 record beside the approved master and return its path and hash."""
+    path = audio1_record_path(master_audio)
+    path.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return str(path), file_sha256(path)

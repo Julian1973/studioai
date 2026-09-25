@@ -988,13 +988,6 @@ def prepare_cinematography(context, images, *, log=print):
     return result
 
 
-_TAG = re.compile(r"\[[^\]]+\]")
-_WORD = re.compile(r"[A-Za-z0-9']+")
-
-
-def _spoken_words(text):
-    return [w.lower() for w in _WORD.findall(_TAG.sub("", text or ""))]
-
 
 def _locked_line_text(line):
     return str(line.get("exactText") if line.get("exactText") is not None else line.get("text") or "")
@@ -1025,10 +1018,24 @@ def validate_voice_direction(result, locked_lines):
         if out.character.strip().lower() != str(locked["speaker"]).strip().lower():
             raise RuntimeError(f"Voice Director changed character on line {idx}")
         locked_text = _locked_line_text(locked)
-        if _spoken_words(out.exactDialogue) != _spoken_words(locked_text):
+        if cb_voice_director.words_changed(out.exactDialogue, locked_text):
             raise RuntimeError(f"Voice Director changed locked dialogue on line {idx}")
-        if _spoken_words(out.performedText) != _spoken_words(locked_text):
-            raise RuntimeError(f"Voice Director added, dropped or changed words on line {idx}")
+        # exactDialogue is a copy of the approved script line, never an authored field:
+        # tie it to the script verbatim (T35) so no provider-bound record can drift.
+        out.exactDialogue = locked_text
+        performed_problems = cb_voice_director.script_fidelity_problems(
+            out.performedText, locked_text)
+        if performed_problems:
+            raise RuntimeError(
+                f"Voice Director departed from the script on line {idx}: " +
+                "; ".join(performed_problems))
+        for recipe in out.takeRecipes:
+            recipe_problems = cb_voice_director.script_fidelity_problems(
+                recipe.performedText, locked_text)
+            if recipe_problems:
+                raise RuntimeError(
+                    f"Voice Director take recipe {recipe.recipeId} departed from the script "
+                    f"on line {idx}: " + "; ".join(recipe_problems))
         if out.archetypeId not in registers:
             raise RuntimeError(
                 f"Voice Director selected unregistered archetype {out.archetypeId!r} "
@@ -1044,16 +1051,16 @@ def validate_voice_direction(result, locked_lines):
             for tag in re.findall(r"\[([^\]]+)\]", recipe.performedText)
             if tag.strip()
         }
+        recipe_tags.update(
+            tag.strip().casefold()
+            for tag in re.findall(r"\[([^\]]+)\]", out.performedText) if tag.strip())
         missing_purposes = sorted(tag for tag in recipe_tags if not purposes.get(tag))
         if missing_purposes:
-            locked_delivery = str(locked.get("delivery") or "").strip()
-            fallback = (
-                f"Carry the locked delivery direction: {locked_delivery}"
-                if locked_delivery else
-                "Mark a deliberate performance beat while preserving the locked words."
-            )
-            for tag in missing_purposes:
-                out.tagPurposes.append(VoiceTagPurpose(tag=tag, purpose=fallback))
+            # T35: every tag carries its own dramatic purpose. A generic filler purpose
+            # would hide an unexplained tag from the compiler's audit, so none is invented.
+            raise RuntimeError(
+                f"Voice Director used tag(s) without a dramatic purpose on line {idx}: " +
+                ", ".join(f"[{tag}]" for tag in missing_purposes))
     return result
 
 
@@ -1251,7 +1258,16 @@ def prepare_voice(context, locked_lines, *, log=print):
         "use only its allowedTags):\n" + _j(register_contract) +
         "\n\nTAG PURPOSE LAW: every bracketed audio tag used in performedText or in any "
         "takeRecipes.performedText must have one matching tagPurposes row. The tag value "
-        "must omit brackets and its purpose must explain the dramatic job of that tag.\n" +
+        "must omit brackets and its purpose must explain the dramatic job of that tag.\n"
+        "SCRIPT FIDELITY LAW: exactDialogue is the locked line copied verbatim. In every "
+        "performedText keep every locked word in order (CAPS for operative-word stress is "
+        "allowed) and keep every script punctuation mark where it is; you may ADD only "
+        "pause marks (comma, ellipsis …, em-dash —). Acting lives in tags, stress and "
+        "pauses - never in new, dropped or changed words, and never in screenplay "
+        "directions or parentheticals.\n"
+        "HEAR NOTES: hearTakeNotes in the shot context are Julian's notes on rejected takes "
+        "of this shot. The new direction must answer the latest note through acting, "
+        "cadence, stress, pauses and tags - never by changing a word.\n" +
         "\n\nLOCKED LINES (same count/order/speaker/words must be returned):\n" + _j(locked_lines),
         VoiceDirection, label="department_voice", log=log)
     return validate_voice_direction(result, locked_lines)

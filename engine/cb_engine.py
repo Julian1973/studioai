@@ -625,7 +625,14 @@ def _canon_speaker(label, characters_cfg):
 
 
 def _expected_lines(beats):
-    """Typed source records for every locked dialogue occurrence, in source order."""
+    """Typed source records for every locked dialogue occurrence, in source order, with any
+    explicit "Save corrected words" correction applied (T34): the occurrence keeps its ID and
+    source event; only its approved words change, and only through the signed ledger."""
+    return SCRIPT_STORE.apply_corrections(_identity_lines(beats))
+
+
+def _identity_lines(beats):
+    """The approved identity script's lines exactly as the beat package locked them."""
     out = []
     for b in beats:
         for c in (b.get("cuts") or []):

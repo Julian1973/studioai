@@ -373,11 +373,12 @@ class Providers:
 
         def eleven_dialogue(inputs, out="vo.mp3", **k):
             self.voice_calls.append({"inputs": inputs, "out": out})
-            # a REAL (silent) mp3 — the animatic runs genuine ffmpeg over this file, so the
-            # mock must produce decodable audio, not a byte stub
+            # a REAL mp3 — the animatic runs genuine ffmpeg over this file, so the mock must
+            # produce decodable audio, not a byte stub; audible tone, because approval
+            # measures speech in every line's window before a take can become @Audio1 (T37)
             import subprocess as sp
             total_duration = 0.5 * max(1, len(inputs))
-            sp.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono",
+            sp.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "sine=frequency=220:sample_rate=24000",
                     "-t", str(total_duration), "-q:a", "9", out],
                    check=True, capture_output=True)
             duration = total_duration / max(1, len(inputs))

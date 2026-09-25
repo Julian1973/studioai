@@ -1016,22 +1016,24 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             summary = purpose
             artifact = {"type": "audio", "url": shot_media.get("vo"),
                         "label": "Complete voice performance"}
+            # T36 take review: approve forward, reject with a note, or regenerate
             decisions = [
-                _action("accept-voice", "Accept"),
-                _action("iterate-voice", "Iterate", destructive=True),
+                _action("accept-voice", "Approve & continue to WATCH"),
+                _action("iterate-voice", "Reject / add a note", destructive=True),
+                _action("build-voice", "Regenerate", paid=True),
             ]
         elif (not all_animations_current and keyframe_ready and voice_auditions
               and not current.get("voice")):
             phase = "voice"
-            status = "ready_to_review"
-            headline = "Choose the voice performance"
-            summary = purpose
+            status = "ready_to_fire"
+            headline = "Choose the voice direction"
+            summary = ("Hear the direction auditions, choose one, then create the voice take. "
+                       "An audition is never the shot's voice take.")
             artifact = {"type": "audio-set", "items": voice_auditions,
-                        "label": "Voice performance auditions"}
-            decisions = [
-                _action("accept-voice", "Accept"),
-                _action("iterate-voice", "Iterate", destructive=True),
-            ]
+                        "label": "Voice direction auditions"}
+            # T36: there is no take to approve yet - the way forward is the take itself
+            primary = _action("build-voice", "Create voice take", paid=True)
+            decisions = []
         elif not all_animations_current and keyframe_ready and pending.get("voice"):
             phase = "voice"
             status = "ready_to_review"
@@ -1040,8 +1042,9 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             artifact = {"type": "audio", "url": shot_media.get("vo"),
                         "label": "Voice performance"}
             decisions = [
-                _action("accept-voice", "Accept"),
-                _action("iterate-voice", "Iterate", destructive=True),
+                _action("accept-voice", "Approve & continue to WATCH"),
+                _action("iterate-voice", "Reject / add a note", destructive=True),
+                _action("build-voice", "Regenerate", paid=True),
             ]
         elif (not all_animations_current and keyframe_ready and selected_state.get("talky")
               and not current.get("voice")):
@@ -1052,7 +1055,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                 "The opening frame is locked and protected. Next, create the voice "
                 "performances that will drive the animation."
             )
-            primary = _action("build-voice", "Create performances", paid=True)
+            primary = _action("build-voice", "Create voice take", paid=True)
             artifact = {"type": "image", "url": shot_media.get("keyframeApproved")
                         or shot_media.get("keyframe"), "label": "Accepted opening frame"}
         elif (not all_animations_current and keyframe_ready and voice_ready
@@ -1253,6 +1256,17 @@ def allowed_action_ids(session: dict[str, Any]) -> set[str]:
         out.update({"select-keyframe-library", "select-keyframe-upload"})
     if ((session.get("artifact") or {}).get("type") == "image-set"):
         out.add("select-keyframe-candidate")
+    if "accept-voice" in out:
+        # T36: "Approve this take as heard" - the same decision, with a recorded reason;
+        # cb_safety enforces the identity/voice/timing safeguards
+        out.add("accept-voice-as-heard")
+    if (session.get("status") not in ("rendering", "blocked") and
+            not session.get("preservedPackageView") and any(
+                shot.get("selected") and shot.get("voiceUrl")
+                for shot in session.get("shots") or [])):
+        # T36: "Reject / add a note" is always available for the shot's voice take while
+        # production is live (never while a job runs or the session is blocked)
+        out.add("iterate-voice")
     return out
 
 
@@ -1317,9 +1331,17 @@ def refire_keyframe(scene: str, shot_id: str, correction: str,
 
 
 def build_voice(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
+    """Create voice take / Regenerate (T36). A HEAR note Julian left on a rejected take is
+    answered first: the Voice Director re-directs the shot with the note in its context."""
     import cb_render
 
-    if not _direction_current(scene, shot_id, "voice", episode):
+    package, _ = cb_render.load_pkg(scene, episode)
+    note = cb_render.hear_note_unanswered(package, shot_id, scene, episode)
+    if note:
+        log(f"DIRECTOR — the Voice Director re-directs this shot to answer the HEAR note: "
+            f"{note['note']}")
+        cb_render.prepare_department(scene, "voice", shot_id, episode, log)
+    elif not _direction_current(scene, shot_id, "voice", episode):
         log("DIRECTOR — preparing current voice direction")
         cb_render.prepare_department(scene, "voice", shot_id, episode, log)
     package, path = cb_render.load_pkg(scene, episode)

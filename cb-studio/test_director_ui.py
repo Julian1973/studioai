@@ -622,8 +622,9 @@ def test_voice_review_shows_keyframe_context_and_specific_actions():
     assert "voice-review-stage" in JS
     assert "Approved opening keyframe" in JS
     assert "Approve or refire the dialogue performance only." in JS
-    assert 'action.id === "accept-voice" ? "Approve Voice"' in JS
-    assert 'action.id === "iterate-voice" ? "Refire Voice"' in JS
+    # T36: the voice contract names the take decisions
+    assert 'action.id === "accept-voice" ? "Approve & continue to WATCH"' in JS
+    assert 'action.id === "iterate-voice" ? "Reject / add a note"' in JS
     assert 'action.id === "accept-keyframe" ? "Approve Keyframe"' in JS
     assert 'action.id === "accept-animation" ? "Approve Animation"' in JS
     assert ".voice-review-stage" in CSS
@@ -810,7 +811,7 @@ def test_audio_performance_uses_live_voice_status_take_url():
     assert 'if (action.id === "build-voice") await loadVoicePerformance(true)' in JS
     assert 'status["takeUrl"] = _url_from_abs(led.get("voPath"))' in SERVER
     assert "COMPLETE HEAR TRACK" in JS
-    assert "This is the full shot track you approve or refire" in JS
+    assert "This is the full shot track you approve or reject" in JS
     assert "DIRECTION AUDITIONS · NOT THE SHOT TRACK" in JS
     assert "Choose direction & build full track" in JS
     assert "activeBeatId: app.activeBeatId" in JS
@@ -963,6 +964,56 @@ def test_audio_stage_is_the_editable_elevenlabs_performance_desk():
     assert ".voice-take-player audio" in CSS
     assert "status.error" in JS
     assert "recoveryAction" in JS
+
+
+def test_exact_dialogue_editor_sits_above_the_prompt_and_word_edits_are_unsaved_drafts():
+    # T34, voice contract clause 3: two editors, connected but distinct.
+    desk = JS[JS.index('<div class="voice-prompt-lines">'):JS.index("async function loadVoicePerformance")]
+    assert desk.index("data-dialogue-editor=") < desk.index("Text + audio tags sent to ElevenLabs")
+    assert "Exact dialogue · approved script" in desk
+    assert "data-dialogue-draft-slot=" in desk
+    # a word edit in the prompt shows, live, as an unsaved draft; tags alone never do
+    assert 'addEventListener("input", () => trackPromptWordEdit(field))' in JS
+    assert "Unsaved draft · the prompt changes the spoken words" in JS
+    assert 'replace(/\\[[^\\]]*\\]/g, " ")' in JS
+    # only "Save corrected words" changes the script, with a stated reason
+    assert "Save corrected words" in JS and "data-dialogue-save=" in JS
+    assert "Discard draft" in JS and "data-dialogue-draft-reason=" in JS
+    assert 'api("/api/dialogue-correct"' in JS
+    assert "error.payload?.wordDraft" in JS
+    assert "This line's take is now historical: create a new voice take." in JS
+    assert ".dialogue-draft {" in CSS
+    # the server returns the draft instead of saving it, and one route saves words
+    assert 'self._json(409, {"error": str(e), "wordDraft": e.draft})' in SERVER
+    assert 'if self.path == "/api/dialogue-correct":' in SERVER
+    assert "_CBR.save_corrected_words(" in SERVER
+    assert 'occurrence.startswith("dialogue-occurrence:")' in SERVER
+
+
+def test_take_review_desk_puts_the_take_beneath_the_shot_buttons():
+    # T36, voice contract clause 4
+    desk = JS[JS.index("function takeReviewMarkup("):JS.index("async function loadVoicePerformance")]
+    assert desk.index('class="take-review-actions"') < desk.index('data-voice-send=') \
+        < desk.index('class="voice-take-player"') < desk.index('class="take-review-decisions"')
+    assert 'data-advance-step="footage">${esc(directorActionLabel(acceptAction))}' in desk
+    assert 'data-live-action="accept-voice-as-heard"' in desk and "Approve this take as heard" in desk
+    assert 'const reject = take?.url ? (iterateAction || DESK_ACTIONS["iterate-voice"]) : null' in desk
+    assert "@AUDIO1 · APPROVED" in desk and "measuredStartSec" in desk
+    assert "YOUR NOTE REACHES THE VOICE DIRECTOR" in desk
+    assert 'class="take-history"' in desk and "TAKE_HISTORY_LABELS" in JS
+    assert '"accept-voice-as-heard": { id: "accept-voice-as-heard", label: "Approve this take as heard" }' in JS
+    assert 'action.id.startsWith("iterate-") || action.id === "accept-voice-as-heard"' in JS
+    assert "Why is this take right as heard?" in JS and "Note for the Voice Director" in JS
+    assert 'id="iterate-title"' in HTML and 'id="iterate-submit"' in HTML
+    for rule in (".take-review {", ".audio1-record {", ".take-history-item {", ".hear-note-pending {"):
+        assert rule in CSS
+    # the server carries the as-heard decision with its reason, and serves take history
+    assert '"accept-voice", "accept-voice-as-heard", "iterate-voice",' in SERVER
+    assert 'shot_run_job("approve-voice-as-heard", scene, ep, target, note)' in SERVER
+    assert 'for entry in status.get("takeHistory") or []:' in SERVER
+    # the Golden Path walks the contract's words
+    assert '"Create voice take"' in GOLDEN_BROWSER
+    assert '"Approve & continue to WATCH"' in GOLDEN_BROWSER
 
 
 def test_project_truth_layer_distinguishes_real_production_states():

@@ -214,16 +214,16 @@
     <form method="dialog" id="iterate-form">
       <div class="dialog-heading">
         <div>
-          <span class="stage-label">ONE CLEAR CHANGE</span>
-          <h2>What should improve?</h2>
+          <span class="stage-label" id="iterate-kicker">ONE CLEAR CHANGE</span>
+          <h2 id="iterate-title">What should improve?</h2>
         </div>
         <button type="button" class="close-button" data-close="iterate-dialog" aria-label="Close">×</button>
       </div>
-      <label for="iteration-note">Director note</label>
+      <label for="iteration-note" id="iteration-note-label">Director note</label>
       <textarea id="iteration-note" rows="4" maxlength="500" required placeholder="Describe the one change that matters most."></textarea>
       <div class="dialog-actions">
         <button type="button" class="secondary" data-close="iterate-dialog">Cancel</button>
-        <button type="submit" class="primary">Iterate</button>
+        <button type="submit" class="primary" id="iterate-submit">Iterate</button>
       </div>
     </form>
   </dialog>

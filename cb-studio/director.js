@@ -828,6 +828,13 @@
     </div>`;
   }
 
+  // Take review decisions the session may not list for this take (T36); the server's
+  // allowed-action check and the engine's safeguards still decide every one of them.
+  const DESK_ACTIONS = {
+    "iterate-voice": { id: "iterate-voice", label: "Reject / add a note", destructive: true },
+    "accept-voice-as-heard": { id: "accept-voice-as-heard", label: "Approve this take as heard" },
+  };
+
   function actionActivityCopy(action, session, preparingRetry) {
     if (action.id === "accept-keyframe") {
       return {
@@ -849,10 +856,19 @@
     }
     if (action.id === "iterate-voice") {
       return {
-        label: "Voice refire in progress",
-        step: "Applying your note and preparing the corrected performance...",
-        message: "Your retake note is recorded. The replacement voice will return here for your review.",
-        provider: "ElevenLabs",
+        label: "Rejecting voice take",
+        step: "Recording your note and moving this take to its history...",
+        message: "Your note reaches the Voice Director before the next take. No provider call is made now.",
+        provider: "Studio decision",
+        showDuration: false,
+      };
+    }
+    if (action.id === "accept-voice" || action.id === "accept-voice-as-heard") {
+      return {
+        label: action.id === "accept-voice" ? "Approving voice take" : "Approving take as heard",
+        step: "Measuring the take and recording it as @Audio1...",
+        message: "Your sign-off is being recorded. No provider generation or spend is occurring.",
+        provider: "Studio approval",
         showDuration: false,
       };
     }
@@ -2676,6 +2692,8 @@
     const accept = current ? actions.find((action) => action.id.startsWith("accept-")) : null;
     const iterate = current ? actions.find((action) => action.id.startsWith("iterate-") || action.id === "reopen-shot") : null;
     const primary = current ? (accept || session.primaryAction || actions.find((action) => action.id === "approve-spend")) : null;
+    // T36: on HEAR the take's optional regeneration sits beside the decision
+    const regenerate = current && stage === 2 ? actions.find((action) => action.id === "build-voice" && action !== primary) : null;
     const stateLabel = locked ? "Locked" : complete ? "Signed" : session.status === "rendering" ? "Working" : session.status === "ready_to_review" ? "Your decision" : "Ready";
     const savedNote = session.savedRetakeNotes?.[`${session.selectedShotId}:${stage}`] || "";
     return `<article class="relay-card ${current ? "current" : ""} ${locked ? "locked" : ""} ${complete ? "complete" : ""}">
@@ -2686,7 +2704,8 @@
         <label class="relay-notes">Retake notes<textarea data-relay-note="${stage}" placeholder="What needs to change? Plain English is enough.">${esc(savedNote)}</textarea><span class="relay-note-status" data-relay-note-status="${stage}">${savedNote ? "Saved" : ""}</span></label>
         <div class="relay-actions">
           ${primary ? `<button type="button" class="primary" data-relay-action="${esc(primary.id)}">${esc(primary.id === "direct-scene" ? "Start scene → generate keyframes" : primary.label)}</button>` : complete ? `<span>Approved</span>` : ""}
-          ${iterate ? `<button type="button" class="secondary danger" data-relay-retake="${esc(iterate.id)}" data-relay-stage="${stage}">Refire with notes</button>` : ""}
+          ${iterate ? `<button type="button" class="secondary danger" data-relay-retake="${esc(iterate.id)}" data-relay-stage="${stage}">${iterate.id === "iterate-voice" ? "Reject / add a note" : "Refire with notes"}</button>` : ""}
+          ${regenerate ? `<button type="button" class="secondary" data-relay-action="${esc(regenerate.id)}">${esc(regenerate.label)}</button>` : ""}
         </div>`}
     </article>`;
   }
@@ -3018,10 +3037,10 @@
     return action.id === "approve-spend"
       ? "Render 480p"
       : action.id === "accept-keyframe" ? "Approve Keyframe"
-      : action.id === "accept-voice" ? "Approve Voice"
+      : action.id === "accept-voice" ? "Approve & continue to WATCH"
       : action.id === "accept-animation" ? "Approve Animation"
       : action.id === "iterate-keyframe" ? "Refire Keyframe"
-      : action.id === "iterate-voice" ? "Refire Voice"
+      : action.id === "iterate-voice" ? "Reject / add a note"
       : action.id === "iterate-animation" ? "Refire Animation"
       : action.id.startsWith("accept-") ? "Approve" : action.id.startsWith("iterate-") ? "Refire" : action.label;
   }
@@ -3743,11 +3762,7 @@
         <div><span class="stage-label">ELEVENLABS PERFORMANCE · ${esc(selectedShot?.shotId || app.shotId || "CURRENT SHOT")}${selectedShot?.durationSec ? ` · ${Number(selectedShot.durationSec)}s` : ""}</span><h3>Acting &amp; cadence prompt</h3></div>
         <span class="voice-source ${status.isWorking ? "working" : ""}">${esc(sourceLabel)}</span>
       </div>
-      ${take?.url ? `<div class="voice-take-player">
-        <div><span>COMPLETE HEAR TRACK · ${Number(status.generatedLineCount || 0)}/${Number(status.expectedLineCount || lines.length)} LINES · ${Number(status.shotDurationSec || selectedShot?.durationSec || 0)}s</span><strong>This is the full shot track you approve or refire</strong>${status.takeGeneratedAt ? `<em>Generated ${esc(status.takeGeneratedAt)}</em>` : ""}</div>
-        <audio controls preload="metadata" src="${esc(take.url)}?v=${Date.now()}"></audio>
-      </div>` : ""}
-      ${status.hasTake && status.takeMatchesCurrent === false ? `<div class="voice-compiler-status blocked"><strong>Do not approve this track</strong><p>The generated audio does not match the current compiled performance direction. Build the complete track again first.</p></div>` : ""}
+      ${lines.length ? takeReviewMarkup(status, take, selectedShot, lines, { acceptAction, iterateAction, sendAction }) : ""}
       ${status.compiler?.error ? `<div class="voice-compiler-status blocked"><strong>Voice compiler blocked</strong><p>${esc(status.compiler.error)}</p></div>` : ""}
       ${status.compiler?.ready ? `<div class="voice-compiler-status ready"><strong>Post-Direction Audit passed</strong><p>The locked script, canon voice, performance questions, tag palette, context runway and take recipes are current.</p></div>` : ""}
       ${auditionCandidates.length ? `<section class="voice-auditions">
@@ -3766,9 +3781,14 @@
       <div class="voice-prompt-lines">
         ${lines.map((line, index) => {
           const truth = approved[index] || {};
+          const occurrence = line.dialogueOccurrenceId || truth.dialogueOccurrenceId || "";
           return `<article class="voice-prompt-line">
             <div class="voice-line-head"><strong>${esc(line.speaker)}</strong><span>Line ${index + 1}</span></div>
-            <div class="locked-dialogue"><span>Exact script</span><p>${esc(truth.exactText || line.text)}</p></div>
+            <div class="locked-dialogue dialogue-editor" data-dialogue-editor="${esc(occurrence)}">
+              <span>Exact dialogue · approved script${truth.correctionId ? " · corrected" : ""}</span>
+              <p data-dialogue-approved="${esc(occurrence)}">${esc(truth.exactText || line.text)}</p>
+              <div class="dialogue-draft-slot" data-dialogue-draft-slot="${esc(occurrence)}">${dialogueDraftMarkup(occurrence, line.speaker, index)}</div>
+            </div>
             <div class="voice-direction-grid">
               <div><span>Acting intention</span><p>${esc(line.dramaticIntention || "-")}</p></div>
               <div><span>Subtext</span><p>${esc(line.subtext || "-")}</p></div>
@@ -3780,13 +3800,57 @@
           </article>`;
         }).join("") || '<div class="voice-desk-loading">This shot has no dialogue.</div>'}
       </div>
-      ${lines.length ? `<div class="voice-desk-actions">
-        ${status.compiler?.ready ? "" : `<button type="button" class="secondary" data-voice-restore ${status.isWorking ? "" : "disabled"}>Restore director prompt</button><button type="button" class="secondary" data-voice-save>Save changes</button>`}
-        ${iterateAction ? `<button type="button" class="secondary danger" data-live-action="${esc(iterateAction.id)}">${esc(directorActionLabel(iterateAction))}</button>` : ""}
-        ${acceptAction ? `<button type="button" class="secondary" data-live-action="${esc(acceptAction.id)}">${esc(directorActionLabel(acceptAction))}</button>` : ""}
-        ${acceptAction ? `<button type="button" class="primary" data-live-action="${esc(acceptAction.id)}" data-advance-step="footage">${esc(directorActionLabel(acceptAction))} &amp; Continue</button>` : ""}
-        ${sendAction ? `<button type="button" class="primary" data-voice-send="${esc(sendAction.id)}">${esc(directorActionLabel(sendAction))}</button>` : ""}
+      ${lines.length && !status.compiler?.ready ? `<div class="voice-desk-actions">
+        <button type="button" class="secondary" data-voice-restore ${status.isWorking ? "" : "disabled"}>Restore director prompt</button><button type="button" class="secondary" data-voice-save>Save changes</button>
       </div>` : ""}
+    </section>`;
+  }
+
+  // ── The take review desk (T36, voice contract clause 4) ─────────────────────────
+  // "Create voice take" / "Regenerate" are the shot buttons; the take's player sits directly
+  // beneath them. "Approve & continue to WATCH" is the forward action, "Reject / add a note"
+  // is always available for a take, and a take made from an earlier direction can only be
+  // approved as heard, with a recorded reason. Every rejected, superseded and historical take
+  // stays in the take history.
+  const TAKE_HISTORY_LABELS = {
+    rejected: "Rejected", superseded: "Superseded by a regeneration", historical: "Historical · words corrected",
+  };
+
+  function takeReviewMarkup(status, take, selectedShot, lines, { acceptAction, iterateAction, sendAction }) {
+    const approvedTake = Boolean(status.voiceApprovalRecorded);
+    const stale = Boolean(take?.url) && status.takeMatchesCurrent === false;
+    const audio1 = status.audio1;
+    const history = status.takeHistory || [];
+    const seconds = (value) => Number(value || 0).toFixed(2);
+    const reject = take?.url ? (iterateAction || DESK_ACTIONS["iterate-voice"]) : null;
+    return `<section class="take-review" data-take-review>
+      <div class="take-review-actions">
+        <span class="stage-label">VOICE TAKE · ${esc(selectedShot?.shotId || app.shotId || "CURRENT SHOT")}</span>
+        ${sendAction ? `<button type="button" class="${take?.url ? "secondary" : "primary"}" data-voice-send="${esc(sendAction.id)}">${esc(directorActionLabel(sendAction))}</button>` : ""}
+      </div>
+      ${take?.url ? `<div class="voice-take-player">
+        <div><span>COMPLETE HEAR TRACK · ${Number(status.generatedLineCount || 0)}/${Number(status.expectedLineCount || lines.length)} LINES · ${Number(status.shotDurationSec || selectedShot?.durationSec || 0)}s</span><strong>${approvedTake ? "Approved take" : "This is the full shot track you approve or reject"}</strong>${status.takeGeneratedAt ? `<em>Generated ${esc(status.takeGeneratedAt)}</em>` : ""}</div>
+        <audio controls preload="metadata" src="${esc(take.url)}?v=${Date.now()}"></audio>
+      </div>` : `<div class="take-review-empty">No voice take yet.${sendAction ? " Create voice take builds the complete shot track at its approved timing." : ""}</div>`}
+      ${audio1 ? `<div class="audio1-record">
+        <div><span>@AUDIO1 · APPROVED${status.approvedAsHeard ? " AS HEARD" : ""}</span><strong>${seconds(audio1.measuredDurationSec)}s measured · ${(audio1.lines || []).length} line${(audio1.lines || []).length === 1 ? "" : "s"}</strong></div>
+        <ol>${(audio1.lines || []).map((line) => `<li><b>${esc(line.speaker)}</b><span>${seconds(line.measuredStartSec)}–${seconds(line.measuredEndSec)}s</span><q>${esc(line.exactText)}</q></li>`).join("")}</ol>
+        ${status.approvedAsHeard ? `<p>Approved as heard: ${esc(status.approvedAsHeard.reason)}</p>` : ""}
+      </div>` : ""}
+      ${stale && !approvedTake ? `<div class="voice-compiler-status blocked"><strong>This take was made from an earlier direction</strong><p>Regenerate it, or approve this take as heard and record why. The words, speakers and registered voices must still match.</p></div>` : ""}
+      ${status.hearNotePending ? `<div class="hear-note-pending"><span>YOUR NOTE REACHES THE VOICE DIRECTOR</span><p>“${esc(status.hearNotePending.note)}” The next take is re-directed to answer it first.</p></div>` : ""}
+      ${take?.url ? `<div class="take-review-decisions">
+        ${!approvedTake && acceptAction && !stale ? `<button type="button" class="primary" data-live-action="${esc(acceptAction.id)}" data-advance-step="footage">${esc(directorActionLabel(acceptAction))}</button>` : ""}
+        ${!approvedTake && acceptAction && stale ? `<button type="button" class="primary" data-live-action="accept-voice-as-heard" data-advance-step="footage">Approve this take as heard</button>` : ""}
+        ${reject ? `<button type="button" class="secondary danger" data-live-action="${esc(reject.id)}">${esc(directorActionLabel(reject))}</button>` : ""}
+      </div>` : ""}
+      ${history.length ? `<details class="take-history"><summary>Take history · ${history.length}</summary>
+        ${history.map((entry) => `<article class="take-history-item ${esc(entry.status || "")}">
+          <div><strong>${esc(TAKE_HISTORY_LABELS[entry.status] || entry.status || "Take")}</strong><span>${esc(entry.at || "")}</span></div>
+          ${entry.reason && entry.status === "rejected" ? `<p>${esc(entry.reason)}</p>` : ""}
+          ${entry.url ? `<audio controls preload="none" src="${esc(entry.url)}"></audio>` : "<em>Audio file not available</em>"}
+        </article>`).join("")}
+      </details>` : ""}
     </section>`;
   }
 
@@ -3806,6 +3870,100 @@
       app.voiceLoading = false;
       if (app.pipelineStep === "audio") renderPipeline();
     }
+  }
+
+  // ── The two editors (T34, voice contract clause 3) ─────────────────────────────
+  // The exact dialogue (approved script) sits above the ElevenLabs prompt. Tags are
+  // performance, not dialogue: a tag-only edit never touches the script. A change to the
+  // spoken words shows here, live, as an UNSAVED draft; only "Save corrected words" turns it
+  // into a new script version, and that makes this line's current take historical.
+  function spokenWords(text) {
+    return String(text || "").replace(/\[[^\]]*\]/g, " ").toLowerCase()
+      .match(/[a-z0-9']+/g) || [];
+  }
+
+  function spokenText(text) {
+    return String(text || "").replace(/\[[^\]]*\]/g, " ").replace(/\s+/g, " ").trim();
+  }
+
+  function dialogueDraftMarkup(occurrence, speaker, index) {
+    const draft = (app.voiceWordDrafts || {})[occurrence];
+    if (!occurrence || !draft) return "";
+    return `<div class="dialogue-draft" role="status">
+      <span>Unsaved draft · the prompt changes the spoken words</span>
+      <label for="dialogue-draft-${index}">Corrected words</label>
+      <input id="dialogue-draft-${index}" type="text" data-dialogue-draft-text="${esc(occurrence)}" value="${esc(draft.draftText)}" aria-label="Corrected words for ${esc(speaker)} line ${index + 1}">
+      <label for="dialogue-reason-${index}">Reason</label>
+      <input id="dialogue-reason-${index}" type="text" data-dialogue-draft-reason="${esc(occurrence)}" placeholder="Why do the words change?" aria-label="Reason for correcting ${esc(speaker)} line ${index + 1}">
+      <p>Saving writes a new script version and keeps its history. This line's current take becomes historical; a new voice take is required. Nothing else re-locks.</p>
+      <div class="voice-desk-actions">
+        <button type="button" class="secondary" data-dialogue-discard="${esc(occurrence)}">Discard draft</button>
+        <button type="button" class="primary" data-dialogue-save="${esc(occurrence)}">Save corrected words</button>
+      </div>
+    </div>`;
+  }
+
+  function bindDialogueDraftButtons(root) {
+    root.querySelectorAll("[data-dialogue-save]").forEach((button) => button.addEventListener(
+      "click", () => saveCorrectedWords(button.dataset.dialogueSave)));
+    root.querySelectorAll("[data-dialogue-discard]").forEach((button) => button.addEventListener(
+      "click", () => discardDialogueDraft(button.dataset.dialogueDiscard)));
+  }
+
+  function refreshDialogueDraft(occurrence) {
+    const slot = document.querySelector(`[data-dialogue-draft-slot="${CSS.escape(occurrence)}"]`);
+    if (!slot) return;
+    const lines = app.voiceStatus?.currentLines || [];
+    const index = lines.findIndex((line) => line.dialogueOccurrenceId === occurrence);
+    slot.innerHTML = dialogueDraftMarkup(occurrence, lines[index]?.speaker || "", Math.max(index, 0));
+    bindDialogueDraftButtons(slot);
+  }
+
+  function trackPromptWordEdit(field) {
+    const lines = app.voiceStatus?.currentLines || [];
+    const approved = app.voiceStatus?.approvedLines || [];
+    const index = Number(field.dataset.voiceLine);
+    const occurrence = lines[index]?.dialogueOccurrenceId;
+    if (!occurrence) return;
+    const approvedText = (approved[index] || {}).exactText || "";
+    app.voiceWordDrafts = app.voiceWordDrafts || {};
+    const had = Boolean(app.voiceWordDrafts[occurrence]);
+    if (spokenWords(field.value).join(" ") !== spokenWords(approvedText).join(" ")) {
+      app.voiceWordDrafts[occurrence] = { approvedText, draftText: spokenText(field.value) };
+    } else {
+      delete app.voiceWordDrafts[occurrence];
+    }
+    if (had || app.voiceWordDrafts[occurrence]) refreshDialogueDraft(occurrence);
+  }
+
+  async function saveCorrectedWords(occurrence) {
+    const text = document.querySelector(`[data-dialogue-draft-text="${CSS.escape(occurrence)}"]`)?.value.trim();
+    const reason = document.querySelector(`[data-dialogue-draft-reason="${CSS.escape(occurrence)}"]`)?.value.trim();
+    if (!text) { toast("The corrected words cannot be empty.", true); return; }
+    if (!reason) { toast("Give a reason for changing the approved words.", true); return; }
+    try {
+      await api("/api/dialogue-correct", {
+        method: "POST",
+        body: JSON.stringify({
+          episode: app.session.episode, dialogueOccurrenceId: occurrence,
+          correctedText: text, reason,
+        }),
+      });
+      delete (app.voiceWordDrafts || {})[occurrence];
+      await loadVoicePerformance(true);
+      toast("Corrected words saved as a new script version. This line's take is now historical: create a new voice take.");
+    } catch (error) {
+      toast(error.message, true);
+    }
+  }
+
+  function discardDialogueDraft(occurrence) {
+    delete (app.voiceWordDrafts || {})[occurrence];
+    const lines = app.voiceStatus?.currentLines || [];
+    const index = lines.findIndex((line) => line.dialogueOccurrenceId === occurrence);
+    const field = document.querySelector(`[data-voice-line="${index}"]`);
+    if (field && lines[index]) field.value = lines[index].text;
+    refreshDialogueDraft(occurrence);
   }
 
   function voiceLinesFromEditor() {
@@ -3842,6 +4000,16 @@
       if (!silent) toast("ElevenLabs prompt saved. Nothing was generated.");
       return true;
     } catch (error) {
+      const drafts = error.payload?.wordDraft || [];
+      if (drafts.length) {
+        // Nothing was saved: the word change waits in the dialogue editor as a draft.
+        app.voiceWordDrafts = app.voiceWordDrafts || {};
+        drafts.forEach((draft) => {
+          app.voiceWordDrafts[draft.dialogueOccurrenceId] = {
+            approvedText: draft.approvedText, draftText: draft.draftText };
+          refreshDialogueDraft(draft.dialogueOccurrenceId);
+        });
+      }
       toast(error.message, true);
       return false;
     }
@@ -4276,7 +4444,8 @@
     }
     panel.querySelectorAll("[data-live-action]").forEach((button) => button.addEventListener("click", () => {
       const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
-      const action = actions.find((item) => item.id === button.dataset.liveAction);
+      const action = actions.find((item) => item.id === button.dataset.liveAction) ||
+        DESK_ACTIONS[button.dataset.liveAction];
       if (!action) return;
       if (button.dataset.advanceStep) {
         app.pendingAdvance = {
@@ -4303,6 +4472,8 @@
     panel.querySelectorAll("[data-open-references]").forEach((button) => button.addEventListener("click", openReferences));
     panel.querySelectorAll("[data-open-request]").forEach((button) => button.addEventListener("click", openRequest));
     panel.querySelectorAll("[data-voice-save]").forEach((button) => button.addEventListener("click", () => saveVoicePerformance()));
+    panel.querySelectorAll("[data-voice-line]").forEach((field) => field.addEventListener("input", () => trackPromptWordEdit(field)));
+    bindDialogueDraftButtons(panel);
     panel.querySelectorAll("[data-voice-restore]").forEach((button) => button.addEventListener("click", restoreVoicePerformance));
     panel.querySelectorAll("[data-voice-send]").forEach((button) => button.addEventListener("click", () => {
       const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
@@ -4624,8 +4795,20 @@
     $("#confirm-dialog").showModal();
   }
 
+  const NOTE_DIALOGS = {
+    "iterate-voice": { kicker: "REJECT THIS TAKE", title: "Reject / add a note", label: "Note for the Voice Director", placeholder: "What should the next take do differently?", submit: "Reject take" },
+    "accept-voice-as-heard": { kicker: "APPROVE AS HEARD", title: "Approve this take as heard", label: "Why is this take right as heard?", placeholder: "Record the reason this take is approved although its direction has moved on.", submit: "Approve as heard" },
+  };
+  const DEFAULT_NOTE_DIALOG = { kicker: "ONE CLEAR CHANGE", title: "What should improve?", label: "Director note", placeholder: "Describe the one change that matters most.", submit: "Iterate" };
+
   function openIteration(action) {
     app.pendingAction = action;
+    const copy = NOTE_DIALOGS[action.id] || DEFAULT_NOTE_DIALOG;
+    $("#iterate-kicker").textContent = copy.kicker;
+    $("#iterate-title").textContent = copy.title;
+    $("#iteration-note-label").textContent = copy.label;
+    $("#iteration-note").placeholder = copy.placeholder;
+    $("#iterate-submit").textContent = copy.submit;
     $("#iteration-note").value = "";
     $("#iterate-dialog").showModal();
     setTimeout(() => $("#iteration-note").focus(), 30);
@@ -4636,7 +4819,7 @@
       toast("Nothing spent. The sealed request remains available.");
       return;
     }
-    if (action.id.startsWith("iterate-")) {
+    if (action.id.startsWith("iterate-") || action.id === "accept-voice-as-heard") {
       openIteration(action);
       return;
     }

@@ -144,6 +144,32 @@ NEGATIVES:  no morphing/redesign/rescale, no extra limbs, no flicker/artifacts, 
 ### 3.3 — Voice in the render (Gate 3)
 **Use ONLY `@Audio1` for all dialogue** (one supplied V3 track, both speakers in temporal order) — the fal-documented pattern that makes Seedance *output the supplied 11Labs voice* instead of inventing one; each character lip-syncs to its own lines. `generate_audio: True` so Seedance *also* scores music/SFX. The prose is sent **plain** (`raw_prompt=True`) so nothing wraps or contradicts it. **No post swap** — `cb_post` keeps the render's native voice and only masters.
 
+### 3.3a — Script fidelity: voice direction adds acting, never dialogue (T35, 2026-09-25, Julian's voice/dialogue contract)
+The approved script is the source of truth for every spoken word. `exactDialogue` is a verbatim copy of the locked line, never an authored field. Every `performedText` — the Voice Director's line, each `takeRecipes[].performedText`, and the producer's HEAR prompt — speaks exactly the script's words (CAPS for operative-word stress is allowed) and keeps every script punctuation mark where it is; direction may **add** only pause marks (comma, ellipsis, em-dash). Acting lives in registered, purposeful v3 tags, stress and pauses: an unexplained tag is refused, never given an invented purpose. A word change typed into the HEAR prompt is not saved — it comes back as an **unsaved dialogue draft** that only an explicit "Save corrected words" may turn into a new script version; a producer's punctuation-only glitch fix is allowed and recorded. The same lock runs again at the last point before a paid ElevenLabs request. Screenplay parentheticals — standalone or inline — never enter the spoken text. One shared check (`cb_voice_director.script_fidelity_problems`) serves every path.
+
+### 3.3b — "Save corrected words": identity script + signed line corrections (T34, 2026-09-25, Julian's ruling: only that line's voice re-locks)
+The approved script has an **identity version**: the immutable bytes every approval and every `dialogueOccurrenceId` is bound to. A word change to one line never moves it. "Save corrected words" is the only path that may change approved words, and it needs a stated reason. It appends one signed correction (`fromText`, `toText`, `reason`, `correctedBy`, `correctedAt`, chained by `previousCorrectionId`) to the episode's correction ledger. It also stores the corrected full script as its own immutable history version, and the readable script file shows the corrected words. The correction is refused if it would change anything but that line's words: no tags, no parentheticals, no structural change, and no identical text. It is also refused if it would bring in a canon conflict (a forbidden pattern, a broken locked call, a pronoun conflict) that the approved words did not have. The occurrence keeps its ID. The production dialogue (`cb_engine._expected_lines`, the handover's production lines, the production package line) speaks the corrected words. Story, boards and storyboard checks keep the identity words, and no scene re-locks. That shot's current take becomes **historical** (moved to `voiceTakeHistory`, never deleted, never current), so a new take is required. Only that line's HEAR edit is dropped; the other lines' edits carry forward. That shot's Voice direction goes stale, because it was written for the old words. A new script upload is a new identity: its IDs are new, and the earlier corrections belong to history.
+
+### 3.3c — `@Audio1`: the approved take, named and measured (T37, 2026-09-25, Julian's voice/dialogue contract clause 5)
+Only approval creates `@Audio1`. A saved prompt or a generated take never does. Approval measures the take before anything is recorded. If any line's placed window holds no speech, the take does not speak that line: it is refused and no approval is left behind. The record names:
+- the approved shot-length master and its SHA-256 (`audio1Id` = `audio1:` + hash)
+- the exact dialogue version it is bound to: the script version, the shot's `dialogueHash`, and any line corrections
+- its measured duration
+- for every line: the `dialogueOccurrenceId`, speaker, exact words, the placed window, and the **measured** speech interval, including internal pauses as separate voiced intervals
+
+The timing is measured from the master's own bytes (ffmpeg `silencedetect`), never taken from the provider's reported ranges or from prompt wording. The record is stored on the shot's ledger and written, hash-bound, beside the master. It is current only while the approval, the file's bytes and the shot's dialogue all still match (`current_audio1`). Every consumer uses that accessor: WATCH, captions and the mix (T38/T39). A rejection or a saved word correction makes it history.
+
+### 3.3d — The take review desk (T36, 2026-09-25, Julian's voice/dialogue contract clause 4)
+HEAR is a take review desk.
+- **The shot buttons:** "Create voice take" makes the complete shot-length track. Once a take exists, the same button reads "Regenerate", an optional paid retry.
+- **The player:** the returned take plays directly beneath the shot buttons.
+- **The decisions:**
+  - "Approve & continue to WATCH" is the forward action. It approves, creates `@Audio1` (§3.3c) and moves on.
+  - "Reject / add a note" is always available for a take, approved or not, except while a job runs or production is blocked. The note is written to the take history. The next take re-directs the shot first: the Voice Director receives the notes (`hearTakeNotes`) and must answer the latest one through acting, never through words.
+  - A take made from an earlier direction offers only "Approve this take as heard", with a recorded reason. Identity and voice still hold: the same dialogue version, speakers, words, registered voices and voice canon. Timing is measured as for every `@Audio1`. The reason and the differing inputs are recorded on the approval and on `@Audio1`.
+- **Take history:** no take is a single slot. Every rejected (with its note), superseded (regenerated) and historical (words corrected, §3.3b) take stays in the take history with its audio.
+- **Auditions:** direction auditions are never the shot's take. Once they exist, the way forward is "Create voice take", never an Accept with nothing to approve.
+
 ### 3.4 — The reference model
 `@图N` is Seedance's native image token (not `@ImageN`). Order: `@图1` keyframe, `@图2` larger-bee turnaround, `@图3` smaller-bee turnaround. Audio: `@Audio1..` per speaker.
 

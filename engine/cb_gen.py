@@ -928,10 +928,18 @@ def replace_group_chorus_segments(raw_audio, timing_path, performances,
     return str(rebuilt_audio), str(rebuilt_timing)
 
 
-def _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, error_text):
+_FALLBACK_VOICE_SETTINGS = {"stability": 0.35, "similarity_boost": 0.75, "style": 0.25}
+
+
+def _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, error_text,
+                                  voice_settings=None):
     """Operational fallback for production: if Text-to-Dialogue refuses, still create
     a usable line-ordered voice take. This is not the preferred performance route, but it
-    prevents the Studio from dead-ending on a provider validation change."""
+    prevents the Studio from dead-ending on a provider validation change.
+
+    voice_settings (T35): the registered card settings per input, index-aligned. Each
+    line is spoken with its own character's settings; the generic default applies only
+    to a caller that supplies none."""
     parts = []
     segments = []
     cursor = 0.0
@@ -949,8 +957,10 @@ def _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, error_
                 headers={"xi-api-key": ELEVEN_KEY, "accept": "audio/mpeg",
                          "Content-Type": "application/json"},
                 json={"text": text, "model_id": model_id,
-                      "voice_settings": {"stability": 0.35, "similarity_boost": 0.75,
-                                         "style": 0.25}},
+                      "voice_settings": dict(
+                          (voice_settings or [])[idx]
+                          if idx < len(voice_settings or []) and (voice_settings or [])[idx]
+                          else _FALLBACK_VOICE_SETTINGS)},
                 timeout=120)
             part = tmp_path / f"line_{idx:02d}.mp3"
             part.write_bytes(r.content)
@@ -999,7 +1009,8 @@ def _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, error_
 
 
 def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
-                    generation_kind="generation", production_route=None):
+                    generation_kind="generation", production_route=None,
+                    voice_settings=None):
     _require_production_route(production_route, "eleven_dialogue")
     """V3 TEXT-TO-DIALOGUE — the OPTIMUM for character acting. One request weaves the WHOLE exchange TOGETHER, in
     context: turn-taking, reaction timing, and prosody matched ACROSS speakers, each turn in its own voice, taking
@@ -1014,7 +1025,10 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
                          "apply_text_normalization": "auto"}, timeout=180)
     except requests.HTTPError as exc:
         if os.environ.get("CB_ELEVEN_DIALOGUE_TTS_FALLBACK", "1") != "0":
-            return _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, exc)
+            # Text-to-Dialogue accepts one global stability only; the per-line fallback can
+            # and does carry each character's full registered settings (T35).
+            return _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, exc,
+                                                 voice_settings=voice_settings)
         raise
     r.raise_for_status()
     try:

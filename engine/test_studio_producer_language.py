@@ -58,12 +58,15 @@ def test_recovery_points_to_the_stage_and_asset_that_can_fix_it():
     assert render['targetStage'] == 'watch'
 
 
-def test_every_refusal_rule_has_a_live_recovery_destination():
-    live_routes = {'direct', 'see', 'hear', 'watch', 'recover', 'details'}
+def test_every_refusal_rule_routes_to_a_browser_verified_remedy():
+    # test_journey_workflow_browser.mjs opens each stage, opens the evidence drawer,
+    # and runs the provider-job recovery action. Keep this set aligned with those
+    # exercised UI routes so a new refusal cannot point at an unimplemented remedy.
+    tested_routes = {'direct', 'see', 'hear', 'watch', 'recover', 'details'}
     assert RULES
-    for _pattern, category, _headline, _meaning, action, button in RULES:
+    for pattern, category, _headline, _meaning, action, button in RULES:
         target = _next_stage(category, 'submit_render', action)
-        assert target in live_routes, (category, action, target)
+        assert target in tested_routes, (pattern, category, action, target)
         assert action.strip().endswith('.') and button.strip()
 
 

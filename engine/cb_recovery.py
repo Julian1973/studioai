@@ -150,6 +150,23 @@ def protected_inputs(package, shot_id):
 
 def source_snapshot(root, descriptor, package):
     inputs = protected_inputs(package, descriptor["shotId"])
+    shot = next((row for row in package.get("shots", [])
+                 if row.get("shotId") == descriptor["shotId"]), {})
+    transition = shot.get("shotTransition") or {}
+    source_shot_id = transition.get("stateSourceShotId") or shot.get("sourceShotId")
+    if source_shot_id:
+        source_ledger = _ledger(package, source_shot_id)
+        frame_path = source_ledger.get("harvestFrame") or source_ledger.get("finalFrame")
+        try:
+            frame_hash = hashlib.sha256(pathlib.Path(frame_path).read_bytes()).hexdigest()
+        except (OSError, TypeError):
+            frame_hash = "unavailable"
+        inputs["continuityAnchor"] = {
+            "sourceShotId": source_shot_id,
+            "status": source_ledger.get("status"),
+            "approvalContentHash": (source_ledger.get("approval") or {}).get("contentHash"),
+            "finalFrameSha256": frame_hash,
+        }
     plate_path = pathlib.Path(root) / "cb-output" / (
         f"{descriptor['episode']}_scenelook_scene{descriptor['scene']}.json")
     try:

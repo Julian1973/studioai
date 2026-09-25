@@ -183,6 +183,29 @@ def test_specialist_history_does_not_change_fingerprint(tmp_path,current):
     assert first == recovery.request_fingerprint(tmp_path,desc,pkg)
 
 
+def test_continuity_anchor_fingerprint_tracks_frame_bytes_not_path(tmp_path, current):
+    shot = deepcopy(current['authorities']['shot'])
+    shot.update(shotId='S4.SH3', sourceType='opener',
+                shotTransition={'stateSourceShotId': 'S4.SH2'})
+    frame_a = tmp_path / 'predecessor-a.png'
+    frame_b = tmp_path / 'predecessor-renamed.png'
+    frame_a.write_bytes(b'approved predecessor final frame')
+    frame_b.write_bytes(frame_a.read_bytes())
+    predecessor = {'shotId': 'S4.SH2', 'status': 'approved',
+                   'approval': {'contentHash': 'approved-take-content-hash'},
+                   'harvestFrame': str(frame_a)}
+    package = {'shots': [shot], 'continuityLedger': [predecessor]}
+    descriptor = {'episode': 'Ep4', 'scene': '4', 'shotId': 'S4.SH3',
+                  'kind': 'prepare-render'}
+
+    original = recovery.request_fingerprint(tmp_path, descriptor, package)
+    predecessor['harvestFrame'] = str(frame_b)
+    assert original == recovery.request_fingerprint(tmp_path, descriptor, package)
+
+    frame_b.write_bytes(b'corrected predecessor final frame')
+    assert original != recovery.request_fingerprint(tmp_path, descriptor, package)
+
+
 @pytest.fixture
 def s2_source(tmp_path):
     """S2's four approved DIRECT views; synthetic media, no production approval records."""

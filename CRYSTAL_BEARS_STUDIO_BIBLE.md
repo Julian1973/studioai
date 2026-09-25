@@ -159,6 +159,17 @@ Only approval creates `@Audio1`. A saved prompt or a generated take never does. 
 
 The timing is measured from the master's own bytes (ffmpeg `silencedetect`), never taken from the provider's reported ranges or from prompt wording. The record is stored on the shot's ledger and written, hash-bound, beside the master. It is current only while the approval, the file's bytes and the shot's dialogue all still match (`current_audio1`). Every consumer uses that accessor: WATCH, captions and the mix (T38/T39). A rejection or a saved word correction makes it history.
 
+### 3.3d — The take review desk (T36, 2026-09-25, Julian's voice/dialogue contract clause 4)
+HEAR is a take review desk.
+- **The shot buttons:** "Create voice take" makes the complete shot-length track. Once a take exists, the same button reads "Regenerate", an optional paid retry.
+- **The player:** the returned take plays directly beneath the shot buttons.
+- **The decisions:**
+  - "Approve & continue to WATCH" is the forward action. It approves, creates `@Audio1` (§3.3c) and moves on.
+  - "Reject / add a note" is always available for a take, approved or not, except while a job runs or production is blocked. The note is written to the take history. The next take re-directs the shot first: the Voice Director receives the notes (`hearTakeNotes`) and must answer the latest one through acting, never through words.
+  - A take made from an earlier direction offers only "Approve this take as heard", with a recorded reason. Identity and voice still hold: the same dialogue version, speakers, words, registered voices and voice canon. Timing is measured as for every `@Audio1`. The reason and the differing inputs are recorded on the approval and on `@Audio1`.
+- **Take history:** no take is a single slot. Every rejected (with its note), superseded (regenerated) and historical (words corrected, §3.3b) take stays in the take history with its audio.
+- **Auditions:** direction auditions are never the shot's take. Once they exist, the way forward is "Create voice take", never an Accept with nothing to approve.
+
 ### 3.4 — The reference model
 `@图N` is Seedance's native image token (not `@ImageN`). Order: `@图1` keyframe, `@图2` larger-bee turnaround, `@图3` smaller-bee turnaround. Audio: `@Audio1..` per speaker.
 

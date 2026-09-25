@@ -447,7 +447,7 @@ DIRECTOR_ACTION_IDS = {
     "select-keyframe-candidate",
     "build-keyframe", "build-voice", "prepare-render",
     "accept-keyframe", "iterate-keyframe",
-    "accept-voice", "iterate-voice",
+    "accept-voice", "accept-voice-as-heard", "iterate-voice",
     "approve-spend", "cancel-spend",
     "accept-animation", "iterate-animation",
     "run-ai-review",
@@ -1259,7 +1259,7 @@ SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "approve-timing-s
              "build-keyframe", "keyframe", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
              "select-upload", "select-library", "select-previous",
              "select-scenelook-upload", "select-scenelook-library",
-             "approve-voice", "reject-voice",
+             "approve-voice", "approve-voice-as-heard", "reject-voice",
              "fire", "next", "approve", "reject", "override-model-limited", "stitch")
 # THE OPENING-FRAME SOURCE CHOICE (2026-07-18, Julian's directive): select-upload/select-library/
 # select-previous are the three NON-GENERATION opening-frame sources (cb_render.select_keyframe_source) —
@@ -1886,7 +1886,7 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
     if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
                "pose", "approve-pose", "reject-pose", "select-pose-upload",
                "select-upload", "select-library", "select-previous",
-               "approve-voice", "reject-voice", "regen-voice"):
+               "approve-voice", "approve-voice-as-heard", "reject-voice", "regen-voice"):
         args.append(str(shot_id))
     if cmd in ("pose", "approve-pose", "reject-pose", "select-pose-upload"):
         args.append(str(character))
@@ -1904,7 +1904,7 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
         args.append(str(correction))
     if cmd == "reject-scenelook":
         args.append(str(correction))
-    if cmd == "reject-voice":
+    if cmd in ("reject-voice", "approve-voice-as-heard"):
         args.append(str(correction))
     if cmd == "reject-timing-slate":
         args.append(str(correction))
@@ -3120,6 +3120,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                         auditions = status.get("auditions") or {}
                         for candidate in auditions.get("candidates") or []:
                             candidate["url"] = _url_from_abs(candidate.get("path"))
+                        for entry in status.get("takeHistory") or []:
+                            entry["url"] = _url_from_abs(entry.get("path"))
                     except Exception:
                         status["takeUrl"] = None
                     return self._json(200, status)
@@ -3825,6 +3827,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                          target, note, ep])
                 elif action == "accept-voice":
                     job_id = shot_run_job("approve-voice", scene, ep, target)
+                elif action == "accept-voice-as-heard":
+                    # T36: approving what was heard needs a recorded reason
+                    if not note:
+                        self._json(400, {"error": "Say why this take is right as heard."}); return
+                    job_id = shot_run_job("approve-voice-as-heard", scene, ep, target, note)
                 elif action == "iterate-voice":
                     if not note:
                         self._json(400, {"error": "Tell the Director what must change."}); return
@@ -4559,7 +4566,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
                            "pose", "approve-pose", "reject-pose", "select-pose-upload",
                            "select-upload", "select-library", "select-previous",
-                           "approve-voice", "reject-voice", "regen-voice") \
+                           "approve-voice", "approve-voice-as-heard", "reject-voice", "regen-voice") \
                    and (not shot_id or not _SHOT_TOKEN.match(shot_id)):
                     self._json(400, {"error": f"{cmd} needs a shotId (e.g. 1.B1.S1)"}); return
                 if cmd in ("pose", "approve-pose", "reject-pose", "select-pose-upload") and (
@@ -4577,6 +4584,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": "reject-scenelook needs a plain-language note"}); return
                 if cmd == "reject-voice" and not correction:
                     self._json(400, {"error": "reject-voice needs a plain-language reason"}); return
+                if cmd == "approve-voice-as-heard" and not correction:
+                    self._json(400, {"error": "approve-voice-as-heard needs a recorded reason"}); return
                 if cmd == "reject-timing-slate" and not correction:
                     self._json(400, {"error": "reject-timing-slate needs a plain-language reason"}); return
                 # THE NON-GENERATION OPENING-FRAME SOURCES (2026-07-18): 'select-upload' needs a

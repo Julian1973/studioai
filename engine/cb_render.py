@@ -60,6 +60,7 @@ approximates "is it funny").
     python3 cb_render.py save-voice   <scene> <shotId> '<json lines>' [episode]
     python3 cb_render.py restore-voice <scene> <shotId> [episode]
     python3 cb_render.py approve-voice <scene> <shotId> [episode]
+    python3 cb_render.py approve-voice-as-heard <scene> <shotId> <reason> [episode]
     python3 cb_render.py reject-voice  <scene> <shotId> "<reason>" [episode]
     python3 cb_render.py seedance-status <scene> <shotId> [episode]
     python3 cb_render.py save-seedance   <scene> <shotId> "<prompt text>" [episode]
@@ -3073,6 +3074,8 @@ def _shot_context(pkg, shot, led, scene, episode):
             "humanWorkingVoice": led.get("workingVoice"),
             "humanWorkingAnimationPrompt": led.get("workingSeedancePrompt"),
             "watchDirectorFeedback": led.get("watchDirectorFeedback"),
+            # T36: Julian's notes on rejected voice takes; the next direction answers them
+            "hearTakeNotes": hear_take_notes(led)[-5:],
             "latestAnimationRejection": ((led.get("rejections") or [])[-1]
                                           if led.get("rejections") else None)}
 
@@ -4410,6 +4413,15 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
             "takeKind": "complete-shot-track" if has_take else None,
             # T37: the named, measured @Audio1 while it is still the current approved take
             "audio1": current_audio1(pkg, shot_id),
+            # T36: every rejected, superseded and historical take, newest first
+            "takeHistory": [{
+                "status": entry.get("status"), "reason": entry.get("reason"),
+                "at": entry.get("archivedAt"), "reviewedBy": entry.get("reviewedBy"),
+                "path": (entry.get("take") or {}).get("voPath"),
+                "audio1Id": ((entry.get("take") or {}).get("audio1") or {}).get("audio1Id"),
+            } for entry in reversed(led.get("voiceTakeHistory") or [])],
+            "approvedAsHeard": (led.get("voiceApproval") or {}).get("asHeard"),
+            "hearNotePending": hear_note_unanswered(pkg, shot_id, scene, episode),
             "compiler": compiler, "auditions": auditions}
 
 
@@ -4522,6 +4534,27 @@ def save_voice_working(scene, shot_id, lines, episode="Ep1", reviewed_by="Julian
     _save(pkg, path)
     log(f"VOICE WORKING VERSION SAVED — {shot_id}: {len(clean)} line(s) (no audio generated)")
     return led["workingVoice"]
+
+
+# ── HEAR notes reach the Voice Director (T36, voice contract clause 4) ─────────────────
+def hear_take_notes(led):
+    """Julian's notes on rejected takes of this shot, oldest first."""
+    return [{"note": item["reason"], "rejectedAt": item.get("rejectedAt"),
+             "reviewedBy": item.get("reviewedBy")}
+            for item in led.get("voiceRejections") or [] if (item.get("reason") or "").strip()]
+
+
+def hear_note_unanswered(pkg, shot_id, scene=None, episode=None):
+    """The latest HEAR note the shot's current voice direction was not prepared with, if any.
+    The next voice take re-directs first, so the note always reaches the Voice Director."""
+    notes = hear_take_notes(_ledger(pkg, shot_id))
+    if not notes:
+        return None
+    record = _department_record_status(
+        pkg, shot_id, "voice", scene or pkg.get("sceneNumber"),
+        episode or pkg.get("episode", "Ep1")).get("record") or {}
+    answered = set(record.get("answersHearNotes") or [])
+    return None if notes[-1]["rejectedAt"] in answered else notes[-1]
 
 
 # ── "Save corrected words" (T34, voice contract clause 3) ───────────────────────────
@@ -4793,6 +4826,14 @@ def reject_voice(scene, shot_id, correction, episode="Ep1", reviewed_by="Julian"
     rejection = {"outcome": "rejected", "rejectedAt": _now(), "reason": correction.strip(),
                  "reviewedBy": reviewed_by, "rejectedFile": archived_rel}
     led.setdefault("voiceRejections", []).append(rejection)
+    # T36: every rejected take stays in the take history with its note (never one slot);
+    # the note is also what the Voice Director answers before the next take.
+    led.setdefault("voiceTakeHistory", []).append({
+        "status": "rejected", "reason": rejection["reason"], "reviewedBy": reviewed_by,
+        "archivedAt": rejection["rejectedAt"],
+        "take": {"voPath": str(HERE / archived_rel) if archived_rel else vo,
+                 "voGeneratedFrom": led.get("voGeneratedFrom"),
+                 "voiceApproval": led.get("voiceApproval")}})
     led["voPath"] = None
     led["voiceApproval"] = None
     led["voGeneratedFrom"] = None
@@ -9744,6 +9785,8 @@ if __name__ == "__main__":
             regen_voice_shot(pos[0], pos[1], episode=ep(2))
         elif cmd == "approve-voice":
             approve_voice(pos[0], pos[1], ep(2))
+        elif cmd == "approve-voice-as-heard":
+            approve_voice(pos[0], pos[1], ep(3), as_heard_reason=pos[2])
         elif cmd == "reject-voice":
             reject_voice(pos[0], pos[1], pos[2], episode=ep(3))
         elif cmd == "seedance-status":

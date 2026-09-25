@@ -1264,7 +1264,10 @@ def prepare_voice(context, locked_lines, *, log=print):
         "allowed) and keep every script punctuation mark where it is; you may ADD only "
         "pause marks (comma, ellipsis …, em-dash —). Acting lives in tags, stress and "
         "pauses - never in new, dropped or changed words, and never in screenplay "
-        "directions or parentheticals.\n" +
+        "directions or parentheticals.\n"
+        "HEAR NOTES: hearTakeNotes in the shot context are Julian's notes on rejected takes "
+        "of this shot. The new direction must answer the latest note through acting, "
+        "cadence, stress, pauses and tags - never by changing a word.\n" +
         "\n\nLOCKED LINES (same count/order/speaker/words must be returned):\n" + _j(locked_lines),
         VoiceDirection, label="department_voice", log=log)
     return validate_voice_direction(result, locked_lines)

@@ -122,7 +122,7 @@ function sessionFor(step, notes, voiceUrl = silentWav, failure = null) {
     primaryAction: null, decisionActions: [action("accept-keyframe", "Accept"), action("iterate-keyframe", "Iterate", { destructive: true })] };
   if (step === "voice-ready") return { ...common, phase: "voice", status: "ready_to_fire",
     headline: "Opening frame accepted. Create the performances.", summary: "Create the dialogue performance.",
-    artifact: { type: "image", url: onePixelPng }, primaryAction: action("build-voice", "Create performance", { paid: true }), decisionActions: [] };
+    artifact: { type: "image", url: onePixelPng }, primaryAction: action("build-voice", "Create voice take", { paid: true }), decisionActions: [] };
   if (step === "voice-blocked") return { ...common, phase: "voice", status: "blocked",
     headline: "Voice setup needs attention", summary: "ElevenLabs rejected the configured credential.",
     artifact: { type: "image", url: onePixelPng }, primaryAction: action("build-voice", "Fix voice setup", { paid: true }), decisionActions: [],
@@ -130,7 +130,7 @@ function sessionFor(step, notes, voiceUrl = silentWav, failure = null) {
   if (step === "voice-review") return { ...common, phase: "voice", status: "ready_to_review",
     headline: "Do the performances sound true?", summary: "Listen before deciding.",
     artifact: { type: "audio", url: voiceUrl, label: "Voice performance" }, primaryAction: null,
-    decisionActions: [action("accept-voice", "Accept"), action("iterate-voice", "Iterate", { destructive: true })] };
+    decisionActions: [action("accept-voice", "Approve & continue to WATCH"), action("iterate-voice", "Reject / add a note", { destructive: true }), action("build-voice", "Regenerate", { paid: true })] };
   if (step === "animation-ready") return { ...common, phase: "animation", status: "ready_to_fire",
     headline: "Prepare the animation", summary: "Compile the approved frame and voice.",
     artifact: { type: "image", url: onePixelPng }, primaryAction: action("prepare-render", "Prepare render"), decisionActions: [] };
@@ -279,14 +279,15 @@ async function run() {
   await page.getByRole("button", { name: "Accept", exact: true }).first().click();
   await page.getByText("Accepting keyframe", { exact: true }).first().waitFor();
   await page.getByText("Scene 1 of 10 · Shot 1 · Sign-off 2 of 3", { exact: true }).waitFor();
-  await page.getByRole("button", { name: "Create performance", exact: true }).click();
+  await page.getByRole("button", { name: "Create voice take", exact: true }).click();
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.locator("#toast").getByText("Voice build failed: ElevenLabs rejected the API credential.", { exact: true }).waitFor();
   await page.getByRole("button", { name: "Fix voice setup", exact: true }).first().waitFor();
   await page.getByRole("button", { name: "Fix voice setup", exact: true }).first().click();
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.locator(".relay-card.current .relay-audio-player audio").waitFor();
-  await page.getByRole("button", { name: "Accept", exact: true }).first().click();
+  await page.getByRole("button", { name: "Regenerate", exact: true }).first().waitFor();
+  await page.getByRole("button", { name: "Approve & continue to WATCH", exact: true }).first().click();
   await page.getByText("Scene 1 of 10 · Shot 1 · Sign-off 3 of 3", { exact: true }).waitFor();
   await page.getByRole("button", { name: "Prepare render", exact: true }).click();
   await page.getByRole("button", { name: "Approve $1.25 & render", exact: true }).waitFor();

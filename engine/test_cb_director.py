@@ -582,15 +582,18 @@ def test_voice_auditions_are_a_reviewable_hear_decision():
     )
 
     assert session["phase"] == "voice"
-    assert session["status"] == "ready_to_review"
-    assert session["headline"] == "Choose the voice performance"
+    assert session["headline"] == "Choose the voice direction"
     assert session["artifact"]["type"] == "audio-set"
     assert [item["candidateId"] for item in session["artifact"]["items"]] == [
         "audition-1", "audition-2"
     ]
-    assert {item["id"] for item in session["decisionActions"]} == {
-        "accept-voice", "iterate-voice"
-    }
+    # T36: the audition dead-end is gone - there is no take to approve yet, so the way
+    # forward is the take itself, never an Accept that can only fail
+    assert session["status"] == "ready_to_fire"
+    assert session["primaryAction"]["id"] == "build-voice"
+    assert session["primaryAction"]["label"] == "Create voice take"
+    assert session["decisionActions"] == []
+    assert "accept-voice" not in cb_studio_director.allowed_action_ids(session)
 
 
 def test_complete_voice_track_takes_priority_over_old_auditions():
@@ -626,6 +629,23 @@ def test_complete_voice_track_takes_priority_over_old_auditions():
         "url": "/engine/media/shots/complete-track.wav",
         "label": "Complete voice performance",
     }
+
+
+def test_a_returned_take_offers_the_contract_decisions():
+    # T36, voice contract clause 4: forward, reject with a note, regenerate as an option,
+    # and approve-as-heard (with a reason) wherever approval is offered
+    state = _state(keyframe=True)
+    state["shots"][0]["pending"]["voice"] = True
+    session = _session(state=state, media=_media(
+        keyframeApproved="/engine/media/accepted.png",
+        vo="/engine/media/shots/complete-track.wav"))
+    decisions = {item["id"]: item for item in session["decisionActions"]}
+    assert decisions["accept-voice"]["label"] == "Approve & continue to WATCH"
+    assert decisions["iterate-voice"]["label"] == "Reject / add a note"
+    assert decisions["build-voice"]["label"] == "Regenerate"
+    assert decisions["build-voice"]["paid"] is True
+    allowed = cb_studio_director.allowed_action_ids(session)
+    assert {"accept-voice", "accept-voice-as-heard", "iterate-voice", "build-voice"} <= allowed
 
 
 def test_approved_voice_ignores_old_auditions_and_advances_to_watch():

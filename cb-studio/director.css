@@ -3321,6 +3321,34 @@ h1 { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Sego
 .voice-take-player strong { color: #eef1f5; font-size: 13px; }
 .voice-take-player em { color: #828895; font-size: 9px; font-style: normal; }
 .voice-take-player audio { width: 100%; min-width: 0; }
+/* T36 — the take review desk: shot buttons, the take directly beneath, then the decision */
+.take-review { display: grid; gap: 10px; margin-bottom: 16px; padding: 14px; border: 1px solid var(--line); border-radius: 5px; background: #101316; }
+.take-review-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.take-review-actions .stage-label { color: #aeb8b4; }
+.take-review-empty { padding: 12px; border: 1px dashed #343741; border-radius: 4px; color: #aeb8b4; font-size: 11px; }
+.take-review-decisions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.audio1-record { padding: 11px 12px; border: 1px solid rgba(88, 199, 147, .38); border-radius: 4px; background: rgba(88, 199, 147, .05); }
+.audio1-record > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.audio1-record > div span { color: var(--success); font-size: 9px; font-weight: 850; }
+.audio1-record > div strong { color: #eef1f5; font-size: 11px; }
+.audio1-record ol { display: grid; gap: 4px; margin: 8px 0 0; padding-left: 18px; color: #d7dae1; font-size: 11px; }
+.audio1-record li { display: flex; flex-wrap: wrap; gap: 8px; }
+.audio1-record li span { color: #828895; font-variant-numeric: tabular-nums; }
+.audio1-record li q { color: #aeb8b4; }
+.audio1-record > p { margin-top: 8px; color: #e6c47d; font-size: 10px; }
+.hear-note-pending { padding: 10px 12px; border: 1px solid rgba(226, 178, 92, .46); border-radius: 4px; background: rgba(226, 178, 92, .07); }
+.hear-note-pending span { color: #e2b25c; font-size: 9px; font-weight: 850; }
+.hear-note-pending p { margin-top: 4px; color: #d7dae1; font-size: 11px; line-height: 1.45; }
+.take-history { border-top: 1px solid #292c35; padding-top: 8px; }
+.take-history summary { cursor: pointer; color: #aeb8b4; font-size: 11px; font-weight: 700; }
+.take-history-item { display: grid; gap: 5px; margin-top: 8px; padding: 9px 10px; border: 1px solid #292c35; border-radius: 4px; }
+.take-history-item > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.take-history-item strong { font-size: 10px; }
+.take-history-item.rejected strong { color: #e29283; }
+.take-history-item.superseded strong, .take-history-item.historical strong { color: #aeb8b4; }
+.take-history-item span, .take-history-item em { color: #828895; font-size: 9px; font-style: normal; }
+.take-history-item p { color: #d7dae1; font-size: 11px; }
+.take-history-item audio { width: 100%; min-width: 0; }
 .canonical-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: auto; padding-top: 22px; border-top: 1px solid #292c35; }
 .canonical-actions > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .canonical-actions .text-button { color: #949aa7; }
@@ -3446,6 +3474,9 @@ body.studio-stale .workspace, body.studio-stale .side-nav { pointer-events: none
   .rough-cut-bin-shot video, .rough-cut-thumb { width: 88px; }
   .rough-cut-bin-shot button { grid-column: 1 / -1; width: 100%; }
   .voice-desk-actions .primary, .voice-desk-actions .secondary { width: 100%; }
+  .take-review { padding: 12px; }
+  .take-review-decisions { display: grid; grid-template-columns: 1fr; }
+  .take-review-decisions .primary, .take-review-decisions .secondary, .take-review-actions button { width: 100%; }
   .truth-rail { display: flex; overflow-x: auto; padding-bottom: 2px; }
   .truth-chip { min-width: 126px; }
 }

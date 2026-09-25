@@ -965,6 +965,30 @@ def test_audio_stage_is_the_editable_elevenlabs_performance_desk():
     assert "recoveryAction" in JS
 
 
+def test_exact_dialogue_editor_sits_above_the_prompt_and_word_edits_are_unsaved_drafts():
+    # T34, voice contract clause 3: two editors, connected but distinct.
+    desk = JS[JS.index('<div class="voice-prompt-lines">'):JS.index("async function loadVoicePerformance")]
+    assert desk.index("data-dialogue-editor=") < desk.index("Text + audio tags sent to ElevenLabs")
+    assert "Exact dialogue · approved script" in desk
+    assert "data-dialogue-draft-slot=" in desk
+    # a word edit in the prompt shows, live, as an unsaved draft; tags alone never do
+    assert 'addEventListener("input", () => trackPromptWordEdit(field))' in JS
+    assert "Unsaved draft · the prompt changes the spoken words" in JS
+    assert 'replace(/\\[[^\\]]*\\]/g, " ")' in JS
+    # only "Save corrected words" changes the script, with a stated reason
+    assert "Save corrected words" in JS and "data-dialogue-save=" in JS
+    assert "Discard draft" in JS and "data-dialogue-draft-reason=" in JS
+    assert 'api("/api/dialogue-correct"' in JS
+    assert "error.payload?.wordDraft" in JS
+    assert "This line's take is now historical: create a new voice take." in JS
+    assert ".dialogue-draft {" in CSS
+    # the server returns the draft instead of saving it, and one route saves words
+    assert 'self._json(409, {"error": str(e), "wordDraft": e.draft})' in SERVER
+    assert 'if self.path == "/api/dialogue-correct":' in SERVER
+    assert "_CBR.save_corrected_words(" in SERVER
+    assert 'occurrence.startswith("dialogue-occurrence:")' in SERVER
+
+
 def test_project_truth_layer_distinguishes_real_production_states():
     assert 'id="truth-rail"' in HTML
     for label in ("Canon", "Script", "Assets", "Shots", "Spend", "Delivery"):

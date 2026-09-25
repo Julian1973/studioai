@@ -304,7 +304,7 @@ def parse_script(text, roster=None, log=print):
             li += 1
             if li < n and _PAREN_ONLY_RE.match(lines[li].strip()) and lines[li].strip():
                 li += 1   # a delivery-only parenthetical — never dialogue text
-            text_lines, inline_directions = [], []
+            text_lines, inline_directions, text_line_numbers = [], [], []
             while (li < n and lines[li].strip()
                    and not _SCENE_RE.match(lines[li].rstrip())
                    and not cue_re.match(_norm_apos(lines[li]).rstrip())):
@@ -328,6 +328,7 @@ def parse_script(text, roster=None, log=print):
                         f"{bleed.group(1)}: {cand!r}")
                     break
                 text_lines.append(cand)
+                text_line_numbers.append(li)
                 li += 1
             dlg = " ".join(text_lines).strip()
             if not dlg:
@@ -338,7 +339,10 @@ def parse_script(text, roster=None, log=print):
                 front_matter.append(f"{speaker}: {dlg}")
                 continue
             event = {"i": len(events), "scene": cur_scene, "type": "dialogue",
-                     "speaker": speaker, "text": dlg}
+                     "speaker": speaker, "text": dlg,
+                     # physical script lines holding the spoken words (T34 corrections);
+                     # never part of the event's identity payload
+                     "scriptLines": text_line_numbers}
             if inline_directions:
                 event["inlineDirections"] = inline_directions
             events.append(event)
@@ -424,6 +428,88 @@ def _repair_beat_splits(beats, parsed):
                 else scene_last_idx[scene_num]
             out.append({"beat": b, "lo": lo, "hi": hi, "sceneNumber": scene_num})
     return out
+
+
+def correct_dialogue_line(episode, dialogue_occurrence_id, corrected_text, reason,
+                          corrected_by="Julian", log=print):
+    """T34 — "Save corrected words" at the script level (voice contract clause 3).
+
+    Explicit, never silent: the approved identity script is untouched; the corrected full
+    text is stored as an immutable history version and one signed correction is appended to
+    the episode's ledger (cb_scripts). The occurrence keeps its dialogueOccurrenceId. Ruling
+    (Julian, 2026-09-25): only that line's voice re-locks — the production packages are
+    updated by cb_render.apply_dialogue_correction, which archives the old take."""
+    corrected = re.sub(r"\s+", " ", str(corrected_text or "")).strip()
+    if not corrected:
+        raise Refused("REFUSED — corrected words cannot be empty")
+    if re.search(r"[\[\]()]", corrected):
+        raise Refused("REFUSED — corrected words are dialogue only: audio tags belong in the "
+                      "ElevenLabs prompt and parentheticals in the screenplay directions")
+    current = script_record_for(episode)
+    quiet = lambda *a, **k: None   # noqa: E731
+    identity_text = (ROOT / current["contentPath"]).read_text(encoding="utf-8")
+    identity = parse_script(identity_text, _load_roster(), log=quiet)
+    _annotate_source_events(identity["events"], current["scriptVersionId"])
+    target = next((event for event in identity["events"]
+                   if event.get("dialogueOccurrenceId") == dialogue_occurrence_id), None)
+    if target is None:
+        raise Refused(f"REFUSED — {dialogue_occurrence_id} is not a dialogue occurrence of "
+                      f"{episode}'s approved script")
+    approved_now = SCRIPT_STORE.effective_text(episode, dialogue_occurrence_id, target["text"])
+    if corrected == approved_now:
+        raise Refused("REFUSED — the corrected words are the same as the approved words")
+
+    effective_text = SCRIPT_STORE.effective_script_text(episode)
+    effective = parse_script(effective_text, _load_roster(), log=quiet)
+    if len(effective["events"]) != len(identity["events"]):
+        raise Refused("REFUSED — the corrected script history no longer partitions like the "
+                      "approved script; re-run intake instead of correcting a line")
+    line_event = effective["events"][target["i"]]
+    if (line_event["type"] != "dialogue" or line_event["speaker"] != target["speaker"] or
+            line_event["text"] != approved_now):
+        raise Refused("REFUSED — the corrected script history is out of step with the "
+                      "correction ledger for this line")
+    rows = line_event.get("scriptLines") or []
+    if not rows:
+        raise Refused("REFUSED — could not locate the line's words in the script text")
+    lines = effective_text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    indent = re.match(r"\s*", lines[rows[0]]).group(0)
+    lines[rows[0]] = indent + corrected
+    for row in sorted(rows[1:], reverse=True):
+        del lines[row]
+    new_text = "\n".join(lines)
+
+    # Prove the edit changed exactly this one line's words and nothing else.
+    check = parse_script(new_text, _load_roster(), log=quiet)
+    before = [(e["type"], e.get("speaker"), e["text"]) for e in effective["events"]]
+    after = [(e["type"], e.get("speaker"), e["text"]) for e in check["events"]]
+    expected = list(before)
+    expected[target["i"]] = ("dialogue", target["speaker"], corrected)
+    if after != expected:
+        raise Refused("REFUSED — correcting this line would change the script's structure; "
+                      "edit the screenplay and re-run intake instead")
+    # A correction is a script change: it may not bring in a canon conflict (a forbidden
+    # pattern, a broken locked call, a pronoun conflict) the approved words did not have.
+    try:
+        policy = cb_canon.load_policy(ROOT)
+    except cb_canon.CanonLockError as exc:
+        raise Refused(f"REFUSED — the correction cannot be checked against canon: {exc}") from exc
+    conflicts = lambda text: {(b["code"], b.get("checkId"))   # noqa: E731
+                              for b in cb_canon.validate_script(text, policy)["blockers"]}
+    introduced = conflicts(new_text) - conflicts(effective_text)
+    if introduced:
+        raise Refused("REFUSED — the corrected words conflict with the show canon: " +
+                      ", ".join(sorted(f"{code} ({check})" for code, check in introduced)))
+    try:
+        entry = SCRIPT_STORE.record_dialogue_correction(
+            episode, dialogue_occurrence_id=dialogue_occurrence_id,
+            speaker=target["speaker"], from_text=approved_now, to_text=corrected,
+            effective_script_text=new_text, reason=reason, corrected_by=corrected_by)
+    except cb_scripts.ScriptStoreError as exc:
+        raise Refused(f"REFUSED — {exc}") from exc
+    log(f"DIALOGUE CORRECTED — {episode} {target['speaker']}: {approved_now!r} -> "
+        f"{corrected!r} ({reason})")
+    return entry
 
 
 def _annotate_source_events(events, script_version_id):

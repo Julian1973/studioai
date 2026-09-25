@@ -177,6 +177,14 @@ class ScriptStore:
             "previousScriptVersionId": (previous or {}).get("scriptVersionId"),
         }
         _atomic_json(self._current_path(episode_id), current)
+        # T34: the same identity bytes (a title rename) keep their signed line corrections,
+        # so the readable script keeps the corrected words. A new upload is a new identity.
+        corrections = self.dialogue_corrections(episode_id).get("corrections") or []
+        if corrections:
+            corrected = self._recorded_content_path(
+                corrections[-1]["effectiveContentPath"]).read_bytes()
+            for base in (self.script_root, self.studio_root):
+                _atomic_write(base / display_file, corrected)
         return current
 
     def current(self, episode: str | int, *, verify: bool = True,
@@ -230,6 +238,152 @@ class ScriptStore:
             activated_by=migrated_by,
             event_kind="legacy-script-migrated",
         )
+
+    # ── dialogue line corrections (T34, voice contract clauses 1 and 3) ────────────
+    # Ruling (Julian, 2026-09-25): "Save corrected words" re-locks ONLY that line's voice.
+    # The approved script is therefore the IDENTITY version (the bytes every approval and
+    # every dialogueOccurrenceId is bound to) plus an append-only ledger of signed line
+    # corrections. Each correction also stores the corrected full text as its own immutable
+    # version (history, reading, export) without moving the identity pointer, so no other
+    # approval re-locks and every occurrence keeps its ID.
+
+    def _corrections_path(self, episode_id: str) -> pathlib.Path:
+        return self.script_root / "_corrections" / f"{episode_id}.json"
+
+    def dialogue_corrections(self, episode: str | int) -> dict:
+        """The correction ledger for the episode's current identity version."""
+        episode_id = self.normalize_episode(episode)
+        current = self.current(episode_id, verify=True, required=False)
+        empty = {"schemaVersion": 1, "episodeId": episode_id,
+                 "identityScriptVersionId": (current or {}).get("scriptVersionId"),
+                 "corrections": []}
+        path = self._corrections_path(episode_id)
+        if not current or not path.exists():
+            return empty
+        ledger = json.loads(path.read_text(encoding="utf-8"))
+        if ledger.get("identityScriptVersionId") != current["scriptVersionId"]:
+            # A new script upload is a new identity; older corrections belong to history.
+            return empty
+        return ledger
+
+    def corrected_words(self, episode: str | int) -> dict[str, dict]:
+        """dialogueOccurrenceId -> its latest correction entry (current words)."""
+        latest = {}
+        for entry in self.dialogue_corrections(episode).get("corrections") or []:
+            latest[entry["dialogueOccurrenceId"]] = entry
+        return latest
+
+    def all_corrected_words(self) -> dict[str, dict]:
+        """Every episode's current corrections, keyed by dialogueOccurrenceId (occurrence
+        IDs are globally unique: they hash their own script version)."""
+        latest = {}
+        if not self.current_root.exists():
+            return latest
+        for pointer in sorted(self.current_root.glob("Ep*.json")):
+            try:
+                latest.update(self.corrected_words(pointer.stem))
+            except (OSError, ValueError, ScriptStoreError, cb_lineage.LineageError):
+                continue
+        return latest
+
+    def apply_corrections(self, lines: list[dict], *, text_key: str = "exactText") -> list[dict]:
+        """Overlay approved corrections onto dialogue line records (copies, never in place).
+        Each corrected line carries its identity text and the correction that changed it."""
+        corrections = self.all_corrected_words()
+        out = []
+        for line in lines:
+            entry = corrections.get(line.get("dialogueOccurrenceId"))
+            if entry and line.get(text_key) is not None:
+                # idempotent: an already-corrected record keeps its recorded identity text
+                identity = line.get("identityText") or (
+                    line[text_key] if line[text_key] != entry["toText"] else None)
+                line = {**line, text_key: entry["toText"], "correctionId": entry["correctionId"]}
+                if identity:
+                    line["identityText"] = identity
+            out.append(line)
+        return out
+
+    def effective_text(self, episode: str | int, dialogue_occurrence_id: str | None,
+                       identity_text: str) -> str:
+        """The approved words for one occurrence: its identity text unless corrected."""
+        if not dialogue_occurrence_id:
+            return identity_text
+        entry = self.corrected_words(episode).get(dialogue_occurrence_id)
+        return entry["toText"] if entry else identity_text
+
+    def record_dialogue_correction(self, episode: str | int, *, dialogue_occurrence_id: str,
+                                   speaker: str, from_text: str, to_text: str,
+                                   effective_script_text: str, reason: str,
+                                   corrected_by: str = "Julian") -> dict:
+        """Append one explicit correction and store the corrected full script as an
+        immutable history version. The identity pointer never moves."""
+        episode_id = self.normalize_episode(episode)
+        current = self.current(episode_id, verify=True, required=True)
+        reason = str(reason or "").strip()
+        if not reason:
+            raise ScriptStoreError("a dialogue correction needs a stated reason")
+        if str(from_text).strip() == str(to_text).strip():
+            raise ScriptStoreError("the corrected words are the same as the approved words")
+        at = _now()
+        raw = effective_script_text.encode("utf-8")
+        digest = cb_lineage.sha256_bytes(raw)
+        content_path, record_path = self._version_paths(episode_id, digest)
+        if content_path.exists():
+            if content_path.read_bytes() != raw:
+                raise ScriptStoreError(f"immutable script object is corrupt: {content_path}")
+        else:
+            _atomic_write(content_path, raw)
+        if not record_path.exists():
+            _atomic_json(record_path, {
+                "schemaVersion": 1, "episodeId": episode_id,
+                "scriptVersionId": cb_lineage.SCRIPT_VERSION_PREFIX + digest,
+                "algorithm": "sha256", "sha256": digest, "byteLength": len(raw),
+                "contentPath": self._relative(content_path), "createdAt": at,
+                "sourceName": "dialogue-line-correction",
+                "identityScriptVersionId": current["scriptVersionId"],
+            })
+        ledger = self.dialogue_corrections(episode_id)
+        previous = self.corrected_words(episode_id).get(dialogue_occurrence_id)
+        entry = {
+            "correctionId": uuid.uuid4().hex,
+            "dialogueOccurrenceId": dialogue_occurrence_id,
+            "speaker": speaker,
+            "fromText": from_text,
+            "toText": to_text,
+            "previousCorrectionId": (previous or {}).get("correctionId"),
+            "reason": reason,
+            "correctedBy": str(corrected_by or ""),
+            "correctedAt": at,
+            "effectiveScriptVersionId": cb_lineage.SCRIPT_VERSION_PREFIX + digest,
+            "effectiveContentPath": self._relative(content_path),
+        }
+        ledger = {**ledger, "identityScriptVersionId": current["scriptVersionId"],
+                  "corrections": [*(ledger.get("corrections") or []), entry]}
+        _atomic_json(self._corrections_path(episode_id), ledger)
+        _atomic_json(
+            self.events_root / episode_id / f"{at.replace(':', '')}_{entry['correctionId']}.json", {
+                "schemaVersion": 1, "eventId": entry["correctionId"],
+                "kind": "dialogue-line-corrected", "episodeId": episode_id,
+                "scriptVersionId": current["scriptVersionId"],
+                "effectiveScriptVersionId": entry["effectiveScriptVersionId"],
+                "dialogueOccurrenceId": dialogue_occurrence_id, "speaker": speaker,
+                "fromText": from_text, "toText": to_text, "reason": reason,
+                "activatedAt": at, "activatedBy": entry["correctedBy"],
+            })
+        # Humans read the corrected script; the identity bytes stay where approvals point.
+        display_file = current.get("displayFile") or f"{episode_id}.txt"
+        for base in (self.script_root, self.studio_root):
+            _atomic_write(base / display_file, raw)
+        return entry
+
+    def effective_script_text(self, episode: str | int) -> str:
+        """The readable current script: the identity bytes, or the latest correction's."""
+        episode_id = self.normalize_episode(episode)
+        corrections = self.dialogue_corrections(episode_id).get("corrections") or []
+        if corrections:
+            return self._recorded_content_path(
+                corrections[-1]["effectiveContentPath"]).read_text(encoding="utf-8")
+        return self.content_path(episode_id).read_text(encoding="utf-8")
 
     def list_current(self) -> list[dict]:
         if not self.current_root.exists():

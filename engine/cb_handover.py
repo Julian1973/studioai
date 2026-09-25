@@ -729,7 +729,10 @@ def _dialogue_lines(vps, timing_windows, duration):
                       "sourceEventId": vp["sourceEventId"],
                       "speaker": vp["speaker"], "exactText": text, "delivery": delivery,
                       "startSec": start, "endSec": end})
-    return lines
+    # T34: production dialogue speaks the approved words - the identity line unless an
+    # explicit "Save corrected words" correction replaced them. Story, boards and the
+    # creative voice placement keep the identity words (ruling: only the voice re-locks).
+    return SCRIPT_STORE.apply_corrections(lines)
 
 
 def _voice_director_brief_lines(vps):

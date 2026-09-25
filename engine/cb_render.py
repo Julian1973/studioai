@@ -80,7 +80,7 @@ approximates "is it funny").
     python3 cb_render.py stitch   <scene> [episode]
     python3 cb_render.py status   <scene> [episode]
 """
-import os, sys, io, json, re, glob, pathlib, datetime, shutil, hashlib, uuid, subprocess, tempfile, threading
+import os, sys, io, json, re, glob, pathlib, datetime, shutil, hashlib, uuid, subprocess, tempfile, threading, copy
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_engine
@@ -4233,18 +4233,41 @@ def _default_voice_lines(shot):
     return out
 
 
+def _carry_forward_voice_lines(shot, candidates):
+    """T34: after "Save corrected words" only the corrected line loses its performance text;
+    every other line's edit or direction carries forward. A corrected line that is missing,
+    or still speaks the words it had before the correction, falls back to the plain
+    approved words. Untyped or foreign candidates are returned unchanged."""
+    locked = shot.get("dialogueLines") or []
+    by_occurrence = {c.get("dialogueOccurrenceId"): c for c in candidates}
+    locked_ids = {ln.get("dialogueOccurrenceId") for ln in locked}
+    if None in by_occurrence or not set(by_occurrence) <= locked_ids or None in locked_ids:
+        return candidates
+    if len(candidates) == len(locked) and not any(ln.get("correctionId") for ln in locked):
+        return candidates
+    out = []
+    for ln, default in zip(locked, _default_voice_lines(shot)):
+        candidate = by_occurrence.get(ln["dialogueOccurrenceId"])
+        if candidate is None or (ln.get("correctionId") and cb_voice_director.words_changed(
+                candidate.get("text") or "", ln["exactText"])):
+            candidate = default
+        out.append(candidate)
+    return out
+
+
 def _resolve_voice_lines(pkg, shot):
     """Exact ElevenLabs input with explicit precedence: Julian edit > approved worker > legacy."""
     led = _ledger(pkg, shot["shotId"])
     working = led.get("workingVoice")
     if working and working.get("lines"):
-        return working["lines"], "human-working"
+        return _carry_forward_voice_lines(shot, working["lines"]), "human-working"
     output = _approved_department_output(pkg, shot["shotId"], "voice") or {}
     if output.get("lines"):
-        return [{"dialogueOccurrenceId": x.get("dialogueOccurrenceId"),
-                 "sourceEventId": x.get("sourceEventId"),
-                 "speaker": x["speaker"], "text": x["performedText"]}
-                for x in output["lines"]], "voice-director-approved"
+        return _carry_forward_voice_lines(shot, [
+            {"dialogueOccurrenceId": x.get("dialogueOccurrenceId"),
+             "sourceEventId": x.get("sourceEventId"),
+             "speaker": x["speaker"], "text": x["performedText"]}
+            for x in output["lines"]]), "voice-director-approved"
     return _default_voice_lines(shot), "legacy-approved-storyboard"
 
 
@@ -4287,6 +4310,9 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
             "dialogueOccurrenceId": ln.get("dialogueOccurrenceId"),
             "sourceEventId": ln.get("sourceEventId"),
             "speaker": ln["speaker"], "exactText": exact_text,
+            # T34: a corrected line shows it is corrected, and what it was
+            "identityText": ln.get("identityText"), "correctionId": ln.get("correctionId"),
+            "wordRevisions": ln.get("wordRevisions") or [],
             "delivery": ln.get("delivery"),
             "dramaticIntention": direction.get("dramaticIntention"),
             "subtext": direction.get("subtext"),
@@ -4494,6 +4520,94 @@ def save_voice_working(scene, shot_id, lines, episode="Ep1", reviewed_by="Julian
     _save(pkg, path)
     log(f"VOICE WORKING VERSION SAVED — {shot_id}: {len(clean)} line(s) (no audio generated)")
     return led["workingVoice"]
+
+
+# ── "Save corrected words" (T34, voice contract clause 3) ───────────────────────────
+# Ruling (Julian, 2026-09-25): a saved word change re-locks ONLY that line's voice. The
+# production line takes the corrected words under the same dialogueOccurrenceId; the shot's
+# current take becomes historical (never deleted, never current); everything that depends on
+# that take (its approval, WATCH, the mix) goes stale through its own input signature.
+VOICE_TAKE_KEYS = ("voPath", "voRawPath", "voTimingPath", "voPlacementPath",
+                   "voGeneratedFrom", "voInputSignature", "voiceApproval", "audioProvenance")
+
+
+def _archive_voice_take(led, reason, **context):
+    """Move the shot's current take and its approval into take history, marked historical.
+    The audio files stay where they are; only the CURRENT pointers are cleared."""
+    take = {key: led.get(key) for key in VOICE_TAKE_KEYS if led.get(key) is not None}
+    if not take:
+        return None
+    entry = {"status": "historical", "reason": reason, "archivedAt": _now(),
+             **context, "take": take}
+    led.setdefault("voiceTakeHistory", []).append(entry)
+    for key in VOICE_TAKE_KEYS:
+        if key in led:
+            led[key] = None
+    return entry
+
+
+def apply_dialogue_correction(episode, entry, log=print, packages_dir=None):
+    """Carry one ledger correction into every production package line that speaks it.
+    Returns the shots touched. Never generates audio, never touches another line."""
+    occurrence = entry["dialogueOccurrenceId"]
+    touched = []
+    for path in sorted(pathlib.Path(packages_dir or HERE.parent / "cb-output").glob(
+            f"{episode}_scene*_production_package.json")):
+        match = re.search(r"_scene(.+?)_production_package\.json$", path.name)
+        if not match:
+            continue
+        pkg, pkg_path = load_pkg(match.group(1), episode)
+        changed = False
+        for shot in pkg.get("shots") or []:
+            for line in shot.get("dialogueLines") or []:
+                if (line.get("dialogueOccurrenceId") != occurrence or
+                        line.get("exactText") == entry["toText"]):
+                    continue
+                line["identityText"] = line.get("identityText") or line["exactText"]
+                line.setdefault("wordRevisions", []).append({
+                    "correctionId": entry["correctionId"], "fromText": line["exactText"],
+                    "toText": entry["toText"], "reason": entry["reason"],
+                    "correctedBy": entry["correctedBy"], "correctedAt": entry["correctedAt"]})
+                line["exactText"] = entry["toText"]
+                line["correctionId"] = entry["correctionId"]
+                led = _ledger(pkg, shot["shotId"])
+                _archive_voice_take(led, "dialogue-corrected",
+                                    correctionId=entry["correctionId"],
+                                    dialogueOccurrenceId=occurrence)
+                working = led.get("workingVoice")
+                if working and any(item.get("dialogueOccurrenceId") == occurrence
+                                   for item in working.get("lines") or []):
+                    # only this line's HEAR edit was written for the old words: the full
+                    # record goes to history, the other lines' edits carry forward
+                    led.setdefault("workingVoiceHistory", []).append({
+                        **copy.deepcopy(working), "status": "historical",
+                        "reason": "dialogue-corrected", "correctionId": entry["correctionId"]})
+                    kept = [item for item in working.get("lines") or []
+                            if item.get("dialogueOccurrenceId") != occurrence]
+                    led["workingVoice"] = {**working, "lines": kept} if kept else None
+                touched.append({"scene": match.group(1), "shotId": shot["shotId"]})
+                changed = True
+        if changed:
+            _save(pkg, pkg_path)
+    for item in touched:
+        log(f"DIALOGUE CORRECTION APPLIED — {episode} scene {item['scene']} {item['shotId']}: "
+            f"old take is historical; a new voice take is required")
+    return touched
+
+
+def save_corrected_words(episode, dialogue_occurrence_id, corrected_text, reason,
+                         reviewed_by="Julian", log=print):
+    """The explicit "Save corrected words" action: one new script version with history,
+    then the production line. The only path that may change approved dialogue words."""
+    import cb_intake
+    try:
+        entry = cb_intake.correct_dialogue_line(
+            episode, dialogue_occurrence_id, corrected_text, reason,
+            corrected_by=reviewed_by, log=log)
+    except cb_intake.Refused as exc:
+        raise Refused(str(exc)) from exc
+    return {"correction": entry,
+            "shots": apply_dialogue_correction(episode, entry, log=log)}
 
 
 def restore_voice_working(scene, shot_id, episode="Ep1", log=print):

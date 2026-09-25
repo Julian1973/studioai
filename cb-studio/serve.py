@@ -4503,8 +4503,33 @@ class H(http.server.SimpleHTTPRequestHandler):
                 else:
                     _CBR.restore_seedance_working(scene, sid, ep)
                     self._json(200, {"ok": True})
+            except _CBR.WordDraftRefused as e:
+                # T34/T35: the prompt changed spoken words. Nothing was saved; the draft goes
+                # back to the dialogue editor as UNSAVED until "Save corrected words".
+                self._json(409, {"error": str(e), "wordDraft": e.draft})
             except _CBR.Refused as e:
                 self._json(400, {"error": str(e)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/dialogue-correct":
+            # "Save corrected words" (T34, voice contract clause 3): the ONLY route that may
+            # change approved dialogue words. Writes a new script version with history and
+            # makes that line's current take historical (ruling: only that voice re-locks).
+            # Never generates audio.
+            try:
+                d = self._body()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                occurrence = str(d.get("dialogueOccurrenceId") or "").strip()
+                if not _SHOT_TOKEN.match(ep) or not occurrence.startswith("dialogue-occurrence:"):
+                    self._json(400, {"error": "episode and a dialogueOccurrenceId are required"}); return
+                if str(CBGEN) not in sys.path:
+                    sys.path.insert(0, str(CBGEN))
+                import cb_render as _CBR
+                result = _CBR.save_corrected_words(
+                    ep, occurrence, str(d.get("correctedText") or ""),
+                    str(d.get("reason") or ""), reviewed_by="Julian")
+                self._json(200, {"ok": True, **result})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

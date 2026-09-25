@@ -3766,9 +3766,14 @@
       <div class="voice-prompt-lines">
         ${lines.map((line, index) => {
           const truth = approved[index] || {};
+          const occurrence = line.dialogueOccurrenceId || truth.dialogueOccurrenceId || "";
           return `<article class="voice-prompt-line">
             <div class="voice-line-head"><strong>${esc(line.speaker)}</strong><span>Line ${index + 1}</span></div>
-            <div class="locked-dialogue"><span>Exact script</span><p>${esc(truth.exactText || line.text)}</p></div>
+            <div class="locked-dialogue dialogue-editor" data-dialogue-editor="${esc(occurrence)}">
+              <span>Exact dialogue · approved script${truth.correctionId ? " · corrected" : ""}</span>
+              <p data-dialogue-approved="${esc(occurrence)}">${esc(truth.exactText || line.text)}</p>
+              <div class="dialogue-draft-slot" data-dialogue-draft-slot="${esc(occurrence)}">${dialogueDraftMarkup(occurrence, line.speaker, index)}</div>
+            </div>
             <div class="voice-direction-grid">
               <div><span>Acting intention</span><p>${esc(line.dramaticIntention || "-")}</p></div>
               <div><span>Subtext</span><p>${esc(line.subtext || "-")}</p></div>
@@ -3808,6 +3813,100 @@
     }
   }
 
+  // ── The two editors (T34, voice contract clause 3) ─────────────────────────────
+  // The exact dialogue (approved script) sits above the ElevenLabs prompt. Tags are
+  // performance, not dialogue: a tag-only edit never touches the script. A change to the
+  // spoken words shows here, live, as an UNSAVED draft; only "Save corrected words" turns it
+  // into a new script version, and that makes this line's current take historical.
+  function spokenWords(text) {
+    return String(text || "").replace(/\[[^\]]*\]/g, " ").toLowerCase()
+      .match(/[a-z0-9']+/g) || [];
+  }
+
+  function spokenText(text) {
+    return String(text || "").replace(/\[[^\]]*\]/g, " ").replace(/\s+/g, " ").trim();
+  }
+
+  function dialogueDraftMarkup(occurrence, speaker, index) {
+    const draft = (app.voiceWordDrafts || {})[occurrence];
+    if (!occurrence || !draft) return "";
+    return `<div class="dialogue-draft" role="status">
+      <span>Unsaved draft · the prompt changes the spoken words</span>
+      <label for="dialogue-draft-${index}">Corrected words</label>
+      <input id="dialogue-draft-${index}" type="text" data-dialogue-draft-text="${esc(occurrence)}" value="${esc(draft.draftText)}" aria-label="Corrected words for ${esc(speaker)} line ${index + 1}">
+      <label for="dialogue-reason-${index}">Reason</label>
+      <input id="dialogue-reason-${index}" type="text" data-dialogue-draft-reason="${esc(occurrence)}" placeholder="Why do the words change?" aria-label="Reason for correcting ${esc(speaker)} line ${index + 1}">
+      <p>Saving writes a new script version and keeps its history. This line's current take becomes historical; a new voice take is required. Nothing else re-locks.</p>
+      <div class="voice-desk-actions">
+        <button type="button" class="secondary" data-dialogue-discard="${esc(occurrence)}">Discard draft</button>
+        <button type="button" class="primary" data-dialogue-save="${esc(occurrence)}">Save corrected words</button>
+      </div>
+    </div>`;
+  }
+
+  function bindDialogueDraftButtons(root) {
+    root.querySelectorAll("[data-dialogue-save]").forEach((button) => button.addEventListener(
+      "click", () => saveCorrectedWords(button.dataset.dialogueSave)));
+    root.querySelectorAll("[data-dialogue-discard]").forEach((button) => button.addEventListener(
+      "click", () => discardDialogueDraft(button.dataset.dialogueDiscard)));
+  }
+
+  function refreshDialogueDraft(occurrence) {
+    const slot = document.querySelector(`[data-dialogue-draft-slot="${CSS.escape(occurrence)}"]`);
+    if (!slot) return;
+    const lines = app.voiceStatus?.currentLines || [];
+    const index = lines.findIndex((line) => line.dialogueOccurrenceId === occurrence);
+    slot.innerHTML = dialogueDraftMarkup(occurrence, lines[index]?.speaker || "", Math.max(index, 0));
+    bindDialogueDraftButtons(slot);
+  }
+
+  function trackPromptWordEdit(field) {
+    const lines = app.voiceStatus?.currentLines || [];
+    const approved = app.voiceStatus?.approvedLines || [];
+    const index = Number(field.dataset.voiceLine);
+    const occurrence = lines[index]?.dialogueOccurrenceId;
+    if (!occurrence) return;
+    const approvedText = (approved[index] || {}).exactText || "";
+    app.voiceWordDrafts = app.voiceWordDrafts || {};
+    const had = Boolean(app.voiceWordDrafts[occurrence]);
+    if (spokenWords(field.value).join(" ") !== spokenWords(approvedText).join(" ")) {
+      app.voiceWordDrafts[occurrence] = { approvedText, draftText: spokenText(field.value) };
+    } else {
+      delete app.voiceWordDrafts[occurrence];
+    }
+    if (had || app.voiceWordDrafts[occurrence]) refreshDialogueDraft(occurrence);
+  }
+
+  async function saveCorrectedWords(occurrence) {
+    const text = document.querySelector(`[data-dialogue-draft-text="${CSS.escape(occurrence)}"]`)?.value.trim();
+    const reason = document.querySelector(`[data-dialogue-draft-reason="${CSS.escape(occurrence)}"]`)?.value.trim();
+    if (!text) { toast("The corrected words cannot be empty.", true); return; }
+    if (!reason) { toast("Give a reason for changing the approved words.", true); return; }
+    try {
+      await api("/api/dialogue-correct", {
+        method: "POST",
+        body: JSON.stringify({
+          episode: app.session.episode, dialogueOccurrenceId: occurrence,
+          correctedText: text, reason,
+        }),
+      });
+      delete (app.voiceWordDrafts || {})[occurrence];
+      await loadVoicePerformance(true);
+      toast("Corrected words saved as a new script version. This line's take is now historical: create a new voice take.");
+    } catch (error) {
+      toast(error.message, true);
+    }
+  }
+
+  function discardDialogueDraft(occurrence) {
+    delete (app.voiceWordDrafts || {})[occurrence];
+    const lines = app.voiceStatus?.currentLines || [];
+    const index = lines.findIndex((line) => line.dialogueOccurrenceId === occurrence);
+    const field = document.querySelector(`[data-voice-line="${index}"]`);
+    if (field && lines[index]) field.value = lines[index].text;
+    refreshDialogueDraft(occurrence);
+  }
+
   function voiceLinesFromEditor() {
     const current = app.voiceStatus?.currentLines || [];
     return $$('[data-voice-line]').map((field) => {
@@ -3842,6 +3941,16 @@
       if (!silent) toast("ElevenLabs prompt saved. Nothing was generated.");
       return true;
     } catch (error) {
+      const drafts = error.payload?.wordDraft || [];
+      if (drafts.length) {
+        // Nothing was saved: the word change waits in the dialogue editor as a draft.
+        app.voiceWordDrafts = app.voiceWordDrafts || {};
+        drafts.forEach((draft) => {
+          app.voiceWordDrafts[draft.dialogueOccurrenceId] = {
+            approvedText: draft.approvedText, draftText: draft.draftText };
+          refreshDialogueDraft(draft.dialogueOccurrenceId);
+        });
+      }
       toast(error.message, true);
       return false;
     }
@@ -4303,6 +4412,8 @@
     panel.querySelectorAll("[data-open-references]").forEach((button) => button.addEventListener("click", openReferences));
     panel.querySelectorAll("[data-open-request]").forEach((button) => button.addEventListener("click", openRequest));
     panel.querySelectorAll("[data-voice-save]").forEach((button) => button.addEventListener("click", () => saveVoicePerformance()));
+    panel.querySelectorAll("[data-voice-line]").forEach((field) => field.addEventListener("input", () => trackPromptWordEdit(field)));
+    bindDialogueDraftButtons(panel);
     panel.querySelectorAll("[data-voice-restore]").forEach((button) => button.addEventListener("click", restoreVoicePerformance));
     panel.querySelectorAll("[data-voice-send]").forEach((button) => button.addEventListener("click", () => {
       const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);

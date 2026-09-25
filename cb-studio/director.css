@@ -2953,6 +2953,13 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 .locked-dialogue { margin-bottom: 10px; padding: 9px 10px; border-left: 2px solid #557068; background: #18201e; }
 .locked-dialogue span, .voice-prompt-line label { display: block; margin-bottom: 5px; color: var(--muted); font-size: 9px; font-weight: 800; text-transform: uppercase; }
 .locked-dialogue p { color: #c7d0cc; font-size: 12px; line-height: 1.45; }
+.dialogue-draft { margin-top: 9px; padding: 10px; border: 1px solid rgba(226, 178, 92, .46); border-radius: 4px; background: rgba(226, 178, 92, .07); }
+.dialogue-draft > span { color: #e2b25c; }
+.dialogue-draft label { margin-top: 7px; }
+.dialogue-draft input { width: 100%; padding: 7px 9px; border: 1px solid #50605b; border-radius: 4px; background: #0b100f; color: #eef3f1; font: 12px/1.45 inherit; }
+.dialogue-draft input:focus { outline: 2px solid rgba(226, 178, 92, .35); border-color: #e2b25c; }
+.dialogue-draft p { margin-top: 8px; color: #aeb8b4; font-size: 10px; }
+.dialogue-draft .voice-desk-actions { position: static; margin-top: 8px; padding: 0; background: none; }
 .voice-direction-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
 .voice-direction-grid > div { min-width: 0; padding: 9px 10px; border: 1px solid #292f2d; border-radius: 3px; background: #151b19; }
 .voice-direction-grid span { display: block; margin-bottom: 4px; color: #76b9ab; font-size: 9px; font-weight: 800; text-transform: uppercase; }

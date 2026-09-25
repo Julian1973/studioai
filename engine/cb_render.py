@@ -4408,6 +4408,8 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
             "generatedLineCount": len((placement or {}).get("placements") or []),
             "placements": (placement or {}).get("placements") or [],
             "takeKind": "complete-shot-track" if has_take else None,
+            # T37: the named, measured @Audio1 while it is still the current approved take
+            "audio1": current_audio1(pkg, shot_id),
             "compiler": compiler, "auditions": auditions}
 
 
@@ -4528,7 +4530,8 @@ def save_voice_working(scene, shot_id, lines, episode="Ep1", reviewed_by="Julian
 # current take becomes historical (never deleted, never current); everything that depends on
 # that take (its approval, WATCH, the mix) goes stale through its own input signature.
 VOICE_TAKE_KEYS = ("voPath", "voRawPath", "voTimingPath", "voPlacementPath",
-                   "voGeneratedFrom", "voInputSignature", "voiceApproval", "audioProvenance")
+                   "voGeneratedFrom", "voInputSignature", "voiceApproval", "audioProvenance",
+                   "audio1")
 
 
 def _archive_voice_take(led, reason, **context):

@@ -1103,23 +1103,116 @@ def install(m):
             if not value or not os.path.exists(value):
                 raise m.Refused(
                     f"REFUSED — {shot_id}'s timestamped voice bundle is incomplete ({field})")
+        # T37: measure before anything is approved, so a take that cannot become @Audio1
+        # never leaves an approval behind.
+        audio1 = audio1_record(pkg, shot, ledger, signature, scene, episode)
         result = original["approve_voice"](scene, shot_id, episode, reviewed_by, log)
         pkg, path = m.load_pkg(scene, episode); ledger = m._ledger(pkg, shot_id)
-        ledger["voiceApproval"].update({"packageRevision": pkg.get("revision"),
-                                         "inputSignature": signature,
-                                         "contentHash": file_sha256(ledger.get("voPath")),
-                                         "rawContentHash": file_sha256(ledger.get("voRawPath")),
-                                         "timingContentHash": file_sha256(
-                                             ledger.get("voTimingPath")),
-                                         "placementContentHash": file_sha256(
-                                             ledger.get("voPlacementPath"))})
+        approval = ledger["voiceApproval"]
+        audio1.update({"approvedBy": approval.get("reviewedBy"),
+                       "approvedAt": approval.get("at"),
+                       "packageRevision": pkg.get("revision")})
+        record_path, record_sha = cb_audio_timing.write_audio1_record(ledger["voPath"], audio1)
+        approval.update({"packageRevision": pkg.get("revision"),
+                         "inputSignature": signature,
+                         "contentHash": file_sha256(ledger.get("voPath")),
+                         "rawContentHash": file_sha256(ledger.get("voRawPath")),
+                         "timingContentHash": file_sha256(ledger.get("voTimingPath")),
+                         "placementContentHash": file_sha256(ledger.get("voPlacementPath")),
+                         "audio1Id": audio1["audio1Id"],
+                         "audio1RecordPath": record_path,
+                         "audio1RecordSha256": record_sha})
+        ledger["audio1"] = {**audio1, "recordPath": record_path, "recordSha256": record_sha}
         m._save(pkg, path)
+        log(f"@Audio1 — {shot_id}: {audio1['audio1Id'][:19]}… "
+            f"{audio1['measuredDurationSec']:.2f}s, {len(audio1['lines'])} measured line(s)")
         return ledger["voiceApproval"]
+
+    def audio1_record(pkg, shot, ledger, signature, scene, episode):
+        """The named @Audio1 record (T37, voice contract clause 5): the approved master's
+        hash, bound to the exact dialogue version, with its measured duration and every
+        line's measured speech interval and speaker. Built only by approval."""
+        master = ledger["voPath"]
+        content_hash = file_sha256(master)
+        try:
+            placement = json.loads(pathlib.Path(ledger["voPlacementPath"]).read_text(
+                encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise m.Refused(f"REFUSED — {shot['shotId']}'s placement contract is "
+                            f"unreadable") from exc
+        locked = shot.get("dialogueLines") or []
+        placements = placement.get("placements") or []
+        if placement.get("outputSha256") != content_hash:
+            raise m.Refused(f"REFUSED — {shot['shotId']}'s placement contract does not "
+                            f"describe this take")
+        if len(placements) != len(locked):
+            raise m.Refused(f"REFUSED — {shot['shotId']}'s take places {len(placements)} "
+                            f"line(s); the dialogue locks {len(locked)}")
+        try:
+            measured = cb_audio_timing.measure_speech_intervals(master, placements)
+        except cb_audio_timing.AudioTimingError as exc:
+            raise m.Refused(f"REFUSED — {shot['shotId']} cannot become @Audio1: {exc}") from exc
+        lines = []
+        for item in measured["lines"]:
+            source = locked[item["dialogueIndex"]]
+            if (item.get("dialogueOccurrenceId") and
+                    item["dialogueOccurrenceId"] != source.get("dialogueOccurrenceId")):
+                raise m.Refused(f"REFUSED — {shot['shotId']}'s take places line "
+                                f"{item['dialogueIndex'] + 1} out of script order")
+            lines.append({
+                **item,
+                "dialogueOccurrenceId": source.get("dialogueOccurrenceId"),
+                "sourceEventId": source.get("sourceEventId"),
+                "speaker": source["speaker"],
+                "exactText": source.get("exactText") if source.get("exactText") is not None
+                else source.get("text"),
+                "correctionId": source.get("correctionId"),
+            })
+        return {
+            "schemaVersion": 1,
+            "name": "@Audio1",
+            "audio1Id": "audio1:" + content_hash,
+            "authority": ("sole authority for voice, exact dialogue, cadence, pauses and "
+                          "timing"),
+            "episode": episode, "scene": str(scene), "shotId": shot["shotId"],
+            "path": master, "sha256": content_hash,
+            "measuredDurationSec": measured["durationSec"],
+            "shotDurationSec": placement.get("durationSec"),
+            "dialogueVersion": {
+                "scriptVersionId": (pkg.get("sourceScript") or {}).get("scriptVersionId"),
+                "dialogueHash": signature["dialogueHash"],
+                "correctionIds": [line["correctionId"] for line in lines
+                                  if line.get("correctionId")],
+            },
+            "lines": lines,
+            "measurement": measured["method"],
+            "sources": {"rawContentHash": file_sha256(ledger["voRawPath"]),
+                        "timingContentHash": file_sha256(ledger["voTimingPath"]),
+                        "placementContentHash": file_sha256(ledger["voPlacementPath"])},
+        }
+
+    def current_audio1(pkg, shot_id):
+        """The shot's @Audio1 while it is still the approved take for the current dialogue;
+        None otherwise. Consumers (WATCH, captions, the mix) use only this."""
+        shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
+        record, approval = ledger.get("audio1") or {}, ledger.get("voiceApproval") or {}
+        if not (record and approval.get("approved") and
+                approval.get("audio1Id") == record.get("audio1Id")):
+            return None
+        dialogue_hash = hashlib.sha256(json.dumps(
+            shot.get("dialogueLines") or [], sort_keys=True,
+            ensure_ascii=False).encode()).hexdigest()
+        if (record.get("dialogueVersion") or {}).get("dialogueHash") != dialogue_hash:
+            return None
+        path = record.get("path")
+        if not path or not os.path.exists(path) or file_sha256(path) != record.get("sha256"):
+            return None
+        return record
 
     def reject_voice(scene, shot_id, correction, episode="Ep1", reviewed_by="Julian", log=print):
         before, _ = m.load_pkg(scene, episode)
         bundle = {key: m._ledger(before, shot_id).get(key) for key in (
-            "voRawPath", "voTimingPath", "voPlacementPath")}
+            "voRawPath", "voTimingPath", "voPlacementPath", "audio1")}
         result = original["reject_voice"](scene, shot_id, correction, episode, reviewed_by, log)
         pkg, path = m.load_pkg(scene, episode); ledger = m._ledger(pkg, shot_id)
         if ledger.get("voiceRejections"):
@@ -1127,6 +1220,7 @@ def install(m):
         ledger["voRawPath"] = None
         ledger["voTimingPath"] = None
         ledger["voPlacementPath"] = None
+        ledger["audio1"] = None      # a rejected take is never @Audio1 (kept in its bundle)
         ledger["voInputSignature"] = None; ledger["voPackageRevision"] = None
         m._save(pkg, path)
         return result
@@ -1652,6 +1746,7 @@ def install(m):
     m._external_import_input_signature = external_import_input_signature
     m.voice_shot = voice_shot
     m.approve_voice = approve_voice
+    m.current_audio1 = current_audio1
     m.reject_voice = reject_voice
     m.restore_previous_voice_take = restore_voice
     m.keyframe_shot = keyframe_shot

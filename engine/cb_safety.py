@@ -594,6 +594,15 @@ def install(m):
             working_line = working_by_occurrence.get(source.get("dialogueOccurrenceId"))
             provider_text = ((working_line or {}).get("text") or
                              recipe["performedText"])
+            # T35: whichever text wins, the provider may only ever speak the approved
+            # script's words. A stale HEAR edit (saved before a script correction) or a
+            # drifted recipe is refused here, at the last point before a paid request.
+            locked_words = source.get("exactText") if source.get("exactText") is not None else source.get("text")
+            if m.cb_voice_director.words_changed(provider_text, locked_words):
+                raise m.Refused(
+                    f"REFUSED - the voice text for {source.get('speaker')} no longer speaks the "
+                    f"approved script words ({locked_words!r}); restore the HEAR prompt or "
+                    f"Save corrected words first")
             result.append({
                 "dialogueOccurrenceId": source.get("dialogueOccurrenceId"),
                 "sourceEventId": source.get("sourceEventId"),
@@ -1010,7 +1019,8 @@ def install(m):
             m.cb_gen.eleven_dialogue(
                 turns, out=str(raw_out), stability=stability,
                 generation_kind="regeneration" if previous else "generation",
-                production_route="cb_render")
+                production_route="cb_render",
+                voice_settings=[item.get("voiceSettings") for item in lines])
             timing_path = cb_audio_timing.dialogue_timing_path(raw_out)
             raw_out, timing_path = m.cb_gen.replace_group_chorus_segments(
                 raw_out, timing_path, lines, production_route="cb_render")

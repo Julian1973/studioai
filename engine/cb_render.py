@@ -126,6 +126,16 @@ class Refused(RuntimeError):
     """A named, deliberate refusal — never a crash, never a silent skip."""
 
 
+class WordDraftRefused(Refused):
+    """A HEAR prompt edit changed the spoken words (T35). The approved script is never
+    silently altered: the edit is refused and handed back as an UNSAVED dialogue draft,
+    which only an explicit "Save corrected words" may turn into a new script version."""
+
+    def __init__(self, message, draft):
+        super().__init__(message)
+        self.draft = draft
+
+
 def _review_video_resolution():
     value = os.environ.get("CB_REVIEW_VIDEO_RESOLUTION", REVIEW_VIDEO_RESOLUTION).strip()
     if value not in {"480p", "720p"}:
@@ -4439,7 +4449,7 @@ def save_voice_working(scene, shot_id, lines, episode="Ep1", reviewed_by="Julian
     if len(lines) != len(dl):
         raise Refused(f"REFUSED — {shot_id} has {len(dl)} approved dialogue line(s); "
                       f"the working version must have exactly that many, in the same order")
-    clean = []
+    clean, word_drafts = [], []
     for i, (ln, dl_ln) in enumerate(zip(lines, dl)):
         text = str(ln.get("text") or "").strip()
         if not text:
@@ -4451,9 +4461,35 @@ def save_voice_working(scene, shot_id, lines, episode="Ep1", reviewed_by="Julian
         submitted_id = ln.get("dialogueOccurrenceId")
         if submitted_id and submitted_id != dl_ln.get("dialogueOccurrenceId"):
             raise Refused(f"REFUSED — working line {i+1}'s dialogue occurrence ID changed")
-        clean.append({"dialogueOccurrenceId": dl_ln.get("dialogueOccurrenceId"),
-                      "sourceEventId": dl_ln.get("sourceEventId"),
-                      "speaker": dl_ln["speaker"], "text": text})
+        exact = dl_ln.get("exactText") if dl_ln.get("exactText") is not None else dl_ln.get("text")
+        if cb_voice_director.words_changed(text, exact):
+            # T35: tags are performance, not dialogue. A word change is a script
+            # correction, never a prompt tweak — hand it back as an unsaved draft.
+            word_drafts.append({
+                "dialogueOccurrenceId": dl_ln.get("dialogueOccurrenceId"),
+                "speaker": dl_ln["speaker"], "approvedText": exact,
+                "draftText": cb_voice_director.spoken_text(text), "promptText": text})
+            continue
+        palette = cb_voice_director.allowed_tags_for(
+            _resolve_char(dl_ln["speaker"], _characters_cfg()))
+        off_palette = sorted({tag for tag in re.findall(r"\[([^\]]+)\]", text)
+                              if tag.strip().casefold() not in palette})
+        if off_palette:
+            raise Refused(f"REFUSED — working line {i+1} uses tag(s) outside "
+                          f"{dl_ln['speaker']}'s registered palette: " +
+                          ", ".join(f"[{tag}]" for tag in off_palette))
+        entry = {"dialogueOccurrenceId": dl_ln.get("dialogueOccurrenceId"),
+                 "sourceEventId": dl_ln.get("sourceEventId"),
+                 "speaker": dl_ln["speaker"], "text": text}
+        edits = cb_voice_director.punctuation_edits(text, exact)
+        if edits:
+            entry["punctuationEdits"] = edits   # recorded and visible: a glitch fix, not a script change
+        clean.append(entry)
+    if word_drafts:
+        raise WordDraftRefused(
+            f"REFUSED — {len(word_drafts)} line(s) change the spoken words. The approved script "
+            f"is unchanged; review the draft in the dialogue editor and Save corrected words, "
+            f"or restore the words and keep only tags.", word_drafts)
     led["workingVoice"] = {"lines": clean, "savedAt": _now(), "savedBy": reviewed_by}
     _save(pkg, path)
     log(f"VOICE WORKING VERSION SAVED — {shot_id}: {len(clean)} line(s) (no audio generated)")
@@ -4495,13 +4531,25 @@ def voice_shot(pkg, path, shot_id, episode="Ep1", log=print):
         # default rather than submit a mismatched performance track.
         perf_lines = _default_voice_lines(shot)
         performance_source = "legacy-approved-storyboard"
-    turns = []
+    turns, turn_settings = [], []
+    try:
+        voice_cards = cb_voice_director.voice_cards().get("characters") or {}
+    except cb_voice_director.VoiceContractError:
+        voice_cards = {}
     for ln, perf in zip(shot["dialogueLines"], perf_lines):
-        vid = (characters_cfg.get(_resolve_char(ln["speaker"], characters_cfg)) or {}).get("voiceId")
+        resolved = _resolve_char(ln["speaker"], characters_cfg)
+        card = characters_cfg.get(resolved) or {}
+        vid = card.get("voiceId")
         if not vid:
             raise Refused(f"REFUSED — no ElevenLabs voiceId for {ln['speaker']} "
                           f"(Law 5: the voice lives in the render; no fallback)")
+        exact = ln.get("exactText") if ln.get("exactText") is not None else ln.get("text")
+        if cb_voice_director.words_changed(perf["text"], exact):   # T35 sweep: same lock as cb_safety
+            raise Refused(f"REFUSED — the voice text for {ln['speaker']} no longer speaks the "
+                          f"approved script words ({exact!r}); restore the HEAR prompt or Save "
+                          f"corrected words first")
         turns.append({"text": perf["text"], "voice_id": vid})
+        turn_settings.append((voice_cards.get(resolved) or {}).get("settings"))
     MEDIA.mkdir(parents=True, exist_ok=True)
     out = _vo_path(shot_id, episode)
     kind = "regeneration" if led.get("voPath") else "generation"
@@ -4522,7 +4570,7 @@ def voice_shot(pkg, path, shot_id, episode="Ep1", log=print):
                                  "generatedFrom": led.get("voGeneratedFrom"),
                                  "supersededAt": _now()}
     cb_gen.eleven_dialogue(turns, out=str(out), generation_kind=kind,
-                            production_route="cb_render")
+                            production_route="cb_render", voice_settings=turn_settings)
     led["voPath"] = str(out)
     # THE STALE-TAKE FLAG (2026-07-19, Julian — "I don't feel the acting from the direction
     # changed anything"): traced live to a real, confirmed gap — editing and saving a working

@@ -70,7 +70,13 @@ def test_compiler_emits_nine_stable_v3_requests_with_canon_settings():
      "Missing performance questions"),
     (lambda item: item["takeRecipes"][0].update(
         {"performedText": "[exhales][confident] Totally nailed it."}),
-     "preserves every locked script word"),
+     "spoken words changed"),
+    (lambda item: item["takeRecipes"][0].update(
+        {"performedText": "[exhales][confident] Nailed it"}),
+     r"script punctuation '\.' after 'it' was removed"),
+    (lambda item: item["takeRecipes"][0].update(
+        {"performedText": "[exhales][confident] Nailed! it."}),
+     "direction may only add pause marks"),
     (lambda item: item["takeRecipes"][0].update(
         {"performedText": "[exhales][confident][angry] Nailed it."}),
      "off-palette/banned tags"),

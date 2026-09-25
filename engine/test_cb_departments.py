@@ -228,7 +228,7 @@ def test_voice_director_may_act_but_not_rewrite_locked_words():
 
     changed = valid.model_copy(deep=True)
     changed.lines[0].performedText = "[nervous] Totally nailed it."
-    with pytest.raises(RuntimeError, match="added, dropped or changed words"):
+    with pytest.raises(RuntimeError, match="departed from the script.*spoken words changed"):
         D.validate_voice_direction(changed, _locked())
 
     invented = valid.model_copy(deep=True)
@@ -236,15 +236,36 @@ def test_voice_director_may_act_but_not_rewrite_locked_words():
     with pytest.raises(RuntimeError, match="selected unregistered archetype"):
         D.validate_voice_direction(invented, _locked())
 
+    # T35: an unexplained tag is refused - no generic purpose is invented to hide it.
     missing_take_tag_purpose = valid.model_copy(deep=True)
     missing_take_tag_purpose.lines[0].takeRecipes.append(
         D.VoiceTakeRecipe(
             recipeId="B", label="alternate", performedText="[casual] Nailed it.",
             takesCount=2))
-    repaired = D.validate_voice_direction(missing_take_tag_purpose, _locked())
-    purposes = {item.tag: item.purpose for item in repaired.lines[0].tagPurposes}
-    assert "casual" in purposes
-    assert purposes["casual"]
+    with pytest.raises(RuntimeError, match=r"without a dramatic purpose.*\[casual\]"):
+        D.validate_voice_direction(missing_take_tag_purpose, _locked())
+
+
+def test_voice_direction_preserves_script_punctuation_and_ties_exact_dialogue():
+    """T35 contract clause 2: acting may add pause marks, never drop or swap a script mark."""
+    valid = D.VoiceDirection(
+        shotId="S1.SH1", sceneIntention="cover the wobble", lines=[_voice_line()])
+
+    dropped = valid.model_copy(deep=True)
+    dropped.lines[0].performedText = "[nervous] NAILED it"          # script "." removed
+    dropped.lines[0].takeRecipes[0].performedText = "[nervous] NAILED it"
+    with pytest.raises(RuntimeError, match=r"script punctuation '\.'"):
+        D.validate_voice_direction(dropped, _locked())
+
+    swapped = valid.model_copy(deep=True)
+    swapped.lines[0].takeRecipes[0].performedText = "[nervous] Nailed it!"   # "." became "!"
+    with pytest.raises(RuntimeError, match="take recipe A departed from the script"):
+        D.validate_voice_direction(swapped, _locked())
+
+    # A re-typed exactDialogue with drifted punctuation is re-tied to the script verbatim.
+    drifted = valid.model_copy(deep=True)
+    drifted.lines[0].exactDialogue = "Nailed it"
+    assert D.validate_voice_direction(drifted, _locked()).lines[0].exactDialogue == "Nailed it."
 
 
 def test_voice_direction_uses_openai_strict_tag_purpose_rows():

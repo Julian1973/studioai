@@ -115,6 +115,36 @@ DoD: Gate 0 receives the ledger as context; Gate 5 sign-off appends the episode'
 
 ---
 
+## THE VOICE CONTRACT (P0, 2026-09-25 — Julian's voice/dialogue contract)
+
+The contract, in Julian's words, is the DoD for this section: script is the source of truth; voice direction adds acting, not dialogue; two editors connected but distinct; create and review the actual take; approval creates `@Audio1`; WATCH inherits that exact audio. Acceptance checks: tag-only edits leave script words alone; saved word edits update the dialogue and require a new take; every returned take has a player plus approve/reject; approval makes that exact take `@Audio1`; WATCH uses that audio and its measured timing. Rulings the same day: Seedance 2.5 scores music + SFX; the guide voice is removed by local Demucs stem separation before the approved master is laid in; the showrunner's audio-sync sentence is added verbatim alongside the existing audio-authority wording; contract before Ep3.
+
+**T35 · Script fidelity on every voice path (clause 2, acceptance 1)** ✅ DONE (2026-09-25)
+cb_voice_director.py (`script_fidelity_problems`, `words_changed`, `punctuation_edits`, `allowed_tags_for`), cb_departments.py, cb_render.py, cb_safety.py, cb_gen.py, cb_intake.py, Studio Bible §3.3a. Words AND script punctuation locked for the Voice Director's line and every take recipe (pause marks may be added); `exactDialogue` re-tied to the script verbatim; an unexplained tag is refused (the generic filler purpose is gone); a HEAR prompt word edit is refused as an unsaved dialogue draft (`WordDraftRefused`), a punctuation glitch fix allowed and recorded, off-palette tags refused; the lock runs again before the paid request; the per-line fallback speaks each character with its own registered card settings; inline parentheticals are lifted out of spoken text at intake.
+DoD: every path that can put words in a provider request refuses a word change and a dropped/swapped script mark (tests: test_cb_script_fidelity.py, test_cb_voice_director.py, test_cb_departments.py). Known limit: ElevenLabs Text-to-Dialogue accepts one global stability only — per-character similarity/style reach the provider only on the per-line path.
+
+**T34 · Stable occurrence IDs and "Save corrected words" (clauses 1 and 3, acceptance 2)** ⏳ OPEN
+A dialogue occurrence keeps its `dialogueOccurrenceId` across a per-line word correction; "Save corrected words" writes a new script version with history, never silently; the saved change requires a new voice take and makes the old take historical. The Director desk shows the exact dialogue above the editable ElevenLabs prompt and surfaces a word edit as an unsaved draft.
+
+**T37 · The `@Audio1` record (clause 5, acceptance 4)** ⏳ OPEN
+Approval creates a named `@Audio1` record binding the approved file's hash to the exact dialogue version, its measured duration and each line's measured speaker interval. A saved prompt or a generated take is never approval.
+
+**T36 · The take review desk (clause 4, acceptance 3)** ⏳ OPEN
+"Create voice take"; the returned player directly beneath the shot buttons; "Approve & continue to WATCH" forward, "Reject / add a note" always available (the note reaches the Voice Director), "Regenerate" as an option; "Approve this take as heard" with a recorded reason and identity/voice/timing safeguards; rejected and superseded takes stay in history (no single slot); the audition dead-end removed.
+
+**T38 · WATCH inherits `@Audio1` and its measured timing (clause 6, acceptance 5)** ⏳ OPEN
+The compiler and captions take each line's interval from the `@Audio1` record, one binding per exact line to its speaker; the showrunner's audio-sync sentence added verbatim; golden diff shown to Julian before merge.
+
+**T39 · The final mix: Seedance music + SFX under the approved master (clause 6)** ⏳ OPEN
+Demucs removes the Seedance guide voice; the no-vocals stem stays; the approved `@Audio1` master is laid at its measured timing; `guideDialogueRemoved` is recorded only when measured true, otherwise the mix refuses. Studio Bible §3.3 updated to match.
+
+**T40 · Ep3 "The Perfectly Rainy Party" through the finished path** ⏳ OPEN
+The locked 19 Sep 2026 script through ScriptStore and intake; approved keyframes and character masters registered; Scene 1 through HEAR → approval → WATCH → mix.
+
+Order of play for this section: T35 → T34 → T37 → T36 → T38 → T39 → T40.
+
+---
+
 ## THE ORDER OF PLAY
 
 Week one: T1 to T6 and T16 (the floor) — ✅ done 2026-07-02. T21 and T20 — ✅ done.

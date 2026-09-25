@@ -177,6 +177,10 @@ _TRANSITION_RE = re.compile(
     r"^\s*(FADE IN|FADE OUT|CUT TO|DISSOLVE TO|SMASH CUT TO|MATCH CUT TO)\.?:?\s*$",
     re.IGNORECASE)
 _PAREN_ONLY_RE = re.compile(r"^\s*\(.*\)\s*$")
+# An inline parenthetical inside a dialogue line ("It's fine! (beat) It's okay!") is a
+# screenplay direction, never spoken text (T35). It is lifted out of the words and kept
+# beside them as inlineDirections for the Voice Director to read as acting context.
+_INLINE_PAREN_RE = re.compile(r"\(([^()]*)\)")
 _CONTD_RE = re.compile(r"\s*\(CONT'D\)\s*$", re.IGNORECASE)
 _APOS_RE = re.compile("[‘’ʼ′]")   # curly/prime apostrophe variants
 
@@ -300,7 +304,7 @@ def parse_script(text, roster=None, log=print):
             li += 1
             if li < n and _PAREN_ONLY_RE.match(lines[li].strip()) and lines[li].strip():
                 li += 1   # a delivery-only parenthetical — never dialogue text
-            text_lines = []
+            text_lines, inline_directions = [], []
             while (li < n and lines[li].strip()
                    and not _SCENE_RE.match(lines[li].rstrip())
                    and not cue_re.match(_norm_apos(lines[li]).rstrip())):
@@ -308,6 +312,15 @@ def parse_script(text, roster=None, log=print):
                     li += 1
                     continue
                 cand = lines[li].strip()
+                lifted = [d.strip() for d in _INLINE_PAREN_RE.findall(cand) if d.strip()]
+                if lifted:
+                    cand = re.sub(r"\s{2,}", " ", _INLINE_PAREN_RE.sub(" ", cand)).strip()
+                    inline_directions.extend(lifted)
+                    log(f"INLINE DIRECTION lifted out of {speaker}'s spoken text: "
+                        + "; ".join(f"({d})" for d in lifted))
+                    if not cand:
+                        li += 1
+                        continue
                 bleed = action_bleed_re.match(_norm_apos(cand)) if text_lines else None
                 if bleed:
                     log(f"ACTION-BLEED GUARD fired — stopped {speaker}'s dialogue before "
@@ -324,8 +337,11 @@ def parse_script(text, roster=None, log=print):
                 # character speaking. Not expected in a real script, kept for robustness.
                 front_matter.append(f"{speaker}: {dlg}")
                 continue
-            events.append({"i": len(events), "scene": cur_scene, "type": "dialogue",
-                           "speaker": speaker, "text": dlg})
+            event = {"i": len(events), "scene": cur_scene, "type": "dialogue",
+                     "speaker": speaker, "text": dlg}
+            if inline_directions:
+                event["inlineDirections"] = inline_directions
+            events.append(event)
             continue
         unknown_cue = _NUMBERED_CUE_RE.match(_norm_apos(raw).rstrip())
         if unknown_cue:

@@ -54,6 +54,98 @@ def _words(text):
     return [word.casefold() for word in _WORD_RE.findall(_TAG_RE.sub("", str(text or "")))]
 
 
+# ── script fidelity: the one check every voice path uses (T35) ──────────────────────
+# Voice direction adds acting, never dialogue. The spoken words must be the approved
+# script's words (case may change - CAPS is operative-word stress) and the script's own
+# punctuation must survive. Direction may ADD pause punctuation (comma, ellipsis,
+# em-dash) - the Voice Director's rhythm craft - but may not drop or swap a script mark.
+PAUSE_MARKS = frozenset({",", "…", "—"})
+_MARK_EQUIVALENTS = (("...", "…"), ("--", "—"), ("–", "—"), ("’", "'"), ("‘", "'"),
+                     ("ʼ", "'"), ("“", '"'), ("”", '"'))
+_LAYOUT_TOKEN_RE = re.compile(r"[A-Za-z0-9']+|[^\sA-Za-z0-9']")
+
+
+def _normalise_marks(text):
+    value = str(text or "")
+    for raw, canonical in _MARK_EQUIVALENTS:
+        value = value.replace(raw, canonical)
+    return value
+
+
+def spoken_text(text):
+    """The words and punctuation a provider will speak: tags removed, spacing tidied."""
+    return re.sub(r"\s+", " ", _TAG_RE.sub(" ", str(text or ""))).strip()
+
+
+def _layout(text):
+    """(words, gaps): casefolded words, and the punctuation marks sitting in each gap -
+    gaps[0] before the first word, gaps[i] after word i-1."""
+    words, gaps = [], [[]]
+    for token in _LAYOUT_TOKEN_RE.findall(_normalise_marks(spoken_text(text))):
+        if _WORD_RE.fullmatch(token):
+            words.append(token.casefold())
+            gaps.append([])
+        else:
+            gaps[-1].append(token)
+    return words, gaps
+
+
+def words_changed(performed, exact):
+    """True when the spoken words differ from the approved script's words."""
+    return _layout(performed)[0] != _layout(exact)[0]
+
+
+def script_fidelity_problems(performed, exact, *, allow_added_pauses=True):
+    """Every way `performed` departs from the approved `exact` script text.
+
+    Empty list = faithful. Words must match exactly (case aside). Each script
+    punctuation mark must still be present, in order, in the same place; the only
+    additions allowed are PAUSE_MARKS, and only when allow_added_pauses."""
+    performed_words, performed_gaps = _layout(performed)
+    exact_words, exact_gaps = _layout(exact)
+    if performed_words != exact_words:
+        return [f"spoken words changed: {' '.join(performed_words)!r} is not the approved "
+                f"{' '.join(exact_words)!r}"]
+    problems = []
+    for index, (have, want) in enumerate(zip(performed_gaps, exact_gaps)):
+        remaining, cursor = list(have), 0
+        for mark in want:
+            try:
+                found = remaining.index(mark, cursor)
+            except ValueError:
+                where = f"after {exact_words[index - 1]!r}" if index else "at the start"
+                problems.append(f"script punctuation {mark!r} {where} was removed or changed")
+                break
+            remaining.pop(found)
+            cursor = found
+        else:
+            extras = [mark for mark in remaining
+                      if not (allow_added_pauses and mark in PAUSE_MARKS)]
+            if extras:
+                where = f"after {exact_words[index - 1]!r}" if index else "at the start"
+                problems.append(f"punctuation {''.join(extras)!r} added {where}; direction may "
+                                f"only add pause marks ({' '.join(sorted(PAUSE_MARKS))})")
+    return problems
+
+
+def punctuation_edits(performed, exact):
+    """Script punctuation a human HEAR edit removed or changed (words already locked).
+    Recorded, not refused: the producer may fix a provider glitch this way."""
+    return script_fidelity_problems(performed, exact, allow_added_pauses=True)
+
+
+def allowed_tags_for(character, *, cards=None, registers=None):
+    """The tag palette a character may use in any register: card defaults plus every
+    registered archetype's allowed tags, minus the card's banned tags."""
+    cards = cards or voice_cards()
+    registers = registers or archetype_registers()
+    card = (cards.get("characters") or {}).get(character) or {}
+    palette = {tag.casefold() for tag in card.get("defaultTags", [])}
+    for register in (registers.get("registers") or {}).values():
+        palette.update(tag.casefold() for tag in register.get("allowedTags", []))
+    return palette - {tag.casefold() for tag in card.get("bannedTags", [])}
+
+
 def _locked_text(line):
     return str(line.get("exactText") if line.get("exactText") is not None else line.get("text") or "")
 
@@ -109,9 +201,12 @@ def post_direction_audit(line, locked_line, card, register):
            str(locked_line.get("speaker") or "").casefold(),
            "Character matches the locked script speaker.")
     locked_text = _locked_text(locked_line)
-    _check(checks, "exact-dialogue-lock",
-           _words(line.get("exactDialogue")) == _words(locked_text),
-           "Exact dialogue preserves every locked script word.")
+    exact_problems = script_fidelity_problems(
+        line.get("exactDialogue"), locked_text, allow_added_pauses=False)
+    _check(checks, "exact-dialogue-lock", not exact_problems,
+           "Exact dialogue is the approved script line, words and punctuation."
+           if not exact_problems else "Exact dialogue departs from the script: " +
+           "; ".join(exact_problems))
 
     recipes = line.get("takeRecipes") or []
     _check(checks, "recipe-count", 1 <= len(recipes) <= 3,
@@ -122,9 +217,10 @@ def post_direction_audit(line, locked_line, card, register):
     for recipe in recipes:
         text = str(recipe.get("performedText") or "")
         recipe_id = recipe.get("recipeId") or "unnamed"
-        _check(checks, f"script-fidelity:{recipe_id}",
-               _words(text) == _words(locked_text),
-               f"{recipe_id} preserves every locked script word.")
+        fidelity = script_fidelity_problems(text, locked_text)
+        _check(checks, f"script-fidelity:{recipe_id}", not fidelity,
+               f"{recipe_id} preserves every locked script word and script punctuation."
+               if not fidelity else f"{recipe_id}: " + "; ".join(fidelity))
         spoken_text = _TAG_RE.sub("", text).strip()
         locked_spoken_text = _TAG_RE.sub("", locked_text).strip()
         deliberately_interrupted = locked_spoken_text.endswith(("—", "--", "...", "…"))

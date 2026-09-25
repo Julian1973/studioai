@@ -623,6 +623,15 @@ def create_policy(m):
     def current_direction_output(pkg, shot_id, stage):
         return current_direction_record(pkg, shot_id, stage)["output"]
 
+    def optional_direction_output(pkg, shot_id, stage):
+        """Return only current specialist data; optional reads never become stage gates."""
+        state = department_record_status(pkg, shot_id, stage)
+        record = state.get("record") or {}
+        if (not state.get("current") and stage in ("voice", "animation") and
+                record.get("manualCurrentOverride") and record.get("output")):
+            return record["output"]
+        return record.get("output") if state.get("current") else None
+
     def resolve_scenelook_prompt(scene, episode="Ep1"):
         return look_prompt(scene, episode) or m._compile_scenelook_prompt(scene, episode)
 
@@ -806,10 +815,7 @@ def create_policy(m):
 
     def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
         if stage in ("look", "cinematography", "voice", "animation"):
-            raise m.Refused(
-                "DIRECTOR_REVISION_REQUIRED: creative departments are retired from current production. "
-                "Use DIRECT for creative authority, SEE for visual evidence, and HEAR for Audio1."
-            )
+            return m._route_legacy_department(scene, stage, shot_id, episode, log)
         pkg, path = current_package(scene, episode)
         if stage in direction_stages:
             current = department_record_status(
@@ -820,15 +826,6 @@ def create_policy(m):
                     "(no OpenAI call, $0)"
                 )
                 return current["record"]
-        if stage == "animation":
-            cinematography = department_record_status(
-                pkg, shot_id, "cinematography", scene, episode)
-            if not cinematography["current"]:
-                log("WATCH PREPARATION — refreshing Cinematography direction first "
-                    "(no media generation; AI direction review may incur cost)")
-                prepare_department(
-                    scene, "cinematography", shot_id, episode, log)
-                pkg, path = current_package(scene, episode)
         work, save_extra = m._department_container(
             pkg, scene, shot_id, stage, episode)
         existing = work.get("candidate") or {}
@@ -2333,7 +2330,7 @@ def create_policy(m):
         decide_department=decide_department,
         _current_department_output=current_direction_output,
         _require_approved_department_output=current_direction_output,
-        _approved_department_output=current_direction_output,
+        _approved_department_output=optional_direction_output,
         _department_input_signature=department_input_signature,
         _department_record_status=department_record_status,
         _resolve_keyframe_prompt=keyframe_prompt,

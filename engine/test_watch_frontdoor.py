@@ -49,11 +49,29 @@ def test_exact_direct_survives_history_and_specialists(current):
     assert prior['authorities']['shot']['directorCard'] == current['authorities']['shot']['directorCard']
 
 
-@pytest.mark.parametrize('stage', ['look', 'cinematography', 'voice', 'animation'])
-def test_current_creative_department_preparation_is_retired(stage):
+@pytest.mark.parametrize(('stage', 'handler'), [
+    ('look', 'generate_scenelook_plate'),
+    ('cinematography', 'keyframe_shot'),
+    ('voice', 'regen_voice_shot'),
+    ('animation', 'prepare_render'),
+])
+def test_legacy_department_remedy_reaches_its_current_stage(stage, handler, monkeypatch):
     import cb_render as R
-    with pytest.raises(R.Refused, match='creative departments are retired'):
-        R.prepare_department('3', stage, 'S3.SH1', 'Ep4')
+    calls = []
+    def handled(*args, **kwargs):
+        calls.append((args, kwargs))
+        return {'stage': stage, 'routed': True}
+    if stage == 'animation':
+        import cb_studio_director as D
+        monkeypatch.setattr(D, handler, handled)
+    else:
+        monkeypatch.setattr(R, handler, handled)
+
+    result = R.prepare_department('3', stage, 'S3.SH1', 'Ep4')
+
+    assert result == {'stage': stage, 'routed': True}
+    assert len(calls) == 1
+    assert ('S3.SH1' in calls[0][0]) if stage != 'look' else ('S3.SH1' not in calls[0][0])
 
 
 def test_action_drift_blocks(current):
@@ -106,6 +124,54 @@ def test_unknown_or_active_submission_blocks(tmp_path):
     with pytest.raises(ValueError,match='provider submission'):
         recovery.require_no_provider_operation(tmp_path,'Ep4','2','S2.SH1')
     assert not recovery.pre_submit_failure(recovery.get(tmp_path,op['operationId']))
+
+
+def test_prepare_watch_performs_legacy_direct_handoff_before_readiness(tmp_path, monkeypatch):
+    import cb_render as R
+    import cb_studio_director as D
+    import cb_audio_authority
+    import studio_director_handoff as H
+    import studio_see_service as SEE
+
+    shot = {"shotId": "S4.SH3", "sourceType": "opener",
+            "storyboardInternalShotPlanApproved": [{"viewId": "S4_V01"}],
+            "dialogueLines": [{"speaker": "Sunny", "exactText": "Hello."}]}
+    ledger = {"shotId": "S4.SH3", "status": "designed",
+              "keyframeApproval": {"approved": True},
+              "voiceApproval": {"approved": True}}
+    package = {"episode": "Ep4", "sceneNumber": "4", "revision": 1,
+               "validation": {"passed": True}, "shots": [shot],
+               "continuityLedger": [ledger]}
+    package_path = tmp_path / "Ep4_scene4_production_package.json"
+    calls = []
+    monkeypatch.setattr(R, "load_pkg", lambda *a: (package, package_path))
+    monkeypatch.setattr(R, "reassess_keyframe", lambda *a: {"verdict": "carry_forward"})
+    monkeypatch.setattr(H, "refresh_previous_frame", lambda *a: None)
+    monkeypatch.setattr(H, "errors", lambda _shot: [
+        "Legacy coverage has no shared Director Card; prepare the current direction handoff."])
+    monkeypatch.setattr(H, "card_issues", lambda _shot: ["Director Card unavailable"])
+    monkeypatch.setattr(H, "prepare_native", lambda *a, **k: calls.append("direct-handoff"))
+    monkeypatch.setattr(R, "_require_valid", lambda *_: None)
+    monkeypatch.setattr(R, "_require_current_lineage", lambda *_: None)
+    monkeypatch.setattr(recovery, "require_no_provider_operation", lambda *a: None)
+    monkeypatch.setattr(SEE, "context", lambda *a: {
+        "componentReviews": {"plate": "approved", "opening": "approved"}})
+    monkeypatch.setattr(cb_audio_authority, "spoken_dialogue_lines", lambda *_: ["Hello."])
+    monkeypatch.setattr(R, "_voice_approval_status", lambda *a: {"current": True})
+    monkeypatch.setattr(D, "watch_readiness", lambda *a: calls.append("watch-readiness") or {"provider": "fixture"})
+    monkeypatch.setattr(R, "_require_confirmed_billing", lambda *_: None)
+
+    def stop_at_spend_review(*args, **kwargs):
+        calls.append("spend-review")
+        ledger["pendingSpendAuth"] = {"token": "fixture"}
+        raise R.Refused("SPEND NOT APPROVED")
+
+    monkeypatch.setattr(R, "fire_shot", stop_at_spend_review)
+    D.prepare_render("4", "S4.SH3", "Ep4", log=lambda *_: None)
+
+    assert calls == ["direct-handoff", "watch-readiness", "spend-review"]
+    assert ledger["keyframeApproval"] == {"approved": True}
+    assert ledger["voiceApproval"] == {"approved": True}
 
 
 def test_specialist_history_does_not_change_fingerprint(tmp_path,current):

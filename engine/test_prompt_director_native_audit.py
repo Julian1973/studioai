@@ -108,6 +108,10 @@ def test_compiler_only_refresh_does_not_regenerate_direction_or_touch_media(worl
     pkg, _ = R.load_pkg('9', 'EpT')
     work, _ = R._department_container(pkg, '9', sid, 'animation', 'EpT')
     original = deepcopy(work.get('candidate') or work.get('approved'))
+    creative_shot = R._shot_context(
+        pkg, R._shot(pkg, sid), R._ledger(pkg, sid), '9', 'EpT')['shot']
+    original['output']['creativeTranslation']['generationDesign']['handoffState'] = (
+        creative_shot['visualPayoff'])
     # Represent an already prepared source with older derived compiler bytes.
     work['candidate'] = deepcopy(original)
     work['candidate']['output']['providerPrompt'] += '\n\nOld presentation.'
@@ -115,9 +119,11 @@ def test_compiler_only_refresh_does_not_regenerate_direction_or_touch_media(worl
     ledger['pendingSpendAuth'] = {'token': 'synthetic-stale-request'}
     protected = {k: deepcopy(ledger.get(k)) for k in ('keyframeApproval', 'voiceApproval', 'approvedTake')}
     R._save(pkg, path)
-    updated = R.prepare_department('9', 'animation', sid, 'EpT', log=lambda *a: None)
-    assert updated['output'] == original['output']
-    assert updated['recompileKind'] == 'same signed direction; new derived prompt'
+    updated = R.recompile_animation_candidate('9', sid, 'EpT', log=lambda *a: None)
+    for field in ('durationSec', 'audioContract', 'soundHandoff', 'timeline',
+                  'stagePlan', 'shotPlan', 'creativeTranslation'):
+        assert updated['output'].get(field) == original['output'].get(field)
+    assert updated['output']['providerPrompt'] != original['output']['providerPrompt']
     current, _ = R.load_pkg('9', 'EpT')
     after = R._ledger(current, sid)
     assert after['pendingSpendAuth'] is None

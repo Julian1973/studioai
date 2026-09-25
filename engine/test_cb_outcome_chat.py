@@ -51,18 +51,28 @@ def test_request_approval_submits_only_sealed_request_not_render_approval(packag
 
 
 def test_voice_without_dialogue_prepares_request_and_never_invents_voice(package, monkeypatch):
+    import cb_studio_director as D
     C.budget.approve('Ep3', 10, 'Julian', 'script')
     calls = []
-    monkeypatch.setattr(C, '_direction', lambda ep, scene, shot, stage: calls.append(stage))
     monkeypatch.setattr(C.R, 'regen_voice_shot', lambda *a, **k: pytest.fail('Silent shot'))
-    def seal(*a, **kw):
-        assert 'spend_token' not in kw
-        calls.append('seal-request')
-        package[0]['continuityLedger'][0]['pendingSpendAuth'] = {'token': 'fixture'}
-        raise C.R.Refused('SPEND NOT APPROVED')
-    monkeypatch.setattr(C.R, 'fire_shot', seal)
+    monkeypatch.setattr(D, 'prepare_render', lambda *a: calls.append('prepare-watch'))
     assert C.prepare('Ep3', '1', 'S1.SH1', 'voice') == {'requestReady': True}
-    assert calls == ['animation', 'seal-request']
+    assert calls == ['prepare-watch']
+
+
+def test_keyframe_preparation_routes_unapproved_scene_plate_back_to_see(package, monkeypatch):
+    from contextlib import nullcontext
+    pkg, _ = package
+    pkg['continuityLedger'][0].pop('keyframeCandidate', None)
+    C.budget.approve('Ep3', 10, 'Julian', 'script')
+    monkeypatch.setattr(C.cb_db, 'scene_lease', lambda *a, **k: nullcontext())
+    monkeypatch.setattr(C.R.production_contracts, 'active_shots', lambda value: value['shots'])
+    monkeypatch.setattr(C.R, 'scenelook_status', lambda *a, **k: {'current': True, 'approvedCurrent': False})
+    monkeypatch.setattr(C.R, 'approve_scenelook', lambda *a, **k: pytest.fail('SEE cannot be auto-approved'))
+    monkeypatch.setattr(C.R, 'keyframe_shot', lambda *a, **k: pytest.fail('Opening build must wait for plate approval'))
+
+    with pytest.raises(C.R.Refused, match='SEE_CONFIGURATION_REQUIRED'):
+        C.prepare('Ep3', '1', 'S1.SH1', 'keyframe')
 
 
 def test_render_selection_is_bound_to_reviewed_batch(package, monkeypatch):

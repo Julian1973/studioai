@@ -549,44 +549,18 @@ def test_relay_opening_frame_contract_overrides_stale_first_frame_wording():
     assert "Each subject remains the same continuous instance throughout" in extension_prompt
 
 
-def test_prepare_direction_archives_a_stale_candidate_before_replacing_it(
-        monkeypatch, tmp_path):
-    pkg = {"episode": "EpT", "sceneNumber": "1", "revision": 2,
-           "validation": {"passed": True}, "shots": [], "continuityLedger": []}
-    record = {"approved": None, "candidate": None, "history": [],
-              "departmentWork": {"look": {
-                  "approved": None,
-                  "candidate": {"output": {"providerPrompt": "stale prompt"},
-                                "inputSignature": {"stale": True}},
-                  "history": [],
-              }}}
-
-    class LookResult:
-        def model_dump(self):
-            return {"providerPrompt": "fresh prompt"}
-
-    monkeypatch.setattr(R, "_require_show_adapter", lambda: None)
-    monkeypatch.setattr(R, "load_pkg", lambda *_args, **_kwargs: (pkg, tmp_path / "pkg.json"))
-    monkeypatch.setattr(R, "_require_valid", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(R, "_require_current_lineage", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(R, "_scene_context", lambda *_args, **_kwargs: {"scene": "1"})
-    monkeypatch.setattr(R, "_load_scenelook_rec", lambda *_args, **_kwargs: record)
-    monkeypatch.setattr(R, "_save_scenelook_rec", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(R, "_save", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(R.cb_departments, "prepare_look",
-                        lambda *_args, **_kwargs: LookResult())
-    monkeypatch.setattr(cb_safety.cb_canon, "load_policy", lambda *_args, **_kwargs: {})
+def test_legacy_look_preparation_routes_to_see_without_archiving_department_work(monkeypatch):
+    routed = []
     monkeypatch.setattr(
-        cb_safety.cb_canon, "require_locked",
-        lambda *_args, **_kwargs: {"profileDigests": {"look": "canon-look"}})
+        R, "_route_legacy_department",
+        lambda scene, stage, shot_id, episode, log:
+            routed.append((scene, stage, shot_id, episode)) or "SEE",
+    )
 
-    replacement = R.prepare_department("1", "look", episode="EpT", log=lambda *_: None)
-    work = record["departmentWork"]["look"]
+    result = R.prepare_department("1", "look", episode="EpT", log=lambda *_: None)
 
-    assert replacement["output"]["providerPrompt"] == "fresh prompt"
-    assert work["history"][0]["outcome"] == "invalidated"
-    assert work["history"][0]["output"]["providerPrompt"] == "stale prompt"
-    assert work["candidate"] is replacement
+    assert result == "SEE"
+    assert routed == [("1", "look", None, "EpT")]
 
 
 def test_seedance_director_returns_shot_plan_and_separate_reference_contract(monkeypatch):

@@ -176,6 +176,21 @@ try{
  await primary.click();
  await page.waitForFunction(()=>window.calls.some(c=>c.source==='library'&&c.component==='opening'));
  assert.equal(requests.filter(r=>r.command==='recover').length,openingActionCount,'Stale opening recovery never routes through the plate or blind retry');
+ for(const targetStage of ['direct','see','hear','watch']){
+  await page.evaluate(()=>{window.calls.length=0;});
+  await refresh({...baseView,phase:'audio',operation:{id:'remedy-'+targetStage,status:'needs-decision',decision:{
+   issue:'A current input needs attention.',proposed:'Open the owner stage.',
+   producer:{category:'direction',targetStage,headline:'A current input needs attention.',meaning:'Approved work is retained.',
+    nextAction:'Open the owning stage and resolve this input.',button:'Open '+targetStage,preserved:'Everything you approved is saved.'}}}});
+  await primary.click();
+  await page.waitForFunction(stage=>window.calls.some(c=>c.stage===stage||stage==='hear'&&c.hear),targetStage);
+ }
+ await refresh({...baseView,operation:{id:'remedy-details',status:'needs-decision',decision:{
+  issue:'A provider setting needs attention.',proposed:'Review details.',
+  producer:{category:'setup',targetStage:'details',headline:'A provider setting needs attention.',meaning:'No approved work changed.',
+   nextAction:'Review the saved technical details.',button:'View details',preserved:'Everything you approved is saved.'}}}});
+ await primary.click();
+ assert.equal(await page.locator('main > details').first().evaluate(element=>element.open),true,'Details remedy opens the evidence drawer');
  assert.deepEqual(errors,[]);
  console.log('PASS: SEE tiles before the plate exists, source controls, missing assets, approval failure, DIRECT, optional storyboard, real montage, HEAR approval, recovery, sealed WATCH, REVIEW, remount, desktop/mobile. External requests blocked.');
 }catch(error){console.error(error,errors,await page?.locator('body').innerText());throw error;}

@@ -4223,6 +4223,26 @@ def _review_frames(video_path, max_frames=4):
     return tmp, [str(p) for p in frames]
 
 
+def _route_legacy_department(scene, stage, shot_id=None, episode="Ep1", log=print):
+    """Keep old command names usable by dispatching to the current owner stage."""
+    if stage == "look":
+        return generate_scenelook_plate(scene, episode, log=log)
+    if stage == "cinematography":
+        if not shot_id:
+            raise Refused("SEE_CONFIGURATION_REQUIRED: choose a shot before building its opening frame in SEE")
+        return keyframe_shot(scene, shot_id, episode, log=log)
+    if stage == "voice":
+        if not shot_id:
+            raise Refused("HEAR_CONFIGURATION_REQUIRED: choose a shot before creating its Audio1 take")
+        return regen_voice_shot(scene, shot_id, episode, log=log)
+    if stage == "animation":
+        if not shot_id:
+            raise Refused("WATCH_CONFIGURATION_REQUIRED: choose a shot before preparing its WATCH request")
+        from cb_studio_director import prepare_render
+        return prepare_render(scene, shot_id, episode, log=log)
+    raise Refused(f"REFUSED — no current-stage route exists for legacy department '{stage}'")
+
+
 def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
     """Run one real specialist once and store an awaiting-approval candidate.
 
@@ -4230,9 +4250,8 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
     signed candidate is production-ready without pretending a human approved prose; rendered
     outcomes retain their own explicit approval gates. No cb_gen function is reachable here.
     """
-    if stage == "animation":
-        raise Refused("DIRECTOR_REVISION_REQUIRED: the animation rewrite department is retired from WATCH. "
-                      "Approve action, camera and performance in DIRECT; WATCH compiles those fields.")
+    if stage in ("look", "cinematography", "voice", "animation"):
+        return _route_legacy_department(scene, stage, shot_id, episode, log)
     if stage not in _DEPARTMENT_WORKERS:
         raise Refused(f"REFUSED — unknown department stage '{stage}'")
     pkg, path = load_pkg(scene, episode)

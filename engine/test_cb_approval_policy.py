@@ -255,6 +255,39 @@ def test_current_prepared_direction_is_operational_without_fake_human_approval(
         package, shot["shotId"], "cinematography")["current"]
 
 
+def test_optional_direction_reads_never_block_but_strict_reads_still_do(tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    monkeypatch.setattr(render, "_provider_attachment_plan", lambda *a, **k: [])
+    approved = _approve_department(package, shot["shotId"], "cinematography")
+    assert render._approved_department_output(
+        package, shot["shotId"], "cinematography") == approved["output"]
+
+    shot["durationSec"] += 1
+    assert render._approved_department_output(
+        package, shot["shotId"], "cinematography") is None
+    with pytest.raises(render.Refused, match="stale"):
+        render._require_approved_department_output(
+            package, shot["shotId"], "cinematography")
+
+
+def test_optional_direction_read_does_not_swallow_unexpected_failures(monkeypatch):
+    def broken(*_args, **_kwargs):
+        raise PermissionError("direction store is not readable")
+
+    monkeypatch.setattr(render, "_department_container", broken)
+    with pytest.raises(PermissionError, match="not readable"):
+        render._approved_department_output(
+            {"continuityLedger": []}, "S1.SH1", "voice")
+
+
+def test_missing_direction_has_a_stage_route_instead_of_a_dead_remedy(tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    assert render._approved_department_output(
+        package, shot["shotId"], "voice") is None
+    with pytest.raises(render.Refused, match="Prepare current Voice"):
+        render._require_approved_department_output(package, shot["shotId"], "voice")
+
+
 def test_complex_relay_inherits_approved_predecessor_frame_as_watch_anchor(tmp_path):
     package, shot, opening_frame = _pkg(tmp_path)
     previous_frame = tmp_path / "previous-final.png"

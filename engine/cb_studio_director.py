@@ -1343,6 +1343,47 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
     import cb_providers
     import cb_render
 
+    from studio_director_handoff import errors, card_issues, prepare_native, refresh_previous_frame
+    package, path = cb_render.load_pkg(scene, episode)
+    shot = cb_render._shot(package, shot_id)
+    refresh_previous_frame(cb_render, package, path, shot, log)
+    if shot.get("sourceType") == "opener":
+        opening = cb_render.reassess_keyframe(scene, shot_id, episode)
+        if opening.get("verdict") != "carry_forward":
+            raise cb_render.Refused(
+                f"WATCH_CONFIGURATION_REQUIRED: {shot_id} opening inputs changed; "
+                "review the saved image against the current prior final frame in SEE, "
+                "then choose Library, Upload or Generate. Approved Audio1 is preserved.")
+
+    legacy_handoff = "Legacy coverage has no shared Director Card; prepare the current direction handoff."
+    direct_errors = errors(shot)
+    direction_errors = card_issues(shot)
+    if (shot.get("storyboardInternalShotPlanApproved") and
+            direct_errors == [legacy_handoff] and
+            set(direction_errors) <= {"Director Card unavailable"}):
+        from cb_recovery import require_no_provider_operation
+        from studio_see_service import context as see_context
+
+        cb_render._require_valid(package)
+        cb_render._require_current_lineage(package, scene, episode)
+        ledger = cb_render._ledger(package, shot_id)
+        require_no_provider_operation(cb_render.ROOT, episode, scene, shot_id, ledger)
+        see = see_context(cb_render.ROOT, {
+            "projectId": package.get("projectId") or "crystal-bears",
+            "episode": episode, "scene": str(scene), "unit": shot_id,
+        })
+        if any(see.get("componentReviews", {}).get(key) != "approved"
+               for key in ("plate", "opening")):
+            raise cb_render.Refused(
+                "WATCH_CONFIGURATION_REQUIRED: approve the scene plate and opening in SEE before the DIRECT handoff")
+        import cb_audio_authority
+        if (cb_audio_authority.spoken_dialogue_lines(shot) and
+                not cb_render._voice_approval_status(
+                    package, shot, scene, episode).get("current")):
+            raise cb_render.Refused(
+                "HEAR_CONFIGURATION_REQUIRED: approve current Audio1 in HEAR before the DIRECT handoff")
+        prepare_native(cb_render, scene, shot_id, episode, log, package=(package, path))
+
     readiness = watch_readiness(scene, shot_id, episode)
     cb_render._require_confirmed_billing(readiness["provider"])
     try:

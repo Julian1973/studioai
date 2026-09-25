@@ -593,10 +593,6 @@ def save_native_animation_direction(runtime, scene, shot_id, episode, authored, 
                                                  'accepted-visual-source-changed-before-fire')
         ledger['pendingSpendAuth'] = None
         runtime._save(pkg, path)
-        try:
-            runtime._approved_department_output(pkg, shot_id, 'cinematography')
-        except runtime.Refused:
-            runtime.prepare_department(scene, 'cinematography', shot_id, episode)
         latest, _ = runtime.load_pkg(scene, episode)
         return save_native_animation_direction(runtime, scene, shot_id, episode, authored,
             expected_input_signature=runtime._department_input_signature(

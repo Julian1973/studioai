@@ -108,16 +108,6 @@ def execute(episode, scene, shot_id, stage, reviewed_hash, reviewer="Julian", ca
         return R.approve_shot(scene, shot_id, selected, episode, reviewed_by=reviewer)
 
 
-def _direction(episode, scene, shot_id, stage):
-    R.prepare_department(scene, stage, shot_id, episode)
-    pkg, _ = R.load_pkg(scene, episode)
-    work, _ = R._department_container(pkg, scene, shot_id, stage, episode)
-    if work.get("candidate"):
-        R.decide_department(scene, stage, "approved", shot_id,
-                            "Automatic technical preparation for outcome review.", episode,
-                            "Studio Director")
-
-
 def prepare(episode, scene, shot_id, stage):
     if not budget.status(episode)["approved"]:
         raise budget.BudgetRefused("Approve the episode allowance in chat first")
@@ -134,34 +124,23 @@ def prepare(episode, scene, shot_id, stage):
                 return prepare(episode, scene, shot_id, "voice")
             if led.get("keyframeCandidate") or (led.get("keyframeApproval") or {}).get("approved"):
                 return {"existing": True}
-            if not R.scenelook_status(scene, episode).get("current"):
-                _direction(episode, scene, None, "look")
-                rec = R._load_scenelook_rec(scene, episode)
-                if not rec.get("candidate"):
-                    R.generate_scenelook_plate(scene, episode)
-                # Scene world is an internal reference. The user reviews the composed SEE
-                # outcome; this stamp must never claim a human reviewed the reference.
-                R.approve_scenelook(scene, episode, reviewed_by="Studio Director — internal scene reference")
-            _direction(episode, scene, shot_id, "cinematography")
+            plate = R.scenelook_status(scene, episode)
+            if not plate.get("approvedCurrent"):
+                raise R.Refused(
+                    "SEE_CONFIGURATION_REQUIRED: choose and approve the current scene plate in SEE before building the opening frame")
             return R.keyframe_shot(scene, shot_id, episode)
         if stage == "voice":
             if not R.cb_audio_authority.spoken_dialogue_lines(shot):
                 return prepare(episode, scene, shot_id, "animation")
             if led.get("voPath"):
                 return {"existing": True}
-            _direction(episode, scene, shot_id, "voice")
             return R.regen_voice_shot(scene, shot_id, episode)
         if stage == "animation":
             if led.get("pendingSpendAuth"):
                 return {"existing": True}
-            _direction(episode, scene, shot_id, "animation")
-            try:
-                return R.fire_shot(scene, shot_id, episode, candidates=1)
-            except R.Refused:
-                pkg, _ = R.load_pkg(scene, episode)
-                if R._ledger(pkg, shot_id).get("pendingSpendAuth"):
-                    return {"requestReady": True}
-                raise
+            from cb_studio_director import prepare_render
+            prepare_render(scene, shot_id, episode)
+            return {"requestReady": True}
         raise ValueError("Unsupported outcome")
 
 

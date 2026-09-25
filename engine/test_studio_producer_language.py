@@ -1,6 +1,6 @@
 """Every stop the producer can hit reads as a sentence and a next action, never a code."""
 import pytest
-from studio_producer_language import translate, stopped_message
+from studio_producer_language import RULES, _next_stage, translate, stopped_message
 
 
 @pytest.mark.parametrize('raw, category, button', [
@@ -19,7 +19,7 @@ from studio_producer_language import translate, stopped_message
     ('Approve the current WATCH request before firing its render.', 'request', 'Review WATCH request'),
     ('REFUSED — SPEND NOT APPROVED for 1.B1.S1', 'money', 'Review spend in WATCH'),
     ('openai.RateLimitError: credit_balance_exhausted', 'provider', 'View details'),
-    ('APITimeoutError: Request timed out.', 'provider', 'Try again'),
+    ('APITimeoutError: Request timed out.', 'provider', 'Check existing job'),
     ('REFUSED — no current signed scene plate found for Ep1 scene 1 — generate the internal world anchor before the first keyframe', 'images', 'Open scene plate'),
     ('WATCH_SOURCE_PACKAGE_MISMATCH: storyboard and production package contain different shot rosters', 'request', 'Open WATCH'),
     ('REFUSED — opening-frame approval is stale against its direct inputs', 'images', 'Review opening frame'),
@@ -56,6 +56,15 @@ def test_recovery_points_to_the_stage_and_asset_that_can_fix_it():
     assert review['targetStage'] == 'watch'
     render = translate('BLOCKED: STALE PACKAGE', stage='submit_render')
     assert render['targetStage'] == 'watch'
+
+
+def test_every_refusal_rule_has_a_live_recovery_destination():
+    live_routes = {'direct', 'see', 'hear', 'watch', 'recover', 'details'}
+    assert RULES
+    for _pattern, category, _headline, _meaning, action, button in RULES:
+        target = _next_stage(category, 'submit_render', action)
+        assert target in live_routes, (category, action, target)
+        assert action.strip().endswith('.') and button.strip()
 
 
 def test_unknown_stop_never_says_unknown_to_the_producer():

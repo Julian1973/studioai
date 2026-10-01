@@ -8391,6 +8391,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
             str(i), {"segments": [], "status": "generating"})
         segment_paths = []
         active_segment = None
+        provider_call_started = False
         try:
             for segment in segments:
                 segment_index = int(segment["segmentIndex"])
@@ -8503,6 +8504,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                     }
                     if video_inputs:
                         generate_kwargs["video_urls"] = video_inputs
+                    provider_call_started = True
                     cb_gen.generate_video_seedance_ref(
                         segment["prompt"], image_inputs, **generate_kwargs)
                     if segment_count > 1:
@@ -8561,13 +8563,20 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
             if active_segment is not None:
                 try:
                     cb_db.fail_candidate_segment(
-                        HERE.parent, batch["token"], i, active_segment, e)
+                        HERE.parent, batch["token"], i, active_segment, e,
+                        unresolved=provider_call_started)
                 except cb_db.SpendConflict:
                     pass
-            cb_db.fail_candidate(HERE.parent, batch["token"], i, e)
+            cb_db.fail_candidate(HERE.parent, batch["token"], i, e,
+                                 unresolved=provider_call_started)
             batch["failed"].append({"candidate": i, "error": str(e)[:400], "at": _now()})
-            transport["status"] = "failed"
+            transport["status"] = "unresolved" if provider_call_started else "failed"
             _save(pkg, path)
+            if provider_call_started:
+                raise Refused(
+                    f"REFUSED — candidate {i} has an unresolved provider attempt "
+                    f"({str(e)[:160]}). Automatic repayment is blocked. Reconcile the "
+                    "saved provider task and output before retrying this candidate.") from e
             raise Refused(f"REFUSED — candidate {i} failed during its sealed provider plan "
                           f"({str(e)[:160]}). The batch is saved and resumable: re-run with "
                           f"the SAME spend token to generate only the missing candidates — "

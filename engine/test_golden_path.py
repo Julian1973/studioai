@@ -1817,9 +1817,8 @@ def test_parallel_fire_cannot_claim_the_same_spend_token_twice(world, monkeypatc
     assert len(prov.fire_calls) == 1
 
 
-def test_batch_resume_is_idempotent_never_repays(world):
-    """Protection 2: two of three complete, the third fails -> resume generates ONLY the
-    missing candidate under the ORIGINAL token; completed candidates never regenerate."""
+def test_unknown_provider_failure_blocks_retry_without_repaying_completed(world):
+    """An ambiguous third attempt cannot be repaid; the first two remain landed."""
     prov, tmp, _ = world
     _voice_and_approve()
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
@@ -1838,7 +1837,7 @@ def test_batch_resume_is_idempotent_never_repays(world):
     orig = R.cb_gen.generate_video_seedance_ref
     R.cb_gen.generate_video_seedance_ref = flaky
     try:
-        with _pt.raises(R.Refused, match="resumable"):
+        with _pt.raises(R.Refused, match="Automatic repayment is blocked"):
             R.fire_shot("9", "1.B1.S1", "EpT", spend_token=tok, log=lambda *a, **k: None)
         led = _led()["1.B1.S1"]
         assert led["batch"]["status"] == "generating"
@@ -1851,12 +1850,13 @@ def test_batch_resume_is_idempotent_never_repays(world):
         with _pt.raises(R.Refused, match="original spend token"):
             R.fire_shot("9", "1.B1.S1", "EpT", spend_token="deadbeef" * 4,
                          log=lambda *a, **k: None)
-        # resume with the original token: ONLY candidate 3 generates
+        # A 500 can occur after provider acceptance. The original token must not
+        # silently authorise a second paid submission for candidate 3.
         before = calls["n"]
-        R.fire_shot("9", "1.B1.S1", "EpT", spend_token=tok, log=lambda *a, **k: None)
-        assert calls["n"] == before + 1                             # one call, no repays
-        assert _led()["1.B1.S1"]["status"] == "candidates-pending"
-        assert len(_led()["1.B1.S1"]["candidatePaths"]) == 3
+        with _pt.raises(R.Refused, match="automatic repayment is blocked"):
+            R.fire_shot("9", "1.B1.S1", "EpT", spend_token=tok, log=lambda *a, **k: None)
+        assert calls["n"] == before
+        assert _led()["1.B1.S1"]["batch"]["done"] == [1, 2]
     finally:
         R.cb_gen.generate_video_seedance_ref = orig
 

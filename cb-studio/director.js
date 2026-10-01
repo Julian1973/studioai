@@ -4833,9 +4833,69 @@
     }
   }
 
+  const SCORED_REVIEW_ACTIONS = new Set([
+    "accept-keyframe", "iterate-keyframe", "accept-voice", "iterate-voice",
+    "accept-animation", "iterate-animation", "accept-master", "iterate-master",
+  ]);
+
+  function askReviewScore(action, note) {
+    return new Promise((resolve) => {
+      const dialog = document.createElement("dialog");
+      dialog.setAttribute("aria-label", "Score this result");
+      dialog.innerHTML = `<form method="dialog" style="padding:20px;max-width:420px">
+        <h2>How well does this result work?</h2>
+        <p>Score the result, then tell us why. Your decision remains yours.</p>
+        <label>Score out of ten <input name="score" type="number" min="0" max="10" step="1" required style="width:70px"></label>
+        <label style="display:block;margin-top:12px">Reason
+          <textarea name="reason" required maxlength="2000" style="display:block;width:100%;min-height:80px"></textarea></label>
+        <div style="display:flex;gap:12px;margin-top:16px">
+          <button type="button" data-review-cancel>Cancel</button>
+          <button type="submit">Save score and continue</button>
+        </div></form>`;
+      const form = dialog.querySelector("form");
+      form.elements.reason.value = note || "";
+      let result = null;
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const score = Number(form.elements.score.value);
+        const reason = form.elements.reason.value.trim();
+        if (!form.reportValidity() || !Number.isInteger(score) || !reason) return;
+        result = { score, reason, requestId: crypto.randomUUID() };
+        dialog.close();
+      });
+      dialog.querySelector("[data-review-cancel]").addEventListener("click", () => dialog.close());
+      dialog.addEventListener("close", () => { dialog.remove(); resolve(result); }, { once: true });
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      form.elements.score.focus();
+    });
+  }
+
+  function reviewTargetSignature(session, candidate) {
+    if (!session) return "";
+    return JSON.stringify({
+      episode: session.episode, scene: session.scene,
+      shotId: session.selectedShotId, phase: session.phase,
+      artifact: session.artifact, candidate,
+    });
+  }
+
   async function submitAction(action, note) {
     if (!app.session) return;
+    if (app.reviewPending) return;
     const previousSession = app.session;
+    const previousReviewTarget = reviewTargetSignature(previousSession, app.selectedCandidate);
+    let review = null;
+    if (SCORED_REVIEW_ACTIONS.has(action.id)) {
+      app.reviewPending = true;
+      try { review = await askReviewScore(action, note); }
+      finally { app.reviewPending = false; }
+    }
+    if (SCORED_REVIEW_ACTIONS.has(action.id) && !review) return;
+    if (reviewTargetSignature(app.session, app.selectedCandidate) !== previousReviewTarget) {
+      toast("The current result changed while you reviewed it. Review the current result again.", true);
+      return;
+    }
     $$("#action-area button").forEach((button) => { button.disabled = true; });
     const preparingRetry = action.id === "iterate-animation";
     const spend = previousSession.spendDisclosure || {};
@@ -4884,6 +4944,7 @@
           action: action.id,
           note: note || "",
           candidate: app.selectedCandidate,
+          review,
         }),
       });
       if (result.navigate) {

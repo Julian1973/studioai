@@ -6,6 +6,7 @@ import pathlib
 import sys
 import threading
 import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
@@ -18,6 +19,35 @@ if str(ENGINE) not in sys.path:
     sys.path.insert(0, str(ENGINE))
 
 import cb_lineage
+
+
+def test_director_scores_are_persisted_before_voice_dispatch(studio, monkeypatch):
+    import cb_db
+    import cb_studio_director
+    module, port = studio
+    session = {"episode": "Ep1", "scene": "1", "selectedShotId": "S1.SH1"}
+    monkeypatch.setattr(module, "_director_session", lambda *args: session)
+    monkeypatch.setattr(cb_studio_director, "allowed_action_ids", lambda _: {"accept-voice"})
+    calls = []
+    def dispatch(*args, **kwargs):
+        with cb_db.transaction(ROOT) as conn:
+            assert conn.execute("SELECT count(*) FROM director_outcomes").fetchone()[0] == 1
+        calls.append(args)
+        return "test-job"
+    monkeypatch.setattr(module, "shot_run_job", dispatch)
+    _, headers, _ = _request(port, "GET", f"/cb-studio/director.html?launchToken={module.LAUNCH_TOKEN}")
+    cookie = headers["Set-Cookie"].split(";", 1)[0]
+    payload = {"episode": "Ep1", "scene": "1", "shotId": "S1.SH1", "action": "accept-voice",
+               "review": {"score": 8, "reason": "The performance lands", "requestId": str(uuid.uuid4())}}
+    request_headers = {"Cookie": cookie, "Content-Type": "application/json", "Origin": f"http://127.0.0.1:{port}"}
+    status, _, body = _request(port, "POST", "/api/director-action", request_headers, json.dumps(payload))
+    assert status == 200
+    assert json.loads(body)["jobId"] == "test-job"
+    assert len(calls) == 1
+    payload["review"]["score"] = 11
+    status, _, _ = _request(port, "POST", "/api/director-action", request_headers, json.dumps(payload))
+    assert status == 400
+    assert len(calls) == 1
 
 
 def _load_server_module(name="cb_studio_serve_auth_test"):

@@ -3698,6 +3698,20 @@ class H(http.server.SimpleHTTPRequestHandler):
                     }); return
                 target = session.get("selectedShotId")
 
+                # New Director clients supply a scored review. Preserve it before the
+                # asynchronous action starts; this is intent evidence, not a success claim.
+                # Historical clients remain compatible while the other surfaces migrate.
+                if d.get("review") is not None:
+                    import studio_outcomes
+                    review = d["review"]
+                    if not isinstance(review, dict):
+                        raise ValueError("review must be an object")
+                    studio_outcomes.record(
+                        ROOT, show_id=ACTIVE_SHOW.profile.showId, session=session,
+                        action=action, score=review.get("score"),
+                        reason=review.get("reason"), reviewer=str(d.get("by") or "Julian"),
+                        request_id=review.get("requestId"), candidate=d.get("candidate"))
+
                 if action in ("open-inspector", "open-provider-setup"):
                     stage = "animation" if action == "open-provider-setup" else session.get("phase")
                     if action == "open-inspector" and stage == "story":

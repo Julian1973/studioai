@@ -8,6 +8,18 @@ import cb_gen
 import cb_providers
 
 
+@pytest.mark.parametrize("duration", [float("nan"), "nan", float("inf"), "-inf", True])
+def test_provider_refuses_nonfinite_and_boolean_duration(duration):
+    with pytest.raises(cb_providers.ProviderCapabilityError):
+        cb_providers.request_contract(duration=duration, resolution="480p", image_count=1)
+
+
+@pytest.mark.parametrize("count", [1.5, -0.5, True, "1", None, float("nan")])
+def test_provider_refuses_coerced_reference_counts(count):
+    with pytest.raises(cb_providers.ProviderCapabilityError, match="must be an integer"):
+        cb_providers.request_contract(duration=10, resolution="480p", image_count=count)
+
+
 def test_crystal_bears_production_images_are_locked_to_seedream_5_pro(monkeypatch):
     calls = []
     monkeypatch.setattr(

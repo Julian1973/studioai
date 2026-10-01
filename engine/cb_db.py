@@ -695,15 +695,16 @@ def claim_candidate(root, token, candidate_index, owner):
     return {"action": "generate", "candidate_index": candidate_index}
 
 
-def fail_candidate(root, token, candidate_index, error):
+def fail_candidate(root, token, candidate_index, error, *, unresolved=False):
     with transaction(root) as conn:
         changed = conn.execute(
             """
             UPDATE spend_candidate_claims
-            SET status='failed', finished_at=?, error=?
+            SET status=?, finished_at=?, error=?
             WHERE token=? AND candidate_index=? AND status='started'
             """,
-            (utc_now(), str(error)[:1000], str(token), int(candidate_index)),
+            ("started" if unresolved else "failed", None if unresolved else utc_now(),
+             str(error)[:1000], str(token), int(candidate_index)),
         ).rowcount
         if changed != 1:
             raise SpendConflict("candidate failure did not match an active provider claim")
@@ -772,15 +773,16 @@ def claim_candidate_segment(root, token, candidate_index, segment_index,
             "segment_index": segment_index}
 
 
-def fail_candidate_segment(root, token, candidate_index, segment_index, error):
+def fail_candidate_segment(root, token, candidate_index, segment_index, error, *, unresolved=False):
     with transaction(root) as conn:
         changed = conn.execute(
             """
             UPDATE spend_segment_claims
-            SET status='failed', finished_at=?, error=?
+            SET status=?, finished_at=?, error=?
             WHERE token=? AND candidate_index=? AND segment_index=? AND status='started'
             """,
-            (utc_now(), str(error)[:1000], str(token), int(candidate_index),
+            ("started" if unresolved else "failed", None if unresolved else utc_now(),
+             str(error)[:1000], str(token), int(candidate_index),
              int(segment_index)),
         ).rowcount
         if changed != 1:

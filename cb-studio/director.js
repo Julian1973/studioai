@@ -2694,7 +2694,12 @@
   function renderHumanEye(session) {
     const review = session.humanReview || {};
     const stages = review.stages || [];
-    if (!stages.length) return "";
+    const history = (session.reviewHistory || []).length ? `<details class="review-history"><summary>Your recent scores (${session.reviewHistory.length})</summary>
+      <p>Recorded review requests. A score does not confirm that a production action completed.</p>
+      <ol>${session.reviewHistory.map((item) => `<li><strong>${esc(item.score)}/10 · ${esc(item.action)}</strong>
+        <p>${esc(item.reason)}</p><small>${esc(item.reviewer)} · ${esc(item.createdAt)}${item.requestedCandidate != null ? ` · Take ${esc(item.requestedCandidate)}` : ""}</small></li>`).join("")}</ol>
+    </details>` : "";
+    if (!stages.length) return history;
     const decision = review.currentDecision || {};
     const active = stages.find((stage) => stage.current) || stages[0];
     const aiReview = decision.aiReview || {};
@@ -2737,11 +2742,7 @@
         </div>
       </div>
       <p class="human-eye-rule">${esc(review.rule || "The AI Director recommends; only Julian's decision is final.")}</p>
-      ${(session.reviewHistory || []).length ? `<details class="review-history"><summary>Your recent scores (${session.reviewHistory.length})</summary>
-        <p>Recorded review requests. A score does not confirm that a production action completed.</p>
-        <ol>${session.reviewHistory.map((item) => `<li><strong>${esc(item.score)}/10 · ${esc(item.action)}</strong>
-          <p>${esc(item.reason)}</p><small>${esc(item.reviewer)} · ${esc(item.createdAt)}${item.requestedCandidate != null ? ` · Take ${esc(item.requestedCandidate)}` : ""}</small></li>`).join("")}</ol>
-      </details>` : ""}
+      ${history}
     </section>`;
   }
 

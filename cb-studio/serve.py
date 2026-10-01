@@ -2141,6 +2141,16 @@ def _static_blocked(urlpath):
     if name in _DENY_NAMES:                   return True     # state/stale registry, even if under an approved root
     if pl in _APPROVED_FILES:                 return False    # explicitly-approved exact file
     ext = os.path.splitext(name)[1]
+    if len(segs) >= 4 and segs[0] == "shows":
+        try:
+            loaded = studio_profile.load_show_profile(ROOT, segs[1])
+            relative = "/".join(segs[2:])
+            if relative in {"canon/characters.json", "canon/LOCKED_CANON.md", "episodes/episodes.json"}:
+                return False
+            if segs[2] in {"assets", "media"} and ext in _MEDIA_EXT:
+                return False
+        except studio_profile.ShowProfileError:
+            pass
     for root, exts in _APPROVED_ROOTS:
         if pl.startswith(root) and ext in exts:
             if root == "/cb-output/" and not name.endswith("_beat_package.json"):
@@ -2540,30 +2550,12 @@ class H(http.server.SimpleHTTPRequestHandler):
                 houses = []
             return self._json(200, {"houses": houses})
         if self.path == "/api/projects":
-            projs = []
             try:
-                pf = ROOT / "cb-studio" / "data" / "projects.json"
-                if pf.exists():
-                    d = json.loads(pf.read_text()); projs = d.get("projects", []) if isinstance(d, dict) else []
-                for p in projs:
-                    pid = p.get("id", "")
-                    cfgbase = p.get("configBase") or ("projects/" + pid)
-                    epfile = p.get("episodesFile") or ("projects/" + pid + "/episodes.json")
-                    try:
-                        epf = ROOT / epfile; ed = json.loads(epf.read_text()) if epf.exists() else []
-                        p["episodeCount"] = len(ed) if isinstance(ed, list) else len(ed.get("episodes", []))
-                    except Exception:
-                        p["episodeCount"] = 0
-                    try:
-                        cf = ROOT / cfgbase / "characters.json"; cd = json.loads(cf.read_text()) if cf.exists() else {}
-                        p["characterCount"] = len([k for k, v in cd.items()
-                                                   if isinstance(v, dict) and not str(k).startswith("_")
-                                                   and k != "sizeClasses"])
-                    except Exception:
-                        p["characterCount"] = 0
-            except Exception:
-                projs = []
-            return self._json(200, {"projects": projs})
+                import studio_projects
+                return self._json(200, {"projects": studio_projects.list_projects(ROOT),
+                                        "activeShowId": ACTIVE_SHOW.profile.showId})
+            except Exception as exc:
+                return self._json(500, {"error": str(exc)})
         if urlsplit(self.path).path == "/api/project-workbench-state":
             from urllib.parse import urlparse, parse_qs
             q = parse_qs(urlparse(self.path).query)
@@ -3299,6 +3291,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                 script = data.get("script") or ""
                 if data.get("docData"):   # an uploaded script document — extract its text
                     script = extract_doc_text(data["docData"], data.get("docName", "")) or script
+                project = str(data.get("project") or ACTIVE_SHOW.profile.showId)
+                if project != ACTIVE_SHOW.profile.showId or not SHOW_PROFILE_STATUS["adapterReady"]:
+                    import studio_projects
+                    result = studio_projects.store_script(
+                        ROOT, project, f"Ep{num}", script, title,
+                        source_name=str(data.get("docName") or "pasted-script"),
+                        by=str(data.get("by") or "Julian"))
+                    self._json(200, result)
+                    return
                 current = SCRIPT_STORE.store(
                     f"Ep{num}", script, title,
                     source_name=str(data.get("docName") or "pasted-script"),
@@ -3321,6 +3322,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                 title = (d.get("title") or "").strip()
                 if not title:
                     raise ValueError("a new name is required")
+                project = str(d.get("project") or ACTIVE_SHOW.profile.showId)
+                if project != ACTIVE_SHOW.profile.showId or not SHOW_PROFILE_STATUS["adapterReady"]:
+                    import studio_projects
+                    self._json(200, studio_projects.rename_script(ROOT, project, f"Ep{num}", title))
+                    return
                 newslug = slug(title)
                 before = SCRIPT_STORE.current(f"Ep{num}", required=False)
                 current = SCRIPT_STORE.rename_current(f"Ep{num}", title)
@@ -3456,67 +3462,11 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if self.path == "/api/project":
             try:
-                import datetime
-                d = self._body()
-                name = str(d.get("name", "")).strip()
-                if not name:
-                    raise ValueError("project name required")
-                pid = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "project"
-                base_pid = pid; i = 2
-                while (ROOT / "projects" / pid).exists():
-                    pid = base_pid + "-" + str(i); i += 1
-                pdir = ROOT / "projects" / pid
-                (pdir / "assets").mkdir(parents=True, exist_ok=True)
-                chars = {}
-                for ch in (d.get("characters") or []):
-                    cn = str(ch.get("name", "")).strip()
-                    if not cn:
-                        continue
-                    entry = {"key_features": str(ch.get("keyFeatures", "")).strip()}
-                    raw = ch.get("imageData") or ""
-                    if raw:
-                        blob, ext = decode_image_upload(raw)
-                        safe = slug(cn).lower()
-                        fn = safe + "_anchor" + ext
-                        (pdir / "assets" / fn).write_bytes(blob)
-                        rel = "projects/" + pid + "/assets/" + fn
-                        entry["anchor"] = rel; entry["refs"] = [rel]
-                    chars[cn] = entry
-                cover_image = ""
-                raw_cover = d.get("coverImageData") or ""
-                if raw_cover:
-                    blob, ext = decode_image_upload(raw_cover)
-                    fn = "project_key_art" + ext
-                    (pdir / "assets" / fn).write_bytes(blob)
-                    cover_image = "/projects/" + pid + "/assets/" + fn
-                (pdir / "characters.json").write_text(json.dumps(chars, indent=2, ensure_ascii=False))
-                (pdir / "show_bible.md").write_text(str(d.get("showBible", "")))
-                (pdir / "episodes.json").write_text("[]")
-                accent = str(d.get("accentColor", "")).strip().lower()
-                if not re.fullmatch(r"#[0-9a-f]{6}", accent):
-                    accent = "#0b8f87"
-                meta = {
-                    "id": pid, "name": name, "primary": False,
-                    "animationType": d.get("animationType", ""), "style": d.get("style", ""),
-                    "premise": d.get("premise", ""), "audience": d.get("audience", ""),
-                    "episodeLength": d.get("episodeLength", ""), "aspectRatio": d.get("aspectRatio", ""),
-                    "voiceProvider": d.get("voiceProvider", ""), "musicStyle": d.get("musicStyle", ""),
-                    "theme": {"accent": accent},
-                    "configBase": "projects/" + pid, "showBibleFile": "projects/" + pid + "/show_bible.md",
-                    "episodesFile": "projects/" + pid + "/episodes.json", "mediaBase": "projects/" + pid + "/media",
-                    "createdAt": str(datetime.date.today()),
-}
-                if cover_image:
-                    meta["coverImage"] = cover_image
-                    meta["episodeCoverImage"] = cover_image
-                (pdir / "meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))
-                pf = ROOT / "cb-studio" / "data" / "projects.json"
-                pdata = json.loads(pf.read_text()) if pf.exists() else {"projects": []}
-                if not isinstance(pdata, dict):
-                    pdata = {"projects": []}
-                pdata.setdefault("projects", []).append(meta)
-                pf.write_text(json.dumps(pdata, indent=2, ensure_ascii=False))
-                self._json(200, {"ok": True, "id": pid, "project": meta})
+                import studio_projects
+                project = studio_projects.create_project(
+                    ROOT, self._body(), decode_image=decode_image_upload)
+                self._json(200, {"ok": True, "id": project["id"], "project": project,
+                                 "zeroSpend": True})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

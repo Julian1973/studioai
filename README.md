@@ -1,7 +1,9 @@
 # Studio Ai
 
-A Agnostic Ai Studio helping to bring The canonical Crystal Bears production build: a human-directed, approval-gated AI
-animation pipeline from script to finished scene.
+Studio AI is a human-directed, approval-gated production platform. Its current
+qualified animation workflow takes Crystal Bears from script to finished scene.
+Additional productions can be onboarded into isolated show profiles and immutable
+script stores; their shot-production adapters must be qualified before generation.
 
 It is designed around one principle: the models execute a resolved production plan. They
 do not silently decide story, performance, camera, canon, continuity or spend.
@@ -23,7 +25,7 @@ Run the zero-spend verification suite:
 python3 -m pytest -q
 ```
 
-Expected canonical result: **153 passed, 4 skipped**. The skips name unavailable historical
+Latest verified baseline: **751 passed, 4 skipped**. The skips name unavailable historical
 revision-6 media fixtures; the current production route is covered and passes.
 
 ## The production path
@@ -73,6 +75,19 @@ The researched Seedance 2.5 scene-generation, provider-migration and delivery pl
   Director.
 - `cb-output/` — production packages and evidence.
 - `tools/` — canon, media and field-audit utilities.
+
+## Additional productions
+
+The New Project wizard creates a canonical `shows/<show-id>/profile.json`,
+project identity, character references, bible, visual style and episode directories.
+Projects are discovered from published manifests; legacy archives remain visible.
+Script uploads name their project explicitly and preserve immutable script versions
+inside that project's tenant. Reopening a development project shows its own screenplay
+without entering the active show's production workflow.
+
+New projects start in development. `studio-generic-v1` is a declared future adapter,
+not an installed production capability. Live action and arbitrary animation are not
+yet qualified for shot generation. See [delivery gates](docs/STUDIO_PLATFORM_DELIVERY.md).
 
 The root Node/Replit files are an older, unrelated interactive project retained from the
 original 8th Hour folder. They are not part of this animation production path.

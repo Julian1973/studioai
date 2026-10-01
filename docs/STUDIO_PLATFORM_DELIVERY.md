@@ -32,3 +32,25 @@ live model compatibility or cloud deployment readiness.
 
 Preserve approved production media and history. Archive only after runtime reachability
 and compatibility checks. Do not advertise unsupported production types or providers.
+
+## Canonical onboarding slice
+
+The former New Project handler wrote a legacy `projects/` scaffold which the
+show-profile loader could not select. Project creation now publishes canonical
+show manifests, with character assets, identity, bible, style and episode paths.
+Published manifests are discovered alongside the preserved legacy registry.
+
+Script uploads are explicitly project-scoped; new productions use the existing
+immutable ScriptStore and their own episode indexes. Development projects open
+their own screenplay in the UI and do not enter the active show's scene pipeline.
+Malformed reference uploads are rejected before any project is reserved.
+Publishing the profile last keeps incomplete project directories out of discovery.
+
+The generic adapter remains unqualified. This slice proves project creation,
+script storage and reopening; it does not prove new-show shot production or a
+finished live-action sequence. The next implementation gate is generic creative
+contracts and runtime routing, with independent end-to-end production evidence.
+
+Verification: 751 passed, 4 skipped for the full suite. Subsequent scoped script
+rename checks: 22 passed. The real app script passes JavaScript syntax and backend
+state-derivation checks. No paid provider was called.

@@ -23,7 +23,8 @@ try {
 }
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const chromePath = process.env.STUDIO_CHROME_PATH ||
+  (process.platform === "darwin" ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" : undefined);
 let activeStudio = null;
 let activeBrowser = null;
 let activeTemp = null;
@@ -277,6 +278,9 @@ async function run() {
   await page.locator('[data-relay-note="1"]').blur();
   await page.getByText("Saved", { exact: true }).waitFor();
   await page.getByRole("button", { name: "Accept", exact: true }).first().click();
+  await page.getByRole("dialog", { name: "Score this result" }).locator('[name="score"]').fill("8");
+  await page.getByRole("dialog", { name: "Score this result" }).locator('[name="reason"]').fill("Matches the approved direction.");
+  await page.getByRole("button", { name: "Save score and continue", exact: true }).click();
   await page.getByText("Accepting keyframe", { exact: true }).first().waitFor();
   await page.getByText("Scene 1 of 10 · Shot 1 · Sign-off 2 of 3", { exact: true }).waitFor();
   await page.getByRole("button", { name: "Create performance", exact: true }).click();
@@ -287,6 +291,9 @@ async function run() {
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.locator(".relay-card.current .relay-audio-player audio").waitFor();
   await page.getByRole("button", { name: "Accept", exact: true }).first().click();
+  await page.getByRole("dialog", { name: "Score this result" }).locator('[name="score"]').fill("8");
+  await page.getByRole("dialog", { name: "Score this result" }).locator('[name="reason"]').fill("Matches the approved direction.");
+  await page.getByRole("button", { name: "Save score and continue", exact: true }).click();
   await page.getByText("Scene 1 of 10 · Shot 1 · Sign-off 3 of 3", { exact: true }).waitFor();
   await page.getByRole("button", { name: "Prepare render", exact: true }).click();
   await page.getByRole("button", { name: "Approve $1.25 & render", exact: true }).waitFor();
@@ -294,11 +301,17 @@ async function run() {
   await page.getByRole("button", { name: "Render", exact: true }).click();
   await page.locator(".relay-card.current video").waitFor();
   await page.getByRole("button", { name: "Accept", exact: true }).first().click();
+  await page.getByRole("dialog", { name: "Score this result" }).locator('[name="score"]').fill("8");
+  await page.getByRole("dialog", { name: "Score this result" }).locator('[name="reason"]').fill("Matches the approved direction.");
+  await page.getByRole("button", { name: "Save score and continue", exact: true }).click();
   await page.locator(".relay-card.complete").nth(2).waitFor();
 
   if (mainNavigations !== navigationBaseline) throw new Error("Golden Path reloaded the page instead of updating state in place.");
   if (notes["S1.SH1A:1"] !== "Keep the bee-height chase lane open.") throw new Error("Director note was not persisted.");
   const expected = ["select-scene-plate-library", "accept-keyframe", "build-voice", "build-voice", "accept-voice", "prepare-render", "approve-spend", "accept-animation"];
+  for (const item of requests.filter((item) => ["accept-keyframe", "accept-voice", "accept-animation"].includes(item.action))) {
+    if (item.review?.score !== 8 || !item.review?.reason || !item.review?.requestId) throw new Error("Missing scored review evidence");
+  }
   const requestActions = requests.map((item) => item.action);
   const productionActions = requestActions.filter((item) => item !== "save-retake-note");
   if (!requestActions.includes("save-retake-note") || JSON.stringify(productionActions) !== JSON.stringify(expected)) {

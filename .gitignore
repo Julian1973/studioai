@@ -23,6 +23,7 @@ cb-output/research/
 /cb_pages/
 
 # Python
+.venv-studio/
 __pycache__/
 *.pyc
 

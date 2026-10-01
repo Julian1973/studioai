@@ -10,6 +10,20 @@ do not silently decide story, performance, camera, canon, continuity or spend.
 
 ## Start the Studio
 
+For a repeatable workstation installation, use the
+[workstation guide](docs/STUDIO_WORKSTATIONS.md):
+
+```bash
+python3 scripts/studio.py install --verify
+python3 scripts/studio.py doctor
+python3 scripts/studio.py run
+```
+
+This release candidate targets Linux and Python 3.12. Studio macOS/Windows machines
+and shared multi-user deployment still need separate qualification.
+
+The original developer setup remains:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -25,7 +39,7 @@ Run the zero-spend verification suite:
 python3 -m pytest -q
 ```
 
-Latest verified baseline: **751 passed, 4 skipped**. The skips name unavailable historical
+Latest verified baseline: **755 passed, 4 skipped**. The skips name unavailable historical
 revision-6 media fixtures; the current production route is covered and passes.
 
 ## The production path

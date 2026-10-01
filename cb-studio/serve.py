@@ -2702,7 +2702,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                     "zeroSpend": True,
                 })
             try:
-                return self._json(200, _cached_director_session(scene, ep, shot_id))
+                session = _cached_director_session(scene, ep, shot_id)
+                import studio_outcomes
+                return self._json(200, {**session, "reviewHistory": studio_outcomes.history(
+                    ROOT, show_id=ACTIVE_SHOW.profile.showId, episode=ep, scene=scene,
+                    shot_id=session.get("selectedShotId"))})
             except Exception as exc:
                 return self._json(400, {"error": str(exc), "zeroSpend": True})
         if self.path.startswith("/api/studio-agent"):

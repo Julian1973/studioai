@@ -13,6 +13,7 @@ def _auth(token="a" * 32):
         "prompt": "locked prompt",
         "durationSec": 4,
     }
+
     return {
         "token": token,
         "bindingHash": "b" * 32,
@@ -21,6 +22,26 @@ def _auth(token="a" * 32):
         "disclosure": {"candidateCount": 2},
         "issuedAt": cb_db.utc_now(),
     }
+
+def test_uncertain_provider_attempt_cannot_be_repaid_after_reopen(tmp_path):
+    auth = _auth()
+    cb_db.issue_spend_authorization(tmp_path, "EpT", "1", "SH1", auth)
+    cb_db.claim_spend_authorization(tmp_path, auth["token"], "EpT", "1", "SH1",
+                                   auth["bindingHash"], auth["envelopeHash"], "batch")
+    cb_db.claim_candidate(tmp_path, auth["token"], 1, "worker")
+    cb_db.claim_candidate_segment(tmp_path, auth["token"], 1, 1, 2, "worker")
+    cb_db.fail_candidate_segment(tmp_path, auth["token"], 1, 1, "poll timed out", unresolved=True)
+    cb_db.fail_candidate(tmp_path, auth["token"], 1, "poll timed out", unresolved=True)
+    with pytest.raises(cb_db.SpendConflict, match="automatic repayment is blocked"):
+        cb_db.claim_candidate(tmp_path, auth["token"], 1, "new-worker")
+    with pytest.raises(cb_db.SpendConflict, match="automatic repayment is blocked"):
+        cb_db.claim_candidate_segment(tmp_path, auth["token"], 1, 1, 2, "new-worker")
+    with cb_db.transaction(tmp_path) as conn:
+        row = conn.execute("SELECT * FROM spend_candidate_claims").fetchone()
+        assert row["status"] == "started"
+        assert row["error"] == "poll timed out"
+        assert row["attempts"] == 1
+
 
 
 def test_atomic_json_compare_and_swap_blocks_lost_update(tmp_path):

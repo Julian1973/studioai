@@ -70,3 +70,17 @@ Track first-pass approvals, revisions per approved shot, cost per approved minut
 completion time, continuity defects and recovery success. Human creative assessment
 remains a separate requirement. Tests and mocked browser flows do not certify live
 provider quality, Mac installation or Adobe-level readiness.
+
+## Verification update
+
+The Golden Path browser gate now passes on Linux Chromium, including SEE, HEAR,
+WATCH, scored reviews, provider refusal, live-state polling and stale-build protection.
+This is a zero-spend test with mocked production/provider API responses, not a live
+BytePlus production or Mac installation trial.
+
+Recovery now conservatively preserves an unresolved claim after a generation adapter
+was entered and an exception occurred. Neither the candidate nor its active segment
+can be automatically repaid. Completed candidates remain intact. Provider reconciliation
+and recovery UI remain outstanding; manual reconciliation is required before retrying.
+Pre-provider failures retain the existing retry behaviour. Targeted recovery and golden
+engine checks: 30 passed. BytePlus and ElevenLabs credentials are absent in this checkout.

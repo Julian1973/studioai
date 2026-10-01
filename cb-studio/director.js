@@ -1546,7 +1546,7 @@
 
   async function loadProjectWorkbenchState() {
     try {
-      app.workbenchState = await api(`/api/project-workbench-state?project=crystal-bears&episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}`);
+      app.workbenchState = await api(`/api/project-workbench-state?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}`);
       if (!app.explicitBeat && app.workbenchState?.activeBeatId) {
         app.activeBeatId = app.workbenchState.activeBeatId;
       }
@@ -1562,7 +1562,6 @@
         app.workbenchState = await api("/api/project-workbench-state", {
           method: "POST",
           body: JSON.stringify({
-            project: "crystal-bears",
             episode: app.episode,
             scene: app.scene,
             activeBeatId: app.activeBeatId,

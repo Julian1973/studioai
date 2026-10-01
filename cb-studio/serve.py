@@ -573,24 +573,25 @@ def _load_workbench_state():
 
 
 def _workbench_key(project, episode, scene):
-    return f"{project or 'crystal-bears'}:{episode or 'Ep1'}:{scene or '1'}"
+    return f"{project or ACTIVE_SHOW.profile.showId}:{episode or 'Ep1'}:{scene or '1'}"
 
 
-def _project_workbench_state(project="crystal-bears", episode="Ep1", scene="1"):
+def _project_workbench_state(project=None, episode="Ep1", scene="1"):
+    project = project or ACTIVE_SHOW.profile.showId
     payload = _load_workbench_state()
     key = _workbench_key(project, episode, scene)
     return payload.get("projects", {}).get(key, {
         "project": project,
         "episode": episode,
         "scene": scene,
-        "activeBeatId": "moustache",
+        "activeBeatId": None,
         "beatState": {},
         "updatedAt": None,
     })
 
 
 def _save_project_workbench_state(update):
-    project = str(update.get("project") or "crystal-bears")
+    project = str(update.get("project") or ACTIVE_SHOW.profile.showId)
     episode = str(update.get("episode") or "Ep1")
     scene = str(update.get("scene") or "1")
     key = _workbench_key(project, episode, scene)
@@ -1712,7 +1713,7 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
     session = cb_studio_director.build_session(
         **common, animation_contract=animation_contract)
     _expose_session_shot_media(session, media)
-    workbench = _project_workbench_state("crystal-bears", episode, scene)
+    workbench = _project_workbench_state(ACTIVE_SHOW.profile.showId, episode, scene)
     session["savedRetakeNotes"] = dict(workbench.get("retakeNotes") or {})
     return session
 
@@ -2566,7 +2567,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if urlsplit(self.path).path == "/api/project-workbench-state":
             from urllib.parse import urlparse, parse_qs
             q = parse_qs(urlparse(self.path).query)
-            project = (q.get("project") or ["crystal-bears"])[0]
+            project = (q.get("project") or [ACTIVE_SHOW.profile.showId])[0]
             ep = (q.get("episode") or ["Ep1"])[0]
             scene = (q.get("scene") or ["1"])[0]
             if not (_SHOT_TOKEN.match(project) and _SHOT_TOKEN.match(ep) and _SHOT_TOKEN.match(scene)):
@@ -3261,7 +3262,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/project-workbench-state":
             try:
                 d = self._body()
-                project = str(d.get("project") or "crystal-bears")
+                project = str(d.get("project") or ACTIVE_SHOW.profile.showId)
                 episode = str(d.get("episode") or "Ep1")
                 scene = str(d.get("scene") or "1")
                 if not (_SHOT_TOKEN.match(project) and _SHOT_TOKEN.match(episode) and _SHOT_TOKEN.match(scene)):
@@ -3675,7 +3676,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     if not shot_id or stage not in ("1", "2", "3"):
                         self._json(400, {"error": "A shot and SEE, HEAR or WATCH stage are required."}); return
                     state = _save_project_workbench_state({
-                        "project": "crystal-bears", "episode": ep, "scene": scene,
+                        "project": ACTIVE_SHOW.profile.showId, "episode": ep, "scene": scene,
                         "retakeNotes": {f"{shot_id}:{stage}": note},
                     })
                     self._json(200, {"ok": True, "zeroSpend": True,
@@ -3704,7 +3705,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                         route = ("/cb-studio/director.html#view=pipeline&scene=" +
                                  quote(scene) + "&step=analysis")
                     else:
-                        route = ("/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=" +
+                        route = ("/cb-studio/app.html#p=" + quote(ACTIVE_SHOW.profile.showId) + "&pg=pipeline&ep=" +
                                  quote(ep) + "&sc=" + quote(scene) + "&st=" +
                                  quote(str(stage or "storyboard")) +
                                  (("&shot=" + quote(target)) if target else ""))

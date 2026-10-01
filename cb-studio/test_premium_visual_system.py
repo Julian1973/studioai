@@ -58,16 +58,20 @@ def test_first_viewport_names_the_slate_and_next_decision():
     assert "if(EXPLICIT_START_HASH){bootProjects();return;}" in APP
 
 
-def test_project_art_reaches_central_screens_and_new_project_storage():
+def test_project_art_reaches_central_screens_and_new_project_storage(tmp_path):
+    import studio_projects
     assert "function projectScreenHeaderHTML(opts)" in APP
     assert 'class="screenhead-art"' in APP
     assert "CURRENT_PROJECT.episodeCoverImage||CURRENT_PROJECT.coverImage" in APP
     assert "function wizKeyArt(input)" in APP
     assert 'id="wz_accent" type="color"' in APP
     assert "coverImageData" in APP
-    assert 'fn = "project_key_art" + ext' in SERVER
-    assert 'meta["coverImage"] = cover_image' in SERVER
-    assert '"theme": {"accent": accent}' in SERVER
+    project = studio_projects.create_project(tmp_path, {
+        "name": "New Film", "animationType": "Live action", "accentColor": "#123456",
+        "coverImageData": "fixture"}, decode_image=lambda _: (b"fixture-image", ".png"))
+    assert (tmp_path / project["coverImage"].lstrip("/")).read_bytes() == b"fixture-image"
+    assert project["episodeCoverImage"] == project["coverImage"]
+    assert project["theme"]["accent"] == "#123456"
     assert 'fn = "CB_" + safe + "_anchor.png"' not in SERVER
 
 

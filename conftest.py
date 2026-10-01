@@ -21,6 +21,11 @@ def isolate_mutable_production_state(monkeypatch, tmp_path):
     )
 
     import cb_learning
+    import cb_prompt_bank
+
+    monkeypatch.setattr(
+        cb_prompt_bank, "DEFAULT_BANK_PATH", tmp_path / "prompt-bank.jsonl"
+    )
 
     learning = tmp_path / "learning"
     monkeypatch.setattr(cb_learning, "LEARNING", learning)

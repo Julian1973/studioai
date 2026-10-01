@@ -53,6 +53,45 @@ def _request(port, method, path, headers=None, body=None):
     return result
 
 
+def test_new_project_http_path_keeps_script_in_selected_production(studio, monkeypatch, tmp_path):
+    module, port = studio
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _, headers, _ = _request(port, "GET", "/cb-studio/app.html")
+    cookie = headers["Set-Cookie"].split(";", 1)[0]
+    auth = {"Cookie": cookie, "Content-Type": "application/json",
+            "Origin": f"http://127.0.0.1:{port}"}
+    status, _, body = _request(port, "POST", "/api/project", auth, json.dumps({
+        "name": "Lantern House", "animationType": "Live action", "aspectRatio": "16:9",
+        "showBible": "A family reconciles.", "characters": [{"name": "Morgan"}]}))
+    assert status == 200
+    project = json.loads(body)["project"]
+    assert project["id"] == "lantern-house"
+    assert project["capabilities"]["productionReady"] is False
+    status, _, body = _request(port, "POST", "/api/episode", auth, json.dumps({
+        "project": project["id"], "number": 1, "title": "Home",
+        "script": "INT. HOUSE - NIGHT\nMORGAN\nWelcome home."}))
+    assert status == 200
+    result = json.loads(body)
+    assert result["projectId"] == project["id"]
+    assert result["scriptVersionId"].startswith(cb_lineage.SCRIPT_VERSION_PREFIX)
+    version = result["scriptVersionId"]
+    status, _, body = _request(port, "POST", "/api/episode-rename", auth, json.dumps({
+        "project": project["id"], "number": 1, "title": "The Homecoming"}))
+    assert status == 200
+    assert json.loads(body)["scriptVersionId"] == version
+    assert not (tmp_path / "shows/crystal-bears").exists()
+    status, _, body = _request(port, "GET", "/api/projects", {"Cookie": cookie})
+    assert status == 200
+    assert json.loads(body)["projects"][0]["episodeCount"] == 1
+    status, _, body = _request(port, "GET", "/shows/lantern-house/episodes/episodes.json", {"Cookie": cookie})
+    assert status == 200
+    assert json.loads(body)[0]["title"] == "The Homecoming"
+    assert module._static_blocked("/shows/lantern-house/profile.json")
+    assert module._static_blocked("/shows/lantern-house/canon/continuity.json")
+    assert module._static_blocked("/shows/lantern-house/../crystal-bears/profile.json")
+
+
 def test_uncached_director_builds_are_serialized_across_different_shots(monkeypatch):
     module = _load_server_module("cb_studio_serve_build_serialization_test")
     active = 0

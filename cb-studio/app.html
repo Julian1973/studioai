@@ -1096,7 +1096,7 @@ function renderProjects(){
     return `<article class="projcard" data-primary="${p.primary?'true':'false'}" data-archived="${p.archived?'true':'false'}" id="pc_${_esc(p.id)}" style="--brand:${theme.accent};--brandink:${theme.ink};--brandbg:${theme.soft}">
     <div class="projcard-art" id="pcart_${_esc(p.id)}">
       <div class="projcard-artmedia">${art}</div>
-      <div class="projcard-artmeta"><span>${p.archived?'Preserved reference':'Live production'}</span><span>${_esc(p.aspectRatio||'')}</span></div>
+      <div class="projcard-artmeta"><span>${p.archived?'Preserved reference':p.setupStatus==='development'?'Development':'Live production'}</span><span>${_esc(p.aspectRatio||'')}</span></div>
     </div>
     <div class="projcard-body">
       <div class="projcard-name"><span>${_esc(p.name)}</span>${p.primary?'<span class="project-role">Flagship</span>':''}</div>
@@ -1105,7 +1105,7 @@ function renderProjects(){
       <div class="projcard-meta">${p.episodeCount||0} episode${p.episodeCount==1?'':'s'} · ${p.characterCount||0} characters${p.aspectRatio?' · '+_esc(p.aspectRatio):''}</div>
       <div id="pcstats_${_esc(p.id)}" class="projcard-stats"><div class="projcard-activity">Loading production status…</div></div>
       <div class="projcard-actions">
-        <button type="button" class="btn" onclick='${p.archived?"enterProject":"continueProject"}(${JSON.stringify(p.id)})'>${p.archived?"Open archive":"Continue production"}</button>
+        <button type="button" class="btn" onclick='${p.archived?"enterProject":"continueProject"}(${JSON.stringify(p.id)})'>${p.archived?"Open archive":p.setupStatus==='development'?"Open development":"Continue production"}</button>
         ${p.archived?"":`<button type="button" class="btn ghost" onclick='enterProject(${JSON.stringify(p.id)})'>Episodes</button>`}
       </div>
     </div>
@@ -1537,6 +1537,11 @@ async function openEpisode(num,deferRender){
   const epNum=Number(num);
   CUR=EPISODES.find(e=>Number(e.number)===epNum);
   if(!CUR){page="episodes";renderTop();renderNav();renderEpisodes();return false;}
+  if(CURRENT_PROJECT?.capabilities && !CURRENT_PROJECT.capabilities.productionReady){
+    page="script"; renderTop();renderNav();
+    document.getElementById("gatesbar").innerHTML="";
+    await renderDevelopmentScript(); return true;
+  }
   PREFIX="Ep"+epNum+"_";SHOTS=[];
   SH_EP="Ep"+epNum;SH_SC="1";SH_PKG=null;SH_MEDIA=null;PSB=null;PSHOT_I=0;
   BOARD_SCENES=null;SCENE_ROSTER=null;SH_STORY_INTAKE=null;resetStoryReferenceCheck();
@@ -1600,7 +1605,7 @@ async function renameEp(num){
   if(!title){alert("The episode name can't be empty.");return;}
   if(title===cur) return;
   try{
-    const r=await fetch(BASE+"/api/episode-rename",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({number:+num,title})});
+    const r=await fetch(BASE+"/api/episode-rename",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({number:+num,title,project:CURRENT_PROJECT?.id})});
     const j=await r.json();
     if(!j.ok){alert("Rename failed: "+(j.error||"failed"));return;}
     EPISODES=j.episodes;
@@ -1646,14 +1651,27 @@ function onDoc(e){
 async function saveEp(){
   const num=document.getElementById("f-num").value,title=document.getElementById("f-title").value,script=document.getElementById("f-script").value;
   if(!num||(!script&&!DOC)){alert("Episode number and a script (pasted or uploaded) are required.");return;}
-  const body={number:+num,title,script};
+  const body={number:+num,title,script,project:CURRENT_PROJECT?.id};
   if(DOC){body.docData=DOC.data; body.docName=DOC.name;}
   const r=await fetch(BASE+"/api/episode",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const j=await r.json();
   if(j.ok){EPISODES=j.episodes;openEpisode(+num);}else{alert("Error: "+(j.error||"failed"));}
 }
 
+async function renderDevelopmentScript(){
+  const project=CURRENT_PROJECT;
+  let script="";
+  if(CUR?.script){
+    const path=`/cb-studio/data/shows/${encodeURIComponent(project.id)}/scripts/${encodeURIComponent(CUR.script)}`;
+    const response=await fetch(BASE+path,{cache:"no-store"});
+    if(response.ok)script=await response.text();
+  }
+  document.getElementById("view").innerHTML=`<h1 class="h1">${_esc(CUR?.title||project.name)}</h1>
+    ${outcomePanelHTML({title:"Script development",body:"Your script is saved in this production. Shot production will open when this production's workflow has been qualified.",actions:[{label:"Episodes",onclick:"goHome()"},{label:"Add episode",onclick:"addForm()",kind:"secondary"}]})}
+    <pre style="white-space:pre-wrap;line-height:1.6;padding:24px;background:var(--surface);border:1px solid var(--line);border-radius:12px">${_esc(script||"No script has been saved yet.")}</pre>`;
+}
 async function renderScript(){
+  if(CURRENT_PROJECT?.capabilities && !CURRENT_PROJECT.capabilities.productionReady)return renderDevelopmentScript();
   const view=document.getElementById("view");
   let raw="",scoreData=null;
   if(CUR.script){
@@ -1755,7 +1773,7 @@ async function uploadScriptHere(){
   const title=(document.getElementById('us_title').value||'').trim()||CUR.title||('Episode '+CUR.number);
   const paste=(document.getElementById('us_paste').value||'').trim();
   if(!paste&&!window._scriptDoc){alert('Upload a file or paste a script first.');return;}
-  const body={number:CUR.number,title,script:paste};
+  const body={number:CUR.number,title,script:paste,project:CURRENT_PROJECT?.id};
   if(window._scriptDoc){body.docData=window._scriptDoc.data;body.docName=window._scriptDoc.name;}
   try{const r=await fetch(BASE+"/api/episode",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json();
     if(!j.ok){alert('Upload error: '+(j.error||'failed'));return;}

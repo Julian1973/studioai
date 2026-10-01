@@ -163,7 +163,8 @@ def bank_prompt(*, prompt: str, episode: str, scene: str, shot_id: str,
                 diagnosis: str | None = None, category: str | None = None,
                 metadata: dict[str, Any] | None = None,
                 conformance: dict[str, Any] | None = None,
-                bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> dict[str, Any]:
+                bank_path: pathlib.Path | str | None = None) -> dict[str, Any]:
+    bank_path = DEFAULT_BANK_PATH if bank_path is None else bank_path
     if outcome not in {"approved", "rejected"}:
         raise ValueError("prompt bank outcome must be approved or rejected")
     parsed = parse_prompt_structure(prompt)
@@ -203,7 +204,8 @@ def bank_prompt(*, prompt: str, episode: str, scene: str, shot_id: str,
     return record
 
 
-def load_records(bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> list[dict[str, Any]]:
+def load_records(bank_path: pathlib.Path | str | None = None) -> list[dict[str, Any]]:
+    bank_path = DEFAULT_BANK_PATH if bank_path is None else bank_path
     path = pathlib.Path(bank_path)
     if not path.exists():
         return []
@@ -214,7 +216,7 @@ def load_records(bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> list[dict
     return records
 
 
-def report(bank_path: pathlib.Path | str = DEFAULT_BANK_PATH) -> dict[str, Any]:
+def report(bank_path: pathlib.Path | str | None = None) -> dict[str, Any]:
     raw_records = load_records(bank_path)
     records_by_hash = {}
     duplicate_counts = collections.Counter()

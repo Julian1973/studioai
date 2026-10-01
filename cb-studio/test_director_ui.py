@@ -797,7 +797,7 @@ def test_workbench_gate_summary_is_dynamic_and_actionable():
 
 
 def test_workbench_state_is_persisted_for_project_reopen():
-    assert "/api/project-workbench-state?project=crystal-bears" in JS
+    assert "/api/project-workbench-state?episode=" in JS
     assert 'api("/api/project-workbench-state"' in JS
     assert "loadProjectWorkbenchState" in JS
     assert "saveProjectWorkbenchState" in JS

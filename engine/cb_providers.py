@@ -8,6 +8,7 @@ or secret access and cannot spend.
 from __future__ import annotations
 
 import json
+import math
 import os
 import pathlib
 from typing import Dict, List, Literal, Optional
@@ -157,12 +158,16 @@ def _validate_video_request_for_model(model, *, mode, duration, resolution,
             seconds = float(duration)
         except (TypeError, ValueError) as exc:
             raise ProviderCapabilityError("video duration must be numeric or 'auto'") from exc
+        if isinstance(duration, bool) or not math.isfinite(seconds):
+            raise ProviderCapabilityError("video duration must be a finite number")
         if seconds < model.duration.minSec or seconds > model.duration.maxSec:
             raise ProviderCapabilityError(
                 f"{model.modelId} duration must be {model.duration.minSec:g}-"
                 f"{model.duration.maxSec:g}s; got {seconds:g}s")
-    counts = {"images": int(image_count), "audio": int(audio_count), "video": int(video_count)}
+    counts = {"images": image_count, "audio": audio_count, "video": video_count}
     for key, count in counts.items():
+        if type(count) is not int:
+            raise ProviderCapabilityError(f"{key} reference count must be an integer")
         limit = getattr(model.referenceLimits, key)
         if count < 0 or limit is None or count > limit:
             raise ProviderCapabilityError(

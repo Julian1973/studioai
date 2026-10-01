@@ -4871,10 +4871,20 @@
     });
   }
 
+  function reviewTargetSignature(session, candidate) {
+    if (!session) return "";
+    return JSON.stringify({
+      episode: session.episode, scene: session.scene,
+      shotId: session.selectedShotId, phase: session.phase,
+      artifact: session.artifact, candidate,
+    });
+  }
+
   async function submitAction(action, note) {
     if (!app.session) return;
     if (app.reviewPending) return;
     const previousSession = app.session;
+    const previousReviewTarget = reviewTargetSignature(previousSession, app.selectedCandidate);
     let review = null;
     if (SCORED_REVIEW_ACTIONS.has(action.id)) {
       app.reviewPending = true;
@@ -4882,7 +4892,7 @@
       finally { app.reviewPending = false; }
     }
     if (SCORED_REVIEW_ACTIONS.has(action.id) && !review) return;
-    if (app.session !== previousSession) {
+    if (reviewTargetSignature(app.session, app.selectedCandidate) !== previousReviewTarget) {
       toast("The current result changed while you reviewed it. Review the current result again.", true);
       return;
     }

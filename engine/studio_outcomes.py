@@ -56,3 +56,27 @@ def record(root, *, show_id, session, action, score, reason, reviewer, request_i
             conn.execute("INSERT INTO director_outcomes VALUES (?, ?, ?)",
                          (request_id, payload, created))
     return values | {"createdAt": created}
+
+
+def history(root, *, show_id, episode, scene, shot_id=None, limit=10):
+    """Bounded, project-scoped review summaries; never return stored session snapshots."""
+    if type(limit) is not int or not 1 <= limit <= 100:
+        raise ValueError("history limit must be an integer from 1 to 100")
+    filters = ["json_extract(payload, '$.showId')=?",
+               "json_extract(payload, '$.episode')=?",
+               "json_extract(payload, '$.scene')=?"]
+    values = [show_id, episode, scene]
+    if shot_id is not None:
+        filters.append("json_extract(payload, '$.shotId')=?")
+        values.append(shot_id)
+    with cb_db.transaction(root) as conn:
+        if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='director_outcomes'").fetchone():
+            return []
+        rows = conn.execute(
+            "SELECT payload, created_at FROM director_outcomes WHERE " +
+            " AND ".join(filters) + " ORDER BY created_at DESC, request_id DESC LIMIT ?",
+            (*values, limit)).fetchall()
+    allowed = {"requestId", "action", "score", "reason", "reviewer", "shotId",
+               "requestedCandidate", "status", "learningEligible", "sessionHash"}
+    return [{key: value for key, value in json.loads(row["payload"]).items() if key in allowed}
+            | {"createdAt": row["created_at"]} for row in rows]

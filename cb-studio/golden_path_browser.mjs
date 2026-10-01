@@ -220,7 +220,11 @@ async function run() {
     if (pathname === "/api/rough-cut-draft") return json({ clips: [] });
     if (pathname === "/api/director-session") {
       if (mediaAuditActive) mediaSessionPolls += 1;
-      return json(sessionFor(step, notes, voiceUrl));
+      return json({...sessionFor(step, notes, voiceUrl), reviewHistory: [{
+        requestId: "history-fixture", action: "accept-keyframe", score: 8,
+        reason: "The expression matches the direction.", reviewer: "Julian",
+        createdAt: "2026-10-01T18:00:00Z", requestedCandidate: "A",
+      }]});
     }
     if (pathname === "/api/jobs") {
       for (const job of Object.values(jobs)) {
@@ -277,6 +281,8 @@ async function run() {
   await page.locator('[data-relay-note="1"]').fill("Keep the bee-height chase lane open.");
   await page.locator('[data-relay-note="1"]').blur();
   await page.getByText("Saved", { exact: true }).waitFor();
+  await page.locator(".review-history summary").first().click();
+  await page.getByText("The expression matches the direction.", { exact: true }).first().waitFor();
   await page.getByRole("button", { name: "Accept", exact: true }).first().click();
   await page.getByRole("dialog", { name: "Score this result" }).locator('[name="score"]').fill("8");
   await page.getByRole("dialog", { name: "Score this result" }).locator('[name="reason"]').fill("Matches the approved direction.");

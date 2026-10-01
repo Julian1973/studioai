@@ -44,6 +44,13 @@ def test_director_scores_are_persisted_before_voice_dispatch(studio, monkeypatch
     assert status == 200
     assert json.loads(body)["jobId"] == "test-job"
     assert len(calls) == 1
+    monkeypatch.setattr(module, "_cached_director_session", lambda *args: session)
+    status, _, body = _request(port, "GET", "/api/director-session?episode=Ep1&scene=1",
+                               {"Cookie": cookie})
+    assert status == 200
+    rows = json.loads(body)["reviewHistory"]
+    assert len(rows) == 1 and rows[0]["reason"] == "The performance lands"
+    assert "sessionSnapshot" not in rows[0]
     payload["review"]["score"] = 11
     status, _, _ = _request(port, "POST", "/api/director-action", request_headers, json.dumps(payload))
     assert status == 400

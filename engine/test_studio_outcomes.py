@@ -39,3 +39,16 @@ def test_parallel_reviews_are_not_lost(tmp_path):
         list(pool.map(lambda _: studio_outcomes.record(tmp_path, **args()), range(12)))
     with cb_db.transaction(tmp_path) as conn:
         assert conn.execute("SELECT count(*) FROM director_outcomes").fetchone()[0] == 12
+
+
+def test_history_is_scoped_bounded_and_excludes_session_snapshots(tmp_path):
+    assert studio_outcomes.history(tmp_path, show_id="sample", episode="Ep1", scene="1") == []
+    studio_outcomes.record(tmp_path, **args())
+    studio_outcomes.record(tmp_path, **(args() | {"show_id": "other"}))
+    rows = studio_outcomes.history(tmp_path, show_id="sample", episode="Ep1", scene="1", shot_id="SH1", limit=1)
+    assert len(rows) == 1 and rows[0]["score"] == 8
+    assert "sessionSnapshot" not in rows[0]
+    assert studio_outcomes.history(tmp_path, show_id="sample", episode="Ep2", scene="1") == []
+    assert studio_outcomes.history(tmp_path, show_id="sample", episode="Ep1", scene="1", shot_id="SH2") == []
+    with pytest.raises(ValueError):
+        studio_outcomes.history(tmp_path, show_id="sample", episode="Ep1", scene="1", limit=True)
